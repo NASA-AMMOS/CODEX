@@ -43,17 +43,15 @@ API/sub/__pycache__/
 /prototype/public/bower_components
 __pycache__/
 .coverage
-src/server/timeLogs/
+server/timeLogs/
 returned_code.py
-src/server/CODEX.egg-info/
-src/server/dist/
-src/server/codex.log
+server/CODEX.egg-info/
+server/dist/
+server/codex.log
 src/servertimeLogs/
-
+server/debug/
 src/server/pep8/index.html
 
 # env
 env_codex/
 *.csv
-src/serverreturned_code\.py
-src/server/

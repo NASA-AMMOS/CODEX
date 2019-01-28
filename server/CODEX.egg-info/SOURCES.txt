@@ -1,7 +1,0 @@
-setup.py
-CODEX.egg-info/PKG-INFO
-CODEX.egg-info/SOURCES.txt
-CODEX.egg-info/dependency_links.txt
-CODEX.egg-info/requires.txt
-CODEX.egg-info/top_level.txt
-CODEX.egg-info/zip-safe

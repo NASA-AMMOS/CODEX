@@ -19,8 +19,6 @@ _Note that this installs Matplotlib using PyQT5 as the [backend](https://matplot
 
 1. Run `run_codex.sh` in the project's home directory
 
-*Note:* `run3_codex.sh` just uses `python3` instead of `python`
-
 ## Volunteer Collaborators to Guide Interface Development
 - Robert Hodyss
 - Kiri Wagstaff
