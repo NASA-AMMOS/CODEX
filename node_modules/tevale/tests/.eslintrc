@@ -1,0 +1,16 @@
+// Codefresh Code Style - eslint ruleset
+// Based on AirBnB.
+//
+// More details: https://codefresh-io.atlassian.net/wiki/display/COD/Code+Style+Guide
+{
+  "extends": [ "../.eslintrc" ],
+  "env": {
+    "node": true,
+    "mocha": true
+  },
+  "globals": {
+    "expect": true,
+    "sinon": true,
+    "MAIN": true
+  },
+}
