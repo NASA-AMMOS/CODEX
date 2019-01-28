@@ -26,6 +26,8 @@ import codex_downsample, codex_hash
 import codex_doctest, codex_time_log
 import codex_system, codex_math
 
+DEBUG = False
+
 def ml_segmentation(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result):
     '''
     Inputs:

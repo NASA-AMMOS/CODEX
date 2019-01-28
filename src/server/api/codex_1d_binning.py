@@ -26,6 +26,8 @@ import codex_return_code, codex_read_data_api
 import codex_hash, codex_time_log
 import codex_doctest
 
+DEBUG = False
+
 def ml_binning(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result):
     '''
     Inputs:

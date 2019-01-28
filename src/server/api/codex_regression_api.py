@@ -35,6 +35,8 @@ import codex_plot, codex_return_code
 import codex_read_data_api, codex_system
 import codex_doctest, codex_math
 
+DEBUG = False
+
 def ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName, downsampled, parms, result):
     '''
     Inputs:

@@ -30,6 +30,8 @@ import codex_system, codex_return_code
 import codex_read_data_api, codex_hash
 import codex_doctest, codex_time_log, codex_math
 
+DEBUG = False
+
 def ml_quality_scan(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result):
     '''
     Inputs:

@@ -28,6 +28,8 @@ import codex_plot, codex_downsample
 import codex_return_code, codex_read_data_api
 import codex_doctest, codex_system, codex_math
 
+DEBUG = False
+
 # Note: algorithm source: https://blog.ytotech.com/2015/11/01/findpeaks-in-python/
 # Note: algorithm source: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.signal.find_peaks_cwt.html
 

@@ -17,6 +17,8 @@ import codex_time_log, codex_doctest
 import codex_system, codex_downsample
 import codex_math
 
+DEBUG = False
+
 def ml_template_scan(inputHash, hashList, subsetHashName, templateHashName, algorithmName, downsampled, parms, result):
     '''
     Inputs:

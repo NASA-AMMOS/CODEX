@@ -19,8 +19,6 @@ import time, sklearn
 import collections
 import traceback
 
-DEBUG = False
-
 ## Enviornment variable for setting CODEX root directory.
 CODEX_ROOT  = os.getenv('CODEX_ROOT')
 sys.path.insert(1,CODEX_ROOT + '/api/sub/')
@@ -30,6 +28,8 @@ import codex_time_log, codex_return_code
 import codex_read_data_api, codex_hash
 import codex_doctest, codex_downsample
 import codex_math, codex_system
+
+DEBUG = False
 
 def ml_dimensionality_reduction(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result):
     '''

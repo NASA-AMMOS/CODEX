@@ -22,6 +22,8 @@ import traceback
 import codex_doctest, codex_hash
 import codex_system
 
+DEBUG = False
+
 def ml_normalize(hashList, subsetHashName, algorithmName, downsampled, parms, result):
     '''
     Inputs:
