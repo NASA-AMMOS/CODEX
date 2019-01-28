@@ -1,0 +1,347 @@
+clustering_page:
+
+    general_clustering: |
+      # Clustering
+
+      Clustering tries to group data observations into "similar" collections called clusters. It is an unsupervised method that doesn't need any user labels or guidance, but it does require the user to provide guidance for certain parameters involved in the math of the clustering process.
+
+      ### When to use clustering:
+
+      * To ask "How many kinds of observations are there my data?"
+      * When you don't have any labels and want to just explore your data
+      * To explore the data swiftly and build intuition on which variables "matter" when comparing observations
+
+      ### To make clustering work, you must:
+
+      * Select the statistical algorithm to use (there are many options) +
+      * Select parameters that effect how each algorithm converges to its answer +
+
+      ### How do I select an algorithm?
+
+      * Some algorithms take a lot of time, while others are extremely fast +
+      * Each specializes in certain kinds of data relationships (explore!)
+        - Your data's qualities will help you decide
+        - Outlier sensitivity
+        - Noise sensitivity
+        - Ability to handle high dimensions (many input features)
+
+      * Most must be told how many clusters to find +
+      * Those that can guess cluster number have other, more esoteric parameters +
+      * All will need to know what kind of distance metric to use +
+        - How to measure how far observations are from each other
+        - Intuitive way is called Euclidean (sqrt(x^2 + y^2 + z^2 + ...))
+        - Other distance metrics handle high dimensions better (e.g. Mahalanobis)
+
+      ### What does clustering output look like?
+
+      * A graph showing your observations's arrangement, colored by cluster membership
+      * A new feature vector with cluster membership for each observation (integers 0,1,2,3...)
+
+      ### I still don't know enough!
+
+      * You do. Go explore. CODEX will help you at each stage make the righ decision visually.
+
+      ### External links
+
+      * [Wikipedia](https://en.wikipedia.org/wiki/Cluster_analysis)
+      * [SciKit-Learn](http://scikit-learn.org/stable/modules/clustering.html)
+      * [Comparison of supported clustering methods](http://scikit-learn.org/0.18/auto_examples/cluster/plot_cluster_comparison.html)
+
+      + Items marked with this symbol have CODEX guidance to support you
+
+    kmeans: |
+      #### K-Means Clustering (Mini-batch)
+
+      ##### Why this algorithm?
+
+      * Must guess K number of clusters +
+      * Intuitive: Seeks "compactness" (clusters should be like spheres)
+      * Straightforward: few parameters
+      * Mini-batch implementation is extremely fast and scales to large data
+      * Handles high dimensions well
+      * Extremely popular, familar, well-cited, and understood
+      * General purpose algorithm for initial exploration
+
+      ##### External links
+
+      * [Wikipedia](https://en.wikipedia.org/wiki/K-means_clustering)
+      * [Stanford](http://stanford.edu/~cpiech/cs221/handouts/kmeans.html)
+      * [Scikit-Learn implementation](http://scikit-learn.org/stable/modules/generated/sklearn.cluster.MiniBatchKMeans.html)
+
+      + Items marked with this symbol have CODEX guidance to support you
+
+    affinity_propagation: |
+      #### Affinity Propagation
+
+      ##### Why this algorithm? (Special Cases only)
+
+      * Determines K number of clusters itself: you don't have to guess initially
+      * Typically used for computer vision and some biological systems, not for general use
+      * Runs slowly, not scalable to large data volumes
+      * Based on the concept of "message passing"
+
+      ##### External links
+
+      * [Wikipedia](https://en.wikipedia.org/wiki/Affinity_propagation)
+      * [Scikit-Learn implementation](http://scikit-learn.org/stable/modules/generated/sklearn.cluster.AffinityPropagation.html)
+
+    mean_shift: |
+      #### Mean Shift
+
+      ##### Why this algorithm?
+
+      * Scales well to high data volume
+      * Binning approximation enables scalability
+      * Binning also requires additional parameters
+      * Must guess K number of clusters +
+      * Use when other methods are too slow
+
+      ##### External links
+
+      * [Wikipedia](https://en.wikipedia.org/wiki/Mean_shift)
+      * [Scikit-Learn implementation](http://scikit-learn.org/stable/modules/generated/sklearn.cluster.MeanShift.html)
+
+      + Items marked with this symbol have CODEX guidance to support you
+
+    spectral: |
+      #### Spectral Clustering
+
+      ##### Why this algorithm?
+
+      * Handles very complex cluster shapes (nested hollow spheres)
+      * Does not seek "compactness" (clusters need not be like spheres)
+      * Seeks Connectivity instead (clusters should be continuously connected without gaps)
+      * Must guess K number of clusters +
+      * Straightforward: few parameters
+      * Mini-batch implementation is extremely fast and scales to large data
+      * Handles high dimensions well
+      * Second-step algorithm for exploration if clusters appear complex in shape
+
+      ##### External links
+
+      * [Wikipedia](https://en.wikipedia.org/wiki/Spectral_clustering)
+      * [Scikit-Learn implementation](http://ogrisel.github.io/scikit-learn.org/sklearn-tutorial/modules/generated/sklearn.cluster.SpectralClustering.html)
+
+      + Items marked with this symbol have CODEX guidance to support you
+
+    ward: |
+      #### Ward's Method
+
+      ##### Why this algorithm?
+
+      * A special case of Agglomerative clustering that tries to balance cluster sizes
+      * Each point begins as its own cluster, then clusters merge until clusters get too sparse
+      * Instead of evaluating distances between points, tries to minimize variance within each cluster
+      * Good for heirarchical relationships: clusters made of up other smaller clusters
+      * Tree-based
+      * Must guess K number of clusters +
+      * Esoteric parameters +
+      * Fairly obscure
+      * Optional for special case datasets
+
+      ##### External links
+
+      * [Wikipedia](https://en.wikipedia.org/wiki/Ward%27s_method)
+      * [Scikit-Learn implementation](http://scikit-learn.org/0.15/modules/generated/sklearn.cluster.Ward.html)
+
+      + Items marked with this symbol have CODEX guidance to support you
+
+    agglomerative: |
+      #### Agglomerative
+
+      ##### Why this algorithm?
+
+      * Each point begins as its own cluster, then clusters merge until clusters get too sparse
+      * Instead of evaluating distances between points, tries to minimize variance within each cluster
+      * Good for heirarchical relationships: clusters made of up other smaller clusters
+      * Tree-based
+      * Must guess K number of clusters +
+      * Esoteric parameters +
+      * "Rich get richer" behavior can lead to very uneven cluster sizes
+      * Optional for special case datasets
+
+      ##### External links
+
+      * [Wikipedia](https://en.wikipedia.org/wiki/Hierarchical_clustering)
+      * [Scikit-Learn Heirarchical Clustering](http://scikit-learn.org/stable/modules/clustering.html#hierarchical-clustering)
+      * [Scikit-Learn implementation](http://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html)
+
+      + Items marked with this symbol have CODEX guidance to support you
+
+    dbscan: |
+      #### DBScan
+
+      ##### Why this algorithm?
+
+      * Don't have to guess K number of clusters
+      * Finds dense "Blobs" in the data
+      * Extremely popular, well-cited, and well-understood
+      * Good for data where clusters have similar core density
+      * Very esoteric convergence parameters +
+      * More automated than most... either works, or fails fairly badly
+      * Good for initial exploration or for future automation projects where K won't be known
+
+      ##### External links
+
+      * [Wikipedia](https://en.wikipedia.org/wiki/DBSCAN)
+      * [Scikit-Learn implementation](http://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html)
+
+      + Items marked with this symbol have CODEX guidance to support you
+
+
+    birch: |
+
+      #### BIRCH Clustering
+
+      ##### Why this algorithm?
+      * Efficient alternative to Kmeans (less intuitive parameters) +
+      * Tree-based algorithm where leaves represent centroids
+      * Mini-batch implementation is extremely fast and scales to large data
+      * Handles high dimensions well
+      * General purpose algorithm for initial exploration
+      * Intuitive: find K cluster centers that best group the data
+
+      ##### External links
+
+      * [Wikipedia](https://en.wikipedia.org/wiki/BIRCH)
+      * [Original paper](http://www.cs.uoi.gr/~pitoura/courses/dm07/birch.pdf)
+      * [Scikit-Learn implementation](http://scikit-learn.org/stable/modules/generated/sklearn.cluster.Birch.html)
+
+
+      + Items marked with this symbol have CODEX guidance to support you
+
+segmentation_page:
+
+    general_segmentation: |
+
+      # Segmentation
+
+      Fill out with general information about segmentation data anlysis techniques.
+
+    felzenszwalb: |
+
+      #felzenswalb
+    
+    quickshift: |
+
+      #quickshift
+
+normalization_page:
+
+    general_normalization: |
+      # Normalization
+
+      Fill out with general information about normalization data anlysis techniques.
+
+    min_max: |
+
+      #Min/Max
+
+peak_find_page:
+
+    general_peak_find: |
+      # Peak Find
+
+      Fill out with general information about peak find data anlysis techniques.
+
+    findpeaks: |
+
+      #Find Peaks
+
+    peak_cwt: |
+
+      #Peak CWT
+
+template_scan_page:
+
+    general_template_scan: |
+      # Template Scanning
+
+      Fill out with general information about template scanning data anlysis techniques.
+
+    template: |
+
+      #Template Scan
+
+binning_page:
+
+    general_binning: |
+      # Binning
+
+      Fill out with general information about data binning anlysis techniques.
+
+    1d: |
+
+      #1-Dimensional
+
+regression_page:
+
+    general_regression: |
+      # Regression
+
+      Fill out with general information about regression data anlysis techniques.
+
+    linear: |
+
+      #Linear regression
+
+endmember_page:
+
+    general_endmember: |
+      # Endmember
+
+      Fill out with general information about endmember data anlysis techniques.
+
+    ATGP: |
+
+      #ATGP
+
+    FIPPI: |
+
+      #FIPPI
+
+    PPI: |
+
+      #PPI
+
+dimensionality_reduction_page:
+
+    general_dimensionality_reduction: |
+      # Dimensionality Reduction
+
+      Fill out with general information about dimensionality reduction data anlysis techniques.
+
+    PCA: |
+
+      #PCA
+
+    PCA_Incremental: |
+
+      #PCA_Incremental
+
+    LDA: |
+
+      #LDA
+
+    ICA: |
+
+      #ICA
+
+quality_scan_page:
+
+    general_quality_scan: |
+      # Quality Scanning
+
+      Fill out with general information about data quality scanning techniques.
+
+    oddities: |
+
+      #Oddities
+
+    sigma_data: |
+
+      #Sigma Data
+
+# Unit tests
+unit_tests:
+  test: This is a unit test

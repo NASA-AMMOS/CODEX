@@ -1,0 +1,19 @@
+.QualityScanTable {
+    width: 350px;
+}
+
+.QualityScanTable #featureTable {
+    width: 100%;
+}
+.QualityScanTable #featureTable td {
+    font-size: 14px;
+    cursor: pointer;
+    padding: 1px 12px 2px 12px;
+}
+
+.QualityScanTable .tableFeatureName {
+    max-width: 140px;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}

@@ -1,0 +1,37 @@
+.HeatMap {
+    height: 100%;
+}
+
+.HeatMap .graphToolbar {
+    height: 24px;
+    color: #ddd;
+    text-align: center;
+    display: inline-flex;
+}
+
+.HeatMap .graphToolbar label {
+    padding: 0px 5px 0px 15px;
+}
+
+.HeatMap .graphToolbar input {
+    background: #ffffff22;
+    height: 22px;
+    border: none;
+    color: #ddd;
+}
+
+.HeatMap .graphToolbar #setAxes {
+    width: 60px;
+    line-height: 24px;
+    background: #ffffff22;
+    border: none;
+    color: #ddd;
+    cursor: pointer;
+    margin-left: 15px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.HeatMap .graphToolbar #setAxes:hover {
+    background: #ffffff44;
+    color: #fff;
+}

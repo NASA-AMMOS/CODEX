@@ -1,0 +1,138 @@
+.WindowGroup {
+    width: 100%;
+    height: 100%;
+    position: absolute !important;
+    pointer-events: none;
+}
+.WindowGroupRnd {
+    pointer-events: auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    z-index: 200000;
+    box-shadow: rgb(0, 0, 0) 0px 0px 15px;
+}
+.WindowGroupContent {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+}
+
+.WindowGroupHandle {
+    box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.3);
+    cursor: move;
+    color: black;
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    line-height: 23px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.WindowGroupHandle .WindowGroupHandleLeft {
+    display: flex;
+}
+.WindowGroupHandle .WindowGroupHandleTitle {
+    margin-left: 4px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.WindowGroupHandle > .WindowGroupHandleSnap {
+    color: rgba(255,255,255,0.5);
+    font-size: 14px;
+    line-height: 14px;
+    cursor: pointer;
+}
+.WindowGroupHandle > .WindowGroupHandleSnap:hover {
+    color: white;
+}
+
+.WindowGroupHandle .WindowGroupHandleButtons {
+    display: flex;
+    margin-left: 3px;
+}
+.WindowGroupHandle .WindowGroupHandleButtons > div {
+    width: 12px;
+    height: 12px;
+    margin: 6px 4px; 
+    border-radius: 12px;
+    cursor: pointer;
+    opacity: 0.85;
+}
+.WindowGroupHandle .WindowGroupHandleButtons > div:hover {
+    opacity: 1;
+    box-shadow: inset 0px 0px 4px 0px white;
+}
+.WindowGroupHandle .WindowGroupHandleButtons > .WindowGroupHandleButtonsMinimize {
+    background: #1e569e;
+}
+.WindowGroupHandle .WindowGroupHandleButtons > .WindowGroupHandleButtonsMaximize {
+    background: #259e1e;
+}
+.WindowGroupHandle .WindowGroupHandleButtons > .WindowGroupHandleButtonsClose {
+    background: #9e1e1e;
+}
+
+.WindowGroupHandle .WindowGroupHandleEmbrace {
+    width: 22px;
+    height: 22px;
+    background: #c7c7c7;
+    border-left: 1px solid darkgrey;
+    cursor: pointer;
+}
+.WindowGroupHandle .WindowGroupHandleEmbrace > div {
+    opacity: 0;
+    line-height: 17px;
+    font-size: 20px;
+    color: #061427;
+    transition: opacity 0.15s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
+
+.WindowGroupContent > .WindowGroupContentInner {
+    width: 100%;
+    flex: 1;
+    border: 1px solid #b9b9b9;
+    border-top: none;
+    overflow: auto;
+}
+
+.WindowGroupContent .SnapCont {
+    transition: opacity 0.2s cubic-bezier(0.39, 0.575, 0.565, 1);
+}
+.WindowGroupContent .snap {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    line-height: 0px;
+    border: 2px solid black;
+    margin: 1px;
+    border-radius: 50%;
+    transition: opacity 0.2s cubic-bezier(0.39, 0.575, 0.565, 1);
+}
+.WindowGroupContent .SnapPortTop {
+    bottom: 100%;
+    left: 50%;
+}
+.WindowGroupContent .SnapPortRight {
+    left: 100%;
+    top: 50%;
+}
+.WindowGroupContent .SnapPortBottom {
+    top: 100%;
+    left: 50%;
+}
+.WindowGroupContent .SnapPortLeft {
+    right: 100%;
+    top: 50%;
+}
+
+.WindowGroup .WindowGroupWrapper {
+    position: fixed;
+    z-index: 2147480000;
+}
+.WindowGroup .WindowGroupContextMenu {
+    display: none;
+}

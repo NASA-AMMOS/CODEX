@@ -1,0 +1,240 @@
+.QualityScan {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.QualityScan .left {
+    width: 100%;
+    height: 30px;
+    display: flex;
+    background: #181818;
+}
+
+.QualityScan tr {
+    transition: background 0.1s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
+.QualityScan tbody tr:hover {
+    background: #FF4500 !important;
+    color: white !important;
+}
+
+.QualityScan .left .top {
+    height: 30px;
+    padding: 1px 6px 1px 6px;
+    font-weight: bold;
+    line-height: 27px;
+    color: white;
+}
+.QualityScan .left .middle {
+    flex: 1;
+    display: flex;
+    overflow-x: auto;
+}
+.QualityScan .left .middle .masks {
+    flex: 1;
+    width: 100%;
+}
+.QualityScan .left .bottom {
+    display: none;
+    flex: 1;
+    width: 100%;
+    height: calc( 100% - 279px );
+}
+
+
+
+.QualityScan .right {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    border-left: 1px solid #555;
+    background: #181818;
+    color: white;
+}
+
+.QualityScan .right .top {
+    width: 100%;
+    height: 30px;
+    display: flex;
+}
+.QualityScan .right .middle {
+    width: 100%;
+    height: calc( 100% - 60px );
+    position: relative;
+    display: flex;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.QualityScan .right .bottom {
+    width: 100%;
+    height: 30px;
+    display: flex;
+}
+
+.QualityScan .right .top .header {
+    width: 350px;
+    height: 30px;
+}
+.QualityScan .right .horiline {
+    flex: 1;
+    height: 30px;
+    position: relative;
+    background: black;
+    border-top: 1px solid #555;
+    overflow: hidden;
+}
+.QualityScan .bottom .corner {
+    width: 30px;
+    height: 30px;
+    background: black;
+}
+
+.QualityScan .right .middle .list {
+    width: 350px;
+    height: 100%;
+}
+.QualityScan .right .middle .list #featureList {
+    list-style-type: none;
+    padding: 0px 10px 2px 10px;
+    margin: 0;
+    font-size: 12px;
+}
+.QualityScan .right .middle .list #featureList li {
+    height: 22px;
+    padding: 1px 0px;
+    font-size: 14px;
+}
+.QualityScan .right .middle .list #featureList li:first-child {
+    padding-top: 0;
+}
+
+.QualityScan .right .middle #highlighter {
+    display: none;
+    position: relative;
+    width: 100%;
+    height: 24px;
+    z-index: -1;
+    background: rgba(0,0,0,0.2);
+    pointer-events: none;
+}
+
+
+.QualityScan .right .middle .heat {
+    flex: 1;
+    height: 100%;
+}
+.QualityScan .right .middle .vertline {
+    width: 30px;
+    height: 100%;
+    background: black;
+    border-left: 1px solid #555;
+}
+
+.QualityScan .right .bottom .totalsbar {
+    width: 350px;
+    height: 30px;
+    display: flex;
+}
+.QualityScan .right .bottom .totalsbar div {
+    padding: 1px 12px;
+}
+.QualityScan .right .optionbar {
+    flex: 1;
+    border-bottom: 1px solid #555;
+    height: 30px;
+    line-height: 24px;
+    font-size: 20px;
+    background: black;
+    display: flex;
+    justify-content: space-between;
+    padding-right: 5px;
+}
+.QualityScan .right .optionbar > div {
+    display: flex;
+}
+.QualityScan .right .optionbar .optionbarleft > div {
+    display: flex;
+    padding: 1px 6px;
+    cursor: pointer;
+    color: white;
+    transition: color 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
+.QualityScan .right .optionbar .optionbarleft > div > span {
+    margin-right: 4px;
+}
+.QualityScan .right .optionbar .optionbarleft > div:hover {
+    background: #777 !important;
+}
+.QualityScan .right .optionbar .optionbarleft > div > div {
+    font-size: 12px;
+    line-height: 27px;
+}
+
+.QualityScan .tableHeader {
+    display: flex;
+    border-bottom: 1px solid #555;
+}
+.QualityScan .tableHeader th {
+    padding: 3px 12px 2px 12px;
+    display: flex;
+}
+.QualityScan .tableHeader th > div {
+    cursor: pointer;
+    margin-left: 4px;
+    font-size: 15px;
+}
+.QualityScan .table {
+    width: 400px;
+}
+
+.QualityScan .extentbox {
+    position: absolute;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid #ccc;
+    cursor: ew-resize;
+    transition: left 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95), width 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+} 
+
+.QualityScan #highlightCanvas {
+    display: none;
+    pointer-events: none;
+    z-index: 100000000;
+    left: -1px;
+    position: absolute;
+}
+.QualityScan #highlitArrow {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 12px 29px 12px 0;
+    border-color: transparent white transparent transparent;
+    position: absolute;
+    right: 350px;
+    display: none;
+}
+
+.QualityScan #righter {
+    position: absolute;
+    left: 100%;
+    top: 30px;
+    width: 350px;
+    height: calc( 100% - 30px );
+    background: #181818;
+    transition: left 0.25s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
+
+.QualityScan #invertColors {
+    width: 100%;
+    height: 100%;
+    font-size: 19px;
+    padding-left: 6px;
+    line-height: 25px;
+    cursor: pointer;
+    transition: background 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}

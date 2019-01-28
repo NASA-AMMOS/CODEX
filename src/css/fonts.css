@@ -1,0 +1,35 @@
+@font-face {
+    font-family: 'lato';
+    src: url(../resources/Fonts/Lato/Lato-Regular.ttf);
+}
+@font-face {
+    font-family: 'lato_light';
+    src: url(../resources/Fonts/Lato/Lato-Light.ttf);
+}
+@font-face {
+    font-family: 'lato_bold';
+    src: url(../resources/Fonts/Lato/Lato-Bold.ttf);
+}
+
+@font-face {
+    font-family: 'philosopher';
+    src: url(../resources/Fonts/Philosopher/Philosopher-Regular.ttf);
+}
+@font-face {
+    font-family: 'philosopher_bold';
+    src: url(../resources/Fonts/Philosopher/Philosopher-Bold.ttf);
+}
+
+@font-face {
+    font-family: 'recharge';
+    src: url(../resources/Fonts/Recharge/Recharge.ttf);
+}
+
+@font-face {
+    font-family: 'bitstreamvera';
+    src: url(../resources/Fonts/BitstreamVera/VeraMono.ttf);
+}
+@font-face {
+    font-family: 'bitstreamvera_bold';
+    src: url(../resources/Fonts/BitstreamVera/VeraMoBd.ttf);
+}

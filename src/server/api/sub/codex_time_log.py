@@ -1,0 +1,142 @@
+'''
+Author: Jack Lightholder
+Date  : 5/10/17
+
+Brief : Time logging and estimation for CODEX algorithms
+
+Notes :
+'''
+import os
+import time
+import h5py
+import os.path
+import sys
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+from scipy import misc
+from random import randint
+from heapq import nsmallest
+from os import listdir
+from os.path import isfile, join, isdir
+
+CODEX_ROOT = os.getenv('CODEX_ROOT')
+
+logPath = CODEX_ROOT + "timeLogs/"
+timeLogs = {}
+
+def logTime(domain, algorithm, time, samples, features):
+    '''
+    Inputs:
+        domain (string)     - String indicating the domain type of the algorithm you're seeking.
+                                See timeLogs/ subfolder names for choices
+        algorithm (string)  - Algorithm name you're looking for a compute estimate for.
+                                See timeLogs/domain/ subfolder names for choices.
+        time (float)		- Log time for a given executation of the algorithm
+        samples (int)		- Log number of samples for a given execution of the algorithm.
+
+    Outputs:
+        NONE
+
+    Examples:
+        >>> logTime("clustering", "kmeans", 10, 100, 2)
+    '''
+
+    if(timeLogs == {}):
+        getTimeLogDict()
+
+    algorithmPath = logPath + domain + "/" + algorithm
+    if not os.path.exists(algorithmPath):
+        try:
+            os.makedirs(algorithmPath)
+        except:
+            pass
+
+    algorithmFile = algorithmPath + "/timeLog.npy"
+
+    try:
+        data = timeLogs[domain][algorithm]["log"]
+        data = np.concatenate((data,np.array([samples,features,time]).reshape(1,3)), axis=0)
+    except:
+        data = np.array([samples,features,time]).reshape(1,3)
+
+    if(domain not in timeLogs.keys()):
+        timeLogs[domain] = {}
+
+    if(algorithm not in timeLogs[domain].keys()):
+        timeLogs[domain][algorithm] = {}
+
+    timeLogs[domain][algorithm]["log"] = data
+    np.save(algorithmFile, data)
+
+def getTimeLogDict():
+
+    if not os.path.exists(logPath):
+        os.makedirs(logPath)
+
+    algorithmTypes = [f for f in listdir(logPath) if isdir(join(logPath, f))]
+    for algorithmType in algorithmTypes:
+        timeLogs[algorithmType] = {}
+        algorithms = [f for f in listdir(logPath + algorithmType) if isdir(join(logPath + algorithmType, f))]
+        for algorithm in algorithms:
+            timeLogs[algorithmType][algorithm] = {}
+            try:
+                data = np.load(logPath + algorithmType + "/" + algorithm + "/timeLog.npy")
+                timeLogs[algorithmType][algorithm]["log"] = data
+            except:
+                pass
+
+
+def getComputeTimeEstimate(domain, algorithm, inputSamples):
+    '''
+    Inputs:
+    domain (string)     - string indicating the domain type of the algorithm you're seeking.
+                            See timeLogs/ subfolder names for choices
+    algorithm (string)  - Algorithm name you're looking for a compute estimate for.
+                            See timeLogs/domain/ subfolder names for choices.
+    inputSamples (int)  - Number of samples in the given computation.  Finds closest references
+                            to similarly sized problems for calulcation of algorithm ETA.
+
+    Outputs:
+        outTime (float)     - Estimated time to complete computation for given algorithm and sample size
+
+    Examples:
+    >>> time = getComputeTimeEstimate("clustering", "kmeans", 9000)
+    '''
+
+    algorithmPath = logPath + domain + "/" + algorithm
+    count = 0
+    totalTime = 0
+
+    try:
+        data = timeLogs[domain][algorithm]["log"]
+    except:
+        data = None
+
+    if(data is not None):
+
+        samples = data[:,0]
+        features = data[:,1]
+        times = data[:,2]
+
+        numReferences = len(samples)
+
+        # Get the five closest reference samples, take average time
+        resultSamples = nsmallest(5, samples, key=lambda x: abs(x-inputSamples))
+
+        for x in range(0, numReferences):
+            if(samples[x] in resultSamples):
+                totalTime += times[x]
+                count += 1
+
+        outTime = (totalTime / count)
+    else:
+        outTime = None
+
+    return outTime
+
+if __name__ == "__main__":
+
+    import doctest
+    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
+    sys.exit(results.failed)

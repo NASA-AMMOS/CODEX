@@ -1,0 +1,93 @@
+body {
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    height: 100vh;
+    overflow: hidden;
+}
+
+#root {
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+#root:active {
+    cursor: move;
+}
+
+/* svg */
+
+.node {
+    cursor: pointer;
+}
+
+.node circle {
+    fill: #fff;
+    stroke-width: 3px;
+}
+
+.node text { font: 12px sans-serif; }
+
+.node--internal text {
+    text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff;
+}
+
+.node--type_file {
+    stroke: steelblue;
+}
+
+.node--type_library {
+    stroke: #9b59b6;
+}
+.node--type_asset {
+    stroke: #1abc9c;
+}
+
+.node--type_seen {
+    stroke: #ccc;
+}
+
+.node--type_circular {
+    stroke: red;
+}
+
+.node--type_error {
+    stroke: orange;
+}
+
+.link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 2px;
+}
+
+.seenarc {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 2px;
+    opacity: 0.7;
+}
+
+.circarc {
+    fill: none;
+    stroke: red;
+    stroke-width: 2px;
+    opacity: 0.7;
+}
+
+.arc--active {
+    display: inline !important;
+    stroke: blue;
+}
+.circarc.arc--active {
+    stroke: red;
+}
+
+.disabled > path {
+    display: none;
+}

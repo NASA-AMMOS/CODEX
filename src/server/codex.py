@@ -1,0 +1,433 @@
+from tornado import web, ioloop, websocket, gen
+import os
+## Enviornment variable for setting CODEX root directory.
+CODEX_ROOT  = os.getenv('CODEX_ROOT')
+
+import sys
+sys.path.insert(1,CODEX_ROOT + '/api/')
+sys.path.insert(1,CODEX_ROOT + '/api/sub/')
+import ssl
+import time, h5py, codex_plot
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+from scipy import misc
+from random import randint
+from sklearn import cluster, datasets
+from sklearn.neighbors import kneighbors_graph
+from sklearn.preprocessing import StandardScaler
+from decimal import *
+from concurrent.futures import ProcessPoolExecutor
+from tornado.ioloop import IOLoop
+import concurrent.futures
+import base64, threading, datetime, functools, tornado, json
+
+# CODEX API
+import codex_1d_binning
+import codex_clustering_api
+import codex_data_quality_scan_api
+import codex_dimmension_reduction_api
+import codex_endmembers
+import codex_normalize
+import codex_peak_detection_api
+import codex_read_data_api
+import codex_regression_api
+import codex_segmentation_api
+import codex_template_scan_api
+
+# CODEX Support
+import codex_system
+import codex_hash, codex_return_code
+import codex_downsample, codex_yaml
+import codex_time_log
+
+# create a `ThreadPoolExecutor` instance
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
+
+verbose = True
+fileChunks = []
+
+def algorithm_call(inputHash, hashList, subsetHashName, templateHashName, labelHash, algorithmType, algorithmName, downsampled, parms, result):
+    '''
+    Inputs:
+
+    Outputs:
+
+    Examples:
+
+    '''
+    if(algorithmType == "binning"):
+        result = codex_1d_binning.ml_binning(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result)
+
+    elif(algorithmType == "clustering"):
+        result = codex_clustering_api.ml_cluster(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result)
+
+    elif(algorithmType == "data_quality_scan"):
+        result = codex_data_quality_scan_api.ml_quality_scan(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result)
+
+    elif(algorithmType == "dimensionality_reduction"):
+        result = codex_dimmension_reduction_api.ml_dimensionality_reduction(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result)
+
+    elif(algorithmType == "endmember"):
+        result = codex_endmembers.ml_endmember(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result)
+
+    elif(algorithmType == "normalize"):
+        result = codex_normalize.ml_normalize(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result)
+
+    elif(algorithmType == "peak_detect"):
+        result = codex_peak_detection_api.ml_peak_detect(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result)
+
+    elif(algorithmType == "regression"):
+        result = codex_regression_api.ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName, downsampled, parms, result)
+
+    elif(algorithmType == "segment"):
+        result = codex_segmentation_api.ml_segmentation(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result)
+
+    elif(algorithmType == "template_scan"):
+        result = codex_template_scan_api.ml_template_scan(inputHash, hashList, subsetHashName, templateHashName, algorithmName, downsampled, parms, result)
+
+    else:
+        result['message'] = "Cannot parse algorithmType"
+
+    return result
+
+def get_guidance(guidance, result):
+    '''
+    Inputs:
+
+    Outputs:
+
+    Examples:
+
+    '''
+    split = guidance.split(":")
+    if(len(split) == 2):
+        guidanceString = codex_yaml.get_guidance_text_block(split[0], split[1])
+        if(guidanceString is not None):
+            result["guidance"] = guidanceString
+        else:
+            result["message"] = guidance + " does not exist in YAML guidance file"
+            result["guidance"] = ""
+    else:
+        result["message"] = "Incorrect request formatting"
+        result["guidance"] = ""
+
+    return result
+
+
+class uploadSocket(tornado.websocket.WebSocketHandler):
+    def open(self):
+        print("Upload Websocket opened")
+    
+    def check_origin(self, origin):
+        return True
+
+    def on_message(self, message):
+
+        global fileChunks
+        msg = json.loads(message)
+        result = {}
+
+        filename = msg["filename"]
+        filepath = CODEX_ROOT + "/../../uploads/" + filename
+
+        if(msg["done"] == True):
+            
+            f = open(filepath, 'wb')
+            for chunk in fileChunks:
+                f.write(chunk)
+            f.close()
+            fileChunks = []
+            
+            fileExtension = filename.split(".")[-1]    
+            if(fileExtension == "csv"):
+                hashList = codex_read_data_api.codex_read_csv(filepath, None, "feature")
+                codex_return_code.logReturnCode("hashList = codex_read_data_api.codex_read_csv('" + filepath + "', None, 'feature')")
+
+            elif(fileExtension == "h5"):
+                hashList = codex_read_data_api.codex_read_hd5(filepath, None, "feature")
+                codex_return_code.logReturnCode("hashList = codex_read_data_api.codex_read_h5('" + filepath + "', None, 'feature')")
+
+            elif(fileExtension == "npy"):
+                hashList = codex_read_data_api.codex_read_npy(filepath, None, "feature")
+                codex_return_code.logReturnCode("hashList = codex_read_data_api.codex_read_npy('" + filepath + "', None, 'feature')")
+                
+            else:
+                result['message'] = "Currently unsupported filetype"
+
+        else:
+            contents = base64.decodebytes(str.encode(msg["chunk"]))
+            fileChunks.append(contents)
+
+        if msg['done']:
+            result['status'] = 'complete'
+        else:
+            result['status'] = 'streaming'
+
+        stringMsg = json.dumps(result)
+        self.write_message(stringMsg)
+
+
+# Tornado Websocket
+class CodexSocket(tornado.websocket.WebSocketHandler):
+
+    connection = set()
+
+    def open(self):
+        print("Websocket opened")
+    
+    def check_origin(self, origin):
+        return True
+    
+    def on_response(self, response):
+        self.write_message(response.result())
+
+    def _on_response_ready(self, response):
+        ioloop.IOLoop.current().add_callback(
+            functools.partial(self.on_response, response)
+        )
+
+    @gen.engine
+    def on_message(self, message):
+        result = executor.submit(self.handle_request, message)
+        result.add_done_callback(self._on_response_ready)
+        codex_system.codex_server_memory_check()
+    
+    def handle_request(self, message):
+        '''
+        Inputs:
+
+        Outputs:
+
+        Notes:
+            Helpful link for multi-threading: https://stackoverflow.com/questions/32211102/tornado-with-threadpoolexecutor
+
+        Examples:
+
+        '''
+        if(verbose):
+            print(message)
+        
+        result = {}
+
+        msg = json.loads(message)
+
+        routine = msg['routine']
+
+        if( routine == 'algorithm' ):
+
+            hashList = []
+
+            featureList = msg["dataFeatures"]
+            featureList = codex_system.get_featureList(featureList)
+
+            subsetHashName = msg["dataSelections"]
+            if(subsetHashName != []):
+                subsetHashName = subsetHashName[0]
+            else:
+                subsetHashName = None
+
+
+            templateHashName = None
+            '''
+            templateHashName = msg["dataTemplates"]
+            if(templateHashName != []):
+                templateHashName = templateHashName[0]
+            else:
+                templateHashName = None
+            '''
+
+            hashList = codex_hash.feature2hashList(featureList)
+            codex_return_code.logReturnCode("hashList = codex_hash.feature2hashList(featureList)")
+
+            parms = msg['parameters']
+            downsampled = parms["downsampled"]
+
+            if(downsampled != False):
+                downsampled = int(downsampled)
+
+            algorithmName = msg['algorithmName']
+            algorithmType = msg["algorithmType"]
+
+            data = codex_hash.mergeHashResults(hashList)
+            codex_return_code.logReturnCode("data = codex_hash.mergeHashResults(hashList)")
+            inputHash = codex_hash.hashArray('Merged', data, "feature") 
+
+            if(inputHash != None):
+                codex_return_code.logReturnCode('codex_hash.hashArray("Merged", data, "feature")')
+                inputHash = inputHash["hash"]
+
+            # temporary TODO
+            labelHash = None
+
+
+            if(inputHash is not None):
+                result = algorithm_call( inputHash, hashList, subsetHashName, templateHashName, labelHash, algorithmType, algorithmName, downsampled, parms, result)
+            else:
+                codex_system.codex_log("Feature hash failure in ml_cluster")
+                result['message'] = "Feature hash failure in ml_cluster"
+
+            # If anything failed above, the result will be None.
+            # TODO - Replace this with an error handling scheme at some point
+            if(result is None):
+                result = {}
+            result['identification'] = msg['identification']
+
+        elif( routine == 'guidance' ):
+            
+            guidance = msg["guidance"]
+
+            if(guidance is not None):
+                result = get_guidance(guidance, result)
+            else:
+                result['message'] = 'guidance none'
+
+            result['identification'] = msg['identification']
+
+        elif( routine == 'arrange' ):
+
+            activity = msg["activity"]
+            hashType = msg['hashType']
+
+            if(activity == "add"):
+    
+                data = msg["data"]          
+                maskLength = msg["length"]
+                encoded = data.encode("ascii")
+                decoded = base64.decodebytes(encoded)
+                resultString = "".join(["{:08b}".format(x) for x in decoded])
+
+                numResults = len(resultString)
+                delta = abs(numResults - maskLength)
+                
+                maskTmp = np.zeros(numResults)
+
+                for x in range(0,numResults):
+                    maskTmp[x] = int(resultString[x])
+
+                mask = maskTmp[delta:]
+
+                if(hashType == "selection"):
+                    hashResult = codex_hash.hashArray(msg["name"],mask,"subset")
+                elif(hashType == "feature"):
+                    hashResult = codex_hash.hashArray(msg["name"],mask,"feature")
+                else:
+                    result["message"] = 'failure'
+
+                result['message'] = 'success'
+
+            elif(activity == "delete"):
+
+                name = msg["name"]
+                
+                if(hashType == "selection"):
+                    status = codex_hash.deleteHashName(name, "subset")
+                elif(hashType == "feature"):
+                    status = codex_hash.deleteHashName(name, "feature")
+                else:
+                    result["message"] = 'failure'
+                    status = False
+
+                if(status == True):
+                    result['message'] = 'success'
+                else:
+                    result['message'] = 'failure'
+
+            elif(activity == "update"):
+
+                field = msg["field"]
+                old = msg["old"]
+                new = msg["new"]
+
+                if(hashType == "selection"):
+                    status = codex_hash.hashUpdate(field, new, old, "subset")
+                elif(hashType == "feature"):
+                    status = codex_hash.hashUpdate(field, new, old, "feature")
+                else:
+                    result["message"] = 'failure'
+                    status = False
+
+                if(status == True):
+                    result['message'] = 'success'
+                else:
+                    result['message'] = 'failure'
+
+            else:
+
+                result['message'] = 'failure'
+
+        elif( routine == 'download_code'):
+
+            codex_return_code.dump_code_to_file()
+            f = open(CODEX_ROOT + "returned_code.py","r")
+            lines = f.readlines()
+            outString = "".join(lines)
+            outStringEncoded = outString.encode('ascii')
+            result['code'] = str(base64.b64encode(outStringEncoded).decode('utf-8'))
+            result['message'] = 'success'
+
+        else:
+
+            result['message'] = 'Unknown Routine'
+
+        # If anything failed above, the result will be None.
+        # TODO - Replace this with an error handling scheme at some point
+        if(result is None):
+            result = {}
+        
+
+        result['cid'] = msg['cid']
+        if 'message' not in result:
+            result['message'] = 'success' 
+        
+        stringMsg = json.dumps(result)
+        return stringMsg
+    
+
+def routine_add_selection( msg ):
+    routineResult = {};
+
+
+class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        return
+
+def make_app():
+    settings = dict(
+        app_name=u"JPL Complex Data Explorer",
+                static_path=os.path.join(os.path.dirname(__file__), "static"),
+        debug=True
+    )
+
+    print(settings['static_path'])
+
+    return web.Application([
+        (r"/", MainHandler),
+        (r"/codex", CodexSocket),
+        (r"/upload", uploadSocket),
+    ], **settings)  
+
+
+if __name__ == '__main__':
+
+    print("CODEX Server Started")
+    now = datetime.datetime.now()
+    codex_system.codex_log("Server started at: " + str(now.isoformat()))
+    codex_return_code.makeReturnCode()
+
+    codex_time_log.getTimeLogDict()
+
+    
+    # Tornado Websocket
+    app = make_app()
+    if (len(sys.argv) > 1) and (sys.argv[1] == '-ssl'):
+        ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        ssl_ctx.load_cert_chain(os.path.join("/web/codex/html/_cert/codex.crt"),
+                                    os.path.join("/web/codex/html/_cert/codex.key"))
+        app = tornado.httpserver.HTTPServer(app, ssl_options=ssl_ctx)
+    else:
+        app = tornado.httpserver.HTTPServer(app)
+    app.listen(8888)
+    ioloop.IOLoop.instance().start()
+
+

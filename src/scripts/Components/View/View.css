@@ -1,0 +1,6 @@
+.View {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  background: linear-gradient(to top, #061427, #061427);
+}

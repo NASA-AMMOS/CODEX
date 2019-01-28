@@ -1,0 +1,25 @@
+.LoadingBar {
+    height: 100%;
+    position: absolute;
+    left: 251px;
+    right: 269px;
+    pointer-events: none;
+}
+
+.LoadingBar #loadingBar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient( to right, #335de6, #335de6 );
+    transition: width 0.5s cubic-bezier(0.445, 0.05, 0.55, 0.95), opacity 0.8s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
+
+
+.LoadingBar .indeterminate {
+    animation: IndeterminateLoad 2s ease infinite;
+}
+@keyframes IndeterminateLoad {
+    0% {background: #7be633;}
+    50%   {background: transparent;}
+    75% {background: #40e767}
+    100% {background: #7be633;}
+} 

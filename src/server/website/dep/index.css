@@ -1,0 +1,118 @@
+info-bar.info-bar {
+    display: flex;
+    width: 100vw;
+    height: 2.5rem;
+
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+
+    position: fixed;
+    bottom: 0;
+    background-color: #2b2b2b;
+
+    z-index: 10;
+}
+
+.info-bar__title {
+    margin-left: 1rem;
+    font-family: monospace;
+    color: white;
+}
+
+.info-bar__subtitle {
+    margin-left: 1rem;
+    font-family: monospace;
+    color: white;
+    opacity: 0.7;
+}
+
+.error-window {
+    position: fixed;
+    right: 0.5rem;
+    bottom: 3rem;
+    width: 20rem;
+    height: 10rem;
+    margin: 0;
+    padding: 5px;
+    background-color: orange;
+    color: white;
+    font-family: monospace;
+}
+.error-window--hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.error-window__title {
+    padding-bottom: 2px;
+    border-bottom: 1px solid white;
+    margin-bottom: 2px;
+
+    font-weight: bold;
+}
+
+.control-drawer {
+    position: absolute;
+    bottom: calc(2.5rem);
+    left: 0.5rem;
+    height: 80px;
+    width: 15rem;
+    font-family: monspace;
+
+    z-index: 5;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+
+    transform: translateY(68px);
+    transition: transform 0.1s;
+}
+
+.control-drawer.control-drawer--active {
+    transform: none;
+}
+
+.control-drawer__handle {
+    background-color: #2b2b2b;
+    width: 40px;
+    height: 12px;
+    margin-left: 20px;
+    cursor: pointer;
+}
+
+.control-drawer__handle::before {
+    display: block;
+    height: 2px;
+    width: 30px;
+    background-color: white;
+    content: " ";
+    transform: translate(5px,6px);
+}
+
+
+.control-drawer__drawer {
+    flex-grow: 1;
+    background-color: #2b2b2b;
+    padding: 5px;
+}
+
+.control-drawer__button {
+    display: inline-block;
+    color: #bbb;
+    font-family: monospace;
+    cursor: pointer;
+    user-select: none;
+}
+.control-drawer__button.control-drawer__button--active {
+    color: white
+}
+
+#legend {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+
+    pointer-events: none;
+}

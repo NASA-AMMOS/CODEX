@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>depgraph viz</title>
+		<link rel="stylesheet" type="text/css" href="graph.css">
+		<link href="https://fonts.googleapis.com/css?family=Fira+Mono" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="index.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script src="https://d3js.org/d3.v5.min.js"></script>
+	</head>
+	<body>
+		<div id="root"></div>
+		<svg id="legend" width="200" height="200">
+			<g transform="translate(10, 10)" class="node node--internal">
+				<circle r="5" class="node--type_file" style="fill: white;"></circle>
+				<text dx="0.2em" dy="0.35em" style="text-anchor: start">file node</text>
+			</g>
+			<g transform="translate(10, 30)" class="node node--internal">
+				<circle r="5" class="node--type_asset" style="fill: white;"></circle>
+				<text dx="0.2em" dy="0.35em" style="text-anchor: start">asset node</text>
+			</g>
+			<g transform="translate(10, 50)" class="node node--internal">
+				<circle r="5" class="node--type_library" style="fill: white;"></circle>
+				<text dx="0.2em" dy="0.35em" style="text-anchor: start">library node</text>
+			</g>
+			<g transform="translate(10, 70)" class="node node--internal">
+				<circle r="5" class="node--type_error" style="fill: white;"></circle>
+				<text dx="0.2em" dy="0.35em" style="text-anchor: start">error node</text>
+			</g>
+			<g transform="translate(10, 90)" class="node node--internal">
+				<circle r="5" class="node--type_seen" style="fill: white;"></circle>
+				<text dx="0.2em" dy="0.35em" style="text-anchor: start">cross dep. node</text>
+			</g>
+			<g transform="translate(10, 110)" class="node node--internal">
+				<circle r="5" class="node--type_circular" style="fill: white;"></circle>
+				<text dx="0.2em" dy="0.35em" style="text-anchor: start">circular dep. node</text>
+			</g>
+
+		</svg>
+		<info-bar></info-bar>
+		<control-drawer></control-drawer>
+
+		<script src="graph.js"></script>
+		<script src="index.js"></script>
+	</body>
+</html>

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PEP 8 Report</title>
+    <style type="text/css">
+        /* BEGIN CSS RESET */
+
+        /* http://meyerweb.com/eric/tools/css/reset/
+           v2.0 | 20110126
+           License: none (public domain)
+        */
+        html, body, div, span, applet, object, iframe,
+        h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+        a, abbr, acronym, address, big, cite, code,
+        del, dfn, em, img, ins, kbd, q, s, samp,
+        small, strike, strong, sub, sup, tt, var,
+        dl, dt, dd, ul, ol, li, u, i, center,
+        fieldset, form, label, legend,
+        table, caption, tbody, tfoot, thead, tr, th, td,
+        article, aside, canvas, details, embed,
+        figure, figcaption, footer, header, hgroup,
+        menu, nav, output, ruby, section, summary,
+        time, mark, audio, video {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            font-size: 100%;
+            font: inherit;
+            vertical-align: baseline;
+            box-sizing: border-box;
+        }
+        /* HTML5 display-role reset for older browsers */
+        article, aside, details, figcaption, figure,
+        footer, header, hgroup, menu, nav, section {
+            display: block;
+        }
+        body {
+            line-height: 1;
+        }
+        ul {
+            list-style: none;
+        }
+        ol {
+            padding-left: 15px;
+        }
+        blockquote, q {
+            quotes: none;
+        }
+        blockquote:before, blockquote:after,
+        q:before, q:after {
+            content: '';
+            content: none;
+        }
+
+        /* END CSS RESET */
+
+        html, body {
+            margin: 0;
+            padding: 20px;
+            width: 100%;
+            height: 100%;
+            font-family: 'Arial', 'Open Sans', sans-serif;
+            font-size: 14px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-top: 10px;
+            margin-bottom: 30px;
+            color: #223366;
+            font-weight: bold;
+            vertical-align: middle;
+        }
+        h2 {
+            font-size: 1.5em;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+        h3 {
+            font-size: 1.25em;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        h1 > small {
+            font-size: 50%;
+            font-weight: normal;
+            vertical-align: middle;
+        }
+        a {
+            color: #536c97;
+        }
+        a:visited {
+            color: #536c97;
+        }
+        a:active, a:hover {
+            color: #7e99cf;
+        }
+        tr, th, td {
+            margin: 0px;
+            padding: 0px;
+        }
+        table {
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+        table > thead > tr > th {
+            padding: 15px 5px 15px 5px;
+            color: #333;
+            font-size: 16px;
+            font-weight: bold;
+            border-bottom: 1px solid #666;
+        }
+        table > tbody > tr > td {
+            padding: 5px;
+        }
+        table > tbody > tr:nth-child(even) {
+            background-color: #e9e9e9;
+        }
+        table > tbody > tr:nth-child(odd) {
+            background-color: #fcfcfc;
+        }
+        .fill {
+            width: 100%;
+        }
+        .left {
+            width: 80%;
+            float: left;
+        }
+        .right {
+            width: 20%;
+            float: right;
+            padding-left: 25px;
+        }
+        .center {
+            margin: 0 auto;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-left {
+            text-align: left;
+        }
+        #build-messages {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<h1>PEP 8 Report<br>
+    <small>
+        PEP8 Errors: 21,
+        PEP8 Warnings: 44,
+        Other: 0
+    </small>
+</h1>
+<div class="left">
+    
+    <h2 class="file-path">../api/sub/codex_doctest.py</h2>
+    <table class="fill">
+        <thead>
+        <tr>
+            <th class="text-left">Line</th>
+            <th class="text-left">Code</th>
+            <th class="text-left">Pos</th>
+            <th class="text-left">Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        
+        <tr>
+            <td>7</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W291</a></td>
+            <td>8</td>
+            <td>trailing whitespace</td>
+        </tr>
+        
+        <tr>
+            <td>10</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E266</a></td>
+            <td>1</td>
+            <td>too many leading '#' for block comment</td>
+        </tr>
+        
+        <tr>
+            <td>11</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E221</a></td>
+            <td>11</td>
+            <td>multiple spaces before operator</td>
+        </tr>
+        
+        <tr>
+            <td>12</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E402</a></td>
+            <td>1</td>
+            <td>module level import not at top of file</td>
+        </tr>
+        
+        <tr>
+            <td>13</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E231</a></td>
+            <td>18</td>
+            <td>missing whitespace after ','</td>
+        </tr>
+        
+        <tr>
+            <td>16</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E402</a></td>
+            <td>1</td>
+            <td>module level import not at top of file</td>
+        </tr>
+        
+        <tr>
+            <td>17</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E402</a></td>
+            <td>1</td>
+            <td>module level import not at top of file</td>
+        </tr>
+        
+        <tr>
+            <td>20</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E402</a></td>
+            <td>1</td>
+            <td>module level import not at top of file</td>
+        </tr>
+        
+        <tr>
+            <td>21</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E402</a></td>
+            <td>1</td>
+            <td>module level import not at top of file</td>
+        </tr>
+        
+        <tr>
+            <td>23</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E302</a></td>
+            <td>1</td>
+            <td>expected 2 blank lines, found 1</td>
+        </tr>
+        
+        <tr>
+            <td>25</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>30</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>31</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>33</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>34</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>36</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>37</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>37</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E501</a></td>
+            <td>80</td>
+            <td>line too long (80 > 79 characters)</td>
+        </tr>
+        
+        <tr>
+            <td>39</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>40</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>42</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>43</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>44</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>45</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>45</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E231</a></td>
+            <td>23</td>
+            <td>missing whitespace after ','</td>
+        </tr>
+        
+        <tr>
+            <td>45</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E231</a></td>
+            <td>30</td>
+            <td>missing whitespace after ','</td>
+        </tr>
+        
+        <tr>
+            <td>45</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E231</a></td>
+            <td>37</td>
+            <td>missing whitespace after ','</td>
+        </tr>
+        
+        <tr>
+            <td>46</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>46</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E501</a></td>
+            <td>80</td>
+            <td>line too long (111 > 79 characters)</td>
+        </tr>
+        
+        <tr>
+            <td>46</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E231</a></td>
+            <td>99</td>
+            <td>missing whitespace after ','</td>
+        </tr>
+        
+        <tr>
+            <td>48</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>49</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>50</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>50</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E231</a></td>
+            <td>9</td>
+            <td>missing whitespace after ','</td>
+        </tr>
+        
+        <tr>
+            <td>52</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>52</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W291</a></td>
+            <td>61</td>
+            <td>trailing whitespace</td>
+        </tr>
+        
+        <tr>
+            <td>54</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>55</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>56</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>58</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>58</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E231</a></td>
+            <td>19</td>
+            <td>missing whitespace after ','</td>
+        </tr>
+        
+        <tr>
+            <td>58</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E231</a></td>
+            <td>28</td>
+            <td>missing whitespace after ','</td>
+        </tr>
+        
+        <tr>
+            <td>60</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E302</a></td>
+            <td>1</td>
+            <td>expected 2 blank lines, found 1</td>
+        </tr>
+        
+        <tr>
+            <td>62</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>64</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>66</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>67</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>68</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>69</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>70</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>70</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W291</a></td>
+            <td>48</td>
+            <td>trailing whitespace</td>
+        </tr>
+        
+        <tr>
+            <td>71</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>72</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>74</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>75</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>76</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>77</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>78</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>79</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>80</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>81</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>83</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></td>
+            <td>1</td>
+            <td>indentation contains tabs</td>
+        </tr>
+        
+        <tr>
+            <td>85</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E305</a></td>
+            <td>1</td>
+            <td>expected 2 blank lines after class or function definition, found 1</td>
+        </tr>
+        
+        <tr>
+            <td>87</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E101</a></td>
+            <td>1</td>
+            <td>indentation contains mixed spaces and tabs</td>
+        </tr>
+        
+        <tr>
+            <td>90</td>
+            <td><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W391</a></td>
+            <td>1</td>
+            <td>blank line at end of file</td>
+        </tr>
+        
+        </tbody>
+    </table>
+    
+</div>
+<aside class="right">
+    <h2>Statistics</h2>
+    <ol>
+        
+        <li><b><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W191</a></b>: 40</li>
+        
+        <li><b><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E231</a></b>: 8</li>
+        
+        <li><b><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E402</a></b>: 5</li>
+        
+        <li><b><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W291</a></b>: 3</li>
+        
+        <li><b><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E302</a></b>: 2</li>
+        
+        <li><b><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E501</a></b>: 2</li>
+        
+        <li><b><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E101</a></b>: 1</li>
+        
+        <li><b><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E221</a></b>: 1</li>
+        
+        <li><b><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">W391</a></b>: 1</li>
+        
+        <li><b><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E266</a></b>: 1</li>
+        
+        <li><b><a target="_blank" href="https://flake8.readthedocs.io/en/latest/user/error-codes.html">E305</a></b>: 1</li>
+        
+    </ol>
+</aside>
+</body>
+</html>

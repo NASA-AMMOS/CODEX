@@ -1,0 +1,17 @@
+.Sparkline {
+  position: relative;
+  height: 25px;
+}
+
+.Sparkline > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.Sparkline > svg > .occlusionMask {
+  fill: rgba(255,255,255,0.5);
+}
+
+.Sparkline > svg > .sparkline {
+  fill: #74b9ff;
+}
