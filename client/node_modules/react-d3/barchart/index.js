@@ -1,2 +1,0 @@
-
-exports.BarChart = require('./BarChart');

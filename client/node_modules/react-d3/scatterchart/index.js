@@ -1,2 +1,0 @@
-
-exports.ScatterChart = require('./ScatterChart');
