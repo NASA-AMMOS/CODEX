@@ -4,42 +4,53 @@
  * See docs/redux-docs.md file for more information
  */
 
-import { fromJS, Set } from 'immutable'
-import { createReducer } from 'redux-create-reducer'
-import { formulas } from '../scripts/formulas/formulas'
+import { fromJS, Set } from "immutable";
+import { createReducer } from "redux-create-reducer";
+import { formulas } from "../src/formulas/formulas";
 
-import * as sels from '../selectors/data'
+import * as sels from "../selectors/data";
 
 /**
  * Initial state, as defined by docs file
  * The reason this is a function is because we need to convert
  * 'selected_features' to a Set instead of a Map.
  */
-export const getInitialState = ( data, filename ) => {
+export const getInitialState = (data, filename) => {
 	const initialState = fromJS({
-		'data': data || null,
-		'filename': filename || null,
-		'master': {},
-		'selections': [],
-		'brush': {},
-		'selected_features': [],
+		data: data || null,
+		filename: filename || null,
+		master: {},
+		selections: [],
+		brush: {},
+		selected_features: [],
 		// states needed only by its reducer
-		'_featureSelect': {
-			'last_shiftless_selected_feature': null
+		_featureSelect: {
+			last_shiftless_selected_feature: null
 		}
-		})
+	});
 
-	return initialState.updateIn(['selected_features'], () => Set())
-}
+	return initialState.updateIn(["selected_features"], () => Set());
+};
 
 /**
  * Color palette for newly created selections, as well as a master and brush selection
  */
-const selectionsColorPalette = ['#7733e6', '#e63380', '#98e633', '#33e6c5', '#333be6', '#e63333',
-	'#380f7b', '#7b0f3e', '#4c7b0f', '#0f7b67', '#0f157b', '#7b0f0f' ]
-const selectionsMasterColor = '#335ce4'
-const selectionsBrushColor = '#ff4500'
-
+const selectionsColorPalette = [
+	"#7733e6",
+	"#e63380",
+	"#98e633",
+	"#33e6c5",
+	"#333be6",
+	"#e63333",
+	"#380f7b",
+	"#7b0f3e",
+	"#4c7b0f",
+	"#0f7b67",
+	"#0f157b",
+	"#7b0f0f"
+];
+const selectionsMasterColor = "#335ce4";
+const selectionsBrushColor = "#ff4500";
 
 /**
  * Handle a FILE_LOAD
@@ -49,28 +60,30 @@ const selectionsBrushColor = '#ff4500'
  */
 const fileLoad = (state, action) => {
 	return state
-			.set('data', fromJS(action.data))
-			.set('filename', action.filename)
-			.set('master', fromJS(
-				{
-					name: 'Master',
-					mask: Array.from(Array(action.data.length-1), () => true),
-					color: selectionsMasterColor,
-					visible: true,
-					emphasize: false,
-				}
-			))
-			.set('selections', fromJS([]))
-			.set('brush', fromJS(
-				{
-					name: 'Brush',
-					mask: Array.from(Array(action.data.length-1), () => false),
-					color: selectionsBrushColor,
-					visible: true,
-					emphasize: false,
-				}
-			))
-}
+		.set("data", fromJS(action.data))
+		.set("filename", action.filename)
+		.set(
+			"master",
+			fromJS({
+				name: "Master",
+				mask: Array.from(Array(action.data.length - 1), () => true),
+				color: selectionsMasterColor,
+				visible: true,
+				emphasize: false
+			})
+		)
+		.set("selections", fromJS([]))
+		.set(
+			"brush",
+			fromJS({
+				name: "Brush",
+				mask: Array.from(Array(action.data.length - 1), () => false),
+				color: selectionsBrushColor,
+				visible: true,
+				emphasize: false
+			})
+		);
+};
 
 /**
  * Handle a FEATURE_ADD
@@ -85,24 +98,32 @@ const featureAdd = (state, action) => {
 	let foundUniqueName = false;
 	let uniqueNameIndex = 0;
 	let testFeatureName = action.featureName;
-	while( !foundUniqueName ) {
-		if( state.getIn(['data', 0]).includes(testFeatureName) ) {
-			testFeatureName = action.featureName + '_' + formulas.iToAlphabet(uniqueNameIndex);
+	while (!foundUniqueName) {
+		if (state.getIn(["data", 0]).includes(testFeatureName)) {
+			testFeatureName =
+				action.featureName +
+				"_" +
+				formulas.iToAlphabet(uniqueNameIndex);
 			uniqueNameIndex++;
-		}
-		else {
+		} else {
 			foundUniqueName = true;
 		}
 	}
 
-	action.featureData.unshift( testFeatureName );
-	if( action.featureData.length === state.get('data').size )
-		return state.updateIn(['data'], d => d.map((val, index, arr) => d.get(index).push(action.featureData[index])))
+	action.featureData.unshift(testFeatureName);
+	if (action.featureData.length === state.get("data").size)
+		return state.updateIn(["data"], d =>
+			d.map((val, index, arr) =>
+				d.get(index).push(action.featureData[index])
+			)
+		);
 	else {
-		console.warn( 'FEATURE_ADD - Unsuccessful: new feature length differs from data length' )
-		return state
+		console.warn(
+			"FEATURE_ADD - Unsuccessful: new feature length differs from data length"
+		);
+		return state;
 	}
-}
+};
 
 /**
  * Handle a FEATURE_SELECT
@@ -112,33 +133,41 @@ const featureAdd = (state, action) => {
  */
 const featureSelect = (state, action) => {
 	// insert into the selected features set
-	if( !action.shifted ) {
-		state = state.setIn( ['_featureSelect', 'last_shiftless_selected_feature'], action.feature )
-		return state.updateIn(['selected_features'], sel => sel.add(action.feature))
-	}
-	else {
+	if (!action.shifted) {
+		state = state.setIn(
+			["_featureSelect", "last_shiftless_selected_feature"],
+			action.feature
+		);
+		return state.updateIn(["selected_features"], sel =>
+			sel.add(action.feature)
+		);
+	} else {
 		// handle shift key
 		// select everything between action.feature and last_shiftless
 		//   (inclusive and regardless of which comes first)
-		const shiftless = state.getIn( ['_featureSelect', 'last_shiftless_selected_feature'] )
-		const featureNames = sels.getFeatures( state ).toJS()
-		const selectedFeatures = state.get( 'selected_features' )
-		let pastFeature = false
-		for( let n in featureNames ) {
-			n = featureNames[n]
-			if( pastFeature || n === action.feature || n == shiftless ) {
-				if( !selectedFeatures.includes( n ) ) {
-					state = state.updateIn(['selected_features'], sel => sel.add(n))
+		const shiftless = state.getIn([
+			"_featureSelect",
+			"last_shiftless_selected_feature"
+		]);
+		const featureNames = sels.getFeatures(state).toJS();
+		const selectedFeatures = state.get("selected_features");
+		let pastFeature = false;
+		for (let n in featureNames) {
+			n = featureNames[n];
+			if (pastFeature || n === action.feature || n == shiftless) {
+				if (!selectedFeatures.includes(n)) {
+					state = state.updateIn(["selected_features"], sel =>
+						sel.add(n)
+					);
 				}
-				if( pastFeature && ( n === action.feature || n == shiftless ) )
+				if (pastFeature && (n === action.feature || n == shiftless))
 					pastFeature = false;
-				else
-					pastFeature = true;
+				else pastFeature = true;
 			}
 		}
 		return state;
 	}
-}
+};
 
 /**
  * Handle a FEATURE_UNSELECT
@@ -149,22 +178,23 @@ const featureSelect = (state, action) => {
 const featureUnselect = (state, action) => {
 	// remove from the selected features set
 	//if( !action.shifted ) //Ignore shift for now
-		return state.updateIn(['selected_features'], sel => sel.remove(action.feature))
+	return state.updateIn(["selected_features"], sel =>
+		sel.remove(action.feature)
+	);
 	//else {
-		//TODO: handle shift key
+	//TODO: handle shift key
 	//	return state;
 	//}
-}
+};
 /**
  * Handle a FEATURES_UNSELECTALL
  * @param {Map} state current state
  * @return {Map} new state
  */
-const featuresUnselectAll = (state) => {
+const featuresUnselectAll = state => {
 	// reset the selected features set
-	return state.updateIn(['selected_features'], () => Set())
-}
-
+	return state.updateIn(["selected_features"], () => Set());
+};
 
 /**
  * Handle a SELECTION_CREATE
@@ -173,33 +203,39 @@ const featuresUnselectAll = (state) => {
  * @return {Map} new state
  */
 const selectionCreate = (state, action) => {
-	let computedColor = action.color
-	if (computedColor === '') {
+	let computedColor = action.color;
+	if (computedColor === "") {
 		// then select from our list of selection colors
-		computedColor = selectionsColorPalette[(state.get('selections').size) % selectionsColorPalette.length]
+		computedColor =
+			selectionsColorPalette[
+				state.get("selections").size % selectionsColorPalette.length
+			];
 	}
 
 	// make sure name is unique
-	const selNames = state.get('selections').map(sel => sel.get('name'));
+	const selNames = state.get("selections").map(sel => sel.get("name"));
 	const savedActionName = action.name;
 	let count = 0;
-	while( selNames.includes( action.name ) ) {
-		action.name = savedActionName + '_' + count;
+	while (selNames.includes(action.name)) {
+		action.name = savedActionName + "_" + count;
 		count++;
 	}
 
-	if( action.mask === 'brush' )
-		action.mask = state.getIn(['brush', 'mask'])
+	if (action.mask === "brush") action.mask = state.getIn(["brush", "mask"]);
 
-	return state.updateIn(['selections'], sel => sel.push(fromJS({
-		name: action.name,
-		mask: action.mask,
-		color: computedColor,
-		emphasize: false,
-		visible: action.visible,
-		meta: action.meta
-	})))
-}
+	return state.updateIn(["selections"], sel =>
+		sel.push(
+			fromJS({
+				name: action.name,
+				mask: action.mask,
+				color: computedColor,
+				emphasize: false,
+				visible: action.visible,
+				meta: action.meta
+			})
+		)
+	);
+};
 
 /**
  * Handle a SELECTION_REORDER
@@ -209,10 +245,12 @@ const selectionCreate = (state, action) => {
  */
 const selectionReorder = (state, action) => {
 	// complex: we're performing a map over the existing array, but for every index
-	// we look up the index in the order array (from theg action) and return the 
+	// we look up the index in the order array (from theg action) and return the
 	// original value at that index. this results in a reordered array.
-	return state.updateIn(['selections'], sel => sel.map((val, index, arr) => arr.get(action.order[index])))
-}
+	return state.updateIn(["selections"], sel =>
+		sel.map((val, index, arr) => arr.get(action.order[index]))
+	);
+};
 
 /**
  * Handle a SELECTION_RECOLOR
@@ -221,8 +259,10 @@ const selectionReorder = (state, action) => {
  * @return {Map} new state
  */
 const selectionRecolor = (state, action) => {
-	return state.updateIn(['selections', action.index], sel => sel.set('color', action.color))
-}
+	return state.updateIn(["selections", action.index], sel =>
+		sel.set("color", action.color)
+	);
+};
 
 /**
  * Handle a SELECTION_RENAME
@@ -231,8 +271,10 @@ const selectionRecolor = (state, action) => {
  * @return {Map} new state
  */
 const selectionRename = (state, action) => {
-	return state.updateIn(['selections', action.index], sel => sel.set('name', action.name))
-}
+	return state.updateIn(["selections", action.index], sel =>
+		sel.set("name", action.name)
+	);
+};
 
 /**
  * Handle a SELECTION_TOGGLE
@@ -241,18 +283,20 @@ const selectionRename = (state, action) => {
  * @return {Map} new state
  */
 const selectionToggle = (state, action) => {
-	return state.updateIn(['selections', action.index, 'visible'], val => !val)
-}
+	return state.updateIn(["selections", action.index, "visible"], val => !val);
+};
 
 /**
  * Handle a SELECTIONS_UNSELECTALL
  * @param {Map} state current state
  * @return {Map} new state
  */
-const selectionsUnselectAll = (state) => {
+const selectionsUnselectAll = state => {
 	// remove from the selected features set
-	return state.updateIn(['selections'], sel => sel.map((val) => val.set('visible', false) ) )
-}
+	return state.updateIn(["selections"], sel =>
+		sel.map(val => val.set("visible", false))
+	);
+};
 
 /**
  * Handle a SELECTION_EMPHASIZE
@@ -261,8 +305,11 @@ const selectionsUnselectAll = (state) => {
  * @return {Map} new state
  */
 const selectionEmphasisToggle = (state, action) => {
-	return state.updateIn(['selections', action.index, 'emphasize'], val => !val)
-}
+	return state.updateIn(
+		["selections", action.index, "emphasize"],
+		val => !val
+	);
+};
 
 /**
  * Handle a SELECTION_REMOVE
@@ -271,8 +318,8 @@ const selectionEmphasisToggle = (state, action) => {
  * @return {Map} new state
  */
 const selectionRemove = (state, action) => {
-	return state.deleteIn(['selections', action.index])
-}
+	return state.deleteIn(["selections", action.index]);
+};
 
 /**
  * Handle a BRUSH_UPDATE
@@ -282,10 +329,10 @@ const selectionRemove = (state, action) => {
  * @return {Map} new state
  */
 const brushUpdate = (state, action) => {
-	if( state.getIn(['brush', 'mask']).size === action.mask.length )
-		return state.updateIn(['brush', 'mask'], val => fromJS(action.mask))
-	return state
-}
+	if (state.getIn(["brush", "mask"]).size === action.mask.length)
+		return state.updateIn(["brush", "mask"], val => fromJS(action.mask));
+	return state;
+};
 
 /**
  * Handle a BRUSH_UPDATE_AREA
@@ -302,38 +349,43 @@ const brushUpdate = (state, action) => {
 const brushUpdateArea = (state, action) => {
 	let brushedMask = []; //false is unbrushed, true brushed
 
-	const dataSize = state.get('data').size;
+	const dataSize = state.get("data").size;
 
-	let xFeatureI = state.getIn(['data', 0]).findIndex( i => i === action.xAxisFeature );
-	let yFeatureI = state.getIn(['data', 0]).findIndex( i => i === action.yAxisFeature );
-	if( xFeatureI === -1 || yFeatureI === -1 ) return state;
+	let xFeatureI = state
+		.getIn(["data", 0])
+		.findIndex(i => i === action.xAxisFeature);
+	let yFeatureI = state
+		.getIn(["data", 0])
+		.findIndex(i => i === action.yAxisFeature);
+	if (xFeatureI === -1 || yFeatureI === -1) return state;
 
-	for( let i = 1; i < dataSize; i++ ) {
-		if( action.mode === 'rectangle' &&
-			( state.getIn(['data', i, xFeatureI]) > action.area.x[0] ) &&
-			( state.getIn(['data', i, xFeatureI]) < action.area.x[1] ) &&
-			( state.getIn(['data', i, yFeatureI]) > action.area.y[0] ) &&
-			( state.getIn(['data', i, yFeatureI]) < action.area.y[1] ) ) {
-			brushedMask.push( true );
-		}
-		else if( action.mode === 'freehand' &&
-			formulas.isPointInPoly( action.area, {
-				x: state.getIn(['data', i, xFeatureI]),
-				y: state.getIn(['data', i, yFeatureI])
-				} )
+	for (let i = 1; i < dataSize; i++) {
+		if (
+			action.mode === "rectangle" &&
+			state.getIn(["data", i, xFeatureI]) > action.area.x[0] &&
+			state.getIn(["data", i, xFeatureI]) < action.area.x[1] &&
+			state.getIn(["data", i, yFeatureI]) > action.area.y[0] &&
+			state.getIn(["data", i, yFeatureI]) < action.area.y[1]
 		) {
-			brushedMask.push( true );
-		}
-		else {
-			brushedMask.push( false );
+			brushedMask.push(true);
+		} else if (
+			action.mode === "freehand" &&
+			formulas.isPointInPoly(action.area, {
+				x: state.getIn(["data", i, xFeatureI]),
+				y: state.getIn(["data", i, yFeatureI])
+			})
+		) {
+			brushedMask.push(true);
+		} else {
+			brushedMask.push(false);
 		}
 	}
 
-	if( state.getIn(['brush', 'mask']).size === brushedMask.length ) {
-		return state.updateIn(['brush', 'mask'], val => fromJS(brushedMask))
+	if (state.getIn(["brush", "mask"]).size === brushedMask.length) {
+		return state.updateIn(["brush", "mask"], val => fromJS(brushedMask));
 	}
-	return state
-}
+	return state;
+};
 
 /**
  * Handle a BRUSH_CLEAR
@@ -343,10 +395,11 @@ const brushUpdateArea = (state, action) => {
  */
 const brushClear = (state, action) => {
 	// fill it with false
-	const size = state.getIn(['brush', 'mask']).size;
-	return state.updateIn(['brush', 'mask'],
-		val => fromJS(Array.from(Array(size), () => false)))
-}
+	const size = state.getIn(["brush", "mask"]).size;
+	return state.updateIn(["brush", "mask"], val =>
+		fromJS(Array.from(Array(size), () => false))
+	);
+};
 
 /**
  * Data reducer
@@ -368,5 +421,4 @@ export default createReducer(getInitialState(), {
 	BRUSH_UPDATE: brushUpdate,
 	BRUSH_UPDATE_AREA: brushUpdateArea,
 	BRUSH_CLEAR: brushClear
-})
-
+});
