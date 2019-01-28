@@ -161,6 +161,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
 
         if msg['done']:
             result['status'] = 'complete'
+            result['feature_names'] = featureList
         else:
             result['status'] = 'streaming'
 
