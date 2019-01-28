@@ -81,7 +81,7 @@ def codex_read_csv(file, featureList, hashType):
         feature_hash = codex_hash.hashArray(feature_name, feature_data, hashType)
         hashList.append(feature_hash['hash'])
 
-    return hashList
+    return hashList, list(featureList)
 
 
 def codex_read_image(file, show=False):
@@ -196,7 +196,7 @@ def codex_read_hd5(file, featureList, hashType):
         hashList.append(feature_hash['hash'])
 
     f.close()
-    return hashList
+    return hashList, list(featureList)
 
 
 def codex_read_npy(file, featureList, hashType):
@@ -219,6 +219,7 @@ def codex_read_npy(file, featureList, hashType):
         return None
 
     samples, features = data.shape
+    featureList = []
     for x in range(0,features):
 
         try:
@@ -227,10 +228,12 @@ def codex_read_npy(file, featureList, hashType):
             feature_data = codex_system.string2token(data[:,x])
             codex_system.codex_log("Log: codex_read_npy: Tokenized " + feature_name)
 
-        feature_hash = codex_hash.hashArray("feature_"+str(x), feature_data, hashType)
+        feature_name = "feature_"+str(x)
+        featureList.append(feature_name)
+        feature_hash = codex_hash.hashArray(feature_name, feature_data, hashType)
         hashList.append(feature_hash['hash'])
 
-    return hashList
+    return hashList, featureList
     
 
 def codex_save_subset(inputHash, subsetHash, saveFilePath):

@@ -141,17 +141,17 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
             
             fileExtension = filename.split(".")[-1]    
             if(fileExtension == "csv"):
-                hashList = codex_read_data_api.codex_read_csv(filepath, None, "feature")
+                hashList, featureList = codex_read_data_api.codex_read_csv(filepath, None, "feature")
                 codex_return_code.logReturnCode("hashList = codex_read_data_api.codex_read_csv('" + filepath + "', None, 'feature')")
 
             elif(fileExtension == "h5"):
-                hashList = codex_read_data_api.codex_read_hd5(filepath, None, "feature")
+                hashList, featureList= codex_read_data_api.codex_read_hd5(filepath, None, "feature")
                 codex_return_code.logReturnCode("hashList = codex_read_data_api.codex_read_h5('" + filepath + "', None, 'feature')")
 
             elif(fileExtension == "npy"):
-                hashList = codex_read_data_api.codex_read_npy(filepath, None, "feature")
+                hashList, featureList = codex_read_data_api.codex_read_npy(filepath, None, "feature")
                 codex_return_code.logReturnCode("hashList = codex_read_data_api.codex_read_npy('" + filepath + "', None, 'feature')")
-                
+
             else:
                 result['message'] = "Currently unsupported filetype"
 
