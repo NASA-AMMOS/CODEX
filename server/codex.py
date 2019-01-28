@@ -129,7 +129,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
         result = {}
 
         filename = msg["filename"]
-        filepath = CODEX_ROOT + "/../../uploads/" + filename
+        filepath = CODEX_ROOT + "/uploads/" + filename
 
         if(msg["done"] == True):
             
