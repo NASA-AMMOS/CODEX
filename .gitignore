@@ -8,6 +8,8 @@ src/server/timeLogs/*
 # testing
 /coverage
 
+package-lock.json
+
 # production
 /build
 
