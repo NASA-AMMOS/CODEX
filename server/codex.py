@@ -317,6 +317,24 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 
                 result['message'] = 'success'
 
+            elif(activity == "get"):
+
+                name = msg["name"]
+                print(name)
+                if(hashType == "selection"):
+                    data = codex_hash.findHashArray("name", name, "subset")
+                elif(hashType == "feature"):
+                    data = codex_hash.findHashArray("name", name, "feature")
+                else:
+                    result["message"] = 'failure'
+                    status = False
+
+                if(status == True):
+                    result['message'] = 'success'
+                else:
+                    result['message'] = 'failure'
+
+
             elif(activity == "delete"):
 
                 name = msg["name"]

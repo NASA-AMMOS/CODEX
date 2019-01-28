@@ -209,8 +209,6 @@ def codex_segmentation_quickshift(inputHash, subsetHash, downsampled, kernel_siz
         data = codex_downsample.downsample(data, percentage=downsampled)
 
     data = np.dstack((data,data,data))
-    #print(data.shape)
-    #data = codex_math.codex_impute(data)
     segments = quickshift(data, kernel_size=kernel_size, sigma=sigma, max_dist=max_dist)
 
     endTime = time.time()
