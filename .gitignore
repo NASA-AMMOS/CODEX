@@ -49,7 +49,7 @@ server/CODEX.egg-info/
 server/dist/
 server/codex.log
 src/servertimeLogs/
-
+server/debug/
 src/server/pep8/index.html
 
 # env
