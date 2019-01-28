@@ -1,2 +1,0 @@
-
-exports.LineChart = require('./LineChart');

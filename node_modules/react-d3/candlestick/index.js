@@ -1,2 +1,0 @@
-
-exports.CandlestickChart = require('./CandlestickChart');
