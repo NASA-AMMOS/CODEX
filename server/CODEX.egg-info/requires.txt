@@ -1,9 +1,0 @@
-pysptools
-scikit-image
-scipy
-fastdtw
-pyyaml
-markdown
-sklearn
-tornado
-freeport
