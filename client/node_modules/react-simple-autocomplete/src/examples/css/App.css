@@ -1,0 +1,151 @@
+:root {
+  --white: #ECEFF1;
+  --black: #3A464F;
+  --purple: #7B84C8;
+}
+
+:global html, :global body {
+  margin: 0;
+  padding: 0;
+  background: var(--white);
+}
+
+
+.container {
+  font-family: Helvetica, sans-serif;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.header {
+  flex: 1 0 100%;
+  text-align: center;
+  font-size: 30px;
+  margin-top: 12px;
+  color: var(--black);
+  font-family: monospace;
+}
+
+.title {
+  flex: 1 0 100%;
+  text-align: center;
+  font-size: 20px;
+  margin: 12px 0;
+  margin-top: 50px;
+  color: var(--black);
+}
+
+.column {
+  flex: 1 0 300px;
+  margin: 12px;
+}
+
+.code {
+  composes: column;
+  padding: 12px;
+  box-sizing: border-box;
+  font-family: monospace;
+  background: white;
+  overflow-x: scroll;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px -3px var(--black);
+}
+
+.simple {
+  composes: column;
+  position: relative;
+
+  input {
+    width: 100%;
+    margin: 0;
+    padding: 12px;
+    box-sizing: border-box;
+    border: none;
+    font-size: 14px;
+  }
+
+  ul {
+    display: block;
+    background: white;
+    margin: 0;
+    padding: 0;
+    box-shadow: 0 0px 4px -2px var(--black);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 100;
+  }
+
+  li {
+    list-style-type: none;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+
+  em li {
+    background: var(--purple);
+    color: white;
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  li:hover {
+    cursor: pointer;
+  }
+}
+
+.menu {
+  composes: column;
+  position: relative;
+
+  input {
+    width: 100%;
+    margin: 0;
+    padding: 12px;
+    box-sizing: border-box;
+    border: none;
+    font-size: 14px;
+  }
+}
+.renderMenu {
+  display: block;
+  background: white;
+  margin: 0;
+  padding: 0;
+  box-shadow: 0 0px 4px -2px var(--black);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.item {
+  list-style-type: none;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.activeItem {
+  composes: item;
+  background: var(--purple);
+  font-style: normal;
+  color: white;
+}
+
+.item:hover {
+  cursor: pointer;
+}
+
+.stream {
+  composes: item;
+  color: #CCC;
+  font-style: italic;
+  text-align: center;
+}

@@ -3,7 +3,7 @@
 __pycache__/
 src/server/timeLogs/*
 # dependencies
-/node_modules
+client/node_modules
 
 # testing
 /coverage

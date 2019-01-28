@@ -1,0 +1,3 @@
+--require ./src/__tests__/init.js
+--require ignore-styles
+--compilers js:babel-core/register
