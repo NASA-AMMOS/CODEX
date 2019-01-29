@@ -1,35 +1,28 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
 // redux
-import { connect } from 'react-redux'
+import { connect } from "react-redux";
 
 class TestReport extends Component {
-  constructor(props) { 
-    super(props);
-  }
+    constructor(props) {
+        super(props);
+    }
 
-
-  render() {
-
-    return (
-      <div className='TestReport'>
-        Testing
-      </div>
-    );
-  }
-  
+    render() {
+        return <div className="TestReport">Testing</div>;
+    }
 }
 
 // redux connection
-const mapStateToProps = (state) => {
-	return {
-		data: state.getIn(['data', 'data'])
-	}
-}
-const mapDispatchToProps = () => ({})
+const mapStateToProps = state => {
+    return {
+        data: state.getIn(["data", "data"])
+    };
+};
+const mapDispatchToProps = () => ({});
 
-export { TestReport }
+export { TestReport };
 export default connect(
-	mapStateToProps,
-	mapDispatchToProps
+    mapStateToProps,
+    mapDispatchToProps
 )(TestReport);

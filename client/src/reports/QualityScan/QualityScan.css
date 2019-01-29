@@ -18,7 +18,7 @@
     transition: background 0.1s cubic-bezier(0.445, 0.05, 0.55, 0.95);
 }
 .QualityScan tbody tr:hover {
-    background: #FF4500 !important;
+    background: #ff4500 !important;
     color: white !important;
 }
 
@@ -42,10 +42,8 @@
     display: none;
     flex: 1;
     width: 100%;
-    height: calc( 100% - 279px );
+    height: calc(100% - 279px);
 }
-
-
 
 .QualityScan .right {
     flex: 1;
@@ -64,7 +62,7 @@
 }
 .QualityScan .right .middle {
     width: 100%;
-    height: calc( 100% - 60px );
+    height: calc(100% - 60px);
     position: relative;
     display: flex;
     overflow-x: hidden;
@@ -119,10 +117,9 @@
     width: 100%;
     height: 24px;
     z-index: -1;
-    background: rgba(0,0,0,0.2);
+    background: rgba(0, 0, 0, 0.2);
     pointer-events: none;
 }
-
 
 .QualityScan .right .middle .heat {
     flex: 1;
@@ -198,8 +195,9 @@
     background: rgba(255, 255, 255, 0.2);
     border: 1px solid #ccc;
     cursor: ew-resize;
-    transition: left 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95), width 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95);
-} 
+    transition: left 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95),
+        width 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
 
 .QualityScan #highlightCanvas {
     display: none;
@@ -224,7 +222,7 @@
     left: 100%;
     top: 30px;
     width: 350px;
-    height: calc( 100% - 30px );
+    height: calc(100% - 30px);
     background: #181818;
     transition: left 0.25s cubic-bezier(0.445, 0.05, 0.55, 0.95);
 }

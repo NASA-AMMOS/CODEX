@@ -1,9 +1,9 @@
 export default class chord {
     constructor() {
         this.seriesKey = {
-            name: '',
-            type: 'graph',
-            layout: 'circular',
+            name: "",
+            type: "graph",
+            layout: "circular",
             circular: {
                 rotateLabel: true
             },
@@ -13,13 +13,13 @@ export default class chord {
             roam: true,
             label: {
                 normal: {
-                    position: 'right',
-                    formatter: '{b}'
+                    position: "right",
+                    formatter: "{b}"
                 }
             },
             itemStyle: {
                 normal: {
-                    color: 'source',
+                    color: "source",
                     curveness: 0.3
                 }
             }
@@ -27,31 +27,29 @@ export default class chord {
 
         this.option = {
             title: {
-                text: ''
+                text: ""
             },
             grid: {
                 right: 10,
                 left: 140
             },
-            tooltip : {},
+            tooltip: {},
             legend: {
-                data:['']
+                data: [""]
             },
             animationDurationUpdate: 1500,
-            animationEasingUpdate: 'quinticInOut',
-            series : [
-                Object.assign( {}, this.seriesKey )
-            ]
-        }
+            animationEasingUpdate: "quinticInOut",
+            series: [Object.assign({}, this.seriesKey)]
+        };
     }
 
     getOption() {
         return this.option;
     }
     getSeriesKey() {
-        return Object.assign( {}, this.seriesKey );
+        return Object.assign({}, this.seriesKey);
     }
-    transformData( d ) {
+    transformData(d) {
         var arr = [];
         /*
             format:
@@ -63,7 +61,7 @@ export default class chord {
                 node.category = ??
             }
         */
-        
+
         var temp = {
             itemStyle: null,
             value: null,
@@ -78,8 +76,8 @@ export default class chord {
 
         for (var i = 1; i < d.length; i++) {
             temp.value = d[i][0];
-            temp.symbolSize = temp.value/1.5;
-           // temp.label.normal.show = temp.value > 0;
+            temp.symbolSize = temp.value / 1.5;
+            // temp.label.normal.show = temp.value > 0;
             arr.push(temp);
         }
         return arr;

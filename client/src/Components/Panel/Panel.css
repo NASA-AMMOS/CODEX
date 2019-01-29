@@ -9,7 +9,8 @@
     width: 20px;
     background: #1a1a1a;
     cursor: pointer;
-    transition: width 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95), background 0.4s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+    transition: width 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95),
+        background 0.4s cubic-bezier(0.445, 0.05, 0.55, 0.95);
 }
 .Panel #border:hover {
     width: 30px;
@@ -27,7 +28,7 @@
 
 .Panel #contents {
     width: auto;
-    height: calc( 100% - 30px );
+    height: calc(100% - 30px);
     display: flex;
     position: relative;
     box-sizing: border-box;
@@ -67,8 +68,8 @@
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    background: rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.75);
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.75);
     border: none;
     padding: 0px 6px;
 }

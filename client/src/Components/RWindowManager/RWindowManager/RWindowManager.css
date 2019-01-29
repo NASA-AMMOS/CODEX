@@ -7,7 +7,7 @@
 
 .RWindowManager > #RWindowManager_windowcont {
     width: 100%;
-    height: calc( 100% - 24px );
+    height: calc(100% - 24px);
 }
 .RWindowManager > #RWindowManager_taskbarcont {
     height: 24px;
@@ -19,7 +19,7 @@
 .RWindowManager #RWindowManager_svgunderlay {
     width: 100%;
     position: absolute;
-    height: calc( 100% - 30px );
+    height: calc(100% - 30px);
     top: 30px;
     pointer-events: none;
 }

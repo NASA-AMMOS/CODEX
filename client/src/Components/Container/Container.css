@@ -1,6 +1,6 @@
 .Container {
     height: 100%;
-    width: calc( 100% - 220px );
+    width: calc(100% - 220px);
     position: relative;
 }
 
@@ -9,6 +9,6 @@
     top: 30px;
     left: 0;
     width: 100%;
-    height: calc( 100% - 30px );
+    height: calc(100% - 30px);
     box-shadow: inset 5px 5px 11px rgba(6, 6, 6, 0.3);
 }

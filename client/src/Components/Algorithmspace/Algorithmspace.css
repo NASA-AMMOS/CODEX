@@ -14,7 +14,7 @@
 }
 .Container > .ReactModalPortal #portalheader #title {
     font-size: 24px;
-    font-family: 'lato_bold';
+    font-family: "lato_bold";
 }
 .Container > .ReactModalPortal #portalheader #close {
     width: 28px;
@@ -57,18 +57,19 @@
 }
 
 .Container > .ReactModalPortal .ReactModal__Overlay {
-  transition: opacity 0.25s cubic-bezier(0.445, 0.05, 0.55, 0.95), left 0.5s cubic-bezier(0.445, 0.05, 0.55, 0.95);
-  background: rgba(0, 0, 0, 0.15);
-  position: absolute !important;
-  right: unset !important;
-  width: 100%;
-  z-index: 1000000000;
-  border-top: 0px solid #1a1a1a;
+    transition: opacity 0.25s cubic-bezier(0.445, 0.05, 0.55, 0.95),
+        left 0.5s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+    background: rgba(0, 0, 0, 0.15);
+    position: absolute !important;
+    right: unset !important;
+    width: 100%;
+    z-index: 1000000000;
+    border-top: 0px solid #1a1a1a;
 }
 
 .Container > .ReactModalPortal .ReactModal__Overlay--after-open {
     opacity: 1;
 }
-.Container >  .ReactModalPortal .ReactModal__Overlay--before-close {
+.Container > .ReactModalPortal .ReactModal__Overlay--before-close {
     opacity: 0;
 }

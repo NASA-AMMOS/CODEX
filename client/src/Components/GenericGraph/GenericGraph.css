@@ -30,7 +30,7 @@
     margin: 0 15px 0 15px;
     transition: background 0.2s, color 0.2s;
     width: 80px;
-    background: linear-gradient( to top, #0069e0, #0077ff );
+    background: linear-gradient(to top, #0069e0, #0077ff);
     text-align: center;
     border-radius: 4px;
     border: 1px solid black;
@@ -103,11 +103,9 @@
     color: white;
 }
 
-
 .GenericGraph .setGroup {
     position: relative;
 }
-
 
 .GenericGraph > .groupColor {
     position: absolute;
@@ -127,7 +125,6 @@
     justify-content: space-between;
 }
 .GenericGraph .GenericGraphContextMenuGroup > #groupNumber {
-    
 }
 .GenericGraph .GenericGraphContextMenuGroup > #groupColor {
     width: 24px;

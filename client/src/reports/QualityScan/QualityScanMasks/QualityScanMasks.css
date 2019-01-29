@@ -2,7 +2,7 @@
     width: 100%;
     height: 100%;
     overflow-y: hidden;
-    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.3);
+    box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.3);
 }
 
 .QualityScanMasks #sortlist {
@@ -29,7 +29,7 @@
 .QualityScanMasks_maskli:hover {
     background: #3a3a3a;
     color: white;
-    box-shadow: 0px 1px 8px 0px rgba(0,0,0,0.3);
+    box-shadow: 0px 1px 8px 0px rgba(0, 0, 0, 0.3);
 }
 
 .QualityScanMasks_maskli .header {
@@ -57,7 +57,7 @@
     transition: color 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95);
 }
 .QualityScanMasks .Checkbox.active {
-    color: #FF4500;
+    color: #ff4500;
 }
 
 .QualityScanMasks_maskli .opacityslider {
@@ -69,15 +69,15 @@
     -webkit-appearance: none;
     height: 2px;
     background: white;
-    box-shadow: 0px 1px 3px rgba(0,0,0,0.3);
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
 }
 .QualityScanMasks_maskli .opacityslider input::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 7px;
     height: 14px;
     background: white;
-    box-shadow: 0px 1px 3px rgba(0,0,0,0.3);
-    cursor: ew-resize; 
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
+    cursor: ew-resize;
 }
 
 .QualityScanMasks_maskli .maskmiddle {
@@ -92,7 +92,6 @@
 .QualityScanMasks_maskli .colorpalette img {
     margin-bottom: 3px;
 }
-
 
 .QualityScanMasks_maskli .option {
     justify-content: space-between;
@@ -116,7 +115,7 @@
     width: 7px;
     height: 14px;
     background: #666;
-    cursor: ew-resize; 
+    cursor: ew-resize;
 }
 
 .QualityScanMasks_maskli .option .text {

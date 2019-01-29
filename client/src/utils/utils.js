@@ -5,12 +5,11 @@
  *     -> 0, 1, 0, 2
  */
 let getIdIds = {};
-export const getId = ( idName ) => {
-    if( getIdIds.hasOwnProperty( idName ) ) {
+export const getId = idName => {
+    if (getIdIds.hasOwnProperty(idName)) {
         getIdIds[idName]++;
-    }
-    else {
+    } else {
         getIdIds[idName] = 0;
     }
     return getIdIds[idName];
-}
+};

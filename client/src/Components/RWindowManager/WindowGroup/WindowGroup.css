@@ -41,7 +41,7 @@
 }
 
 .WindowGroupHandle > .WindowGroupHandleSnap {
-    color: rgba(255,255,255,0.5);
+    color: rgba(255, 255, 255, 0.5);
     font-size: 14px;
     line-height: 14px;
     cursor: pointer;
@@ -57,7 +57,7 @@
 .WindowGroupHandle .WindowGroupHandleButtons > div {
     width: 12px;
     height: 12px;
-    margin: 6px 4px; 
+    margin: 6px 4px;
     border-radius: 12px;
     cursor: pointer;
     opacity: 0.85;

@@ -1,114 +1,110 @@
-import ecStat from 'echarts-stat';
+import ecStat from "echarts-stat";
 
 export default class Bar {
     constructor() {
         this.seriesKey = {
-            name: '',
-            type: 'bar',
+            name: "",
+            type: "bar",
             data: [],
             markPoint: {
-              data: [
-                { type: 'max', name: 'MAX'},
-                { type: 'min', name: 'MIN'}
-              ]
+                data: [{ type: "max", name: "MAX" }, { type: "min", name: "MIN" }]
             }
         };
 
         this.option = {
             title: {
-                text: ''
+                text: ""
             },
             grid: {
-                left: '2%',
-                right: '5%',
-                bottom: '5%',
+                left: "2%",
+                right: "5%",
+                bottom: "5%",
                 containLabel: true
             },
             legend: {
-                data:[]
+                data: []
             },
             toolbox: {
-                show : true,
-                feature : {
-                mark : {show: true},
-                dataZoom : {show: true, title: { zoom: 'area zoom', back: 'restore area zoom' }},
-                restore : {show: true, title: 'restore'},
-                saveAsImage : {show: true, title: 'save as image'},
-                brush: {
-                    show: true,
-                    title: {
-                        rect: 'Rectangle selection',
-                        polygon: 'Polygon selection',
-                        lineX: 'Horizontal selection',
-                        lineY: 'Vertical selection',
-                        keep: 'Keep previous selections',
-                        clear: 'Clear selection'
+                show: true,
+                feature: {
+                    mark: { show: true },
+                    dataZoom: {
+                        show: true,
+                        title: { zoom: "area zoom", back: "restore area zoom" }
+                    },
+                    restore: { show: true, title: "restore" },
+                    saveAsImage: { show: true, title: "save as image" },
+                    brush: {
+                        show: true,
+                        title: {
+                            rect: "Rectangle selection",
+                            polygon: "Polygon selection",
+                            lineX: "Horizontal selection",
+                            lineY: "Vertical selection",
+                            keep: "Keep previous selections",
+                            clear: "Clear selection"
+                        }
                     }
-                }
                 }
             },
             brush: {
-                toolbox: ['rect', 'polygon', 'keep', 'clear'],
+                toolbox: ["rect", "polygon", "keep", "clear"],
                 outOfBrush: {
-                    color: '#abc'
+                    color: "#abc"
                 },
                 brushStyle: {
                     borderWidth: 2,
-                    color: 'rgba(0,0,0,0.2)',
-                    borderColor: 'rgba(0,0,0,0.5)',
+                    color: "rgba(0,0,0,0.2)",
+                    borderColor: "rgba(0,0,0,0.5)"
                 },
-                throttleType: 'debounce',
+                throttleType: "debounce",
                 throttleDelay: 500
             },
-            xAxis : [
+            xAxis: [
                 {
-                type : 'value',
-                name : '',
-                nameLocation: 'middle',
-                scale: true,
-                inverse: false
+                    type: "value",
+                    name: "",
+                    nameLocation: "middle",
+                    scale: true,
+                    inverse: false
                 }
             ],
-            yAxis : [
+            yAxis: [
                 {
-                type : 'value',
-                name : '',
-                nameLocation: 'middle',
-                inverse: false
+                    type: "value",
+                    name: "",
+                    nameLocation: "middle",
+                    inverse: false
                 }
             ],
-            series : [
+            series: [
                 //Object.assign( {}, this.seriesKey )
             ]
-        }
+        };
     }
 
     getOption() {
         return this.option;
     }
     getSeriesKey() {
-        return Object.assign( {}, this.seriesKey );
+        return Object.assign({}, this.seriesKey);
     }
 
-    transformData( d, seriesI, r, reverse) {
-        if ( r ) {
-            if (reverse === "x")
-                this.option.xAxis[0].inverse = !(this.option.xAxis[0].inverse);
-            else
-                this.option.yAxis[0].inverse = !(this.option.yAxis[0].inverse);
+    transformData(d, seriesI, r, reverse) {
+        if (r) {
+            if (reverse === "x") this.option.xAxis[0].inverse = !this.option.xAxis[0].inverse;
+            else this.option.yAxis[0].inverse = !this.option.yAxis[0].inverse;
             return this.option;
-        
         }
         var arr = [];
 
         //currently working with x-axis
         for (var i = 1; i < d.length; i++) {
-          arr.push(d[i][seriesI]);
+            arr.push(d[i][seriesI]);
         }
 
         var bins = ecStat.histogram(arr);
 
         return bins.data;
-
     }
 }

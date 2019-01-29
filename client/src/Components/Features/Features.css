@@ -6,10 +6,10 @@
     flex: 1;
     box-sizing: border-box;
     color: white;
-    font-family: 'bitstreamvera', monospace
+    font-family: "bitstreamvera", monospace;
     /*background: linear-gradient(-33deg, hsl(240, 49%, 14%), hsl(209, 76%, 22%),  hsl(240, 49%, 14%));*/
     /*background: linear-gradient(-20deg, #ed8f03, #ffb75e, #ed8f03);*/
-   /*box-shadow: inset -4px 0px 20px 0px rgba(0, 0, 0, 0.2);*/
+    /*box-shadow: inset -4px 0px 20px 0px rgba(0, 0, 0, 0.2);*/
 }
 
 .Features #header {
@@ -20,7 +20,7 @@
     margin-bottom: 2px;
 }
 .Features #header #title {
-    font-family: 'lato_bold';
+    font-family: "lato_bold";
     font-size: 21px;
 }
 .Features #header #toolbar {
@@ -45,8 +45,8 @@
     background: #d3d3d3;
     outline: none;
     opacity: 0.7;
-    -webkit-transition: .2s;
-    transition: opacity .2s;
+    -webkit-transition: 0.2s;
+    transition: opacity 0.2s;
 }
 .Features #nameslider .slider:hover {
     opacity: 1;
@@ -62,6 +62,6 @@
 .Features #nameslider .slider::-moz-range-thumb {
     width: 25px;
     height: 25px;
-    background: #4CAF50;
+    background: #4caf50;
     cursor: pointer;
 }

@@ -8,8 +8,8 @@
 .QualityScanInfo .infoTable {
     flex: 1;
     width: 100%;
-    height: calc( 100% - 30px);
-    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.3);
+    height: calc(100% - 30px);
+    box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.3);
     overflow-y: auto;
 }
 
@@ -46,7 +46,8 @@
 .QualityScanInfo th {
     cursor: pointer;
 }
-.QualityScanInfo th, .QualityScanInfo td {
+.QualityScanInfo th,
+.QualityScanInfo td {
     padding: 1px 12px;
 }
 
@@ -54,7 +55,7 @@
     flex: 1;
     width: 100%;
     overflow-y: auto;
-    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.3);
+    box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.3);
 }
 .QualityScanInfo .option {
     display: flex;
@@ -78,7 +79,7 @@
     width: 14px;
     height: 14px;
     background: #666;
-    cursor: ew-resize; 
+    cursor: ew-resize;
 }
 
 .QualityScanInfo .option .text {

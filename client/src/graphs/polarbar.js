@@ -1,25 +1,25 @@
-import ecStat from 'echarts-stat';
+import ecStat from "echarts-stat";
 
 export default class polarbar {
     constructor() {
         this.seriesKey = {
-            name: '',
-            type: 'bar',
-            coordinateSystem: 'polar',
-            stack: 'a',
-            data: [],
+            name: "",
+            type: "bar",
+            coordinateSystem: "polar",
+            stack: "a",
+            data: []
         };
 
         this.option = {
             title: {
-                text: ''
+                text: ""
             },
             polar: {},
             angleAxis: {
                 //
             },
             radiusAxis: {
-                type: 'category',
+                type: "category",
                 z: 10,
                 data: []
             },
@@ -31,27 +31,25 @@ export default class polarbar {
             //     containLabel: true
             // },
             legend: {
-                data:[]
+                data: []
             },
-            series : [
-                Object.assign( {}, this.seriesKey )
-            ]
-        }
+            series: [Object.assign({}, this.seriesKey)]
+        };
     }
 
     getOption() {
         return this.option;
     }
     getSeriesKey() {
-        return Object.assign( {}, this.seriesKey );
+        return Object.assign({}, this.seriesKey);
     }
 
-    transformData( d, ind, reverse) {
+    transformData(d, ind, reverse) {
         var arr = [];
 
         //currently working with x-axis
         for (var i = 1; i < d.length; i++) {
-          arr.push(d[i][ind]);
+            arr.push(d[i][ind]);
         }
 
         var bins = ecStat.histogram(arr);
@@ -64,7 +62,7 @@ export default class polarbar {
         //     var x1 = bins.bins[i].x1;
         //     interval = x1 - x0;
         //     min = Math.min(min, x0);
-        //     max = Math.max(max, x1); 
+        //     max = Math.max(max, x1);
         // }
         // var add = min;
         // this.option.radiusAxis.data.push(min);
@@ -74,6 +72,5 @@ export default class polarbar {
         // }
 
         return bins.data;
-
     }
 }

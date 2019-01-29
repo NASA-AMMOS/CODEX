@@ -1,11 +1,11 @@
 .SparklineRange {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-  margin: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    margin: 15px;
 }
 
 .SparklineRange > input[type="range"] {
-  width: 100%;
+    width: 100%;
 }

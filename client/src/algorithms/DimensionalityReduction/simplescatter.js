@@ -1,15 +1,15 @@
 export default class simplescatter {
     constructor() {
         this.seriesKey = {
-            name: '',
-            type: 'line',
+            name: "",
+            type: "line",
             symbolSize: 5,
             data: [],
             animation: true,
-            animationEasing: 'quarticIn',
+            animationEasing: "quarticIn",
             itemStyle: {
                 emphasis: {
-                    borderColor: '#111',
+                    borderColor: "#111",
                     borderWidth: 2
                 }
             }
@@ -17,7 +17,7 @@ export default class simplescatter {
 
         this.option = {
             title: {
-                text: ''
+                text: ""
             },
             grid: {
                 right: 10,
@@ -28,65 +28,65 @@ export default class simplescatter {
             axisPointer: {
                 label: {
                     textStyle: {
-                        color: '#292939'
+                        color: "#292939"
                     }
                 }
             },
             legend: {
-                data:['']
+                data: [""]
             },
             toolbox: {
-                show : false,
+                show: false
             },
-            xAxis : [
+            xAxis: [
                 {
-                type : 'value',
-                name: '',
-                nameLocation: 'middle',
-                min: 0,
-                max: 'dataMax',
-                axisLabel: {
-                    show: true
-                },
-                splitLine: { show: false },
-                scale: true,
-                splitNumber: 1,
-                interval: 1,
-                nameTextStyle: {
-                    padding: 12,
-                    fontSize: 18
-                }
+                    type: "value",
+                    name: "",
+                    nameLocation: "middle",
+                    min: 0,
+                    max: "dataMax",
+                    axisLabel: {
+                        show: true
+                    },
+                    splitLine: { show: false },
+                    scale: true,
+                    splitNumber: 1,
+                    interval: 1,
+                    nameTextStyle: {
+                        padding: 12,
+                        fontSize: 18
+                    }
                 }
             ],
-            yAxis : [
+            yAxis: [
                 {
-                type : 'value',
-                name: '',
-                nameLocation: 'middle',
-                min: 0,
-                max: 1,
-                axisLabel: {
-                    show: true
-                },
-                splitLine: { show: false },
-                scale: true,
-                nameTextStyle: {
-                    padding: 12,
-                    fontSize: 18
-                }
+                    type: "value",
+                    name: "",
+                    nameLocation: "middle",
+                    min: 0,
+                    max: 1,
+                    axisLabel: {
+                        show: true
+                    },
+                    splitLine: { show: false },
+                    scale: true,
+                    nameTextStyle: {
+                        padding: 12,
+                        fontSize: 18
+                    }
                 }
             ],
-            series : [],
-        }
+            series: []
+        };
     }
 
     getOption() {
         return this.option;
     }
     getSeriesKey() {
-        return Object.assign( {}, this.seriesKey );
+        return Object.assign({}, this.seriesKey);
     }
-    transformData( d ) {
+    transformData(d) {
         return d;
     }
 }

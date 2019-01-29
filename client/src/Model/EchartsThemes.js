@@ -1,7 +1,7 @@
 export default class EchartsThemes {
     getDarkTheme() {
-        var contrastColor = '#eee';
-        var axisCommon = function () {
+        var contrastColor = "#eee";
+        var axisCommon = function() {
             return {
                 axisLine: {
                     lineStyle: {
@@ -20,8 +20,8 @@ export default class EchartsThemes {
                 },
                 splitLine: {
                     lineStyle: {
-                        type: 'dashed',
-                        color: '#555'
+                        type: "dashed",
+                        color: "#555"
                     }
                 },
                 splitArea: {
@@ -31,11 +31,23 @@ export default class EchartsThemes {
                 }
             };
         };
-    
-        var colorPalette = ['#dd6b66','#D8DD66','#e69d87','#8dc1a9','#ea7e53','#eedd78','#73a373','#73b9bc','#7289ab', '#91ca8c','#f49f42'];
+
+        var colorPalette = [
+            "#dd6b66",
+            "#D8DD66",
+            "#e69d87",
+            "#8dc1a9",
+            "#ea7e53",
+            "#eedd78",
+            "#73a373",
+            "#73b9bc",
+            "#7289ab",
+            "#91ca8c",
+            "#f49f42"
+        ];
         return {
             color: colorPalette,
-            backgroundColor: 'none',
+            backgroundColor: "none",
             tooltip: {
                 axisPointer: {
                     lineStyle: {
@@ -103,9 +115,9 @@ export default class EchartsThemes {
             logAxis: axisCommon(),
             valueAxis: axisCommon(),
             categoryAxis: axisCommon(),
-    
+
             line: {
-                symbol: 'circle'
+                symbol: "circle"
             },
             graph: {
                 color: colorPalette
@@ -120,10 +132,10 @@ export default class EchartsThemes {
             candlestick: {
                 itemStyle: {
                     normal: {
-                        color: '#FD1050',
-                        color0: '#0CF49B',
-                        borderColor: '#FD1050',
-                        borderColor0: '#0CF49B'
+                        color: "#FD1050",
+                        color0: "#0CF49B",
+                        borderColor: "#FD1050",
+                        borderColor0: "#0CF49B"
                     }
                 }
             }
