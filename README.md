@@ -21,13 +21,13 @@ $ GIT/bin/run_codex.sh
 Note:  To start the client and server in different terminal sessions, follow instructions below.
 ```
 Terminal 1:
-cd GIT/client/
-npm start
+$ cd GIT/client/
+$ npm start
 
 Terminal 2:
-conda activate codex
-cd $CODEX_ROOT
-python codex.py
+$ conda activate codex
+$ cd $CODEX_ROOT
+$ python codex.py
 ```
 
 
