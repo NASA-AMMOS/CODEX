@@ -317,6 +317,28 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 
                 result['message'] = 'success'
 
+            elif(activity == "get"):
+
+                name = msg["name"]
+                print(name)
+                if(hashType == "selection"):
+                    data = codex_hash.findHashArray("name", name, "subset")
+                elif(hashType == "feature"):
+                    data = codex_hash.findHashArray("name", name, "feature")
+                elif(hashType == "downsample"):
+                    data = codex_hash.findHashArray("name", name, "downsample")
+                elif(hashType == "label"):
+                    data = codex_hash.findHashArray("name", name, "label")
+                else:
+                    result["message"] = 'failure'
+                    status = False
+
+                if(status == True):
+                    result['message'] = 'success'
+                else:
+                    result['message'] = 'failure'
+
+
             elif(activity == "delete"):
 
                 name = msg["name"]
@@ -325,6 +347,10 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
                     status = codex_hash.deleteHashName(name, "subset")
                 elif(hashType == "feature"):
                     status = codex_hash.deleteHashName(name, "feature")
+                elif(hashType == "downsample"):
+                    status = codex_hash.deleteHashName(name, "downsample")
+                elif(hashType == "label"):
+                    status = codex_hash.deleteHashName(name, "label")
                 else:
                     result["message"] = 'failure'
                     status = False
@@ -344,6 +370,10 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
                     status = codex_hash.hashUpdate(field, new, old, "subset")
                 elif(hashType == "feature"):
                     status = codex_hash.hashUpdate(field, new, old, "feature")
+                elif(hashType == "downsample"):
+                    status = codex_hash.hashUpdate(field, new, old, "downsample")
+                elif(hashType == "label"):
+                    status = codex_hash.hashUpdate(field, new, old, "label")
                 else:
                     result["message"] = 'failure'
                     status = False

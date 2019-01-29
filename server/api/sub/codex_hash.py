@@ -41,6 +41,8 @@ subsetList = []
 downsampleList = []
 labelList = []
 
+debug = True
+
 def printCacheCount():
     '''
     Inputs:
