@@ -64,9 +64,11 @@ const fileLoad = (state, action) => {
 		.set(
 			"featureList",
 			fromJS(
-				action.data[0].map(f => {
-					return { name: f, selected: false };
-				})
+				action.data.length
+					? action.data[0].map(f => {
+							return { name: f, selected: false };
+					  })
+					: []
 			)
 		)
 		.set("filename", action.filename)
@@ -74,7 +76,9 @@ const fileLoad = (state, action) => {
 			"master",
 			fromJS({
 				name: "Master",
-				mask: Array.from(Array(action.data.length - 1), () => true),
+				mask: action.data.length
+					? Array.from(Array(action.data.length - 1), () => true)
+					: [],
 				color: selectionsMasterColor,
 				visible: true,
 				emphasize: false
@@ -85,7 +89,9 @@ const fileLoad = (state, action) => {
 			"brush",
 			fromJS({
 				name: "Brush",
-				mask: Array.from(Array(action.data.length - 1), () => false),
+				mask: action.data.length
+					? Array.from(Array(action.data.length - 1), () => false)
+					: [],
 				color: selectionsBrushColor,
 				visible: true,
 				emphasize: false

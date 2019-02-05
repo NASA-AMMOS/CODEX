@@ -30,7 +30,7 @@ class Import extends Component {
             console.log("%cUpload", "background: #800075; padding: 0px 4px 0px 4px;", e);
             const res = JSON.parse(e.data);
             if (res.status === "complete") {
-                this.props.fileLoad([res.feature_names], "TEST_FILENAME");
+                this.props.fileLoad([res.feature_names], this.vars.fileToUpload);
             }
         });
     }
@@ -115,7 +115,9 @@ class Import extends Component {
     }
     uploadClick(e) {
         this.props.setProgress(0);
-        var that = this;
+
+        // Clear out list of feature names while we handle new file
+        this.props.fileLoad([], "");
         if (this.vars.fileToUpload !== null) {
             workerUpload.postMessage({
                 files: this.vars.etf,
