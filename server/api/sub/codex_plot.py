@@ -1,11 +1,13 @@
-import os
-CODEX_ROOT  = os.getenv('CODEX_ROOT')
-import time, h5py, sys
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-from scipy import misc
+import sys
+import h5py
+import time
 from random import randint
+from scipy import misc
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 
 def getColorMap():
@@ -25,23 +27,25 @@ def getColorMap():
 
     return colors
 
+
 def plot_regression(regr, X_test, Y_test):
     '''
     Inputs:
         regr     - sklearn linear regression model
         X_test   - feature test data
         Y_test   - target test data
-     
+
     Outputs:
         NONE
 
     '''
-    plt.scatter(X_test, Y_test,  color='black')
+    plt.scatter(X_test, Y_test, color='black')
     plt.xlabel("Features")
     plt.ylabel("Targets")
     plt.title("Linear Regression")
     plt.plot(X_test, regr.predict(X_test), color='blue', linewidth=3)
     plt.show()
+
 
 def plot_clustering(X, y_pred, centers, pltTitle, save=False, show=False):
     '''
@@ -69,9 +73,10 @@ def plot_clustering(X, y_pred, centers, pltTitle, save=False, show=False):
         if not os.path.exists(savePath):
             os.makedirs(savePath)
         plt.savefig(savePath + pltTitle.replace(" ", "_") + ".png")
-    
+
     plt.close()
     plt.clf()
+
 
 def plot_dimensionality(explained_variance, pltTitle, save=False, show=False):
 
@@ -91,8 +96,9 @@ def plot_dimensionality(explained_variance, pltTitle, save=False, show=False):
         if not os.path.exists(savePath):
             os.makedirs(savePath)
         plt.savefig(savePath + pltTitle.replace(" ", "_") + ".png")
-           
+
     plt.close()
+
 
 def codex_plot_peak(data, indexes):
     '''
@@ -108,6 +114,7 @@ def codex_plot_peak(data, indexes):
     X = np.arange(num_samples)
     plt.plot(X, data, '-D', markevery=indexes)
     plt.show()
+
 
 if __name__ == "__main__":
 

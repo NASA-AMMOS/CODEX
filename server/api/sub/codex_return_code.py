@@ -18,6 +18,7 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 returnedCodePath = CODEX_ROOT + "returned_code.py"
 contents = []
 
+
 def makeReturnCode():
     '''
     Inputs:
@@ -31,7 +32,8 @@ def makeReturnCode():
     contents.append("import sys\n")
     contents.append("sys.path.insert(1,CODEX_ROOT + '/api/')\n")
     contents.append("sys.path.insert(1,CODEX_ROOT + '/api/sub/')\n")
-    contents.append("import time, h5py, codex_read_data_api, codex_plot, codex_time_log\n")
+    contents.append(
+        "import time, h5py, codex_read_data_api, codex_plot, codex_time_log\n")
     contents.append("import codex_data_quality_scan_api\n")
     contents.append("import numpy as np\n")
     contents.append("import matplotlib.pyplot as plt\n")
@@ -44,10 +46,13 @@ def makeReturnCode():
     contents.append("from sklearn.preprocessing import StandardScaler\n")
     contents.append("from codex_plot import getColorMap\n")
     contents.append("import codex_hash, codex_return_code\n")
-    contents.append("import codex_clustering_api, codex_dimmension_reduction_api\n")
+    contents.append(
+        "import codex_clustering_api, codex_dimmension_reduction_api\n")
     contents.append("import codex_template_scan_api, codex_endmembers\n")
     contents.append("import codex_segmentation_api, codex_regression_api\n")
-    contents.append("\n\n#### This code is an auto-generated output of your last session working in CODEX.\n\n")
+    contents.append(
+        "\n\n#### This code is an auto-generated output of your last session working in CODEX.\n\n")
+
 
 def logReturnCode(inputString):
     '''
@@ -59,10 +64,12 @@ def logReturnCode(inputString):
     '''
     contents.append(inputString + "\n")
 
+
 def code_unique(seq):
     seen = set()
     seen_add = seen.add
     return [x for x in seq if not (x in seen or seen_add(x))]
+
 
 def dump_code_to_file():
     '''
@@ -81,6 +88,7 @@ def dump_code_to_file():
         file.write(line)
 
     file.close()
+
 
 if __name__ == "__main__":
 

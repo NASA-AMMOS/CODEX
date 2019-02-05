@@ -1,16 +1,26 @@
+import codex_math
+import codex_doctest
+import codex_system
+import codex_read_data_api
+import codex_return_code
+import codex_plot
+import codex_time_log
+import codex_hash
+import sys
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
 
 Brief : Regression algorithms, formatted for CODEX
 
-Notes : 
+Notes :
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
 '''
 import os
-import sklearn, subprocess
+import sklearn
+import subprocess
 import h5py
 import time
 import traceback
@@ -26,18 +36,22 @@ from sklearn.model_selection import train_test_split
 
 # Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
-import sys
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 # CODEX Support
-import codex_hash, codex_time_log
-import codex_plot, codex_return_code
-import codex_read_data_api, codex_system
-import codex_doctest, codex_math
 
 DEBUG = False
 
-def ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName, downsampled, parms, result):
+
+def ml_regression(
+        inputHash,
+        hashList,
+        subsetHashName,
+        labelHash,
+        algorithmName,
+        downsampled,
+        parms,
+        result):
     '''
     Inputs:
 
@@ -57,9 +71,9 @@ def ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName,
 
     '''
 
-    if(subsetHashName != None):
-        subsetHash = codex_hash.findHashArray("name", subsetHashName,"subset")
-        if(subsetHash == None):
+    if(subsetHashName is not None):
+        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
+        if(subsetHash is None):
             subsetHash = False
         else:
             subsetHash = subsetHash["hash"]
@@ -69,7 +83,7 @@ def ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName,
     if(algorithmName == 'linear'):
         try:
             ts = float(parms['test_size'])
-        except:
+        except BaseException:
             codex_system.codex_log("test_size parameter not set")
             result['message'] = "test_size parameter not set"
             codex_system.codex_log(traceback.format_exc())
@@ -77,18 +91,18 @@ def ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName,
 
         try:
             # TODO - fix
-            result = codex_regression_linear(inputHash,inputHash,subsetHash,ts, downsampled, False)
-        except:
+            result = codex_regression_linear(
+                inputHash, inputHash, subsetHash, ts, downsampled, False)
+        except BaseException:
             codex_system.codex_log("Failed to run regression algorithm")
             result['message'] = "Failed to run regression algorithm"
             codex_system.codex_log(traceback.format_exc())
             return None
 
-	
     elif(algorithmName == 'lasso'):
         try:
             ts = float(parms['test_size'])
-        except:
+        except BaseException:
             codex_system.codex_log("test_size parameter not set")
             result['message'] = "test_size parameter not set"
             codex_system.codex_log(traceback.format_exc())
@@ -96,7 +110,7 @@ def ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName,
 
         try:
             alpha = float(parms['alpha'])
-        except:
+        except BaseException:
             codex_system.codex_log("alpha parameter not set")
             result['message'] = "alpha parameter not set"
             codex_system.codex_log(traceback.format_exc())
@@ -104,7 +118,7 @@ def ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName,
 
         try:
             fit_intercept = float(parms['fit_intercept'])
-        except:
+        except BaseException:
             codex_system.codex_log("fit_intercept parameter not set")
             result['message'] = "fit_intercept parameter not set"
             codex_system.codex_log(traceback.format_exc())
@@ -112,7 +126,7 @@ def ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName,
 
         try:
             max_iter = float(parms['max_iter'])
-        except:
+        except BaseException:
             codex_system.codex_log("max_iter parameter not set")
             result['message'] = "max_iter parameter not set"
             codex_system.codex_log(traceback.format_exc())
@@ -120,7 +134,7 @@ def ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName,
 
         try:
             tol = float(parms['tol'])
-        except:
+        except BaseException:
             codex_system.codex_log("tol parameter not set")
             result['message'] = "tol parameter not set"
             codex_system.codex_log(traceback.format_exc())
@@ -128,8 +142,18 @@ def ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName,
 
         try:
             # TODO - fix
-            result = codex_regression_lasso(inputHash, inputHash, subsetHash, ts, alpha, fit_intercept, max_iter, tol, downsampled, False)
-        except:
+            result = codex_regression_lasso(
+                inputHash,
+                inputHash,
+                subsetHash,
+                ts,
+                alpha,
+                fit_intercept,
+                max_iter,
+                tol,
+                downsampled,
+                False)
+        except BaseException:
             codex_system.codex_log("Failed to run regression algorithm")
             result['message'] = "Failed to run regression algorithm"
             codex_system.codex_log(traceback.format_exc())
@@ -139,7 +163,7 @@ def ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName,
 
         try:
             ts = float(parms['test_size'])
-        except:
+        except BaseException:
             codex_system.codex_log("test_size parameter not set")
             result['message'] = "test_size parameter not set"
             codex_system.codex_log(traceback.format_exc())
@@ -147,7 +171,7 @@ def ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName,
 
         try:
             n_estimators = float(parms['n_estimators'])
-        except:
+        except BaseException:
             codex_system.codex_log("n_estimators parameter not set")
             result['message'] = "n_estimators parameter not set"
             codex_system.codex_log(traceback.format_exc())
@@ -155,9 +179,11 @@ def ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName,
 
         try:
             # TODO - fix
-            result = codex_regression_randomForest(inputHash, labelHash, subsetHash, n_estimators, ts, downsampled, False)
-        except:
-            codex_system.codex_log("Failed to run regression random forest algorithm")
+            result = codex_regression_randomForest(
+                inputHash, labelHash, subsetHash, n_estimators, ts, downsampled, False)
+        except BaseException:
+            codex_system.codex_log(
+                "Failed to run regression random forest algorithm")
             result['message'] = "Failed to run regression algorithm"
             codex_system.codex_log(traceback.format_exc())
             return None
@@ -168,7 +194,13 @@ def ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName,
     return result
 
 
-def codex_regression_linear(inputHash, targetHash, subsetHash, test_size, downsampled, showPlot):
+def codex_regression_linear(
+        inputHash,
+        targetHash,
+        subsetHash,
+        test_size,
+        downsampled,
+        showPlot):
     '''
     Inputs:
         inputHash (string)               - hash value corresponding to the data to cluster
@@ -178,7 +210,7 @@ def codex_regression_linear(inputHash, targetHash, subsetHash, test_size, downsa
         showPlot (bool)                  - visualize results in standalone matplot lib if True
 
     Outputs:
-        Dictionary - 
+        Dictionary -
             coefficient (float)          - parameter vector (w in the cost function formula)
             mean_sqaured_error (float)   - mean squared error of the regression.  Algorithm: np.mean((regr.predict(X_test) - Y_test) ** 2)
             intercept (float)            - independent term in decision function.
@@ -226,33 +258,39 @@ def codex_regression_linear(inputHash, targetHash, subsetHash, test_size, downsa
     if(subsetHash is not False):
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            print("ERROR: codex_regression_linear - subsetHash returned None for features.")
+            print(
+                "ERROR: codex_regression_linear - subsetHash returned None for features.")
             return None
 
         targets = codex_hash.applySubsetMask(targets, subsetHash)
         if(targets is None):
-            print("ERROR: codex_regression_linear - subsetHash returned None for targets.")
+            print(
+                "ERROR: codex_regression_linear - subsetHash returned None for targets.")
             return None
 
     try:
         samples, num_features = data.shape
-    except:
+    except BaseException:
         num_features = 1
         data = data.reshape(data.shape[0], -1)
-	
+
     if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " percent")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("clustering", "kmeans", samples)
+        eta = codex_time_log.getComputeTimeEstimate(
+            "clustering", "kmeans", samples)
 
-
-    combined_data_labels = np.column_stack([targets,data])
+    combined_data_labels = np.column_stack([targets, data])
     combined_data_labels = codex_math.codex_impute(combined_data_labels)
-    targets = combined_data_labels[:,0]
-    data = combined_data_labels[:,1:]
+    targets = combined_data_labels[:, 0]
+    data = combined_data_labels[:, 1:]
 
-    X_train, X_test, Y_train, Y_test = train_test_split(data, targets, test_size=test_size, random_state=5)
+    X_train, X_test, Y_train, Y_test = train_test_split(
+        data, targets, test_size=test_size, random_state=5)
 
     regr = linear_model.LinearRegression()
     regr.fit(X_train, Y_train)
@@ -264,26 +302,49 @@ def codex_regression_linear(inputHash, targetHash, subsetHash, test_size, downsa
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("regression", "linear", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "regression",
+        "linear",
+        computeTime,
+        len(data),
+        data.ndim)
 
-    if(showPlot == True):
+    if(showPlot):
         if(num_features == 1):
             codex_plot.plot_regression(regr, X_test, Y_test)
         else:
-            print("WARNING: Plotting does not currently handle multiple linear regression.")
-	
+            print(
+                "WARNING: Plotting does not currently handle multiple linear regression.")
+
     if(subsetHash is False):
-        returnCodeString = "codex_regression_api.codex_regression_linear('"+inputHash+"','"+targetHash+"',False,"+str(test_size)+",True)"
+        returnCodeString = "codex_regression_api.codex_regression_linear('" + \
+            inputHash + "','" + targetHash + "',False," + str(test_size) + ",True)"
     else:
-        returnCodeString = "codex_regression_api.codex_regression_linear('"+inputHash+"','"+targetHash+"','"+str(subsetHash)+"',"+str(test_size)+",True)" 
+        returnCodeString = "codex_regression_api.codex_regression_linear('" + inputHash + "','" + targetHash + "','" + str(
+            subsetHash) + "'," + str(test_size) + ",True)"
     codex_return_code.logReturnCode(returnCodeString)
 
-    output = {'coefficient': coefficient.tolist(), 'mean_squared_error': mean_squared_error, 'intercept': intercept.tolist(), 'variance_score': variance_score, 'coefficient_array': regr.predict(X_test).tolist()}
-	
+    output = {
+        'coefficient': coefficient.tolist(),
+        'mean_squared_error': mean_squared_error,
+        'intercept': intercept.tolist(),
+        'variance_score': variance_score,
+        'coefficient_array': regr.predict(X_test).tolist()}
+
     return output
 
 
-def codex_regression_lasso(inputHash, targetHash, subsetHash, test_size, alpha, fit_intercept, max_iter, tol, downsampled, showPlot):
+def codex_regression_lasso(
+        inputHash,
+        targetHash,
+        subsetHash,
+        test_size,
+        alpha,
+        fit_intercept,
+        max_iter,
+        tol,
+        downsampled,
+        showPlot):
     '''
     Inputs:
         inputHash (string)               - hash value corresponding to the data to cluster
@@ -297,7 +358,7 @@ def codex_regression_lasso(inputHash, targetHash, subsetHash, test_size, alpha, 
         showPlot (bool)                  - visualize results in standalone matplot lib if True
 
     Outputs:
-        Dictionary - 
+        Dictionary -
             coefficient (float)          - parameter vector (w in the cost function formula)
             mean_sqaured_error (float)   - mean squared error of the regression.  Algorithm: np.mean((regr.predict(X_test) - Y_test) ** 2)
             intercept (float)            - independent term in decision function.
@@ -322,7 +383,7 @@ def codex_regression_lasso(inputHash, targetHash, subsetHash, test_size, alpha, 
 
     try:
         samples, num_features = data.shape
-    except:
+    except BaseException:
         num_features = 1
         data = data.reshape(data.shape[0], -1)
 
@@ -333,24 +394,33 @@ def codex_regression_lasso(inputHash, targetHash, subsetHash, test_size, alpha, 
     targets = returnTargetHash['data']
 
     if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " percent")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("clustering", "kmeans", samples)
+        eta = codex_time_log.getComputeTimeEstimate(
+            "clustering", "kmeans", samples)
 
-
-    combined_data_labels = np.column_stack([targets,data])
+    combined_data_labels = np.column_stack([targets, data])
     combined_data_labels = codex_math.codex_impute(combined_data_labels)
-    targets = combined_data_labels[:,0]
-    data = combined_data_labels[:,1:]
+    targets = combined_data_labels[:, 0]
+    data = combined_data_labels[:, 1:]
 
-    X_train, X_test, Y_train, Y_test = train_test_split(data, targets, test_size=test_size, random_state=5)
+    X_train, X_test, Y_train, Y_test = train_test_split(
+        data, targets, test_size=test_size, random_state=5)
 
     if(subsetHash is not False):
         data = codex_hash.applySubsetMask(data, subsetHash)
         targets = codex_hash.applySubsetMask(targets, subsetHash)
 
-    clf = linear_model.Lasso(alpha=alpha, fit_intercept=fit_intercept, max_iter=max_iter, selection='cyclic', tol=tol)
+    clf = linear_model.Lasso(
+        alpha=alpha,
+        fit_intercept=fit_intercept,
+        max_iter=max_iter,
+        selection='cyclic',
+        tol=tol)
     clf.fit(X_train, Y_train)
 
     coefficient = clf.coef_
@@ -360,23 +430,37 @@ def codex_regression_lasso(inputHash, targetHash, subsetHash, test_size, alpha, 
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("regression", "lasso", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "regression",
+        "lasso",
+        computeTime,
+        len(data),
+        data.ndim)
 
-    if(showPlot == True):
+    if(showPlot):
         if(num_features == 1):
             codex_plot.plot_regression(clf, X_test, Y_test)
         else:
-            print("WARNING: Plotting does not currently handle multiple linear regression.")
-	
+            print(
+                "WARNING: Plotting does not currently handle multiple linear regression.")
+
     if(subsetHash is False):
-        returnCodeString = "codex_regression_api.codex_regression_lasso('"+inputHash+"','"+targetHash+"',False,"+str(test_size)+","+str(alpha)+","+str(fit_intercept)+","+str(max_iter)+","+str(tol)+",True)"
+        returnCodeString = "codex_regression_api.codex_regression_lasso('" + inputHash + "','" + targetHash + "',False," + str(
+            test_size) + "," + str(alpha) + "," + str(fit_intercept) + "," + str(max_iter) + "," + str(tol) + ",True)"
     else:
-        returnCodeString = "codex_regression_api.codex_regression_lasso('"+inputHash+"','"+targetHash+"','"+str(subsetHash)+"',"+str(test_size)+str(alpha)+","+str(fit_intercept)+","+str(max_iter)+","+str(tol)+",True)"
+        returnCodeString = "codex_regression_api.codex_regression_lasso('" + inputHash + "','" + targetHash + "','" + str(
+            subsetHash) + "'," + str(test_size) + str(alpha) + "," + str(fit_intercept) + "," + str(max_iter) + "," + str(tol) + ",True)"
     codex_return_code.logReturnCode(returnCodeString)
 
-    output = {'coefficient': coefficient,'mean_squared_error': mean_squared_error, 'intercept': intercept, 'variance_score': variance_score, 'coefficient_array': clf.predict(X_test)}
-	
+    output = {
+        'coefficient': coefficient,
+        'mean_squared_error': mean_squared_error,
+        'intercept': intercept,
+        'variance_score': variance_score,
+        'coefficient_array': clf.predict(X_test)}
+
     return output
+
 
 def codex_polynomial_regression(data, targets, degrees, downsampled, show):
     '''
@@ -398,20 +482,28 @@ def codex_polynomial_regression(data, targets, degrees, downsampled, show):
 
     #clf = linear_model.LinearRegression()
     #clf.fit(X_, vector)
-    #print clf.predict(predict_)
+    # print clf.predict(predict_)
 
     startTime = time.time()
     eta = None
 
-    X_train, X_test, Y_train, Y_test = sklearn.cross_validation.train_test_split(data, targets, test_size=0.33, random_state=5)
+    X_train, X_test, Y_train, Y_test = sklearn.cross_validation.train_test_split(
+        data, targets, test_size=0.33, random_state=5)
 
-    x_new = np.linspace([0], x[-1], num=len(x)*10)
+    x_new = np.linspace([0], x[-1], num=len(x) * 10)
 
     coefs = poly.polyfit(x, y, int(degrees))
     ffit = poly.polyval(x_new, coefs)
 
 
-def codex_regression_randomForest(inputHash, targetHash, subsetHash, n_estimators, test_size, downsampled, showPlot):
+def codex_regression_randomForest(
+        inputHash,
+        targetHash,
+        subsetHash,
+        n_estimators,
+        test_size,
+        downsampled,
+        showPlot):
     '''
     Inuputs:
 
@@ -432,16 +524,19 @@ def codex_regression_randomForest(inputHash, targetHash, subsetHash, n_estimator
 
     try:
         samples, num_features = data.shape
-    except:
+    except BaseException:
         num_features = 1
         data = data.reshape(data.shape[0], -1)
 
     if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " percent")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("clustering", "kmeans", samples)
-
+        eta = codex_time_log.getComputeTimeEstimate(
+            "clustering", "kmeans", samples)
 
     returnTargetHash = codex_hash.findHashArray("hash", targetHash, "label")
     if(returnTargetHash is None):
@@ -450,12 +545,13 @@ def codex_regression_randomForest(inputHash, targetHash, subsetHash, n_estimator
 
     targets = returnTargetHash['data']
 
-    combined_data_labels = np.column_stack([targets,data])
+    combined_data_labels = np.column_stack([targets, data])
     combined_data_labels = codex_math.codex_impute(combined_data_labels)
-    targets = combined_data_labels[:,0]
-    data = combined_data_labels[:,1:]
+    targets = combined_data_labels[:, 0]
+    data = combined_data_labels[:, 1:]
 
-    X_train, X_test, y_train, y_test = train_test_split(data, targets, test_size=test_size, random_state=5)
+    X_train, X_test, y_train, y_test = train_test_split(
+        data, targets, test_size=test_size, random_state=5)
 
     clf = RandomForestClassifier(n_estimators=int(n_estimators))
     '''
@@ -466,13 +562,13 @@ def codex_regression_randomForest(inputHash, targetHash, subsetHash, n_estimator
     endTime = time.time()
     computeTime = endTime - startTime
     codex_time_log.logTime("regression", "lasso", computeTime, len(data), data.ndim)
-    
+
     if(showPlot == True):
         if(num_features == 1):
             codex_plot.plot_regression(clf, X_test, Y_test)
         else:
             print("WARNING: Plotting does not currently handle multiple linear regression.")
-    
+
     if(subsetHash is False):
         returnCodeString = "codex_regression_api.codex_regression_lasso('"+inputHash+"','"+targetHash+"',False,"+str(test_size)+","+str(alpha)+","+str(fit_intercept)+","+str(max_iter)+","+str(tol)+",True)"
     else:
@@ -490,6 +586,3 @@ if __name__ == "__main__":
     import doctest
     results = doctest.testmod(optionflags=doctest.ELLIPSIS)
     sys.exit(results.failed)
-
-
-

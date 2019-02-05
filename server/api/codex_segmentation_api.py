@@ -1,34 +1,49 @@
+import time
+import statistics
+import math
+import codex_math
+import codex_system
+import codex_time_log
+import codex_doctest
+import codex_hash
+import codex_downsample
+import codex_read_data_api
+import codex_return_code
+import h5py
+import traceback
+from skimage.segmentation import quickshift
+from skimage.segmentation import felzenszwalb
+import numpy as np
+import sys
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
 
 Brief : Segmentation algorithms, formatted for CODEX
 
-Notes : 
+Notes :
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
 '''
 import os
-## Enviornment variable for setting CODEX root directory.
-CODEX_ROOT  = os.getenv('CODEX_ROOT')
-import sys
-sys.path.insert(1,CODEX_ROOT + '/api/sub/')
-import h5py, math, statistics, time
-import numpy as np
-from skimage.segmentation import felzenszwalb
-from skimage.segmentation import quickshift
-import traceback
+# Enviornment variable for setting CODEX root directory.
+CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 # CODEX Support
-import codex_return_code, codex_read_data_api
-import codex_downsample, codex_hash
-import codex_doctest, codex_time_log
-import codex_system, codex_math
 
 DEBUG = False
 
-def ml_segmentation(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result):
+
+def ml_segmentation(
+        inputHash,
+        hashList,
+        subsetHashName,
+        algorithmName,
+        downsampled,
+        parms,
+        result):
     '''
     Inputs:
 
@@ -69,17 +84,17 @@ def ml_segmentation(inputHash, hashList, subsetHashName, algorithmName, downsamp
     Cannot find requested segmentation algorithm
     '''
     data = codex_hash.mergeHashResults(hashList)
-    inputHash = codex_hash.hashArray('Merged', data, "feature") 
-    if(inputHash != None):
+    inputHash = codex_hash.hashArray('Merged', data, "feature")
+    if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
         codex_system.codex_log("Feature hash failure in ml_cluster")
         result['message'] = "Feature hash failure in ml_cluster"
         return None
 
-    if(subsetHashName != None):
-        subsetHash = codex_hash.findHashArray("name", subsetHashName,"subset")
-        if(subsetHash == None):
+    if(subsetHashName is not None):
+        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
+        if(subsetHash is None):
             subsetHash = False
         else:
             subsetHash = subsetHash["hash"]
@@ -90,7 +105,7 @@ def ml_segmentation(inputHash, hashList, subsetHashName, algorithmName, downsamp
 
         try:
             scale = float(parms['scale'])
-        except:
+        except BaseException:
             codex_system.codex_log("scale parameter not set")
             result['message'] = "scale parameter not set"
             codex_system.codex_log(traceback.format_exc())
@@ -98,7 +113,7 @@ def ml_segmentation(inputHash, hashList, subsetHashName, algorithmName, downsamp
 
         try:
             sigma = float(parms['sigma'])
-        except:
+        except BaseException:
             codex_system.codex_log("sigma parameter not set")
             result['message'] = "sigma parameter not set"
             codex_system.codex_log(traceback.format_exc())
@@ -106,16 +121,18 @@ def ml_segmentation(inputHash, hashList, subsetHashName, algorithmName, downsamp
 
         try:
             min_size = int(parms['min_size'])
-        except:
+        except BaseException:
             codex_system.codex_log("min_size parameter not set")
             result['message'] = "min_size parameter not set"
             codex_system.codex_log(traceback.format_exc())
             return None
 
         try:
-            result = codex_segmentation_felzenszwalb(inputHash, subsetHash, downsampled, scale, sigma, min_size)
-        except:
-            codex_system.codex_log("Failed to run felzenszwalb segmentation algorithm")
+            result = codex_segmentation_felzenszwalb(
+                inputHash, subsetHash, downsampled, scale, sigma, min_size)
+        except BaseException:
+            codex_system.codex_log(
+                "Failed to run felzenszwalb segmentation algorithm")
             result['message'] = "Failed to run felzenszwalb segmentation algorithm"
             codex_system.codex_log(traceback.format_exc())
             return None
@@ -124,7 +141,7 @@ def ml_segmentation(inputHash, hashList, subsetHashName, algorithmName, downsamp
 
         try:
             kernel_size = float(parms['kernel_size'])
-        except:
+        except BaseException:
             codex_system.codex_log("kernel_size parameter not set")
             result['message'] = "kernel_size parameter not set"
             codex_system.codex_log(traceback.format_exc())
@@ -132,7 +149,7 @@ def ml_segmentation(inputHash, hashList, subsetHashName, algorithmName, downsamp
 
         try:
             sigma = float(parms['sigma'])
-        except:
+        except BaseException:
             codex_system.codex_log("sigma parameter not set")
             result['message'] = "sigma parameter not set"
             codex_system.codex_log(traceback.format_exc())
@@ -140,29 +157,36 @@ def ml_segmentation(inputHash, hashList, subsetHashName, algorithmName, downsamp
 
         try:
             max_dist = int(parms['max_dist'])
-        except:
+        except BaseException:
             codex_system.codex_log("max_dist parameter not set")
             result['message'] = "max_dist parameter not set"
             codex_system.codex_log(traceback.format_exc())
             return None
 
         try:
-            result = codex_segmentation_quickshift(inputHash, subsetHash, downsampled, kernel_size, max_dist, sigma)
-        except:
-            codex_system.codex_log("Failed to run quickshift segmentation algorithm")
+            result = codex_segmentation_quickshift(
+                inputHash, subsetHash, downsampled, kernel_size, max_dist, sigma)
+        except BaseException:
+            codex_system.codex_log(
+                "Failed to run quickshift segmentation algorithm")
             result['message'] = "Failed to run quickshift segmentation algorithm"
             codex_system.codex_log(traceback.format_exc())
             return None
-
 
     else:
         codex_system.codex_log("Cannot find requested segmentation algorithm")
         result['message'] = "Cannot find requested segmentation algorithm"
 
-    return result   
+    return result
 
 
-def codex_segmentation_quickshift(inputHash, subsetHash, downsampled, kernel_size, max_dist, sigma):
+def codex_segmentation_quickshift(
+        inputHash,
+        subsetHash,
+        downsampled,
+        kernel_size,
+        max_dist,
+        sigma):
     '''
     Inputs:
         inputHash (string)   - hash value corresponding to the data to cluster
@@ -170,13 +194,13 @@ def codex_segmentation_quickshift(inputHash, subsetHash, downsampled, kernel_siz
         downsampled (int)    - number of data points to use for quicklook
         kernel_size (float)  - Width of Gaussian kernel used in smoothing the sample density. Higher means fewer clusters.
         max_dist (float)     - Cut-off point for data distances. Higher means fewer clusters.
-        sigma (float)        - Width for Gaussian smoothing as preprocessing. Zero means no smoothing. 
+        sigma (float)        - Width for Gaussian smoothing as preprocessing. Zero means no smoothing.
 
     Outputs:
         Dictionary -
             segments (array)    - segment subset mask
-            kernel_size (float) - Width of Gaussian kernel used in smoothing the sample density. Higher means fewer clusters. 
-            max_dist (float)    - Cut-off point for data distances. Higher means fewer clusters. 
+            kernel_size (float) - Width of Gaussian kernel used in smoothing the sample density. Higher means fewer clusters.
+            max_dist (float)    - Cut-off point for data distances. Higher means fewer clusters.
             sigma (float)       - Width for Gaussian smoothing as preprocessing. Zero means no smoothing.
 
     Notes:
@@ -201,32 +225,61 @@ def codex_segmentation_quickshift(inputHash, subsetHash, downsampled, kernel_siz
     if(subsetHash is not False):
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log("ERROR: codex_segmentation quickshift - subsetHash returned None.")
+            codex_system.codex_log(
+                "ERROR: codex_segmentation quickshift - subsetHash returned None.")
             return None
 
     if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " percent")
         data = codex_downsample.downsample(data, percentage=downsampled)
 
-    data = np.dstack((data,data,data))
-    segments = quickshift(data, kernel_size=kernel_size, sigma=sigma, max_dist=max_dist)
+    data = np.dstack((data, data, data))
+    segments = quickshift(
+        data,
+        kernel_size=kernel_size,
+        sigma=sigma,
+        max_dist=max_dist)
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("segmentation", "quickshift", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "segmentation",
+        "quickshift",
+        computeTime,
+        len(data),
+        data.ndim)
 
-    merged_hash = codex_hash.hashArray("temporary", data, "feature") # temporary to not change API right now
+    # temporary to not change API right now
+    merged_hash = codex_hash.hashArray("temporary", data, "feature")
 
     if(subsetHash is False):
-        returnCodeString = "codex_segmentation_api.codex_segmentation_quickshift('"+inputHash+"',False,"+str(downsampled)+","+str(kernel_size)+","+str(sigma)+","+str(max_dist)+")" 
+        returnCodeString = "codex_segmentation_api.codex_segmentation_quickshift('" + inputHash + "',False," + str(
+            downsampled) + "," + str(kernel_size) + "," + str(sigma) + "," + str(max_dist) + ")"
     else:
-        returnCodeString = "codex_segmentation_api.codex_segmentation_quickshift('"+inputHash+"','"+subsetHash+"',"+str(downsampled)+","+str(kernel_size)+","+str(sigma)+","+str(max_dist)+")" 
+        returnCodeString = "codex_segmentation_api.codex_segmentation_quickshift('" + inputHash + "','" + subsetHash + "'," + str(
+            downsampled) + "," + str(kernel_size) + "," + str(sigma) + "," + str(max_dist) + ")"
     codex_return_code.logReturnCode(returnCodeString)
 
-    output = {'eta': eta, "segments": segments.tolist(), "kernel_size": kernel_size, "sigma": sigma, "max_dist": max_dist, 'downsample':downsampled}
+    output = {
+        'eta': eta,
+        "segments": segments.tolist(),
+        "kernel_size": kernel_size,
+        "sigma": sigma,
+        "max_dist": max_dist,
+        'downsample': downsampled}
     return output
 
-def codex_segmentation_felzenszwalb(inputHash, subsetHash, downsampled, scale, sigma, min_size):
+
+def codex_segmentation_felzenszwalb(
+        inputHash,
+        subsetHash,
+        downsampled,
+        scale,
+        sigma,
+        min_size):
     '''
     Inputs:
         inputHash (string)   - hash value corresponding to the data to cluster
@@ -267,11 +320,15 @@ def codex_segmentation_felzenszwalb(inputHash, subsetHash, downsampled, scale, s
     if(subsetHash is not False):
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log("ERROR: codex_segmentation felzenswalb - subsetHash returned None.")
+            codex_system.codex_log(
+                "ERROR: codex_segmentation felzenswalb - subsetHash returned None.")
             return None
 
     if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " percent")
         data = codex_downsample.downsample(data, percentage=downsampled)
 
     data = codex_math.codex_impute(data)
@@ -279,24 +336,37 @@ def codex_segmentation_felzenszwalb(inputHash, subsetHash, downsampled, scale, s
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("segmentation", "felzenszwalb", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "segmentation",
+        "felzenszwalb",
+        computeTime,
+        len(data),
+        data.ndim)
 
-    merged_hash = codex_hash.hashArray("temporary", data, "feature") # temporary to not change API right now
+    # temporary to not change API right now
+    merged_hash = codex_hash.hashArray("temporary", data, "feature")
 
     if(subsetHash is False):
-        returnCodeString = "codex_segmentation_api.codex_segmentation_felzenszwalb('"+inputHash+"',False,"+str(downsampled)+","+str(scale)+","+str(sigma)+","+str(min_size)+")" 
+        returnCodeString = "codex_segmentation_api.codex_segmentation_felzenszwalb('" + inputHash + "',False," + str(
+            downsampled) + "," + str(scale) + "," + str(sigma) + "," + str(min_size) + ")"
     else:
-        returnCodeString = "codex_segmentation_api.codex_segmentation_felzenszwalb('"+inputHash+"','"+subsetHash+"',"+str(downsampled)+","+str(scale)+","+str(sigma)+","+str(min_size)+")" 
+        returnCodeString = "codex_segmentation_api.codex_segmentation_felzenszwalb('" + inputHash + "','" + subsetHash + "'," + str(
+            downsampled) + "," + str(scale) + "," + str(sigma) + "," + str(min_size) + ")"
     codex_return_code.logReturnCode(returnCodeString)
 
-    output = {'eta': eta, "segments": segments.tolist(), "scale": scale, "sigma": sigma, "min_size": min_size, 'downsample':downsampled}
+    output = {
+        'eta': eta,
+        "segments": segments.tolist(),
+        "scale": scale,
+        "sigma": sigma,
+        "min_size": min_size,
+        'downsample': downsampled}
 
     return output
-    
+
 
 if __name__ == "__main__":
 
     import doctest
     results = doctest.testmod(optionflags=doctest.ELLIPSIS)
     sys.exit(results.failed)
-

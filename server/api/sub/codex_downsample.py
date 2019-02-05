@@ -1,3 +1,5 @@
+import codex_system
+import codex_hash
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
@@ -13,12 +15,11 @@ import sys
 import numpy as np
 
 # Enviornment variable for setting CODEX root directory.
-CODEX_ROOT  = os.getenv('CODEX_ROOT')
+CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 # CODEX library imports
-import codex_hash
-import codex_system
+
 
 def downsample(inputArray, samples=0, percentage=0.0):
     '''
@@ -64,7 +65,7 @@ def downsample(inputArray, samples=0, percentage=0.0):
 
     # convert to list
     inputList = inputArray.tolist()
-    
+
     totalPoints = len(inputList)
 
     # if number of samples is provided, use
@@ -75,34 +76,37 @@ def downsample(inputArray, samples=0, percentage=0.0):
         if(percentage <= 100 and percentage >= 0):
             usedSamples = int(float(percentage / 100) * totalPoints)
         else:
-            codex_system.codex_log("ERROR: downsample - perceange out of bounds 0-100")
+            codex_system.codex_log(
+                "ERROR: downsample - perceange out of bounds 0-100")
             usedSamples = totalPoints
 
     else:
-        codex_system.codex_log("ERROR: downsample - samples and percentage both 0.")
+        codex_system.codex_log(
+            "ERROR: downsample - samples and percentage both 0.")
         usedSamples = totalPoints
 
     # first, check if this downsampling has already been done before
-    existingHashCheck = codex_hash.findHashArray("name", inputHashCode, "downsample")
+    existingHashCheck = codex_hash.findHashArray(
+        "name", inputHashCode, "downsample")
 
-    if(existingHashCheck != None and existingHashCheck["samples"] == usedSamples):
+    if(existingHashCheck is not None and existingHashCheck["samples"] == usedSamples):
         outputArray = existingHashCheck["data"]
 
     else:
 
         try:
             outputList = random.sample(inputList, usedSamples)
-        except:
+        except BaseException:
             outputList = inputList
 
         # Convert back to numpy array
         outputArray = np.asarray(outputList)
 
-
     # Hash the downsampled output, using the hash of the input in place of the name.
     #	Later look up using this, w.r.t origin data
     outputHash = codex_hash.hashArray(inputHashCode, outputArray, "downsample")
     return outputArray
+
 
 if __name__ == "__main__":
 

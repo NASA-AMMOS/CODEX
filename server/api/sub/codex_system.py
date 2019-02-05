@@ -1,3 +1,6 @@
+import codex_hash
+import codex_yaml
+import codex_return_code
 '''
 Author: Jack Lightholder
 Date  : 2/15/18
@@ -16,9 +19,7 @@ import numpy as np
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
-import codex_return_code
-import codex_yaml
-import codex_hash
+
 
 def get_featureList(featureList):
     '''
@@ -45,6 +46,7 @@ def get_featureList(featureList):
     codex_return_code.logReturnCode(featureString)
 
     return featureList
+
 
 def string2token(feature_data):
     '''
@@ -109,6 +111,7 @@ def string2Numpy(dataString):
 
     return outData
 
+
 def codex_log(message, verbose=True):
     '''
     Inputs:
@@ -120,7 +123,7 @@ def codex_log(message, verbose=True):
     '''
     try:
         f = open(CODEX_ROOT + "/codex.log", "a")
-    except:
+    except BaseException:
         f = open(CODEX_ROOT + "/codex.log", 'w+')
 
     if(verbose):
@@ -128,6 +131,7 @@ def codex_log(message, verbose=True):
 
     f.write(message + "\n")
     f.close()
+
 
 def get_setting(settingName):
     '''
@@ -143,6 +147,7 @@ def get_setting(settingName):
 
     yaml = codex_yaml.codex_read_yaml(CODEX_ROOT + "/codex_settings.yaml")
     return yaml[settingName]
+
 
 def get_codex_memory_usage():
     '''
@@ -161,9 +166,10 @@ def get_codex_memory_usage():
 
     '''
     process = psutil.Process(os.getpid())
-    current_ram = int((process.memory_info().rss/1024)/1024)
+    current_ram = int((process.memory_info().rss / 1024) / 1024)
 
     return current_ram
+
 
 def codex_server_memory_check(verbose=False):
     '''
@@ -197,6 +203,7 @@ def codex_server_memory_check(verbose=False):
 
         if(math.isclose(current_ram, last_ram, abs_tol=10)):
             return
+
 
 if __name__ == "__main__":
 

@@ -1,3 +1,5 @@
+import sys
+import yaml
 '''
 Author: Jack Lightholder
 Date  : 2/7/18
@@ -9,8 +11,6 @@ Notes :
 '''
 import os
 CODEX_ROOT = os.getenv('CODEX_ROOT')
-import yaml
-import sys
 
 
 def codex_read_yaml(filepath):
@@ -27,6 +27,7 @@ def codex_read_yaml(filepath):
     with open(filepath, 'r') as ymlfile:
         cfg = yaml.load(ymlfile)
         return cfg
+
 
 def get_guidance_text_block(page, section):
     '''
@@ -45,8 +46,9 @@ def get_guidance_text_block(page, section):
 
     try:
         return yaml[page][section]
-    except:
+    except BaseException:
         return None
+
 
 if __name__ == "__main__":
 

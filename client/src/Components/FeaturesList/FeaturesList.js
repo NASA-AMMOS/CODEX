@@ -40,7 +40,9 @@ class FeaturesList extends Component {
      * @param {boolean} selected selection status of feature
      * @param {key} key index for listing (required by react, don't modify)
      */
-    createFeature(name, selected) {
+    createFeature(feature) {
+        const name = feature.get("name");
+        const selected = feature.get("selected");
         return (
             <li
                 className={classnames("FeaturesList__feature", {
@@ -69,45 +71,59 @@ class FeaturesList extends Component {
     }
 
     render() {
-        // create the list of features
-        // first filter by the filterString, then map to elements
-        const features = this.props.features
-            .toJS()
-            .filter(n => {
-                switch (this.props.onOffAll) {
-                    case "all":
-                        if (this.props.filterString === "") return true;
-                        return (
-                            n[0].toLowerCase().indexOf(this.props.filterString.toLowerCase()) !== -1
-                        );
-                        break;
-                    case "on":
-                        if (this.props.filterString === "" && n[1]) return true;
-                        return (
-                            n[0].toLowerCase().indexOf(this.props.filterString.toLowerCase()) !==
-                                -1 && n[1]
-                        );
-                        break;
-                    case "off":
-                        if (this.props.filterString === "" && !n[1]) return true;
-                        return (
-                            n[0].toLowerCase().indexOf(this.props.filterString.toLowerCase()) !==
-                                -1 && !n[1]
-                        );
-                        break;
-                    default:
-                        return true;
-                }
-            })
-            .map((n, i) => this.createFeature(n[0], n[1], i));
+        if (!this.props.featureList.size) return null;
+
+        const features = this.props.featureList
+            .filter(f =>
+                this.props.filterString
+                    ? f
+                          .get("name")
+                          .toLowerCase()
+                          .startsWith(this.props.filterString.toLowerCase())
+                    : true
+            )
+            .map(f => this.createFeature(f));
+
+        // return null;
+        // // create the list of features
+        // // first filter by the filterString, then map to elements
+        // const features = this.props.features
+        //     .get(0)
+        //     .filter(n => {
+        //         switch (this.props.onOffAll) {
+        //             case "all":
+        //                 if (this.props.filterString === "") return true;
+        //                 return (
+        //                     n[0].toLowerCase().indexOf(this.props.filterString.toLowerCase()) !== -1
+        //                 );
+        //                 break;
+        //             case "on":
+        //                 if (this.props.filterString === "" && n[1]) return true;
+        //                 return (
+        //                     n[0].toLowerCase().indexOf(this.props.filterString.toLowerCase()) !==
+        //                         -1 && n[1]
+        //                 );
+        //                 break;
+        //             case "off":
+        //                 if (this.props.filterString === "" && !n[1]) return true;
+        //                 return (
+        //                     n[0].toLowerCase().indexOf(this.props.filterString.toLowerCase()) !==
+        //                         -1 && !n[1]
+        //                 );
+        //                 break;
+        //             default:
+        //                 return true;
+        //         }
+        //     })
+        //     .map((n, i) => this.createFeature(n[0], n[1], i));
 
         // get the number of selected rows
         // see List#reduce (or Array#reduce) for info on the reductor
-        const activeCount = this.props.features.reduce((r, v) => r + (v.get(1) ? 1 : 0), 0);
+        const activeCount = this.props.featureList.filter(f => f.get("selected")).size;
 
         // get the total number of features, and the shown count
-        const totalCount = this.props.features.size;
-        const shownCount = features.length;
+        const totalCount = this.props.featureList.size;
+        const shownCount = features.size;
 
         return (
             <div className="FeaturesList">
@@ -129,15 +145,13 @@ class FeaturesList extends Component {
                 </div>
             </div>
         );
-
-        //<ul>{features}</ul>
     }
 }
 
 // prop types
 FeaturesList.propTypes = {
     // store interaction
-    features: IPropTypes.list.isRequired,
+    featureList: PropTypes.object.isRequired,
     featureSelect: PropTypes.func.isRequired,
     featureUnselect: PropTypes.func.isRequired,
     featuresUnselectAll: PropTypes.func.isRequired,
@@ -152,7 +166,7 @@ FeaturesList.propTypes = {
 // react state connection, autocreate a container component
 const mapStateToProps = state => {
     return {
-        features: getFeaturesWithSelected(state.get("data"))
+        featureList: state.getIn(["data", "featureList"])
     };
 };
 const mapDispatchToProps = dispatch => ({

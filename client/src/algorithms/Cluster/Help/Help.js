@@ -26,14 +26,6 @@ class Help extends Component {
         this.setState({ markdown: markdown });
     }
 
-    LinkRenderer(props) {
-        return (
-            <a href={props.href} target="_blank">
-                {props.children}
-            </a>
-        );
-    }
-
     render() {
         return (
             <div className="Help">
@@ -56,10 +48,7 @@ class Help extends Component {
                         <MdClose />
                     </div>
                     <div id="helpContainer" style={{ padding: "20px 20% 20px 20%" }}>
-                        <ReactMarkdown
-                            source={this.state.markdown}
-                            renderers={{ link: this.LinkRenderer }}
-                        />
+                        <ReactMarkdown source={this.state.markdown} />
                     </div>
                 </ReactModal>
             </div>

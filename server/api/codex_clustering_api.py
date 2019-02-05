@@ -1,10 +1,21 @@
+import codex_return_code
+import codex_math
+import codex_time_log
+import codex_doctest
+import codex_plot
+import codex_read_data_api
+import codex_downsample
+import codex_hash
+import codex_dimmension_reduction_api
+import codex_system
+import codex_labels
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
 
 Brief : Clustering algorithms, formatted for CODEX
 
-Notes : 
+Notes :
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
@@ -13,33 +24,28 @@ import os
 import sys
 import time
 import h5py
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-from scipy import misc
-from random import randint
-from sklearn import cluster, datasets
-from sklearn.neighbors import kneighbors_graph
-from sklearn.preprocessing import StandardScaler
-from json import dumps, loads, JSONEncoder, JSONDecoder
-import pickle
-from decimal import *
 import traceback
+import numpy as np
+from sklearn.neighbors import kneighbors_graph
+from sklearn import cluster
 
 DEBUG = False
 
 # Enviornment variable for setting CODEX root directory.
-CODEX_ROOT  = os.getenv('CODEX_ROOT')
-sys.path.insert(1,CODEX_ROOT + '/api/sub/')
+CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 # CODEX Support
-import codex_labels, codex_system
-import codex_dimmension_reduction_api
-import codex_hash, codex_return_code, codex_downsample
-import codex_read_data_api, codex_plot
-import codex_doctest, codex_time_log, codex_math
 
-def ml_cluster(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result):
+
+def ml_cluster(
+        inputHash,
+        hashList,
+        subsetHashName,
+        algorithmName,
+        downsampled,
+        parms,
+        result):
     '''
     Inputs:
 
@@ -125,132 +131,147 @@ def ml_cluster(inputHash, hashList, subsetHashName, algorithmName, downsampled, 
 
     '''
 
-    if(len(hashList) < 2):
+    if len(hashList) < 2:
         codex_system.codex_log("Clustering requires >= 2 features.")
-        return None      
+        return None
 
-    if(subsetHashName != None):
-        subsetHash = codex_hash.findHashArray("name", subsetHashName,"subset")
-        if(subsetHash == None):
+    if subsetHashName is not None:
+        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
+        if(subsetHash is None):
             subsetHash = False
         else:
             subsetHash = subsetHash["hash"]
     else:
         subsetHash = False
 
-    if(algorithmName == 'kmeans'):
+    if algorithmName == 'kmeans':
         try:
             k = int(parms['k'])
-        except:
+        except BaseException:
             codex_system.codex_log("K parameter not set")
             result['message'] = "K parameter not set"
             codex_system.codex_log(traceback.format_exc())
             return None
 
         try:
-            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(inputHash, subsetHash, 2, True, False, False)
-            result = codex_clustering_kmeans(pca["outputHash"], False, k, False, downsampled)
-        except:
-            codex_system.codex_log("Failed to run k-means clustering algorithm")
+            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(
+                inputHash, subsetHash, 2, True, False, False)
+            result = codex_clustering_kmeans(
+                pca["outputHash"], False, k, False, downsampled)
+        except BaseException:
+            codex_system.codex_log(
+                "Failed to run k-means clustering algorithm")
             result['message'] = "Failed to run k-means clustering algorithm"
             codex_system.codex_log(traceback.format_exc())
             return None
-    
-    elif(algorithmName == 'mean_shift'):
+
+    elif algorithmName == 'mean_shift':
         try:
             quantile = float(parms["quantile"])
-        except:
+        except BaseException:
             codex_system.codex_log("Quantile parameter not set")
             result['message'] = "Quantile parameter not set"
             codex_system.codex_log(traceback.format_exc())
             return None
 
         try:
-            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(inputHash, subsetHash, 2, True, False, False)
-            result = codex_clustering_mean_shift(pca["outputHash"], False, quantile, False, downsampled)
-        except:
-            codex_system.codex_log("Failed to run mean-shift clustering algorithm")
+            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(
+                inputHash, subsetHash, 2, True, False, False)
+            result = codex_clustering_mean_shift(
+                pca["outputHash"], False, quantile, False, downsampled)
+        except BaseException:
+            codex_system.codex_log(
+                "Failed to run mean-shift clustering algorithm")
             result['message'] = "Failed to run mean-shift clustering algorithm"
             codex_system.codex_log(traceback.format_exc())
             return None
 
-    elif(algorithmName == 'birch'):
+    elif algorithmName == 'birch':
         try:
             k = int(parms["k"])
-        except:
+        except BaseException:
             codex_system.codex_log("k parameter not set")
             result['message'] = "k parameter not set"
             codex_system.codex_log(traceback.format_exc())
             return None
 
         try:
-            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(inputHash, subsetHash, 2, True, False, False)
-            result = codex_clustering_birch(pca["outputHash"], False, k, False, downsampled)
-        except:
+            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(
+                inputHash, subsetHash, 2, True, False, False)
+            result = codex_clustering_birch(
+                pca["outputHash"], False, k, False, downsampled)
+        except BaseException:
             codex_system.codex_log("Failed to run birch clustering algorithm")
             result['message'] = "Failed to run birch clustering algorithm"
             codex_system.codex_log(traceback.format_exc())
             return None
 
-    elif(algorithmName == 'ward'):
+    elif algorithmName == 'ward':
         try:
-            num_neighbors =  int(parms["n_neighbors"])
+            num_neighbors = int(parms["n_neighbors"])
             k = int(parms["k"])
-        except:
+        except BaseException:
             codex_system.codex_log("n_neighbors, or k parameter not set")
             result['message'] = "n_neighbors, or k parameter not set"
             codex_system.codex_log(traceback.format_exc())
             return None
 
         try:
-            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(inputHash, subsetHash, 2, True, False, False)
-            result = codex_clustering_ward(pca["outputHash"], False, num_neighbors, k, False, downsampled)
-        except:
+            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(
+                inputHash, subsetHash, 2, True, False, False)
+            result = codex_clustering_ward(
+                pca["outputHash"], False, num_neighbors, k, False, downsampled)
+        except BaseException:
             codex_system.codex_log("Failed to run ward clustering algorithm")
             result['message'] = "Failed to run ward clustering algorithm"
             codex_system.codex_log(traceback.format_exc())
             return None
 
-    elif(algorithmName == 'spectral'):
+    elif algorithmName == 'spectral':
         try:
             k = int(parms["k"])
-        except:
+        except BaseException:
             codex_system.codex_log("k parameter not set")
             result['message'] = "k parameter not set"
             codex_system.codex_log(traceback.format_exc())
             return None
 
         try:
-            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(inputHash, subsetHash, 2, True, False, False)
-            result = codex_clustering_spectral(pca["outputHash"], False, k, False, downsampled)
-        except:
-            codex_system.codex_log("Failed to run spectral clustering algorithm")
+            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(
+                inputHash, subsetHash, 2, True, False, False)
+            result = codex_clustering_spectral(
+                pca["outputHash"], False, k, False, downsampled)
+        except BaseException:
+            codex_system.codex_log(
+                "Failed to run spectral clustering algorithm")
             result['message'] = "Failed to run spectral clustering algorithm"
             codex_system.codex_log(traceback.format_exc())
             return None
 
-    elif(algorithmName == 'dbscan'):
+    elif algorithmName == 'dbscan':
         try:
             eps = float(parms["eps"])
-        except:
+        except BaseException:
             codex_system.codex_log("eps parameter not set")
             result['message'] = "eps parameter not set"
             codex_system.codex_log(traceback.format_exc())
             return None
 
         try:
-            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(inputHash, subsetHash, 2, True, False, False)
-            result = codex_clustering_dbScan(pca["outputHash"], False, eps, False, downsampled)
-        except:
+            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(
+                inputHash, subsetHash, 2, True, False, False)
+            result = codex_clustering_dbScan(
+                pca["outputHash"], False, eps, False, downsampled)
+        except BaseException:
             codex_system.codex_log("Failed to run dbScan clustering algorithm")
             result['message'] = "Failed to run dbScan clustering algorithm"
             codex_system.codex_log(traceback.format_exc())
             return None
 
-    elif(algorithmName == 'agglomerative'):
+    elif algorithmName == 'agglomerative':
         try:
             num_neighbors = int(parms["n_neighbors"])
-        except:
+        except BaseException:
             codex_system.codex_log("n_neighbors parameter not set")
             result['message'] = "n_neighbors parameter not set"
             codex_system.codex_log(traceback.format_exc())
@@ -258,43 +279,48 @@ def ml_cluster(inputHash, hashList, subsetHashName, algorithmName, downsampled, 
 
         try:
             k = int(parms['k'])
-        except:
+        except BaseException:
             codex_system.codex_log("K parameter not set")
             result['message'] = "K parameter not set"
             codex_system.codex_log(traceback.format_exc())
             return None
 
         try:
-            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(inputHash, subsetHash, 2, True, False, False)
-            result = codex_clustering_agglomerative(pca["outputHash"], False, num_neighbors, k, False, downsampled)
-        except:
-            codex_system.codex_log("Failed to run agglomerative clustering algorithm")
+            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(
+                inputHash, subsetHash, 2, True, False, False)
+            result = codex_clustering_agglomerative(
+                pca["outputHash"], False, num_neighbors, k, False, downsampled)
+        except BaseException:
+            codex_system.codex_log(
+                "Failed to run agglomerative clustering algorithm")
             result['message'] = "Failed to run agglomerative clustering algorithm"
             codex_system.codex_log(traceback.format_exc())
             return None
 
-
-    elif(algorithmName == "affinity_propagation"):
+    elif algorithmName == "affinity_propagation":
         try:
             damping = float(parms["damping"])
-        except:
+        except BaseException:
             codex_system.codex_log("damping parameter not set")
             result['message'] = "damping parameter not set"
             codex_system.codex_log(traceback.format_exc())
             return None
 
         try:
-            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(inputHash, subsetHash, 2, True, False, False)
-            result = codex_clustering_affinity_propagation(pca["outputHash"], False, damping, False, downsampled)
-        except:
-            codex_system.codex_log("Failed to run affinity propagation clustering algorithm")
+            pca = codex_dimmension_reduction_api.codex_decomposition_PCA(
+                inputHash, subsetHash, 2, True, False, False)
+            result = codex_clustering_affinity_propagation(
+                pca["outputHash"], False, damping, False, downsampled)
+        except BaseException:
+            codex_system.codex_log(
+                "Failed to run affinity propagation clustering algorithm")
             result['message'] = "Failed to run affinity propagation clustering algorithm"
             codex_system.codex_log(traceback.format_exc())
             return None
 
     else:
         result['message'] = "Cannot find requested clustering algorithm"
-    
+
     return result
 
 
@@ -343,28 +369,35 @@ def codex_clustering_kmeans(inputHash, subsetHash, k, showPlot, downsampled):
     eta = None
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
-        codex_system.codex_log("Clustering: Kmeans: Hash not found. Returning!")
+    if returnHash is None:
+        codex_system.codex_log(
+            "Clustering: Kmeans: Hash not found. Returning!")
         return None
 
     data = returnHash['data']
-    if(data is None):
+    if data is None:
         return None
 
-    if(subsetHash is not False):
+    if subsetHash is not False:
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log("ERROR: codex_clustering_kmeans - subsetHash returned None.")
+            codex_system.codex_log(
+                "ERROR: codex_clustering_kmeans - subsetHash returned None.")
             return None
 
-    if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+    if downsampled is not False:
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " percent")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("clustering", "kmeans", samples)
+        eta = codex_time_log.getComputeTimeEstimate(
+            "clustering", "kmeans", samples)
 
-    if(data.ndim < 2):
-        codex_system.codex_log("ERROR: codex_clustering_kmeans - insufficient data dimmensions")
+    if data.ndim < 2:
+        codex_system.codex_log(
+            "ERROR: codex_clustering_kmeans - insufficient data dimmensions")
         return None
 
     X = data
@@ -380,7 +413,12 @@ def codex_clustering_kmeans(inputHash, subsetHash, k, showPlot, downsampled):
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("clustering", "kmeans", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "clustering",
+        "kmeans",
+        computeTime,
+        len(data),
+        data.ndim)
 
     if showPlot:
         codex_plot.plot_clustering(X, y_pred, centers, plotName, show=True)
@@ -388,20 +426,36 @@ def codex_clustering_kmeans(inputHash, subsetHash, k, showPlot, downsampled):
     if DEBUG:
         codex_plot.plot_clustering(X, y_pred, centers, plotName, save=True)
 
-    merged_hash = codex_hash.hashArray("temporary", X, "feature") # temporary to not change API right now
+    # temporary to not change API right now
+    merged_hash = codex_hash.hashArray("temporary", X, "feature")
     label_hash = codex_hash.hashArray(merged_hash["hash"], y_pred, "label")
     y_pred = codex_labels.label_swap(y_pred, merged_hash["hash"])
 
-    if(subsetHash is False):
-        returnCodeString = "codex_clustering_api.codex_clustering_kmeans('"+inputHash+"',False,"+str(k)+","+str(True)+","+str(downsampled)+")\n" 
+    if subsetHash is False:
+        returnCodeString = "codex_clustering_api.codex_clustering_kmeans('" + inputHash + "',False," + str(
+            k) + "," + str(True) + "," + str(downsampled) + ")\n"
     else:
-        returnCodeString = "codex_clustering_api.codex_clustering_kmeans('"+inputHash+"','"+subsetHash+"',"+str(k)+","+str(True)+","+str(downsampled)+")\n" 
+        returnCodeString = "codex_clustering_api.codex_clustering_kmeans('" + inputHash + "','" + subsetHash + "'," + str(
+            k) + "," + str(True) + "," + str(downsampled) + ")\n"
     codex_return_code.logReturnCode(returnCodeString)
 
-    output = {'eta': eta,'algorithm': 'K-Means','centers': centers.tolist(), 'data': X.tolist(), 'clusters': y_pred.tolist(), 'k': k, 'downsample': downsampled, 'numClusters': np.unique(y_pred).size}
+    output = {'eta': eta,
+              'algorithm': 'K-Means',
+              'centers': centers.tolist(),
+              'data': X.tolist(),
+              'clusters': y_pred.tolist(),
+              'k': k,
+              'downsample': downsampled,
+              'numClusters': np.unique(y_pred).size}
     return output
 
-def codex_clustering_mean_shift(inputHash, subsetHash, quantile, showPlot, downsampled):
+
+def codex_clustering_mean_shift(
+        inputHash,
+        subsetHash,
+        quantile,
+        showPlot,
+        downsampled):
     '''
     Inputs:
         inputHash (string)     - hash value corresponding to the data to cluster
@@ -447,32 +501,40 @@ def codex_clustering_mean_shift(inputHash, subsetHash, quantile, showPlot, downs
     eta = None
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
+    if returnHash is None:
         codex_system.codex_log("Hash not found. Returning!")
         return
 
     data = returnHash['data']
-    if(data is None):
+    if data is None:
         return None
 
-    if(subsetHash is not False):
+    if subsetHash is not False:
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log("ERROR: codex_clustering_mean_shift - subsetHash returned None.")
+            codex_system.codex_log(
+                "ERROR: codex_clustering_mean_shift - subsetHash returned None.")
             return None
 
-    if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+    if downsampled is not False:
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " percent")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("clustering", "mean_shift", samples)
+        eta = codex_time_log.getComputeTimeEstimate(
+            "clustering", "mean_shift", samples)
 
-    if(data.ndim < 2):
-        codex_system.codex_log("ERROR: codex_clustering_mean_shift - insufficient data dimmensions")
+    if data.ndim < 2:
+        codex_system.codex_log(
+            "ERROR: codex_clustering_mean_shift - insufficient data dimmensions")
         return None
 
-    if(float(quantile) < 0.0 or float(quantile) > 1.0):
-        codex_system.codex_log("ERROR: codex_clustering_mean_shift - quantile out of bounds: " + str(quantile))
+    if float(quantile) < 0.0 or float(quantile) > 1.0:
+        codex_system.codex_log(
+            "ERROR: codex_clustering_mean_shift - quantile out of bounds: " +
+            str(quantile))
         return None
 
     X = data
@@ -488,28 +550,51 @@ def codex_clustering_mean_shift(inputHash, subsetHash, quantile, showPlot, downs
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("clustering", "mean_shift", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "clustering",
+        "mean_shift",
+        computeTime,
+        len(data),
+        data.ndim)
 
     if showPlot:
-        codex_plot.plot_clustering(X, y_pred, centers, "Mean Shift Clustering", show=True)
+        codex_plot.plot_clustering(
+            X, y_pred, centers, "Mean Shift Clustering", show=True)
 
     if DEBUG:
-        codex_plot.plot_clustering(X, y_pred, centers, "Mean Shift Clustering", save=True)
+        codex_plot.plot_clustering(
+            X, y_pred, centers, "Mean Shift Clustering", save=True)
 
-    merged_hash = codex_hash.hashArray("temporary", X, "feature") # temporary to not change API right now
+    # temporary to not change API right now
+    merged_hash = codex_hash.hashArray("temporary", X, "feature")
     label_hash = codex_hash.hashArray(merged_hash["hash"], y_pred, "label")
     y_pred = codex_labels.label_swap(y_pred, merged_hash["hash"])
 
-    if(subsetHash is False):
-        returnCodeString = "codex_clustering_api.codex_clustering_mean_shift('"+inputHash+"',False,"+str(quantile)+","+str(True)+","+str(downsampled)+")\n" 
+    if subsetHash is False:
+        returnCodeString = "codex_clustering_api.codex_clustering_mean_shift('" + inputHash + "',False," + str(
+            quantile) + "," + str(True) + "," + str(downsampled) + ")\n"
     else:
-        returnCodeString = "codex_clustering_api.codex_clustering_mean_shift('"+inputHash+"','"+subsetHash+"',"+str(quantile)+","+str(True)+","+str(downsampled)+")\n" 
+        returnCodeString = "codex_clustering_api.codex_clustering_mean_shift('" + inputHash + "','" + subsetHash + "'," + str(
+            quantile) + "," + str(True) + "," + str(downsampled) + ")\n"
     codex_return_code.logReturnCode(returnCodeString)
 
-    output = {'eta':eta,'algorithm': 'Mean Shift','centers': centers.tolist(), 'data': X.tolist(), 'clusters': y_pred.tolist(), 'quantile': quantile, 'downsample': downsampled, 'numClusters': np.unique(y_pred).size}
+    output = {'eta': eta,
+              'algorithm': 'Mean Shift',
+              'centers': centers.tolist(),
+              'data': X.tolist(),
+              'clusters': y_pred.tolist(),
+              'quantile': quantile,
+              'downsample': downsampled,
+              'numClusters': np.unique(y_pred).size}
     return output
 
-def codex_clustering_affinity_propagation(inputHash, subsetHash, damping, showPlot, downsampled):
+
+def codex_clustering_affinity_propagation(
+        inputHash,
+        subsetHash,
+        damping,
+        showPlot,
+        downsampled):
     '''
     Inputs:
         inputHash (string)       - hash value corresponding to the data to cluster
@@ -552,28 +637,34 @@ def codex_clustering_affinity_propagation(inputHash, subsetHash, damping, showPl
     eta = None
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
+    if returnHash is None:
         codex_system.codex_log("Hash not found. Returning!")
         return
 
     data = returnHash['data']
-    if(data is None):
+    if data is None:
         return None
 
-    if(subsetHash is not False):
+    if subsetHash is not False:
         data = codex_hash.applySubsetMask(data, subsetHash)
-        if(data is None):
-            codex_system.codex_log("ERROR: codex_clustering_affinity_propagation - subsetHash returned None.")
+        if data is None:
+            codex_system.codex_log(
+                "ERROR: codex_clustering_affinity_propagation - subsetHash returned None.")
             return None
 
-    if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+    if downsampled is not False:
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " percent")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("clustering", "affinity_propagation", samples)
+        eta = codex_time_log.getComputeTimeEstimate(
+            "clustering", "affinity_propagation", samples)
 
-    if(data.ndim < 2):
-        codex_system.codex_log("ERROR: codex_clustering_affinity_propagation - insufficient data dimmensions")
+    if data.ndim < 2:
+        codex_system.codex_log(
+            "ERROR: codex_clustering_affinity_propagation - insufficient data dimmensions")
         return None
 
     X = data
@@ -587,33 +678,59 @@ def codex_clustering_affinity_propagation(inputHash, subsetHash, damping, showPl
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("clustering", "affinity_propagation", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "clustering",
+        "affinity_propagation",
+        computeTime,
+        len(data),
+        data.ndim)
 
     if showPlot:
-        codex_plot.plot_clustering(X, y_pred, centers, "Affinity Propagation Clustering", show=True)
+        codex_plot.plot_clustering(
+            X,
+            y_pred,
+            centers,
+            "Affinity Propagation Clustering",
+            show=True)
 
     if DEBUG:
-        codex_plot.plot_clustering(X, y_pred, centers, "Affinity Propagation Clustering", save=True)
-    
-    merged_hash = codex_hash.hashArray("temporary", X, "feature") # temporary to not change API right now
+        codex_plot.plot_clustering(
+            X,
+            y_pred,
+            centers,
+            "Affinity Propagation Clustering",
+            save=True)
+
+    # temporary to not change API right now
+    merged_hash = codex_hash.hashArray("temporary", X, "feature")
     label_hash = codex_hash.hashArray(merged_hash["hash"], y_pred, "label")
     y_pred = codex_labels.label_swap(y_pred, merged_hash["hash"])
 
-    if(subsetHash is False):
-        returnCodeString = "codex_clustering_api.codex_clustering_affinity_propagation('"+inputHash+"',False,"+str(damping)+","+str(True)+","+str(downsampled)+")\n" 
+    if subsetHash is False:
+        returnCodeString = "codex_clustering_api.codex_clustering_affinity_propagation('" + inputHash + "',False," + str(
+            damping) + "," + str(True) + "," + str(downsampled) + ")\n"
     else:
-        returnCodeString = "codex_clustering_api.codex_clustering_affinity_propagation('"+inputHash+"','"+subsetHash+"',"+str(damping)+","+str(True)+","+str(downsampled)+")\n"  
+        returnCodeString = "codex_clustering_api.codex_clustering_affinity_propagation('" + inputHash + "','" + subsetHash + "'," + str(
+            damping) + "," + str(True) + "," + str(downsampled) + ")\n"
     codex_return_code.logReturnCode(returnCodeString)
 
-    output = {'eta': eta,'algorithm': 'Affinity Propagation','centers': centers.tolist(), 'data': X.tolist(), 'clusters': y_pred.tolist(), 'damping':damping, 'downsample':downsampled, 'numClusters': np.unique(y_pred).size}
+    output = {'eta': eta,
+              'algorithm': 'Affinity Propagation',
+              'centers': centers.tolist(),
+              'data': X.tolist(),
+              'clusters': y_pred.tolist(),
+              'damping': damping,
+              'downsample': downsampled,
+              'numClusters': np.unique(y_pred).size}
     return output
+
 
 def codex_clustering_birch(inputHash, subsetHash, k, showPlot, downsampled):
     '''
     Inputs:
         inputHash (string)  - hash value corresponding to the data to cluster
         subsetHash (string) - hash value corresponding to the subselection (false if full feature)
-        k (int)    - Number of clusters after the final clustering step, which treats the subclusters 
+        k (int)    - Number of clusters after the final clustering step, which treats the subclusters
                                 from the leaves as new samples.
         showPlot (bool)     - show the matplotlib plot (turned off for CODEX API / on for standalone python script output)
         downsampled (int)   - number of data points to use for quicklook
@@ -624,7 +741,7 @@ def codex_clustering_birch(inputHash, subsetHash, k, showPlot, downsampled):
             centers (np.ndarray)  - (k,2) array containing coordinates for centroid of each cluster
             data (np.ndarray)     - (samples, features) array of features to cluster
             clusters (np.ndarray) -  array containing cluster index for each sample
-            k (int)      - Number of clusters after the final clustering step, which treats the subclusters 
+            k (int)      - Number of clusters after the final clustering step, which treats the subclusters
                                         from the leaves as new samples.
             downsample (int)      - number of data points used in quicklook
             numClusters (int)     - number of clusters calculated by the algorithm (unique of clusters)
@@ -653,70 +770,99 @@ def codex_clustering_birch(inputHash, subsetHash, k, showPlot, downsampled):
     eta = None
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
+    if returnHash is None:
         codex_system.codex_log("Hash not found. Returning!")
         return
 
     data = returnHash['data']
-    if(data is None):
+    if data is None:
         return None
 
-    if(subsetHash is not False):
+    if subsetHash is not False:
         data = codex_hash.applySubsetMask(data, subsetHash)
-        if(data is None):
-            codex_system.codex_log("ERROR: codex_clustering_birch - subsetHash returned None.")
+        if data is None:
+            codex_system.codex_log(
+                "ERROR: codex_clustering_birch - subsetHash returned None.")
             return None
 
-    if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+    if downsampled is not False:
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " percent")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("clustering", "birch", samples)
+        eta = codex_time_log.getComputeTimeEstimate(
+            "clustering", "birch", samples)
 
-    if(data.ndim < 2):
-        codex_system.codex_log("ERROR: codex_clustering_birch - insufficient data dimmensions")
+    if data.ndim < 2:
+        codex_system.codex_log(
+            "ERROR: codex_clustering_birch - insufficient data dimmensions")
         return None
 
     X = data
     X = codex_math.codex_impute(X)
 
     algorithm = cluster.Birch(n_clusters=int(k))
-    algorithm.fit(X)	
+    algorithm.fit(X)
 
     y_pred = algorithm.labels_.astype(np.int)
     centers = None
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("clustering", "birch", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "clustering",
+        "birch",
+        computeTime,
+        len(data),
+        data.ndim)
 
     if showPlot:
-        codex_plot.plot_clustering(X, y_pred, centers, "Birch Clustering", show=True)
+        codex_plot.plot_clustering(
+            X, y_pred, centers, "Birch Clustering", show=True)
 
     if DEBUG:
-        codex_plot.plot_clustering(X, y_pred, centers, "Birch Clustering", save=True)
+        codex_plot.plot_clustering(
+            X, y_pred, centers, "Birch Clustering", save=True)
 
-    merged_hash = codex_hash.hashArray("temporary", data, "feature") # temporary to not change API right now
+    # temporary to not change API right now
+    merged_hash = codex_hash.hashArray("temporary", data, "feature")
     label_hash = codex_hash.hashArray(merged_hash["hash"], y_pred, "label")
     y_pred = codex_labels.label_swap(y_pred, merged_hash["hash"])
 
-    if(subsetHash is False):
-        returnCodeString = "codex_clustering_api.codex_clustering_birch('"+inputHash+"',False,"+str(k)+","+str(True)+","+str(downsampled)+")\n"  
+    if subsetHash is False:
+        returnCodeString = "codex_clustering_api.codex_clustering_birch('" + inputHash + "',False," + str(
+            k) + "," + str(True) + "," + str(downsampled) + ")\n"
     else:
-        returnCodeString = "codex_clustering_api.codex_clustering_birch('"+inputHash+"','"+subsetHash+"',"+str(k)+","+str(True)+","+str(downsampled)+")\n" 
+        returnCodeString = "codex_clustering_api.codex_clustering_birch('" + inputHash + "','" + subsetHash + "'," + str(
+            k) + "," + str(True) + "," + str(downsampled) + ")\n"
     codex_return_code.logReturnCode(returnCodeString)
 
-    output = {'eta': eta, 'algorithm': 'Birch', 'centers': centers, 'data': X.tolist(), 'clusters': y_pred.tolist(), 'k': k, 'downsample': downsampled, 'numClusters': np.unique(y_pred).size}
+    output = {'eta': eta,
+              'algorithm': 'Birch',
+              'centers': centers,
+              'data': X.tolist(),
+              'clusters': y_pred.tolist(),
+              'k': k,
+              'downsample': downsampled,
+              'numClusters': np.unique(y_pred).size}
     return output
 
 
-def codex_clustering_ward(inputHash, subsetHash, n_neighbors, k, showPlot, downsampled):
+def codex_clustering_ward(
+        inputHash,
+        subsetHash,
+        n_neighbors,
+        k,
+        showPlot,
+        downsampled):
     '''
     Inputs:
         inputHash (string)  - hash value corresponding to the data to cluster
         subsetHash (string) - hash value corresponding to the subselection (false if full feature)
         n_neighbors (int)   - The number of connected components in the graph defined by the connectivity matrix.
-        k (int)    - Number of clusters after the final clustering step, which treats the subclusters 
+        k (int)    - Number of clusters after the final clustering step, which treats the subclusters
                                 from the leaves as new samples.
         showPlot (bool)     - show the matplotlib plot (turned off for CODEX API / on for standalone python script output)
         downsampled (int)   - number of data points to use for quicklook
@@ -757,37 +903,44 @@ def codex_clustering_ward(inputHash, subsetHash, n_neighbors, k, showPlot, downs
     eta = None
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
+    if returnHash is None:
         codex_system.codex_log("Hash not found. Returning!")
         return
 
     data = returnHash['data']
-    if(data is None):
+    if data is None:
         return None
 
-    if(subsetHash is not False):
+    if subsetHash is not False:
         data = codex_hash.applySubsetMask(data, subsetHash)
-        if(data is None):
-            codex_system.codex_log("ERROR: codex_clustering_ward - subsetHash returned None.")
+        if data is None:
+            codex_system.codex_log(
+                "ERROR: codex_clustering_ward - subsetHash returned None.")
             return None
 
-    if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+    if downsampled is not False:
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " percent")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("clustering", "ward", samples)
+        eta = codex_time_log.getComputeTimeEstimate(
+            "clustering", "ward", samples)
 
-    if(data.ndim < 2):
+    if data.ndim < 2:
         print("ERROR: codex_clustering_ward - insufficient data dimmensions")
         return None
 
     X = data
     X = codex_math.codex_impute(X)
 
-    connectivity = kneighbors_graph(X, n_neighbors=int(n_neighbors), include_self=False)
+    connectivity = kneighbors_graph(
+        X, n_neighbors=int(n_neighbors), include_self=False)
     connectivity = 0.5 * (connectivity + connectivity.T)
 
-    algorithm = cluster.AgglomerativeClustering(n_clusters=int(k), linkage='ward', connectivity=connectivity)
+    algorithm = cluster.AgglomerativeClustering(
+        n_clusters=int(k), linkage='ward', connectivity=connectivity)
     algorithm.fit(X)
 
     y_pred = algorithm.labels_.astype(np.int)
@@ -795,34 +948,52 @@ def codex_clustering_ward(inputHash, subsetHash, n_neighbors, k, showPlot, downs
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("clustering", "ward", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "clustering",
+        "ward",
+        computeTime,
+        len(data),
+        data.ndim)
 
     if showPlot:
-        codex_plot.plot_clustering(X, y_pred, centers, "Ward Clustering", show=True)
+        codex_plot.plot_clustering(
+            X, y_pred, centers, "Ward Clustering", show=True)
 
     if DEBUG:
-        codex_plot.plot_clustering(X, y_pred, centers, "Ward Clustering", save=True)
+        codex_plot.plot_clustering(
+            X, y_pred, centers, "Ward Clustering", save=True)
 
-
-    merged_hash = codex_hash.hashArray("temporary", data, "feature") # temporary to not change API right now
+    # temporary to not change API right now
+    merged_hash = codex_hash.hashArray("temporary", data, "feature")
     label_hash = codex_hash.hashArray(merged_hash["hash"], y_pred, "label")
     y_pred = codex_labels.label_swap(y_pred, merged_hash["hash"])
 
-    if(subsetHash is False):
-        returnCodeString = "codex_clustering_api.codex_clustering_ward('"+inputHash+"',False,"+str(n_neighbors)+","+str(k)+","+str(True)+","+str(downsampled)+")\n" 
+    if subsetHash is False:
+        returnCodeString = "codex_clustering_api.codex_clustering_ward('" + inputHash + "',False," + str(
+            n_neighbors) + "," + str(k) + "," + str(True) + "," + str(downsampled) + ")\n"
     else:
-        returnCodeString = "codex_clustering_api.codex_clustering_ward('"+inputHash+"','"+subsetHash+"',"+str(n_neighbors)+","+str(k)+","+str(True)+","+str(downsampled)+")\n" 
+        returnCodeString = "codex_clustering_api.codex_clustering_ward('" + inputHash + "','" + subsetHash + "'," + str(
+            n_neighbors) + "," + str(k) + "," + str(True) + "," + str(downsampled) + ")\n"
     codex_return_code.logReturnCode(returnCodeString)
 
-    output = {'eta': eta,'algorithm': 'Ward', 'centers': centers, 'data': X.tolist(), 'clusters': y_pred.tolist(), 'n_neighbors': n_neighbors, 'k': k, 'downsample': downsampled, 'numClusters': np.unique(y_pred).size}
+    output = {'eta': eta,
+              'algorithm': 'Ward',
+              'centers': centers,
+              'data': X.tolist(),
+              'clusters': y_pred.tolist(),
+              'n_neighbors': n_neighbors,
+              'k': k,
+              'downsample': downsampled,
+              'numClusters': np.unique(y_pred).size}
     return output
+
 
 def codex_clustering_spectral(inputHash, subsetHash, k, showPlot, downsampled):
     '''
     Inputs:
         inputHash (string)  - hash value corresponding to the data to cluster
         subsetHash (string) - hash value corresponding to the subselection (false if full feature)
-        k (int)    - Number of clusters after the final clustering step, which treats the subclusters 
+        k (int)    - Number of clusters after the final clustering step, which treats the subclusters
                                 from the leaves as new samples.
         showPlot (bool)     - show the matplotlib plot (turned off for CODEX API / on for standalone python script output)
         downsampled (int)   - number of data points to use for quicklook
@@ -862,34 +1033,43 @@ def codex_clustering_spectral(inputHash, subsetHash, k, showPlot, downsampled):
     eta = None
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
+    if returnHash is None:
         codex_system.codex_log("Hash not found. Returning!")
         return
 
     data = returnHash['data']
-    if(data is None):
+    if data is None:
         return None
 
-    if(subsetHash is not False):
+    if subsetHash is not False:
         data = codex_hash.applySubsetMask(data, subsetHash)
-        if(data is None):
-            codex_system.codex_log("ERROR: codex_clustering_spectral - subsetHash returned None.")
+        if data is None:
+            codex_system.codex_log(
+                "ERROR: codex_clustering_spectral - subsetHash returned None.")
             return None
 
-    if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+    if downsampled is not False:
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " percent")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("clustering", "spectral", samples)
+        eta = codex_time_log.getComputeTimeEstimate(
+            "clustering", "spectral", samples)
 
-    if(data.ndim < 2):
-        codex_system.codex_log("ERROR: codex_clustering_spectral - insufficient data dimmensions")
+    if data.ndim < 2:
+        codex_system.codex_log(
+            "ERROR: codex_clustering_spectral - insufficient data dimmensions")
         return None
 
     X = data
     X = codex_math.codex_impute(X)
 
-    algorithm = cluster.SpectralClustering(n_clusters=int(k), eigen_solver='arpack', affinity="nearest_neighbors")
+    algorithm = cluster.SpectralClustering(
+        n_clusters=int(k),
+        eigen_solver='arpack',
+        affinity="nearest_neighbors")
     algorithm.fit(X)
 
     y_pred = algorithm.labels_.astype(np.int)
@@ -897,26 +1077,42 @@ def codex_clustering_spectral(inputHash, subsetHash, k, showPlot, downsampled):
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("clustering", "spectral", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "clustering",
+        "spectral",
+        computeTime,
+        len(data),
+        data.ndim)
 
     if showPlot:
-        codex_plot.plot_clustering(X, y_pred, centers, "Spectral Clustering", show=True)
+        codex_plot.plot_clustering(
+            X, y_pred, centers, "Spectral Clustering", show=True)
 
     if DEBUG:
-        codex_plot.plot_clustering(X, y_pred, centers, "Spectral Clustering", save=True)
+        codex_plot.plot_clustering(
+            X, y_pred, centers, "Spectral Clustering", save=True)
 
-
-    merged_hash = codex_hash.hashArray("temporary", data, "feature") # temporary to not change API right now
+    # temporary to not change API right now
+    merged_hash = codex_hash.hashArray("temporary", data, "feature")
     label_hash = codex_hash.hashArray(merged_hash["hash"], y_pred, "label")
     y_pred = codex_labels.label_swap(y_pred, merged_hash["hash"])
 
-    if(subsetHash is False):
-        returnCodeString = "codex_clustering_api.codex_clustering_spectral('"+inputHash+"',False,"+str(k)+","+str(True)+","+str(downsampled)+")\n" 
+    if subsetHash is False:
+        returnCodeString = "codex_clustering_api.codex_clustering_spectral('" + inputHash + "',False," + str(
+            k) + "," + str(True) + "," + str(downsampled) + ")\n"
     else:
-        returnCodeString = "codex_clustering_api.codex_clustering_spectral('"+inputHash+"','"+subsetHash+"',"+str(k)+","+str(True)+","+str(downsampled)+")\n" 
+        returnCodeString = "codex_clustering_api.codex_clustering_spectral('" + inputHash + "','" + subsetHash + "'," + str(
+            k) + "," + str(True) + "," + str(downsampled) + ")\n"
     codex_return_code.logReturnCode(returnCodeString)
 
-    output = {'eta': eta,'algorithm': "Spectral", 'centers': centers, 'data': X.tolist(), 'clusters': y_pred.tolist(), 'k': k, 'downsample': downsampled, 'numClusters': np.unique(y_pred).size}
+    output = {'eta': eta,
+              'algorithm': "Spectral",
+              'centers': centers,
+              'data': X.tolist(),
+              'clusters': y_pred.tolist(),
+              'k': k,
+              'downsample': downsampled,
+              'numClusters': np.unique(y_pred).size}
     return output
 
 
@@ -968,23 +1164,29 @@ def codex_clustering_dbScan(inputHash, subsetHash, eps, showPlot, downsampled):
         return
 
     data = returnHash['data']
-    if(data is None):
+    if data is None:
         return None
 
-    if(subsetHash is not False):
+    if subsetHash is not False:
         data = codex_hash.applySubsetMask(data, subsetHash)
-        if(data is None):
-            codex_system.codex_log("ERROR: codex_clustering_dbScan - subsetHash returned None.")
+        if data is None:
+            codex_system.codex_log(
+                "ERROR: codex_clustering_dbScan - subsetHash returned None.")
             return None
 
-    if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+    if downsampled is not False:
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " percent")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("clustering", "dbscan", samples)
+        eta = codex_time_log.getComputeTimeEstimate(
+            "clustering", "dbscan", samples)
 
-    if(data.ndim < 2):
-        codex_system.codex_log("ERROR: codex_clustering_dbScan - insufficient data dimmensions")
+    if data.ndim < 2:
+        codex_system.codex_log(
+            "ERROR: codex_clustering_dbScan - insufficient data dimmensions")
         return None
 
     X = data
@@ -998,29 +1200,52 @@ def codex_clustering_dbScan(inputHash, subsetHash, eps, showPlot, downsampled):
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("clustering", "dbscan", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "clustering",
+        "dbscan",
+        computeTime,
+        len(data),
+        data.ndim)
 
     if showPlot:
-        codex_plot.plot_clustering(X, y_pred, centers, "DBSCAN Clustering", show=True)
+        codex_plot.plot_clustering(
+            X, y_pred, centers, "DBSCAN Clustering", show=True)
 
     if DEBUG:
-        codex_plot.plot_clustering(X, y_pred, centers, "DBSCAN Clustering", save=True)
+        codex_plot.plot_clustering(
+            X, y_pred, centers, "DBSCAN Clustering", save=True)
 
-
-    merged_hash = codex_hash.hashArray("temporary", data, "feature") # temporary to not change API right now
+    # temporary to not change API right now
+    merged_hash = codex_hash.hashArray("temporary", data, "feature")
     label_hash = codex_hash.hashArray(merged_hash["hash"], y_pred, "label")
     y_pred = codex_labels.label_swap(y_pred, merged_hash["hash"])
 
-    if(subsetHash is False):
-        returnCodeString = "codex_clustering_api.codex_clustering_dbScan('"+inputHash+"',False,"+str(eps)+","+str(True)+","+str(downsampled)+")\n" 
+    if subsetHash is False:
+        returnCodeString = "codex_clustering_api.codex_clustering_dbScan('" + inputHash + "',False," + str(
+            eps) + "," + str(True) + "," + str(downsampled) + ")\n"
     else:
-        returnCodeString = "codex_clustering_api.codex_clustering_dbScan('"+inputHash+"','"+subsetHash+"',"+str(eps)+","+str(True)+","+str(downsampled)+")\n" 
+        returnCodeString = "codex_clustering_api.codex_clustering_dbScan('" + inputHash + "','" + subsetHash + "'," + str(
+            eps) + "," + str(True) + "," + str(downsampled) + ")\n"
     codex_return_code.logReturnCode(returnCodeString)
 
-    output = {'eta': eta,'algorithm': 'DB Scan', 'centers': centers, 'data': X.tolist(), 'clusters': y_pred.tolist(), 'eps': eps, 'downsample': downsampled, 'numClusters': np.unique(y_pred).size}
+    output = {'eta': eta,
+              'algorithm': 'DB Scan',
+              'centers': centers,
+              'data': X.tolist(),
+              'clusters': y_pred.tolist(),
+              'eps': eps,
+              'downsample': downsampled,
+              'numClusters': np.unique(y_pred).size}
     return output
 
-def codex_clustering_agglomerative(inputHash, subsetHash, n_neighbors, k, showPlot, downsampled):
+
+def codex_clustering_agglomerative(
+        inputHash,
+        subsetHash,
+        n_neighbors,
+        k,
+        showPlot,
+        downsampled):
     '''
     Inputs:
         inputHash (string)  - hash value corresponding to the data to cluster
@@ -1063,37 +1288,48 @@ def codex_clustering_agglomerative(inputHash, subsetHash, n_neighbors, k, showPl
     eta = None
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
+    if returnHash is None:
         codex_system.codex_log("Hash not found. Returning!")
         return
 
     data = returnHash['data']
-    if(data is None):
+    if data is None:
         return None
 
-    if(subsetHash is not False):
+    if subsetHash is not False:
         data = codex_hash.applySubsetMask(data, subsetHash)
-        if(data is None):
-            codex_system.codex_log("ERROR: codex_clustering_agglomerative - subsetHash returned None.")
+        if data is None:
+            codex_system.codex_log(
+                "ERROR: codex_clustering_agglomerative - subsetHash returned None.")
             return None
 
-    if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+    if downsampled is not False:
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " percent")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("clustering", "agglomerative", samples)
+        eta = codex_time_log.getComputeTimeEstimate(
+            "clustering", "agglomerative", samples)
 
-    if(data.ndim < 2):
-        codex_system.codex_log("ERROR: codex_clustering_agglomerative - insufficient data dimmensions")
+    if data.ndim < 2:
+        codex_system.codex_log(
+            "ERROR: codex_clustering_agglomerative - insufficient data dimmensions")
         return None
 
     X = data
     X = codex_math.codex_impute(X)
 
-    connectivity = kneighbors_graph(X, n_neighbors=int(n_neighbors), include_self=False)
+    connectivity = kneighbors_graph(
+        X, n_neighbors=int(n_neighbors), include_self=False)
     connectivity = 0.5 * (connectivity + connectivity.T)
 
-    algorithm = cluster.AgglomerativeClustering(linkage="average", affinity="cityblock", n_clusters=int(k), connectivity=connectivity)
+    algorithm = cluster.AgglomerativeClustering(
+        linkage="average",
+        affinity="cityblock",
+        n_clusters=int(k),
+        connectivity=connectivity)
 
     algorithm.fit(X)
 
@@ -1102,27 +1338,53 @@ def codex_clustering_agglomerative(inputHash, subsetHash, n_neighbors, k, showPl
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("clustering", "agglomerative", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "clustering",
+        "agglomerative",
+        computeTime,
+        len(data),
+        data.ndim)
 
     if showPlot:
-        codex_plot.plot_clustering(X, y_pred, centers, "Agglomerative Clustering", show=True)
+        codex_plot.plot_clustering(
+            X,
+            y_pred,
+            centers,
+            "Agglomerative Clustering",
+            show=True)
 
     if DEBUG:
-        codex_plot.plot_clustering(X, y_pred, centers, "Agglomerative Clustering", save=True)
+        codex_plot.plot_clustering(
+            X,
+            y_pred,
+            centers,
+            "Agglomerative Clustering",
+            save=True)
 
-
-    merged_hash = codex_hash.hashArray("temporary", data, "feature") # temporary to not change API right now
+    # temporary to not change API right now
+    merged_hash = codex_hash.hashArray("temporary", data, "feature")
     label_hash = codex_hash.hashArray(merged_hash["hash"], y_pred, "label")
     y_pred = codex_labels.label_swap(y_pred, merged_hash["hash"])
 
-    if(subsetHash is False):
-        returnCodeString = "codex_clustering_api.codex_clustering_agglomerative('"+inputHash+"',False,"+str(n_neighbors)+","+str(k)+","+str(True)+","+str(downsampled)+")\n"
+    if subsetHash is False:
+        returnCodeString = "codex_clustering_api.codex_clustering_agglomerative('" + inputHash + "',False," + str(
+            n_neighbors) + "," + str(k) + "," + str(True) + "," + str(downsampled) + ")\n"
     else:
-        returnCodeString = "codex_clustering_api.codex_clustering_agglomerative('"+inputHash+"','"+subsetHash+"',"+str(n_neighbors)+","+str(k)+","+str(True)+","+str(downsampled)+")\n"
+        returnCodeString = "codex_clustering_api.codex_clustering_agglomerative('" + inputHash + "','" + subsetHash + "'," + str(
+            n_neighbors) + "," + str(k) + "," + str(True) + "," + str(downsampled) + ")\n"
     codex_return_code.logReturnCode(returnCodeString)
 
-    output = {'eta': eta,'algorithm': 'Agglomerative', 'centers': centers, 'data': X.tolist(), 'clusters': y_pred.tolist(), 'k': k, 'n_neighbors': n_neighbors, 'downsample': downsampled, 'numClusters': np.unique(y_pred).size}
+    output = {'eta': eta,
+              'algorithm': 'Agglomerative',
+              'centers': centers,
+              'data': X.tolist(),
+              'clusters': y_pred.tolist(),
+              'k': k,
+              'n_neighbors': n_neighbors,
+              'downsample': downsampled,
+              'numClusters': np.unique(y_pred).size}
     return output
+
 
 if __name__ == "__main__":
 

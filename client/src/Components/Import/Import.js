@@ -28,35 +28,11 @@ class Import extends Component {
 
         workerUpload.addEventListener("message", e => {
             console.log("%cUpload", "background: #800075; padding: 0px 4px 0px 4px;", e);
-        });
-    }
-
-    uploadLocalData(file, type, progressCallback, completeCallback) {
-        if (!file) return;
-        this.parseFile(file, type, progressCallback, filedata => {
-            filedata = this.validateData(filedata);
-            completeCallback();
-            this.props.fileLoad(filedata, file.name);
-        });
-    }
-
-    parseFile(file, type, progressCallback, completeCallback) {
-        let filedata = [];
-        parser.parseFile(
-            file,
-            type,
-            function(data, progress) {
-                filedata.push(data);
-                if (typeof progressCallback === "function") {
-                    progressCallback(progress);
-                }
-            },
-            function() {
-                if (typeof completeCallback === "function") {
-                    completeCallback(filedata);
-                }
+            const res = JSON.parse(e.data);
+            if (res.status === "complete") {
+                this.props.fileLoad([res.feature_names], "TEST_FILENAME");
             }
-        );
+        });
     }
 
     /**
@@ -141,20 +117,6 @@ class Import extends Component {
         this.props.setProgress(0);
         var that = this;
         if (this.vars.fileToUpload !== null) {
-            //Client Version
-            this.uploadLocalData(
-                this.vars.fileToUpload,
-                "csv",
-                function(progress) {
-                    that.props.setProgress(progress);
-                },
-                function() {
-                    that.props.completedLoad();
-                    that.setState({ fileToUpload: null });
-                }
-            );
-
-            //Server Version
             workerUpload.postMessage({
                 files: this.vars.etf,
                 NODE_ENV: process.env.NODE_ENV
@@ -168,23 +130,13 @@ class Import extends Component {
                 <div id="container">
                     <div id="inputfilebutton">
                         Import
-                        <div
-                            id="dropzone"
-                            onDrop={e => this.drop_handler(e)}
-                            onDragOver={e => this.dragover_handler(e)}
-                            onDragEnd={e => this.dragend_handler(e)}
-                        >
-                            <input
-                                id="inputfile"
-                                multiple="true"
-                                name="files[]"
-                                type="file"
-                                onChange={e => this.browseChange(e)}
-                            />
-                            <div id="filetoupload">
-                                {this.state.fileToUpload ? this.state.fileToUpload.name : ""}
-                            </div>
-                        </div>
+                        <input
+                            id="inputfile"
+                            multiple={true}
+                            name="files[]"
+                            type="file"
+                            onChange={e => this.browseChange(e)}
+                        />
                     </div>
                 </div>
             </div>

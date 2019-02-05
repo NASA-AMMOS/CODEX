@@ -17,7 +17,7 @@ import * as sels from "../selectors/data";
  */
 export const getInitialState = (data, filename) => {
 	const initialState = fromJS({
-		data: data || null,
+		data: {},
 		filename: filename || null,
 		master: {},
 		selections: [],
@@ -26,7 +26,8 @@ export const getInitialState = (data, filename) => {
 		// states needed only by its reducer
 		_featureSelect: {
 			last_shiftless_selected_feature: null
-		}
+		},
+		featureList: {}
 	});
 
 	return initialState.updateIn(["selected_features"], () => Set());
@@ -60,7 +61,14 @@ const selectionsBrushColor = "#ff4500";
  */
 const fileLoad = (state, action) => {
 	return state
-		.set("data", fromJS(action.data))
+		.set(
+			"featureList",
+			fromJS(
+				action.data[0].map(f => {
+					return { name: f, selected: false };
+				})
+			)
+		)
 		.set("filename", action.filename)
 		.set(
 			"master",
@@ -100,10 +108,7 @@ const featureAdd = (state, action) => {
 	let testFeatureName = action.featureName;
 	while (!foundUniqueName) {
 		if (state.getIn(["data", 0]).includes(testFeatureName)) {
-			testFeatureName =
-				action.featureName +
-				"_" +
-				formulas.iToAlphabet(uniqueNameIndex);
+			testFeatureName = action.featureName + "_" + formulas.iToAlphabet(uniqueNameIndex);
 			uniqueNameIndex++;
 		} else {
 			foundUniqueName = true;
@@ -113,14 +118,10 @@ const featureAdd = (state, action) => {
 	action.featureData.unshift(testFeatureName);
 	if (action.featureData.length === state.get("data").size)
 		return state.updateIn(["data"], d =>
-			d.map((val, index, arr) =>
-				d.get(index).push(action.featureData[index])
-			)
+			d.map((val, index, arr) => d.get(index).push(action.featureData[index]))
 		);
 	else {
-		console.warn(
-			"FEATURE_ADD - Unsuccessful: new feature length differs from data length"
-		);
+		console.warn("FEATURE_ADD - Unsuccessful: new feature length differs from data length");
 		return state;
 	}
 };
@@ -134,39 +135,38 @@ const featureAdd = (state, action) => {
 const featureSelect = (state, action) => {
 	// insert into the selected features set
 	if (!action.shifted) {
-		state = state.setIn(
-			["_featureSelect", "last_shiftless_selected_feature"],
-			action.feature
-		);
-		return state.updateIn(["selected_features"], sel =>
-			sel.add(action.feature)
-		);
-	} else {
-		// handle shift key
-		// select everything between action.feature and last_shiftless
-		//   (inclusive and regardless of which comes first)
-		const shiftless = state.getIn([
-			"_featureSelect",
-			"last_shiftless_selected_feature"
-		]);
-		const featureNames = sels.getFeatures(state).toJS();
-		const selectedFeatures = state.get("selected_features");
-		let pastFeature = false;
-		for (let n in featureNames) {
-			n = featureNames[n];
-			if (pastFeature || n === action.feature || n == shiftless) {
-				if (!selectedFeatures.includes(n)) {
-					state = state.updateIn(["selected_features"], sel =>
-						sel.add(n)
-					);
-				}
-				if (pastFeature && (n === action.feature || n == shiftless))
-					pastFeature = false;
-				else pastFeature = true;
-			}
-		}
-		return state;
+		state = state.setIn(["_featureSelect", "last_shiftless_selected_feature"], action.feature);
+		const newFeatureList = state
+			.get("featureList")
+			.map(f => (f.get("name") === action.feature ? f.set("selected", true) : f));
+		return state
+			.set("featureList", newFeatureList)
+			.set(
+				"selected_features",
+				newFeatureList.filter(f => f.get("selected")).map(f => f.get("name"))
+			);
 	}
+
+	// handle shift key
+
+	// select everything between action.feature and last_shiftless
+	//   (inclusive and regardless of which comes first)
+	const shiftless = state.getIn(["_featureSelect", "last_shiftless_selected_feature"]);
+	const firstItemIndex = state.get("featureList").findIndex(f => f.get("name") === shiftless);
+	const lastItemIndex = state.get("featureList").findIndex(f => f.get("name") === action.feature);
+	const range = [firstItemIndex, lastItemIndex].sort((a, b) => a - b);
+	const newFeatureList = state.get("featureList").map((v, idx) => {
+		if (idx >= range[0] && idx <= range[1]) {
+			return v.set("selected", true);
+		}
+		return v;
+	});
+	return state
+		.set("featureList", newFeatureList)
+		.set(
+			"selected_features",
+			newFeatureList.filter(f => f.get("selected")).map(f => f.get("name"))
+		);
 };
 
 /**
@@ -178,9 +178,11 @@ const featureSelect = (state, action) => {
 const featureUnselect = (state, action) => {
 	// remove from the selected features set
 	//if( !action.shifted ) //Ignore shift for now
-	return state.updateIn(["selected_features"], sel =>
-		sel.remove(action.feature)
-	);
+	state = state.setIn(["_featureSelect", "last_shiftless_selected_feature"], action.feature);
+	const newFeatureList = state
+		.get("featureList")
+		.map(f => (f.get("name") === action.feature ? f.set("selected", false) : f));
+	return state.set("featureList", newFeatureList);
 	//else {
 	//TODO: handle shift key
 	//	return state;
@@ -207,9 +209,7 @@ const selectionCreate = (state, action) => {
 	if (computedColor === "") {
 		// then select from our list of selection colors
 		computedColor =
-			selectionsColorPalette[
-				state.get("selections").size % selectionsColorPalette.length
-			];
+			selectionsColorPalette[state.get("selections").size % selectionsColorPalette.length];
 	}
 
 	// make sure name is unique
@@ -259,9 +259,7 @@ const selectionReorder = (state, action) => {
  * @return {Map} new state
  */
 const selectionRecolor = (state, action) => {
-	return state.updateIn(["selections", action.index], sel =>
-		sel.set("color", action.color)
-	);
+	return state.updateIn(["selections", action.index], sel => sel.set("color", action.color));
 };
 
 /**
@@ -271,9 +269,7 @@ const selectionRecolor = (state, action) => {
  * @return {Map} new state
  */
 const selectionRename = (state, action) => {
-	return state.updateIn(["selections", action.index], sel =>
-		sel.set("name", action.name)
-	);
+	return state.updateIn(["selections", action.index], sel => sel.set("name", action.name));
 };
 
 /**
@@ -293,9 +289,7 @@ const selectionToggle = (state, action) => {
  */
 const selectionsUnselectAll = state => {
 	// remove from the selected features set
-	return state.updateIn(["selections"], sel =>
-		sel.map(val => val.set("visible", false))
-	);
+	return state.updateIn(["selections"], sel => sel.map(val => val.set("visible", false)));
 };
 
 /**
@@ -305,10 +299,7 @@ const selectionsUnselectAll = state => {
  * @return {Map} new state
  */
 const selectionEmphasisToggle = (state, action) => {
-	return state.updateIn(
-		["selections", action.index, "emphasize"],
-		val => !val
-	);
+	return state.updateIn(["selections", action.index, "emphasize"], val => !val);
 };
 
 /**
@@ -351,12 +342,8 @@ const brushUpdateArea = (state, action) => {
 
 	const dataSize = state.get("data").size;
 
-	let xFeatureI = state
-		.getIn(["data", 0])
-		.findIndex(i => i === action.xAxisFeature);
-	let yFeatureI = state
-		.getIn(["data", 0])
-		.findIndex(i => i === action.yAxisFeature);
+	let xFeatureI = state.getIn(["data", 0]).findIndex(i => i === action.xAxisFeature);
+	let yFeatureI = state.getIn(["data", 0]).findIndex(i => i === action.yAxisFeature);
 	if (xFeatureI === -1 || yFeatureI === -1) return state;
 
 	for (let i = 1; i < dataSize; i++) {
@@ -396,10 +383,33 @@ const brushUpdateArea = (state, action) => {
 const brushClear = (state, action) => {
 	// fill it with false
 	const size = state.getIn(["brush", "mask"]).size;
-	return state.updateIn(["brush", "mask"], val =>
-		fromJS(Array.from(Array(size), () => false))
-	);
+	return state.updateIn(["brush", "mask"], val => fromJS(Array.from(Array(size), () => false)));
 };
+
+function updateData(state, action) {
+	return state
+		.set("data", fromJS(action.data))
+		.set(
+			"master",
+			fromJS({
+				name: "Master",
+				mask: Array.from(Array(action.data.length - 1), () => true),
+				color: selectionsMasterColor,
+				visible: true,
+				emphasize: false
+			})
+		)
+		.set(
+			"brush",
+			fromJS({
+				name: "Brush",
+				mask: Array.from(Array(action.data.length - 1), () => false),
+				color: selectionsBrushColor,
+				visible: true,
+				emphasize: false
+			})
+		);
+}
 
 /**
  * Data reducer
@@ -420,5 +430,6 @@ export default createReducer(getInitialState(), {
 	SELECTION_REMOVE: selectionRemove,
 	BRUSH_UPDATE: brushUpdate,
 	BRUSH_UPDATE_AREA: brushUpdateArea,
-	BRUSH_CLEAR: brushClear
+	BRUSH_CLEAR: brushClear,
+	UPDATE_DATA: updateData
 });

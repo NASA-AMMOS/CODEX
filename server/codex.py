@@ -319,24 +319,32 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 
             elif(activity == "get"):
 
-                name = msg["name"]
-                print(name)
-                if(hashType == "selection"):
-                    data = codex_hash.findHashArray("name", name, "subset")
-                elif(hashType == "feature"):
-                    data = codex_hash.findHashArray("name", name, "feature")
-                elif(hashType == "downsample"):
-                    data = codex_hash.findHashArray("name", name, "downsample")
-                elif(hashType == "label"):
-                    data = codex_hash.findHashArray("name", name, "label")
-                else:
-                    result["message"] = 'failure'
-                    status = False
+                names = msg["name"]
+                data = []
+                status = True
 
-                if(status == True):
-                    result['message'] = 'success'
-                else:
-                    result['message'] = 'failure'
+                for name in names:
+                    if(hashType == "selection"):
+                        array = codex_hash.findHashArray("name", name, "subset")
+                    elif(hashType == "feature"):
+                        array = codex_hash.findHashArray("name", name, "feature")
+                    elif(hashType == "downsample"):
+                        array = codex_hash.findHashArray("name", name, "downsample")
+                    elif(hashType == "label"):
+                        array = codex_hash.findHashArray("name", name, "label")
+                    else:
+                        result["message"] = 'failure'
+
+                    if not array:
+                        result["message"] = 'failed to find ' + name + ' feature '
+                        status = False
+                        break
+                    else:
+                        data.append(array['data'])
+
+                if(status):
+                    return_data = np.column_stack(data)
+                    result['data'] = return_data.tolist()
 
 
             elif(activity == "delete"):
@@ -410,7 +418,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         result['cid'] = msg['cid']
         if 'message' not in result:
             result['message'] = 'success' 
-        
+
         stringMsg = json.dumps(result)
         return stringMsg
     

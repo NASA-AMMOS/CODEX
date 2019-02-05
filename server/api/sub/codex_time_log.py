@@ -25,6 +25,7 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 logPath = CODEX_ROOT + "timeLogs/"
 timeLogs = {}
 
+
 def logTime(domain, algorithm, time, samples, features):
     '''
     Inputs:
@@ -49,16 +50,17 @@ def logTime(domain, algorithm, time, samples, features):
     if not os.path.exists(algorithmPath):
         try:
             os.makedirs(algorithmPath)
-        except:
+        except BaseException:
             pass
 
     algorithmFile = algorithmPath + "/timeLog.npy"
 
     try:
         data = timeLogs[domain][algorithm]["log"]
-        data = np.concatenate((data,np.array([samples,features,time]).reshape(1,3)), axis=0)
-    except:
-        data = np.array([samples,features,time]).reshape(1,3)
+        data = np.concatenate(
+            (data, np.array([samples, features, time]).reshape(1, 3)), axis=0)
+    except BaseException:
+        data = np.array([samples, features, time]).reshape(1, 3)
 
     if(domain not in timeLogs.keys()):
         timeLogs[domain] = {}
@@ -69,6 +71,7 @@ def logTime(domain, algorithm, time, samples, features):
     timeLogs[domain][algorithm]["log"] = data
     np.save(algorithmFile, data)
 
+
 def getTimeLogDict():
 
     if not os.path.exists(logPath):
@@ -77,13 +80,25 @@ def getTimeLogDict():
     algorithmTypes = [f for f in listdir(logPath) if isdir(join(logPath, f))]
     for algorithmType in algorithmTypes:
         timeLogs[algorithmType] = {}
-        algorithms = [f for f in listdir(logPath + algorithmType) if isdir(join(logPath + algorithmType, f))]
+        algorithms = [
+            f for f in listdir(
+                logPath +
+                algorithmType) if isdir(
+                join(
+                    logPath +
+                    algorithmType,
+                    f))]
         for algorithm in algorithms:
             timeLogs[algorithmType][algorithm] = {}
             try:
-                data = np.load(logPath + algorithmType + "/" + algorithm + "/timeLog.npy")
+                data = np.load(
+                    logPath +
+                    algorithmType +
+                    "/" +
+                    algorithm +
+                    "/timeLog.npy")
                 timeLogs[algorithmType][algorithm]["log"] = data
-            except:
+            except BaseException:
                 pass
 
 
@@ -110,19 +125,21 @@ def getComputeTimeEstimate(domain, algorithm, inputSamples):
 
     try:
         data = timeLogs[domain][algorithm]["log"]
-    except:
+    except BaseException:
         data = None
 
     if(data is not None):
 
-        samples = data[:,0]
-        features = data[:,1]
-        times = data[:,2]
+        samples = data[:, 0]
+        features = data[:, 1]
+        times = data[:, 2]
 
         numReferences = len(samples)
 
         # Get the five closest reference samples, take average time
-        resultSamples = nsmallest(5, samples, key=lambda x: abs(x-inputSamples))
+        resultSamples = nsmallest(
+            5, samples, key=lambda x: abs(
+                x - inputSamples))
 
         for x in range(0, numReferences):
             if(samples[x] in resultSamples):
@@ -134,6 +151,7 @@ def getComputeTimeEstimate(domain, algorithm, inputSamples):
         outTime = None
 
     return outTime
+
 
 if __name__ == "__main__":
 

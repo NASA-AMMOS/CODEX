@@ -1,34 +1,46 @@
-from __future__ import print_function
-import os
-## Enviornment variable for setting CODEX root directory.
-CODEX_ROOT  = os.getenv('CODEX_ROOT')
-import sys
-sys.path.insert(1,CODEX_ROOT + '/api/sub/')
-import time, h5py
-import cProfile, pstats
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-from scipy import misc
-from random import randint
-from sklearn import cluster, datasets
-from sklearn.neighbors import kneighbors_graph
-from sklearn.preprocessing import StandardScaler
-import pysptools.eea
-import pysptools.eea.eea
+import codex_system
+import codex_doctest
+import codex_time_log
+import codex_plot
+import codex_return_code
+import codex_hash
+import pstats
+import cProfile
+import h5py
+import time
+import codex_math
+import codex_downsample
+import codex_read_data_api
 import traceback
+import pysptools.eea.eea
+import pysptools.eea
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import kneighbors_graph
+from sklearn import cluster, datasets
+from random import randint
+from scipy import misc
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+import numpy as np
+import sys
+import os
+# Enviornment variable for setting CODEX root directory.
+CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 # CODEX Support
-import codex_hash, codex_return_code
-import codex_read_data_api
-import codex_downsample
-import codex_plot, codex_time_log
-import codex_doctest, codex_system
-import codex_math
 
 DEBUG = False
 
-def ml_endmember(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result):
+
+def ml_endmember(
+        inputHash,
+        hashList,
+        subsetHashName,
+        algorithmName,
+        downsampled,
+        parms,
+        result):
     '''
     Inputs:
 
@@ -62,9 +74,9 @@ def ml_endmember(inputHash, hashList, subsetHashName, algorithmName, downsampled
     <BLANKLINE>
     '''
 
-    if(subsetHashName != None):
-        subsetHash = codex_hash.findHashArray("name", subsetHashName,"subset")
-        if(subsetHash == None):
+    if(subsetHashName is not None):
+        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
+        if(subsetHash is None):
             subsetHash = False
         else:
             subsetHash = subsetHash["hash"]
@@ -72,8 +84,8 @@ def ml_endmember(inputHash, hashList, subsetHashName, algorithmName, downsampled
         subsetHash = False
 
     try:
-        q = int(parms['q'])	
-    except:
+        q = int(parms['q'])
+    except BaseException:
         codex_system.codex_log("q parameter not set")
         result['message'] = "q parameter not set"
         codex_system.codex_log(traceback.format_exc())
@@ -82,7 +94,7 @@ def ml_endmember(inputHash, hashList, subsetHashName, algorithmName, downsampled
     if(algorithmName == "ATGP"):
         try:
             result = codex_ATGP(inputHash, subsetHash, q, downsampled)
-        except:
+        except BaseException:
             codex_system.codex_log("Failed to run ATGP endmember algorithm")
             result['message'] = "Failed to run ATGP endmember algorithm"
             codex_system.codex_log(traceback.format_exc())
@@ -91,7 +103,7 @@ def ml_endmember(inputHash, hashList, subsetHashName, algorithmName, downsampled
     elif(algorithmName == "FIPPI"):
         try:
             result = codex_FIPPI(inputHash, subsetHash, q, downsampled)
-        except:
+        except BaseException:
             codex_system.codex_log("Failed to run FIPPI endmember algorithm")
             result['message'] = "Failed to run FIPPI endmember algorithm"
             codex_system.codex_log(traceback.format_exc())
@@ -101,15 +113,20 @@ def ml_endmember(inputHash, hashList, subsetHashName, algorithmName, downsampled
 
         try:
             numSkewers = int(parms["numSkewers"])
-        except:
+        except BaseException:
             codex_system.codex_log("numSkewers parameter not set")
             result['message'] = "numSkewers parameter not set"
             codex_system.codex_log(traceback.format_exc())
             return result
 
         try:
-            result = codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled)
-        except:
+            result = codex_PPI(
+                inputHash,
+                subsetHash,
+                q,
+                numSkewers,
+                downsampled)
+        except BaseException:
             codex_system.codex_log("Failed to run PPI endmember algorithm")
             result['message'] = "Failed to run PPI endmember algorithm"
             codex_system.codex_log(traceback.format_exc())
@@ -122,6 +139,7 @@ def ml_endmember(inputHash, hashList, subsetHashName, algorithmName, downsampled
 
     return result
 
+
 def codex_ATGP(inputHash, subsetHash, q, downsampled):
     '''
     Inputs:
@@ -130,7 +148,7 @@ def codex_ATGP(inputHash, subsetHash, q, downsampled):
         q  (int)  			 - Number of endmembers to be induced (positive integer > 0)
 
     Outputs:
-        Dictionary - 
+        Dictionary -
             endmember_array  - Set of induced endmembers (N x p)
             endmember_vector - Array of indices into the array data corresponding to the induced endmembers
 
@@ -152,33 +170,47 @@ def codex_ATGP(inputHash, subsetHash, q, downsampled):
     if(subsetHash is not False):
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log("ERROR: codex_endmembers - ATGP - subsetHash returned None.")
+            codex_system.codex_log(
+                "ERROR: codex_endmembers - ATGP - subsetHash returned None.")
             return None
 
     if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " samples")
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " samples")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("endmember", "ATGP", samples)
+        eta = codex_time_log.getComputeTimeEstimate(
+            "endmember", "ATGP", samples)
 
     data = codex_math.codex_impute(data)
 
     results = pysptools.eea.eea.ATGP(data, int(q))
 
-    dictionary = {'eta': eta, 'endmember_array':np.array_str(results[0]),'endmember_vector': np.array_str(results[1]), 'downsample': downsampled}
+    dictionary = {
+        'eta': eta, 'endmember_array': np.array_str(
+            results[0]), 'endmember_vector': np.array_str(
+            results[1]), 'downsample': downsampled}
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("endmember", "ATGP", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "endmember",
+        "ATGP",
+        computeTime,
+        len(data),
+        data.ndim)
 
     if(subsetHash is False):
-        returnCodeString = "codex_endmembers.codex_ATGP('"+inputHash+"',False,"+str(q)+","+str(downsampled)+")\n"
+        returnCodeString = "codex_endmembers.codex_ATGP('" + inputHash + "',False," + str(
+            q) + "," + str(downsampled) + ")\n"
     else:
-        returnCodeString = "codex_endmembers.codex_ATGP('"+inputHash+"','"+subsetHash+"',"+str(q)+","+str(downsampled)+")\n"
+        returnCodeString = "codex_endmembers.codex_ATGP('" + inputHash + \
+            "','" + subsetHash + "'," + str(q) + "," + str(downsampled) + ")\n"
     codex_return_code.logReturnCode(returnCodeString)
-	
-    return dictionary
 
+    return dictionary
 
 
 def codex_FIPPI(inputHash, subsetHash, q, downsampled):
@@ -189,7 +221,7 @@ def codex_FIPPI(inputHash, subsetHash, q, downsampled):
         q  (int)  			 - Number of endmembers to be induced (positive integer > 0)
 
     Outputs:
-        Dictionary - 
+        Dictionary -
             endmember_array  - Set of induced endmembers (N x p)
             endmember_vector - Array of indices into the array data corresponding to the induced endmembers
 
@@ -207,7 +239,7 @@ def codex_FIPPI(inputHash, subsetHash, q, downsampled):
         return None
 
     data = returnHash['data']
-    x,y = data.shape
+    x, y = data.shape
 
     if(q > y):
         codex_system.codex_log("WARNING: q must be <= to number of features")
@@ -216,14 +248,19 @@ def codex_FIPPI(inputHash, subsetHash, q, downsampled):
     if(subsetHash is not False):
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log("ERROR: codex_endmembers - FIPPI - subsetHash returned None.")
+            codex_system.codex_log(
+                "ERROR: codex_endmembers - FIPPI - subsetHash returned None.")
             return None
 
     if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " samples")
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " samples")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("endmember", "FIPPI", samples)
+        eta = codex_time_log.getComputeTimeEstimate(
+            "endmember", "FIPPI", samples)
 
     data = codex_math.codex_impute(data)
 
@@ -231,17 +268,28 @@ def codex_FIPPI(inputHash, subsetHash, q, downsampled):
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("endmember", "FIPPI", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "endmember",
+        "FIPPI",
+        computeTime,
+        len(data),
+        data.ndim)
 
-    dictionary = {'eta': eta, 'endmember_array':np.array_str(results[0]),'endmember_vector': np.array_str(results[1]), 'downsample': downsampled}
+    dictionary = {
+        'eta': eta, 'endmember_array': np.array_str(
+            results[0]), 'endmember_vector': np.array_str(
+            results[1]), 'downsample': downsampled}
 
     if(subsetHash is False):
-        returnCodeString = "codex_endmembers.codex_FIPPI('"+inputHash+"',False,"+str(q)+","+str(downsampled)+")\n"
+        returnCodeString = "codex_endmembers.codex_FIPPI('" + inputHash + "',False," + str(
+            q) + "," + str(downsampled) + ")\n"
     else:
-        returnCodeString = "codex_endmembers.codex_FIPPI('"+inputHash+"','"+subsetHash+"',"+str(q)+","+str(downsampled)+")\n"
+        returnCodeString = "codex_endmembers.codex_FIPPI('" + inputHash + \
+            "','" + subsetHash + "'," + str(q) + "," + str(downsampled) + ")\n"
     codex_return_code.logReturnCode(returnCodeString)
 
     return dictionary
+
 
 def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled):
     '''
@@ -252,7 +300,7 @@ def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled):
         numSkewers (int)	 - Number of “skewer” vectors to project data onto.
 
     Outputs:
-        Dictionary - 
+        Dictionary -
             endmember_array  - Set of induced endmembers (N x p)
             endmember_vector - Array of indices into the array data corresponding to the induced endmembers
 
@@ -274,29 +322,44 @@ def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled):
     if(subsetHash is not False):
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log("ERROR: codex_endmembers - PPI - subsetHash returned None.")
+            codex_system.codex_log(
+                "ERROR: codex_endmembers - PPI - subsetHash returned None.")
             return None
 
     if(downsampled is not False):
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " samples")
+        codex_system.codex_log(
+            "Downsampling to " +
+            str(downsampled) +
+            " samples")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("endmember", "PPI", samples)
+        eta = codex_time_log.getComputeTimeEstimate(
+            "endmember", "PPI", samples)
 
     data = codex_math.codex_impute(data)
-    
+
     results = pysptools.eea.eea.PPI(data, int(q), int(numSkewers))
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("endmember", "PPI", computeTime, len(data), data.ndim)
+    codex_time_log.logTime(
+        "endmember",
+        "PPI",
+        computeTime,
+        len(data),
+        data.ndim)
 
-    dictionary = {'eta': eta, 'endmember_array':np.array_str(results[0]),'endmember_vector': np.array_str(results[1]), 'downsample':downsampled}
+    dictionary = {
+        'eta': eta, 'endmember_array': np.array_str(
+            results[0]), 'endmember_vector': np.array_str(
+            results[1]), 'downsample': downsampled}
 
     if(subsetHash is False):
-        returnCodeString = "codex_endmembers.codex_PPI('"+inputHash+"',False,"+str(q)+","+str(numSkewers)+","+str(downsampled)+")\n"
+        returnCodeString = "codex_endmembers.codex_PPI('" + inputHash + "',False," + str(
+            q) + "," + str(numSkewers) + "," + str(downsampled) + ")\n"
     else:
-        returnCodeString = "codex_endmembers.codex_PPI('"+inputHash+"','"+subsetHash+"',"+str(q)+","+str(numSkewers)+","+str(downsampled)+")\n"
+        returnCodeString = "codex_endmembers.codex_PPI('" + inputHash + "','" + subsetHash + "'," + str(
+            q) + "," + str(numSkewers) + "," + str(downsampled) + ")\n"
     codex_return_code.logReturnCode(returnCodeString)
 
     return dictionary

@@ -1,3 +1,4 @@
+import codex_system
 '''
 Author: Jack Lightholder
 Date  : 7/15/18
@@ -19,10 +20,9 @@ import time
 import collections
 from scipy import linalg
 
-CODEX_ROOT  = os.getenv('CODEX_ROOT')
+CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
-import codex_system
 
 
 def codex_impute(data):
@@ -62,14 +62,14 @@ def codex_impute(data):
     data = data.astype(float)
     nan = np.isnan(data)
     inf = np.isinf(data)
-    rows = np.logical_or(nan,inf)
+    rows = np.logical_or(nan, inf)
 
     if(data.ndim == 1):
         rows = np.any(rows, axis=0)
-        data = data[:,~rows]
+        data = data[:, ~rows]
     elif(data.ndim == 2):
         rows = np.any(rows, axis=1)
-        data = data[~rows,:]
+        data = data[~rows, :]
     elif(data.ndim == 3):
         # Not currently supported, but needs to be
         return None
@@ -78,6 +78,7 @@ def codex_impute(data):
         return None
 
     return data
+
 
 def codex_explained_variance_ratio(X, n_components):
 
@@ -93,10 +94,8 @@ def codex_explained_variance_ratio(X, n_components):
     return exp_var_ratio
 
 
-
 if __name__ == "__main__":
 
     import doctest
     results = doctest.testmod(optionflags=doctest.ELLIPSIS)
     sys.exit(results.failed)
-

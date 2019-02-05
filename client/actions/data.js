@@ -3,15 +3,14 @@
  * @author Patrick Kage
  */
 
-import * as types from './dataTypes'
-
+import * as types from "./dataTypes";
 
 // file data
 export const fileLoad = (data, filename) => ({
     type: types.FILE_LOAD,
-	data,
-	filename
-})
+    data,
+    filename
+});
 
 // feature mgmt
 
@@ -24,7 +23,7 @@ export const featureAdd = (featureName, featureData) => ({
     type: types.FEATURE_ADD,
     featureName,
     featureData
-})
+});
 
 /**
  * Select a feature
@@ -36,7 +35,7 @@ export const featureSelect = (feature, shifted) => ({
     type: types.FEATURE_SELECT,
     feature,
     shifted
-})
+});
 
 /**
  * Unselect a feature
@@ -48,7 +47,7 @@ export const featureUnselect = (feature, shifted) => ({
     type: types.FEATURE_UNSELECT,
     feature,
     shifted
-})
+});
 
 /**
  * Unselect all features
@@ -56,8 +55,7 @@ export const featureUnselect = (feature, shifted) => ({
  */
 export const featuresUnselectAll = () => ({
     type: types.FEATURES_UNSELECTALL
-})
-
+});
 
 // selection mgmt
 
@@ -70,25 +68,31 @@ export const featuresUnselectAll = () => ({
  * @param {string} color - color of points
  * @return {object} non-dispatched action object
  */
-export const selectionCreate = (name, mask, visible=false, color='', meta) => ({
+export const selectionCreate = (
+    name,
+    mask,
+    visible = false,
+    color = "",
+    meta
+) => ({
     type: types.SELECTION_CREATE,
     name,
     mask,
-	color,
-	visible: visible,
+    color,
+    visible: visible,
     emphasis: false,
     meta
-})
+});
 
 /**
  * Reorder the list of selections
  * @param {array} order array of indices, in new order
  * @return {object} non-dispatched action object
  */
-export const selectionReorder = (order) => ({
+export const selectionReorder = order => ({
     type: types.SELECTION_REORDER,
     order
-})
+});
 
 /**
  * Recolor the selection at index N
@@ -98,10 +102,9 @@ export const selectionReorder = (order) => ({
  */
 export const selectionRecolor = (index, color) => ({
     type: types.SELECTION_RECOLOR,
-	index,
-	color
-})
-
+    index,
+    color
+});
 
 /**
  * Rename the selection at index N
@@ -111,20 +114,19 @@ export const selectionRecolor = (index, color) => ({
  */
 export const selectionRename = (index, name) => ({
     type: types.SELECTION_RENAME,
-	index,
-	name
-})
+    index,
+    name
+});
 
 /**
  * Toggle the visibility of a selection
  * @param {number} index index of selection to toggle
  * @return {object} non-dispatched action object
  */
-export const selectionToggle = (index) => ({
+export const selectionToggle = index => ({
     type: types.SELECTION_TOGGLE,
     index
-})
-
+});
 
 /**
  * Unselect all selections
@@ -132,49 +134,49 @@ export const selectionToggle = (index) => ({
  */
 export const selectionsUnselectAll = () => ({
     type: types.SELECTIONS_UNSELECTALL
-})
+});
 
 /**
  * Toggle the emphasis of a selection
  * @param {number} index index of selection to toggle
  * @return {object} non-dispatched action object
  */
-export const selectionEmphasisToggle = (index) => ({
+export const selectionEmphasisToggle = index => ({
     type: types.SELECTION_EMPHASIZE,
     index
-})
+});
 
 /**
  * Remove a selection
  * @param {index} index index of selection to remove
  * @return {object} non-dispatched action object
  */
-export const selectionRemove = (index) => ({
+export const selectionRemove = index => ({
     type: types.SELECTION_REMOVE,
     index
-})
+});
 
 /**
  * Update brush's mask
  * @param {mask} the mask to assign to brush
  * @return {object} non-dispatched action object
  */
-export const brushUpdate = (mask) => ({
+export const brushUpdate = mask => ({
     type: types.BRUSH_UPDATE,
     mask
-})
+});
 
 /**
  * Update brush's mask by an area
  * @param {Map} state current state
- * 
+ *
  * @param {string} mode - 'rectangle' | 'freehand' | !
  * @param {array} area - of x, y objects with format dependent on mode
  *              //Freehand is [{x: 1, y: 1},{x: 1, y: 1}]
- *      		//Rectangle is { x: [min, max], y: [min, max]}
+ *              //Rectangle is { x: [min, max], y: [min, max]}
  * @param {string} xAxisFeature
  * @param {string} yAxisFeature
- * 
+ *
  * @return {Map} new state
  */
 export const brushUpdateArea = (mode, area, xAxisFeature, yAxisFeature) => ({
@@ -183,7 +185,7 @@ export const brushUpdateArea = (mode, area, xAxisFeature, yAxisFeature) => ({
     area,
     xAxisFeature,
     yAxisFeature
-})
+});
 
 /**
  * Clear brush's mask
@@ -192,4 +194,6 @@ export const brushUpdateArea = (mode, area, xAxisFeature, yAxisFeature) => ({
  */
 export const brushClear = () => ({
     type: types.BRUSH_CLEAR
-})
+});
+
+

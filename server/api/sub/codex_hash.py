@@ -1,3 +1,4 @@
+import codex_system
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
@@ -31,10 +32,9 @@ import numpy as np
 import os
 import psutil
 import time
-CODEX_ROOT  = os.getenv('CODEX_ROOT')
+CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
-import codex_system
 
 featureList = []
 subsetList = []
@@ -42,6 +42,7 @@ downsampleList = []
 labelList = []
 
 debug = True
+
 
 def printCacheCount():
     '''
@@ -66,7 +67,9 @@ def printCacheCount():
     '''
     codex_system.codex_log("Feature Cache Size    : " + str(len(featureList)))
     codex_system.codex_log("Subset Cache Size     : " + str(len(subsetList)))
-    codex_system.codex_log("Downsample Cache Size : " + str(len(downsampleList)))
+    codex_system.codex_log("Downsample Cache Size : " +
+                           str(len(downsampleList)))
+
 
 def remove_stale_data(verbose=False):
     '''
@@ -101,7 +104,7 @@ def remove_stale_data(verbose=False):
     >>> hashResult = hashArray("s1", x1, "downsample")
     >>> hashResult = hashArray("x1", x1, "feature")
     >>> hashResult = hashArray("x2", x1, "feature")
-    >>> remove_stale_data()		
+    >>> remove_stale_data()
     '''
     global featureList
 
@@ -145,6 +148,7 @@ def remove_stale_data(verbose=False):
         process = psutil.Process(os.getpid())
         current_ram = process.memory_info().rss
         print(current_ram)
+
 
 def deleteHashName(name, hashType):
 
@@ -257,6 +261,7 @@ def hashUpdate(field, old, new, hashType):
 
     return True
 
+
 def resetCacheList(hashType):
     '''
     Inputs:
@@ -278,7 +283,7 @@ def resetCacheList(hashType):
         featureList = []
     elif(hashType == "downsample"):
         global downsampleList
-        downsampleList = []	
+        downsampleList = []
     elif(hashType == "subset"):
         global subsetList
         subsetList = []
@@ -336,7 +341,7 @@ def hashArray(arrayName, inputArray, hashType):
     Z-Order: None
     '''
 
-    if(isinstance(inputArray,type(None))):
+    if(isinstance(inputArray, type(None))):
         return None
 
     if isinstance(inputArray, range):
@@ -348,18 +353,28 @@ def hashArray(arrayName, inputArray, hashType):
 
     try:
         inputArray = inputArray.astype(float)
-    except:
+    except BaseException:
         inputArray = codex_system.string2token(inputArray)
 
     hashValue = hashlib.sha1(inputArray).hexdigest()
     samples = len(inputArray)
 
-    # TODO - better figure out how to calculate RAM usage. Don't think static is possible
-    memoryFootprint = 0#asizeof.asizeof(inputArray)
+    # TODO - better figure out how to calculate RAM usage. Don't think static
+    # is possible
+    memoryFootprint = 0  # asizeof.asizeof(inputArray)
 
     creationTime = time.time()
 
-    newHash = {'time': creationTime, 'name': arrayName, 'data': inputArray, 'hash': hashValue, "samples": samples, "memory": memoryFootprint, "type": hashType, "color": None, "z-order": None}
+    newHash = {
+        'time': creationTime,
+        'name': arrayName,
+        'data': inputArray,
+        'hash': hashValue,
+        "samples": samples,
+        "memory": memoryFootprint,
+        "type": hashType,
+        "color": None,
+        "z-order": None}
 
     if(hashType == "feature"):
         if not any(d['hash'] == newHash["hash"] for d in featureList):
@@ -376,7 +391,8 @@ def hashArray(arrayName, inputArray, hashType):
     elif(hashType == "NOSAVE"):
         pass
     else:
-        codex_system.codex_log("ERROR: Hash type not recognized! Not logged for future use.")
+        codex_system.codex_log(
+            "ERROR: Hash type not recognized! Not logged for future use.")
         return None
 
     return newHash
@@ -549,6 +565,7 @@ def findHashArray(field, name, hashType):
         codex_system.codex_log("ERROR: findHashArray - hash not found")
         return None
 
+
 def mergeHashResults(hashList, verbose=False):
     '''
     Inputs:
@@ -576,8 +593,8 @@ def mergeHashResults(hashList, verbose=False):
         codex_system.codex_log("Number of features: " + str(totalFeatures))
 
     currentHash = hashList[0]
-    result = findHashArray("hash",currentHash, "feature")
-    if(result == None):
+    result = findHashArray("hash", currentHash, "feature")
+    if(result is None):
         codex_system.codex_log("Warning, hash not found in mergeHashResults")
         return None
 
@@ -590,8 +607,9 @@ def mergeHashResults(hashList, verbose=False):
     for featureNum in range(1, totalFeatures):
         currentHash = hashList[featureNum]
         result = findHashArray("hash", currentHash, "feature")
-        if(result == None):
-            codex_system.codex_log("Warning, hash not found in mergeHashResults")
+        if(result is None):
+            codex_system.codex_log(
+                "Warning, hash not found in mergeHashResults")
             return None
 
         resultArray = result['data']
@@ -601,17 +619,24 @@ def mergeHashResults(hashList, verbose=False):
             codex_system.codex_log("Merging: " + resultName)
 
         try:
-            (s1,f1) = returnArray.shape
-        except:
+            (s1, f1) = returnArray.shape
+        except BaseException:
             s1 = returnArray.size
 
         s2 = resultArray.size
 
         if(s1 == s2):
-            returnArray = np.column_stack((resultArray,returnArray))
+            returnArray = np.column_stack((resultArray, returnArray))
         else:
             # TODO - long term, how do we want to handle this?
-            codex_system.codex_log("WARNING: " + resultName + " does not match shape of previous features(" + str(s1) + "/" + str(s2) + "). Exlucding.")
+            codex_system.codex_log(
+                "WARNING: " +
+                resultName +
+                " does not match shape of previous features(" +
+                str(s1) +
+                "/" +
+                str(s2) +
+                "). Exlucding.")
 
     return returnArray
 
@@ -620,12 +645,16 @@ def feature2hashList(featureList):
 
     hashList = []
     for feature in featureList:
-        r = findHashArray("name",feature,"feature")
+        r = findHashArray("name", feature, "feature")
         if(r is not None):
             hashList.append(r['hash'])
         else:
-            codex_system.codex_log("WARNING: feature2hashList - could not add " + feature + " to feature list.")
+            codex_system.codex_log(
+                "WARNING: feature2hashList - could not add " +
+                feature +
+                " to feature list.")
     return hashList
+
 
 def applySubsetMask(featureArray, subsetHash):
     '''
@@ -662,7 +691,7 @@ def applySubsetMask(featureArray, subsetHash):
         outData = np.zeros((included, y1))
 
         count = 0
-        for x in range(0,x1):
+        for x in range(0, x1):
             if(indexArray[x] == 1):
                 for y in range(0, y1):
                     outData[count, y] = featureArray[x, y]
@@ -670,7 +699,7 @@ def applySubsetMask(featureArray, subsetHash):
 
         return outData, returnDict['name']
 
-    except:
+    except BaseException:
 
         x1 = featureArray.size
         x2 = indexArray.size
@@ -683,12 +712,13 @@ def applySubsetMask(featureArray, subsetHash):
         outData = np.zeros(included)
 
         count = 0
-        for x in range(0,x1):
+        for x in range(0, x1):
             if(indexArray[x] == 1):
                 outData[count] = featureArray[x]
                 count += 1
 
         return outData, returnDict['name']
+
 
 if __name__ == "__main__":
 

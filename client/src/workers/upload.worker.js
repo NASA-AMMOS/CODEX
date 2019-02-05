@@ -50,7 +50,10 @@ function process(files) {
                         })
                     );
 
-                    self.postMessage("Uploading " + start / SIZE);
+                    const outMsg = {
+                        status: "uploading " + start / SIZE
+                    };
+                    self.postMessage(JSON.stringify(outMsg));
 
                     start = end;
                     end = start + BYTES_PER_CHUNK;
@@ -63,7 +66,8 @@ function process(files) {
                     );
                 }
             } else if (r.status === "complete") {
-                self.postMessage("Upload Complete");
+                console.log("Upload Complete");
+                self.postMessage(JSON.stringify(r));
                 sock.close();
             } else if (r.status === "failure") {
                 self.postMessage("Upload Failed");

@@ -1,38 +1,52 @@
+import codex_doctest
+import codex_math
+import codex_time_log
+import codex_hash
+import codex_read_data_api
+import codex_return_code
+import codex_system
+import traceback
+from sklearn.metrics import r2_score
+from scipy import stats
+import numpy.polynomial.chebyshev
+import matplotlib.pyplot as plt
+import numpy as np
+import time
+import statistics
+import math
+import h5py
+import sys
 '''
 Author: Jack Lightholder
 Date  : 7/19/17
 
 Brief : Custom data quality scan algorithms, formatted for CODEX
 
-Notes : 
+Notes :
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
 '''
 import os
-## Enviornment variable for setting CODEX root directory.
-CODEX_ROOT  = os.getenv('CODEX_ROOT')
-import sys
-sys.path.insert(1,CODEX_ROOT + '/api/sub/')
+# Enviornment variable for setting CODEX root directory.
+CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 # Python Libraries
-import h5py, math, statistics
-import time
-import numpy as np
-import matplotlib.pyplot as plt
-import numpy.polynomial.chebyshev
-from scipy import stats
-from sklearn.metrics import r2_score
-import traceback
-    
+
 # CODEX Support
-import codex_system, codex_return_code
-import codex_read_data_api, codex_hash
-import codex_doctest, codex_time_log, codex_math
 
 DEBUG = False
 
-def ml_quality_scan(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result):
+
+def ml_quality_scan(
+        inputHash,
+        hashList,
+        subsetHashName,
+        algorithmName,
+        downsampled,
+        parms,
+        result):
     '''
     Inputs:
 
@@ -47,9 +61,9 @@ def ml_quality_scan(inputHash, hashList, subsetHashName, algorithmName, downsamp
 
     '''
 
-    if(subsetHashName != None):
-        subsetHash = codex_hash.findHashArray("name",subsetHashName,"subset")
-        if(subsetHash == None):
+    if(subsetHashName is not None):
+        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
+        if(subsetHash is None):
             subsetHash = False
         else:
             subsetHash = subsetHash["hash"]
@@ -59,8 +73,8 @@ def ml_quality_scan(inputHash, hashList, subsetHashName, algorithmName, downsamp
     if(algorithmName == 'oddities'):
 
         try:
-            result = codex_count_oddities(inputHash,subsetHash)
-        except:
+            result = codex_count_oddities(inputHash, subsetHash)
+        except BaseException:
             codex_system.codex_log("Failed to run count_oddities")
             result['message'] = "Failed to run count_oddities"
             codex_system.codex_log(traceback.format_exc())
@@ -70,23 +84,23 @@ def ml_quality_scan(inputHash, hashList, subsetHashName, algorithmName, downsamp
 
         try:
             sigma = int(parms["sigma"])
-        except:
+        except BaseException:
             codex_system.codex_log("sigma parameter not set")
             result['message'] = "sigma parameter not set"
             codex_system.codex_log(traceback.format_exc())
-            return None 
+            return None
 
         try:
             inside = parms["inside"]
-        except:
+        except BaseException:
             codex_system.codex_log("inside parameter not set")
             result['message'] = "inside parameter not set"
             codex_system.codex_log(traceback.format_exc())
-            return None 
+            return None
 
         try:
-            result = codex_get_sigma_data(inputHash, subsetHash, sigma, inside) 
-        except:
+            result = codex_get_sigma_data(inputHash, subsetHash, sigma, inside)
+        except BaseException:
             codex_system.codex_log("Failed to run codex_get_sigma_data")
             result['message'] = "Failed to run codex_get_sigma_data"
             codex_system.codex_log(traceback.format_exc())
@@ -96,6 +110,7 @@ def ml_quality_scan(inputHash, hashList, subsetHashName, algorithmName, downsamp
         result['message'] = "Cannot find requested quality scan algorithm"
 
     return result
+
 
 def codex_count_oddities(inputHash, subsetHash):
     '''
@@ -107,7 +122,7 @@ def codex_count_oddities(inputHash, subsetHash):
         dictionary -
             nan_count        - count of NaN values in the feature
             neg_inf_count    - count of negative infinity values in the feature
-            inf_count        - count of negative 
+            inf_count        - count of negative
             zero_count       - count of 0 value instances (if integers, else None value)
             mode_count       - count of mode value instances (if integers, else None value)
             mode_value       - associated mode value (if integers, else None value)
@@ -128,7 +143,7 @@ def codex_count_oddities(inputHash, subsetHash):
     '''
     startTime = time.time()
 
-    returnHash = codex_hash.findHashArray("hash",inputHash, "feature")
+    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         print("Error: codex_count_oddities: Hash not found")
         return None
@@ -159,39 +174,52 @@ def codex_count_oddities(inputHash, subsetHash):
 
     samples = len(feature)
 
-    for x in range(0,samples):
+    for x in range(0, samples):
 
         if(feature[x] == ''):
             empty_string += 1
 
-        #if(np.isnan(feature[x])):
+        # if(np.isnan(feature[x])):
         #   nan_count += 1
 
-        #if(np.isneginf(feature[x])):
+        # if(np.isneginf(feature[x])):
         #   ninf_count += 1
 
-        #elif(np.isinf(feature[x])):
+        # elif(np.isinf(feature[x])):
         #   inf_count += 1
 
         if(np.issubdtype(feature.dtype, np.integer)):
 
             if(feature[x] == 0):
                 zero_count += 1
-    
-    
-    dictionary = {"feature_name":feature_name,"dtype":str(dtype),"nan_count": nan_count, "neg_inf_count": ninf_count, "inf_count": inf_count, "zero_count":zero_count, "mode_value":mode_value, "mode_count":mode_count, "empty_string_count":empty_string}
-    
+
     if(subsetHash == False):
-        returnCodeString = "codex_data_quality_scan_api.codex_count_oddities('"+inputHash+"',"+str(subsetHash)+")" 
+        returnCodeString = "codex_data_quality_scan_api.codex_count_oddities('" + inputHash + "'," + str(
+            subsetHash) + ")"
     else:
-        returnCodeString = "codex_data_quality_scan_api.codex_count_oddities('"+inputHash+"','"+str(subsetHash)+"')" 
-    
+        returnCodeString = "codex_data_quality_scan_api.codex_count_oddities('" + inputHash + "','" + str(
+            subsetHash) + "')"
+
     codex_return_code.logReturnCode(returnCodeString)
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("quality_scan","count_oddities",computeTime, samples, feature.ndim)
+    codex_time_log.logTime(
+        "quality_scan",
+        "count_oddities",
+        computeTime,
+        samples,
+        feature.ndim)
 
+    dictionary = {"feature_name": feature_name,
+                  "dtype": str(dtype),
+                  "nan_count": nan_count,
+                  "neg_inf_count": ninf_count,
+                  "inf_count": inf_count,
+                  "zero_count": zero_count,
+                  "mode_value": mode_value,
+                  "mode_count": mode_count,
+                  "empty_string_count": empty_string}
     return dictionary
 
 
@@ -201,12 +229,12 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside):
         inputHash (string)   - hash value corresponding to the data to cluster
         subsetHash (string)  - hash value corresponding to the subselection (false if full feature)
         sigma(int)           - sigma value to search around
-        inside (bool)        - returns statistics assoicated with values within sigma range if True or values outside 
+        inside (bool)        - returns statistics assoicated with values within sigma range if True or values outside
                                     sigma range if False
     Outputs:
         dictionary -
-            values      - array of values inside/outside sigma range (values in range if inside = True, values outside 
-                            range if inside = False)        
+            values      - array of values inside/outside sigma range (values in range if inside = True, values outside
+                            range if inside = False)
             std    -      standard deviation of the original feature vector
             mean   -      mean vaue of the original feature vector
             sigma_high  - caulcated high-end sigma value for feature vector
@@ -229,7 +257,6 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside):
     '''
     startTime = time.time()
 
-
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         print("Error: codex_get_sigma_data: Hash not found!")
@@ -246,46 +273,58 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside):
 
     std_value = np.std(feature)
     mean_value = np.mean(feature)
-    
+
     low_sigma = mean_value - ((std_value * sigma) / 2)
     high_sigma = mean_value + ((std_value * sigma) / 2)
 
-
-    if(inside == True):
-        for x in range(0,len(feature)):
+    if(inside):
+        for x in range(0, len(feature)):
             if(feature[x][0] <= float(high_sigma)):
                 if(feature[x][0] >= float(low_sigma)):
                     sigmaList.append(feature[x])
 
     else:
-        for x in range(0,len(feature)):
+        for x in range(0, len(feature)):
             if(feature[x] > high_sigma):
-                    sigmaList.append(feature[x])                
+                sigmaList.append(feature[x])
             elif(feature[x] < low_sigma):
-                    sigmaList.append(feature[x])
-
+                sigmaList.append(feature[x])
 
     resultValues = np.asarray(sigmaList)
     count = len(resultValues)
-    percentage = count/feature_length
-    
+    percentage = count / feature_length
+
     resultValuesString = np.array2string(resultValues)
     mean_value_string = np.array2string(mean_value)
     std_value_string = np.array2string(std_value)
 
-    dictionary = {"values": resultValuesString,"std": std_value_string, "mean": mean_value_string, "sigma_high":high_sigma, "sigma_low":low_sigma, "sigma":sigma,"inside":inside,"count":count,"percentage":percentage}
-
     if(subsetHash == False):
-        returnCodeString = "codex_data_quality_scan_api.codex_get_sigma_data('"+inputHash+"',"+str(subsetHash)+","+str(sigma)+","+str(inside)+")" 
+        returnCodeString = "codex_data_quality_scan_api.codex_get_sigma_data('" + inputHash + "'," + str(
+            subsetHash) + "," + str(sigma) + "," + str(inside) + ")"
     else:
-        returnCodeString = "codex_data_quality_scan_api.codex_get_sigma_data('"+inputHash+"','"+str(subsetHash)+"',"+str(sigma)+","+str(inside)+")" 
-    
+        returnCodeString = "codex_data_quality_scan_api.codex_get_sigma_data('" + inputHash + "','" + str(
+            subsetHash) + "'," + str(sigma) + "," + str(inside) + ")"
+
     codex_return_code.logReturnCode(returnCodeString)
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("quality_scan","sigma_data",computeTime, feature, feature.ndim)
+    codex_time_log.logTime(
+        "quality_scan",
+        "sigma_data",
+        computeTime,
+        feature,
+        feature.ndim)
 
+    dictionary = {"values": resultValuesString,
+                  "std": std_value_string,
+                  "mean": mean_value_string,
+                  "sigma_high": high_sigma,
+                  "sigma_low": low_sigma,
+                  "sigma": sigma,
+                  "inside": inside,
+                  "count": count,
+                  "percentage": percentage}
     return dictionary
 
 
@@ -296,9 +335,9 @@ def codex_column_correlation(inputHash, subsetHash):
         subsetHash (string)           - hash value corresponding to the subselection (false if full feature)
 
     Outputs:
-        Dictionary - 
+        Dictionary -
             r2_matrix (2d-array)      - array of r2 coefficients.  Calculated using sklearn r2_score()
-            pearson_matrix (2d-array) - array of pearson coefficients.  Calculated using scipy.stats.pearson() 
+            pearson_matrix (2d-array) - array of pearson coefficients.  Calculated using scipy.stats.pearson()
 
     Examples:
 
@@ -331,32 +370,43 @@ def codex_column_correlation(inputHash, subsetHash):
     if(features < 2):
         print("Error: Need at least two features to do a correlation!")
         return
-    
-    for x in range(0,features):
-        for y in range(0,features):
-            f1_data = data[:,x]
-            f2_data = data[:,y]
+
+    for x in range(0, features):
+        for y in range(0, features):
+            f1_data = data[:, x]
+            f2_data = data[:, y]
             pearson = stats.pearsonr(f1_data, f2_data)
-            pearsonArray[x,y] = pearson[0]
-            r2Array[x,y] = r2_score(f1_data, f2_data)
+            pearsonArray[x, y] = pearson[0]
+            r2Array[x, y] = r2_score(f1_data, f2_data)
 
     if(subsetHash == False):
-        returnCodeString = "codex_data_quality_scan_api.codex_column_correlation('"+inputHash+"',"+str(subsetHash)+")" 
+        returnCodeString = "codex_data_quality_scan_api.codex_column_correlation('" + inputHash + "'," + str(
+            subsetHash) + ")"
     else:
-        returnCodeString = "codex_data_quality_scan_api.codex_column_correlation('"+inputHash+"','"+str(subsetHash)+"')" 
-    
+        returnCodeString = "codex_data_quality_scan_api.codex_column_correlation('" + inputHash + "','" + str(
+            subsetHash) + "')"
+
     codex_return_code.logReturnCode(returnCodeString)
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("quality_scan","column_correlation",computeTime, data, data.ndim)
+    codex_time_log.logTime(
+        "quality_scan",
+        "column_correlation",
+        computeTime,
+        data,
+        data.ndim)
 
-    dictionary = {"r2_matrix": r2Array.tolist(), "pearson_matrix": pearsonArray.tolist()}
-
+    dictionary = {"r2_matrix": r2Array.tolist(),
+                  "pearson_matrix": pearsonArray.tolist()}
     return dictionary
 
 
-def codex_column_threshold(inputHash, subsetHash, threshold_min, threshold_max):
+def codex_column_threshold(
+        inputHash,
+        subsetHash,
+        threshold_min,
+        threshold_max):
     '''
     Inuputs:
         inputHash (string)            - hash value corresponding to the data to cluster
@@ -365,10 +415,10 @@ def codex_column_threshold(inputHash, subsetHash, threshold_min, threshold_max):
         threshold_max (int/float)     - maximum value to accept into the new column
 
     Outputs:
-        Dictionary - 
+        Dictionary -
             resulting_array           - resulting feature column after threholds are applied to input column feature
             threshold_min             - threshold_min input value
-            threshold_max             - threshold_max input value 
+            threshold_max             - threshold_max input value
             percentage_data           - percentage of data from original feature remaining in filtered feature column
 
     Examples:
@@ -408,18 +458,27 @@ def codex_column_threshold(inputHash, subsetHash, threshold_min, threshold_max):
     dataPercentage = (inThresholdCount / samples) * 100
 
     if(subsetHash == False):
-        returnCodeString = "codex_data_quality_scan_api.codex_column_threshold('"+inputHash+"',"+str(subsetHash)+","+str(threshold_min)+","+str(threshold_max)+")" 
+        returnCodeString = "codex_data_quality_scan_api.codex_column_threshold('" + inputHash + "'," + str(
+            subsetHash) + "," + str(threshold_min) + "," + str(threshold_max) + ")"
     else:
-        returnCodeString = "codex_data_quality_scan_api.codex_column_threshold('"+inputHash+"','"+str(subsetHash)+"',"+str(threshold_min)+","+str(threshold_max)+")" 
-    
+        returnCodeString = "codex_data_quality_scan_api.codex_column_threshold('" + inputHash + "','" + str(
+            subsetHash) + "'," + str(threshold_min) + "," + str(threshold_max) + ")"
+
     codex_return_code.logReturnCode(returnCodeString)
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("quality_scan","column_threshold",computeTime, data, data.ndim)
+    codex_time_log.logTime(
+        "quality_scan",
+        "column_threshold",
+        computeTime,
+        data,
+        data.ndim)
 
-    dictionary = {"resulting_array": returnArray, "threshold_min": threshold_min, "threshold_max": threshold_max, "percentage_data":dataPercentage}
-
+    dictionary = {"resulting_array": returnArray,
+                  "threshold_min": threshold_min,
+                  "threshold_max": threshold_max,
+                  "percentage_data": dataPercentage}
     return dictionary
 
 
@@ -428,4 +487,3 @@ if __name__ == "__main__":
     import doctest
     results = doctest.testmod(optionflags=doctest.ELLIPSIS)
     sys.exit(results.failed)
-

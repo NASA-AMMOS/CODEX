@@ -7,8 +7,7 @@ import { formulas } from "../src/formulas/formulas";
 import { manager } from "../src/Components/RWindowManager/manager/manager";
 
 let config;
-if (process.env.NODE_ENV === "test")
-	config = require("../src/config.mock").config;
+if (process.env.NODE_ENV === "test") config = require("../src/config.mock").config;
 else config = require("../src/config").config;
 // initial state of store, exported for ease of testing
 /**
@@ -62,15 +61,13 @@ const openGraph = (state, action) => {
 	const graphs = state.get("graphs").toJS();
 
 	let type = graphs[0].type;
-	const i = formulas.objectArrayIndexOfKeyWithValue(
-		graphs,
-		"name",
-		action.name
-	);
+	const i = formulas.objectArrayIndexOfKeyWithValue(graphs, "name", action.name);
 	if (i !== -1) type = graphs[i].type;
 
-	const selectedFeatures = dataSels
-		.getSelectedFeatures(action.dataState)
+	const selectedFeatures = action.dataState
+		.get("featureList")
+		.filter(f => f.get("selected"))
+		.map(f => f.get("name"))
 		.toJS();
 	let selectedXAxis = selectedFeatures[0];
 	let selectedYAxis = selectedFeatures[1];
@@ -87,16 +84,14 @@ const openGraph = (state, action) => {
 		return;
 	}
 
-	const activeSelectionNames = dataSels
-		.getActiveSelectionNames(action.dataState)
-		.map(sel => sel.get("name"))
+	const activeSelectionNames = action.dataState
+		.get("featureList")
+		.filter(f => f.get("selected"))
+		.map(f => f.get("name"))
 		.toJS();
 
 	var config = {
-		title:
-			(action.xaxis || selectedXAxis) +
-			" vs. " +
-			(action.yaxis || selectedYAxis),
+		title: (action.xaxis || selectedXAxis) + " vs. " + (action.yaxis || selectedYAxis),
 		type: type,
 		name: action.name,
 		component: "GraphWork",
@@ -144,11 +139,7 @@ const openAlgorithm = (state, action) => {
 
 	//Get component
 	let algorithmComponent;
-	const i = formulas.objectArrayIndexOfKeyWithValue(
-		algorithms,
-		"name",
-		action.name
-	);
+	const i = formulas.objectArrayIndexOfKeyWithValue(algorithms, "name", action.name);
 	if (i !== -1) algorithmComponent = algorithms[i].component;
 
 	//Construct manager config
@@ -201,11 +192,7 @@ const openReport = (state, action) => {
 
 	//Get report
 	let report = {};
-	const i = formulas.objectArrayIndexOfKeyWithValue(
-		reports,
-		"name",
-		action.name
-	);
+	const i = formulas.objectArrayIndexOfKeyWithValue(reports, "name", action.name);
 	if (i !== -1) report = reports[i];
 
 	//Construct manager config
@@ -291,8 +278,7 @@ const brushtypeSet = (state, action) => {
  * @return {Map} new state
  */
 const brushIdSet = (state, action) => {
-	if (typeof action.id === "number")
-		return state.setIn(["brush", "id"], action.id);
+	if (typeof action.id === "number") return state.setIn(["brush", "id"], action.id);
 	else return state;
 };
 
@@ -304,11 +290,7 @@ const brushIdSet = (state, action) => {
  * @return {Map} new state
  */
 const modeSet = (state, action) => {
-	if (
-		action.mode === "zoom" ||
-		action.mode === "select" ||
-		action.mode === "snap"
-	)
+	if (action.mode === "zoom" || action.mode === "select" || action.mode === "snap")
 		return state.set("mode", action.mode);
 	else return state;
 };

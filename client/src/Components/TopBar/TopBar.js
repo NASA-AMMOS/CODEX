@@ -13,7 +13,7 @@ import { Button, ButtonGroup } from "reactstrap";
 import "./TopBar.css";
 
 import PropTypes from "prop-types";
-// redux!
+import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { brushClear } from "../../../actions/data";
 import {
@@ -25,6 +25,7 @@ import {
     modeSet
 } from "../../../actions/ui";
 import { getGraphs, getAlgorithms, getReports } from "../../../selectors/ui";
+import * as graphActions from "../../../actions/graphActions";
 
 class TopBar extends Component {
     constructor(props) {
@@ -63,7 +64,7 @@ class TopBar extends Component {
                 <MenuItem
                     key={g.name}
                     onSelect={() => {
-                        this.props.openGraph(g.name);
+                        this.props.createGraph(g.name);
                     }}
                 >
                     {g.name}
@@ -491,7 +492,8 @@ TopBar.propTypes = {
     openAlgorithm: PropTypes.func.isRequired,
     openReport: PropTypes.func.isRequired,
     brushtypeSet: PropTypes.func.isRequired,
-    modeSet: PropTypes.func.isRequired
+    modeSet: PropTypes.func.isRequired,
+    createGraph: PropTypes.func.isRequired
 };
 
 // redux store
@@ -501,15 +503,19 @@ const mapStateToProps = state => {
         ui: state.get("ui")
     };
 };
-const mapDispatchToProps = dispatch => ({
-    brushClear: () => dispatch(brushClear()),
-    openGraph: (d, n, x, y, s, r) => dispatch(openGraph(d, n, x, y, s, r)),
-    openAlgorithm: (d, n, w, h) => dispatch(openAlgorithm(d, n, w, h)),
-    openReport: (d, n, w, h) => dispatch(openReport(d, n, w, h)),
-    openDevelopment: (d, n) => dispatch(openDevelopment(d, n)),
-    brushtypeSet: t => dispatch(brushtypeSet(t)),
-    modeSet: m => dispatch(modeSet(m))
-});
+
+function mapDispatchToProps(dispatch) {
+    return {
+        brushClear: () => dispatch(brushClear()),
+        openGraph: (d, n, x, y, s, r) => dispatch(openGraph(d, n, x, y, s, r)),
+        openAlgorithm: (d, n, w, h) => dispatch(openAlgorithm(d, n, w, h)),
+        openReport: (d, n, w, h) => dispatch(openReport(d, n, w, h)),
+        openDevelopment: (d, n) => dispatch(openDevelopment(d, n)),
+        brushtypeSet: t => dispatch(brushtypeSet(t)),
+        modeSet: m => dispatch(modeSet(m)),
+        createGraph: name => dispatch(graphActions.createGraph(name))
+    };
+}
 
 function mergeProps(propsFromState, propsFromDispatch, ownProps) {
     return {
@@ -541,6 +547,9 @@ function mergeProps(propsFromState, propsFromDispatch, ownProps) {
         },
         modeSet: mode => {
             propsFromDispatch.modeSet(mode);
+        },
+        createGraph: name => {
+            propsFromDispatch.createGraph(name);
         }
     };
 }

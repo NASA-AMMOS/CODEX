@@ -1,34 +1,37 @@
+import codex_doctest
+import codex_return_code
+import codex_hash
+import codex_system
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
 
 Brief : Read/write and file management for CODEX
 
-Notes : 
+Notes :
 '''
 import os
 import numpy as np
 from collections import defaultdict
 from sklearn.neighbors import kneighbors_graph
 from sklearn.preprocessing import StandardScaler
-import h5py, csv, time
+import h5py
+import csv
+import time
 import matplotlib.pyplot as plt
 import pandas as pd
-import os, errno
+import os
+import errno
 from matplotlib.image import imread
 from PIL import Image
 import sys
 
 # Enviornment variable for setting CODEX root directory.
-CODEX_ROOT  = os.getenv('CODEX_ROOT')
-import sys
-sys.path.insert(1,CODEX_ROOT + '/api/sub/')
+CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 # CODEX Support
-import codex_system
-import codex_hash
-import codex_return_code
-import codex_doctest
+
 
 def codex_read_csv(file, featureList, hashType):
     '''
@@ -53,10 +56,10 @@ def codex_read_csv(file, featureList, hashType):
         with open(file) as f:
             reader = csv.DictReader(f)
             for row in reader:
-                for (k,v) in row.items():
+                for (k, v) in row.items():
                     columns[k].append(v)
-        f.close()		 
-    except:
+        f.close()
+    except BaseException:
         codex_system.codex_log("ERROR: codex_read_csv - cannot open file")
         return None
 
@@ -66,19 +69,20 @@ def codex_read_csv(file, featureList, hashType):
     for feature_name in featureList:
         try:
             feature_data = columns[feature_name][:]
-        except:
+        except BaseException:
             codex_system.codex_log("Error: codex_read_csv: Feature not found.")
             return None
 
-        if(type(feature_data) == list):
+        if(isinstance(feature_data, list)):
             feature_data = np.asarray(feature_data)
 
         try:
-            feature_data = feature_data.astype(float)
-        except:
+            feature_data = feature_data.astype(np.float)
+        except BaseException:
             feature_data = codex_system.string2token(feature_data)
 
-        feature_hash = codex_hash.hashArray(feature_name, feature_data, hashType)
+        feature_hash = codex_hash.hashArray(
+            feature_name, feature_data, hashType)
         hashList.append(feature_hash['hash'])
 
     return hashList, list(featureList)
@@ -103,15 +107,15 @@ def codex_read_image(file, show=False):
     elif(image.format == "JPEG"):
         bits = image.bits
 
-    x,y = image.size
+    x, y = image.size
 
-    if(show):	
+    if(show):
         if(image.mode == "L"):
             imgplot = plt.imshow(image, cmap='gray')
         else:
             imgplot = plt.imshow(image)
         plt.show()
-	
+
     pixels = list(image.getdata())
     width, height = image.size
     pixels = [pixels[i * width:(i + 1) * width] for i in range(height)]
@@ -120,6 +124,7 @@ def codex_read_image(file, show=False):
     feature_hash = codex_hash.hashArray("image", pixels, "feature")
     dictionary = {"pixels": pixels, "rows": y, "cols": x}
     return dictionary
+
 
 def traverse_datasets(hdf_file):
     '''
@@ -137,9 +142,9 @@ def traverse_datasets(hdf_file):
         for key in g.keys():
             item = g[key]
             path = '{}/{}'.format(prefix, key)
-            if isinstance(item, h5py.Dataset): # test for dataset
+            if isinstance(item, h5py.Dataset):  # test for dataset
                 yield (path, item)
-            elif isinstance(item, h5py.Group): # test for group (go down)
+            elif isinstance(item, h5py.Group):  # test for group (go down)
                 yield from h5py_dataset_iterator(item, path)
 
     with h5py.File(hdf_file, 'r') as f:
@@ -172,27 +177,29 @@ def codex_read_hd5(file, featureList, hashType):
 
     try:
         f = h5py.File(file, 'r+')
-    except:
+    except BaseException:
         codex_system.codex_log("ERROR: codex_read_hd5 - cannot open file")
         return None
 
     if(featureList is None):
         featureList = list(traverse_datasets(file))
- 
+
     for feature_name in featureList:
         try:
             feature_data = f[feature_name][:]
-        except:
+        except BaseException:
             codex_system.codex_log("Error: codex_read_hd5: Feature not found.")
             return
 
         try:
             feature_data = feature_data.astype(float)
-        except:
+        except BaseException:
             feature_data = codex_system.string2token(feature_data)
-            codex_system.codex_log("Log: codex_read_hd5: Tokenized " + feature_name)
+            codex_system.codex_log(
+                "Log: codex_read_hd5: Tokenized " + feature_name)
 
-        feature_hash = codex_hash.hashArray(feature_name, feature_data, hashType)
+        feature_hash = codex_hash.hashArray(
+            feature_name, feature_data, hashType)
         hashList.append(feature_hash['hash'])
 
     f.close()
@@ -214,27 +221,29 @@ def codex_read_npy(file, featureList, hashType):
 
     try:
         data = np.load(file)
-    except:
+    except BaseException:
         codex_system.codex_log("ERROR: codex_read_npy - cannot open file")
         return None
 
     samples, features = data.shape
     featureList = []
-    for x in range(0,features):
+    for x in range(0, features):
 
         try:
-            feature_data = data[:,x].astype(float)
-        except:
-            feature_data = codex_system.string2token(data[:,x])
-            codex_system.codex_log("Log: codex_read_npy: Tokenized " + feature_name)
+            feature_data = data[:, x].astype(float)
+        except BaseException:
+            feature_data = codex_system.string2token(data[:, x])
+            codex_system.codex_log(
+                "Log: codex_read_npy: Tokenized " + feature_name)
 
-        feature_name = "feature_"+str(x)
+        feature_name = "feature_" + str(x)
         featureList.append(feature_name)
-        feature_hash = codex_hash.hashArray(feature_name, feature_data, hashType)
+        feature_hash = codex_hash.hashArray(
+            feature_name, feature_data, hashType)
         hashList.append(feature_hash['hash'])
 
     return hashList, featureList
-    
+
 
 def codex_save_subset(inputHash, subsetHash, saveFilePath):
     '''
@@ -300,8 +309,8 @@ def codex_save_subset(inputHash, subsetHash, saveFilePath):
 
     return newHash['hash'], newFeatureName
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
 
     import doctest
     results = doctest.testmod(optionflags=doctest.ELLIPSIS)
