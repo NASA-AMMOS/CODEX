@@ -4,20 +4,32 @@ COmplex Data EXplorer
 ## Local Setup
 
 1. `git clone https://github.jpl.nasa.gov/jackal/CODEX.git`
+
 1. Run `npm install` in this project's home directory. (you need [Node.js](https://nodejs.org/en/) installed)
 
-1. Set a CODEX_ROOT environment variable to point into codex/src/server/  
-1. Install Python 3.6.3+ and [virtualenv](https://virtualenv.pypa.io/en/stable/), then run:
+1. Set a CODEX_ROOT environment variable to point into GIT/server/  
+
+1. Ensure you have the codex conda enviornment set up on your machine.  Follow instructions [here](https://github.jpl.nasa.gov/jackal/CODEX/tree/development/server/envs/README.md) to do this for the first time.
+
+1. Activate the conda enviornment, compile the client and start the server.  run_codex.sh will run both the client and server in a single terminal. If you would like to start each individually, as reccomended for debugging, see the note below.
 
 ```
-$ virtualenv env_codex -p python3
-$ source env_codex/bin/activate
-$ pip install -r requirements.txt
+$ conda activate codex
+$ GIT/bin/run_codex.sh
 ```
 
-_Note that this installs Matplotlib using PyQT5 as the [backend](https://matplotlib.org/tutorials/introductory/usage.html#what-is-a-backend), so that it can run in a virtualenv. If you want to override this, you can either edit `src/server/matplotlibrc` or add a system level `matplotlibrc` according to [this page](https://matplotlib.org/tutorials/introductory/customizing.html#the-matplotlibrc-file)._
+Note:  To start the client and server in different terminal sessions, follow instructions below.
+```
+Terminal 1:
+$ cd GIT/client/
+$ npm start
 
-1. Run `run_codex.sh` in the project's home directory
+Terminal 2:
+$ conda activate codex
+$ cd $CODEX_ROOT
+$ python codex.py
+```
+
 
 ## Volunteer Collaborators to Guide Interface Development
 - Robert Hodyss
@@ -26,14 +38,6 @@ _Note that this installs Matplotlib using PyQT5 as the [backend](https://matplot
 - Jorge Pineda
 - Julie Castillo-Rogez
 - Rob Rosenberg
-
-## Facts about OCO-2 data files
-
-* L2/RetrievalHeader/sounding_id is the key unique index for all observations (just time in YYYYMMDDHHMMSSFF)
-* Last number of sounding_id is not actually 0.01 seconds, but the "footprint number" 1-8
-* L2/RetrievalResults/xco2 is the main target-of-interest, the retrieved estimate of CO2 in the atmosphere
-* Latitude & Longitude are also provided in the file, though the data is 1D (lat & lon are functions of time only)
-
 
 # Lukas’s Rules for the Research Road
 All problems and criticisms should be accompanied by a proposed solution.
