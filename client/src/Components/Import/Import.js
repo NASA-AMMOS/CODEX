@@ -136,6 +136,7 @@ class Import extends Component {
                             name="files[]"
                             type="file"
                             onChange={e => this.browseChange(e)}
+                            accept=".csv,.npy,.h5"
                         />
                     </div>
                 </div>
