@@ -69,6 +69,22 @@ const openGraph = (state, action) => {
 		.filter(f => f.get("selected"))
 		.map(f => f.get("name"))
 		.toJS();
+
+	if (selectedFeatures.length < 2) {
+		alert("Not enough features selected. Please select 2 dimensions to graph.");
+		return state;
+	}
+
+	if (selectedFeatures.length > 2) {
+		alert(
+			`Graphing only works on two features. You've selected ${
+				selectedFeatures.length
+			} features (${selectedFeatures.join(", ")}), but only ${selectedFeatures[0]} and ${
+				selectedFeatures[1]
+			} will be graphed.`
+		);
+	}
+
 	let selectedXAxis = selectedFeatures[0];
 	let selectedYAxis = selectedFeatures[1];
 
