@@ -10,8 +10,8 @@ client/node_modules
 
 package-lock.json
 
-# production
-/build
+# front end production
+client/dist
 
 # misc
 .DS_Store
