@@ -32,6 +32,13 @@ class SubAlgorithms extends Component {
             updateOnToggleOn: false,
             defaultScatterOptions: new simplescatter().getOption(),
             guidanceMarkdown: "",
+            LinkRenderer: function LinkRenderer(props) {
+                 return (
+                     <a href={props.href} target="_blank">
+                         {props.children}
+                     </a>
+                 );
+             },
             guidanceI: 0,
             loading: []
         };
@@ -220,7 +227,10 @@ class SubAlgorithms extends Component {
                         <div className="subalgorithmPopoverClose">
                             <MdClose />
                         </div>
-                        <ReactMarkdown source={this.vars.guidanceMarkdown} />
+                            <ReactMarkdown 
+                                source={this.vars.guidanceMarkdown} 
+                                renderers={{ link: this.vars.LinkRenderer }}
+                        />
                     </Popover>
                 </li>
             );
