@@ -97,8 +97,7 @@
         "start": "webpack-dev-server --mode development --open",
         "build": "webpack --mode production",
         "test": "node scripts/test.js --env=jsdom",
-        "prettier-all": "node_modules/.bin/prettier --config .prettierrc --write './src/**/*(*.css|*.js|*.scss)'",
-        "precommit": "lint-staged"
+        "prettier-all": "node_modules/.bin/prettier --config .prettierrc --write './src/**/*(*.css|*.js|*.scss)'"
     },
     "jest": {
         "collectCoverageFrom": [
@@ -180,9 +179,14 @@
         "webpack-dev-server": "^3.1.14"
     },
     "lint-staged": {
-        "*.{js,css,scss}": [
+        "*.{js,css,scss,json}": [
             "prettier --config .prettierrc --write",
             "git add"
         ]
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged"
+        }
     }
 }
