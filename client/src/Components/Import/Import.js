@@ -1,15 +1,15 @@
 import React, { Component } from "react";
-import "./Import.css";
+import "Components/Import/Import.css";
 
-import { formulas } from "../../formulas/formulas";
-import { parser } from "../../parser/parser.js";
+import { formulas } from "formulas/formulas";
+import { parser } from "parser/parser.js";
 
 // redux!
 import { connect } from "react-redux";
-import { fileLoad } from "../../../actions/data";
+import { fileLoad } from "actions/data";
 
 /* eslint import/no-webpack-loader-syntax: off */
-import WorkerUpload from "worker-loader!../../workers/upload.worker";
+import WorkerUpload from "worker-loader!workers/upload.worker";
 const workerUpload = new WorkerUpload();
 
 class Import extends Component {

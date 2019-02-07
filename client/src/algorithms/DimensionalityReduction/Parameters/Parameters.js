@@ -1,13 +1,13 @@
 import React, { Component } from "react";
-import "./Parameters.css";
+import "algorithms/DimensionalityReduction/Parameters/Parameters.css";
 
 import { Collapse } from "react-collapse";
 import { MdMoreVert } from "react-icons/lib/md";
 
-import { controller } from "../../../Controller/controller";
-import { formulas } from "../../../formulas/formulas";
-import simplescatter from "../simplescatter";
-import HoverableFS from "../../../Components/HoverableFS/HoverableFS";
+import { controller } from "Controller/controller";
+import { formulas } from "formulas/formulas";
+import simplescatter from "algorithms/DimensionalityReduction/simplescatter";
+import HoverableFS from "Components/HoverableFS/HoverableFS";
 
 import ReactEcharts from "echarts-for-react";
 import classnames from "classnames";
@@ -21,7 +21,7 @@ import IPropTypes from "react-immutable-proptypes";
 import { List } from "immutable";
 // redux!
 import { connect } from "react-redux";
-import { getFeatures, getSelectedFeatures } from "../../../../selectors/data";
+import { getFeatures, getSelectedFeatures } from "selectors/data";
 
 class Parameters extends Component {
     constructor(props) {

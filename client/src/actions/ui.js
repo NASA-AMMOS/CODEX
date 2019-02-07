@@ -2,7 +2,7 @@
  * Interface action creators
  */
 
-import * as types from './uiTypes'
+import * as types from "./uiTypes";
 
 /**
  * Handle an OPEN_GRAPH
@@ -16,7 +16,7 @@ export const openGraph = (dataState, name, xaxis, yaxis, selections, randomFeatu
     yaxis,
     selections,
     randomFeatures
-})
+});
 
 /**
  * Handle an OPEN_ALGORITHM
@@ -28,7 +28,7 @@ export const openAlgorithm = (dataState, name, width, height) => ({
     name,
     width,
     height
-})
+});
 
 /**
  * Handle an OPEN_REPORT
@@ -40,7 +40,7 @@ export const openReport = (dataState, name, width, height) => ({
     name,
     width,
     height
-})
+});
 
 /**
  * Handle an OPEN_DEVELOPMENT
@@ -52,37 +52,37 @@ export const openDevelopment = (dataState, name, width, height) => ({
     name,
     width,
     height
-})
+});
 
 /**
  * Handle a BRUSHTYPE_SET
  * @param {string} brushtype - 'rectangle', 'freehand'
  * @return {object} non-dispatched action object
  */
-export const brushtypeSet = (brushtype) => ({
+export const brushtypeSet = brushtype => ({
     type: types.BRUSHTYPE_SET,
     brushtype
-})
+});
 
 /**
  * Handle a BRUSHID_SET
  * @param {int} id - window id of graph brushed on
  * @return {object} non-dispatched action object
  */
-export const brushIdSet = (id) => ({
+export const brushIdSet = id => ({
     type: types.BRUSHID_SET,
     id
-})
+});
 
 /**
  * Handle a MODE_SET
  * @param {string} mode - 'zoom', 'select', 'snap
  * @return {object} non-dispatched action object
  */
-export const modeSet = (mode) => ({
+export const modeSet = mode => ({
     type: types.MODE_SET,
     mode
-})
+});
 
 /**
  * Handle a ADD_TO_HISTORY
@@ -96,4 +96,4 @@ export const addToHistory = (status, kind, description) => ({
     status,
     kind,
     description
-})
+});

@@ -5,14 +5,14 @@ import classnames from "classnames";
 
 // redux
 import { connect } from "react-redux";
-import { getFeaturesWithSelected } from "../../../selectors/data";
+import { getFeaturesWithSelected } from "selectors/data";
 import {
     featureSelect,
     featureUnselect,
     featuresUnselectAll,
     selectionsUnselectAll
-} from "../../../actions/data";
-import { formulas } from "../../formulas/formulas";
+} from "actions/data";
+import { formulas } from "formulas/formulas";
 
 // stylesheet
 import "./FeaturesList.css";

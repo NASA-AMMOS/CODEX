@@ -1,12 +1,12 @@
-import { model } from "../Model/model.js";
-import { config } from "../config.old";
-import { formulas } from "../formulas/formulas";
-import { manager } from "../Components/RWindowManager/manager/manager";
+import { model } from "Model/model.js";
+import { config } from "config.old";
+import { formulas } from "formulas/formulas";
+import { manager } from "Components/RWindowManager/manager/manager";
 
-import Blank from "../Components/Blank";
+import Blank from "Components/Blank";
 
-import { BANDAID_PATCH_STORE } from "../../index";
-import { getSelectedFeatures } from "../../selectors/data";
+import { BANDAID_PATCH_STORE } from "index";
+import { getSelectedFeatures } from "selectors/data";
 
 export default class Controller {
     constructor() {

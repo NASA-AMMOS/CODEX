@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import "./DimensionalityReduction.css";
+import "algorithms/Regression/DimensionalityReduction.css";
 
 import { controller } from "../../Controller/controller";
 import { formulas } from "../../formulas/formulas";
@@ -22,8 +22,8 @@ import {
     getSelectedFeatures,
     getActiveSelectionNames,
     getSelectionNamesByMeta
-} from "../../../selectors/data";
-import { featureAdd, selectionCreate } from "../../../actions/data";
+} from "selectors/data";
+import { featureAdd, selectionCreate } from "actions/data";
 
 class DimensionalityReduction extends Component {
     constructor(props) {

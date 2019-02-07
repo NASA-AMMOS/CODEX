@@ -1,14 +1,14 @@
-import { formulas } from "../formulas/formulas";
-import { invocation } from "../invocation/invocation";
-import { parser } from "../parser/parser.js";
+import { formulas } from "formulas/formulas";
+import { invocation } from "invocation/invocation";
+import { parser } from "parser/parser.js";
 import { echartsThemes } from "./EchartsThemes.js";
 import echarts from "echarts";
 import BitArray from "bit-array-js";
-import { controller } from "../Controller/controller";
+import { controller } from "Controller/controller";
 
 // TODO: REMOVE THIS BANDAID
-import { BANDAID_PATCH_STORE } from "../../index";
-import { fileLoad } from "../../actions/data";
+import { BANDAID_PATCH_STORE } from "index";
+import { fileLoad } from "actions/data";
 
 export default class Model {
     constructor() {

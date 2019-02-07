@@ -1,16 +1,16 @@
 import React, { Component } from "react";
 import "./DimensionalityReduction.css";
 
-import { controller } from "../../Controller/controller";
-import { formulas } from "../../formulas/formulas";
-import { invocation } from "../../invocation/invocation";
-import SubAlgorithms from "./SubAlgorithms/SubAlgorithms";
-import AlgorithmContainer from "./AlgorithmContainer/AlgorithmContainer";
-import HelpTriggerableName from "../../Components/HelpTriggerableName/HelpTriggerableName";
-import Help from "./Help/Help";
+import { controller } from "Controller/controller";
+import { formulas } from "formulas/formulas";
+import { invocation } from "invocation/invocation";
+import SubAlgorithms from "algorithms/DimensionalityReduction/SubAlgorithms/SubAlgorithms";
+import AlgorithmContainer from "algorithms/DimensionalityReduction/AlgorithmContainer/AlgorithmContainer";
+import HelpTriggerableName from "Components/HelpTriggerableName/HelpTriggerableName";
+import Help from "algorithms/DimensionalityReduction/Help/Help";
 
 import { MdClose, MdArrowForward, MdArrowBack } from "react-icons/lib/md";
-import { manager } from "../../Components/RWindowManager/manager/manager";
+import { manager } from "Components/RWindowManager/manager/manager";
 
 import PropTypes from "prop-types";
 import IPropTypes from "react-immutable-proptypes";
@@ -22,8 +22,8 @@ import {
     getSelectedFeatures,
     getActiveSelectionNames,
     getSelectionNamesByMeta
-} from "../../../selectors/data";
-import { featureAdd, selectionCreate } from "../../../actions/data";
+} from "selectors/data";
+import { featureAdd, selectionCreate } from "actions/data";
 
 class DimensionalityReduction extends Component {
     constructor(props) {

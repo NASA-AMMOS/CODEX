@@ -68,13 +68,7 @@ export const featuresUnselectAll = () => ({
  * @param {string} color - color of points
  * @return {object} non-dispatched action object
  */
-export const selectionCreate = (
-    name,
-    mask,
-    visible = false,
-    color = "",
-    meta
-) => ({
+export const selectionCreate = (name, mask, visible = false, color = "", meta) => ({
     type: types.SELECTION_CREATE,
     name,
     mask,
@@ -195,5 +189,3 @@ export const brushUpdateArea = (mode, area, xAxisFeature, yAxisFeature) => ({
 export const brushClear = () => ({
     type: types.BRUSH_CLEAR
 });
-
-

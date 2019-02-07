@@ -8,8 +8,8 @@ import { evaluateExpression } from "tevale";
 
 // connect to redux store
 import { connect } from "react-redux";
-import { getColumn, getSelectedFeatures } from "../../../selectors/data";
-import { selectionCreate } from "../../../actions/data";
+import { getColumn, getSelectedFeatures } from "selectors/data";
+import { selectionCreate } from "actions/data";
 
 class Filter extends Component {
     constructor(props) {

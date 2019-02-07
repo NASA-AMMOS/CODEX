@@ -1,14 +1,14 @@
 import React, { Component } from "react";
 
-import "./QualityScanInfo.css";
-import { formulas } from "../../../formulas/formulas";
+import "reports/QualityScan/QualityScanInfo/QualityScanInfo.css";
+import { formulas } from "formulas/formulas";
 
 import { MdClose } from "react-icons/lib/md";
 
 // redux
 import { connect } from "react-redux";
 
-import { getFeatures } from "../../../../selectors/data";
+import { getFeatures } from "selectors/data";
 
 class QualityScanInfo extends Component {
     constructor(props) {

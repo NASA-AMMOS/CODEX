@@ -1,14 +1,14 @@
 import React, { Component } from "react";
-import "./WebGLHeat.css";
+import "Components/WebGLHeat/WebGLHeat.css";
 
-import { formulas } from "../../formulas/formulas";
-import { manager } from "../../Components/RWindowManager/manager/manager";
+import { formulas } from "formulas/formulas";
+import { manager } from "Components/RWindowManager/manager/manager";
 
-import { webglheatmap } from "./webgl-heatmap";
+import { webglheatmap } from "Components/WebGLHeat/webgl-heatmap";
 
 // redux
 import { connect } from "react-redux";
-import { getFeatures } from "../../../selectors/data";
+import { getFeatures } from "selectors/data";
 
 class WebGLHeat extends Component {
     constructor(props) {

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
-import WebGLHeat from "../../Components/WebGLHeat/WebGLHeat";
-import QualityScanMasks from "./QualityScanMasks/QualityScanMasks";
+import WebGLHeat from "Components/WebGLHeat/WebGLHeat";
+import QualityScanMasks from "reports/QualityScan/QualityScanMasks/QualityScanMasks";
 import {
     FaCheck,
     FaSortAlphaAsc,
@@ -18,13 +18,13 @@ import { GoFold, GoUnfold, GoArrowLeft, GoArrowRight } from "react-icons/lib/go"
 import { MdInvertColorsOff, MdInvertColorsOn } from "react-icons/lib/md";
 
 import "./QualityScan.css";
-import { formulas } from "../../formulas/formulas";
-import QualityScanInfo from "./QualityScanInfo/QualityScanInfo";
-import QualityScanTable from "./QualityScanTable/QualityScanTable";
+import { formulas } from "formulas/formulas";
+import QualityScanInfo from "reports/QualityScan/QualityScanInfo/QualityScanInfo";
+import QualityScanTable from "reports/QualityScan/QualityScanTable/QualityScanTable";
 
 // redux
 import { connect } from "react-redux";
-import { getFeatures } from "../../../selectors/data";
+import { getFeatures } from "selectors/data";
 
 class QualityScan extends Component {
     constructor(props) {

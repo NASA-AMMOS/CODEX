@@ -6,7 +6,7 @@ import "./SelectionsList.css";
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import { SortableContainer, SortableElement, arrayMove } from "react-sortable-hoc";
 import { SketchPicker } from "react-color";
-import { formulas } from "../../formulas/formulas";
+import { formulas } from "formulas/formulas";
 import { Popover } from "reactstrap";
 
 // redux
@@ -18,7 +18,7 @@ import {
     selectionReorder,
     selectionRename,
     selectionRemove
-} from "../../../actions/data";
+} from "actions/data";
 
 class SelectionsList extends Component {
     constructor(props) {

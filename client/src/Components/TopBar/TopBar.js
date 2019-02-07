@@ -1,21 +1,21 @@
 import React, { Component } from "react";
 
-import { manager } from "../RWindowManager/manager/manager";
+import { manager } from "Components/RWindowManager/manager/manager";
 
-import Import from "../Import/Import";
-import Export from "../Export/Export";
+import Import from "Components/Import/Import";
+import Export from "Components/Export/Export";
 
-import LoadingBar from "../LoadingBar/LoadingBar";
+import LoadingBar from "Components/LoadingBar/LoadingBar";
 
 import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
 import { Button, ButtonGroup } from "reactstrap";
 
-import "./TopBar.css";
+import "Components/TopBar/TopBar.css";
 
 import PropTypes from "prop-types";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import { brushClear } from "../../../actions/data";
+import { brushClear } from "actions/data";
 import {
     openGraph,
     openAlgorithm,
@@ -23,9 +23,9 @@ import {
     openDevelopment,
     brushtypeSet,
     modeSet
-} from "../../../actions/ui";
-import { getGraphs, getAlgorithms, getReports } from "../../../selectors/ui";
-import * as graphActions from "../../../actions/graphActions";
+} from "actions/ui";
+import { getGraphs, getAlgorithms, getReports } from "selectors/ui";
+import * as graphActions from "actions/graphActions";
 
 class TopBar extends Component {
     constructor(props) {

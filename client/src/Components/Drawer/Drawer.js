@@ -1,12 +1,12 @@
 import React, { Component } from "react";
-import "./Drawer.css";
-import { formulas } from "../../formulas/formulas";
+import "Components/Drawer/Drawer.css";
+import { formulas } from "formulas/formulas";
 
 import PropTypes from "prop-types";
 // redux!
 import { connect } from "react-redux";
-import { brushClear } from "../../../actions/data";
-import { brushtypeSet, brushIdSet, modeSet } from "../../../actions/ui";
+import { brushClear } from "actions/data";
+import { brushtypeSet, brushIdSet, modeSet } from "actions/ui";
 
 class Drawer extends Component {
     constructor(props) {

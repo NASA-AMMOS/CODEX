@@ -1,16 +1,16 @@
 import React, { Component } from "react";
-import "./Cluster.css";
+import "algorithms/Cluster/Cluster.css";
 
-import { controller } from "../../Controller/controller";
-import { formulas } from "../../formulas/formulas";
-import { invocation } from "../../invocation/invocation";
+import { controller } from "Controller/controller";
+import { formulas } from "formulas/formulas";
+import { invocation } from "invocation/invocation";
 import SubAlgorithms from "./SubAlgorithms/SubAlgorithms";
 import AlgorithmContainer from "./AlgorithmContainer/AlgorithmContainer";
-import HelpTriggerableName from "../../Components/HelpTriggerableName/HelpTriggerableName";
-import Help from "./Help/Help";
+import HelpTriggerableName from "Components/HelpTriggerableName/HelpTriggerableName";
+import Help from "algorithms/Cluster/Help/Help";
 
 import { MdClose, MdArrowForward, MdArrowBack } from "react-icons/lib/md";
-import { manager } from "../../Components/RWindowManager/manager/manager";
+import { manager } from "Components/RWindowManager/manager/manager";
 
 import PropTypes from "prop-types";
 import IPropTypes from "react-immutable-proptypes";
@@ -21,9 +21,9 @@ import {
     getSelectedFeatures,
     getActiveSelectionNames,
     getSelectionNamesByMeta
-} from "../../../selectors/data";
-import { featureAdd, selectionCreate } from "../../../actions/data";
-import { openGraph } from "../../../actions/ui";
+} from "selectors/data";
+import { featureAdd, selectionCreate } from "actions/data";
+import { openGraph } from "actions/ui";
 
 class Cluster extends Component {
     constructor(props) {

@@ -15,9 +15,9 @@ const rootReducer = combineReducers(reducers);
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const store = createStore(
-	rootReducer,
-	Immutable.Map({}),
-	composeEnhancers(applyMiddleware(logger, thunkMiddleware))
+    rootReducer,
+    Immutable.Map({}),
+    composeEnhancers(applyMiddleware(logger, thunkMiddleware))
 );
 
 export default store;
