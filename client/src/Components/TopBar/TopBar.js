@@ -196,7 +196,7 @@ class TopBar extends Component {
                     }}
                 />
                 <div id="topBarMenu">
-                    <Dropdown className="dropdownMain" autoOpen={true}>
+                    <Dropdown className="dropdownMain" autoOpen={false}>
                         <Dropdown.Toggle className="dropdownToggle" title="Files" />
                         <Dropdown.Menu>
                             <MenuItem>
@@ -213,17 +213,17 @@ class TopBar extends Component {
                         </Dropdown.Menu>
                     </Dropdown>
 
-                    <Dropdown className="dropdownMain" autoOpen={true}>
+                    <Dropdown className="dropdownMain" autoOpen={false}>
                         <Dropdown.Toggle className="dropdownToggle" title="Graphs" />
                         <Dropdown.Menu>{this.getGraphMenuItems()}</Dropdown.Menu>
                     </Dropdown>
 
-                    <Dropdown className="dropdownMain" autoOpen={true}>
+                    <Dropdown className="dropdownMain" autoOpen={false}>
                         <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
                         <Dropdown.Menu>{this.getAlgorithmsMenuItems()}</Dropdown.Menu>
                     </Dropdown>
 
-                    <Dropdown className="dropdownMain" autoOpen={true}>
+                    <Dropdown className="dropdownMain" autoOpen={false}>
                         <Dropdown.Toggle className="dropdownToggle" title="Reports" />
                         <Dropdown.Menu>{this.getReportsMenuItems()}</Dropdown.Menu>
                     </Dropdown>
@@ -231,7 +231,7 @@ class TopBar extends Component {
                     <Dropdown
                         style={{ display: devDisplay }}
                         className="dropdownMain"
-                        autoOpen={true}
+                        autoOpen={false}
                     >
                         <Dropdown.Toggle className="dropdownToggle" title="Development" />
                         <Dropdown.Menu>
@@ -276,7 +276,7 @@ class TopBar extends Component {
                         >
                             Select
                         </Button>
-                        <Dropdown className="dropdownMain right" autoOpen={true}>
+                        <Dropdown className="dropdownMain right" autoOpen={false}>
                             <Dropdown.Toggle className="dropdownToggle thin" title="" />
                             <Dropdown.Menu>
                                 <MenuItem header>Shape</MenuItem>
@@ -319,7 +319,7 @@ class TopBar extends Component {
                         </Button>
                     </ButtonGroup>
 
-                    <Dropdown className="dropdownMain right" autoOpen={true}>
+                    <Dropdown className="dropdownMain right" autoOpen={false}>
                         <Dropdown.Toggle className="dropdownToggle" title="Grid Size" />
                         <Dropdown.Menu>
                             <MenuItem
@@ -370,7 +370,7 @@ class TopBar extends Component {
                         </Dropdown.Menu>
                     </Dropdown>
 
-                    <Dropdown className="dropdownMain right" autoOpen={true}>
+                    <Dropdown className="dropdownMain right" autoOpen={false}>
                         <Dropdown.Toggle className="dropdownToggle" title="Windows" />
                         <Dropdown.Menu>
                             <MenuItem header>Arrangement</MenuItem>
