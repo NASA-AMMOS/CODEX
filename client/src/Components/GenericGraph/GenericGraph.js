@@ -484,8 +484,8 @@ class GenericGraph extends Component {
                     />
                 </ContextMenuTrigger>
 
-                <div className="GenericGraphXAxis">{this.vars.xaxis}</div>
-                <div className="GenericGraphYAxis">{this.vars.yaxis}</div>
+                <div className="GenericGraphXAxisLabel">{this.vars.xaxis}</div>
+                <div className="GenericGraphYAxisLabel">{this.vars.yaxis}</div>
 
                 <div
                     className="GenericGraphWrapper"

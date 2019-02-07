@@ -42,17 +42,19 @@
 }
 */
 
-.GenericGraph .GenericGraphXAxis {
+.GenericGraph .GenericGraphXAxisLabel {
     position: absolute;
     right: 17px;
     bottom: 24px;
     font-weight: bold;
+    pointer-events: none;
 }
-.GenericGraph .GenericGraphYAxis {
+.GenericGraph .GenericGraphYAxisLabel {
     position: absolute;
     left: 30px;
     top: 14px;
     font-weight: bold;
+    pointer-events: none;
 }
 
 .GenericGraph .GenericGraphToolbar {
