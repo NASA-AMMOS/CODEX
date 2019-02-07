@@ -53,9 +53,10 @@ class GenericGraph extends Component {
     setData(dataState) {
         dataState = dataState || this.props.data;
         let dataObj = {};
-        const option = this.graph.getOption();
         let index = 0;
+        const option = this.graph.getOption();
         option.series = [];
+        option.animationDurationUpdate = 0; // this can be a function that differentiates between chart entities
 
         this.echarts_instance.clear();
 
