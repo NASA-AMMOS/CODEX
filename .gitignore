@@ -1,17 +1,7 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 
 __pycache__/
-src/server/timeLogs/*
-# dependencies
-client/node_modules
-
-# testing
-/coverage
-
-package-lock.json
-
-# front end production
-client/dist
+src/server/timeLogs/t *
 
 # misc
 .DS_Store
@@ -20,7 +10,6 @@ client/dist
 .env.test.local
 .env.production.local
 
-npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
@@ -33,7 +22,6 @@ yarn-error.log*
 # pre
 .project
 .pydevproject
-.DS_Store
 .pyc
 code/API/__pycache__/
 code/API/sub/__pycache__/
