@@ -23,10 +23,6 @@ class GenericGraph extends Component {
         super(props);
 
         this.updateFlag = false;
-        this.lastDimensions = {
-            width: 0,
-            height: 0
-        };
 
         this.brushedData = [];
 
@@ -57,9 +53,10 @@ class GenericGraph extends Component {
     setData(dataState) {
         dataState = dataState || this.props.data;
         let dataObj = {};
-        const option = this.graph.getOption();
         let index = 0;
+        const option = this.graph.getOption();
         option.series = [];
+        option.animationDurationUpdate = 0; // this can be a function that differentiates between chart entities
 
         this.echarts_instance.clear();
 
@@ -312,39 +309,14 @@ class GenericGraph extends Component {
 
     componentDidMount() {
         this.echarts_instance = this.echarts_react.getEchartsInstance();
-        window.addEventListener("resize", () => this.resize());
-
-        //controller.addGenericGraph( this.vars.graphId, this );
 
         this.setData();
-        //controller.refreshTopBarMode();
     }
     componentDidUpdate() {
         this.setData();
     }
     componentWillUnmount() {
         //controller.removeGenericGraph( this.vars.graphId );
-    }
-
-    componentResize() {
-        if (this.genericGraph) {
-            if (
-                this.genericGraph.offsetWidth !== this.lastDimensions.width ||
-                this.genericGraph.offsetHeight !== this.lastDimensions.height
-            ) {
-                this.resize();
-                this.lastDimensions.width = this.genericGraph.offsetWidth;
-                this.lastDimensions.height = this.genericGraph.offsetHeight;
-            }
-        }
-    }
-    resize() {
-        if (!this.echarts_instance.isDisposed()) {
-            clearTimeout(this.resizeTimeout);
-            this.resizeTimeout = setTimeout(() => {
-                this.echarts_instance.resize();
-            }, 100);
-        }
     }
 
     _makeInvertAxesMenuItems() {
