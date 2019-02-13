@@ -40,7 +40,7 @@ export default class Manager {
             "#f519d4"
         ];
 
-        this.gridSize = [1, 1];
+        this.gridSize = [10, 10];
 
         // create bindings
         this.onAddWindow = this.onAddWindow.bind(this);

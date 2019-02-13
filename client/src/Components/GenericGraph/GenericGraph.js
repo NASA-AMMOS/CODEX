@@ -477,32 +477,7 @@ class GenericGraph extends Component {
                         >
                             Save Selection
                         </MenuItem>
-                        <MenuItem data={{ action: "copy" }} onClick={this.handleContextMenuClick}>
-                            Copy
-                        </MenuItem>
-                        <MenuItem data={{ action: "paste" }} onClick={this.handleContextMenuClick}>
-                            Paste
-                        </MenuItem>
-                        <MenuItem data={{ action: "cut" }} onClick={this.handleContextMenuClick}>
-                            Cut
-                        </MenuItem>
-                        <SubMenu title="Change Graph" hoverDelay={100}>
-                            {this._makeChangeGraphMenuItems()}
-                        </SubMenu>
-                        <SubMenu title="Format Graph" hoverDelay={100}>
-                            <MenuItem
-                                data={{ action: "format_reset" }}
-                                onClick={this.handleContextMenuClick}
-                            >
-                                Reset
-                            </MenuItem>
-                            <MenuItem
-                                data={{ action: "format_invertcolors" }}
-                                onClick={this.handleContextMenuClick}
-                            >
-                                Invert Colors
-                            </MenuItem>
-                        </SubMenu>
+
                         <SubMenu title="Invert Axes" hoverDelay={100}>
                             {this._makeInvertAxesMenuItems()}
                         </SubMenu>

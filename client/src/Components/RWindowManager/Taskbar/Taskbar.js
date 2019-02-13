@@ -174,14 +174,6 @@ class Taskbar extends Component {
                     <div>
                         <ContextMenu id={"rwm_taskBarContext_" + id}>
                             <MenuItem
-                                data={{ action: "center" }}
-                                onClick={(e, data) => {
-                                    this.handleContextMenuClick(e, data, id);
-                                }}
-                            >
-                                Center
-                            </MenuItem>
-                            <MenuItem
                                 data={{ action: "unsnap" }}
                                 onClick={(e, data) => {
                                     this.handleContextMenuClick(e, data, id);
@@ -189,22 +181,7 @@ class Taskbar extends Component {
                             >
                                 Unsnap
                             </MenuItem>
-                            <MenuItem
-                                data={{ action: "maximize" }}
-                                onClick={(e, data) => {
-                                    this.handleContextMenuClick(e, data, id);
-                                }}
-                            >
-                                Maximize
-                            </MenuItem>
-                            <MenuItem
-                                data={{ action: "minimize" }}
-                                onClick={(e, data) => {
-                                    this.handleContextMenuClick(e, data, id);
-                                }}
-                            >
-                                Minimize
-                            </MenuItem>
+
                             <MenuItem
                                 data={{ action: "close" }}
                                 onClick={(e, data) => {

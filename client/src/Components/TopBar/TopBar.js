@@ -34,7 +34,7 @@ class TopBar extends Component {
         this.state = {
             rSelected: 2,
             brushSelected: "freehand",
-            gridSize: 0
+            gridSize: 10
         };
 
         this.vars = {
@@ -207,9 +207,6 @@ class TopBar extends Component {
                                     completedLoad={() => {}}
                                 />
                             </MenuItem>
-                            <MenuItem>
-                                <Export />
-                            </MenuItem>
                         </Dropdown.Menu>
                     </Dropdown>
 
@@ -221,11 +218,6 @@ class TopBar extends Component {
                     <Dropdown className="dropdownMain" autoOpen={false}>
                         <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
                         <Dropdown.Menu>{this.getAlgorithmsMenuItems()}</Dropdown.Menu>
-                    </Dropdown>
-
-                    <Dropdown className="dropdownMain" autoOpen={false}>
-                        <Dropdown.Toggle className="dropdownToggle" title="Reports" />
-                        <Dropdown.Menu>{this.getReportsMenuItems()}</Dropdown.Menu>
                     </Dropdown>
 
                     <Dropdown
@@ -314,61 +306,11 @@ class TopBar extends Component {
                             className="topBarRadioSmall"
                             onClick={() => this.onRadioBtnClick(3)}
                             active={this.state.rSelected === 3}
+                            style={{ marginLeft: "10px" }}
                         >
                             Snap
                         </Button>
                     </ButtonGroup>
-
-                    <Dropdown className="dropdownMain right" autoOpen={false}>
-                        <Dropdown.Toggle className="dropdownToggle" title="Grid Size" />
-                        <Dropdown.Menu>
-                            <MenuItem
-                                active={this.state.gridSize === 1}
-                                onSelect={eventKey => {
-                                    this.setGridSize(eventKey);
-                                }}
-                                eventKey={1}
-                            >
-                                1
-                            </MenuItem>
-                            <MenuItem
-                                active={this.state.gridSize === 10}
-                                onSelect={eventKey => {
-                                    this.setGridSize(eventKey);
-                                }}
-                                eventKey={10}
-                            >
-                                10
-                            </MenuItem>
-                            <MenuItem
-                                active={this.state.gridSize === 25}
-                                onSelect={eventKey => {
-                                    this.setGridSize(eventKey);
-                                }}
-                                eventKey={25}
-                            >
-                                25
-                            </MenuItem>
-                            <MenuItem
-                                active={this.state.gridSize === 50}
-                                onSelect={eventKey => {
-                                    this.setGridSize(eventKey);
-                                }}
-                                eventKey={50}
-                            >
-                                50
-                            </MenuItem>
-                            <MenuItem
-                                active={this.state.gridSize === 100}
-                                onSelect={eventKey => {
-                                    this.setGridSize(eventKey);
-                                }}
-                                eventKey={100}
-                            >
-                                100
-                            </MenuItem>
-                        </Dropdown.Menu>
-                    </Dropdown>
 
                     <Dropdown className="dropdownMain right" autoOpen={false}>
                         <Dropdown.Toggle className="dropdownToggle" title="Windows" />
