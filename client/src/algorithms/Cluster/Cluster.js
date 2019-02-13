@@ -90,6 +90,7 @@ class Cluster extends Component {
             outputGraph: {},
             guidancePath: "",
             guidanceMarkdown: "",
+
             callIsRunning: false,
             refreshTime: 5,
             refreshCountdownInterval: null,

@@ -1,4 +1,4 @@
-clustering_page:
+﻿clustering_page:
 
     general_clustering: |
       # Clustering
@@ -278,12 +278,16 @@ regression_page:
 
     general_regression: |
       # Regression
+      ###Title
+      * [Wikipedia](https://en.wikipedia.org/wiki/Regression_analysis)
 
       Fill out with general information about regression data anlysis techniques.
+    
 
     linear: |
 
       #Linear regression
+      * [Wikipedia](https://en.wikipedia.org/wiki/Regression_analysis#Linear_regression)
 
 endmember_page:
 
@@ -310,18 +314,22 @@ dimensionality_reduction_page:
       # Dimensionality Reduction
 
       Fill out with general information about dimensionality reduction data anlysis techniques.
+      * [Wikipedia](https://en.wikipedia.org/wiki/Dimensionality_reduction)
 
     PCA: |
 
       #PCA
+      * [Wikipedia](https://en.wikipedia.org/wiki/Dimensionality_reduction#Principal_component_analysis_(PCA))
 
     PCA_Incremental: |
 
       #PCA_Incremental
+      
 
     LDA: |
 
       #LDA
+      * [Wikipedia](https://en.wikipedia.org/wiki/Dimensionality_reduction#Linear_discriminant_analysis_(LDA))
 
     ICA: |
 
