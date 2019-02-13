@@ -9,13 +9,15 @@ module.exports = {
     entry: "./src/index.js",
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "bundle.js"
+        filename: "bundle.js",
+        globalObject: "this" //hack to make hot reloading work (https://github.com/webpack/webpack-dev-server/issues/628)
     },
     devServer: {
         contentBase: "./dist",
         watchContentBase: true,
         inline: true,
-        port: 3000
+        port: 3000,
+        hot: true
     },
     devtool: "cheap-module-source-map",
     module: {
@@ -41,7 +43,8 @@ module.exports = {
         new HtmlWebpackPlugin({
             inject: true,
             template: paths.appHtml
-        })
+        }),
+        new webpack.HotModuleReplacementPlugin()
     ],
     resolve: {
         modules: [path.resolve("./src"), path.resolve("./node_modules")]

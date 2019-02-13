@@ -149,7 +149,7 @@ class Import extends Component {
 
 // redux store
 const mapStateToProps = state => {
-    const domain = state.get("data");
+    const domain = state.data;
     return {
         data: domain.get("data")
     };

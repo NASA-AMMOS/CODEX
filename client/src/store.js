@@ -2,22 +2,34 @@
  * Redux setup
  * @author Patrick Kage
  */
-import { createStore, applyMiddleware, compose } from "redux";
-import { combineReducers } from "redux-immutable";
 import { createLogger } from "redux-logger";
-import thunkMiddleware from "redux-thunk";
+import { createStore, applyMiddleware, compose } from "redux";
 import Immutable from "immutable";
-import reducers from "./reducers";
+import thunkMiddleware from "redux-thunk";
 
-const logger = createLogger();
-const rootReducer = combineReducers(reducers);
+import rootReducer from "reducers";
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+import window from "./Components/RWindowManager/Window/Window";
 
-const store = createStore(
-    rootReducer,
-    Immutable.Map({}),
-    composeEnhancers(applyMiddleware(logger, thunkMiddleware))
-);
+export default function configureStore(initialState) {
+    const logger = createLogger();
 
-export default store;
+    const store = createStore(
+        rootReducer,
+        initialState,
+        compose(
+            applyMiddleware(logger, thunkMiddleware),
+            window.devToolsExtension ? window.devToolsExtension() : f => f //add support for Redux dev tools
+        )
+    );
+
+    if (module.hot) {
+        // Enable Webpack hot module replacement for reducers
+        module.hot.accept("./reducers", () => {
+            const nextReducer = require("./reducers").default;
+            store.replaceReducer(nextReducer);
+        });
+    }
+
+    return store;
+}

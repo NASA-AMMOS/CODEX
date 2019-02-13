@@ -441,8 +441,8 @@ TopBar.propTypes = {
 // redux store
 const mapStateToProps = state => {
     return {
-        data: state.get("data"),
-        ui: state.get("ui")
+        data: state.data,
+        ui: state.ui
     };
 };
 

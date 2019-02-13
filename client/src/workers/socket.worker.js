@@ -1,4 +1,4 @@
-import * as types from "actions/dataTypes";
+import * as types from "constants/actionTypes";
 
 var socket;
 

@@ -272,7 +272,7 @@ SelectionsList.propTypes = {
 
 // store connections
 const mapStateToProps = state => {
-    const domain = state.get("data");
+    const domain = state.data;
     return {
         selections: domain.get("selections")
     };

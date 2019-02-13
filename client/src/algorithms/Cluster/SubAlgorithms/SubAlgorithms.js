@@ -33,12 +33,12 @@ class SubAlgorithms extends Component {
             defaultScatterOptions: new simplescatter().getOption(),
             guidanceMarkdown: "",
             LinkRenderer: function LinkRenderer(props) {
-                 return (
-                     <a href={props.href} target="_blank">
-                         {props.children}
-                     </a>
-                 );
-             },
+                return (
+                    <a href={props.href} target="_blank">
+                        {props.children}
+                    </a>
+                );
+            },
             guidanceI: 0,
             loading: []
         };
@@ -227,9 +227,9 @@ class SubAlgorithms extends Component {
                         <div className="subalgorithmPopoverClose">
                             <MdClose />
                         </div>
-                            <ReactMarkdown 
-                                source={this.vars.guidanceMarkdown} 
-                                renderers={{ link: this.vars.LinkRenderer }}
+                        <ReactMarkdown
+                            source={this.vars.guidanceMarkdown}
+                            renderers={{ link: this.vars.LinkRenderer }}
                         />
                     </Popover>
                 </li>
@@ -356,8 +356,8 @@ SubAlgorithms.propTypes = {
 // redux store
 const mapStateToProps = state => {
     return {
-        data: state.get("data"),
-        ui: state.get("ui")
+        data: state.data,
+        ui: state.ui
     };
 };
 const mapDispatchToProps = dispatch => ({});

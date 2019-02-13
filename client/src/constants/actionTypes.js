@@ -1,25 +1,13 @@
-/**
- * Data action types, probably don't need to be used above this
- * @parmesan
- * @roquefort
- */
-
 export const NO_ACTION = "NO_ACTION";
-
-// file handling
 export const FILE_LOAD = "FILE_LOAD";
-
-// feature mgmt
 export const FEATURE_ADD = "FEATURE_ADD";
 export const FEATURE_SELECT = "FEATURE_SELECT";
 export const FEATURE_UNSELECT = "FEATURE_UNSELECT";
 export const FEATURES_UNSELECTALL = "FEATURES_UNSELECTALL";
-
-// selection mgmt
 export const SELECTION_CREATE = "SELECTION_CREATE";
-export const SELECTION_RENAME = "SELECTION_RENAME";
 export const SELECTION_REORDER = "SELECTION_REORDER";
 export const SELECTION_RECOLOR = "SELECTION_RECOLOR";
+export const SELECTION_RENAME = "SELECTION_RENAME";
 export const SELECTION_EMPHASIZE = "SELECTION_EMPHASIZE";
 export const SELECTION_TOGGLE = "SELECTION_TOGGLE";
 export const SELECTIONS_UNSELECTALL = "SELECTIONS_UNSELECTALL";
@@ -27,6 +15,15 @@ export const SELECTION_REMOVE = "SELECTION_REMOVE";
 export const BRUSH_UPDATE = "BRUSH_UPDATE";
 export const BRUSH_UPDATE_AREA = "BRUSH_UPDATE_AREA";
 export const BRUSH_CLEAR = "BRUSH_CLEAR";
+export const UPDATE_DATA = "UPDATE_DATA";
+
+export const OPEN_GRAPH = "OPEN_GRAPH";
+export const OPEN_ALGORITHM = "OPEN_ALGORITHM";
+export const OPEN_REPORT = "OPEN_REPORT";
+export const OPEN_DEVELOPMENT = "OPEN_DEVELOPMENT";
+export const BRUSHTYPE_SET = "BRUSHTYPE_SET";
+export const BRUSHID_SET = "BRUSHID_SET";
+export const MODE_SET = "MODE_SET";
+export const ADD_TO_HISTORY = "ADD_TO_HISTORY";
 
 export const GET_GRAPH_DATA = "GET_GRAPH_DATA";
-export const UPDATE_DATA = "UPDATE_DATA";

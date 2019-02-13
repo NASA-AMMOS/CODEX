@@ -301,7 +301,7 @@ Drawer.propTypes = {
 
 // redux store
 const mapStateToProps = state => {
-    const ui = state.get("ui");
+    const ui = state.ui;
     return {
         mode: ui.get("mode"),
         brushtype: ui.getIn(["brush", "type"]),

@@ -3,7 +3,7 @@
  * @author Patrick Kage
  */
 
-import * as types from "./dataTypes";
+import * as types from "constants/actionTypes";
 
 // file data
 export const fileLoad = (data, filename) => ({

@@ -1,4 +1,4 @@
-import * as types from "actions/dataTypes";
+import * as types from "constants/actionTypes";
 import * as uiActions from "actions/ui";
 
 /* eslint import/no-webpack-loader-syntax: off */
@@ -7,8 +7,7 @@ import WorkerSocket from "worker-loader!workers/socket.worker";
 export function createGraph(graphMode) {
     return (dispatch, getState) => {
         const selectedFeatures = getState()
-            .get("data")
-            .get("featureList")
+            .data.get("featureList")
             .filter(f => f.get("selected"))
             .map(f => f.get("name"))
             .toJS();
@@ -21,7 +20,7 @@ export function createGraph(graphMode) {
             // This is a bit of a hack to make the data structure look like it used to when we were parsing whole files.
             data.unshift(selectedFeatures);
             dispatch({ type: types.UPDATE_DATA, data });
-            dispatch(uiActions.openGraph(getState().get("data"), graphMode));
+            dispatch(uiActions.openGraph(getState().data, graphMode));
         });
 
         socketWorker.postMessage(

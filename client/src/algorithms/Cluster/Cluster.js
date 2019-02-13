@@ -1,29 +1,23 @@
-import React, { Component } from "react";
 import "algorithms/Cluster/Cluster.css";
 
-import { controller } from "Controller/controller";
-import { formulas } from "formulas/formulas";
-import { invocation } from "invocation/invocation";
-import SubAlgorithms from "./SubAlgorithms/SubAlgorithms";
-import AlgorithmContainer from "./AlgorithmContainer/AlgorithmContainer";
-import HelpTriggerableName from "Components/HelpTriggerableName/HelpTriggerableName";
-import Help from "algorithms/Cluster/Help/Help";
-
-import { MdClose, MdArrowForward, MdArrowBack } from "react-icons/lib/md";
-import { manager } from "Components/RWindowManager/manager/manager";
-
-import PropTypes from "prop-types";
-import IPropTypes from "react-immutable-proptypes";
-// redux!
+import { MdArrowForward, MdArrowBack } from "react-icons/lib/md";
 import { connect } from "react-redux";
-import {
-    getFilename,
-    getSelectedFeatures,
-    getActiveSelectionNames,
-    getSelectionNamesByMeta
-} from "selectors/data";
+import IPropTypes from "react-immutable-proptypes";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+
+import { controller } from "Controller/controller";
 import { featureAdd, selectionCreate } from "actions/data";
+import { formulas } from "formulas/formulas";
+import { getFilename, getActiveSelectionNames, getSelectionNamesByMeta } from "selectors/data";
+import { invocation } from "invocation/invocation";
+import { manager } from "Components/RWindowManager/manager/manager";
 import { openGraph } from "actions/ui";
+import Help from "algorithms/Cluster/Help/Help";
+import HelpTriggerableName from "Components/HelpTriggerableName/HelpTriggerableName";
+
+import AlgorithmContainer from "./AlgorithmContainer/AlgorithmContainer";
+import SubAlgorithms from "./SubAlgorithms/SubAlgorithms";
 
 class Cluster extends Component {
     constructor(props) {
@@ -885,11 +879,11 @@ Cluster.propTypes = {
 
 // redux store
 const mapStateToProps = state => {
-    const data = state.get("data");
-    const ui = state.get("ui");
+    const data = state.data;
+    const ui = state.ui;
     return {
-        data: data,
-        ui: ui,
+        data,
+        ui,
         selectedFeatures: data.get("selected_features").toJS()
     };
 };

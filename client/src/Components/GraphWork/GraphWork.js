@@ -62,7 +62,7 @@ class GraphWork extends Component {
 // redux store
 const mapStateToProps = state => {
     return {
-        data: state.get("data")
+        data: state.data
     };
 };
 const mapDispatchToProps = dispatch => ({

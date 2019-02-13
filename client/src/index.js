@@ -12,10 +12,12 @@ import registerServiceWorker from "registerServiceWorker";
 
 // redux setup
 import { Provider } from "react-redux";
-import store from "store";
+import configureStore from "store";
 
 // solely for use in old singletons
 export const BANDAID_PATCH_STORE = store;
+
+const store = configureStore();
 
 ReactDOM.render(
     <Provider store={store}>

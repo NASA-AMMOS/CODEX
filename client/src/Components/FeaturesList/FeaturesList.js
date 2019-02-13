@@ -1,11 +1,10 @@
-import React, { Component } from "react";
+import "Components/FeaturesList/FeaturesList.css";
+
+import { connect } from "react-redux";
 import PropTypes from "prop-types";
-import IPropTypes from "react-immutable-proptypes";
+import React, { Component } from "react";
 import classnames from "classnames";
 
-// redux
-import { connect } from "react-redux";
-import { getFeaturesWithSelected } from "selectors/data";
 import {
     featureSelect,
     featureUnselect,
@@ -13,9 +12,6 @@ import {
     selectionsUnselectAll
 } from "actions/data";
 import { formulas } from "formulas/formulas";
-
-// stylesheet
-import "./FeaturesList.css";
 
 class FeaturesList extends Component {
     constructor(props) {
@@ -166,7 +162,7 @@ FeaturesList.propTypes = {
 // react state connection, autocreate a container component
 const mapStateToProps = state => {
     return {
-        featureList: state.getIn(["data", "featureList"])
+        featureList: state.data.get("featureList")
     };
 };
 const mapDispatchToProps = dispatch => ({
