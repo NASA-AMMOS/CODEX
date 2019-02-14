@@ -1,22 +1,22 @@
-import Filter from "./algorithms/Filter/Filter";
-import Cluster from "./algorithms/Cluster/Cluster";
-import DimensionalityReduction from "./algorithms/DimensionalityReduction/DimensionalityReduction";
-import Regression from "./algorithms/Regression/DimensionalityReduction";
+import Filter from "components/Filter/Filter";
+import Cluster from "components/Cluster/Cluster";
+import DimensionalityReduction from "components/DimensionalityReduction/DimensionalityReduction";
+import Regression from "components/Regression/DimensionalityReduction";
 /*
-import PeakFind from './algorithms/PeakFind/PeakFind';
-import Segment from './algorithms/Segment/Segment';
-import Bin from './algorithms/Bin/Bin';
-import ReduceDimension from './algorithms/ReduceDimension/ReduceDimension';
-import Regress from './algorithms/Regress/Regress';
-import Normalize from './algorithms/Normalize/Normalize';
-import Endmembers from './algorithms/Endmembers/Endmembers';
-import QualityScan from './algorithms/QualityScan/QualityScan';
-import TemplateScan from './algorithms/TemplateScan/TemplateScan';
+import PeakFind from 'components/PeakFind/PeakFind';
+import Segment from 'components/Segment/Segment';
+import Bin from 'components/Bin/Bin';
+import ReduceDimension from 'components/ReduceDimension/ReduceDimension';
+import Regress from 'components/Regress/Regress';
+import Normalize from 'components/Normalize/Normalize';
+import Endmembers from 'components/Endmembers/Endmembers';
+import QualityScan from 'components/QualityScan/QualityScan';
+import TemplateScan from 'components/TemplateScan/TemplateScan';
 */
 
 import QualityScan from "./reports/QualityScan/QualityScan";
 
-import Blank from "./Components/Blank";
+import Blank from "components/Blank";
 
 import scatter from "./graphs/scatter";
 import heatmap from "./graphs/heatmap";

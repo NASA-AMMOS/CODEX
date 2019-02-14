@@ -11,7 +11,7 @@ import { formulas } from "formulas/formulas";
 import { getGraphs, getGraphByType } from "selectors/ui";
 import { getSelectedFeatures, getFeaturesMasked, getActiveSelectionNames } from "selectors/data";
 import { selectionCreate, brushUpdateArea, brushClear } from "actions/data";
-import Drawer from "Components/Drawer/Drawer";
+import Drawer from "components/Drawer/Drawer";
 
 class GenericGraph extends Component {
     constructor(props) {

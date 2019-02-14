@@ -1,21 +1,14 @@
-import React, { Component } from "react";
-
-import { manager } from "Components/RWindowManager/manager/manager";
-
-import Import from "Components/Import/Import";
-import Export from "Components/Export/Export";
-
-import LoadingBar from "Components/LoadingBar/LoadingBar";
-
-import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
-import { Button, ButtonGroup } from "reactstrap";
-
 import "components/TopBar/TopBar.css";
 
-import PropTypes from "prop-types";
-import { bindActionCreators } from "redux";
+import { Button, ButtonGroup } from "reactstrap";
 import { connect } from "react-redux";
+import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+
 import { brushClear } from "actions/data";
+import { getGraphs, getAlgorithms, getReports } from "selectors/ui";
+import { manager } from "components/RWindowManager/manager/manager";
 import {
     openGraph,
     openAlgorithm,
@@ -24,7 +17,8 @@ import {
     brushtypeSet,
     modeSet
 } from "actions/ui";
-import { getGraphs, getAlgorithms, getReports } from "selectors/ui";
+import Import from "components/Import/Import";
+import LoadingBar from "components/LoadingBar/LoadingBar";
 import * as graphActions from "actions/graphActions";
 
 class TopBar extends Component {
