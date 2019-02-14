@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import "Components/Import/Import.css";
+import "components/Import/Import.css";
 
 import { formulas } from "formulas/formulas";
 import { parser } from "parser/parser.js";

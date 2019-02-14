@@ -1,8 +1,8 @@
-import React, { Component } from "react";
 import "./HeatMap.css";
 
-import echarts from "echarts";
+import React, { Component } from "react";
 import ReactEcharts from "echarts-for-react";
+import echarts from "echarts";
 
 import { getNoiseHelper } from "./helper.js";
 

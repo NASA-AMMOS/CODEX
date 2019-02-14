@@ -1,23 +1,18 @@
-import React, { Component } from "react";
 import "algorithms/Cluster/SubAlgorithms/SubAlgorithms.css";
 
-import simplescatter from "algorithms/Cluster/simplescatter";
-
-import HelpTriggerableName from "Components/HelpTriggerableName/HelpTriggerableName";
-
-import ReactEcharts from "echarts-for-react";
-import classnames from "classnames";
-import { Popover } from "reactstrap";
-import ReactMarkdown from "react-markdown";
-
 import { MdClose } from "react-icons/lib/md";
-import { formulas } from "formulas/formulas";
-
-import PropTypes from "prop-types";
-import IPropTypes from "react-immutable-proptypes";
-// redux!
+import { Popover } from "reactstrap";
 import { connect } from "react-redux";
+import IPropTypes from "react-immutable-proptypes";
+import React, { Component } from "react";
+import ReactEcharts from "echarts-for-react";
+import ReactMarkdown from "react-markdown";
+import classnames from "classnames";
+
+import { formulas } from "formulas/formulas";
 import { getAlgorithmByName } from "selectors/ui";
+import HelpTriggerableName from "components/HelpTriggerableName/HelpTriggerableName";
+import simplescatter from "algorithms/Cluster/simplescatter";
 
 class SubAlgorithms extends Component {
     constructor(props) {

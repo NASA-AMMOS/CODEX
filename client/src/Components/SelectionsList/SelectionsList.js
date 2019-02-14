@@ -1,16 +1,15 @@
-import React, { Component, Fragment } from "react";
-import PropTypes from "prop-types";
-import IPropTypes from "react-immutable-proptypes";
-import classnames from "classnames";
 import "./SelectionsList.css";
-import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import { SortableContainer, SortableElement, arrayMove } from "react-sortable-hoc";
-import { SketchPicker } from "react-color";
-import { formulas } from "formulas/formulas";
-import { Popover } from "reactstrap";
 
-// redux
+import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+import { SketchPicker } from "react-color";
+import { SortableContainer, SortableElement, arrayMove } from "react-sortable-hoc";
 import { connect } from "react-redux";
+import IPropTypes from "react-immutable-proptypes";
+import PropTypes from "prop-types";
+import React, { Component, Fragment } from "react";
+import classnames from "classnames";
+
+import { formulas } from "formulas/formulas";
 import {
     selectionToggle,
     selectionEmphasisToggle,
