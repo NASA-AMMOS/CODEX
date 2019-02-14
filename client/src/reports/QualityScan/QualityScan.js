@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import WebGLHeat from "components/WebGLHeat/WebGLHeat";
+import WebGLHeat from "Components/WebGLHeat/WebGLHeat";
 import QualityScanMasks from "reports/QualityScan/QualityScanMasks/QualityScanMasks";
 import {
     FaCheck,

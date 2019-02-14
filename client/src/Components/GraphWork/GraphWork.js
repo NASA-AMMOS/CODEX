@@ -6,7 +6,7 @@ import React, { Component } from "react";
 import { formulas } from "formulas/formulas";
 import { getId } from "utils/utils";
 import { selectionCreate } from "actions/data";
-import GenericGraph from "components/GenericGraph/GenericGraph.js";
+import GenericGraph from "Components/GenericGraph/GenericGraph.js";
 
 class GraphWork extends Component {
     constructor(props) {

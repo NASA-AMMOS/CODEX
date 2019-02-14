@@ -1,6 +1,6 @@
 import * as dataSels from "selectors/data";
 import { formulas } from "formulas/formulas";
-import { manager } from "components/RWindowManager/manager/manager";
+import { manager } from "Components/RWindowManager/manager/manager";
 import Immutable from "immutable";
 
 export default class UiReducer {

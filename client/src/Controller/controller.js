@@ -1,9 +1,9 @@
 import { model } from "Model/model.js";
 import { config } from "config.old";
 import { formulas } from "formulas/formulas";
-import { manager } from "components/RWindowManager/manager/manager";
+import { manager } from "Components/RWindowManager/manager/manager";
 
-import Blank from "components/Blank";
+import Blank from "Components/Blank";
 
 import { BANDAID_PATCH_STORE } from "index";
 import { getSelectedFeatures } from "selectors/data";

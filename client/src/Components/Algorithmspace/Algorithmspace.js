@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import "./Algorithmspace.css";
 
 import { manager } from "../RWindowManager/manager/manager";
-import Blank from "components/Blank";
+import Blank from "../Blank";
 import { formulas } from "../../formulas/formulas";
 
 class Algorithmspace extends Component {

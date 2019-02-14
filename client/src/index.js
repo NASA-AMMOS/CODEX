@@ -7,7 +7,7 @@ import "index.css";
 import "css/react-contextmenu.css";
 import "bootstrap/dist/css/bootstrap.css";
 
-import Main from "components/Main/Main";
+import Main from "Components/Main/Main";
 import registerServiceWorker from "registerServiceWorker";
 
 // redux setup

@@ -1,10 +1,10 @@
 import React, { Component } from "react";
-import "components/WebGLHeat/WebGLHeat.css";
+import "Components/WebGLHeat/WebGLHeat.css";
 
 import { formulas } from "formulas/formulas";
-import { manager } from "components/RWindowManager/manager/manager";
+import { manager } from "Components/RWindowManager/manager/manager";
 
-import { webglheatmap } from "components/WebGLHeat/webgl-heatmap";
+import { webglheatmap } from "Components/WebGLHeat/webgl-heatmap";
 
 // redux
 import { connect } from "react-redux";

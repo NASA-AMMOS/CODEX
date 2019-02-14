@@ -1,7 +1,7 @@
-import Filter from "components/Filter/Filter";
-import Cluster from "components/Cluster/Cluster";
-import DimensionalityReduction from "components/DimensionalityReduction/DimensionalityReduction";
-import Regression from "components/Regression/DimensionalityReduction";
+import Filter from "./algorithms/Filter/Filter";
+import Cluster from "./algorithms/Cluster/Cluster";
+import DimensionalityReduction from "./algorithms/DimensionalityReduction/DimensionalityReduction";
+import Regression from "./algorithms/Regression/DimensionalityReduction";
 /*
 import PeakFind from './algorithms/PeakFind/PeakFind';
 import Segment from './algorithms/Segment/Segment';
@@ -16,7 +16,7 @@ import TemplateScan from './algorithms/TemplateScan/TemplateScan';
 
 import QualityScan from "./reports/QualityScan/QualityScan";
 
-import Blank from "components/Blank";
+import Blank from "./Components/Blank";
 
 import scatter from "./graphs/scatter";
 import heatmap from "./graphs/heatmap";

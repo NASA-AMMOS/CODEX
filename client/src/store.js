@@ -9,7 +9,7 @@ import thunkMiddleware from "redux-thunk";
 
 import rootReducer from "reducers";
 
-import window from "components/RWindowManager/Window/Window";
+import window from "./Components/RWindowManager/Window/Window";
 
 export default function configureStore(initialState) {
     const logger = createLogger();
