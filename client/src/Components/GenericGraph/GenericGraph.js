@@ -1,17 +1,22 @@
-import "components/GenericGraph/GenericGraph.css";
+import React, { Component } from "react";
+import "Components/GenericGraph/GenericGraph.css";
+
+import ReactEcharts from "echarts-for-react";
+import echartsgl from "echarts-gl"; //This is necessary
 
 import { ContextMenu, MenuItem, SubMenu, ContextMenuTrigger } from "react-contextmenu";
-import { connect } from "react-redux";
-import IPropTypes from "react-immutable-proptypes";
-import PropTypes from "prop-types";
-import React, { Component } from "react";
-import ReactEcharts from "echarts-for-react";
 
-import { formulas } from "formulas/formulas";
-import { getGraphs, getGraphByType } from "selectors/ui";
-import { getSelectedFeatures, getFeaturesMasked, getActiveSelectionNames } from "selectors/data";
-import { selectionCreate, brushUpdateArea, brushClear } from "actions/data";
 import Drawer from "Components/Drawer/Drawer";
+import { formulas } from "formulas/formulas";
+
+import PropTypes from "prop-types";
+import IPropTypes from "react-immutable-proptypes";
+import { List } from "immutable";
+// redux!
+import { connect } from "react-redux";
+import { getSelectedFeatures, getFeaturesMasked, getActiveSelectionNames } from "selectors/data";
+import { getGraphs, getGraphByType } from "selectors/ui";
+import { selectionCreate, brushUpdateArea, brushClear } from "actions/data";
 
 class GenericGraph extends Component {
     constructor(props) {

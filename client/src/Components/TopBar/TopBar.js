@@ -10,7 +10,7 @@ import LoadingBar from "Components/LoadingBar/LoadingBar";
 import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
 import { Button, ButtonGroup } from "reactstrap";
 
-import "components/TopBar/TopBar.css";
+import "Components/TopBar/TopBar.css";
 
 import PropTypes from "prop-types";
 import { bindActionCreators } from "redux";

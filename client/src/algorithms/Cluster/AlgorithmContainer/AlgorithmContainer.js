@@ -1,9 +1,7 @@
-import "./AlgorithmContainer.css";
-
 import React, { Component } from "react";
-
-import Parameters from "../Parameters/Parameters";
+import "./AlgorithmContainer.css";
 import Preview from "../Preview/Preview";
+import Parameters from "../Parameters/Parameters";
 
 class AlgorithmContainer extends Component {
     constructor(props) {

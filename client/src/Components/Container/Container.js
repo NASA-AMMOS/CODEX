@@ -1,9 +1,8 @@
+import React, { Component } from "react";
 import "./Container.css";
 
-import React, { Component } from "react";
-
-import RWindowManager from "../RWindowManager/RWindowManager/RWindowManager";
 import TopBar from "../TopBar/TopBar";
+import RWindowManager from "../RWindowManager/RWindowManager/RWindowManager";
 
 class Container extends Component {
     render() {

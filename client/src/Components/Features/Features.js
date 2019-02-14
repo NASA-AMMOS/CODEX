@@ -1,9 +1,8 @@
+import React, { Component } from "react";
 import "./Features.css";
 
-import React, { Component } from "react";
-
-import FeaturesList from "components/FeaturesList/FeaturesList";
-import SelectionsList from "components/SelectionsList/SelectionsList";
+import FeaturesList from "../FeaturesList/FeaturesList";
+import SelectionsList from "../SelectionsList/SelectionsList";
 
 class Features extends Component {
     render() {

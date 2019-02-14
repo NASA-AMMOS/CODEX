@@ -1,12 +1,14 @@
-import "components/GraphWork/GraphWork.css";
-
-import { connect } from "react-redux";
 import React, { Component } from "react";
+import "Components/GraphWork/GraphWork.css";
 
 import { formulas } from "formulas/formulas";
 import { getId } from "utils/utils";
-import { selectionCreate } from "actions/data";
+
 import GenericGraph from "Components/GenericGraph/GenericGraph.js";
+
+// redux!
+import { connect } from "react-redux";
+import { selectionCreate } from "actions/data";
 
 class GraphWork extends Component {
     constructor(props) {

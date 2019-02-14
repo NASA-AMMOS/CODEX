@@ -1,9 +1,9 @@
-import "components/HoverableFS/HoverableFS.css";
-
-import { connect } from "react-redux";
-import IPropTypes from "react-immutable-proptypes";
 import React, { Component } from "react";
+import "Components/HoverableFS/HoverableFS.css";
 
+import IPropTypes from "react-immutable-proptypes";
+// redux!
+import { connect } from "react-redux";
 import { getSelectedFeatures, getActiveSelectionNames } from "selectors/data";
 
 class HoverableFS extends Component {

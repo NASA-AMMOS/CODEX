@@ -14,7 +14,7 @@ import { invocation } from "invocation/invocation";
 import { manager } from "Components/RWindowManager/manager/manager";
 import { openGraph } from "actions/ui";
 import Help from "algorithms/Cluster/Help/Help";
-import HelpTriggerableName from "components/HelpTriggerableName/HelpTriggerableName";
+import HelpTriggerableName from "Components/HelpTriggerableName/HelpTriggerableName";
 
 import AlgorithmContainer from "./AlgorithmContainer/AlgorithmContainer";
 import SubAlgorithms from "./SubAlgorithms/SubAlgorithms";
