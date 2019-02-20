@@ -67,7 +67,7 @@ function process(files) {
                 }
             } else if (r.status === "complete") {
                 console.log("Upload Complete");
-                self.postMessage(JSON.stringify(r));
+                self.postMessage(JSON.stringify(Object.assign(r, { filename: blob.name })));
                 sock.close();
             } else if (r.status === "failure") {
                 self.postMessage("Upload Failed");

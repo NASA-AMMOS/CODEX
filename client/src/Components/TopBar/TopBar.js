@@ -10,7 +10,7 @@ import { brushClear } from "actions/data";
 import { getReports } from "selectors/ui";
 import { manager } from "components/RWindowManager/manager/manager";
 import { openAlgorithm, openReport, openDevelopment, brushtypeSet, modeSet } from "actions/ui";
-import Import from "Components/Import/Import";
+import Import from "components/Import/Import";
 import LoadingBar from "Components/LoadingBar/LoadingBar";
 import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";

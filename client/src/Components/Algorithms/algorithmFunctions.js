@@ -54,7 +54,6 @@ export function getAlgorithmData(algorithm, selectedFeatures, filename, dataCall
         );
 
         requestObject.closeSocket = _ => {
-            console.log("cleanup!");
             socketWorker.postMessage(
                 JSON.stringify({
                     action: actionTypes.CLOSE_SOCKET

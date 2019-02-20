@@ -14,11 +14,9 @@ export default class DataReducer {
             .set(
                 "featureList",
                 Immutable.fromJS(
-                    action.data.length
-                        ? action.data[0].map(f => {
-                              return { name: f, selected: false };
-                          })
-                        : []
+                    action.data.map(f => {
+                        return { name: f, selected: false };
+                    })
                 )
             )
             .set("filename", action.filename)
