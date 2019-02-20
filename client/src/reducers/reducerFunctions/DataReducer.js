@@ -156,7 +156,7 @@ export default class DataReducer {
      */
     static featuresUnselectAll(state) {
         // reset the selected features set
-        return state.updateIn(["selected_features"], () => Set());
+        return state.updateIn(["selected_features"], () => new Set());
     }
 
     /**

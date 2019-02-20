@@ -1,13 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "css/fonts.css";
+
 import "index.css";
 
 //Other global css'
 import "css/react-contextmenu.css";
 import "bootstrap/dist/css/bootstrap.css";
 
-import Main from "Components/Main/Main";
+import Main from "components/Main/Main";
 import registerServiceWorker from "registerServiceWorker";
 
 // redux setup

@@ -326,19 +326,19 @@ class QualityScan extends Component {
             "%";
     }
 
-    setExtentBox = (startRow, pixelsPerBin, dataLength) => {
+    setExtentBox(startRow, pixelsPerBin, dataLength) {
         let width = this.ref_chart["horizontal"].getBoundingClientRect().width;
         this.ref_extentbox.style.transition =
             "left 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95), width 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95)";
         this.ref_extentbox.style.left = (startRow / dataLength) * width + "px";
         this.ref_extentbox.style.width = (pixelsPerBin * width * width) / (dataLength * 2) + "px";
-    };
+    }
     /**
      * Sets the sparkline distribution
      * @param {string} graphPos - 'veritcal' || 'horizontal'
      * @param {obj} masks - masks object from webglheat
      */
-    setDistribution = (graphPos, masks) => {
+    setDistribution(graphPos, masks) {
         this.ref_chart[graphPos].innerHTML = "";
 
         masks = masks || this.masks;
@@ -447,7 +447,7 @@ class QualityScan extends Component {
                     console.warn("Warning - Unknown Quality Scan graph position: " + graphPos);
             }
         }
-    };
+    }
 
     setMaskInputValue(maskName, inputName, value) {
         for (let m in this.masks) {
@@ -534,10 +534,10 @@ class QualityScan extends Component {
      * @param {string} title - table title
      * @param {object} dataObject - { key: count, key: count, ... }
      */
-    setInfoTable = (title, dataObject) => {
+    setInfoTable(title, dataObject) {
         this.shiftInfoTable(true);
         this.ref_QualityScanInfo.setQualityInfoRaw(title, dataObject);
-    };
+    }
 
     /**
      * Opens or closes that right most info table

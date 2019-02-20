@@ -1,16 +1,13 @@
 import React, { Component } from "react";
-import "./Container.css";
+import "components/Container/Container.css";
 
-import TopBar from "../TopBar/TopBar";
-import RWindowManager from "../RWindowManager/RWindowManager/RWindowManager";
+import WindowManager from "components/WindowManager/WindowManager";
 
 class Container extends Component {
     render() {
         return (
             <div className="Container">
-                <TopBar />
-                <div id="stylyDiv" />
-                <RWindowManager />
+                <WindowManager />
             </div>
         );
     }

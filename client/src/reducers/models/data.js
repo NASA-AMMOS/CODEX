@@ -21,7 +21,6 @@ export const dataState = Immutable.fromJS({
     master: {},
     selections: [],
     brush: {},
-    selected_features: {},
     // states needed only by its reducer
     _featureSelect: {
         last_shiftless_selected_feature: null

@@ -1,15 +1,20 @@
-import React, { Component } from "react";
 import "./View.css";
 
-import Panel from "../Panel/Panel";
+import React, { Component } from "react";
+
 import Container from "../Container/Container";
+import Panel from "../Panel/Panel";
+import TopBar from "components/TopBar/TopBar";
 
 class View extends Component {
     render() {
         return (
             <div className="View noselect">
                 <Panel />
-                <Container />
+                <div className="rightPanel">
+                    <TopBar />
+                    <Container />
+                </div>
             </div>
         );
     }

@@ -1,31 +1,21 @@
+import "components/TopBar/TopBar.css";
+
+import { Button, ButtonGroup } from "reactstrap";
+import { connect } from "react-redux";
+import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
+import PropTypes from "prop-types";
 import React, { Component } from "react";
 
-import { manager } from "Components/RWindowManager/manager/manager";
-
-import Import from "Components/Import/Import";
-import Export from "Components/Export/Export";
-
-import LoadingBar from "Components/LoadingBar/LoadingBar";
-
-import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
-import { Button, ButtonGroup } from "reactstrap";
-
-import "Components/TopBar/TopBar.css";
-
-import PropTypes from "prop-types";
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
 import { brushClear } from "actions/data";
-import {
-    openGraph,
-    openAlgorithm,
-    openReport,
-    openDevelopment,
-    brushtypeSet,
-    modeSet
-} from "actions/ui";
-import { getGraphs, getAlgorithms, getReports } from "selectors/ui";
+import { getReports } from "selectors/ui";
+import { manager } from "components/RWindowManager/manager/manager";
+import { openAlgorithm, openReport, openDevelopment, brushtypeSet, modeSet } from "actions/ui";
+import Import from "Components/Import/Import";
+import LoadingBar from "Components/LoadingBar/LoadingBar";
+import * as algorithmActions from "actions/algorithmActions";
+import * as algorithmTypes from "constants/algorithmTypes";
 import * as graphActions from "actions/graphActions";
+import * as uiTypes from "constants/uiTypes";
 
 class TopBar extends Component {
     constructor(props) {
@@ -38,8 +28,6 @@ class TopBar extends Component {
         };
 
         this.vars = {
-            graphs: getGraphs(this.props.ui).toJS(),
-            algorithms: getAlgorithms(this.props.ui).toJS(),
             reports: getReports(this.props.ui).toJS()
         };
 
@@ -58,37 +46,29 @@ class TopBar extends Component {
     }
 
     getGraphMenuItems() {
-        let menuItems = [];
-        for (let g of this.vars.graphs) {
-            menuItems.push(
-                <MenuItem
-                    key={g.name}
-                    onSelect={() => {
-                        this.props.createGraph(g.name);
-                    }}
-                >
-                    {g.name}
-                </MenuItem>
-            );
-        }
-        return menuItems;
+        return uiTypes.GRAPH_TYPES.map(graph => (
+            <MenuItem
+                key={graph}
+                onSelect={() => {
+                    this.props.createGraph(graph);
+                }}
+            >
+                {graph}
+            </MenuItem>
+        ));
     }
 
     getAlgorithmsMenuItems() {
-        let menuItems = [];
-        for (let a of this.vars.algorithms) {
-            menuItems.push(
-                <MenuItem
-                    key={a.name}
-                    onSelect={() => {
-                        this.props.openAlgorithm(a.name);
-                    }}
-                >
-                    {a.name}
-                </MenuItem>
-            );
-        }
-        return menuItems;
+        return algorithmTypes.ALGORITHM_TYPES.map(algo => (
+            <MenuItem
+                key={algo}
+                onSelect={() => {
+                    this.props.createAlgorithm(algo);
+                }}
+            >
+                {algo}
+            </MenuItem>
+        ));
     }
 
     getReportsMenuItems() {
@@ -430,7 +410,6 @@ class TopBar extends Component {
 // validation
 TopBar.propTypes = {
     brushClear: PropTypes.func.isRequired,
-    openGraph: PropTypes.func.isRequired,
     openAlgorithm: PropTypes.func.isRequired,
     openReport: PropTypes.func.isRequired,
     brushtypeSet: PropTypes.func.isRequired,
@@ -449,13 +428,14 @@ const mapStateToProps = state => {
 function mapDispatchToProps(dispatch) {
     return {
         brushClear: () => dispatch(brushClear()),
-        openGraph: (d, n, x, y, s, r) => dispatch(openGraph(d, n, x, y, s, r)),
+
         openAlgorithm: (d, n, w, h) => dispatch(openAlgorithm(d, n, w, h)),
         openReport: (d, n, w, h) => dispatch(openReport(d, n, w, h)),
         openDevelopment: (d, n) => dispatch(openDevelopment(d, n)),
         brushtypeSet: t => dispatch(brushtypeSet(t)),
         modeSet: m => dispatch(modeSet(m)),
-        createGraph: name => dispatch(graphActions.createGraph(name))
+        createGraph: name => dispatch(graphActions.createGraph(name)),
+        createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name))
     };
 }
 
@@ -465,16 +445,7 @@ function mergeProps(propsFromState, propsFromDispatch, ownProps) {
         brushClear: () => {
             propsFromDispatch.brushClear();
         },
-        openGraph: (name, xaxis, yaxis, selections, randomFeatures) => {
-            propsFromDispatch.openGraph(
-                propsFromState.data,
-                name,
-                xaxis,
-                yaxis,
-                selections,
-                randomFeatures
-            );
-        },
+
         openAlgorithm: (name, width, height) => {
             propsFromDispatch.openAlgorithm(propsFromState.data, name, width, height);
         },
@@ -492,6 +463,9 @@ function mergeProps(propsFromState, propsFromDispatch, ownProps) {
         },
         createGraph: name => {
             propsFromDispatch.createGraph(name);
+        },
+        createAlgorithm: name => {
+            propsFromDispatch.createAlgorithm(name);
         }
     };
 }

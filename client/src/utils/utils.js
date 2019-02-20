@@ -13,3 +13,24 @@ export const getId = idName => {
     }
     return getIdIds[idName];
 };
+
+export function unzip(ary) {
+    return ary.reduce((acc, item) => {
+        item.forEach((val, idx) => {
+            acc[idx] = acc[idx] || [];
+            acc[idx].push(val);
+        });
+        return acc;
+    }, []);
+}
+
+export function zip(ary) {
+    return ary[0].reduce((acc, val, idx) => {
+        const newRow = [val];
+        for (let i = 1; i < ary.length; i++) {
+            newRow.push(ary[i][idx]);
+        }
+        acc.push(newRow);
+        return acc;
+    }, []);
+}

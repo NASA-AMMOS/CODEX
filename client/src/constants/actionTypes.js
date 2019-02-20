@@ -27,3 +27,11 @@ export const MODE_SET = "MODE_SET";
 export const ADD_TO_HISTORY = "ADD_TO_HISTORY";
 
 export const GET_GRAPH_DATA = "GET_GRAPH_DATA";
+
+export const OPEN_NEW_WINDOW = "OPEN_NEW_WINDOW";
+export const CLOSE_WINDOW = "CLOSE_WINDOW";
+
+export const GET_ALGORITHM_DATA = "GET_ALGORITHM_DATA";
+export const LOADING_ALGORITHM = "LOADING_ALGORITHM";
+
+export const CLOSE_SOCKET = "CLOSE_SOCKET";

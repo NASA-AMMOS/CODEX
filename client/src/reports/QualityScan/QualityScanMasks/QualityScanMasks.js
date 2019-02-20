@@ -251,7 +251,7 @@ class QualityScanMasks extends Component {
         return inputElements;
     }
 
-    onSortEnd = ({ oldIndex, newIndex }) => {
+    onSortEnd({ oldIndex, newIndex }) {
         //Rearrange masks
         let masks = arrayMove(this.state.masks, oldIndex, newIndex);
 
@@ -261,7 +261,7 @@ class QualityScanMasks extends Component {
         this.props.setMaskOrder(maskOrder);
 
         this.setState({ masks: masks });
-    };
+    }
 
     componentDidUpdate() {
         this.check(this.vars.checkedName);

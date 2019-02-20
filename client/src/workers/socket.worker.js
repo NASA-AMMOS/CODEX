@@ -12,11 +12,11 @@ function handleGraphDataRequest(msg) {
     socket = new WebSocket(socketString);
 
     socket.onclose = function() {
-        console.log("Closed Data Socket");
+        console.log("Closed Graph Socket");
     };
 
     socket.onopen = function() {
-        console.log("Opened Data Socket");
+        console.log("Opened Graph Socket");
         const outMsg = JSON.stringify({
             routine: "arrange",
             hashType: "feature",
@@ -35,11 +35,44 @@ function handleGraphDataRequest(msg) {
     };
 }
 
+function handleAlgorithmRequest(msg) {
+    const cid = Math.random()
+        .toString(36)
+        .substring(8);
+
+    let socketString = "ws://localhost:8888/codex";
+
+    socket = new WebSocket(socketString);
+
+    socket.onclose = function() {
+        console.log("Closed Algorithm Socket");
+    };
+
+    socket.onopen = function() {
+        console.log("Opened Algorithm Socket");
+        msg.request.cid = cid;
+        const outMsg = JSON.stringify(msg.request);
+        socket.send(outMsg);
+    };
+
+    // TODO: Use a transferable object to return the data array so we aren't copying it back to the main thread
+    socket.onmessage = msg => {
+        const inMsg = JSON.parse(msg.data);
+        if (inMsg.data) self.postMessage(JSON.stringify(inMsg));
+    };
+}
+
 self.addEventListener("message", function(e) {
     const msg = JSON.parse(e.data);
     switch (msg.action) {
         case types.GET_GRAPH_DATA:
             handleGraphDataRequest(msg);
+            break;
+        case types.GET_ALGORITHM_DATA:
+            handleAlgorithmRequest(msg);
+            break;
+        case types.CLOSE_SOCKET:
+            if (socket) socket.close();
             break;
     }
 });

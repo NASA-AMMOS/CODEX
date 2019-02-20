@@ -1,0 +1,20 @@
+.initialGraph {
+    width: 250px;
+    height: 250px;
+}
+
+.GenericGraphXAxisLabel {
+    position: absolute;
+    right: 17px;
+    bottom: 24px;
+    font-weight: bold;
+    pointer-events: none;
+}
+
+.GenericGraphYAxisLabel {
+    position: absolute;
+    left: 38px;
+    top: 25px;
+    font-weight: bold;
+    pointer-events: none;
+}

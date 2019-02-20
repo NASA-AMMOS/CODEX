@@ -4,3 +4,7 @@
     display: flex;
     background: linear-gradient(to top, #061427, #061427);
 }
+
+.rightPanel {
+    width: 100%;
+}

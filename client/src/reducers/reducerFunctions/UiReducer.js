@@ -16,81 +16,81 @@ export default class UiReducer {
      * ~@param {string array} selections (default: selected selections) - selection names
      * ~@param {bool} randomFeatures (default: false) - whether to randomize x,y,subset (for testing)
      */
-    static openGraph(state, action) {
-        /*
-	if( !model.hasData() ) {
-		this.setMessage( 'Please import data first. Files -> Import', 'warning' );
-		return;
-	}
-	*/
+    //    static openGraph(state, action) {
+    //        /*
+    // if( !model.hasData() ) {
+    //  this.setMessage( 'Please import data first. Files -> Import', 'warning' );
+    //  return;
+    // }
+    // */
 
-        //Get type
-        const graphs = state.get("graphs").toJS();
+    //        //Get type
+    //        const graphs = state.get("graphs").toJS();
 
-        let type = graphs[0].type;
-        const i = formulas.objectArrayIndexOfKeyWithValue(graphs, "name", action.name);
-        if (i !== -1) type = graphs[i].type;
+    //        let type = graphs[0].type;
+    //        const i = formulas.objectArrayIndexOfKeyWithValue(graphs, "name", action.name);
+    //        if (i !== -1) type = graphs[i].type;
 
-        const selectedFeatures = action.dataState
-            .get("featureList")
-            .filter(f => f.get("selected"))
-            .map(f => f.get("name"))
-            .toJS();
+    //        const selectedFeatures = action.dataState
+    //            .get("featureList")
+    //            .filter(f => f.get("selected"))
+    //            .map(f => f.get("name"))
+    //            .toJS();
 
-        if (selectedFeatures.length < 2) {
-            alert("Not enough features selected. Please select 2 dimensions to graph.");
-            return state;
-        }
+    //        if (selectedFeatures.length < 2) {
+    //            alert("Not enough features selected. Please select 2 dimensions to graph.");
+    //            return state;
+    //        }
 
-        if (selectedFeatures.length > 2) {
-            alert(
-                `Graphing only works on two features. You've selected ${
-                    selectedFeatures.length
-                } features (${selectedFeatures.join(", ")}), but only ${selectedFeatures[0]} and ${
-                    selectedFeatures[1]
-                } will be graphed.`
-            );
-        }
+    //        if (selectedFeatures.length > 2) {
+    //            alert(
+    //                `Graphing only works on two features. You've selected ${
+    //                    selectedFeatures.length
+    //                } features (${selectedFeatures.join(", ")}), but only ${selectedFeatures[0]} and ${
+    //                    selectedFeatures[1]
+    //                } will be graphed.`
+    //            );
+    //        }
 
-        let selectedXAxis = selectedFeatures[0];
-        let selectedYAxis = selectedFeatures[1];
+    //        let selectedXAxis = selectedFeatures[0];
+    //        let selectedYAxis = selectedFeatures[1];
 
-        if (action.randomFeatures) {
-            let f = dataSels.getFeatures(action.dataState).toJS();
+    //        if (action.randomFeatures) {
+    //            let f = dataSels.getFeatures(action.dataState).toJS();
 
-            selectedXAxis = f[formulas.getRandomInt(f.length - 1)];
-            selectedYAxis = f[formulas.getRandomInt(f.length - 1)];
-        }
+    //            selectedXAxis = f[formulas.getRandomInt(f.length - 1)];
+    //            selectedYAxis = f[formulas.getRandomInt(f.length - 1)];
+    //        }
 
-        if (selectedXAxis === undefined || selectedYAxis === undefined) {
-            //this.setMessage( 'Please select at least 2 features on the left before making a graph.', 'warning' );
-            return;
-        }
+    //        if (selectedXAxis === undefined || selectedYAxis === undefined) {
+    //            //this.setMessage( 'Please select at least 2 features on the left before making a graph.', 'warning' );
+    //            return;
+    //        }
 
-        const activeSelectionNames = action.dataState
-            .get("featureList")
-            .filter(f => f.get("selected"))
-            .map(f => f.get("name"))
-            .toJS();
+    //        const activeSelectionNames = action.dataState
+    //            .get("featureList")
+    //            .filter(f => f.get("selected"))
+    //            .map(f => f.get("name"))
+    //            .toJS();
 
-        var config = {
-            title: (action.xaxis || selectedXAxis) + " vs. " + (action.yaxis || selectedYAxis),
-            type: type,
-            name: action.name,
-            component: "GraphWork",
-            props: {
-                type: type,
-                subsets: action.selections || activeSelectionNames,
-                xaxis: action.xaxis || selectedXAxis,
-                yaxis: action.yaxis || selectedYAxis
-            }
-        };
+    //        var config = {
+    //            title: (action.xaxis || selectedXAxis) + " vs. " + (action.yaxis || selectedYAxis),
+    //            type: type,
+    //            name: action.name,
+    //            component: "GraphWork",
+    //            props: {
+    //                type: type,
+    //                subsets: action.selections || activeSelectionNames,
+    //                xaxis: action.xaxis || selectedXAxis,
+    //                yaxis: action.yaxis || selectedYAxis
+    //            }
+    //        };
 
-        manager.addWindow(config);
+    //        manager.addWindow(config);
 
-        //Letting manager control all window state
-        return state;
-    }
+    //        //Letting manager control all window state
+    //        return state;
+    //    }
 
     /**
      * False Reducer
@@ -102,48 +102,49 @@ export default class UiReducer {
      * ~@param {int | string} width - in px or % (like "50%")
      * ~@param {int | string} height - in px or %
      */
-    static openAlgorithm(state, action) {
-        /*
-	if( !model.hasData() ) {
-		this.setMessage( 'Please import data first. Files -> Import', 'warning' );
-		return;
-	}
-	*/
-        /*
-	let xysubset = this.getChosenXYSubset();
-	if( BANDAID_PATCH_STORE.getState().getIn(['data', 'selected_features']).size < 1) {
-	//type === 'algorithms' && ( xysubset.x === null || xysubset.y === null ) ) {
-		this.setMessage( 'Please select at least 2 features on the left before using ' + type + '.', 'warning' );
-		return;
-	}
-	*/
 
-        const algorithms = state.get("algorithms").toJS();
+    // static openAlgorithm(state, action) {
+    //     /*
+    // if( !model.hasData() ) {
+    //     this.setMessage( 'Please import data first. Files -> Import', 'warning' );
+    //     return;
+    // }
+    // */
+    //     /*
+    // let xysubset = this.getChosenXYSubset();
+    // if( BANDAID_PATCH_STORE.getState().getIn(['data', 'selected_features']).size < 1) {
+    // //type === 'algorithms' && ( xysubset.x === null || xysubset.y === null ) ) {
+    //     this.setMessage( 'Please select at least 2 features on the left before using ' + type + '.', 'warning' );
+    //     return;
+    // }
+    // */
 
-        //Get component
-        let algorithmComponent;
-        const i = formulas.objectArrayIndexOfKeyWithValue(algorithms, "name", action.name);
-        if (i !== -1) algorithmComponent = algorithms[i].component;
+    //     const algorithms = state.get("algorithms").toJS();
 
-        //Construct manager config
-        const config = {
-            title: action.name,
-            type: "",
-            name: action.name,
-            initialWidth: action.width || 1000,
-            initialHeight: action.height || 600,
-            component: "AlgorithmSpace",
-            props: {
-                algorithmComponent: algorithmComponent
-            }
-        };
+    //     //Get component
+    //     let algorithmComponent;
+    //     const i = formulas.objectArrayIndexOfKeyWithValue(algorithms, "name", action.name);
+    //     if (i !== -1) algorithmComponent = algorithms[i].component;
 
-        //Add a new window from that config
-        manager.addWindow(config);
+    //     //Construct manager config
+    //     const config = {
+    //         title: action.name,
+    //         type: "",
+    //         name: action.name,
+    //         initialWidth: action.width || 1000,
+    //         initialHeight: action.height || 600,
+    //         component: "AlgorithmSpace",
+    //         props: {
+    //             algorithmComponent: algorithmComponent
+    //         }
+    //     };
 
-        //Letting manager control all window state
-        return state;
-    }
+    //     //Add a new window from that config
+    //     manager.addWindow(config);
+
+    //     //Letting manager control all window state
+    //     return state;
+    // }
 
     /**
      * False Reducer
@@ -157,19 +158,19 @@ export default class UiReducer {
      */
     static openReport(state, action) {
         /*
-	if( !model.hasData() ) {
-		this.setMessage( 'Please import data first. Files -> Import', 'warning' );
-		return;
-	}
-	*/
+    if( !model.hasData() ) {
+        this.setMessage( 'Please import data first. Files -> Import', 'warning' );
+        return;
+    }
+    */
         /*
-	let xysubset = this.getChosenXYSubset();
-	if( BANDAID_PATCH_STORE.getState().getIn(['data', 'selected_features']).size < 1) {
-	//type === 'algorithms' && ( xysubset.x === null || xysubset.y === null ) ) {
-		this.setMessage( 'Please select at least 2 features on the left before using ' + type + '.', 'warning' );
-		return;
-	}
-	*/
+    let xysubset = this.getChosenXYSubset();
+    if( BANDAID_PATCH_STORE.getState().getIn(['data', 'selected_features']).size < 1) {
+    //type === 'algorithms' && ( xysubset.x === null || xysubset.y === null ) ) {
+        this.setMessage( 'Please select at least 2 features on the left before using ' + type + '.', 'warning' );
+        return;
+    }
+    */
 
         const reports = state.get("reports").toJS();
 
@@ -239,7 +240,7 @@ export default class UiReducer {
      * Handle a BRUSHTYPE_SET
      * @param {Map} state current state
      * @param {object} action action
-     * 				action.brushtype = 'rectangle', 'freehand'
+     *              action.brushtype = 'rectangle', 'freehand'
      * @return {Map} new state
      */
     static brushtypeSet(state, action) {
@@ -257,7 +258,7 @@ export default class UiReducer {
      * Handle a BRUSHID_SET
      * @param {Map} state current state
      * @param {object} action action
-     * 				action.id - int
+     *              action.id - int
      * @return {Map} new state
      */
     static brushIdSet(state, action) {
@@ -269,7 +270,7 @@ export default class UiReducer {
      * Handle a MODE_SET
      * @param {Map} state current state
      * @param {object} action action
-     * 				action.mode = 'zoom', 'select', 'snap'
+     *              action.mode = 'zoom', 'select', 'snap'
      * @return {Map} new state
      */
     static modeSet(state, action) {
@@ -282,9 +283,9 @@ export default class UiReducer {
      * Pushes a new entry to our history
      * @param {Map} state current state
      * @param {object} action
-     * 				{string} .type
-     * 				{string} .status - 'success', 'warning', 'error', 'note'
-     * 				{string} .description
+     *              {string} .type
+     *              {string} .status - 'success', 'warning', 'error', 'note'
+     *              {string} .description
      * @return {Map} new state
      */
     static addToHistory(state, action) {
