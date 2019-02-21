@@ -3,7 +3,7 @@
     height: 250px;
 }
 
-.GenericGraphXAxisLabel {
+.xAxisLabel {
     position: absolute;
     right: 17px;
     bottom: 24px;
@@ -11,10 +11,10 @@
     pointer-events: none;
 }
 
-.GenericGraphYAxisLabel {
+.yAxisLabel {
     position: absolute;
     left: 38px;
-    top: 25px;
+    top: 30px;
     font-weight: bold;
     pointer-events: none;
 }

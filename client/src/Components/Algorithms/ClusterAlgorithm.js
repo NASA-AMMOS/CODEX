@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from "react";
-import * as algorithmTypes from "constants/algorithmTypes";
-import * as actionTypes from "constants/actionTypes";
-import Immutable from "immutable";
-import { getAlgorithmData } from "components/Algorithms/algorithmFunctions";
 
-/* eslint import/no-webpack-loader-syntax: off */
-import WorkerSocket from "worker-loader!workers/socket.worker";
+import { getAlgorithmData } from "components/Algorithms/algorithmFunctions";
+import * as algorithmTypes from "constants/algorithmTypes";
 
 function ClusterAlgorithm(props) {
     const algorithm = algorithmTypes.CLUSTER_ALGORITHM;

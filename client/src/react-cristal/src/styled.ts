@@ -44,6 +44,7 @@ export const Wrapper = styled.div`
 
 export const Header = styled.div`
     height: 30px;
+    min-height: 30px;
     border-bottom: 1px solid #ccc;
     cursor: ${({ isDraggable }: HeaderProps) => (isDraggable ? `-webkit-grab` : `default`)};
     display: flex;

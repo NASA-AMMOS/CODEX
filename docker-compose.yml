@@ -1,0 +1,14 @@
+version: "3"
+services:
+    backend:
+        build: "./server"
+        volumes:
+            - "./server:/home/codex/server"
+        ports:
+            - "8888:8888"
+    frontend:
+        build: "./client"
+        volumes:
+            - "./client:/home/codex/client"
+        ports:
+            - "3000:3000"

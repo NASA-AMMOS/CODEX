@@ -172,8 +172,8 @@ function ScatterGraph(props) {
                 lazyUpdate={true}
                 style={{ height: "100%", width: "100%" }}
             />
-            <div className="GenericGraphXAxisLabel">{xAxis}</div>
-            <div className="GenericGraphYAxisLabel">{yAxis}</div>
+            <div className="xAxisLabel">{xAxis}</div>
+            <div className="yAxisLabel">{yAxis}</div>
         </React.Fragment>
     );
 }
