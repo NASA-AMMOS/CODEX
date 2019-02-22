@@ -124,7 +124,7 @@ function createGraphOptions(dataState) {
         series: [
             {
                 name: `${xAxis} vs ${yAxis}`,
-                type: "scatter",
+                type: "scatterGL",
                 symbolSize: 2,
                 large: true,
                 data: dataState.get("data").toJS(),
