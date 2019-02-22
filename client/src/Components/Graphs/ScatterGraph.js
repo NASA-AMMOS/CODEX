@@ -67,27 +67,7 @@ function createGraphOptions(dataState) {
             }
         },
         toolbox: {
-            show: true,
-            feature: {
-                mark: { show: true },
-                dataZoom: {
-                    show: true,
-                    title: { zoom: "area zoom", back: "restore area zoom" }
-                },
-                restore: { show: true, title: "restore" },
-                saveAsImage: { show: true, title: "save as image" },
-                brush: {
-                    show: true,
-                    title: {
-                        rect: "Rectangle selection",
-                        polygon: "Polygon selection",
-                        lineX: "Horizontal selection",
-                        lineY: "Vertical selection",
-                        keep: "Keep previous selections",
-                        clear: "Clear selection"
-                    }
-                }
-            }
+            show: false
         },
         brush: {
             toolbox: ["rect", "polygon", "keep", "clear"],
@@ -168,21 +148,7 @@ let onEvents = {
                 type: "takeGlobalCursor",
                 key: "brush",
                 brushOption: {
-                    type: "rect",
-                    toolbox: ["rect", "polygon", "keep", "clear"],
-                    brushStyle: {
-                        borderWidth: 5,
-                        color: "rgba(0,0,0,0.1)",
-                        borderColor: "rgba(255,69,0,1)"
-                    },
-                    outOfBrush: {
-                        color: "rgb(0,255,0)"
-                    },
-                    inBrush: {
-                        color: "rgb(0,0,255)"
-                    },
-                    xAxisIndex: 0,
-                    yAxisIndex: 0
+                    type: "rect"
                 }
             });
             firstRender = false;
@@ -194,8 +160,6 @@ function ScatterGraph(props) {
     const selectedFeatures = props.data.get("featureList").filter(f => f.get("selected"));
     const xAxis = selectedFeatures.get(0).get("name");
     const yAxis = selectedFeatures.get(1).get("name");
-
-    console.log("react render");
 
     return (
         <React.Fragment>
