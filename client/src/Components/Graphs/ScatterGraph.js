@@ -4,6 +4,9 @@ import React from "react";
 import ReactEcharts from "echarts-for-react";
 import echartsgl from "echarts-gl";
 
+let echart = null;
+let firstRender = true;
+
 function createGraphOptions(dataState) {
     const selectedFeatures = dataState.get("featureList").filter(f => f.get("selected"));
     const xAxis = selectedFeatures.get(0).get("name");
@@ -12,6 +15,7 @@ function createGraphOptions(dataState) {
         title: {
             text: ""
         },
+        animation: false,
         grid: {
             top: 15,
             right: 15,
@@ -63,7 +67,7 @@ function createGraphOptions(dataState) {
             }
         },
         toolbox: {
-            show: false,
+            show: true,
             feature: {
                 mark: { show: true },
                 dataZoom: {
@@ -92,8 +96,14 @@ function createGraphOptions(dataState) {
                 color: "rgba(0,0,0,0.1)",
                 borderColor: "rgba(255,69,0,1)"
             },
-            throttleType: "debounce",
-            throttleDelay: 800
+            outOfBrush: {
+                color: "rgb(0,255,0)"
+            },
+            inBrush: {
+                color: "rgb(0,0,255)"
+            },
+            xAxisIndex: 0,
+            yAxisIndex: 0
         },
         xAxis: [
             {
@@ -134,7 +144,7 @@ function createGraphOptions(dataState) {
         series: [
             {
                 name: `${xAxis} vs ${yAxis}`,
-                type: "scatterGL",
+                type: "scatter",
                 symbolSize: 2,
                 large: true,
                 data: dataState.get("data").toJS(),
@@ -144,34 +154,60 @@ function createGraphOptions(dataState) {
                     }
                 }
             }
-        ],
-        color: [
-            "#0069e0",
-            "#61a0a8",
-            "#d48265",
-            "#91c7ae",
-            "#749f83",
-            "#ca8622",
-            "#bda29a",
-            "#6e7074",
-            "#546570",
-            "#c4ccd3"
         ]
     };
 }
+
+let onEvents = {
+    brush: (e, echart) => {
+        // plug into the brush event here
+    },
+    rendered: () => {
+        if (firstRender) {
+            echart.getEchartsInstance().dispatchAction({
+                type: "takeGlobalCursor",
+                key: "brush",
+                brushOption: {
+                    type: "rect",
+                    toolbox: ["rect", "polygon", "keep", "clear"],
+                    brushStyle: {
+                        borderWidth: 5,
+                        color: "rgba(0,0,0,0.1)",
+                        borderColor: "rgba(255,69,0,1)"
+                    },
+                    outOfBrush: {
+                        color: "rgb(0,255,0)"
+                    },
+                    inBrush: {
+                        color: "rgb(0,0,255)"
+                    },
+                    xAxisIndex: 0,
+                    yAxisIndex: 0
+                }
+            });
+            firstRender = false;
+        }
+    }
+};
 
 function ScatterGraph(props) {
     const selectedFeatures = props.data.get("featureList").filter(f => f.get("selected"));
     const xAxis = selectedFeatures.get(0).get("name");
     const yAxis = selectedFeatures.get(1).get("name");
 
+    console.log("react render");
+
     return (
         <React.Fragment>
             <ReactEcharts
+                ref={e => {
+                    echart = e;
+                }}
                 option={createGraphOptions(props.data)}
                 notMerge={true}
-                lazyUpdate={true}
+                lazyUpdate={false}
                 style={{ height: "100%", width: "100%" }}
+                onEvents={onEvents}
             />
             <div className="xAxisLabel">{xAxis}</div>
             <div className="yAxisLabel">{yAxis}</div>
