@@ -50,9 +50,9 @@ function WindowManager(props) {
         };
         return (
             <Cristal
-                key={idx}
+                key={win.id}
                 className="newWindow"
-                onClose={_ => props.closeWindow(idx)}
+                onClose={_ => props.closeWindow(win.id)}
                 {...settings}
             >
                 <div className="windowBody">{getWindowContent(win)}</div>
