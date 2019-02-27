@@ -7,8 +7,6 @@ import PropTypes from "prop-types";
 import React, { Component } from "react";
 
 import { brushClear } from "actions/data";
-import { getReports } from "selectors/ui";
-import { manager } from "components/RWindowManager/manager/manager";
 import { openAlgorithm, openReport, openDevelopment, brushtypeSet, modeSet } from "actions/ui";
 import Import from "components/Import/Import";
 import LoadingBar from "Components/LoadingBar/LoadingBar";
@@ -25,10 +23,6 @@ class TopBar extends Component {
             rSelected: 2,
             brushSelected: "freehand",
             gridSize: 10
-        };
-
-        this.vars = {
-            reports: getReports(this.props.ui).toJS()
         };
 
         this.defaultBackground = "#05101f";
@@ -113,10 +107,7 @@ class TopBar extends Component {
             this.setState({ brushSelected: eventKey });
         }
     }
-    setGridSize(size) {
-        manager.setGridSizes([size, size]);
-        this.setState({ gridSize: size });
-    }
+    setGridSize(size) {}
 
     setLoadingPercent(p) {
         if (this.ref_loading) this.ref_loading.setLoadingPercent(p);
@@ -291,114 +282,6 @@ class TopBar extends Component {
                             Snap
                         </Button>
                     </ButtonGroup>
-
-                    <Dropdown className="dropdownMain right" autoOpen={false}>
-                        <Dropdown.Toggle className="dropdownToggle" title="Windows" />
-                        <Dropdown.Menu>
-                            <MenuItem header>Arrangement</MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    manager.tweenWindows("tile");
-                                }}
-                            >
-                                Tile
-                            </MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    manager.tweenWindows("cascade");
-                                }}
-                            >
-                                Cascade
-                            </MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    manager.tweenWindows("horizontal");
-                                }}
-                            >
-                                Horizontal
-                            </MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    manager.tweenWindows("vertical");
-                                }}
-                            >
-                                Vertical
-                            </MenuItem>
-                            <MenuItem header>Select</MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    manager.embraceAll(0);
-                                }}
-                            >
-                                Select All
-                            </MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    manager.unembraceAll(0);
-                                }}
-                            >
-                                Deselect All
-                            </MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    manager.invertEmbrace(0);
-                                }}
-                            >
-                                Invert Selected
-                            </MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    manager.unsnapAllEmbracedWindows();
-                                }}
-                            >
-                                Unsnap Selected
-                            </MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    manager.minimizeAllEmbraced(0);
-                                }}
-                            >
-                                Minimize Selected
-                            </MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    manager.removeAllEmbraced(0);
-                                }}
-                            >
-                                Close Selected
-                            </MenuItem>
-                            <MenuItem header>Grouping</MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    manager.groupEmbraced(0);
-                                }}
-                            >
-                                Group
-                            </MenuItem>
-                            <MenuItem header>State</MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    manager.showAll(0);
-                                }}
-                            >
-                                Show All
-                            </MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    manager.minimizeAll(0);
-                                }}
-                            >
-                                Minimize All
-                            </MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    manager.removeAll(0);
-                                }}
-                            >
-                                Close All
-                            </MenuItem>
-                        </Dropdown.Menu>
-                    </Dropdown>
 
                     <div className="triTopRight" />
                 </div>

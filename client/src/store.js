@@ -4,12 +4,9 @@
  */
 import { createLogger } from "redux-logger";
 import { createStore, applyMiddleware, compose } from "redux";
-import Immutable from "immutable";
 import thunkMiddleware from "redux-thunk";
 
 import rootReducer from "reducers";
-
-import window from "./Components/RWindowManager/Window/Window";
 
 export default function configureStore(initialState) {
     const logger = createLogger();
@@ -17,10 +14,7 @@ export default function configureStore(initialState) {
     const store = createStore(
         rootReducer,
         initialState,
-        compose(
-            applyMiddleware(logger, thunkMiddleware),
-            window.devToolsExtension ? window.devToolsExtension() : f => f //add support for Redux dev tools
-        )
+        compose(applyMiddleware(logger, thunkMiddleware))
     );
 
     if (module.hot) {

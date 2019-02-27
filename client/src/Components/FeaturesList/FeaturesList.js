@@ -11,7 +11,6 @@ import {
     featuresUnselectAll,
     selectionsUnselectAll
 } from "actions/data";
-import { formulas } from "formulas/formulas";
 
 class FeaturesList extends Component {
     constructor(props) {
@@ -54,7 +53,6 @@ class FeaturesList extends Component {
                 }}
             >
                 <div className="FeaturesList__checkbox" />
-                {formulas.markSubstring(name, this.props.filterString)}
             </li>
         );
     }

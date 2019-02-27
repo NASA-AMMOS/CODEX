@@ -1,28 +1,22 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import "css/fonts.css";
-
-import "index.css";
-
-//Other global css'
-import "css/react-contextmenu.css";
 import "bootstrap/dist/css/bootstrap.css";
 
-import Main from "components/Main/Main";
-import registerServiceWorker from "registerServiceWorker";
+import "styles/index.css";
+import "styles/fonts.css";
+import "styles/react-contextmenu.css";
 
-// redux setup
 import { Provider } from "react-redux";
-import configureStore from "store";
+import React from "react";
+import ReactDOM from "react-dom";
 
-// solely for use in old singletons
-export const BANDAID_PATCH_STORE = store;
+import View from "components/View/View";
+import configureStore from "store";
+import registerServiceWorker from "registerServiceWorker";
 
 const store = configureStore();
 
 ReactDOM.render(
     <Provider store={store}>
-        <Main />
+        <View />
     </Provider>,
     document.getElementById("root")
 );

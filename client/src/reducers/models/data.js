@@ -5,10 +5,6 @@
  */
 
 import Immutable from "immutable";
-import { createReducer } from "redux-create-reducer";
-import { formulas } from "formulas/formulas";
-
-import * as sels from "selectors/data";
 
 /**
  * Initial state, as defined by docs file
