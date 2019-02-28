@@ -2,6 +2,7 @@ import "components/Graphs/ScatterGraph.css";
 
 import React from "react";
 import ReactEcharts from "echarts-for-react";
+import echartsgl from "echarts-gl";
 
 function createGraphOptions(dataState) {
     const selectedFeatures = dataState.get("featureList").filter(f => f.get("selected"));

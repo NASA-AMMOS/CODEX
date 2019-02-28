@@ -2,7 +2,7 @@ import "components/Graphs/HeatmapGraph.css";
 
 import React from "react";
 import ReactEcharts from "echarts-for-react";
-
+import echartsgl from "echarts-gl";
 import * as utils from "utils/utils";
 
 function formatData(cols) {

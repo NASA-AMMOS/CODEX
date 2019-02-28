@@ -1,4 +1,4 @@
-import "Components/FeaturesList/FeaturesList.css";
+import "components/FeaturesList/FeaturesList.css";
 
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
@@ -53,6 +53,7 @@ class FeaturesList extends Component {
                 }}
             >
                 <div className="FeaturesList__checkbox" />
+                <span>{name}</span>
             </li>
         );
     }
