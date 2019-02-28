@@ -2,7 +2,7 @@ import { windowManagerState } from "reducers/models/windowManager";
 import WindowManagerReducer from "reducers/reducerFunctions/WindowManagerReducer";
 import * as actionTypes from "constants/actionTypes";
 
-export default function data(
+export default function windowManager(
     state = windowManagerState,
     action,
     opt_reducer = WindowManagerReducer

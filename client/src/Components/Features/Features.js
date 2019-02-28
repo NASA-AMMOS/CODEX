@@ -1,19 +1,30 @@
 import React, { Component } from "react";
 import "./Features.css";
-
+import { connect } from "react-redux";
 import FeaturesList from "../FeaturesList/FeaturesList";
 
-class Features extends Component {
-    render() {
-        return (
-            <div className="Features">
-                <FeaturesList
-                    filterString={this.props.filterString}
-                    onOffAll={this.props.onOffAll}
-                />
-            </div>
-        );
-    }
+function createSelectionsList(props) {
+    return props.selectionState.selections.map(selection => (
+        <div key={selection.rowIndex}>{selection.name}</div>
+    ));
 }
 
-export default Features;
+function Features(props) {
+    return (
+        <div className="Features">
+            <FeaturesList filterString={props.filterString} onOffAll={props.onOffAll} />
+            {createSelectionsList(props)}
+        </div>
+    );
+}
+
+function mapStateToProps(state) {
+    return {
+        selectionState: state.selections
+    };
+}
+
+export default connect(
+    mapStateToProps,
+    null
+)(Features);
