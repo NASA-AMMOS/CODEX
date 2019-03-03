@@ -3,30 +3,36 @@ import ReactEcharts from "echarts-for-react";
 import echartsgl from "echarts-gl";
 import { getAlgorithmData } from "components/Algorithms/algorithmFunctions";
 import * as algorithmTypes from "constants/algorithmTypes";
-import { makeSimpleScatterPlot } from "components/Algorithms/algorithmChartFunctions";
-import "components/Algorithms/algorithmStyles.css";
+import SubalgoChart from "components/Algorithms/SubalgoChart";
+import "components/Algorithms/algorithmStyles.scss";
+
+function selectAlgorithm(subalgoStates, setSubalgoStates) {
+    setSubalgoStates(subalgoStates.map(subalgo => subalgo));
+}
 
 function ClusterAlgorithm(props) {
     const algorithm = algorithmTypes.CLUSTER_ALGORITHM;
 
-    const [loadingStates, setLoadingStates] = useState(
+    const [subalgoStates, setSubalgoStates] = useState(
         algorithmTypes.SUBALGORITHMS[algorithm].map(subalgo => {
             return {
                 name: subalgo.simplename,
                 loaded: false,
-                serverData: null
+                serverData: null,
+                humanName: subalgo.name
             };
         })
     );
 
+    // Routine to get data from the backend for each subalgorithm. State is updated as data comes in.
     useEffect(_ => {
         const algorithmRequests = getAlgorithmData(
             algorithm,
             props.selectedFeatures,
             props.filename,
             inMsg => {
-                setLoadingStates(
-                    loadingStates.map(subalgo =>
+                setSubalgoStates(
+                    subalgoStates.map(subalgo =>
                         subalgo.name === inMsg.algorithmName
                             ? Object.assign(subalgo, { loaded: true, serverData: inMsg })
                             : subalgo
@@ -42,8 +48,16 @@ function ClusterAlgorithm(props) {
     }, []); // Only run this call once, on component load.
 
     return (
-        <div className="subalgo_container">
-            {loadingStates.map(algorithmChartFunctions.makeSubalgoPlot)}
+        <div className="algo_container">
+            {subalgoStates.map(subalgoState => (
+                <SubalgoChart
+                    key={subalgoState.name}
+                    name={subalgoState.name}
+                    humanName={subalgoState.humanName}
+                    serverData={subalgoState.serverData}
+                    onClickCallback={_ => console.log("click!")}
+                />
+            ))}
         </div>
     );
 }

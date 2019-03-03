@@ -1,9 +1,0 @@
-.subalgo_container {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.subalgo-plot {
-    width: 200px;
-    height: 200px;
-}

@@ -21,6 +21,8 @@ function getWindowTitle(win) {
         case uiTypes.SCATTER_GRAPH:
         case uiTypes.HEATMAP_GRAPH:
             return getTwoAxisGraphTitle(win);
+        case algorithmTypes.CLUSTER_ALGORITHM:
+            return `Algorithm: ${win.windowType}`;
         default:
             return "";
     }
