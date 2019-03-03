@@ -6,11 +6,12 @@
 import * as types from "constants/actionTypes";
 
 // file data
-export const fileLoad = (data, filename) => ({
-    type: types.FILE_LOAD,
-    data,
-    filename
-});
+export function fileLoad(data, filename) {
+    return dispatch => {
+        dispatch({ type: types.CLOSE_ALL_WINDOWS });
+        dispatch({ type: types.FILE_LOAD, data, filename });
+    };
+}
 
 // feature mgmt
 

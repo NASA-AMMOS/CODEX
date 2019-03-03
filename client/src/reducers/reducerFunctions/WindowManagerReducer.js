@@ -1,3 +1,5 @@
+import Immutable from "immutable";
+
 export default class WindowManagerReducer {
     static openNewWindow(state, action) {
         // Add an ID to the window
@@ -9,5 +11,9 @@ export default class WindowManagerReducer {
 
     static closeWindow(state, action) {
         return state.set("windows", state.get("windows").filter(f => f.id !== action.id));
+    }
+
+    static closeAllWindows(state, action) {
+        return state.set("windows", Immutable.fromJS([]));
     }
 }

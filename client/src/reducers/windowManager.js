@@ -12,6 +12,8 @@ export default function windowManager(
             return opt_reducer.openNewWindow(state, action);
         case actionTypes.CLOSE_WINDOW:
             return opt_reducer.closeWindow(state, action);
+        case actionTypes.CLOSE_ALL_WINDOWS:
+            return opt_reducer.closeAllWindows(state, action);
         default:
             return state;
     }
