@@ -9,6 +9,7 @@ import ClusterAlgorithm from "components/Algorithms/ClusterAlgorithm";
 import * as uiTypes from "constants/uiTypes";
 import "components/WindowManager/WindowManagerStyles.css";
 import * as algorithmTypes from "constants/algorithmTypes";
+import * as windowSettings from "constants/windowSettings";
 
 function getTwoAxisGraphTitle(win) {
     const selectedFeatures = win.data.get("featureList").filter(f => f.get("selected"));
@@ -46,7 +47,8 @@ function WindowManager(props) {
             isResizeable: true,
             isDraggable: true,
             initialPosition: "top-left",
-            restrictToParentDiv: true
+            restrictToParentDiv: true,
+            initialSize: windowSettings.initialSizes[win.windowType] || null
         };
         return (
             <Cristal

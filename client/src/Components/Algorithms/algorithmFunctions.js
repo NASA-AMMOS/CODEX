@@ -37,11 +37,13 @@ export function getAlgorithmData(algorithm, selectedFeatures, filename, dataCall
 
     return requests.map(request => {
         const requestObject = {};
-
         const socketWorker = new WorkerSocket();
 
         socketWorker.addEventListener("message", e => {
             const inMsg = JSON.parse(e.data);
+
+            if (inMsg.message !== "success") return; // Not handling in-progress messages right now.
+
             inMsg.algorithmName = request.algorithmName;
             dataCallback(inMsg);
         });
