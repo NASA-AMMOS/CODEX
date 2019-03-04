@@ -16,5 +16,6 @@ export const dataState = Immutable.fromJS({
     _featureSelect: {
         last_shiftless_selected_feature: null
     },
-    featureList: {}
+    featureList: {},
+    featureListLoading: false
 });

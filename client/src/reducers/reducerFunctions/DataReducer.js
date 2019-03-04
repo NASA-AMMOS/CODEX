@@ -3,6 +3,10 @@ import Immutable from "immutable";
 import * as uiTypes from "constants/uiTypes";
 
 export default class DataReducer {
+    static setFeatureListLoading(state, action) {
+        return state.set("featureListLoading", action.isLoading);
+    }
+
     /**
      * Handle a FILE_LOAD
      * @param {Map} state current state

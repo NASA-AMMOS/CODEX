@@ -8,13 +8,6 @@ import "components/Algorithms/algorithmStyles.scss";
 import SubalgoEditParams from "components/Algorithms/SubalgoEditParams";
 import SubalgoEditOutputs from "components/Algorithms/SubalgoEditOutputs";
 
-const baseOutputParamOptions = {
-    name: "Cluster",
-    pca: true,
-    clusterId: false,
-    clusters: true
-};
-
 function ClusterAlgorithm(props) {
     const algorithm = algorithmTypes.CLUSTER_ALGORITHM;
 
@@ -28,7 +21,12 @@ function ClusterAlgorithm(props) {
                 params: subalgo.parameters.map(param => {
                     return { name: param.name, value: param.value };
                 }),
-                outputParams: baseOutputParamOptions
+                outputParams: {
+                    name: "Cluster",
+                    pca: true,
+                    clusterId: false,
+                    clusters: true
+                }
             };
         })
     );
@@ -64,6 +62,7 @@ function ClusterAlgorithm(props) {
         );
     }
 
+    // Function to change the parameters of each subalgo (called from within the parameter edit component)
     function changeParam(subalgoName, paramName, value) {
         setSubalgoStates(
             subalgoStates.map(subalgo =>
@@ -80,6 +79,7 @@ function ClusterAlgorithm(props) {
         );
     }
 
+    // Function to change the output parameters of each subalgo (called from within the output parameter edit component)
     function changeOutputParam(subalgoName, outputParamName, value) {
         setSubalgoStates(
             subalgoStates.map(subalgo =>
@@ -99,7 +99,7 @@ function ClusterAlgorithm(props) {
         );
     }
 
-    // Generate preview images
+    // Generate preview charts
     const subalgoPreviews = subalgoStates.map(subalgoState => (
         <SubalgoChart
             key={subalgoState.name}
@@ -115,7 +115,7 @@ function ClusterAlgorithm(props) {
 
     // If we aren't editing a subalgo, display the whole panel of previews
     const selectedSubalgo = subalgoStates.find(subalgo => subalgo.editMode);
-    if (!selectedSubalgo) return <div className="algo_container">{subalgoPreviews}</div>;
+    if (!selectedSubalgo) return <div className="algo-container">{subalgoPreviews}</div>;
 
     // Render the subalgo edit mode if a subalgo is in an edit state
     switch (selectedSubalgo.editMode) {

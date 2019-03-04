@@ -4,12 +4,31 @@
  */
 
 import * as types from "constants/actionTypes";
+import WorkerUpload from "worker-loader!workers/upload.worker";
 
-// file data
-export function fileLoad(data, filename) {
+export function fileLoad(fileList) {
     return dispatch => {
+        // Clear out list of feature names while we handle new file
+        dispatch({ type: types.FILE_LOAD, data: [], filename: "" });
+        dispatch({ type: types.FEATURE_LIST_LOADING, isLoading: true });
         dispatch({ type: types.CLOSE_ALL_WINDOWS });
-        dispatch({ type: types.FILE_LOAD, data, filename });
+
+        const workerUpload = new WorkerUpload();
+        workerUpload.addEventListener("message", msg => {
+            const res = JSON.parse(msg.data);
+            if (res.status !== "complete") return;
+            dispatch({
+                type: types.FILE_LOAD,
+                data: res.feature_names,
+                filename: res.filename
+            });
+            dispatch({ type: types.FEATURE_LIST_LOADING, isLoading: false });
+        });
+
+        workerUpload.postMessage({
+            files: fileList,
+            NODE_ENV: process.env.NODE_ENV
+        });
     };
 }
 

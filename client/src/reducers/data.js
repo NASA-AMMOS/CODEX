@@ -38,6 +38,8 @@ export default function data(state = dataState, action, opt_reducer = DataReduce
             return opt_reducer.brushClear(state, action);
         case actionTypes.UPDATE_DATA:
             return opt_reducer.updateData(state, action);
+        case actionTypes.FEATURE_LIST_LOADING:
+            return opt_reducer.setFeatureListLoading(state, action);
         default:
             return state;
     }
