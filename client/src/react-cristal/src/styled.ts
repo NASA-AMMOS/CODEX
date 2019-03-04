@@ -15,7 +15,7 @@ export interface HeaderProps {
     isDraggable?: boolean;
 }
 
-export const minWidth = 400;
+export const minWidth = 225;
 export const minHeight = 225;
 export const padding = 10;
 

@@ -139,27 +139,35 @@ export function makeSimpleScatterPlot(serverData) {
 
 // Render the subalgo plot div.
 export function SubalgoChart(props) {
+    console.log(props.serverData);
+
     const [hoverState, setHoverState] = useState(false);
 
     const dataPoints = props.serverData ? props.serverData.data : null;
     const containerClasses = classnames({
         "subalgo-container": true,
-        selected: props.selected || hoverState
+        selected: !props.editMode && hoverState,
+        "edit-mode": props.editMode
     });
     const titleClasses = classnames({
         "subalgo-title": true,
-        selected: props.selected || hoverState
+        selected: !props.editMode && hoverState
     });
+
+    const timeToGenerate = props.serverData ? `~${props.serverData.eta.toFixed(2)}s` : "";
 
     return (
         <div
             className={containerClasses}
             onMouseOver={_ => setHoverState(true)}
             onMouseOut={_ => setHoverState(false)}
-            onClick={_ => props.onClickCallback()}
+            onClick={props.onClickCallback}
         >
-            <div className={titleClasses}>{props.humanName}</div>
+            <div className={titleClasses}>{props.editMode ? "Preview" : props.humanName}</div>
             <div className="subalgo-plot">{makeSimpleScatterPlot(props.serverData)}</div>
+            <div className="subalgo-time" hidden={props.editMode}>
+                {timeToGenerate}
+            </div>
         </div>
     );
 }

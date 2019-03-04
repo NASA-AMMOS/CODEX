@@ -1,14 +1,16 @@
-import React, { Component } from "react";
-import Cristal from "react-cristal/src";
-import { connect } from "react-redux";
-import * as windowManagerActions from "actions/windowManagerActions";
-import { bindActionCreators } from "redux";
-import ScatterGraph from "components/Graphs/ScatterGraph";
-import HeatmapGraph from "components/Graphs/HeatmapGraph";
-import ClusterAlgorithm from "components/Algorithms/ClusterAlgorithm";
-import * as uiTypes from "constants/uiTypes";
 import "components/WindowManager/WindowManagerStyles.css";
+
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
+import React from "react";
+
+import ClusterAlgorithm from "components/Algorithms/ClusterAlgorithm";
+import Cristal from "react-cristal/src";
+import HeatmapGraph from "components/Graphs/HeatmapGraph";
+import ScatterGraph from "components/Graphs/ScatterGraph";
 import * as algorithmTypes from "constants/algorithmTypes";
+import * as uiTypes from "constants/uiTypes";
+import * as windowManagerActions from "actions/windowManagerActions";
 import * as windowSettings from "constants/windowSettings";
 
 function getTwoAxisGraphTitle(win) {

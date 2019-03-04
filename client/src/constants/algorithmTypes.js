@@ -144,3 +144,6 @@ export const SUBALGORITHMS = {
         }
     ]
 };
+
+export const SUBALGO_MODE_EDIT_PARAMS = "SUBALGO_MODE_EDIT_PARAMS";
+export const SUBALGO_MODE_EDIT_OUTPUTS = "SUBALGO_MODE_EDIT_OUTPUTS";
