@@ -6,12 +6,11 @@ import * as algorithmTypes from "constants/algorithmTypes";
 import SubalgoChart from "components/Algorithms/SubalgoChart";
 import "components/Algorithms/algorithmStyles.scss";
 import SubalgoEditParams from "components/Algorithms/SubalgoEditParams";
-import SubalgoEditOutputs from "components/Algorithms/SubalgoEditOutputs";
 import AlgorithmHelpContent from "components/Algorithms/AlgorithmHelpContent";
 
 function ClusterAlgorithm(props) {
     const algorithm = algorithmTypes.CLUSTER_ALGORITHM;
-    const algoVerb = "Clustering";
+    const algoVerb = "clustering";
 
     // SUBALGORITHM STATE MANAGEMENT
 
@@ -30,7 +29,8 @@ function ClusterAlgorithm(props) {
                     pca: true,
                     clusterId: false,
                     clusters: true
-                }
+                },
+                paramHelpText: null
             };
         })
     );
@@ -106,87 +106,66 @@ function ClusterAlgorithm(props) {
     // HELP MODE MANAGEMENT
 
     const [helpModeState, setHelpModeState] = useState({ active: false, textContent: null });
+    function toggleHelpMode() {
+        setHelpModeState({
+            active: !helpModeState.active,
+            textContent: helpModeState.textContent
+        });
+    }
 
     //ACTUAL RENDERING STARTS HERE
 
-    // Generate preview charts
-    const subalgoPreviews = subalgoStates.map(subalgoState => (
-        <SubalgoChart
-            key={subalgoState.name}
-            name={subalgoState.name}
-            humanName={subalgoState.humanName}
-            serverData={subalgoState.serverData}
-            onClickCallback={_ =>
-                setSubalgoEditMode(subalgoState.name, algorithmTypes.SUBALGO_MODE_EDIT_PARAMS)
-            }
-            editMode={subalgoState.editMode}
-        />
-    ));
-
-    // If we aren't focusing on single a subalgo, either display the whole panel of previews or the general algorithm help.
     const selectedSubalgo = subalgoStates.find(subalgo => subalgo.editMode);
-    if (!selectedSubalgo)
-        return (
-            <React.Fragment>
-                <div className="preview-title">
-                    <div className="title">
-                        {helpModeState.active ? `Help: ${algoVerb}` : "Choose a Clustering Method"}
-                    </div>
-                    <button
-                        onClick={_ =>
-                            setHelpModeState({
-                                active: !helpModeState.active,
-                                textContent: helpModeState.textContent
-                            })
+    return (
+        <React.Fragment>
+            <div className="preview-title">
+                <div className="title">
+                    {helpModeState.active ? `Help: ${algoVerb}` : "Choose a Clustering Method"}
+                </div>
+                <button onClick={toggleHelpMode}>
+                    {helpModeState.active ? "exit help" : "help"}
+                </button>
+            </div>
+            <div className="algo-container">
+                {helpModeState.active ? (
+                    <AlgorithmHelpContent
+                        helpModeState={helpModeState}
+                        updateTextContent={textContent =>
+                            setHelpModeState({ active: helpModeState.active, textContent })
                         }
-                    >
-                        {helpModeState.active ? "exit help" : "help"}
-                    </button>
-                </div>
-                <div className="algo-container">
-                    {helpModeState.active ? (
-                        <AlgorithmHelpContent
-                            algo={algorithm}
-                            helpModeState={helpModeState}
-                            updateTextContent={textContent =>
-                                setHelpModeState({ active: helpModeState.active, textContent })
+                        guidancePath={`${algoVerb}_page:general_${algoVerb}`}
+                    />
+                ) : (
+                    subalgoStates.map(subalgoState => (
+                        <SubalgoChart
+                            key={subalgoState.name}
+                            name={subalgoState.name}
+                            humanName={subalgoState.humanName}
+                            serverData={subalgoState.serverData}
+                            onClickCallback={_ =>
+                                setSubalgoEditMode(
+                                    subalgoState.name,
+                                    algorithmTypes.SUBALGO_MODE_EDIT_PARAMS
+                                )
                             }
-                            guidancePath="clustering_page:general_clustering"
+                            editMode={subalgoState.editMode}
                         />
-                    ) : (
-                        subalgoPreviews
-                    )}
-                </div>
-            </React.Fragment>
-        );
-
-    // Render the subalgo edit mode if a subalgo is in an edit state
-    switch (selectedSubalgo.editMode) {
-        case algorithmTypes.SUBALGO_MODE_EDIT_PARAMS:
-            return (
-                <SubalgoEditParams
-                    previewPlot={subalgoPreviews.find(
-                        preview => preview.key === selectedSubalgo.name
-                    )}
-                    setMode={setSubalgoEditMode}
-                    algo={algorithm}
-                    subalgoState={selectedSubalgo}
-                    changeParam={changeParam}
-                />
-            );
-        case algorithmTypes.SUBALGO_MODE_EDIT_OUTPUTS:
-            return (
-                <SubalgoEditOutputs
-                    previewPlot={subalgoPreviews.find(
-                        preview => preview.key === selectedSubalgo.name
-                    )}
-                    setMode={setSubalgoEditMode}
-                    algo={algorithm}
-                    subalgoState={selectedSubalgo}
-                    changeOutputParam={changeOutputParam}
-                />
-            );
-    }
+                    ))
+                )}
+            </div>
+            <div className="subalgo-focus" hidden={!selectedSubalgo}>
+                {!selectedSubalgo ? null : (
+                    <SubalgoEditParams
+                        setMode={setSubalgoEditMode}
+                        algo={algorithm}
+                        subalgoState={selectedSubalgo}
+                        changeParam={changeParam}
+                        baseGuidancePath={`${algoVerb}_page`}
+                    />
+                )}
+            </div>
+        </React.Fragment>
+    );
 }
 
 export default ClusterAlgorithm;

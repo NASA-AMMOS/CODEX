@@ -81,12 +81,14 @@ function handleHelpTextRequest(msg) {
             identification: cid,
             cid
         });
+        console.log(outMsg);
         socket.send(outMsg);
     };
 
     // TODO: Use a transferable object to return the data array so we aren't copying it back to the main thread
     socket.onmessage = msg => {
         const inMsg = JSON.parse(msg.data);
+        console.log(inMsg);
         if (inMsg.message === "success") self.postMessage(JSON.stringify(inMsg));
     };
 }
