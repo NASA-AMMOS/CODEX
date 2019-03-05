@@ -7,9 +7,13 @@ import SubalgoChart from "components/Algorithms/SubalgoChart";
 import "components/Algorithms/algorithmStyles.scss";
 import SubalgoEditParams from "components/Algorithms/SubalgoEditParams";
 import SubalgoEditOutputs from "components/Algorithms/SubalgoEditOutputs";
+import AlgorithmHelpContent from "components/Algorithms/AlgorithmHelpContent";
 
 function ClusterAlgorithm(props) {
     const algorithm = algorithmTypes.CLUSTER_ALGORITHM;
+    const algoVerb = "Clustering";
+
+    // SUBALGORITHM STATE MANAGEMENT
 
     const [subalgoStates, setSubalgoStates] = useState(
         algorithmTypes.SUBALGORITHMS[algorithm].map(subalgo => {
@@ -99,6 +103,12 @@ function ClusterAlgorithm(props) {
         );
     }
 
+    // HELP MODE MANAGEMENT
+
+    const [helpModeState, setHelpModeState] = useState({ active: false, textContent: null });
+
+    //ACTUAL RENDERING STARTS HERE
+
     // Generate preview charts
     const subalgoPreviews = subalgoStates.map(subalgoState => (
         <SubalgoChart
@@ -113,9 +123,42 @@ function ClusterAlgorithm(props) {
         />
     ));
 
-    // If we aren't editing a subalgo, display the whole panel of previews
+    // If we aren't focusing on single a subalgo, either display the whole panel of previews or the general algorithm help.
     const selectedSubalgo = subalgoStates.find(subalgo => subalgo.editMode);
-    if (!selectedSubalgo) return <div className="algo-container">{subalgoPreviews}</div>;
+    if (!selectedSubalgo)
+        return (
+            <React.Fragment>
+                <div className="preview-title">
+                    <div className="title">
+                        {helpModeState.active ? `Help: ${algoVerb}` : "Choose a Clustering Method"}
+                    </div>
+                    <button
+                        onClick={_ =>
+                            setHelpModeState({
+                                active: !helpModeState.active,
+                                textContent: helpModeState.textContent
+                            })
+                        }
+                    >
+                        {helpModeState.active ? "exit help" : "help"}
+                    </button>
+                </div>
+                <div className="algo-container">
+                    {helpModeState.active ? (
+                        <AlgorithmHelpContent
+                            algo={algorithm}
+                            helpModeState={helpModeState}
+                            updateTextContent={textContent =>
+                                setHelpModeState({ active: helpModeState.active, textContent })
+                            }
+                            guidancePath="clustering_page:general_clustering"
+                        />
+                    ) : (
+                        subalgoPreviews
+                    )}
+                </div>
+            </React.Fragment>
+        );
 
     // Render the subalgo edit mode if a subalgo is in an edit state
     switch (selectedSubalgo.editMode) {

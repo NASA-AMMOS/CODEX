@@ -139,8 +139,6 @@ export function makeSimpleScatterPlot(serverData) {
 
 // Render the subalgo plot div.
 export function SubalgoChart(props) {
-    console.log(props.serverData);
-
     const [hoverState, setHoverState] = useState(false);
 
     const dataPoints = props.serverData ? props.serverData.data : null;

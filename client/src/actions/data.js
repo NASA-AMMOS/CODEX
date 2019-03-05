@@ -13,7 +13,7 @@ export function fileLoad(fileList) {
         dispatch({ type: types.FEATURE_LIST_LOADING, isLoading: true });
         dispatch({ type: types.CLOSE_ALL_WINDOWS });
 
-        const workerUpload = new WorkerUpload();
+        let workerUpload = new WorkerUpload();
         workerUpload.addEventListener("message", msg => {
             const res = JSON.parse(msg.data);
             if (res.status !== "complete") return;
@@ -23,6 +23,7 @@ export function fileLoad(fileList) {
                 filename: res.filename
             });
             dispatch({ type: types.FEATURE_LIST_LOADING, isLoading: false });
+            workerUpload = null;
         });
 
         workerUpload.postMessage({

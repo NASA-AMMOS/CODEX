@@ -1,7 +1,19 @@
+.preview-title {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    margin-left: 10px;
+
+    .title {
+        font-size: 26px;
+    }
+}
+
 .algo-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
+    height: 90%;
 }
 
 .subalgo-container {
@@ -86,5 +98,11 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
+    margin-left: 10px;
+}
+
+.help-content {
+    height: 100%;
+    overflow: scroll;
     margin-left: 10px;
 }

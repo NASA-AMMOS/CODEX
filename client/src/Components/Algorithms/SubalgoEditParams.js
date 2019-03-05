@@ -21,14 +21,6 @@ function makeParamField(props, baseParam) {
     );
 }
 
-function makeParamFields(props, baseParams) {
-    return (
-        <React.Fragment>
-            {baseParams.map(baseParam => makeParamField(props, baseParam))}
-        </React.Fragment>
-    );
-}
-
 function SubalgoEditParams(props) {
     const baseParams = algorithmTypes.SUBALGORITHMS[props.algo].find(
         subalgo => subalgo.simplename === props.subalgoState.name
@@ -38,7 +30,7 @@ function SubalgoEditParams(props) {
         <div className="subalgo-detail">
             <div className="params">
                 <div className="title">{props.subalgoState.humanName}: Edit Parameters</div>
-                {makeParamFields(props, baseParams)}
+                {baseParams.map(baseParam => makeParamField(props, baseParam))}
                 <button onClick={_ => props.setMode(props.subalgoState.name)}>
                     Back to previews
                 </button>
