@@ -1,10 +1,11 @@
 import React, { Component } from "react";
-import "./Panel.css";
+import "components/LeftPanel/LeftPanel.css";
 
 import Title from "../Title/Title";
-import Features from "../Features/Features";
+import FeatureList from "components/LeftPanel/FeatureList";
+import SelectionList from "components/LeftPanel/SelectionList";
 
-class Panel extends Component {
+class LeftPanel extends Component {
     constructor() {
         super();
 
@@ -50,10 +51,11 @@ class Panel extends Component {
                                     {this.state.onOffAll}
                                 </div>
                             </div>
-                            <Features
+                            <FeatureList
                                 filterString={this.state.filterString}
                                 onOffAll={this.state.onOffAll}
                             />
+                            <SelectionList />
                         </div>
                     </div>
                 </div>
@@ -62,4 +64,4 @@ class Panel extends Component {
     }
 }
 
-export default Panel;
+export default LeftPanel;

@@ -52,11 +52,13 @@ export const featureAdd = (featureName, featureData) => ({
  * @param {bool} shifted - whether shift key was held
  * @return {object} non-dispatched action object
  */
-export const featureSelect = (feature, shifted) => ({
-    type: types.FEATURE_SELECT,
-    feature,
-    shifted
-});
+export function featureSelect(feature, shifted) {
+    return {
+        type: types.FEATURE_SELECT,
+        feature,
+        shifted
+    };
+}
 
 /**
  * Unselect a feature
@@ -64,11 +66,13 @@ export const featureSelect = (feature, shifted) => ({
  * @param {bool} shifted - whether shift key was held
  * @return {object} non-dispatched action object
  */
-export const featureUnselect = (feature, shifted) => ({
-    type: types.FEATURE_UNSELECT,
-    feature,
-    shifted
-});
+export function featureUnselect(feature, shifted) {
+    return {
+        type: types.FEATURE_UNSELECT,
+        feature,
+        shifted
+    };
+}
 
 /**
  * Unselect all features
