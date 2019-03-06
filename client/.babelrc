@@ -1,5 +1,5 @@
 {
-	"presets": ["env", "react"],
+	"presets": ["env", "react", "stage-2"],
 	"env": {
 		"development": {
 			"presets": ["react-hmre"]

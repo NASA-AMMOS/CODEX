@@ -3,11 +3,15 @@ import "components/Graphs/ScatterGraph.css";
 import React from "react";
 import ReactEcharts from "echarts-for-react";
 import echartsgl from "echarts-gl";
+import { bindActionCreators } from "redux";
+import * as selectionActions from "actions/selectionActions";
+import { connect } from "react-redux";
 
 let echart = null;
 let firstRender = true;
 
-function createGraphOptions(dataState) {
+function createGraphOptions(props) {
+    const dataState = props.data;
     const selectedFeatures = dataState.get("featureList").filter(f => f.get("selected"));
     const xAxis = selectedFeatures.get(0).get("name");
     const yAxis = selectedFeatures.get(1).get("name");
@@ -138,25 +142,28 @@ function createGraphOptions(dataState) {
     };
 }
 
-let onEvents = {
-    brush: (e, echart) => {
-        // plug into the brush event here
-    },
-    rendered: () => {
-        if (firstRender) {
-            echart.getEchartsInstance().dispatchAction({
-                type: "takeGlobalCursor",
-                key: "brush",
-                brushOption: {
-                    type: "rect"
-                }
-            });
-            firstRender = false;
-        }
-    }
-};
-
 function ScatterGraph(props) {
+    console.log(props.selections);
+    let onEvents = {
+        brush: (e, echart) => {
+            // plug into the brush event here
+
+            props.createSelection("Some Selection Name", [10, 15, 65]); // Action arguments are the selection name and an array of all the selected row indices.
+        },
+        rendered: () => {
+            if (firstRender) {
+                echart.getEchartsInstance().dispatchAction({
+                    type: "takeGlobalCursor",
+                    key: "brush",
+                    brushOption: {
+                        type: "rect"
+                    }
+                });
+                firstRender = false;
+            }
+        }
+    };
+
     const selectedFeatures = props.data.get("featureList").filter(f => f.get("selected"));
     const xAxis = selectedFeatures.get(0).get("name");
     const yAxis = selectedFeatures.get(1).get("name");
@@ -167,7 +174,7 @@ function ScatterGraph(props) {
                 ref={e => {
                     echart = e;
                 }}
-                option={createGraphOptions(props.data)}
+                option={createGraphOptions(props)}
                 notMerge={true}
                 lazyUpdate={false}
                 style={{ height: "100%", width: "100%" }}
@@ -179,4 +186,19 @@ function ScatterGraph(props) {
     );
 }
 
-export default ScatterGraph;
+function mapStateToProps(state) {
+    return {
+        selections: state
+    };
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        createSelection: bindActionCreators(selectionActions.createSelection, dispatch)
+    };
+}
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(ScatterGraph);

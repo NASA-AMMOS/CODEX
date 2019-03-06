@@ -4,5 +4,5 @@ export const selectionsState = {
 
 export const selectionModel = {
     name: "name",
-    rowIndex: 0
+    rowIndices: []
 };

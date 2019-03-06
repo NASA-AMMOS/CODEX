@@ -1,5 +1,5 @@
 import * as actionTypes from "constants/actionTypes";
 
-export function createSelection(rowIndex, name) {
-    return { type: actionTypes.CREATE_SELECTION, rowIndex, name };
+export function createSelection(name, rowIndices) {
+    return { type: actionTypes.CREATE_SELECTION, name, rowIndices };
 }
