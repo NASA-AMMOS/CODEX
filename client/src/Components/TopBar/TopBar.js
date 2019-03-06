@@ -1,6 +1,7 @@
 import "components/TopBar/TopBar.css";
 
 import { Button, ButtonGroup } from "reactstrap";
+import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
 import PropTypes from "prop-types";
@@ -14,6 +15,7 @@ import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as graphActions from "actions/graphActions";
 import * as uiTypes from "constants/uiTypes";
+import * as windowManagerActions from "actions/windowManagerActions";
 
 class TopBar extends Component {
     constructor(props) {
@@ -281,6 +283,15 @@ class TopBar extends Component {
                         >
                             Snap
                         </Button>
+                        <Dropdown>
+                            <Dropdown.Toggle className="dropdownToggle" title="Windows" />
+                            <Dropdown.Menu>
+                                <MenuItem header>Arrange</MenuItem>
+                                <MenuItem onSelect={() => this.props.setWindowTileAction(true)}>
+                                    Tile
+                                </MenuItem>
+                            </Dropdown.Menu>
+                        </Dropdown>
                     </ButtonGroup>
 
                     <div className="triTopRight" />
@@ -297,7 +308,8 @@ TopBar.propTypes = {
     openReport: PropTypes.func.isRequired,
     brushtypeSet: PropTypes.func.isRequired,
     modeSet: PropTypes.func.isRequired,
-    createGraph: PropTypes.func.isRequired
+    createGraph: PropTypes.func.isRequired,
+    setWindowTileAction: PropTypes.func.isRequired
 };
 
 // redux store
@@ -318,44 +330,13 @@ function mapDispatchToProps(dispatch) {
         brushtypeSet: t => dispatch(brushtypeSet(t)),
         modeSet: m => dispatch(modeSet(m)),
         createGraph: name => dispatch(graphActions.createGraph(name)),
-        createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name))
-    };
-}
-
-function mergeProps(propsFromState, propsFromDispatch, ownProps) {
-    return {
-        ui: propsFromState.ui,
-        brushClear: () => {
-            propsFromDispatch.brushClear();
-        },
-
-        openAlgorithm: (name, width, height) => {
-            propsFromDispatch.openAlgorithm(propsFromState.data, name, width, height);
-        },
-        openReport: (name, width, height) => {
-            propsFromDispatch.openReport(propsFromState.data, name, width, height);
-        },
-        openDevelopment: name => {
-            propsFromDispatch.openDevelopment(propsFromState.data, name);
-        },
-        brushtypeSet: brushtype => {
-            propsFromDispatch.brushtypeSet(brushtype);
-        },
-        modeSet: mode => {
-            propsFromDispatch.modeSet(mode);
-        },
-        createGraph: name => {
-            propsFromDispatch.createGraph(name);
-        },
-        createAlgorithm: name => {
-            propsFromDispatch.createAlgorithm(name);
-        }
+        createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name)),
+        setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch)
     };
 }
 
 export { TopBar };
 export default connect(
     mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
+    mapDispatchToProps
 )(TopBar);

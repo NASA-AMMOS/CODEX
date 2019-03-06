@@ -6,7 +6,7 @@ import WindowManager from "components/WindowManager/WindowManager";
 class Container extends Component {
     render() {
         return (
-            <div className="Container">
+            <div className="Container" id="Container">
                 <WindowManager />
             </div>
         );

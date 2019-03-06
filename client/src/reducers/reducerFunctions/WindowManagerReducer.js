@@ -16,4 +16,12 @@ export default class WindowManagerReducer {
     static closeAllWindows(state, action) {
         return state.set("windows", Immutable.fromJS([]));
     }
+
+    static setWindowTileActionPending(state, action) {
+        return state.set("tileActionPending", action.isPending);
+    }
+
+    static updateWindows(state, action) {
+        return state.set("windows", action.windows);
+    }
 }

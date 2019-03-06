@@ -4,6 +4,7 @@
     "private": true,
     "homepage": ".",
     "dependencies": {
+        "@mapbox/shelf-pack": "^3.2.0",
         "@trendmicro/react-dropdown": "^1.2.3",
         "@types/react-dom": "^16.8.1",
         "@types/react-redux": "^7.0.1",

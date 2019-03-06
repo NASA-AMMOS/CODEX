@@ -11,11 +11,7 @@ import rootReducer from "reducers";
 export default function configureStore(initialState) {
     const logger = createLogger();
 
-    const store = createStore(
-        rootReducer,
-        initialState,
-        compose(applyMiddleware(logger, thunkMiddleware))
-    );
+    const store = createStore(rootReducer, initialState, compose(applyMiddleware(thunkMiddleware)));
 
     if (module.hot) {
         // Enable Webpack hot module replacement for reducers

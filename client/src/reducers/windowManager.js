@@ -14,6 +14,10 @@ export default function windowManager(
             return opt_reducer.closeWindow(state, action);
         case actionTypes.CLOSE_ALL_WINDOWS:
             return opt_reducer.closeAllWindows(state, action);
+        case actionTypes.SET_WINDOW_TILE_ACTION_PENDING:
+            return opt_reducer.setWindowTileActionPending(state, action);
+        case actionTypes.UPDATE_WINDOWS:
+            return opt_reducer.updateWindows(state, action);
         default:
             return state;
     }

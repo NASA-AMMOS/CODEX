@@ -121,6 +121,12 @@ export class Cristal extends Component<CristalProps, CristalState> {
         this.setState({ x, y });
     };
 
+    snapToPosition = (coords: Coords) => {
+        const { x, y } = coords;
+
+        this.setState({ x, y });
+    };
+
     saveHeaderRef = (el: Element) => {
         this.headerElement = el;
     };
