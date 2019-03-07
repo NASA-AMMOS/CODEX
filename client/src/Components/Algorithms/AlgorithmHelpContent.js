@@ -5,12 +5,15 @@ import * as actionTypes from "constants/actionTypes";
 import ReactMarkdown from "react-markdown";
 
 function AlgorithmHelpContent(props) {
+    if (props.hidden) return null;
+    const [textContent, setTextContent] = useState(null);
+
     useEffect(_ => {
-        const socketWorker = new WorkerSocket();
+        let socketWorker = new WorkerSocket();
 
         socketWorker.addEventListener("message", e => {
             const textContent = JSON.parse(e.data).guidance;
-            props.updateTextContent(textContent);
+            setTextContent(textContent);
         });
 
         socketWorker.postMessage(
@@ -19,14 +22,21 @@ function AlgorithmHelpContent(props) {
                 path: props.guidancePath
             })
         );
-    }, []);
+
+        return function cleanup() {
+            socketWorker.postMessage(JSON.stringify({ action: actionTypes.CLOSE_SOCKET }));
+            socketWorker = null;
+        };
+    });
 
     return (
-        <ReactMarkdown
-            source={props.helpModeState.textContent}
-            className="help-content"
-            linkTarget="_blank"
-        />
+        <div className="help-container">
+            <ReactMarkdown
+                source={textContent || "Loading..."}
+                className="help-content"
+                linkTarget="_blank"
+            />
+        </div>
     );
 }
 

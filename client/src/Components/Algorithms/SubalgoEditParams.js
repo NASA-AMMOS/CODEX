@@ -17,7 +17,12 @@ function makeParamField(props, baseParam) {
                 step={baseParam.step}
                 value={paramValue}
                 onChange={e =>
-                    props.changeParam(props.subalgoState.name, baseParam.name, e.target.value)
+                    props.paramDispatch({
+                        type: "changeParam",
+                        name: props.subalgoState.name,
+                        paramName: baseParam.name,
+                        value: e.target.value
+                    })
                 }
             />
         </div>
@@ -37,6 +42,19 @@ function makeParamsCol(props) {
 }
 
 function makeOutputsCol(props) {
+    function dispatchOutputParamChange(param, value) {
+        props.paramDispatch({
+            type: "changeOutputParam",
+            name: props.subalgoState.name,
+            outputParamName: param,
+            value
+        });
+    }
+
+    function getParamValue(name) {
+        return props.subalgoState.outputParams.find(p => p.name === name).value;
+    }
+
     return (
         <React.Fragment>
             <div className="title">{props.subalgoState.humanName}: Edit Outputs</div>
@@ -44,10 +62,8 @@ function makeOutputsCol(props) {
                 <div className="param-title">Name</div>
                 <input
                     type="text"
-                    value={props.subalgoState.outputParams.name}
-                    onChange={e =>
-                        props.changeOutputParam(props.subalgoState.name, "name", e.target.value)
-                    }
+                    value={getParamValue("name")}
+                    onChange={e => dispatchOutputParamChange("name", e.target.value)}
                 />
             </div>
             <hr />
@@ -56,24 +72,16 @@ function makeOutputsCol(props) {
                 <div className="param-title">Name</div>
                 <input
                     type="checkbox"
-                    checked={props.subalgoState.outputParams.pca}
-                    onChange={e =>
-                        props.changeOutputParam(props.subalgoState.name, "pca", e.target.checked)
-                    }
+                    checked={getParamValue("pca")}
+                    onChange={e => dispatchOutputParamChange("pca", e.target.checked)}
                 />
             </div>
             <div className="subalgo-param-field">
                 <div className="param-title">Cluster ID</div>
                 <input
                     type="checkbox"
-                    checked={props.subalgoState.outputParams.clusterId}
-                    onChange={e =>
-                        props.changeOutputParam(
-                            props.subalgoState.name,
-                            "clusterId",
-                            e.target.checked
-                        )
-                    }
+                    checked={getParamValue("clusterId")}
+                    onChange={e => dispatchOutputParamChange("clusterId", e.target.checked)}
                 />
             </div>
             <hr />
@@ -82,14 +90,8 @@ function makeOutputsCol(props) {
                 <div className="param-title">Clusters</div>
                 <input
                     type="checkbox"
-                    checked={props.subalgoState.outputParams.clusters}
-                    onChange={e =>
-                        props.changeOutputParam(
-                            props.subalgoState.name,
-                            "clusters",
-                            e.target.checked
-                        )
-                    }
+                    checked={getParamValue("clusters")}
+                    onChange={e => dispatchOutputParamChange("clusters", e.target.checked)}
                 />
             </div>
         </React.Fragment>
@@ -123,13 +125,23 @@ function getActionButtons(props) {
         case algorithmTypes.SUBALGO_MODE_EDIT_PARAMS:
             return (
                 <React.Fragment>
-                    <button onClick={_ => props.setMode(props.subalgoState.name)}>Back</button>
                     <button
                         onClick={_ =>
-                            props.setMode(
-                                props.subalgoState.name,
-                                algorithmTypes.SUBALGO_MODE_EDIT_OUTPUTS
-                            )
+                            props.paramDispatch({
+                                type: "changeEditMode",
+                                name: props.subalgoState.name
+                            })
+                        }
+                    >
+                        Back
+                    </button>
+                    <button
+                        onClick={_ =>
+                            props.paramDispatch({
+                                type: "changeEditMode",
+                                name: props.subalgoState.name,
+                                editMode: algorithmTypes.SUBALGO_MODE_EDIT_OUTPUTS
+                            })
                         }
                     >
                         Next
@@ -141,10 +153,11 @@ function getActionButtons(props) {
                 <React.Fragment>
                     <button
                         onClick={_ =>
-                            props.setMode(
-                                props.subalgoState.name,
-                                algorithmTypes.SUBALGO_MODE_EDIT_PARAMS
-                            )
+                            props.paramDispatch({
+                                type: "changeEditMode",
+                                name: props.subalgoState.name,
+                                editMode: algorithmTypes.SUBALGO_MODE_EDIT_PARAMS
+                            })
                         }
                     >
                         Back
@@ -156,33 +169,22 @@ function getActionButtons(props) {
 }
 
 function SubalgoEditParams(props) {
-    const [helpModeState, setHelpModeState] = useState({
-        active: false,
-        textContent: "Loading..."
-    });
-    function toggleHelpMode() {
-        setHelpModeState({ active: !helpModeState.active, textContent: helpModeState.textContent });
-    }
+    const [helpModeState, setHelpModeState] = useState(false);
 
     return (
         <React.Fragment>
             <div className="subalgo-edit-header">
                 <div className="title">{getTitle(props, helpModeState)}</div>
-                <button onClick={toggleHelpMode}>
-                    {helpModeState.active ? "Exit Help" : "Help"}
+                <button onClick={_ => setHelpModeState(state => !state)}>
+                    {helpModeState ? "Exit Help" : "Help"}
                 </button>
             </div>
             <div className="subalgo-detail">
                 <div className="params">{getLeftCol(props)}</div>
-                <div className="help-container" hidden={!helpModeState.active}>
-                    <AlgorithmHelpContent
-                        helpModeState={helpModeState}
-                        updateTextContent={textContent =>
-                            setHelpModeState({ active: helpModeState.active, textContent })
-                        }
-                        guidancePath={`${props.baseGuidancePath}:${props.subalgoState.name}`}
-                    />
-                </div>
+                <AlgorithmHelpContent
+                    hidden={!helpModeState}
+                    guidancePath={`${props.baseGuidancePath}:${props.subalgoState.name}`}
+                />
                 <div className="preview">
                     <SubalgoChart
                         key={props.subalgoState.name}
