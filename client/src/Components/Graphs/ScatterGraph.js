@@ -1,14 +1,11 @@
 import "components/Graphs/ScatterGraph.css";
 
-import React from "react";
+import React, { useRef, useState } from "react";
 import ReactEcharts from "echarts-for-react";
 import echartsgl from "echarts-gl";
 import { bindActionCreators } from "redux";
 import * as selectionActions from "actions/selectionActions";
 import { connect } from "react-redux";
-
-let echart = null;
-let firstRender = true;
 
 function createGraphOptions(props) {
     const dataState = props.data;
@@ -143,23 +140,25 @@ function createGraphOptions(props) {
 }
 
 function ScatterGraph(props) {
-    console.log(props.selections);
+    const echart = useRef(null);
+    const firstRender = useRef(true);
+
     let onEvents = {
         brush: (e, echart) => {
+            console.log(e);
             // plug into the brush event here
-
             props.createSelection("Some Selection Name", [10, 15, 65]); // Action arguments are the selection name and an array of all the selected row indices.
         },
         rendered: () => {
-            if (firstRender) {
-                echart.getEchartsInstance().dispatchAction({
+            if (firstRender.current) {
+                echart.current.getEchartsInstance().dispatchAction({
                     type: "takeGlobalCursor",
                     key: "brush",
                     brushOption: {
                         type: "rect"
                     }
                 });
-                firstRender = false;
+                firstRender.current = false;
             }
         }
     };
@@ -171,9 +170,7 @@ function ScatterGraph(props) {
     return (
         <React.Fragment>
             <ReactEcharts
-                ref={e => {
-                    echart = e;
-                }}
+                ref={echart}
                 option={createGraphOptions(props)}
                 notMerge={true}
                 lazyUpdate={false}
@@ -188,7 +185,7 @@ function ScatterGraph(props) {
 
 function mapStateToProps(state) {
     return {
-        selections: state
+        selections: state.selections.selections
     };
 }
 

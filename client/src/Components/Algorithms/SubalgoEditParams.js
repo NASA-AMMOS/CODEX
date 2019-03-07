@@ -156,7 +156,10 @@ function getActionButtons(props) {
 }
 
 function SubalgoEditParams(props) {
-    const [helpModeState, setHelpModeState] = useState({ active: false, textContent: null });
+    const [helpModeState, setHelpModeState] = useState({
+        active: false,
+        textContent: "Loading..."
+    });
     function toggleHelpMode() {
         setHelpModeState({ active: !helpModeState.active, textContent: helpModeState.textContent });
     }

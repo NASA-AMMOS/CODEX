@@ -154,7 +154,8 @@ export function SubalgoChart(props) {
         "preview-mode": props.previewMode
     });
 
-    const timeToGenerate = props.serverData ? `~${props.serverData.eta.toFixed(2)}s` : "";
+    const timeToGenerate =
+        props.serverData && props.serverData.eta ? `~${props.serverData.eta.toFixed(2)}s` : "";
 
     return (
         <div
