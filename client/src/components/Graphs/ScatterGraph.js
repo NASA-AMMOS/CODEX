@@ -84,7 +84,9 @@ function createGraphOptions(props) {
                 color: "rgb(0,0,255)"
             },
             xAxisIndex: 0,
-            yAxisIndex: 0
+            yAxisIndex: 0,
+            throttleType: "debounce",
+            throttleDelay: 300
         },
         xAxis: [
             {
@@ -144,7 +146,7 @@ function ScatterGraph(props) {
     const firstRender = useRef(true);
 
     let onEvents = {
-        brush: (e, echart) => {
+        brushselected: (e, echart) => {
             console.log(e);
             // plug into the brush event here
             props.createSelection("Some Selection Name", [10, 15, 65]); // Action arguments are the selection name and an array of all the selected row indices.
