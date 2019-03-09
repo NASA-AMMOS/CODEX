@@ -1,21 +1,23 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect, useReducer, useMemo } from "react";
 import ReactEcharts from "echarts-for-react";
 import echartsgl from "echarts-gl";
-import { getAlgorithmData } from "components/Algorithms/algorithmFunctions";
+import { getAlgorithmData, getSubAlgorithmData } from "components/Algorithms/algorithmFunctions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import SubalgoChart from "components/Algorithms/SubalgoChart";
 import "components/Algorithms/algorithmStyles.scss";
 import SubalgoEditParams from "components/Algorithms/SubalgoEditParams";
 import AlgorithmHelpContent from "components/Algorithms/AlgorithmHelpContent";
 
+// Creates intial states from the subalgo request presets in algorithmTypes
 function createSubalgoStates(subalgos) {
     return subalgos.map(subalgo => {
         return {
             name: subalgo.simplename,
             loaded: false,
             serverData: null,
+            simplename: subalgo.simplename,
             humanName: subalgo.name,
-            params: subalgo.parameters.map(param => {
+            parameters: subalgo.parameters.map(param => {
                 return { name: param.name, value: param.value };
             }),
             outputParams: [
@@ -31,6 +33,12 @@ function createSubalgoStates(subalgos) {
 
 function subalgoParamReducer(subalgoStates, action) {
     switch (action.type) {
+        case "addSocketHandler":
+            return subalgoStates.map(subalgo =>
+                subalgo.name === action.name
+                    ? Object.assign(subalgo, { socket: action.socket })
+                    : subalgo
+            );
         case "updateData":
             return subalgoStates.map(subalgo =>
                 subalgo.name === action.inMsg.algorithmName
@@ -47,11 +55,12 @@ function subalgoParamReducer(subalgoStates, action) {
             return subalgoStates.map(subalgo =>
                 subalgo.name === action.name
                     ? Object.assign(subalgo, {
-                          params: subalgo.params.map(param => {
+                          params: subalgo.parameters.map(param => {
                               return param.name === action.paramName
                                   ? Object.assign(param, { value: action.value })
                                   : param;
-                          })
+                          }),
+                          needsRefresh: true
                       })
                     : subalgo
             );
@@ -64,6 +73,15 @@ function subalgoParamReducer(subalgoStates, action) {
                                   ? Object.assign(param, { value: action.value })
                                   : param;
                           })
+                      })
+                    : subalgo
+            );
+        case "refreshPending":
+            return subalgoStates.map(subalgo =>
+                subalgo.name === action.name
+                    ? Object.assign(subalgo, {
+                          needsRefresh: false,
+                          loaded: false
                       })
                     : subalgo
             );
@@ -82,22 +100,50 @@ function ClusterAlgorithm(props) {
         createSubalgoStates
     );
 
-    // Routine to get data from the backend for each subalgorithm. State is updated as data comes in.
+    // Initial render routine to get data from the backend for each subalgorithm. State is updated as data comes in.
+    // A reference to the socket connection is stored in the state for each subalgo.
     useEffect(_ => {
-        const algorithmRequests = getAlgorithmData(
-            algorithm,
-            props.selectedFeatures,
-            props.filename,
-            inMsg => {
-                subalgoStatesDispatch({ type: "updateData", inMsg });
-            }
-        );
+        subalgoStates.forEach(subalgo => {
+            const socket = getSubAlgorithmData(
+                subalgo,
+                props.selectedFeatures,
+                props.filename,
+                inMsg => {
+                    subalgoStatesDispatch({ type: "updateData", inMsg });
+                },
+                true
+            );
+            subalgoStatesDispatch({ type: "addSocketHandler", name: subalgo.name, socket });
+        });
 
-        // If the user closes the window before all the sub algos have loaded, force close the sockets to the server.
-        return function cleanup() {
-            algorithmRequests.forEach(req => req.closeSocket());
+        // This cleanup function will fire when the component unloads, closing any in-progress socket connections
+        return _ => {
+            subalgoStates.forEach(subalgo => subalgo.socket.closeSocket());
         };
     }, []); // Only run this call once, on component load.
+
+    // Routine to update a subalgo preview if a user has changed any of the parameters
+    useEffect(
+        _ => {
+            subalgoStates
+                .filter(subalgo => subalgo.needsRefresh)
+                .forEach(subalgo => {
+                    console.log(`Refreshing ${subalgo.name}`);
+                    subalgoStatesDispatch({ type: "refreshPending", name: subalgo.name });
+                    const socket = getSubAlgorithmData(
+                        subalgo,
+                        props.selectedFeatures,
+                        props.filename,
+                        inMsg => {
+                            subalgoStatesDispatch({ type: "updateData", inMsg });
+                        },
+                        true
+                    );
+                    subalgoStatesDispatch({ type: "addSocketHandler", name: subalgo.name, socket });
+                });
+        },
+        [subalgoStates]
+    );
 
     // HELP MODE MANAGEMENT
 
@@ -135,6 +181,7 @@ function ClusterAlgorithm(props) {
                             })
                         }
                         editMode={subalgoState.editMode}
+                        loaded={subalgoState.loaded}
                     />
                 ))}
                 )}
@@ -146,6 +193,8 @@ function ClusterAlgorithm(props) {
                         subalgoState={selectedSubalgo}
                         paramDispatch={subalgoStatesDispatch}
                         baseGuidancePath={`${algoVerb}_page`}
+                        selectedFeatures={props.selectedFeatures}
+                        filename={props.filename}
                     />
                 )}
             </div>

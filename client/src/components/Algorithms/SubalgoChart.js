@@ -22,10 +22,10 @@ export function createPlotSeries(serverData) {
 }
 
 // Initializes a simple scatter plot. If no data is passed in, initialize a chart with the loading circle running.
-export function makeSimpleScatterPlot(serverData) {
+export function makeSimpleScatterPlot(props) {
     let series = [];
-    if (serverData) {
-        const { data, noise } = createPlotSeries(serverData);
+    if (props.serverData) {
+        const { data, noise } = createPlotSeries(props.serverData);
         series = data.map(s => {
             return {
                 name: "",
@@ -132,7 +132,7 @@ export function makeSimpleScatterPlot(serverData) {
             notMerge={true}
             lazyUpdate={true}
             style={{ height: "100%", width: "100%" }}
-            showLoading={!serverData}
+            showLoading={!props.loaded}
         />
     );
 }
@@ -165,7 +165,7 @@ export function SubalgoChart(props) {
             onClick={props.onClickCallback}
         >
             <div className={titleClasses}>{props.previewMode ? "Preview" : props.humanName}</div>
-            <div className="subalgo-plot">{makeSimpleScatterPlot(props.serverData)}</div>
+            <div className="subalgo-plot">{makeSimpleScatterPlot(props)}</div>
             <div className="subalgo-time" hidden={props.previewMode}>
                 {timeToGenerate}
             </div>

@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as algorithmTypes from "constants/algorithmTypes";
 import "components/Algorithms/algorithmStyles.scss";
 import AlgorithmHelpContent from "components/Algorithms/AlgorithmHelpContent";
 import classnames from "classnames";
 import SubalgoChart from "components/Algorithms/SubalgoChart";
+import { getSubAlgorithmData } from "components/Algorithms/algorithmFunctions";
 
 function makeParamField(props, baseParam) {
-    const paramValue = props.subalgoState.params.find(param => param.name === baseParam.name).value;
+    const paramValue = props.subalgoState.parameters.find(param => param.name === baseParam.name)
+        .value;
     return (
         <div className="subalgo-param-field" key={baseParam.title}>
             <div className="param-title">{baseParam.title}</div>
@@ -120,7 +122,7 @@ function getTitle(props, helpModeState) {
     }
 }
 
-function getActionButtons(props) {
+function getActionButtons(props, setSubalgoRunPending) {
     switch (props.subalgoState.editMode) {
         case algorithmTypes.SUBALGO_MODE_EDIT_PARAMS:
             return (
@@ -162,7 +164,7 @@ function getActionButtons(props) {
                     >
                         Back
                     </button>
-                    <button>Run</button>
+                    <button onClick={_ => setSubalgoRunPending(true)}>Run</button>
                 </React.Fragment>
             );
     }
@@ -170,6 +172,27 @@ function getActionButtons(props) {
 
 function SubalgoEditParams(props) {
     const [helpModeState, setHelpModeState] = useState(false);
+    const [subalgoRunPending, setSubalgoRunPending] = useState(false);
+
+    useEffect(
+        _ => {
+            if (!subalgoRunPending) return;
+            const req = getSubAlgorithmData(
+                props.subalgoState,
+                props.selectedFeatures,
+                props.filename,
+                inMsg => {
+                    console.log(inMsg);
+                },
+                false
+            );
+
+            return function cleanup() {
+                req.closeSocket();
+            };
+        },
+        [subalgoRunPending]
+    );
 
     return (
         <React.Fragment>
@@ -191,9 +214,12 @@ function SubalgoEditParams(props) {
                         name={props.subalgoState.name}
                         humanName={props.subalgoState.humanName}
                         serverData={props.subalgoState.serverData}
+                        loaded={props.subalgoState.loaded}
                         previewMode
                     />
-                    <div className="action-buttons">{getActionButtons(props)}</div>
+                    <div className="action-buttons">
+                        {getActionButtons(props, setSubalgoRunPending)}
+                    </div>
                 </div>
             </div>
         </React.Fragment>
