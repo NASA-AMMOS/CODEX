@@ -24,4 +24,15 @@ export default class WindowManagerReducer {
     static updateWindows(state, action) {
         return state.set("windows", action.windows);
     }
+
+    static toggleMinimizeWindow(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.id === action.id ? Object.assign(win, { minimized: !win.minimized }) : win
+                )
+        );
+    }
 }

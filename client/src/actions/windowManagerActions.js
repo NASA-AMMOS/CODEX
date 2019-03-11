@@ -13,3 +13,7 @@ export function closeWindow(id) {
 export function setWindowTileAction(isPending) {
     return { type: actionTypes.SET_WINDOW_TILE_ACTION_PENDING, isPending };
 }
+
+export function toggleMinimizeWindow(id) {
+    return { type: actionTypes.TOGGLE_MINIMIZE_WINDOW, id };
+}

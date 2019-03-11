@@ -6,5 +6,6 @@ export const windowManagerState = Immutable.fromJS({
 });
 
 export const windowModel = Immutable.fromJS({
-    id: null
+    id: null,
+    minimized: false
 });

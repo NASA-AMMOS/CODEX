@@ -1,4 +1,4 @@
-import "components/WindowManager/WindowManagerStyles.css";
+import "components/WindowManager/WindowManagerStyles.scss";
 
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
@@ -65,6 +65,24 @@ function tileWindows(props, refs) {
     });
 }
 
+function makeMinimizedBar(props) {
+    return (
+        <div className="minimizedBar">
+            {props.windows
+                .filter(win => win.minimized)
+                .map(win => (
+                    <div
+                        onClick={_ => props.toggleMinimizeWindow(win.id)}
+                        key={win.id}
+                        className="minimizedWindow"
+                    >
+                        {getWindowTitle(win)}
+                    </div>
+                ))}
+        </div>
+    );
+}
+
 function WindowManager(props) {
     const refs = useRef({}); // Store refs to all the windows so we can do global window operations
     // Each time the windows list gets updated, delete old refs.
@@ -88,29 +106,39 @@ function WindowManager(props) {
         [props.tileActionPending]
     );
 
-    return props.windows.map((win, idx) => {
-        const { width, height, resizeable } = windowSettings.initialSizes[win.windowType];
-        const settings = win.settings || {
-            title: getWindowTitle(win),
-            children: null,
-            isResizeable: resizeable,
-            isDraggable: true,
-            initialPosition: "top-left",
-            restrictToParentDiv: true,
-            initialSize: { width, height }
-        };
-        return (
-            <Cristal
-                key={win.id}
-                className="newWindow"
-                onClose={_ => props.closeWindow(win.id)}
-                ref={r => (refs.current[win.id] = r)}
-                {...settings}
-            >
-                <div className="windowBody">{getWindowContent(win)}</div>
-            </Cristal>
-        );
-    });
+    const openWindows = props.windows
+        .filter(win => !win.minimized)
+        .map((win, idx) => {
+            const { width, height, resizeable } = windowSettings.initialSizes[win.windowType];
+            const settings = win.settings || {
+                title: getWindowTitle(win),
+                children: null,
+                isResizeable: resizeable,
+                isDraggable: true,
+                initialPosition: "top-left",
+                restrictToParentDiv: true,
+                initialSize: { width, height }
+            };
+            return (
+                <Cristal
+                    key={win.id}
+                    className="newWindow"
+                    onClose={_ => props.closeWindow(win.id)}
+                    ref={r => (refs.current[win.id] = r)}
+                    onMinimize={_ => props.toggleMinimizeWindow(win.id)}
+                    {...settings}
+                >
+                    <div className="windowBody">{getWindowContent(win)}</div>
+                </Cristal>
+            );
+        });
+
+    return (
+        <React.Fragment>
+            {openWindows}
+            {makeMinimizedBar(props)}
+        </React.Fragment>
+    );
 }
 
 function mapStateToProps(state) {
@@ -124,7 +152,11 @@ function mapDispatchToProps(dispatch) {
     return {
         openNewWindow: bindActionCreators(windowManagerActions.openNewWindow, dispatch),
         closeWindow: bindActionCreators(windowManagerActions.closeWindow, dispatch),
-        setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch)
+        setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch),
+        toggleMinimizeWindow: bindActionCreators(
+            windowManagerActions.toggleMinimizeWindow,
+            dispatch
+        )
     };
 }
 

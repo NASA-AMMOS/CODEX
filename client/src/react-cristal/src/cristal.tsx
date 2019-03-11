@@ -10,7 +10,9 @@ import {
     ContentWrapper,
     padding,
     CloseIcon,
-    Title
+    Title,
+    MinimizeIcon,
+    ButtonContainer
 } from "./styled";
 import { InitialPosition, Size, Coords, isSmartPosition } from "./domain";
 import { getCordsFromInitialPosition, getBoundaryCoords } from "./utils";
@@ -28,6 +30,7 @@ export interface CristalProps {
     onResize?: (state: CristalState) => void;
     className?: string;
     restrictToParentDiv?: boolean;
+    onMinimize?: () => void;
 }
 
 export interface CristalState {
@@ -229,7 +232,9 @@ export class Cristal extends Component<CristalProps, CristalState> {
     startYResize = () => this.setState({ isResizingY: true });
 
     get header() {
-        const { onClose, title, isDraggable } = this.props;
+        const { onClose, title, isDraggable, onMinimize } = this.props;
+
+        const minimizeIcon = onMinimize ? <MinimizeIcon onClick={onMinimize} /> : null;
 
         return (
             <Header
@@ -238,7 +243,10 @@ export class Cristal extends Component<CristalProps, CristalState> {
                 onMouseDown={this.onMouseDown}
             >
                 <Title>{title}</Title>
-                <CloseIcon onClick={onClose} />
+                <ButtonContainer>
+                    {minimizeIcon}
+                    <CloseIcon onClick={onClose} />
+                </ButtonContainer>
             </Header>
         );
     }

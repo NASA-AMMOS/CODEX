@@ -68,12 +68,17 @@ export const ContentWrapper = styled.div`
     padding-bottom: 30px;
 `;
 
+export const ButtonContainer = styled.div`
+    display: flex;
+`;
+
 export const CloseIcon = styled.div`
     position: relative;
     width: 20px;
     height: 20px;
     opacity: 0.3;
     cursor: pointer;
+    margin-left: 5px;
 
     &:hover {
         opacity: 1;
@@ -95,6 +100,31 @@ export const CloseIcon = styled.div`
 
     &:after {
         transform: rotate(-45deg);
+    }
+`;
+
+export const MinimizeIcon = styled.div`
+    position: relative;
+    width: 20px;
+    height: 20px;
+    opacity: 0.3;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+    }
+
+    &:before {
+        position: absolute;
+        right: 15px;
+        content: " ";
+        height: 21px;
+        width: 2px;
+        background-color: #333;
+    }
+
+    &:before {
+        transform: rotate(90deg);
     }
 `;
 

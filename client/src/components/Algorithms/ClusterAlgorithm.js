@@ -77,14 +77,14 @@ function subalgoParamReducer(subalgoStates, action) {
                     : subalgo
             );
         case "refreshPending":
-            return subalgoStates.map(subalgo =>
-                subalgo.name === action.name
-                    ? Object.assign(subalgo, {
-                          needsRefresh: false,
-                          loaded: false
-                      })
-                    : subalgo
-            );
+            return subalgoStates.map(subalgo => {
+                if (subalgo.name !== action.name) return subalgo;
+                if (subalgo.socket) subalgo.socket.closeSocket(); // Want to cancel previous refresh if we're starting a new one
+                return Object.assign(subalgo, {
+                    needsRefresh: false,
+                    loaded: false
+                });
+            });
     }
 }
 
@@ -123,27 +123,24 @@ function ClusterAlgorithm(props) {
     }, []); // Only run this call once, on component load.
 
     // Routine to update a subalgo preview if a user has changed any of the parameters
-    useEffect(
-        _ => {
-            subalgoStates
-                .filter(subalgo => subalgo.needsRefresh)
-                .forEach(subalgo => {
-                    console.log(`Refreshing ${subalgo.name}`);
-                    subalgoStatesDispatch({ type: "refreshPending", name: subalgo.name });
-                    const socket = getSubAlgorithmData(
-                        subalgo,
-                        props.selectedFeatures,
-                        props.filename,
-                        inMsg => {
-                            subalgoStatesDispatch({ type: "updateData", inMsg });
-                        },
-                        true
-                    );
-                    subalgoStatesDispatch({ type: "addSocketHandler", name: subalgo.name, socket });
-                });
-        },
-        [subalgoStates]
-    );
+    // (these changes are initiated in the lower subalgo components but we want to show those changes in the overview window too)
+    if (subalgoStates.some(subalgo => subalgo.needsRefresh)) {
+        subalgoStates
+            .filter(subalgo => subalgo.needsRefresh)
+            .forEach(subalgo => {
+                console.log(`Refreshing ${subalgo.name}`);
+                const socket = getSubAlgorithmData(
+                    subalgo,
+                    props.selectedFeatures,
+                    props.filename,
+                    inMsg => {
+                        subalgoStatesDispatch({ type: "updateData", inMsg });
+                    },
+                    true
+                );
+                subalgoStatesDispatch({ type: "addSocketHandler", name: subalgo.name, socket });
+            });
+    }
 
     // HELP MODE MANAGEMENT
 
@@ -184,7 +181,6 @@ function ClusterAlgorithm(props) {
                         loaded={subalgoState.loaded}
                     />
                 ))}
-                )}
             </div>
             <div className="subalgo-focus" hidden={!selectedSubalgo}>
                 {!selectedSubalgo ? null : (
