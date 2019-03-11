@@ -70,15 +70,27 @@ function makeMinimizedBar(props) {
         <div className="minimizedBar">
             {props.windows
                 .filter(win => win.minimized)
-                .map(win => (
-                    <div
-                        onClick={_ => props.toggleMinimizeWindow(win.id)}
-                        key={win.id}
-                        className="minimizedWindow"
-                    >
-                        {getWindowTitle(win)}
-                    </div>
-                ))}
+                .map(win => {
+                    const { width, height } = windowSettings.initialSizes[win.windowType];
+                    return (
+                        <div
+                            key={win.id}
+                            onClick={_ => props.toggleMinimizeWindow(win.id)}
+                            onMouseOver={_ => props.setWindowHover(win.id, true)}
+                            onMouseOut={_ => props.setWindowHover(win.id, false)}
+                            className="minimizedWindow"
+                        >
+                            <div className="title">{getWindowTitle(win)}</div>
+                            <div
+                                hidden={!win.hover}
+                                className="windowPreview"
+                                style={{ width, height, top: -height }}
+                            >
+                                {getWindowContent(win)}
+                            </div>
+                        </div>
+                    );
+                })}
         </div>
     );
 }
@@ -156,7 +168,8 @@ function mapDispatchToProps(dispatch) {
         toggleMinimizeWindow: bindActionCreators(
             windowManagerActions.toggleMinimizeWindow,
             dispatch
-        )
+        ),
+        setWindowHover: bindActionCreators(windowManagerActions.setWindowHover, dispatch)
     };
 }
 

@@ -35,4 +35,15 @@ export default class WindowManagerReducer {
                 )
         );
     }
+
+    static setWindowHover(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.id === action.id ? Object.assign(win, { hover: action.hover }) : win
+                )
+        );
+    }
 }

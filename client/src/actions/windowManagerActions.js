@@ -17,3 +17,7 @@ export function setWindowTileAction(isPending) {
 export function toggleMinimizeWindow(id) {
     return { type: actionTypes.TOGGLE_MINIMIZE_WINDOW, id };
 }
+
+export function setWindowHover(id, hover) {
+    return { type: actionTypes.SET_WINDOW_HOVER, id, hover };
+}

@@ -1,0 +1,40 @@
+.windowBody {
+    width: 100%;
+    height: 100%;
+}
+
+.newWindow {
+    min-width: 0;
+    min-height: 0;
+    width: 250px;
+    height: 250px;
+}
+
+.minimizedBar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+
+    .minimizedWindow {
+        position: relative;
+        padding: 0 10px;
+        background: rgb(51, 93, 230);
+        width: 180px;
+        margin-left: 10px;
+
+        &:first-of-type {
+            margin-left: 0;
+        }
+
+        .title {
+            color: white;
+        }
+
+        .windowPreview {
+            position: absolute;
+            top: -200px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+    }
+}
