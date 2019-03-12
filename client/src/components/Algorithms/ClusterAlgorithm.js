@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useReducer, useMemo } from "react";
 import ReactEcharts from "echarts-for-react";
 import echartsgl from "echarts-gl";
-import { getAlgorithmData, getSubAlgorithmData } from "components/Algorithms/algorithmFunctions";
+import { getSubAlgorithmData } from "components/Algorithms/algorithmFunctions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import SubalgoChart from "components/Algorithms/SubalgoChart";
 import "components/Algorithms/algorithmStyles.scss";
@@ -129,6 +129,7 @@ function ClusterAlgorithm(props) {
             .filter(subalgo => subalgo.needsRefresh)
             .forEach(subalgo => {
                 console.log(`Refreshing ${subalgo.name}`);
+                subalgoStatesDispatch({ type: "refreshPending", name: subalgo.name });
                 const socket = getSubAlgorithmData(
                     subalgo,
                     props.selectedFeatures,
@@ -170,7 +171,7 @@ function ClusterAlgorithm(props) {
                         name={subalgoState.name}
                         humanName={subalgoState.humanName}
                         serverData={subalgoState.serverData}
-                        onClickCallback={_ =>
+                        onClick={_ =>
                             subalgoStatesDispatch({
                                 type: "changeEditMode",
                                 name: subalgoState.name,
@@ -179,6 +180,7 @@ function ClusterAlgorithm(props) {
                         }
                         editMode={subalgoState.editMode}
                         loaded={subalgoState.loaded}
+                        titleText={subalgoState.humanName}
                     />
                 ))}
             </div>

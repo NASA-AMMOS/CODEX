@@ -103,10 +103,26 @@
     }
 
     .params {
-        width: 30%;
+        width: 49%;
 
         hr {
             margin: 5px 0;
+        }
+
+        .param-previews {
+            display: flex;
+            height: 180px;
+            width: 100%;
+            overflow-y: scroll;
+
+            .subalgo-container {
+                min-width: 140px;
+                height: 157px;
+                .subalgo-plot {
+                    width: 135px;
+                    height: 130px;
+                }
+            }
         }
     }
 

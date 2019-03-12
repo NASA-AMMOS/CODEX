@@ -5,109 +5,8 @@ import AlgorithmHelpContent from "components/Algorithms/AlgorithmHelpContent";
 import classnames from "classnames";
 import SubalgoChart from "components/Algorithms/SubalgoChart";
 import { getSubAlgorithmData } from "components/Algorithms/algorithmFunctions";
-
-function makeParamField(props, baseParam) {
-    const paramValue = props.subalgoState.parameters.find(param => param.name === baseParam.name)
-        .value;
-    return (
-        <div className="subalgo-param-field" key={baseParam.title}>
-            <div className="param-title">{baseParam.title}</div>
-            <input
-                type={baseParam.inputType}
-                min={baseParam.min}
-                max={baseParam.max}
-                step={baseParam.step}
-                value={paramValue}
-                onChange={e =>
-                    props.paramDispatch({
-                        type: "changeParam",
-                        name: props.subalgoState.name,
-                        paramName: baseParam.name,
-                        value: e.target.value
-                    })
-                }
-            />
-        </div>
-    );
-}
-
-function makeParamsCol(props) {
-    const baseParams = algorithmTypes.SUBALGORITHMS[props.algo].find(
-        subalgo => subalgo.simplename === props.subalgoState.name
-    ).parameters;
-
-    return (
-        <React.Fragment>
-            {baseParams.map(baseParam => makeParamField(props, baseParam))}
-        </React.Fragment>
-    );
-}
-
-function makeOutputsCol(props) {
-    function dispatchOutputParamChange(param, value) {
-        props.paramDispatch({
-            type: "changeOutputParam",
-            name: props.subalgoState.name,
-            outputParamName: param,
-            value
-        });
-    }
-
-    function getParamValue(name) {
-        return props.subalgoState.outputParams.find(p => p.name === name).value;
-    }
-
-    return (
-        <React.Fragment>
-            <div className="title">{props.subalgoState.humanName}: Edit Outputs</div>
-            <div className="subalgo-param-field">
-                <div className="param-title">Name</div>
-                <input
-                    type="text"
-                    value={getParamValue("name")}
-                    onChange={e => dispatchOutputParamChange("name", e.target.value)}
-                />
-            </div>
-            <hr />
-            <div className="output-section">Features</div>
-            <div className="subalgo-param-field">
-                <div className="param-title">Name</div>
-                <input
-                    type="checkbox"
-                    checked={getParamValue("pca")}
-                    onChange={e => dispatchOutputParamChange("pca", e.target.checked)}
-                />
-            </div>
-            <div className="subalgo-param-field">
-                <div className="param-title">Cluster ID</div>
-                <input
-                    type="checkbox"
-                    checked={getParamValue("clusterId")}
-                    onChange={e => dispatchOutputParamChange("clusterId", e.target.checked)}
-                />
-            </div>
-            <hr />
-            <div className="output-section">Selections</div>
-            <div className="subalgo-param-field">
-                <div className="param-title">Clusters</div>
-                <input
-                    type="checkbox"
-                    checked={getParamValue("clusters")}
-                    onChange={e => dispatchOutputParamChange("clusters", e.target.checked)}
-                />
-            </div>
-        </React.Fragment>
-    );
-}
-
-function getLeftCol(props) {
-    switch (props.subalgoState.editMode) {
-        case algorithmTypes.SUBALGO_MODE_EDIT_PARAMS:
-            return makeParamsCol(props);
-        case algorithmTypes.SUBALGO_MODE_EDIT_OUTPUTS:
-            return makeOutputsCol(props);
-    }
-}
+import SubalgoParams from "components/Algorithms/SubalgoParams";
+import SubalgoOutputParams from "components/Algorithms/SubalgoOutputParams";
 
 function getTitle(props, helpModeState) {
     switch (props.subalgoState.editMode) {
@@ -203,7 +102,25 @@ function SubalgoEditParams(props) {
                 </button>
             </div>
             <div className="subalgo-detail">
-                <div className="params">{getLeftCol(props)}</div>
+                <div className="params">
+                    <SubalgoParams
+                        hidden={
+                            props.subalgoState.editMode !== algorithmTypes.SUBALGO_MODE_EDIT_PARAMS
+                        }
+                        subalgoState={props.subalgoState}
+                        algo={props.algo}
+                        paramDispatch={props.paramDispatch}
+                        selectedFeatures={props.selectedFeatures}
+                        filename={props.filename}
+                    />
+                    <SubalgoOutputParams
+                        hidden={
+                            props.subalgoState.editMode !== algorithmTypes.SUBALGO_MODE_EDIT_OUTPUTS
+                        }
+                        paramDispatch={props.paramDispatch}
+                        subalgoState={props.subalgoState}
+                    />
+                </div>
                 <AlgorithmHelpContent
                     hidden={!helpModeState}
                     guidancePath={`${props.baseGuidancePath}:${props.subalgoState.name}`}

@@ -144,13 +144,13 @@ export function SubalgoChart(props) {
     const dataPoints = props.serverData ? props.serverData.data : null;
     const containerClasses = classnames({
         "subalgo-container": true,
-        selected: !props.previewMode && hoverState,
+        selected: (!props.previewMode && hoverState) || props.selected,
         "preview-mode": props.previewMode
     });
 
     const titleClasses = classnames({
         "subalgo-title": true,
-        selected: !props.previewMode && hoverState,
+        selected: (!props.previewMode && hoverState) || props.selected,
         "preview-mode": props.previewMode
     });
 
@@ -162,9 +162,9 @@ export function SubalgoChart(props) {
             className={containerClasses}
             onMouseOver={_ => setHoverState(true)}
             onMouseOut={_ => setHoverState(false)}
-            onClick={props.onClickCallback}
+            onClick={props.onClick}
         >
-            <div className={titleClasses}>{props.previewMode ? "Preview" : props.humanName}</div>
+            <div className={titleClasses}>{props.titleText}</div>
             <div className="subalgo-plot">{makeSimpleScatterPlot(props)}</div>
             <div className="subalgo-time" hidden={props.previewMode}>
                 {timeToGenerate}
