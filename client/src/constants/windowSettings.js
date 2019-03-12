@@ -14,7 +14,7 @@ export const initialSizes = {
     },
     [algorithmTypes.CLUSTER_ALGORITHM]: {
         width: 900,
-        height: 580,
+        height: 600,
         resizeable: false
     }
 };

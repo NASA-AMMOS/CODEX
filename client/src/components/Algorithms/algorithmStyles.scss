@@ -81,6 +81,24 @@
 
     .title {
         font-size: 26px;
+
+        .breadcrumbs {
+            font-size: 14px;
+            color: #cdcdcd;
+
+            span {
+                margin: 0 2px;
+            }
+
+            a:link,
+            a:visited {
+                color: #cdcdcd;
+
+                &.next-step {
+                    color: #000;
+                }
+            }
+        }
     }
 }
 

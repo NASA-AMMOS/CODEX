@@ -69,6 +69,61 @@ function getActionButtons(props, setSubalgoRunPending) {
     }
 }
 
+function getBreadcrumbs(props, setSubalgoRunPending) {
+    return (
+        <React.Fragment>
+            <a
+                href="#"
+                onClick={_ =>
+                    props.paramDispatch({
+                        type: "changeEditMode",
+                        name: props.subalgoState.name,
+                        editMode: null
+                    })
+                }
+            >
+                Choose Algorithm
+            </a>
+            <span>-></span>
+            <a
+                href="#"
+                onClick={_ =>
+                    props.paramDispatch({
+                        type: "changeEditMode",
+                        name: props.subalgoState.name,
+                        editMode: algorithmTypes.SUBALGO_MODE_EDIT_PARAMS
+                    })
+                }
+            >
+                Edit Parameters
+            </a>
+            <span>-></span>
+            <a
+                href="#"
+                onClick={_ =>
+                    props.paramDispatch({
+                        type: "changeEditMode",
+                        name: props.subalgoState.name,
+                        editMode: algorithmTypes.SUBALGO_MODE_EDIT_OUTPUTS
+                    })
+                }
+                className={classnames({
+                    "next-step":
+                        props.subalgoState.editMode !== algorithmTypes.SUBALGO_MODE_EDIT_OUTPUTS
+                })}
+            >
+                Outputs
+            </a>
+            <span>-></span>
+            <a href="#" onClick={_ => setSubalgoRunPending(true)} className="next-step">
+                Run
+            </a>
+        </React.Fragment>
+    );
+
+    return elements;
+}
+
 function SubalgoEditParams(props) {
     const [helpModeState, setHelpModeState] = useState(false);
     const [subalgoRunPending, setSubalgoRunPending] = useState(false);
@@ -96,7 +151,10 @@ function SubalgoEditParams(props) {
     return (
         <React.Fragment>
             <div className="subalgo-edit-header">
-                <div className="title">{getTitle(props, helpModeState)}</div>
+                <div className="title">
+                    {getTitle(props, helpModeState)}
+                    <div className="breadcrumbs">{getBreadcrumbs(props, setSubalgoRunPending)}</div>
+                </div>
                 <button onClick={_ => setHelpModeState(state => !state)}>
                     {helpModeState ? "Exit Help" : "Help"}
                 </button>
