@@ -7,6 +7,10 @@ import SubalgoChart from "components/Algorithms/SubalgoChart";
 import { getSubAlgorithmData } from "components/Algorithms/algorithmFunctions";
 import SubalgoParams from "components/Algorithms/SubalgoParams";
 import SubalgoOutputParams from "components/Algorithms/SubalgoOutputParams";
+import HelpOutline from "@material-ui/icons/HelpOutline";
+import Close from "@material-ui/icons/Close";
+import IconButton from "@material-ui/core/IconButton";
+import Button from "@material-ui/core/Button";
 
 function getTitle(props, helpModeState) {
     switch (props.subalgoState.editMode) {
@@ -26,7 +30,9 @@ function getActionButtons(props, setSubalgoRunPending) {
         case algorithmTypes.SUBALGO_MODE_EDIT_PARAMS:
             return (
                 <React.Fragment>
-                    <button
+                    <Button
+                        variant="outlined"
+                        color="primary"
                         onClick={_ =>
                             props.paramDispatch({
                                 type: "changeEditMode",
@@ -35,8 +41,10 @@ function getActionButtons(props, setSubalgoRunPending) {
                         }
                     >
                         Back
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        color="primary"
                         onClick={_ =>
                             props.paramDispatch({
                                 type: "changeEditMode",
@@ -46,13 +54,15 @@ function getActionButtons(props, setSubalgoRunPending) {
                         }
                     >
                         Next
-                    </button>
+                    </Button>
                 </React.Fragment>
             );
         case algorithmTypes.SUBALGO_MODE_EDIT_OUTPUTS:
             return (
                 <React.Fragment>
-                    <button
+                    <Button
+                        variant="outlined"
+                        color="primary"
                         onClick={_ =>
                             props.paramDispatch({
                                 type: "changeEditMode",
@@ -62,8 +72,14 @@ function getActionButtons(props, setSubalgoRunPending) {
                         }
                     >
                         Back
-                    </button>
-                    <button onClick={_ => setSubalgoRunPending(true)}>Run</button>
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={_ => setSubalgoRunPending(true)}
+                    >
+                        Run
+                    </Button>
                 </React.Fragment>
             );
     }
@@ -124,7 +140,7 @@ function getBreadcrumbs(props, setSubalgoRunPending) {
     return elements;
 }
 
-function SubalgoEditParams(props) {
+function SubalgoEdit(props) {
     const [helpModeState, setHelpModeState] = useState(false);
     const [subalgoRunPending, setSubalgoRunPending] = useState(false);
 
@@ -155,9 +171,11 @@ function SubalgoEditParams(props) {
                     {getTitle(props, helpModeState)}
                     <div className="breadcrumbs">{getBreadcrumbs(props, setSubalgoRunPending)}</div>
                 </div>
-                <button onClick={_ => setHelpModeState(state => !state)}>
-                    {helpModeState ? "Exit Help" : "Help"}
-                </button>
+                <div>
+                    <IconButton onClick={_ => setHelpModeState(state => !state)}>
+                        {helpModeState ? <Close /> : <HelpOutline />}
+                    </IconButton>
+                </div>
             </div>
             <div className="subalgo-detail">
                 <div className="params">
@@ -201,4 +219,4 @@ function SubalgoEditParams(props) {
     );
 }
 
-export default SubalgoEditParams;
+export default SubalgoEdit;

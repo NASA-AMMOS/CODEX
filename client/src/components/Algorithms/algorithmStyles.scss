@@ -20,7 +20,7 @@
     position: relative;
     width: 205px;
     height: 227px;
-    margin-bottom: 20px;
+    // margin-bottom: 10px;
     box-shadow: 0px 5px 12px 0px rgba(0, 0, 0, 0.1);
     &.selected {
         background: #000;
@@ -71,7 +71,7 @@
     padding-top: 5px;
     padding-left: 20px;
     padding-right: 10px;
-    height: 545px;
+    height: 565px;
 }
 
 .subalgo-edit-header {

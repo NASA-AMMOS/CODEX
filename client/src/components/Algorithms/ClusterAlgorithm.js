@@ -5,8 +5,11 @@ import { getSubAlgorithmData } from "components/Algorithms/algorithmFunctions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import SubalgoChart from "components/Algorithms/SubalgoChart";
 import "components/Algorithms/algorithmStyles.scss";
-import SubalgoEditParams from "components/Algorithms/SubalgoEditParams";
+import SubalgoEdit from "components/Algorithms/SubalgoEdit";
 import AlgorithmHelpContent from "components/Algorithms/AlgorithmHelpContent";
+import HelpOutline from "@material-ui/icons/HelpOutline";
+import Close from "@material-ui/icons/Close";
+import IconButton from "@material-ui/core/IconButton";
 
 // Creates intial states from the subalgo request presets in algorithmTypes
 function createSubalgoStates(subalgos) {
@@ -150,15 +153,16 @@ function ClusterAlgorithm(props) {
     //ACTUAL RENDERING STARTS HERE
 
     const selectedSubalgo = subalgoStates.find(subalgo => subalgo.editMode);
+
     return (
         <React.Fragment>
             <div className="preview-title">
                 <div className="title">
-                    {helpModeState.active ? `Help: ${algoVerb}` : "Choose a Clustering Method"}
+                    {helpModeState ? `Help: ${algoVerb}` : "Choose a Clustering Method"}
                 </div>
-                <button onClick={_ => setHelpModeState(state => !state)}>
-                    {helpModeState ? "exit help" : "help"}
-                </button>
+                <IconButton onClick={_ => setHelpModeState(state => !state)}>
+                    {helpModeState ? <Close /> : <HelpOutline />}
+                </IconButton>
             </div>
             <div className="algo-container">
                 <AlgorithmHelpContent
@@ -186,7 +190,7 @@ function ClusterAlgorithm(props) {
             </div>
             <div className="subalgo-focus" hidden={!selectedSubalgo}>
                 {!selectedSubalgo ? null : (
-                    <SubalgoEditParams
+                    <SubalgoEdit
                         algo={algorithm}
                         subalgoState={selectedSubalgo}
                         paramDispatch={subalgoStatesDispatch}
