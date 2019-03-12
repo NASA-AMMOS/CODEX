@@ -22,6 +22,8 @@ function subalgoPreviewReducer(params, action) {
 function makeParamPreviews(props, baseParam, serverData, paramValue) {
     const previews = [];
     for (let i = baseParam.min; i <= baseParam.max; i += baseParam.step) {
+        paramValue = typeof paramValue === "number" ? paramValue.toString() : paramValue;
+        const roundedValue = Number.isInteger(baseParam.step) ? i : i.toFixed(1);
         previews.push(
             <SubalgoChart
                 key={i}
@@ -29,17 +31,16 @@ function makeParamPreviews(props, baseParam, serverData, paramValue) {
                 humanName={i}
                 serverData={serverData[i]}
                 loaded={serverData[i]}
-                selected={parseFloat(paramValue) === i}
-                previewText={i}
+                selected={paramValue === roundedValue}
                 onClick={_ =>
                     props.paramDispatch({
                         type: "changeParam",
                         name: props.subalgoState.name,
                         paramName: baseParam.name,
-                        value: i
+                        value: roundedValue
                     })
                 }
-                titleText={i}
+                titleText={roundedValue}
                 previewMode={true}
             />
         );
