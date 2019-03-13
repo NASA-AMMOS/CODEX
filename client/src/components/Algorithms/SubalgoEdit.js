@@ -195,6 +195,7 @@ function SubalgoEdit(props) {
                         }
                         paramDispatch={props.paramDispatch}
                         subalgoState={props.subalgoState}
+                        selectedFeatures={props.selectedFeatures}
                     />
                 </div>
                 <AlgorithmHelpContent

@@ -27,7 +27,10 @@ function createSubalgoStates(subalgos) {
                 { name: "name", value: "Cluster" },
                 { name: "pca", value: true },
                 { name: "clusterId", value: false },
-                { name: "clusters", value: true }
+                { name: "clusters", value: true },
+                { name: "graph", value: false },
+                { name: "xAxis", value: null },
+                { name: "yAxis", value: null }
             ],
             paramHelpText: null
         };
