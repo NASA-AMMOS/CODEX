@@ -13,10 +13,20 @@ import * as uiTypes from "constants/uiTypes";
 import * as windowManagerActions from "actions/windowManagerActions";
 import * as windowSettings from "constants/windowSettings";
 import ShelfPack from "@mapbox/shelf-pack";
+import classnames from "classnames";
 
 function getTwoAxisGraphTitle(win) {
     const selectedFeatures = win.data.get("featureList").filter(f => f.get("selected"));
     return `${selectedFeatures.get(0).get("name")} vs ${selectedFeatures.get(1).get("name")}`;
+}
+
+function previewAllowed(win) {
+    switch (win.windowType) {
+        case algorithmTypes.CLUSTER_ALGORITHM:
+            return false;
+        default:
+            return true;
+    }
 }
 
 function getWindowTitle(win) {
@@ -81,13 +91,6 @@ function makeMinimizedBar(props) {
                             className="minimizedWindow"
                         >
                             <div className="title">{getWindowTitle(win)}</div>
-                            <div
-                                hidden={!win.hover}
-                                className="windowPreview"
-                                style={{ width, height, top: -height }}
-                            >
-                                {getWindowContent(win)}
-                            </div>
                         </div>
                     );
                 })}
@@ -96,7 +99,7 @@ function makeMinimizedBar(props) {
 }
 
 function WindowManager(props) {
-    const refs = useRef({}); // Store refs to all the windows so we can do global window operations
+    const refs = useRef({}); // Store refs to all the open windows so we can do global window operations
     // Each time the windows list gets updated, delete old refs.
     useEffect(
         _ => {
@@ -118,32 +121,47 @@ function WindowManager(props) {
         [props.tileActionPending]
     );
 
-    const openWindows = props.windows
-        .filter(win => !win.minimized)
-        .map((win, idx) => {
-            const { width, height, resizeable } = windowSettings.initialSizes[win.windowType];
-            const settings = win.settings || {
-                title: getWindowTitle(win),
-                children: null,
-                isResizeable: resizeable,
-                isDraggable: true,
-                initialPosition: "top-left",
-                restrictToParentDiv: true,
-                initialSize: { width, height }
-            };
-            return (
-                <Cristal
-                    key={win.id}
-                    className="newWindow"
-                    onClose={_ => props.closeWindow(win.id)}
-                    ref={r => (refs.current[win.id] = r)}
-                    onMinimize={_ => props.toggleMinimizeWindow(win.id)}
-                    {...settings}
-                >
-                    <div className="windowBody">{getWindowContent(win)}</div>
-                </Cristal>
-            );
-        });
+    const openWindows = props.windows.map((win, idx) => {
+        const { width, height, resizeable } = windowSettings.initialSizes[win.windowType];
+        const settings = win.settings || {
+            title: getWindowTitle(win),
+            children: null,
+            isResizeable: resizeable,
+            isDraggable: true,
+            initialPosition: "top-left",
+            restrictToParentDiv: true,
+            initialSize: { width, height }
+        };
+
+        // This is a bit of an odd return fragment, but we want to avoid re-rendering the window's content.
+        // If the window is minimized, we retain the Cristal (draggable window) reference, but keep it hidden.
+        // If the window is in preview mode, we display the window content in preview mode.
+        const hiddenStyle = {
+            display: "none"
+        };
+
+        return (
+            <Cristal
+                key={win.id}
+                className="newWindow"
+                style={
+                    win.minimized
+                        ? win.hover && previewAllowed(win)
+                            ? previewStyle
+                            : hiddenStyle
+                        : null
+                }
+                onClose={_ => props.closeWindow(win.id)}
+                ref={r => (refs.current[win.id] = r)}
+                onMinimize={_ => props.toggleMinimizeWindow(win.id)}
+                isFixed={win.minimized}
+                hideHeader={win.minimized}
+                {...settings}
+            >
+                <div className="windowBody">{getWindowContent(win)}</div>
+            </Cristal>
+        );
+    });
 
     return (
         <React.Fragment>

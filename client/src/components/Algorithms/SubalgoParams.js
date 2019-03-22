@@ -23,7 +23,7 @@ function makeParamPreviews(props, baseParam, serverData, paramValue) {
     const previews = [];
     for (let i = baseParam.min; i <= baseParam.max; i += baseParam.step) {
         paramValue = typeof paramValue === "number" ? paramValue.toString() : paramValue;
-        const roundedValue = Number.isInteger(baseParam.step) ? i : i.toFixed(1);
+        const roundedValue = parseFloat(i.toPrecision(2)).toString();
         previews.push(
             <SubalgoChart
                 key={i}

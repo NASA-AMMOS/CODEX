@@ -37,6 +37,7 @@ function createSubalgoStates(subalgos) {
     });
 }
 
+// Reducer to handle subalgo state changes from sub-components
 function subalgoParamReducer(subalgoStates, action) {
     switch (action.type) {
         case "addSocketHandler":

@@ -11,6 +11,7 @@ import HelpOutline from "@material-ui/icons/HelpOutline";
 import Close from "@material-ui/icons/Close";
 import IconButton from "@material-ui/core/IconButton";
 import Button from "@material-ui/core/Button";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 function getTitle(props, helpModeState) {
     switch (props.subalgoState.editMode) {
@@ -144,6 +145,7 @@ function SubalgoEdit(props) {
     const [helpModeState, setHelpModeState] = useState(false);
     const [subalgoRunPending, setSubalgoRunPending] = useState(false);
 
+    // This effect runs when a user runs a subalgorithm.
     useEffect(
         _ => {
             if (!subalgoRunPending) return;

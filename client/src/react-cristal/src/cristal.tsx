@@ -31,6 +31,8 @@ export interface CristalProps {
     className?: string;
     restrictToParentDiv?: boolean;
     onMinimize?: () => void;
+    hideHeader?: boolean;
+    style?: React.CSSProperties;
 }
 
 export interface CristalState {
@@ -281,9 +283,9 @@ export class Cristal extends Component<CristalProps, CristalState> {
     render() {
         const { isResizing } = this;
         const { x, y, width, height, isDragging, zIndex } = this.state;
-        const { className } = this.props;
+        const { className, hideHeader, style } = this.props;
         const isActive = isDragging || isResizing;
-        const style = {
+        const baseStyle = {
             left: x,
             top: y,
             width,
@@ -297,13 +299,13 @@ export class Cristal extends Component<CristalProps, CristalState> {
 
         const wrapperDiv = (
             <Wrapper
-                style={style}
+                style={style ? style : baseStyle}
                 innerRef={this.saveWrapperRef}
                 isActive={isActive}
                 className={className}
                 onMouseDown={this.changeZIndex}
             >
-                {HeaderComponent}
+                {hideHeader ? null : HeaderComponent}
                 {ContentComponent}
                 {this.renderResizeHandles()}
             </Wrapper>

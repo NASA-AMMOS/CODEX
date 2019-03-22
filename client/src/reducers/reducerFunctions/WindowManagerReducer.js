@@ -31,7 +31,9 @@ export default class WindowManagerReducer {
             state
                 .get("windows")
                 .map(win =>
-                    win.id === action.id ? Object.assign(win, { minimized: !win.minimized }) : win
+                    win.id === action.id
+                        ? Object.assign(win, { minimized: !win.minimized, hover: false })
+                        : win
                 )
         );
     }
