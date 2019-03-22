@@ -10,7 +10,7 @@ import React, { Component } from "react";
 import { brushClear } from "actions/data";
 import { openAlgorithm, openReport, openDevelopment, brushtypeSet, modeSet } from "actions/ui";
 import Import from "components/Import/Import";
-import LoadingBar from "Components/LoadingBar/LoadingBar";
+import LoadingBar from "components/LoadingBar/LoadingBar";
 import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as graphActions from "actions/graphActions";
