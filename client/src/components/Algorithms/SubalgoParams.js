@@ -106,9 +106,8 @@ function SubalgoParams(props) {
         makePreviews
     );
 
-    const [socketsState, setSockets] = useState([]);
-
     useEffect(_ => {
+        const sockets = [];
         previewState.forEach(param => {
             Object.keys(param.serverData).forEach(key => {
                 const parameters = props.subalgoState.parameters.map((p, idx) => {
@@ -129,11 +128,11 @@ function SubalgoParams(props) {
                         }),
                     true
                 );
-                setSockets(socketsState.concat([socket]));
+                sockets.push(socket);
             });
         }, []);
 
-        return _ => socketsState.forEach(socket => socket.closeSocket());
+        return _ => sockets.forEach(socket => socket.closeSocket());
     }, []);
 
     return (
