@@ -18,6 +18,7 @@ export const BRUSH_UPDATE = "BRUSH_UPDATE";
 export const BRUSH_UPDATE_AREA = "BRUSH_UPDATE_AREA";
 export const BRUSH_CLEAR = "BRUSH_CLEAR";
 export const UPDATE_DATA = "UPDATE_DATA";
+export const ADD_DATASET = "ADD_DATASET";
 
 export const OPEN_GRAPH = "OPEN_GRAPH";
 export const OPEN_ALGORITHM = "OPEN_ALGORITHM";

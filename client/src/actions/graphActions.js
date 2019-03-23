@@ -23,6 +23,54 @@ function canBuildGraph(graphMode, dataState) {
     return true;
 }
 
+function loadColumnFromServer(feature) {
+    return new Promise(resolve => {
+        const socketWorker = new WorkerSocket();
+
+        socketWorker.addEventListener("message", e => {
+            const data = JSON.parse(e.data).data.map(ary => ary[0]);
+            resolve(data);
+        });
+
+        socketWorker.postMessage(
+            JSON.stringify({
+                action: actionTypes.GET_GRAPH_DATA,
+                selectedFeatures: [feature]
+            })
+        );
+    });
+}
+
+function getStoredColumn(feature, getState) {
+    const col = getState()
+        .data.get("loadedData")
+        .find(dataset => feature === dataset.feature);
+    if (col) return col.data;
+}
+
+// If we've already gotten and saved this column from the server, this function gets it from the state.
+// If not, it requests it from the server, saves it to the state, and tries again.
+function getColumn(feature, dispatch, getState) {
+    return new Promise(resolve => {
+        let column = getStoredColumn(feature, getState);
+        if (column) {
+            column = [feature, ...column];
+            return resolve(column);
+        }
+
+        loadColumnFromServer(feature).then(data => {
+            dispatch({
+                type: actionTypes.ADD_DATASET,
+                feature,
+                data
+            });
+            column = getStoredColumn(feature, getState);
+            column = [feature, ...column];
+            return resolve(column);
+        });
+    });
+}
+
 export function createGraph(graphMode) {
     return (dispatch, getState) => {
         const selectedFeatures = getState()
@@ -33,28 +81,24 @@ export function createGraph(graphMode) {
 
         if (!canBuildGraph(graphMode, getState().data)) return { type: actionTypes.NO_ACTION };
 
-        const socketWorker = new WorkerSocket();
+        Promise.all(selectedFeatures.map(feature => getColumn(feature, dispatch, getState))).then(
+            cols => {
+                const graphData = cols.reduce((acc, col) => {
+                    col.forEach((val, idx) => {
+                        acc[idx] = acc[idx] || [];
+                        acc[idx].push(val);
+                    });
+                    return acc;
+                }, []);
 
-        socketWorker.addEventListener("message", e => {
-            const data = JSON.parse(e.data).data;
-
-            // This is a bit of a hack to make the data structure look like it used to when we were parsing whole files.
-            data.unshift(selectedFeatures);
-            dispatch({ type: actionTypes.UPDATE_DATA, data });
-            dispatch({
-                type: actionTypes.OPEN_NEW_WINDOW,
-                info: {
-                    windowType: graphMode,
-                    data: getState().data
-                }
-            });
-        });
-
-        socketWorker.postMessage(
-            JSON.stringify({
-                action: actionTypes.GET_GRAPH_DATA,
-                selectedFeatures
-            })
+                dispatch({
+                    type: actionTypes.OPEN_NEW_WINDOW,
+                    info: {
+                        windowType: graphMode,
+                        data: getState().data.set("data", graphData)
+                    }
+                });
+            }
         );
     };
 }

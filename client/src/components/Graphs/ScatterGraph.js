@@ -130,7 +130,7 @@ function createGraphOptions(props) {
                 type: "scatterGL",
                 symbolSize: 2,
                 large: true,
-                data: dataState.get("data").toJS(),
+                data: dataState.get("data"),
                 itemStyle: {
                     normal: {
                         color: "#3386E6"

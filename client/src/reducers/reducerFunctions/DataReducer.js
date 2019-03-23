@@ -48,7 +48,8 @@ export default class DataReducer {
                     visible: true,
                     emphasize: false
                 })
-            );
+            )
+            .set("loadedData", Immutable.fromJS([]));
     }
 
     /**
@@ -376,5 +377,14 @@ export default class DataReducer {
                     emphasize: false
                 })
             );
+    }
+
+    static addDataset(state, action) {
+        const newDataset = {
+            feature: action.feature,
+            data: action.data,
+            clusters: action.clusters
+        };
+        return state.set("loadedData", state.get("loadedData").push(newDataset));
     }
 }

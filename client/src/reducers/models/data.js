@@ -7,7 +7,8 @@
 import Immutable from "immutable";
 
 export const dataState = Immutable.fromJS({
-    data: {},
+    data: [],
+    loadedData: [],
     filename: null,
     master: {},
     selections: [],
@@ -19,3 +20,9 @@ export const dataState = Immutable.fromJS({
     featureList: [],
     featureListLoading: false
 });
+
+export const loadedDataModel = {
+    feature: "",
+    data: [],
+    clusters: []
+};
