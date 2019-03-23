@@ -16,8 +16,8 @@ import ShelfPack from "@mapbox/shelf-pack";
 import classnames from "classnames";
 
 function getTwoAxisGraphTitle(win) {
-    const selectedFeatures = win.data.get("featureList").filter(f => f.get("selected"));
-    return `${selectedFeatures.get(0).get("name")} vs ${selectedFeatures.get(1).get("name")}`;
+    const selectedFeatures = win.data.get("data")[0];
+    return `${selectedFeatures[0]} vs ${selectedFeatures[1]}`;
 }
 
 function previewAllowed(win) {

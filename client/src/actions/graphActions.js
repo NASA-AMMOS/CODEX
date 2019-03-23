@@ -71,13 +71,16 @@ function getColumn(feature, dispatch, getState) {
     });
 }
 
-export function createGraph(graphMode) {
+export function createGraph(graphMode, selectedFeatures) {
     return (dispatch, getState) => {
-        const selectedFeatures = getState()
-            .data.get("featureList")
-            .filter(f => f.get("selected"))
-            .map(f => f.get("name"))
-            .toJS();
+        // Get selected feature list from current state if none specified
+        selectedFeatures =
+            selectedFeatures ||
+            getState()
+                .data.get("featureList")
+                .filter(f => f.get("selected"))
+                .map(f => f.get("name"))
+                .toJS();
 
         if (!canBuildGraph(graphMode, getState().data)) return { type: actionTypes.NO_ACTION };
 

@@ -387,4 +387,13 @@ export default class DataReducer {
         };
         return state.set("loadedData", state.get("loadedData").push(newDataset));
     }
+
+    static addFeature(state, action) {
+        return state.set(
+            "featureList",
+            state
+                .get("featureList")
+                .push(Immutable.fromJS({ name: action.feature, selected: false }))
+        );
+    }
 }

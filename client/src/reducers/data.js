@@ -42,6 +42,8 @@ export default function data(state = dataState, action, opt_reducer = DataReduce
             return opt_reducer.setFeatureListLoading(state, action);
         case actionTypes.ADD_DATASET:
             return opt_reducer.addDataset(state, action);
+        case actionTypes.ADD_FEATURE:
+            return opt_reducer.addFeature(state, action);
         default:
             return state;
     }

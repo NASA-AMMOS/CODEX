@@ -7,11 +7,7 @@ import { bindActionCreators } from "redux";
 import * as selectionActions from "actions/selectionActions";
 import { connect } from "react-redux";
 
-function createGraphOptions(props) {
-    const dataState = props.data;
-    const selectedFeatures = dataState.get("featureList").filter(f => f.get("selected"));
-    const xAxis = selectedFeatures.get(0).get("name");
-    const yAxis = selectedFeatures.get(1).get("name");
+function createGraphOptions(props, xAxis, yAxis) {
     return {
         title: {
             text: ""
@@ -130,7 +126,7 @@ function createGraphOptions(props) {
                 type: "scatterGL",
                 symbolSize: 2,
                 large: true,
-                data: dataState.get("data"),
+                data: props.data.get("data"),
                 itemStyle: {
                     normal: {
                         color: "#3386E6"
@@ -165,15 +161,15 @@ function ScatterGraph(props) {
         }
     };
 
-    const selectedFeatures = props.data.get("featureList").filter(f => f.get("selected"));
-    const xAxis = selectedFeatures.get(0).get("name");
-    const yAxis = selectedFeatures.get(1).get("name");
+    const selectedFeatures = props.data.get("data")[0];
+    const xAxis = selectedFeatures[0];
+    const yAxis = selectedFeatures[1];
 
     return (
         <React.Fragment>
             <ReactEcharts
                 ref={echart}
-                option={createGraphOptions(props)}
+                option={createGraphOptions(props, xAxis, yAxis)}
                 notMerge={true}
                 lazyUpdate={false}
                 style={{ height: "100%", width: "100%" }}
