@@ -197,10 +197,11 @@ function ClusterAlgorithm(props) {
                     <SubalgoEdit
                         algo={algorithm}
                         subalgoState={selectedSubalgo}
-                        paramDispatch={subalgoStatesDispatch}
+                        paramDispatch={action => subalgoStatesDispatch(action)}
                         baseGuidancePath={`${algoVerb}_page`}
                         selectedFeatures={props.selectedFeatures}
                         filename={props.filename}
+                        winId={props.winId}
                     />
                 )}
             </div>

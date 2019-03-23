@@ -12,6 +12,14 @@ import Close from "@material-ui/icons/Close";
 import IconButton from "@material-ui/core/IconButton";
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import * as algorithmActions from "actions/algorithmActions";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
+
+function handleRunAlgorithm(props) {
+    if (!props.subalgoState.serverData.eta) return; // Don't run the algorithm until we have a time estimate from the server
+    props.runAlgorithm(props.subalgoState, props.selectedFeatures, props.winId);
+}
 
 function getTitle(props, helpModeState) {
     switch (props.subalgoState.editMode) {
@@ -26,7 +34,7 @@ function getTitle(props, helpModeState) {
     }
 }
 
-function getActionButtons(props, setSubalgoRunPending) {
+function getActionButtons(props) {
     switch (props.subalgoState.editMode) {
         case algorithmTypes.SUBALGO_MODE_EDIT_PARAMS:
             return (
@@ -77,7 +85,7 @@ function getActionButtons(props, setSubalgoRunPending) {
                     <Button
                         variant="outlined"
                         color="primary"
-                        onClick={_ => setSubalgoRunPending(true)}
+                        onClick={_ => handleRunAlgorithm(props)}
                     >
                         Run
                     </Button>
@@ -86,7 +94,7 @@ function getActionButtons(props, setSubalgoRunPending) {
     }
 }
 
-function getBreadcrumbs(props, setSubalgoRunPending) {
+function getBreadcrumbs(props) {
     return (
         <React.Fragment>
             <a
@@ -132,7 +140,7 @@ function getBreadcrumbs(props, setSubalgoRunPending) {
                 Outputs
             </a>
             <span>-></span>
-            <a href="#" onClick={_ => setSubalgoRunPending(true)} className="next-step">
+            <a href="#" onClick={_ => handleRunAlgorithm(props)} className="next-step">
                 Run
             </a>
         </React.Fragment>
@@ -143,35 +151,34 @@ function getBreadcrumbs(props, setSubalgoRunPending) {
 
 function SubalgoEdit(props) {
     const [helpModeState, setHelpModeState] = useState(false);
-    const [subalgoRunPending, setSubalgoRunPending] = useState(false);
 
     // This effect runs when a user runs a subalgorithm.
-    useEffect(
-        _ => {
-            if (!subalgoRunPending) return;
-            const req = getSubAlgorithmData(
-                props.subalgoState,
-                props.selectedFeatures,
-                props.filename,
-                inMsg => {
-                    console.log(inMsg);
-                },
-                false
-            );
+    // useEffect(
+    //     _ => {
+    //         if (!subalgoRunPending) return;
+    //         const req = getSubAlgorithmData(
+    //             props.subalgoState,
+    //             props.selectedFeatures,
+    //             props.filename,
+    //             inMsg => {
+    //                 console.log(inMsg);
+    //             },
+    //             false
+    //         );
 
-            return function cleanup() {
-                req.closeSocket();
-            };
-        },
-        [subalgoRunPending]
-    );
+    //         return function cleanup() {
+    //             req.closeSocket();
+    //         };
+    //     },
+    //     [subalgoRunPending]
+    // );
 
     return (
         <React.Fragment>
             <div className="subalgo-edit-header">
                 <div className="title">
                     {getTitle(props, helpModeState)}
-                    <div className="breadcrumbs">{getBreadcrumbs(props, setSubalgoRunPending)}</div>
+                    <div className="breadcrumbs">{getBreadcrumbs(props)}</div>
                 </div>
                 <div>
                     <IconButton onClick={_ => setHelpModeState(state => !state)}>
@@ -213,13 +220,20 @@ function SubalgoEdit(props) {
                         loaded={props.subalgoState.loaded}
                         previewMode
                     />
-                    <div className="action-buttons">
-                        {getActionButtons(props, setSubalgoRunPending)}
-                    </div>
+                    <div className="action-buttons">{getActionButtons(props)}</div>
                 </div>
             </div>
         </React.Fragment>
     );
 }
 
-export default SubalgoEdit;
+function mapDispatchToProps(dispatch) {
+    return {
+        runAlgorithm: bindActionCreators(algorithmActions.runAlgorithm, dispatch)
+    };
+}
+
+export default connect(
+    null,
+    mapDispatchToProps
+)(SubalgoEdit);

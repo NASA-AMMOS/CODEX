@@ -4,6 +4,8 @@ export const CLUSTER_ALGORITHM = "Cluster";
 
 export const ALGORITHM_TYPES = [CLUSTER_ALGORITHM];
 
+export const ALGO_LOADING_WINDOW = "ALGO_LOADING_WINDOW";
+
 export const DOWNSAMPLE_FACTOR = 15;
 export const K_FACTOR = 3;
 export const EPS = 0.7;

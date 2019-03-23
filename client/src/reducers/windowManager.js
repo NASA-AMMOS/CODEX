@@ -22,6 +22,8 @@ export default function windowManager(
             return opt_reducer.toggleMinimizeWindow(state, action);
         case actionTypes.SET_WINDOW_HOVER:
             return opt_reducer.setWindowHover(state, action);
+        case actionTypes.UPDATE_WINDOW_INFO:
+            return opt_reducer.updateWindowInfo(state, action);
         default:
             return state;
     }

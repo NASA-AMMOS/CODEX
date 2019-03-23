@@ -3,9 +3,11 @@ import Immutable from "immutable";
 export default class WindowManagerReducer {
     static openNewWindow(state, action) {
         // Add an ID to the window
-        action.info.id = Math.random()
-            .toString(36)
-            .substring(7);
+        action.info.id =
+            action.info.id ||
+            Math.random()
+                .toString(36)
+                .substring(7);
         return state.set("windows", state.get("windows").push(action.info));
     }
 
@@ -46,6 +48,15 @@ export default class WindowManagerReducer {
                 .map(win =>
                     win.id === action.id ? Object.assign(win, { hover: action.hover }) : win
                 )
+        );
+    }
+
+    static updateWindowInfo(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win => (win.id === action.id ? Object.assign(win, action.info) : win))
         );
     }
 }
