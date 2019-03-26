@@ -12,17 +12,22 @@ import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import OutlinedInput from "@material-ui/core/OutlinedInput";
+import Input from "@material-ui/core/Input";
 
 function makeFeatureDropdown(props, paramName) {
+    const featureList = props.selectedFeatures.concat(["PCA1", "PCA2"]);
+
     return (
         <form>
             <FormControl>
                 <Select
-                    value={getParamValue(props, paramName) || "Select Value"}
+                    value={getParamValue(props, paramName)}
                     onChange={e => dispatchOutputParamChange(props, paramName, e.target.value)}
-                    input={<OutlinedInput labelWidth={0} placeholder="aSDFADS" />}
+                    input={<Input name="input-axis" />}
+                    displayEmpty
+                    name="input-axis"
                 >
-                    {props.selectedFeatures.map(feature => (
+                    {featureList.map(feature => (
                         <MenuItem key={feature} value={feature}>
                             {feature}
                         </MenuItem>
@@ -47,7 +52,6 @@ function getParamValue(props, name) {
 }
 
 function SubalgoOutputParams(props) {
-    console.log(props.selectedFeatures.toJS());
     return (
         <div hidden={props.hidden}>
             <div className="title">{props.subalgoState.humanName}: Edit Outputs</div>

@@ -20,15 +20,17 @@ export function createAlgorithm(algoMode) {
     };
 }
 
-function handleAlgorithmReturn(inMsg, subalgoState, dispatch) {
-    console.log(inMsg);
-    console.log(subalgoState);
+function findOutputParam(subalgoState, paramName) {
+    return subalgoState.outputParams.find(param => param.name === paramName).value;
+}
 
+// Saves the returned algorithm data to the state and spawns a new graph window if requested.
+function handleAlgorithmReturn(inMsg, subalgoState, dispatch) {
     // Update data store with new feature columns
-    const basename = subalgoState.outputParams.find(param => param.name === "name").value;
+    const basename = findOutputParam(subalgoState, "name");
     const featureList = [];
     for (let i = 0; i < inMsg.data[0].length; i++) {
-        const feature = `${basename}_pca${i + 1}`;
+        const feature = `${basename}_PCA${i + 1}`;
         featureList.push(feature);
         dispatch({ type: actionTypes.ADD_FEATURE, feature });
         dispatch({
@@ -39,8 +41,16 @@ function handleAlgorithmReturn(inMsg, subalgoState, dispatch) {
     }
 
     // Spawn graph window if requested
-    if (subalgoState.outputParams.find(param => param.name === "graph").value) {
-        dispatch(graphActions.createGraph(uiTypes.SCATTER_GRAPH, featureList));
+    if (findOutputParam(subalgoState, "graph")) {
+        const axes = ["xAxis", "yAxis"].map(axis => {
+            const axisName = findOutputParam(subalgoState, axis);
+            if (axisName.match(/pca\d/i)) {
+                return `${findOutputParam(subalgoState, "name")}_${axisName}`;
+            }
+            return axisName;
+        });
+
+        dispatch(graphActions.createGraph(uiTypes.SCATTER_GRAPH, axes));
     }
 }
 
