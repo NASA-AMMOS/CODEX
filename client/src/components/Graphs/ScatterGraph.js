@@ -43,10 +43,10 @@ function ScatterGraph(props) {
         layout: {
             autosize: true,
             margin: { l: 0, r: 0, t: 0, b: 0 },
-            dragmode: "lasso",
-            hovermode: false
+            dragmode: "lasso"
+            // hovermode: false
         },
-        config: { displayModeBar: false, responsive: true }
+        config: { displayModeBar: true, responsive: true, displaylogo: false }
     });
 
     // The plotly react element only changes when the revision is incremented.
@@ -76,51 +76,24 @@ function ScatterGraph(props) {
                 handleHeight
                 onResize={_ => chart.current.resizeHandler()}
             />
-            <div onContextMenu={handleContextMenu} className="chart-container">
-                <Plot
-                    ref={chart}
-                    data={chartState.data}
-                    layout={chartState.layout}
-                    config={chartState.config}
-                    style={{ width: "100%", height: "100%" }}
-                    useResizeHandler
-                    onInitialized={figure => setChartState(figure)}
-                    onUpdate={figure => setChartState(figure)}
-                    onSelected={e =>
-                        props.setCurrentSelection(e ? e.points.map(point => point.pointIndex) : [])
-                    }
-                />
-            </div>
+
+            <Plot
+                ref={chart}
+                data={chartState.data}
+                layout={chartState.layout}
+                config={chartState.config}
+                style={{ width: "100%", height: "100%" }}
+                useResizeHandler
+                onInitialized={figure => setChartState(figure)}
+                onUpdate={figure => setChartState(figure)}
+                onClick={e => console.log("click1")}
+                onSelected={e => {
+                    props.setCurrentSelection(e ? e.points.map(point => point.pointIndex) : []);
+                }}
+            />
+
             <div className="xAxisLabel">{xAxis}</div>
             <div className="yAxisLabel">{yAxis}</div>
-
-            <Popover
-                id="simple-popper"
-                open={contextMenuVisible}
-                anchorReference="anchorPosition"
-                anchorPosition={{ top: contextMenuPosition.top, left: contextMenuPosition.left }}
-                anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left"
-                }}
-                transformOrigin={{
-                    vertical: "top",
-                    horizontal: "left"
-                }}
-            >
-                <ClickAwayListener onClickAway={_ => setContextMenuVisible(false)}>
-                    <List>
-                        <ListItem
-                            button
-                            onClick={_ => {
-                                setContextMenuVisible(false);
-                            }}
-                        >
-                            Save Selection
-                        </ListItem>
-                    </List>
-                </ClickAwayListener>
-            </Popover>
         </React.Fragment>
     );
 }

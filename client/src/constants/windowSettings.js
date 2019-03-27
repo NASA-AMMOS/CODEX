@@ -3,8 +3,8 @@ import * as algorithmTypes from "constants/algorithmTypes";
 
 export const initialSizes = {
     [uiTypes.SCATTER_GRAPH]: {
-        width: 300,
-        height: 300,
+        width: 400,
+        height: 400,
         resizeable: true
     },
     [uiTypes.HEATMAP_GRAPH]: {
