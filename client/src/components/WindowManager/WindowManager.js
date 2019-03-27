@@ -152,17 +152,10 @@ function WindowManager(props) {
                 <Cristal
                     key={win.id}
                     className="newWindow"
-                    style={
-                        win.minimized
-                            ? win.hover && previewAllowed(win)
-                                ? previewStyle
-                                : hiddenStyle
-                            : null
-                    }
+                    style={win.minimized && !win.hover ? hiddenStyle : null}
                     onClose={_ => props.closeWindow(win.id)}
                     ref={r => (refs.current[win.id] = r)}
                     onMinimize={_ => props.toggleMinimizeWindow(win.id)}
-                    isFixed={win.minimized}
                     hideHeader={win.minimized}
                     {...settings}
                 >

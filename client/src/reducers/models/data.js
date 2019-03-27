@@ -11,7 +11,8 @@ export const dataState = Immutable.fromJS({
     loadedData: [],
     filename: null,
     master: {},
-    selections: [],
+    currentSelectedRows: [],
+    savedSelections: [],
     brush: {},
     // states needed only by its reducer
     _featureSelect: {

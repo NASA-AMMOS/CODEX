@@ -1,195 +1,141 @@
 import "components/Graphs/ScatterGraph.css";
 
-import React, { useRef, useState } from "react";
-import ReactEcharts from "echarts-for-react";
-import echartsgl from "echarts-gl";
+import React, { useRef, useState, useEffect } from "react";
 import { bindActionCreators } from "redux";
 import * as selectionActions from "actions/selectionActions";
 import { connect } from "react-redux";
-
-function createGraphOptions(props, xAxis, yAxis) {
-    return {
-        title: {
-            text: ""
-        },
-        animation: false,
-        grid: {
-            top: 15,
-            right: 15,
-            left: 5,
-            bottom: 5,
-            containLabel: true
-        },
-        dataZoom: [
-            {
-                type: "inside",
-                xAxisIndex: 0,
-                yAxisIndex: 0
-                //orient: 'vertical'
-            }
-        ],
-        tooltip: {
-            formatter: function(params) {
-                if (params.length) {
-                    return (
-                        params.length +
-                        " points:<br/>" +
-                        "x: " +
-                        params[0].value[0] +
-                        " y: " +
-                        params[0].value[1]
-                    );
-                }
-            },
-            trigger: "none",
-            showDelay: 0,
-            axisPointer: {
-                show: true,
-                type: "cross",
-                lineStyle: {
-                    type: "dashed",
-                    width: 1
-                }
-            },
-            zlevel: 1
-        },
-        legend: {
-            type: "scroll",
-            top: "25",
-            data: [""],
-            align: "left",
-            tooltip: {
-                overflow: false,
-                confine: true
-            }
-        },
-        toolbox: {
-            show: false
-        },
-        brush: {
-            toolbox: ["rect", "polygon", "keep", "clear"],
-            brushStyle: {
-                borderWidth: 5,
-                color: "rgba(0,0,0,0.1)",
-                borderColor: "rgba(255,69,0,1)"
-            },
-            outOfBrush: {
-                color: "rgb(0,255,0)"
-            },
-            inBrush: {
-                color: "rgb(0,0,255)"
-            },
-            xAxisIndex: 0,
-            yAxisIndex: 0,
-            throttleType: "debounce",
-            throttleDelay: 300
-        },
-        xAxis: [
-            {
-                type: "value",
-                name: xAxis,
-                nameLocation: "end",
-                scale: true,
-                axisPointer: {
-                    show: true
-                },
-                z: 100,
-                nameTextStyle: {
-                    padding: 12,
-                    fontSize: 18,
-                    color: "rgba(0,0,0,0)"
-                },
-                inverse: false
-            }
-        ],
-        yAxis: [
-            {
-                type: "value",
-                name: yAxis,
-                nameLocation: "middle",
-                scale: true,
-                axisPointer: {
-                    show: true
-                },
-                z: 100,
-                nameTextStyle: {
-                    padding: 20,
-                    fontSize: 18,
-                    color: "rgba(0,0,0,0)"
-                },
-                inverse: false
-            }
-        ],
-        series: [
-            {
-                name: `${xAxis} vs ${yAxis}`,
-                type: "scatterGL",
-                symbolSize: 2,
-                large: true,
-                data: props.data.get("data"),
-                itemStyle: {
-                    normal: {
-                        color: "#3386E6"
-                    }
-                }
-            }
-        ]
-    };
-}
+import Popover from "@material-ui/core/Popover";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import Plot from "react-plotly.js";
+import * as utils from "utils/utils";
+import ReactResizeDetector from "react-resize-detector";
 
 function ScatterGraph(props) {
-    const echart = useRef(null);
-    const firstRender = useRef(true);
+    const [contextMenuVisible, setContextMenuVisible] = useState(false);
+    const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
 
-    let onEvents = {
-        brushselected: (e, echart) => {
-            console.log(e);
-            // plug into the brush event here
-            props.createSelection("Some Selection Name", [10, 15, 65]); // Action arguments are the selection name and an array of all the selected row indices.
-        },
-        rendered: () => {
-            if (firstRender.current) {
-                echart.current.getEchartsInstance().dispatchAction({
-                    type: "takeGlobalCursor",
-                    key: "brush",
-                    brushOption: {
-                        type: "rect"
-                    }
-                });
-                firstRender.current = false;
+    function handleContextMenu(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        setContextMenuVisible(true);
+        setContextMenuPosition({ top: e.clientY, left: e.clientX });
+    }
+
+    const chart = useRef(null);
+    const cols = utils.unzip(props.data.get("data"));
+    const xAxis = cols[0][0];
+    const yAxis = cols[1][0];
+
+    // Initial chart settings. These need to be kept in state and updated as necessary
+    const [chartState, setChartState] = useState({
+        data: [
+            {
+                x: cols[0],
+                y: cols[1],
+                type: "scattergl",
+                mode: "markers",
+                marker: { color: "#3386E6", size: 2 },
+                selected: { marker: { color: "#FF0000", size: 2 } }
             }
-        }
-    };
+        ],
+        layout: {
+            autosize: true,
+            margin: { l: 0, r: 0, t: 0, b: 0 },
+            dragmode: "lasso",
+            hovermode: false
+        },
+        config: { displayModeBar: false, responsive: true }
+    });
 
-    const selectedFeatures = props.data.get("data")[0];
-    const xAxis = selectedFeatures[0];
-    const yAxis = selectedFeatures[1];
+    // The plotly react element only changes when the revision is incremented.
+    const [chartRevision, setChartRevision] = useState(0);
+
+    // Function to update the chart with the latest global chart selection.
+    useEffect(
+        _ => {
+            if (!props.currentSelection) return;
+            const data = chartState.data;
+            data[0] = { ...chartState.data[0], selectedpoints: props.currentSelection };
+            const revision = chartRevision + 1;
+            setChartState({
+                ...chartState,
+                data,
+                layout: { ...chartState.layout, datarevision: revision }
+            });
+            setChartRevision(revision);
+        },
+        [props.currentSelection]
+    );
 
     return (
         <React.Fragment>
-            <ReactEcharts
-                ref={echart}
-                option={createGraphOptions(props, xAxis, yAxis)}
-                notMerge={true}
-                lazyUpdate={false}
-                style={{ height: "100%", width: "100%" }}
-                onEvents={onEvents}
+            <ReactResizeDetector
+                handleWidth
+                handleHeight
+                onResize={_ => chart.current.resizeHandler()}
             />
+            <div onContextMenu={handleContextMenu} className="chart-container">
+                <Plot
+                    ref={chart}
+                    data={chartState.data}
+                    layout={chartState.layout}
+                    config={chartState.config}
+                    style={{ width: "100%", height: "100%" }}
+                    useResizeHandler
+                    onInitialized={figure => setChartState(figure)}
+                    onUpdate={figure => setChartState(figure)}
+                    onSelected={e =>
+                        props.setCurrentSelection(e ? e.points.map(point => point.pointIndex) : [])
+                    }
+                />
+            </div>
             <div className="xAxisLabel">{xAxis}</div>
             <div className="yAxisLabel">{yAxis}</div>
+
+            <Popover
+                id="simple-popper"
+                open={contextMenuVisible}
+                anchorReference="anchorPosition"
+                anchorPosition={{ top: contextMenuPosition.top, left: contextMenuPosition.left }}
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left"
+                }}
+                transformOrigin={{
+                    vertical: "top",
+                    horizontal: "left"
+                }}
+            >
+                <ClickAwayListener onClickAway={_ => setContextMenuVisible(false)}>
+                    <List>
+                        <ListItem
+                            button
+                            onClick={_ => {
+                                setContextMenuVisible(false);
+                            }}
+                        >
+                            Save Selection
+                        </ListItem>
+                    </List>
+                </ClickAwayListener>
+            </Popover>
         </React.Fragment>
     );
 }
 
 function mapStateToProps(state) {
     return {
+        currentSelection: state.selections.currentSelection,
         selections: state.selections.selections
     };
 }
 
 function mapDispatchToProps(dispatch) {
     return {
-        createSelection: bindActionCreators(selectionActions.createSelection, dispatch)
+        createSelection: bindActionCreators(selectionActions.createSelection, dispatch),
+        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch)
     };
 }
 

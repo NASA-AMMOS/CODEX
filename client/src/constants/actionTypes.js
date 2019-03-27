@@ -45,6 +45,7 @@ export const LOADING_ALGORITHM = "LOADING_ALGORITHM";
 
 export const CLOSE_SOCKET = "CLOSE_SOCKET";
 
+export const SET_CURRENT_SELECTION = "SET_CURRENT_SELECTION";
 export const CREATE_SELECTION = "CREATE_SELECTION";
 
 // Window Manager Actions

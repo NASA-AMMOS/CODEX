@@ -1,4 +1,5 @@
 export const selectionsState = {
+    currentSelection: [],
     selections: []
 };
 

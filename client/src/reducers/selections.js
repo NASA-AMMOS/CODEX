@@ -8,6 +8,8 @@ export default function selections(
     opt_reducer = SelectionsReducer
 ) {
     switch (action.type) {
+        case actionTypes.SET_CURRENT_SELECTION:
+            return opt_reducer.setCurrentSelection(state, action);
         case actionTypes.CREATE_SELECTION:
             return opt_reducer.createSelection(state, action);
         default:

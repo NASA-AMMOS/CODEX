@@ -8,26 +8,30 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 function AlgorithmHelpContent(props) {
     const [textContent, setTextContent] = useState(null);
 
-    useEffect(_ => {
-        let socketWorker = new WorkerSocket();
+    useEffect(
+        _ => {
+            if (props.hidden) return;
+            let socketWorker = new WorkerSocket();
 
-        socketWorker.addEventListener("message", e => {
-            const textContent = JSON.parse(e.data).guidance;
-            setTextContent(textContent);
-        });
+            socketWorker.addEventListener("message", e => {
+                const textContent = JSON.parse(e.data).guidance;
+                setTextContent(textContent);
+            });
 
-        socketWorker.postMessage(
-            JSON.stringify({
-                action: actionTypes.GET_HELP_TEXT,
-                path: props.guidancePath
-            })
-        );
+            socketWorker.postMessage(
+                JSON.stringify({
+                    action: actionTypes.GET_HELP_TEXT,
+                    path: props.guidancePath
+                })
+            );
 
-        return function cleanup() {
-            socketWorker.postMessage(JSON.stringify({ action: actionTypes.CLOSE_SOCKET }));
-            socketWorker = null;
-        };
-    }, []);
+            return function cleanup() {
+                socketWorker.postMessage(JSON.stringify({ action: actionTypes.CLOSE_SOCKET }));
+                socketWorker = null;
+            };
+        },
+        [props.hidden]
+    );
 
     return (
         <div className="help-container" hidden={props.hidden}>
