@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import classnames from "classnames";
 import { bindActionCreators } from "redux";
 import * as dataActions from "actions/data";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 function createFeature(props, feature) {
     const name = feature.get("name");
@@ -42,17 +43,22 @@ function FeatureList(props) {
         .map(f => createFeature(props, f));
 
     return (
-        <div className="Features">
-            <div className="header">
-                <div className="title">Features</div>
-                <span className="counts">
-                    {activeCount}/{shownCount}/{totalCount}
-                </span>
+        <React.Fragment>
+            <div className="Features">
+                <div className="header">
+                    <div className="title">Features</div>
+                    <span className="counts">
+                        {activeCount}/{shownCount}/{totalCount}
+                    </span>
+                </div>
+                <div className="loading" hidden={!props.featureListLoading}>
+                    <CircularProgress />
+                </div>
+                <div className="list" hidden={props.featureListLoading}>
+                    <ul>{featureItems}</ul>
+                </div>
             </div>
-            <div className="list">
-                <ul>{featureItems}</ul>
-            </div>
-        </div>
+        </React.Fragment>
     );
 }
 

@@ -7,7 +7,6 @@ import * as dataActions from "actions/data";
 import * as selectionActions from "actions/selectionActions";
 
 function createSelection(props, selection) {
-    console.log(selection);
     return (
         <li
             className={classnames({ selection: true })}
@@ -29,10 +28,17 @@ function createSelection(props, selection) {
 }
 
 function SelectionList(props) {
+    const activeCount = props.savedSelections.filter(sel => sel.active).length;
+    const shownCount = activeCount;
+    const totalCount = props.savedSelections.length;
+
     return (
         <div className="selections">
             <div className="header">
                 <div className="title">Selections</div>
+                <span className="counts">
+                    {activeCount}/{shownCount}/{totalCount}
+                </span>
             </div>
             <div className="list">
                 <ul>{props.savedSelections.map(selection => createSelection(props, selection))}</ul>
