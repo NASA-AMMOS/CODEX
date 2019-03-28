@@ -4,8 +4,10 @@ import { connect } from "react-redux";
 import classnames from "classnames";
 import { bindActionCreators } from "redux";
 import * as dataActions from "actions/data";
+import * as selectionActions from "actions/selectionActions";
 
-function createSelection(selection) {
+function createSelection(props, selection) {
+    console.log(selection);
     return (
         <li
             className={classnames({ selection: true })}
@@ -15,8 +17,13 @@ function createSelection(selection) {
                     .toString(36)
                     .substring(7)
             }
+            onClick={_ => props.toggleSelectionActive(selection.name)}
         >
-            <span>{selection.name}</span>
+            <div>{selection.name}</div>
+            <div
+                className="swatch"
+                style={{ background: selection.active ? selection.color : "#bbbbbb" }}
+            />
         </li>
     );
 }
@@ -28,7 +35,7 @@ function SelectionList(props) {
                 <div className="title">Selections</div>
             </div>
             <div className="list">
-                <ul>{props.selections.map(createSelection)}</ul>
+                <ul>{props.savedSelections.map(selection => createSelection(props, selection))}</ul>
             </div>
         </div>
     );
@@ -36,12 +43,14 @@ function SelectionList(props) {
 
 function mapStateToProps(state) {
     return {
-        selections: state.selections.selections
+        savedSelections: state.selections.savedSelections
     };
 }
 
 function mapDispatchToProps(dispatch) {
-    return {};
+    return {
+        toggleSelectionActive: bindActionCreators(selectionActions.toggleSelectionActive, dispatch)
+    };
 }
 
 export default connect(

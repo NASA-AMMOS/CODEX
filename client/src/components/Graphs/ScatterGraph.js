@@ -12,6 +12,8 @@ import Plot from "react-plotly.js";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 
+const DEFAULT_POINT_COLOR = "#3386E6";
+
 function ScatterGraph(props) {
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
     const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
@@ -28,6 +30,9 @@ function ScatterGraph(props) {
     const xAxis = cols[0][0];
     const yAxis = cols[1][0];
 
+    // The plotly react element only changes when the revision is incremented.
+    const [chartRevision, setChartRevision] = useState(0);
+
     // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState({
         data: [
@@ -36,37 +41,54 @@ function ScatterGraph(props) {
                 y: cols[1],
                 type: "scattergl",
                 mode: "markers",
-                marker: { color: "#3386E6", size: 2 },
-                selected: { marker: { color: "#FF0000", size: 2 } }
+                marker: { color: cols[0].map((val, idx) => DEFAULT_POINT_COLOR), size: 2 },
+                selected: { marker: { color: "#FF0000", size: 2 } },
+                visible: true
             }
         ],
         layout: {
             autosize: true,
             margin: { l: 0, r: 0, t: 0, b: 0 },
-            dragmode: "lasso"
+            dragmode: "lasso",
+            datarevision: chartRevision
             // hovermode: false
         },
         config: { displayModeBar: true, responsive: true, displaylogo: false }
     });
 
-    // The plotly react element only changes when the revision is incremented.
-    const [chartRevision, setChartRevision] = useState(0);
+    function updateChartRevision() {
+        const revision = chartRevision + 1;
+        setChartState({
+            ...chartState,
 
-    // Function to update the chart with the latest global chart selection.
+            layout: { ...chartState.layout, datarevision: revision }
+        });
+        setChartRevision(revision);
+    }
+
+    // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
     useEffect(
         _ => {
             if (!props.currentSelection) return;
-            const data = chartState.data;
-            data[0] = { ...chartState.data[0], selectedpoints: props.currentSelection };
-            const revision = chartRevision + 1;
-            setChartState({
-                ...chartState,
-                data,
-                layout: { ...chartState.layout, datarevision: revision }
-            });
-            setChartRevision(revision);
+            chartState.data[0].selectedpoints = props.currentSelection;
+            updateChartRevision();
         },
         [props.currentSelection]
+    );
+
+    // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
+    useEffect(
+        _ => {
+            props.savedSelections.forEach(selection => {
+                selection.rowIndices.forEach(row => {
+                    chartState.data[0].marker.color[row] = selection.active
+                        ? selection.color
+                        : DEFAULT_POINT_COLOR;
+                });
+            });
+            updateChartRevision();
+        },
+        [props.savedSelections]
     );
 
     return (
@@ -76,24 +98,56 @@ function ScatterGraph(props) {
                 handleHeight
                 onResize={_ => chart.current.resizeHandler()}
             />
-
-            <Plot
-                ref={chart}
-                data={chartState.data}
-                layout={chartState.layout}
-                config={chartState.config}
-                style={{ width: "100%", height: "100%" }}
-                useResizeHandler
-                onInitialized={figure => setChartState(figure)}
-                onUpdate={figure => setChartState(figure)}
-                onClick={e => console.log("click1")}
-                onSelected={e => {
-                    props.setCurrentSelection(e ? e.points.map(point => point.pointIndex) : []);
-                }}
-            />
+            <div className="chart-container" onContextMenu={handleContextMenu}>
+                <Plot
+                    ref={chart}
+                    data={chartState.data}
+                    layout={chartState.layout}
+                    config={chartState.config}
+                    style={{ width: "100%", height: "100%" }}
+                    useResizeHandler
+                    onInitialized={figure => setChartState(figure)}
+                    onUpdate={figure => setChartState(figure)}
+                    onClick={e => {
+                        if (e.event.button === 2) return;
+                        props.setCurrentSelection([]);
+                    }}
+                    onSelected={e => {
+                        if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
+                    }}
+                />
+            </div>
 
             <div className="xAxisLabel">{xAxis}</div>
             <div className="yAxisLabel">{yAxis}</div>
+            <Popover
+                id="simple-popper"
+                open={contextMenuVisible}
+                anchorReference="anchorPosition"
+                anchorPosition={{ top: contextMenuPosition.top, left: contextMenuPosition.left }}
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left"
+                }}
+                transformOrigin={{
+                    vertical: "top",
+                    horizontal: "left"
+                }}
+            >
+                <ClickAwayListener onClickAway={_ => setContextMenuVisible(false)}>
+                    <List>
+                        <ListItem
+                            button
+                            onClick={_ => {
+                                setContextMenuVisible(false);
+                                props.saveCurrentSelection();
+                            }}
+                        >
+                            Save Selection
+                        </ListItem>
+                    </List>
+                </ClickAwayListener>
+            </Popover>
         </React.Fragment>
     );
 }
@@ -101,14 +155,14 @@ function ScatterGraph(props) {
 function mapStateToProps(state) {
     return {
         currentSelection: state.selections.currentSelection,
-        selections: state.selections.selections
+        savedSelections: state.selections.savedSelections
     };
 }
 
 function mapDispatchToProps(dispatch) {
     return {
-        createSelection: bindActionCreators(selectionActions.createSelection, dispatch),
-        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch)
+        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
+        saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
     };
 }
 

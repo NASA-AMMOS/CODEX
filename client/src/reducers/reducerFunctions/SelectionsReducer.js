@@ -6,10 +6,30 @@ export default class SelectionsReducer {
         return { ...state, currentSelection: action.rowIndices };
     }
 
-    static createSelection(state, action) {
+    static saveCurrentSelection(state, action) {
         return {
             ...state,
-            selections: state.selections.concat([action.rowIndices])
+            savedSelections: state.savedSelections.concat([
+                {
+                    name: `Selection_${state.savedSelections.length + 1}`,
+                    rowIndices: state.currentSelection,
+                    color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
+                    active: true
+                }
+            ]),
+            currentSelection: [],
+            nextColorIndex: state.nextColorIndex + 1
+        };
+    }
+
+    static toggleSelectionActive(state, action) {
+        return {
+            ...state,
+            savedSelections: state.savedSelections.map(selection =>
+                selection.name === action.name
+                    ? { ...selection, active: !selection.active }
+                    : selection
+            )
         };
     }
 }

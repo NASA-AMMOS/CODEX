@@ -10,8 +10,10 @@ export default function selections(
     switch (action.type) {
         case actionTypes.SET_CURRENT_SELECTION:
             return opt_reducer.setCurrentSelection(state, action);
-        case actionTypes.CREATE_SELECTION:
-            return opt_reducer.createSelection(state, action);
+        case actionTypes.SAVE_CURRENT_SELECTION:
+            return opt_reducer.saveCurrentSelection(state, action);
+        case actionTypes.TOGGLE_SELECTION_ACTIVE:
+            return opt_reducer.toggleSelectionActive(state, action);
         default:
             return state;
     }

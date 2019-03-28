@@ -1,9 +1,11 @@
 export const selectionsState = {
     currentSelection: [],
-    selections: []
+    savedSelections: [],
+    nextColorIndex: 0
 };
 
 export const selectionModel = {
     name: "name",
-    rowIndices: []
+    rowIndices: [],
+    active: true
 };
