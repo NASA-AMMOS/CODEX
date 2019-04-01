@@ -63,25 +63,57 @@ function getWindowContent(win) {
     }
 }
 
+function tileWindowsFromPackedObject(refAry, packed) {
+    refAry.forEach(([key], idx) => {
+        const { x, y } = packed[idx];
+        const [_, win] = refAry[idx];
+        win.snapToPosition({ x, y });
+    });
+}
+
+function createPackingObject(refAry) {
+    return refAry.map(([key, cristalObj], idx) => {
+        return {
+            id: idx,
+            width: cristalObj.state.width,
+            height: cristalObj.state.height,
+            winId: key
+        };
+    });
+}
+
 function tileWindows(props, refs) {
     const windowContainer = document.getElementById("Container");
     const bounds = windowContainer.getBoundingClientRect();
-    const sprite = new ShelfPack(bounds.width, bounds.height, { autoResize: true });
+    let sprite = new ShelfPack(bounds.width, bounds.height, { autoResize: false });
 
     const oldWindows = props.windows;
-    const packReqs = oldWindows
-        .map(win => {
-            const { width, height } = windowSettings.initialSizes[win.windowType];
-            return { id: win.id, width: width + 5, height: height + 5 }; // Add some buffer
-        })
-        .toJS();
 
-    const packed = sprite.pack(packReqs);
+    // Treat the window ref list as an array so we can use numeric IDs, which are faster with ShelfPack
+    const refAry = Object.entries(refs.current);
 
-    Object.keys(refs.current).forEach(key => {
-        const { x, y } = packed.find(p => p.id === key);
-        refs.current[key].snapToPosition({ x, y });
+    // First try tiling windows at their current size.
+    let packReqs = createPackingObject(refAry);
+    let packed = sprite.pack(packReqs);
+
+    // In all cases, if the number of packed windows doesn't match the number of existing windows,
+    // we know we can't tile all the windows in the available space and have to try something else.
+    if (packed.length === refAry.length) return tileWindowsFromPackedObject(refAry, packed);
+
+    // Shrink windows to their initial size and try tiling again
+    refAry.forEach(([key, cristalObj]) => {
+        const windowType = props.windows.find(win => win.id === key).windowType;
+        const { width, height } = windowSettings.initialSizes[windowType];
+        cristalObj.state.width = width;
+        cristalObj.state.height = height;
     });
+
+    packReqs = createPackingObject(refAry);
+    sprite = new ShelfPack(bounds.width, bounds.height, { autoResize: false }); // For some reason the clear() method doesn't work with batch packing
+    packed = sprite.pack(packReqs);
+    if (packed.length === refAry.length) return tileWindowsFromPackedObject(refAry, packed);
+
+    console.log("Can't tile windows! Not enough space!");
 }
 
 function makeMinimizedBar(props) {

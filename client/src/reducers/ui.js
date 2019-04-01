@@ -12,10 +12,10 @@ export default function ui(state = uiState, action, opt_reducer = UiReducer) {
             return opt_reducer.openReport(state, action);
         case actionTypes.OPEN_DEVELOPMENT:
             return opt_reducer.openDevelopment(state, action);
-        case actionTypes.BRUSHTYPE_SET:
-            return opt_reducer.brushtypeSet(state, action);
-        case actionTypes.BRUSHID_SET:
-            return opt_reducer.brushIdSet(state, action);
+        // case actionTypes.BRUSHTYPE_SET:
+        //     return opt_reducer.brushtypeSet(state, action);
+        // case actionTypes.BRUSHID_SET:
+        //     return opt_reducer.brushIdSet(state, action);
         case actionTypes.MODE_SET:
             return opt_reducer.modeSet(state, action);
         case actionTypes.ADD_TO_HISTORY:

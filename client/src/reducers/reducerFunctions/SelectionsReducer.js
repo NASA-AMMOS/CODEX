@@ -18,7 +18,10 @@ export default class SelectionsReducer {
                 }
             ]),
             currentSelection: [],
-            nextColorIndex: state.nextColorIndex + 1
+            nextColorIndex:
+                state.nextColorIndex === uiTypes.SELECTIONS_COLOR_PALETTE.length - 1
+                    ? 0
+                    : state.nextColorIndex + 1
         };
     }
 
