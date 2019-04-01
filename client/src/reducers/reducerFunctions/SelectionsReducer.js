@@ -35,4 +35,22 @@ export default class SelectionsReducer {
             )
         };
     }
+
+    static saveNewSelection(state, action) {
+        return {
+            ...state,
+            savedSelections: state.savedSelections.concat([
+                {
+                    name: action.name,
+                    rowIndices: action.rowIndices,
+                    color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
+                    active: true
+                }
+            ]),
+            nextColorIndex:
+                state.nextColorIndex === uiTypes.SELECTIONS_COLOR_PALETTE.length - 1
+                    ? 0
+                    : state.nextColorIndex + 1
+        };
+    }
 }

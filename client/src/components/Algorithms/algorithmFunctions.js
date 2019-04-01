@@ -5,7 +5,13 @@ import * as actionTypes from "constants/actionTypes";
 import WorkerSocket from "worker-loader!workers/socket.worker";
 
 // Creates an object (that will later be turned into JSON) for requesting subalgo data from the server
-function buildSubalgoServerRequest(subalgo, selectedFeatures, filename, parameters) {
+function buildSubalgoServerRequest(
+    subalgo,
+    selectedFeatures,
+    filename,
+    parameters,
+    dataSelections
+) {
     return {
         routine: "algorithm",
         algorithmType: "clustering",
@@ -17,7 +23,10 @@ function buildSubalgoServerRequest(subalgo, selectedFeatures, filename, paramete
         identification: {
             id: "dev0"
         },
-        parameters
+        parameters,
+        dataSelections: dataSelections.map(({ name, color }) => {
+            return { name, color, emphasize: false };
+        })
     };
 }
 
@@ -74,14 +83,21 @@ export function getSubAlgorithmData(
     subalgo,
     selectedFeatures,
     filename,
-    dataCallback,
-    downsampled
+    downsampled,
+    dataSelections,
+    dataCallback
 ) {
     const parameters = subalgo.parameters.reduce(
         (acc, param) => Object.assign(acc, { [param.name]: param.value }),
         { downsampled }
     );
-    const request = buildSubalgoServerRequest(subalgo, selectedFeatures, filename, parameters);
+    const request = buildSubalgoServerRequest(
+        subalgo,
+        selectedFeatures,
+        filename,
+        parameters,
+        dataSelections
+    );
 
     const requestObject = {};
     const socketWorker = new WorkerSocket();

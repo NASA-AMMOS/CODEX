@@ -11,3 +11,7 @@ export function setCurrentSelection(rowIndices) {
 export function toggleSelectionActive(name) {
     return { type: actionTypes.TOGGLE_SELECTION_ACTIVE, name };
 }
+
+export function saveNewSelection(name, rowIndices) {
+    return { type: actionTypes.SAVE_NEW_SELECTION, name, rowIndices };
+}

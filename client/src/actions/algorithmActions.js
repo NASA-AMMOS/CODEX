@@ -40,6 +40,21 @@ function handleAlgorithmReturn(inMsg, subalgoState, dispatch) {
         });
     }
 
+    // Create a new selection for each cluster if requested
+    if (findOutputParam(subalgoState, "clusters")) {
+        for (let i = 0; i <= inMsg.numClusters - 1; i++) {
+            const rowIndices = inMsg.clusters.reduce((acc, val, idx) => {
+                if (val === i) acc.push(idx);
+                return acc;
+            }, []);
+            dispatch({
+                type: actionTypes.SAVE_NEW_SELECTION,
+                name: `${basename}_${i + 1}`,
+                rowIndices
+            });
+        }
+    }
+
     // Spawn graph window if requested
     if (findOutputParam(subalgoState, "graph")) {
         const axes = ["xAxis", "yAxis"].map(axis => {
@@ -93,12 +108,13 @@ export function runAlgorithm(subalgoState, selectedFeatures, winId) {
             subalgoState,
             selectedFeatures,
             getState().data.get("filename"),
+            false,
+            getState().selections.savedSelections,
             inMsg => {
                 clearInterval(loadingTimerInterval);
                 dispatch({ type: actionTypes.CLOSE_WINDOW, id: loadingWindowId });
                 handleAlgorithmReturn(inMsg, subalgoState, dispatch);
-            },
-            false
+            }
         );
     };
 }

@@ -119,14 +119,15 @@ function SubalgoParams(props) {
                     subalgo,
                     props.selectedFeatures,
                     props.filename,
+                    true,
+                    [],
                     inMsg =>
                         previewDispatch({
                             type: "updateServerData",
                             name: param.name,
                             key,
                             serverData: inMsg
-                        }),
-                    true
+                        })
                 );
                 sockets.push(socket);
             });

@@ -115,10 +115,11 @@ function ClusterAlgorithm(props) {
                 subalgo,
                 props.selectedFeatures,
                 props.filename,
+                true,
+                [],
                 inMsg => {
                     subalgoStatesDispatch({ type: "updateData", inMsg });
-                },
-                true
+                }
             );
             subalgoStatesDispatch({ type: "addSocketHandler", name: subalgo.name, socket });
         });
@@ -141,10 +142,11 @@ function ClusterAlgorithm(props) {
                     subalgo,
                     props.selectedFeatures,
                     props.filename,
+                    true,
+                    [],
                     inMsg => {
                         subalgoStatesDispatch({ type: "updateData", inMsg });
-                    },
-                    true
+                    }
                 );
                 subalgoStatesDispatch({ type: "addSocketHandler", name: subalgo.name, socket });
             });

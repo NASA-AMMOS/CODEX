@@ -124,7 +124,9 @@ function makeMinimizedBar(props) {
                 .map(win => (
                     <div
                         key={win.id}
-                        onClick={_ => props.toggleMinimizeWindow(win.id)}
+                        onClick={_ => {
+                            if (!win.minimizedOnly) props.toggleMinimizeWindow(win.id);
+                        }}
                         onMouseOver={_ => props.setWindowHover(win.id, true)}
                         onMouseOut={_ => props.setWindowHover(win.id, false)}
                         className="minimizedWindow"
