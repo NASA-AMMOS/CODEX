@@ -227,62 +227,6 @@ class TopBar extends Component {
                 />
                 <div id="topBarTools">
                     <ButtonGroup>
-                        <Button
-                            className="topBarRadioSmall"
-                            onClick={() => this.onRadioBtnClick(1)}
-                            active={this.state.rSelected === 1}
-                        >
-                            Zoom
-                        </Button>
-                        <Button
-                            className="topBarRadioSmall"
-                            onClick={() => this.onRadioBtnClick(2)}
-                            active={this.state.rSelected === 2}
-                        >
-                            Select
-                        </Button>
-                        <Dropdown className="dropdownMain right" autoOpen={false}>
-                            <Dropdown.Toggle className="dropdownToggle thin" title="" />
-                            <Dropdown.Menu>
-                                <MenuItem header>Shape</MenuItem>
-                                <MenuItem
-                                    active={this.state.brushSelected === "rectangle"}
-                                    onSelect={eventKey => {
-                                        this.setBrushSelected(eventKey);
-                                    }}
-                                    eventKey={"rectangle"}
-                                >
-                                    Rectangle
-                                </MenuItem>
-                                <MenuItem
-                                    active={this.state.brushSelected === "freehand"}
-                                    onSelect={eventKey => {
-                                        this.setBrushSelected(eventKey);
-                                    }}
-                                    eventKey={"freehand"}
-                                >
-                                    Freehand
-                                </MenuItem>
-                                <MenuItem divider />
-                                <MenuItem
-                                    onSelect={eventKey => {
-                                        this.setBrushSelected(eventKey);
-                                    }}
-                                    eventKey={"clear"}
-                                >
-                                    Clear
-                                </MenuItem>
-                            </Dropdown.Menu>
-                        </Dropdown>
-
-                        <Button
-                            className="topBarRadioSmall"
-                            onClick={() => this.onRadioBtnClick(3)}
-                            active={this.state.rSelected === 3}
-                            style={{ marginLeft: "10px" }}
-                        >
-                            Snap
-                        </Button>
                         <Dropdown>
                             <Dropdown.Toggle className="dropdownToggle" title="Windows" />
                             <Dropdown.Menu>
