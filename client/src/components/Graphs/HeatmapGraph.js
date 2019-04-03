@@ -1,28 +1,46 @@
 import "components/Graphs/HeatmapGraph.css";
 
-import React from "react";
-import ReactEcharts from "echarts-for-react";
-import echartsgl from "echarts-gl";
+import React, { useRef, useState, useEffect } from "react";
+import { bindActionCreators } from "redux";
+import * as selectionActions from "actions/selectionActions";
+import { connect } from "react-redux";
+import Popover from "@material-ui/core/Popover";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import Plot from "react-plotly.js";
 import * as utils from "utils/utils";
+import ReactResizeDetector from "react-resize-detector";
 
-function formatData(cols) {
+const DEFAULT_POINT_COLOR = "#3386E6";
+
+function binHeatmapData(data) {
     /* Create array of all unique values with a tally (row[2]) of how many times they appear.
         This operation can get slow and may need to be optimized in the future (maybe use typed arrays?).
-
         It's a lot faster to search an array of numbers than an array of arrays,
         so we use zip/unzip functions to break the data into columns and then back again. */
 
+    // return data.slice(1).map(row => row.map(Math.round));
+    // return [];
+
+    const cols = utils.unzip(data.slice(1));
+
+    return cols;
     const yCol = cols[1].slice(1);
+
     return utils.zip(
         cols[0].slice(1).reduce(
             (acc, xVal, idx) => {
                 const yVal = yCol[idx];
-                const itemIndex = acc[0].findIndex((val, i) => val === xVal && acc[1][i] === yVal);
+                const x = Math.round(xVal);
+                const y = Math.round(yVal);
+
+                const itemIndex = acc[0].findIndex((val, i) => val === x && acc[1][i] === y);
                 if (itemIndex !== -1) {
                     acc[2][itemIndex]++;
                 } else {
-                    acc[0].push(xVal);
-                    acc[1].push(yVal);
+                    acc[0].push(x);
+                    acc[1].push(y);
                     acc[2].push(1);
                 }
                 return acc;
@@ -32,109 +50,173 @@ function formatData(cols) {
     );
 }
 
-function createGraphOptions(dataState) {
-    const selectedFeatures = dataState.get("featureList").filter(f => f.get("selected"));
-
-    const xAxis = selectedFeatures.get(0).get("name");
-    const yAxis = selectedFeatures.get(1).get("name");
-
-    // Split into columns for faster searching
-    const cols = utils.unzip(dataState.get("data").toJS());
-    const xRange = [Math.min(...cols[0].slice(1)), Math.max(...cols[0].slice(1))];
-    const yRange = [Math.min(...cols[1].slice(1)), Math.max(...cols[1].slice(1))];
-
-    return {
-        title: {
-            text: ""
-        },
-        grid: {
-            right: 10,
-            left: 140
-        },
-        tooltip: {},
-        legend: {
-            data: [""]
-        },
-        visualMap: {
-            type: "piecewise",
-            min: 0,
-            max: xRange[1],
-            calculable: true,
-            realtime: false,
-            splitNumber: 10,
-            inRange: {
-                color: [
-                    "#313695",
-                    "#4575b4",
-                    "#74add1",
-                    "#abd9e9",
-                    "#e0f3f8",
-                    "#ffffbf",
-                    "#fee090",
-                    "#fdae61",
-                    "#f46d43",
-                    "#d73027",
-                    "#a50026"
-                ]
-            }
-        },
-        xAxis: [
-            {
-                type: "category",
-                name: xAxis,
-                nameLocation: "middle",
-                data: Array.from(
-                    new Array(Math.floor(Math.abs(xRange[1] - xRange[0]) + 1)),
-                    (v, i) => {
-                        return i + xRange[0];
-                    }
-                ),
-                inverse: false
-            }
-        ],
-        yAxis: [
-            {
-                type: "category",
-                name: yAxis,
-                nameLocation: "middle",
-                data: Array.from(
-                    new Array(Math.floor(Math.abs(yRange[1] - yRange[0]) + 1)),
-                    (v, i) => {
-                        return i + yRange[0];
-                    }
-                ),
-                inverse: false
-            }
-        ],
-        series: [
-            {
-                name: `${xAxis} vs ${yAxis}`,
-                type: "heatmap",
-                data: formatData(cols),
-                progressive: 1000,
-                animation: false,
-                itemStyle: {
-                    emphasis: {
-                        borderColor: "#eee",
-                        borderWidth: 2
-                    }
-                }
-            }
-        ]
-    };
-}
-
 function HeatmapGraph(props) {
+    const [contextMenuVisible, setContextMenuVisible] = useState(false);
+    const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
+
+    function handleContextMenu(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        setContextMenuVisible(true);
+        setContextMenuPosition({ top: e.clientY, left: e.clientX });
+    }
+
+    const chart = useRef(null);
+    const data = props.data.get("data");
+
+    const xAxis = data[0][0];
+    const yAxis = data[0][1];
+
+    const cols = utils.unzip(data.slice(1));
+    // The plotly react element only changes when the revision is incremented.
+    const [chartRevision, setChartRevision] = useState(0);
+
+    // Initial chart settings. These need to be kept in state and updated as necessary
+    const [chartState, setChartState] = useState({
+        data: [
+            {
+                x: cols[0],
+                y: cols[1],
+                ncontours: 20,
+                colorscale: "Hot",
+                reversescale: true,
+                showscale: false,
+                type: "histogram2dcontour"
+                // mode: "markers",
+                // marker: { color: cols[0].map((val, idx) => DEFAULT_POINT_COLOR), size: 2 },
+                // selected: { marker: { color: "#FF0000", size: 2 } },
+                // visible: true
+            }
+        ],
+        layout: {
+            autosize: true,
+            margin: { l: 35, r: 0, t: 0, b: 25 }, // Axis tick labels are drawn in the margin space
+            // dragmode: "lasso",
+            datarevision: chartRevision,
+            hovermode: false
+            // xaxis: {
+            //     autotick: true,
+            //     ticks: "outside"
+            // },
+            // yaxis: {
+            //     autotick: true,
+            //     ticks: "outside"
+            // }
+        },
+        config: { displayModeBar: true, responsive: true, displaylogo: false }
+    });
+
+    function updateChartRevision() {
+        const revision = chartRevision + 1;
+        setChartState({
+            ...chartState,
+
+            layout: { ...chartState.layout, datarevision: revision }
+        });
+        setChartRevision(revision);
+    }
+
+    // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
+    useEffect(
+        _ => {
+            if (!props.currentSelection) return;
+            chartState.data[0].selectedpoints = props.currentSelection;
+            updateChartRevision();
+        },
+        [props.currentSelection]
+    );
+
+    // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
+    useEffect(
+        _ => {
+            props.savedSelections.forEach(selection => {
+                selection.rowIndices.forEach(row => {
+                    chartState.data[0].marker.color[row] = selection.active
+                        ? selection.color
+                        : DEFAULT_POINT_COLOR;
+                });
+            });
+            updateChartRevision();
+        },
+        [props.savedSelections]
+    );
+
     return (
         <React.Fragment>
-            <ReactEcharts
-                option={createGraphOptions(props.data)}
-                notMerge={true}
-                lazyUpdate={true}
-                style={{ height: "100%", width: "100%" }}
+            <ReactResizeDetector
+                handleWidth
+                handleHeight
+                onResize={_ => chart.current.resizeHandler()}
             />
+            <div className="chart-container" onContextMenu={handleContextMenu}>
+                <Plot
+                    ref={chart}
+                    data={chartState.data}
+                    layout={chartState.layout}
+                    config={chartState.config}
+                    style={{ width: "100%", height: "100%" }}
+                    useResizeHandler
+                    onInitialized={figure => setChartState(figure)}
+                    onUpdate={figure => setChartState(figure)}
+                    onClick={e => {
+                        if (e.event.button === 2) return;
+                        props.setCurrentSelection([]);
+                    }}
+                    onSelected={e => {
+                        if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
+                    }}
+                />
+            </div>
+
+            <div className="xAxisLabel">{xAxis}</div>
+            <div className="yAxisLabel">{yAxis}</div>
+            <Popover
+                id="simple-popper"
+                open={contextMenuVisible}
+                anchorReference="anchorPosition"
+                anchorPosition={{ top: contextMenuPosition.top, left: contextMenuPosition.left }}
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left"
+                }}
+                transformOrigin={{
+                    vertical: "top",
+                    horizontal: "left"
+                }}
+            >
+                <ClickAwayListener onClickAway={_ => setContextMenuVisible(false)}>
+                    <List>
+                        <ListItem
+                            button
+                            onClick={_ => {
+                                setContextMenuVisible(false);
+                                props.saveCurrentSelection();
+                            }}
+                        >
+                            Save Selection
+                        </ListItem>
+                    </List>
+                </ClickAwayListener>
+            </Popover>
         </React.Fragment>
     );
 }
 
-export default HeatmapGraph;
+function mapStateToProps(state) {
+    return {
+        currentSelection: state.selections.currentSelection,
+        savedSelections: state.selections.savedSelections
+    };
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
+        saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
+    };
+}
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(HeatmapGraph);
