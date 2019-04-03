@@ -91,9 +91,9 @@ function HeatmapGraph(props) {
         layout: {
             autosize: true,
             margin: { l: 35, r: 0, t: 0, b: 25 }, // Axis tick labels are drawn in the margin space
-            // dragmode: "lasso",
+            dragmode: "lasso",
             datarevision: chartRevision,
-            hovermode: false
+            hovermode: "closest"
             // xaxis: {
             //     autotick: true,
             //     ticks: "outside"
