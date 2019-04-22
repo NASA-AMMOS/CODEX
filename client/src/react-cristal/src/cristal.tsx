@@ -17,6 +17,7 @@ import {
 import { InitialPosition, Size, Coords, isSmartPosition } from "./domain";
 import { getCordsFromInitialPosition, getBoundaryCoords } from "./utils";
 import { Stacker } from "./stacker";
+import { CSSTransition } from "react-transition-group";
 
 export interface CristalProps {
     children: ReactNode;
@@ -44,6 +45,7 @@ export interface CristalState {
     zIndex: number;
     width?: number;
     height?: number;
+    isMounted: boolean;
 }
 
 export class Cristal extends Component<CristalProps, CristalState> {
@@ -62,13 +64,15 @@ export class Cristal extends Component<CristalProps, CristalState> {
         isDragging: false,
         isResizingX: false,
         isResizingY: false,
-        zIndex: Stacker.getNextIndex()
+        zIndex: Stacker.getNextIndex(),
+        isMounted: false
     };
 
     componentDidMount() {
         document.addEventListener("mousemove", this.onMouseMove);
         document.addEventListener("mouseup", this.onMouseUp);
         window.addEventListener("resize", this.onWindowResize);
+        this.setState({ isMounted: true });
     }
 
     componentWillUnmount() {
@@ -239,17 +243,19 @@ export class Cristal extends Component<CristalProps, CristalState> {
         const minimizeIcon = onMinimize ? <MinimizeIcon onClick={onMinimize} /> : null;
 
         return (
-            <Header
-                isDraggable={isDraggable}
-                innerRef={this.saveHeaderRef}
-                onMouseDown={this.onMouseDown}
-            >
-                <Title>{title}</Title>
-                <ButtonContainer>
-                    {minimizeIcon}
-                    <CloseIcon onClick={onClose} />
-                </ButtonContainer>
-            </Header>
+            <CSSTransition timeout={500} classNames="window-header" in={this.state.isMounted}>
+                <Header
+                    isDraggable={isDraggable}
+                    innerRef={this.saveHeaderRef}
+                    onMouseDown={this.onMouseDown}
+                >
+                    <Title>{title}</Title>
+                    <ButtonContainer>
+                        {minimizeIcon}
+                        <CloseIcon onClick={onClose} />
+                    </ButtonContainer>
+                </Header>
+            </CSSTransition>
         );
     }
 
