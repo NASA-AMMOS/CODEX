@@ -48,18 +48,17 @@ function ScatterGraph(props) {
         ],
         layout: {
             autosize: true,
-            margin: { l: 10, r: 0, t: 0, b: 25 }, // Axis tick labels are drawn in the margin space
+            margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
             dragmode: "lasso",
             datarevision: chartRevision,
-            hovermode: "closest" // Turning off hovermode seems to screw up click handling
-            // xaxis: {
-            //     autotick: true,
-            //     ticks: "outside"
-            // },
-            // yaxis: {
-            //     autotick: true,
-            //     ticks: "outside"
-            // }
+            hovermode: "closest", // Turning off hovermode seems to screw up click handling
+            titlefont: { size: 5 },
+            xaxis: {
+                automargin: true
+            },
+            yaxis: {
+                automargin: true
+            }
         },
         config: { displayModeBar: true, responsive: true, displaylogo: false }
     });
