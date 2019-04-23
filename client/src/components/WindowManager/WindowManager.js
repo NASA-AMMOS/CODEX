@@ -77,7 +77,9 @@ function createPackingObject(refAry) {
             id: idx,
             width: cristalObj.state.width,
             height: cristalObj.state.height,
-            winId: key
+            winId: key,
+            x: cristalObj.state.x,
+            y: cristalObj.state.y
         };
     });
 }
@@ -114,6 +116,52 @@ function tileWindows(props, refs) {
     if (packed.length === refAry.length) return tileWindowsFromPackedObject(refAry, packed);
 
     console.log("Can't tile windows! Not enough space!");
+}
+
+// Adapted from: https://www.youtube.com/watch?v=g8bSdXCG-lA
+function getNewWindowPosition(props, refs, width, height) {
+    const windowContainer = document.getElementById("Container");
+    const bounds = windowContainer.getBoundingClientRect();
+
+    // Build a matrix of occupied and unoccupied space
+    const matrix = Array(bounds.height)
+        .fill()
+        .map((_, y) =>
+            Array(bounds.width)
+                .fill(0)
+                .map((_, x) => true)
+        );
+
+    const windows = createPackingObject(Object.entries(refs.current));
+    windows.forEach(win => {
+        if (win.width && win.height) {
+            for (let y = win.y; y < win.height + win.y + 10; y++) {
+                for (let x = win.x; x < win.width + win.x + 10; x++) {
+                    matrix[y][x] = false;
+                }
+            }
+        }
+    });
+
+    let cache = Array(bounds.width).fill(0);
+    const stack = [];
+
+    for (let row = 0; row < bounds.height; row++) {
+        cache = cache.map((col, idx) => (matrix[row][idx] ? col + 1 : 0));
+
+        let currentWidth = 0;
+        for (let col = 0; col < bounds.width; col++) {
+            if (cache[col] >= height) {
+                // We've found the start of a box that's tall enough
+                currentWidth = cache[col] >= height ? currentWidth + 1 : 0;
+            }
+
+            if (currentWidth === width) {
+                // And now we have one that's wide enough
+                return { y: row - height + 1, x: col - width + 1 };
+            }
+        }
+    }
 }
 
 function makeMinimizedBar(props) {
@@ -165,12 +213,18 @@ function WindowManager(props) {
         .filter(win => !win.minimizedOnly)
         .map((win, idx) => {
             const { width, height, resizeable } = windowSettings.initialSizes[win.windowType];
+
+            // If we can't find a ref for this window, it's new, and we calculate an initial position for it
+            const initialPos = refs.current[win.id]
+                ? "top-left"
+                : getNewWindowPosition(props, refs, width, height);
+
             const settings = win.settings || {
                 title: getWindowTitle(win),
                 children: null,
                 isResizeable: resizeable,
                 isDraggable: true,
-                initialPosition: "top-left",
+                initialPosition: initialPos,
                 restrictToParentDiv: true,
                 initialSize: { width, height }
             };
