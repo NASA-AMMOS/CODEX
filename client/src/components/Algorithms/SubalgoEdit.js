@@ -151,27 +151,6 @@ function getBreadcrumbs(props) {
 function SubalgoEdit(props) {
     const [helpModeState, setHelpModeState] = useState(false);
 
-    // This effect runs when a user runs a subalgorithm.
-    // useEffect(
-    //     _ => {
-    //         if (!subalgoRunPending) return;
-    //         const req = getSubAlgorithmData(
-    //             props.subalgoState,
-    //             props.selectedFeatures,
-    //             props.filename,
-    //             inMsg => {
-    //                 console.log(inMsg);
-    //             },
-    //             false
-    //         );
-
-    //         return function cleanup() {
-    //             req.closeSocket();
-    //         };
-    //     },
-    //     [subalgoRunPending]
-    // );
-
     return (
         <React.Fragment>
             <div className="subalgo-edit-header">

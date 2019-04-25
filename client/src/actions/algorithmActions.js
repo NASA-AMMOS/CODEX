@@ -55,6 +55,29 @@ function handleAlgorithmReturn(inMsg, subalgoState, dispatch) {
         }
     }
 
+    // Add a feature per cluster if requested
+    if (findOutputParam(subalgoState, "clusterId")) {
+        const features = inMsg.clusters.reduce(
+            (acc, val, idx) => {
+                acc[val][idx] = 1;
+                return acc;
+            },
+            Array(inMsg.numClusters)
+                .fill(0)
+                .map(_ => Array(inMsg.data.length).fill(0))
+        );
+
+        features.forEach((f, idx) => {
+            const feature = `${basename}_${idx}`;
+            dispatch({ type: actionTypes.ADD_FEATURE, feature });
+            dispatch({
+                type: actionTypes.ADD_DATASET,
+                feature,
+                data: f
+            });
+        });
+    }
+
     // Spawn graph window if requested
     if (findOutputParam(subalgoState, "graph")) {
         const axes = ["xAxis", "yAxis"].map(axis => {

@@ -35,9 +35,11 @@
 
 .window-header-enter {
     background-color: #007bff;
+    color: white;
 }
 
 .window-header-enter-done {
     transition: background-color 0.5s ease;
+    transition: color 0.5s ease;
     background-color: white;
 }
