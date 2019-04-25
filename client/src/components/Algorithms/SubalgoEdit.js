@@ -15,6 +15,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import * as algorithmActions from "actions/algorithmActions";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
+import PropTypes from "prop-types";
 
 function handleRunAlgorithm(props) {
     if (!props.subalgoState.serverData.eta) return; // Don't run the algorithm until we have a time estimate from the server
@@ -145,8 +146,6 @@ function getBreadcrumbs(props) {
             </a>
         </React.Fragment>
     );
-
-    return elements;
 }
 
 function SubalgoEdit(props) {
@@ -226,6 +225,10 @@ function SubalgoEdit(props) {
         </React.Fragment>
     );
 }
+
+SubalgoEdit.PropTypes = {
+    subalgoState: PropTypes.object
+};
 
 function mapDispatchToProps(dispatch) {
     return {

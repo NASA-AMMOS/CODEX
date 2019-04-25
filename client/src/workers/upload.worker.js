@@ -1,7 +1,7 @@
-var sock;
+let sock;
 
 function blobToBase64(blob, callback) {
-    var reader = new self.FileReader();
+    let reader = new self.FileReader();
     reader.readAsDataURL(blob);
 
     reader.onloadend = function() {
@@ -11,11 +11,11 @@ function blobToBase64(blob, callback) {
 
 //Send pieces of each files over the socket synchronously
 function process(files) {
-    //for( var j = 0; j < files.length; j++ ) {
+    //for( let j = 0; j < files.length; j++ ) {
 
-    var blob = files[0];
-    var buffer;
-    var fileReader = new FileReader();
+    let blob = files[0];
+    let buffer;
+    let fileReader = new FileReader();
     fileReader.onload = function() {
         buffer = new Buffer(this.result, "binary");
 
@@ -23,9 +23,9 @@ function process(files) {
         // 1MB chunk sizes.
         const SIZE = blob.size;
 
-        var chunk;
-        var start = 0;
-        var end = BYTES_PER_CHUNK;
+        let chunk;
+        let start = 0;
+        let end = BYTES_PER_CHUNK;
 
         //Send the first chunk
         sock.send(
@@ -81,7 +81,7 @@ function process(files) {
 
 self.addEventListener("message", function(e) {
     let files = [];
-    for (var j = 0; j < e.data.files.length; j++) {
+    for (let j = 0; j < e.data.files.length; j++) {
         files.push(e.data.files[j]);
     }
     if (files.length > 0) {

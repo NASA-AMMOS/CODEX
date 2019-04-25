@@ -2,6 +2,9 @@ import Immutable from "immutable";
 
 import * as uiTypes from "constants/uiTypes";
 
+const formulas = {}; //This is just a placeholder to remove some compiler errors, we'll need to fully rebuild the forumulas
+// stuff at some point.
+
 export default class DataReducer {
     static setFeatureListLoading(state, action) {
         return state.set("featureListLoading", action.isLoading);

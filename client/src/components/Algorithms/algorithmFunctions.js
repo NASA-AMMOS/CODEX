@@ -17,7 +17,6 @@ function buildSubalgoServerRequest(
         algorithmType: "clustering",
         algorithmName: subalgo.simplename,
         dataFeatures: selectedFeatures,
-        dataSelections: [], // TODO: hook this back up
         file: filename,
         guidance: null,
         identification: {

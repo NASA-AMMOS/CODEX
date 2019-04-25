@@ -1,6 +1,6 @@
 import * as types from "constants/actionTypes";
 
-var socket;
+let socket;
 
 function handleGraphDataRequest(msg) {
     const cid = Math.random()
