@@ -16,6 +16,8 @@ export default function selections(
             return opt_reducer.toggleSelectionActive(state, action);
         case actionTypes.SAVE_NEW_SELECTION:
             return opt_reducer.saveNewSelection(state, action);
+        case actionTypes.DELETE_SELECTION:
+            return opt_reducer.deleteSelection(state, action);
         default:
             return state;
     }

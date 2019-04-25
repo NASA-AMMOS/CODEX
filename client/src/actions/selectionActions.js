@@ -15,3 +15,7 @@ export function toggleSelectionActive(name) {
 export function saveNewSelection(name, rowIndices) {
     return { type: actionTypes.SAVE_NEW_SELECTION, name, rowIndices };
 }
+
+export function deleteSelection(name) {
+    return { type: actionTypes.DELETE_SELECTION, name };
+}

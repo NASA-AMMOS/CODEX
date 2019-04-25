@@ -86,6 +86,9 @@ function ScatterGraph(props) {
     // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
     useEffect(
         _ => {
+            chartState.data[0].marker.color = chartState.data[0].marker.color.map(
+                _ => DEFAULT_POINT_COLOR
+            );
             props.savedSelections.forEach(selection => {
                 selection.rowIndices.forEach(row => {
                     chartState.data[0].marker.color[row] = selection.active

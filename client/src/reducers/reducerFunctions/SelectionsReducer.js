@@ -53,4 +53,13 @@ export default class SelectionsReducer {
                     : state.nextColorIndex + 1
         };
     }
+
+    static deleteSelection(state, action) {
+        return {
+            ...state,
+            savedSelections: state.savedSelections.filter(
+                selection => selection.name !== action.name
+            )
+        };
+    }
 }
