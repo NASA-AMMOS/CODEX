@@ -34,6 +34,7 @@ import codex_read_data_api
 import codex_regression_api
 import codex_segmentation_api
 import codex_template_scan_api
+import codex_classification_api
 
 # CODEX Support
 import codex_system
@@ -79,6 +80,9 @@ def algorithm_call(inputHash, hashList, subsetHashName, templateHashName, labelH
 
     elif(algorithmType == "regression"):
         result = codex_regression_api.ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName, downsampled, parms, result)
+
+    elif(algorithmType == "classification"):
+        result = codex_classification_api.ml_classification(inputHash, hashList, subsetHashName, labelHash, algorithmName, downsampled, parms, result)
 
     elif(algorithmType == "segment"):
         result = codex_segmentation_api.ml_segmentation(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result)
