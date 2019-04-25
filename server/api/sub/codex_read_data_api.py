@@ -1,7 +1,3 @@
-import codex_doctest
-import codex_return_code
-import codex_hash
-import codex_system
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
@@ -31,6 +27,10 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 # CODEX Support
+import codex_doctest
+import codex_return_code
+import codex_hash
+import codex_system
 
 
 def codex_read_csv(file, featureList, hashType):

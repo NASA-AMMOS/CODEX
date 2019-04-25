@@ -491,7 +491,7 @@ def printHashList(hashType):
 def findHashArray(field, name, hashType):
     '''
     Inputs:
-        name     (string) - hash string for the data set you wish to access
+        name     (string)  - hash string for the data set you wish to access
         hashType (string)  - hash category of the data set {feature, subset}
 
     Outputs:
@@ -723,5 +723,5 @@ def applySubsetMask(featureArray, subsetHash):
 if __name__ == "__main__":
 
     import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
+    results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
     sys.exit(results.failed)

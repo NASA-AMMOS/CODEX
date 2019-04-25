@@ -1,14 +1,4 @@
-import codex_return_code
-import codex_math
-import codex_time_log
-import codex_doctest
-import codex_plot
-import codex_read_data_api
-import codex_downsample
-import codex_hash
-import codex_dimmension_reduction_api
-import codex_system
-import codex_labels
+
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
@@ -36,7 +26,17 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 # CODEX Support
-
+import codex_return_code
+import codex_math
+import codex_time_log
+import codex_doctest
+import codex_plot
+import codex_read_data_api
+import codex_downsample
+import codex_hash
+import codex_dimmension_reduction_api
+import codex_system
+import codex_labels
 
 def ml_cluster(
         inputHash,
@@ -1389,5 +1389,5 @@ def codex_clustering_agglomerative(
 if __name__ == "__main__":
 
     import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
+    results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
     sys.exit(results.failed)
