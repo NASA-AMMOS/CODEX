@@ -1,67 +1,52 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import "components/LeftPanel/LeftPanel.css";
 
 import Title from "../Title/Title";
 import FeatureList from "components/LeftPanel/FeatureList";
 import SelectionList from "components/LeftPanel/SelectionList";
 
-class LeftPanel extends Component {
-    constructor() {
-        super();
+function LeftPanel() {
+    const [filterString, setFilterString] = useState("");
+    const [onOffAll, setOnOffAll] = useState("on");
 
-        this.state = {
-            panelOpen: true,
-            filterString: "",
-            onOffAll: "all"
-        };
+    function toggleOnOffAll() {
+        let newParam = "on";
+        switch (onOffAll) {
+            case "on":
+                newParam = "off";
+                break;
+            case "off":
+                newParam = "all";
+                break;
+        }
+        setOnOffAll(newParam);
     }
 
-    setFilterString(v) {
-        this.setState({ filterString: v });
-    }
-    moveOnOffAll() {
-        let state = this.state.onOffAll;
-        if (state === "on") state = "off";
-        else if (state === "off") state = "all";
-        else state = "on";
-
-        this.setState({ onOffAll: state });
-    }
-
-    render() {
-        return (
-            <div className="Panel">
-                <div id="content">
-                    <Title />
-                    <div id="contents">
-                        <div id="right">
-                            <div className="PanelOptions">
-                                <div id="filter">
-                                    <input
-                                        type="text"
-                                        placeholder="Filter"
-                                        onInput={e => this.setFilterString(e.target.value)}
-                                    />
-                                </div>
-                                <div
-                                    id="onOffAll"
-                                    className={this.state.onOffAll}
-                                    onClick={() => this.moveOnOffAll()}
-                                >
-                                    {this.state.onOffAll}
-                                </div>
+    return (
+        <div className="Panel">
+            <div id="content">
+                <Title />
+                <div id="contents">
+                    <div id="right">
+                        <div className="PanelOptions">
+                            <div id="filter">
+                                <input
+                                    type="text"
+                                    placeholder="Filter"
+                                    onInput={e => setFilterString(e.target.value)}
+                                />
                             </div>
-                            <FeatureList
-                                filterString={this.state.filterString}
-                                onOffAll={this.state.onOffAll}
-                            />
-                            <SelectionList />
+                            <div id="onOffAll" className={onOffAll} onClick={toggleOnOffAll}>
+                                {onOffAll}
+                            </div>
                         </div>
+                        <FeatureList filterString={filterString} onOffAll={onOffAll} />
+                        <SelectionList />
                     </div>
                 </div>
             </div>
-        );
-    }
+        </div>
+    );
 }
 
 export default LeftPanel;
