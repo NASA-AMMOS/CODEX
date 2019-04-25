@@ -9,36 +9,87 @@ import Popover from "@material-ui/core/Popover";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
 
 function createSelection(
     props,
     selection,
-    contextMenuVisible,
-    contextMenuPosition,
     setContextMenuVisible,
-    setContextMenuPosition
+    setContextMenuPosition,
+    setContextActiveSelection
 ) {
     return (
         <li
             className={classnames({ selection: true })}
             key={
-                selection.name +
+                selection.id +
                 Math.random()
                     .toString(36)
                     .substring(7)
             }
-            onClick={_ => props.toggleSelectionActive(selection.name)}
+            onClick={_ => props.toggleSelectionActive(selection.id)}
             onContextMenu={e => {
                 e.preventDefault();
                 setContextMenuVisible(true);
                 setContextMenuPosition({ top: e.clientY, left: e.clientX });
+                setContextActiveSelection({ id: selection.id, displayName: selection.displayName });
             }}
         >
-            <div>{selection.name}</div>
+            <div>{selection.displayName}</div>
             <div
                 className="swatch"
                 style={{ background: selection.active ? selection.color : "#bbbbbb" }}
             />
+        </li>
+    );
+}
+
+function SelectionList(props) {
+    const activeCount = props.savedSelections.filter(sel => sel.active).length;
+    const shownCount = activeCount;
+    const totalCount = props.savedSelections.length;
+
+    const [contextMenuVisible, setContextMenuVisible] = useState(false);
+    const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
+
+    const [contextActiveSelection, setContextActiveSelection] = useState(null);
+    const [contextMode, setContextMode] = useState(null);
+
+    const [renameSelectionBuffer, setRenameSelectionBuffer] = useState("");
+
+    function submitRenamedSelection(e) {
+        if (!e.key || (e.key && e.key === "Enter")) {
+            setContextMenuVisible(false);
+            setContextMode(null);
+            setContextActiveSelection(null);
+            props.renameSelection(contextActiveSelection.id, renameSelectionBuffer);
+        }
+    }
+
+    return (
+        <React.Fragment>
+            <div className="selections">
+                <div className="header">
+                    <div className="title">Selections</div>
+                    <span className="counts">
+                        {activeCount}/{shownCount}/{totalCount}
+                    </span>
+                </div>
+                <div className="list">
+                    <ul>
+                        {props.savedSelections.map(selection =>
+                            createSelection(
+                                props,
+                                selection,
+                                setContextMenuVisible,
+                                setContextMenuPosition,
+                                setContextActiveSelection
+                            )
+                        )}
+                    </ul>
+                </div>
+            </div>
             <Popover
                 id="simple-popper"
                 open={contextMenuVisible}
@@ -58,8 +109,10 @@ function createSelection(
                         <ListItem
                             button
                             onClick={_ => {
-                                setContextMenuVisible(false);
+                                setContextMode("rename");
+                                setRenameSelectionBuffer(contextActiveSelection.displayName);
                             }}
+                            hidden={contextMode}
                         >
                             Rename Selection
                         </ListItem>
@@ -67,50 +120,30 @@ function createSelection(
                             button
                             onClick={_ => {
                                 setContextMenuVisible(false);
-                                props.deleteSelection(selection.name);
+                                props.deleteSelection(contextActiveSelection.id);
+                                setContextActiveSelection(null);
                             }}
+                            hidden={contextMode}
                         >
                             Delete Selection
+                        </ListItem>
+                        <ListItem hidden={contextMode !== "rename"}>
+                            <TextField
+                                value={renameSelectionBuffer}
+                                onChange={e => setRenameSelectionBuffer(e.target.value)}
+                                onKeyPress={submitRenamedSelection}
+                            />
+                            <Button
+                                variant="outlined"
+                                style={{ marginLeft: "10px" }}
+                                onClick={submitRenamedSelection}
+                            >
+                                Rename
+                            </Button>
                         </ListItem>
                     </List>
                 </ClickAwayListener>
             </Popover>
-        </li>
-    );
-}
-
-function SelectionList(props) {
-    const activeCount = props.savedSelections.filter(sel => sel.active).length;
-    const shownCount = activeCount;
-    const totalCount = props.savedSelections.length;
-
-    const [contextMenuVisible, setContextMenuVisible] = useState(false);
-    const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
-
-    return (
-        <React.Fragment>
-            <div className="selections">
-                <div className="header">
-                    <div className="title">Selections</div>
-                    <span className="counts">
-                        {activeCount}/{shownCount}/{totalCount}
-                    </span>
-                </div>
-                <div className="list">
-                    <ul>
-                        {props.savedSelections.map(selection =>
-                            createSelection(
-                                props,
-                                selection,
-                                contextMenuVisible,
-                                contextMenuPosition,
-                                setContextMenuVisible,
-                                setContextMenuPosition
-                            )
-                        )}
-                    </ul>
-                </div>
-            </div>
         </React.Fragment>
     );
 }
@@ -124,7 +157,8 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         toggleSelectionActive: bindActionCreators(selectionActions.toggleSelectionActive, dispatch),
-        deleteSelection: bindActionCreators(selectionActions.deleteSelection, dispatch)
+        deleteSelection: bindActionCreators(selectionActions.deleteSelection, dispatch),
+        renameSelection: bindActionCreators(selectionActions.renameSelection, dispatch)
     };
 }
 

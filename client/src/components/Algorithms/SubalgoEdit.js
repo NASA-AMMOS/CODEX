@@ -226,10 +226,6 @@ function SubalgoEdit(props) {
     );
 }
 
-SubalgoEdit.PropTypes = {
-    subalgoState: PropTypes.object
-};
-
 function mapDispatchToProps(dispatch) {
     return {
         runAlgorithm: bindActionCreators(algorithmActions.runAlgorithm, dispatch)

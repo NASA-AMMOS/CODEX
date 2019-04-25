@@ -8,14 +8,18 @@ export function setCurrentSelection(rowIndices) {
     return { type: actionTypes.SET_CURRENT_SELECTION, rowIndices };
 }
 
-export function toggleSelectionActive(name) {
-    return { type: actionTypes.TOGGLE_SELECTION_ACTIVE, name };
+export function toggleSelectionActive(id) {
+    return { type: actionTypes.TOGGLE_SELECTION_ACTIVE, id };
 }
 
-export function saveNewSelection(name, rowIndices) {
-    return { type: actionTypes.SAVE_NEW_SELECTION, name, rowIndices };
+export function saveNewSelection(id, rowIndices) {
+    return { type: actionTypes.SAVE_NEW_SELECTION, id, rowIndices };
 }
 
-export function deleteSelection(name) {
-    return { type: actionTypes.DELETE_SELECTION, name };
+export function deleteSelection(id) {
+    return { type: actionTypes.DELETE_SELECTION, id };
+}
+
+export function renameSelection(id, name) {
+    return { type: actionTypes.RENAME_SELECTION, id, name };
 }

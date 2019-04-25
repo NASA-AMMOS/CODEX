@@ -18,6 +18,8 @@ export default function selections(
             return opt_reducer.saveNewSelection(state, action);
         case actionTypes.DELETE_SELECTION:
             return opt_reducer.deleteSelection(state, action);
+        case actionTypes.RENAME_SELECTION:
+            return opt_reducer.renameSelection(state, action);
         default:
             return state;
     }

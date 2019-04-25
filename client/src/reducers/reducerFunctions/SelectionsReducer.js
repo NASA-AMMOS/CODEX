@@ -11,10 +11,11 @@ export default class SelectionsReducer {
             ...state,
             savedSelections: state.savedSelections.concat([
                 {
-                    name: `Selection_${state.savedSelections.length + 1}`,
+                    id: `Selection_${state.savedSelections.length + 1}`,
                     rowIndices: state.currentSelection,
                     color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
-                    active: true
+                    active: true,
+                    displayName: `Selection_${state.savedSelections.length + 1}`
                 }
             ]),
             currentSelection: [],
@@ -29,9 +30,7 @@ export default class SelectionsReducer {
         return {
             ...state,
             savedSelections: state.savedSelections.map(selection =>
-                selection.name === action.name
-                    ? { ...selection, active: !selection.active }
-                    : selection
+                selection.id === action.id ? { ...selection, active: !selection.active } : selection
             )
         };
     }
@@ -41,10 +40,11 @@ export default class SelectionsReducer {
             ...state,
             savedSelections: state.savedSelections.concat([
                 {
-                    name: action.name,
+                    id: action.name,
                     rowIndices: action.rowIndices,
                     color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
-                    active: true
+                    active: true,
+                    displayName: action.name
                 }
             ]),
             nextColorIndex:
@@ -57,8 +57,17 @@ export default class SelectionsReducer {
     static deleteSelection(state, action) {
         return {
             ...state,
-            savedSelections: state.savedSelections.filter(
-                selection => selection.name !== action.name
+            savedSelections: state.savedSelections.filter(selection => selection.id !== action.id)
+        };
+    }
+
+    static renameSelection(state, action) {
+        return {
+            ...state,
+            savedSelections: state.savedSelections.map(selection =>
+                selection.id === action.id
+                    ? Object.assign(selection, { displayName: action.name })
+                    : selection
             )
         };
     }
