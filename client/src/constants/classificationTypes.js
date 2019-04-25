@@ -1,21 +1,7 @@
-import Immutable from "immutable";
+export const CLASSIFICATION_TYPES = [YOUR_NAME_HERE];
 
-export const CLUSTER_ALGORITHM = "Cluster";
-
-export const ALGORITHM_TYPES = [CLUSTER_ALGORITHM];
-
-export const ALGO_LOADING_WINDOW = "ALGO_LOADING_WINDOW";
-
-// Defaults
-export const DOWNSAMPLE_FACTOR = 15;
-export const K_FACTOR = 3;
-export const EPS = 0.7;
-export const QUANTILE = 0.5;
-export const DAMPING = 0.9;
-export const N_NEIGHBORS = 5;
-
-export const SUBALGORITHMS = {
-    [CLUSTER_ALGORITHM]: [
+export const CLASSIFICATIONS = {
+    [YOUR_NAME_HERE]: [
         {
             name: "Mini Batch K-Means",
             simplename: "kmeans",
@@ -147,6 +133,3 @@ export const SUBALGORITHMS = {
         }
     ]
 };
-
-export const SUBALGO_MODE_EDIT_PARAMS = "SUBALGO_MODE_EDIT_PARAMS";
-export const SUBALGO_MODE_EDIT_OUTPUTS = "SUBALGO_MODE_EDIT_OUTPUTS";
