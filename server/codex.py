@@ -289,6 +289,25 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 
             result['identification'] = msg['identification']
 
+        elif( routine == 'time'):
+
+            algorithmType = msg['algorithmType']
+            algorithmName = msg['algorithmName']
+            numSamples = int(msg['numSamples'])
+
+            # TODO - extend computeTimeEstimate to factor in number of features
+            numFeatures = int(msg['numFeatures'])
+
+            eta = codex_time_log.getComputeTimeEstimate(algorithmType, algorithmName, numSamples)
+
+            result['eta'] = eta
+            result['message'] = 'success'
+            result['algorithmType'] = msg['algorithmType']
+            result['algorithmName'] = msg['algorithmName']
+            result['numSamples'] = int(msg['numSamples'])
+            result['numFeatures'] = int(msg['numFeatures'])         
+
+
         elif( routine == 'arrange' ):
 
             activity = msg["activity"]

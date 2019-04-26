@@ -447,7 +447,7 @@ def codex_classification_adaBoostClassifier(inputHash, subsetHash, labelHash, do
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
         eta = codex_time_log.getComputeTimeEstimate(
-            "classification", "adaBoostClassifier", samples)
+            "classification", "AdaBoostClassifier", samples)
 
     if data.ndim < 2:
         codex_system.codex_log(
@@ -472,7 +472,7 @@ def codex_classification_adaBoostClassifier(inputHash, subsetHash, labelHash, do
     computeTime = endTime - startTime
     codex_time_log.logTime(
         "classification",
-        "adaBoostClassifier",
+        "AdaBoostClassifier",
         computeTime,
         len(data),
         data.ndim)
@@ -2845,12 +2845,12 @@ def codex_classification_SVC(inputHash, subsetHash, labelHash, downsampled):
 
 if __name__ == "__main__":
 
-    #import doctest
-    #results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
-    #sys.exit(results.failed)
-    (inputHash,hashList,template, labelHash) = codex_doctest.doctest_get_data()
+    import doctest
+    results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
+    sys.exit(results.failed)
+    #(inputHash,hashList,template, labelHash) = codex_doctest.doctest_get_data()
     
-    result = codex_classification_NuSVC(inputHash, False, labelHash, False)
+    #result = codex_classification_NuSVC(inputHash, False, labelHash, False)
     
 
 

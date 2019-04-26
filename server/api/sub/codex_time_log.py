@@ -123,6 +123,9 @@ def getComputeTimeEstimate(domain, algorithm, inputSamples):
     count = 0
     totalTime = 0
 
+    if(timeLogs == {}):
+        getTimeLogDict()
+
     try:
         data = timeLogs[domain][algorithm]["log"]
     except BaseException:
@@ -158,3 +161,4 @@ if __name__ == "__main__":
     import doctest
     results = doctest.testmod(optionflags=doctest.ELLIPSIS)
     sys.exit(results.failed)
+
