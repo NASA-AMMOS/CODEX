@@ -67,7 +67,7 @@ function ScatterGraph(props) {
                 "sendDataToCloud",
                 "hoverCompareCartesian",
                 "toImage",
-                "zoom2d",
+                "select2d",
                 "autoScale2d",
                 "toggleSpikelines"
             ]
