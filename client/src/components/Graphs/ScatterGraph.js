@@ -60,7 +60,7 @@ function ScatterGraph(props) {
                 automargin: true
             }
         },
-        config: { displayModeBar: true, responsive: true, displaylogo: false }
+        config: { responsive: true, displaylogo: false }
     });
 
     function updateChartRevision() {
