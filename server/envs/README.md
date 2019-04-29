@@ -23,7 +23,7 @@ Assuming you have an up-to-date version of anaconda installed, you can install o
 
 ```bash
 $ cd $CODEX_ROOT
-$ conda env create -f envs/codex-env.yml
+$ conda env create -f envs/environment.yml
 ```
 
 In the above example, the variable `$CODEX_ROOT` is assumed to point to the CODEX server directory.
@@ -33,7 +33,7 @@ If the `codex-env.yml` file changes for any reason (e.g. adding new packages), t
 
 ```bash
 $ cd $CODEX_ROOT
-$ conda env update -f envs/codex-env.yml
+$ conda env update -f envs/environment.yml
 ```
 
 In the above example, the variable `$CODEX_ROOTH` is assumed to point to the CODEX server directory.
