@@ -1,4 +1,3 @@
-import codex_system
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
@@ -30,16 +29,20 @@ import hashlib
 import sys
 import numpy as np
 import os
+import pickle
 import psutil
 import time
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
+import codex_system
 
 featureList = []
 subsetList = []
 downsampleList = []
 labelList = []
+classifierList = []
+regressorList = []
 
 debug = True
 
@@ -61,14 +64,17 @@ def printCacheCount():
     >>> hashResult = hashArray("x2", x1, "feature")
     >>> hashResult = hashArray("s1", x1, "subset")
     >>> printCacheCount()
-    Feature Cache Size    : 1
-    Subset Cache Size     : 1
-    Downsample Cache Size : 0
+    Feature Cache Size           : 1
+    Subset Cache Size            : 1
+    Downsample Cache Size        : 0
+    Number of classifier models  : 0
+    Number of regressor models   : 1
     '''
-    codex_system.codex_log("Feature Cache Size    : " + str(len(featureList)))
-    codex_system.codex_log("Subset Cache Size     : " + str(len(subsetList)))
-    codex_system.codex_log("Downsample Cache Size : " +
-                           str(len(downsampleList)))
+    codex_system.codex_log("Feature Cache Size           : " + str(len(featureList)))
+    codex_system.codex_log("Subset Cache Size            : " + str(len(subsetList)))
+    codex_system.codex_log("Downsample Cache Size        : " + str(len(downsampleList)))
+    codex_system.codex_log("Number of classifier models  : " + str(len(regressorList)))
+    codex_system.codex_log("Number of regressor models   : " + str(len(classifierList)))
 
 
 def remove_stale_data(verbose=False):
@@ -290,6 +296,12 @@ def resetCacheList(hashType):
     elif(hashType == "label"):
         global labelList
         labelList = []
+    elif(hashType == "classifier"):
+        global classifierList
+        classifierList = []
+    elif(hashType == "regressor"):
+        global regressorList
+        regressorList = []
     else:
         codex_system.codex_log("Unknown hash type.  Not resetting")
 
@@ -309,7 +321,7 @@ def hashArray(arrayName, inputArray, hashType):
             samples (int)     - number of samples in the data set
             memory (int)      - size, in bytes, of memory being cached
 
-    Notes:
+    Notes: 
 
     Examples:
     # Standard completion check
@@ -718,6 +730,191 @@ def applySubsetMask(featureArray, subsetHash):
                 count += 1
 
         return outData, returnDict['name']
+
+
+def pickle_data(session_name):
+    '''
+    Inputs:
+
+    Outputs:
+
+    Notes: 
+
+    Examples:
+
+    >>> from sklearn import datasets, linear_model
+    >>> diabetes = datasets.load_diabetes()
+    >>> regr = linear_model.LinearRegression()
+    >>> regr.fit(diabetes.data, diabetes.target)
+    LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
+             normalize=False)
+
+    >>> model = saveModel("test", regr, "classifier")
+    >>> print(model['hash'])
+    875372967b37595f402f2d2e749e34e1e2eb4721
+
+    >>> resetCacheList("feature")
+    >>> resetCacheList("subset")
+    >>> resetCacheList("downsample")
+    >>> resetCacheList("label")
+
+    >>> x1 = np.array([2,3,1,0])
+
+    >>> hashResult = hashArray("x1", x1, "feature")
+    >>> hashResult = hashArray("x1", x1, "subset")
+    >>> hashResult = hashArray("x1", x1, "downsample")
+    >>> hashResult = hashArray("x1", x1, "label")
+    
+    >>> pickle_data("test_session")
+
+    '''
+    session_path = os.path.join(CODEX_ROOT, 'sessions', session_name)
+    if not os.path.exists(os.path.join(session_path)):
+        os.makedirs(session_path)
+
+    ## Save classifier models
+    pickle_path = os.path.join(session_path, 'classifier_models')
+    pickle.dump(classifierList, open(pickle_path, 'wb'))
+
+    # Save regression models
+    pickle_path = os.path.join(session_path, 'regressor_models')
+    pickle.dump(regressorList, open(pickle_path, 'wb'))
+
+    # Save labels
+    pickle_path = os.path.join(session_path, "label_data")
+    pickle.dump(labelList, open(pickle_path, 'wb'))
+
+    # Save features
+    pickle_path = os.path.join(session_path, "feature_data")
+    pickle.dump(featureList, open(pickle_path, 'wb'))
+
+    # Save subsets
+    pickle_path = os.path.join(session_path, "subset_data")
+    pickle.dump(subsetList, open(pickle_path, 'wb'))
+
+    # Save downsampled features
+    pickle_path = os.path.join(session_path, "downsampled_data")
+    pickle.dump(downsampleList, open(pickle_path, 'wb'))
+
+
+def unpickle_data(session_name):
+    '''
+    Inputs:
+
+    Outputs:
+
+    Notes: 
+
+    Examples:
+
+    >>> unpickle_data("test_session")
+    >>> printCacheCount()
+    Feature Cache Size           : 1
+    Subset Cache Size            : 1
+    Downsample Cache Size        : 1
+    Number of classifier models  : 0
+    Number of regressor models   : 1
+    '''
+    global classifierList
+    global regressorList
+    global featureList
+    global subsetList
+    global labelList
+    global downsampleList
+
+    session_path = os.path.join(CODEX_ROOT, 'sessions', session_name)
+    if not os.path.exists(os.path.join(session_path)):
+        os.makedirs(session_path)
+
+    ## Save classifier models
+    pickle_path = os.path.join(session_path, 'classifier_models')
+    classifierList = pickle.load(open(pickle_path, "rb"))
+
+    # Save regression models
+    pickle_path = os.path.join(session_path, 'regressor_models')
+    regressorList = pickle.load(open(pickle_path, "rb"))
+
+    # Save labels
+    pickle_path = os.path.join(session_path, "label_data")
+    labelList = pickle.load(open(pickle_path, "rb"))
+
+    # Save features
+    pickle_path = os.path.join(session_path, "feature_data")
+    featureList = pickle.load(open(pickle_path, "rb"))
+
+    # Save subsets
+    pickle_path = os.path.join(session_path, "subset_data")
+    subsetList = pickle.load(open(pickle_path, "rb"))
+
+    # Save downsampled features
+    pickle_path = os.path.join(session_path, "downsampled_data")
+    downsampleList = pickle.load(open(pickle_path, "rb"))
+
+
+def saveModel(modelName, inputModel, modelType):
+    '''
+    Inputs:
+        modelName (string)    - Name of the model.  Used in visalization for easy human model recognition
+        inputModel            - Model object to be saved
+        modelType (string)    - classifier | regressor
+
+    Outputs:
+        Dictionary -
+            name (string)     - arrayName input stored
+            data (nd array)   - inputArray input stored
+            hash (string)     - resulting hash
+            samples (int)     - number of samples in the data set
+            memory (int)      - size, in bytes, of memory being cached
+
+    Notes: 
+
+    Examples:
+
+    >>> from sklearn import datasets, linear_model
+    >>> diabetes = datasets.load_diabetes()
+    >>> regr = linear_model.LinearRegression()
+    >>> regr.fit(diabetes.data, diabetes.target)
+    LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
+             normalize=False)
+
+    >>> model = saveModel("test", regr, "classifier")
+    >>> print(model['hash'])
+    875372967b37595f402f2d2e749e34e1e2eb4721
+
+    '''
+
+    pickled_model = pickle.dumps(inputModel)
+    hashValue = hashlib.sha1(pickled_model).hexdigest()
+
+    # TODO - better figure out how to calculate RAM usage. Don't think static
+    # is possible
+    memoryFootprint = 0  # asizeof.asizeof(inputArray)
+
+    creationTime = time.time()
+
+    newHash = {
+        'time': creationTime,
+        'name': modelName,
+        'model': pickled_model,
+        'hash': hashValue,
+        "memory": memoryFootprint,
+        "type": modelType}
+
+    if(modelType == "regressor"):
+        if not any(d['hash'] == newHash["hash"] for d in regressorList):
+            regressorList.append(newHash)
+    elif(modelType == "classifier"):
+        if not any(d['hash'] == newHash["hash"] for d in classifierList):
+            classifierList.append(newHash)
+    else:
+        codex_system.codex_log(
+            "ERROR: Model hash type not recognized! Not logged for future use.")
+        return None
+
+    return newHash
+
+
+
 
 
 if __name__ == "__main__":

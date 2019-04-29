@@ -2,6 +2,7 @@
 
 __pycache__/
 src/server/timeLogs/t *
+server/sessions/
 
 # misc
 .DS_Store
