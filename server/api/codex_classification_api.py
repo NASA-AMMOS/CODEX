@@ -146,6 +146,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
               'downsample': downsampled,
               'WARNING': "None"}
 
+    cv_count = 5 # TODO - start getting from front end
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
@@ -194,9 +195,15 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         y = labelHash_dict['data']
         result['y'] = y.tolist()
 
+        unique, counts = np.unique(y, return_counts=True)
+        count_dict = dict(zip(unique, counts))
+        if any(v < cv_count for v in count_dict.values()):
+            return {'algorithm': algorithm,
+                    'downsample': downsampled,
+                    'WARNING': "Label class has less samples than cross val score"}         
+
     try:
 
-        cv_count = 5
         if(algorithm == "AdaBoostClassifier"):
             #clf = AdaBoostClassifier(n_estimators=parms["n_estimators"])
             clf =  GridSearchCV(AdaBoostClassifier(), parms, cv=cv_count, scoring='precision')
@@ -335,11 +342,6 @@ if __name__ == "__main__":
     import doctest
     results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
     sys.exit(results.failed)
-
-
-
-
-
 
 
 

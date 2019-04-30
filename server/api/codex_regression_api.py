@@ -220,6 +220,8 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
               'downsample': downsampled,
               'WARNING': "None"}
 
+    cv_count = 5 # TODO - start getting from front end
+
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
         codex_system.codex_log("Regression: " + algorithm + ": Hash not found. Returning!")
@@ -266,12 +268,18 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
         y = labelHash_dict['data']
         result['y'] = y.tolist()
 
+        unique, counts = np.unique(y, return_counts=True)
+        count_dict = dict(zip(unique, counts))
+        if any(v < cv_count for v in count_dict.values()):
+            return {'algorithm': algorithm,
+                    'downsample': downsampled,
+                    'WARNING': "Label class has less samples than cross val score"}  
 
     try:
         if(algorithm == "ARDRegression"):
             #regr = ARDRegression(n_iter=parms["n_iter"])
             print(parms)
-            regr =  GridSearchCV(ARDRegression(), parms, cv=5, scoring='precision')
+            regr =  GridSearchCV(ARDRegression(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "AdaBoostRegressor"):
             regr = AdaBoostRegressor(n_estimators=parms["n_estimators"])
         elif(algorithm == "BaggingRegressor"):
@@ -373,7 +381,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
                 'WARNING': traceback.format_exc()}
 
     # TODO - eta needs to be multipled by number of folds
-    scores = model_selection.cross_val_score(regr, X, y, cv=5)
+    scores = model_selection.cross_val_score(regr, X, y, cv=cv_count)
     result['accuracy'] = scores.mean()
     result['accuracy_error'] = scores.std() * 2
 
