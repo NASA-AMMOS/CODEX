@@ -218,6 +218,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         result = {}
 
         msg = json.loads(message)
+        codex_system.codex_log(str(msg))
 
         routine = msg['routine']
 
