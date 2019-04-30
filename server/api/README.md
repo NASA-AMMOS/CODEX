@@ -29,15 +29,15 @@ Example:
 
 
 |     algorithmName       | Description  | parm 1 name  | parm 1 dtype | parm 1 default value | parm 1 range | parm 2 name  | parm 2 dtype | parm 2 default value | parm 2 range | parm 3 name  | parm 3 dtype | parm 3 default value | parm 3 range |
-|-------------------------|--------------|--------------|--------------|----------------------|--------------|--------------|--------------|----------------------|--------------|
-|  agglomerative          |              | downsampled  |      bool    |         False        | True | False |  n_neighbors |     int      |          5           |   [2, 1000]  |
-|  dbscan                 |              | downsampled  |      bool    |         False        | True | False |              |              |                      |              |
-|  spectral               |              | downsampled  |      bool    |         False        | True | False |              |              |                      |              |
-|  ward                   |              | downsampled  |      bool    |         False        | True | False |  n_neighbors |     int      |          5           |   [2, 1000]  |
-|  birch                  |              | downsampled  |      bool    |         False        | True | False |              |              |                      |              |
-|  affinity_propagation   |              | downsampled  |      bool    |         False        | True | False |              |              |                      |              |
-|  mean_shift             |              | downsampled  |      bool    |         False        | True | False |              |              |                      |              |
-|  kmeans                 |              | downsampled  |      bool    |         False        | True | False |              |              |                      |              |
+|-------------------------|--------------|--------------|--------------|----------------------|--------------|--------------|--------------|----------------------|--------------|--------------|--------------|----------------------|--------------|
+|  agglomerative          |              | downsampled  |      bool    |         False        | True | False |      k       |     int      |          3           |    [3,10]    |  n_neighbors |     int      |          5           |   [2, 1000]  |
+|  dbscan                 |              | downsampled  |      bool    |         False        | True | False |     eps      |    float     |          5           |   [2, 1000]  |              |              |                      |              |
+|  spectral               |              | downsampled  |      bool    |         False        | True | False |      k       |     int      |          3           |    [3,10]    |              |              |                      |              |
+|  ward                   |              | downsampled  |      bool    |         False        | True | False |      k       |     int      |          3           |    [3,10]    |  n_neighbors |     int      |          5           |   [2, 1000]  |
+|  birch                  |              | downsampled  |      bool    |         False        | True | False |      k       |     int      |          3           |    [3,10]    |              |              |                      |              |
+|  affinity_propagation   |              | downsampled  |      bool    |         False        | True | False |    damping   |    float     |         0.5          |   [0.5, 1]   |              |              |                      |              |
+|  mean_shift             |              | downsampled  |      bool    |         False        | True | False |    quantile  |    float     |         0.3          |    [0, 1]    |              |              |                      |              |
+|  kmeans                 |              | downsampled  |      bool    |         False        | True | False |      k       |     int      |          3           |    [3,10]    |              |              |                      |              |
 
 
 # Classification API
@@ -46,34 +46,34 @@ Example:
 {"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"classification", 'dataFeatures': [<list of feature strings>], 'file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {'downsampled': True, 'eps': 0.7}, 'dataSelections': [], 'cid': 'wngyu'}
 
 
-|         algorithmName          | Description  | parm 1 name  | parm 1 dtype | parm 1 default value | parm 1 range |
-|--------------------------------|--------------|--------------|--------------|----------------------|--------------|
-| AdaBoostClassifier             |              | downsampled  |      bool    |         False        | True | False |
-| BaggingClassifier              |              | downsampled  |      bool    |         False        | True | False |
-| BayesianGaussianMixture        |              | downsampled  |      bool    |         False        | True | False |
-| BernoulliNB                    |              | downsampled  |      bool    |         False        | True | False |
-| CalibratedClassifierCV         |              | downsampled  |      bool    |         False        | True | False |
-| ComplementNB                   |              | downsampled  |      bool    |         False        | True | False |
-| DecisionTreeClassifier         |              | downsampled  |      bool    |         False        | True | False |
-| ExtraTreesClassifier           |              | downsampled  |      bool    |         False        | True | False |
-| ExtraTreeClassifier            |              | downsampled  |      bool    |         False        | True | False |
-| GaussianMixture                |              | downsampled  |      bool    |         False        | True | False |
-| GaussianNB                     |              | downsampled  |      bool    |         False        | True | False |
-| GaussianProcessClassifier      |              | downsampled  |      bool    |         False        | True | False |
-| GradientBoostingClassifier     |              | downsampled  |      bool    |         False        | True | False |
-| KNeighborsClassifier           |              | downsampled  |      bool    |         False        | True | False |
-| LabelPropagation               |              | downsampled  |      bool    |         False        | True | False |
-| LabelSpreading                 |              | downsampled  |      bool    |         False        | True | False |
-| LinearDiscriminantAnalysis     |              | downsampled  |      bool    |         False        | True | False |
-| LogisticRegression             |              | downsampled  |      bool    |         False        | True | False |
-| LogisticRegressionCV           |              | downsampled  |      bool    |         False        | True | False |
-| MLPClassifier                  |              | downsampled  |      bool    |         False        | True | False |
-| MultinomialNB                  |              | downsampled  |      bool    |         False        | True | False |
-| NuSVC                          |              | downsampled  |      bool    |         False        | True | False |
-| QuadraticDiscriminantAnalysis  |              | downsampled  |      bool    |         False        | True | False |
-| RandomForestClassifier         |              | downsampled  |      bool    |         False        | True | False |
-| SGDClassifier                  |              | downsampled  |      bool    |         False        | True | False |
-| SVC                            |              | downsampled  |      bool    |         False        | True | False |
+|         algorithmName          | Description  | parm 1 name  | parm 1 dtype | parm 1 default value | parm 1 range |     parm 2 name      | parm 2 dtype | parm 2 default value |     parm 2 range   |
+|--------------------------------|--------------|--------------|--------------|----------------------|--------------|----------------------|--------------|----------------------|--------------------|
+| AdaBoostClassifier             |              | downsampled  |      bool    |         False        | True | False | n_estimators         |     int      |          50          |     [1, 100]       |
+| BaggingClassifier              |              | downsampled  |      bool    |         False        | True | False | n_estimators         |     int      |          10          |     [1, 100]       |
+| BayesianGaussianMixture        |              | downsampled  |      bool    |         False        | True | False | n_components         |     int      |           1          |     [1, 100]       |
+| BernoulliNB                    |              | downsampled  |      bool    |         False        | True | False |    alpha             |    float     |           1          |     [0, 100]       |
+| CalibratedClassifierCV         |              | downsampled  |      bool    |         False        | True | False |    method            |    string    |       sigmoid        | sigmoid | isotonic |
+| ComplementNB                   |              | downsampled  |      bool    |         False        | True | False |    alpha             |    float     |           1          |     [0, 100]       |
+| DecisionTreeClassifier         |              | downsampled  |      bool    |         False        | True | False |  max_depth           |     int      |         None         |   None | [1, 1000] |
+| ExtraTreesClassifier           |              | downsampled  |      bool    |         False        | True | False | n_estimators         |     int      |          10          |     [1, 100]       |
+| ExtraTreeClassifier            |              | downsampled  |      bool    |         False        | True | False |  max_depth           |     int      |         None         |   None | [1, 1000] |
+| GaussianMixture                |              | downsampled  |      bool    |         False        | True | False | n_components         |     int      |           1          |     [1, 100]       |
+| GaussianNB                     |              | downsampled  |      bool    |         False        | True | False | var_smoothing        |    float     |         1e-09        |     [0, 100]       |
+| GaussianProcessClassifier      |              | downsampled  |      bool    |         False        | True | False | n_restarts_optimizer |     int      |           0          |     [0, 100]       |
+| GradientBoostingClassifier     |              | downsampled  |      bool    |         False        | True | False | n_estimators         |     int      |          100         |     [1, 1000]      |
+| KNeighborsClassifier           |              | downsampled  |      bool    |         False        | True | False | n_neighbors          |     int      |           5          |     [1, 100]       |
+| LabelPropagation               |              | downsampled  |      bool    |         False        | True | False | n_neighbors          |     int      |           5          |     [1, 100]       |
+| LabelSpreading                 |              | downsampled  |      bool    |         False        | True | False | n_neighbors          |     int      |           5          |     [1, 100]       |
+| LinearDiscriminantAnalysis     |              | downsampled  |      bool    |         False        | True | False | n_components         |     int      |           3          | [1, # features -1] |
+| LogisticRegression             |              | downsampled  |      bool    |         False        | True | False | max_iter             |     int      |          100         |    [1, 10000]      |
+| LogisticRegressionCV           |              | downsampled  |      bool    |         False        | True | False | max_iter             |     int      |          100         |    [1, 10000]      |
+| MLPClassifier                  |              | downsampled  |      bool    |         False        | True | False | max_iter             |     int      |          200         |    [1, 10000]      |
+| MultinomialNB                  |              | downsampled  |      bool    |         False        | True | False |    alpha             |    float     |           1          |     [0, 100]       |
+| NuSVC                          |              | downsampled  |      bool    |         False        | True | False | max_iter             |     int      |          -1          |    [-1, 10000]     |
+| QuadraticDiscriminantAnalysis  |              | downsampled  |      bool    |         False        | True | False | tol                  |    float     |         1.0e-4       |   [1.0e-6, 1.0e-2] |
+| RandomForestClassifier         |              | downsampled  |      bool    |         False        | True | False | n_estimators         |     int      |          10          |     [1, 100]       |
+| SGDClassifier                  |              | downsampled  |      bool    |         False        | True | False |    alpha             |    float     |        0.0001        |     [0, 100]       |
+| SVC                            |              | downsampled  |      bool    |         False        | True | False | max_iter             |     int      |          -1          |    [-1, 10000]     |
 
 
 # Regression API

@@ -124,32 +124,17 @@ def ml_regression(
     else:
         subsetHash = False
 
-    if(algorithmName == 'linear'):
-
-        '''
-        try:
-            ts = float(parms['test_size'])
-        except BaseException:
-            codex_system.codex_log("test_size parameter not set")
-            result['message'] = "test_size parameter not set"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-        '''
-
-        try:
-            result =  run_codex_regression(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log("Failed to run regression algorithm")
-            result['message'] = "Failed to run regression algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    else:
-        result['message'] = "Cannot find requested regression algorithm"
+    try:
+        result =  run_codex_regression(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms)
+    except BaseException:
+        codex_system.codex_log("Failed to run regression algorithm")
+        result['message'] = "Failed to run regression algorithm"
+        codex_system.codex_log(traceback.format_exc())
+        return None
 
     return result
 
-def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorithm):
+def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorithm, parms):
     '''
     Inputs:
         inputHash (string)  - hash value corresponding to the data to cluster
@@ -181,52 +166,52 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
         >>> (inputHash,hashList,template, labelHash) = codex_doctest.doctest_get_data()
     
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ARDRegression")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "AdaBoostRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "BaggingRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "BayesianRidge")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "CCA")
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ARDRegression", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "AdaBoostRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "BaggingRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "BayesianRidge", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "CCA", {})
 
-        >>> result = run_codex_regression(inputHash, False, labelHash[0], False, "DecisionTreeRegressor")
+        >>> result = run_codex_regression(inputHash, False, labelHash[0], False, "DecisionTreeRegressor", {})
 
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ElasticNet")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ElasticNetCV")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ExtraTreeRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ExtraTreesRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "GaussianProcessRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "GradientBoostingRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "HuberRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "KNeighborsRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "KernelRidge")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "Lars")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LarsCV")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "Lasso")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LassoCV")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LassoLars")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LassoLarsCV")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LassoLarsIC")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LinearRegression")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LinearSVR")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MLPRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MultiTaskElasticNet")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MultiTaskElasticNetCV")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MultiTaskLasso")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MultiTaskLassoCV")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "NuSVR")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "OrthogonalMatchingPursuit")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "OrthogonalMatchingPursuitCV")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "PLSCanonical")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "PLSRegression")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "PassiveAggressiveRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "RANSACRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "RadiusNeighborsRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "RandomForestRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "Ridge")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "RidgeCV")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "SGDRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "SVR")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "TheilSenRegressor")
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "TransformedTargetRegressor")
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ElasticNet", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ElasticNetCV", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ExtraTreeRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ExtraTreesRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "GaussianProcessRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "GradientBoostingRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "HuberRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "KNeighborsRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "KernelRidge", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "Lars", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LarsCV", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "Lasso", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LassoCV", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LassoLars", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LassoLarsCV", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LassoLarsIC", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LinearRegression", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LinearSVR", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MLPRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MultiTaskElasticNet", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MultiTaskElasticNetCV", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MultiTaskLasso", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MultiTaskLassoCV", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "NuSVR", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "OrthogonalMatchingPursuit", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "OrthogonalMatchingPursuitCV", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "PLSCanonical", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "PLSRegression", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "PassiveAggressiveRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "RANSACRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "RadiusNeighborsRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "RandomForestRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "Ridge", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "RidgeCV", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "SGDRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "SVR", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "TheilSenRegressor", {})
+        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "TransformedTargetRegressor", {})
 
     '''
     startTime = time.time()
@@ -429,9 +414,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
 if __name__ == "__main__":
 
-    #import doctest
-    #results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
-    #sys.exit(results.failed)
+    import doctest
+    results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
+    sys.exit(results.failed)
 
-    (inputHash,hashList,template, labelHash) = codex_doctest.doctest_get_data()
-    result = run_codex_regression(inputHash, False, labelHash[0], False, "DecisionTreeRegressor")

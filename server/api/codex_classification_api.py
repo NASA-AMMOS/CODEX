@@ -96,298 +96,18 @@ def ml_classification(
     else:
         subsetHash = False
 
-    if algorithmName == 'AdaBoostClassifier':
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run adaBoostClassifier classification algorithm")
-            result['message'] = "Failed to run adaBoostClassifier classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-        
-    elif algorithmName == 'BaggingClassifier':
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run BaggingClassifier classification algorithm")
-            result['message'] = "Failed to run BaggingClassifier classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == 'BayesianGaussianMixture':
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run BayesianGaussianMixture classification algorithm")
-            result['message'] = "Failed to run BayesianGaussianMixture classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == 'BernoulliNB':
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run BernoulliNB classification algorithm")
-            result['message'] = "Failed to run BernoulliNB classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == 'CalibratedClassifierCV':
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run CalibratedClassifierCV classification algorithm")
-            result['message'] = "Failed to run CalibratedClassifierCV classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == 'ComplementNB':
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run ComplementNB classification algorithm")
-            result['message'] = "Failed to run ComplementNB classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "DecisionTreeClassifier":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run DecisionTreeClassifier classification algorithm")
-            result['message'] = "Failed to run DecisionTreeClassifier classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "ExtraTreeClassifier":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run ExtraTreeClassifier classification algorithm")
-            result['message'] = "Failed to run ExtraTreeClassifier classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "ExtraTreesClassifier":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run ExtraTreesClassifier classification algorithm")
-            result['message'] = "Failed to run ExtraTreesClassifier classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "GaussianMixture":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run GaussianMixture classification algorithm")
-            result['message'] = "Failed to run GaussianMixture classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "GaussianNB":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run GaussianNB classification algorithm")
-            result['message'] = "Failed to run GaussianNB classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "GaussianProcessClassifier":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run GaussianProcessClassifier classification algorithm")
-            result['message'] = "Failed to run GaussianProcessClassifier classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "GradientBoostingClassifier":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run GradientBoostingClassifier classification algorithm")
-            result['message'] = "Failed to run GradientBoostingClassifier classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "KNeighborsClassifier":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run KNeighborsClassifier classification algorithm")
-            result['message'] = "Failed to run KNeighborsClassifier classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "LabelPropagation":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run LabelPropagation classification algorithm")
-            result['message'] = "Failed to run LabelPropagation classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "LabelSpreading":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run LabelSpreading classification algorithm")
-            result['message'] = "Failed to run LabelSpreading classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "LinearDiscriminantAnalysis":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run LinearDiscriminantAnalysis classification algorithm")
-            result['message'] = "Failed to run LinearDiscriminantAnalysis classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "LogisticRegression":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run LogisticRegression classification algorithm")
-            result['message'] = "Failed to run LogisticRegression classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "LogisticRegressionCV":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run LogisticRegressionCV classification algorithm")
-            result['message'] = "Failed to run LogisticRegressionCV classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "MLPClassifier":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run MLPClassifier classification algorithm")
-            result['message'] = "Failed to run MLPClassifier classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "MultinomialNB":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run MultinomialNB classification algorithm")
-            result['message'] = "Failed to run MultinomialNB classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "NuSVC":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run NuSVC classification algorithm")
-            result['message'] = "Failed to run NuSVC classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "QuadraticDiscriminantAnalysis":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run QuadraticDiscriminantAnalysis classification algorithm")
-            result['message'] = "Failed to run QuadraticDiscriminantAnalysis classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "RandomForestClassifier":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run RandomForestClassifier classification algorithm")
-            result['message'] = "Failed to run RandomForestClassifier classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "SGDClassifier":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run SGDClassifier classification algorithm")
-            result['message'] = "Failed to run SGDClassifier classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    elif algorithmName == "SVC":
-
-        try:
-            result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName)
-        except BaseException:
-            codex_system.codex_log(
-                "Failed to run SVC classification algorithm")
-            result['message'] = "Failed to run SVC classification algorithm"
-            codex_system.codex_log(traceback.format_exc())
-            return None
-
-    else:
-        result['message'] = "Cannot find requested classification algorithm"
+    try:
+        result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms)
+    except BaseException:
+        codex_system.codex_log(
+            "Failed to run classification algorithm")
+        result['message'] = "Failed to run classification algorithm"
+        codex_system.codex_log(traceback.format_exc())
+        return None
 
     return result
 
-def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algorithm):
+def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algorithm,  parms):
     '''
     Inputs:
         inputHash (string)  - hash value corresponding to the data to cluster
@@ -416,7 +136,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
         >>> (inputHash,hashList,template, labelHash) = codex_doctest.doctest_get_data()
     
-        >>> result = run_codex_classification(inputHash, False, labelHash[0], False, "AdaBoostClassifier")
+        >>> result = run_codex_classification(inputHash, False, labelHash[0], False, "AdaBoostClassifier", {"n_estimators":10})
     
     '''
     startTime = time.time()
@@ -475,57 +195,57 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     try:
 
         if(algorithm == "AdaBoostClassifier"):
-            clf = AdaBoostClassifier()
+            clf = AdaBoostClassifier(n_estimators=parms["n_estimators"])
         elif(algorithm == "BaggingClassifier"):
-            clf = BaggingClassifier()
+            clf = BaggingClassifier(n_estimators=parms["n_estimators"])
         elif(algorithm == "BayesianGaussianMixture"):
-            clf = BayesianGaussianMixture()
+            clf = BayesianGaussianMixture(n_components=parms["n_components"])
         elif(algorithm == "BernoulliNB"):
-            clf = BernoulliNB()
+            clf = BernoulliNB(alpha=parms["alpha"])
         elif(algorithm == "CalibratedClassifierCV"):
-            clf = CalibratedClassifierCV()
+            clf = CalibratedClassifierCV(method=parms["method"])
         elif(algorithm == "ComplementNB"):
-            clf = ComplementNB()
+            clf = ComplementNB(alpha=parms["alpha"])
         elif(algorithm == "DecisionTreeClassifier"):
-            clf = DecisionTreeClassifier()
+            clf = DecisionTreeClassifier(max_depth=parms["max_depth"])
         elif(algorithm == "ExtraTreeClassifier"):
-            clf = ExtraTreeClassifier()
+            clf = ExtraTreeClassifier(max_depth=parms["max_depth"])
         elif(algorithm == "ExtraTreesClassifier"):
-            clf = ExtraTreesClassifier()
+            clf = ExtraTreesClassifier(n_estimators=parms["n_estimators"])
         elif(algorithm == "GaussianMixture"):
-            clf = GaussianMixture()
+            clf = GaussianMixture(n_components=parms["n_components"])
         elif(algorithm == "GaussianNB"):
-            clf = GaussianNB()
+            clf = GaussianNB(var_smoothing=parms["var_smoothing"])
         elif(algorithm == "GaussianProcessClassifier"):
-            clf = GaussianProcessClassifier()
+            clf = GaussianProcessClassifier(n_restarts_optimizer=parms["n_restarts_optimizer"])
         elif(algorithm == "GradientBoostingClassifier"):
-            clf = GradientBoostingClassifier()
+            clf = GradientBoostingClassifier(n_estimators=parms["n_estimators"])
         elif(algorithm == "KNeighborsClassifier"):
-            clf = KNeighborsClassifier()
+            clf = KNeighborsClassifier(n_neighbors=parms["n_neighbors"])
         elif(algorithm == "LabelPropagation"):
-            clf = LabelPropagation()
+            clf = LabelPropagation(n_neighbors=parms["n_neighbors"])
         elif(algorithm == "LabelSpreading"):
-            clf = LabelSpreading()
+            clf = LabelSpreading(n_neighbors=parms["n_neighbors"])
         elif(algorithm == "LinearDiscriminantAnalysis"):
-            clf = LinearDiscriminantAnalysis()
+            clf = LinearDiscriminantAnalysis(n_components=parms["n_components"])
         elif(algorithm == "LogisticRegression"):
-            clf = LogisticRegression()
+            clf = LogisticRegression(max_iter=parms["max_iter"])
         elif(algorithm == "LogisticRegressionCV"):
-            clf = LogisticRegressionCV()
+            clf = LogisticRegressionCV(max_iter=parms["max_iter"])
         elif(algorithm == "MLPClassifier"):
-            clf = MLPClassifier()
+            clf = MLPClassifier(max_iter=parms["max_iter"])
         elif(algorithm == "MultinomialNB"):
-            clf = MultinomialNB()
+            clf = MultinomialNB(alpha=parms["alpha"])
         elif(algorithm == "NuSVC"):
-            clf = NuSVC()
+            clf = NuSVC(max_iter=parms["max_iter"])
         elif(algorithm == "QuadraticDiscriminantAnalysis"):
-            clf = QuadraticDiscriminantAnalysis()
+            clf = QuadraticDiscriminantAnalysis(tol=parms["tol"])
         elif(algorithm == "RandomForestClassifier"):
-            clf = RandomForestClassifier()
+            clf = RandomForestClassifier(n_estimators=parms["n_estimators"])
         elif(algorithm == "SGDClassifier"):
-            clf = SGDClassifier()
+            clf = SGDClassifier(alpha=parms["alpha"])
         elif(algorithm == "SVC"):
-            clf = SVC()
+            clf = SVC(max_iter=parms["max_iter"])
         else:
             return {'algorithm': algorithm,
                     'data': X.tolist(),
