@@ -28,16 +28,16 @@ Example:
 {"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"clustering", 'dataFeatures': [<list of feature strings>], 'file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {'downsampled': True, 'eps': 0.7}, 'dataSelections': [], 'cid': 'wngyu'}
 
 
-|     algorithmName       | Description  |   parm 1: name / dtype / default / range  | parm 2: name / dtype / default / range | parm 3: name / dtype / default / range |
-|-------------------------|--------------|-------------------------------------------|----------------------------------------|----------------------------------------|
-|  agglomerative          |              | downsampled / bool / False / True or False | k / int / 3 / [3,10]                  |  n_neighbors / int / 5 / [2, 1000]     |
-|  dbscan                 |              | downsampled / bool / False / True or False | eps / float / 5 / [2, 1000]           |                                        |
-|  spectral               |              | downsampled / bool / False / True or False | k / int / 3 / [3,10]                  |                                        |
-|  ward                   |              | downsampled / bool / False / True or False | k / int / 3 / [3,10]                  |  n_neighbors / int / 5 / [2, 1000]     |
-|  birch                  |              | downsampled / bool / False / True or False | k / int / 3 / [3,10]                  |                                        |
-|  affinity_propagation   |              | downsampled / bool / False / True or False | damping / float / 0.5 / [0.5, 1]      |                                        |
-|  mean_shift             |              | downsampled / bool / False / True or False | quantile / float / 0.3 / [0, 1]       |                                        |
-|  kmeans                 |              | downsampled / bool / False / True or False | k / int / 3 / [3,10]                  |                                        |
+|     algorithmName       | Description  | parm 1 name  | parm 1 dtype | parm 1 default value | parm 1 range | parm 2 name  | parm 2 dtype | parm 2 default value | parm 2 range | parm 3 name  | parm 3 dtype | parm 3 default value | parm 3 range |
+|-------------------------|--------------|--------------|--------------|----------------------|--------------|--------------|--------------|----------------------|--------------|--------------|--------------|----------------------|--------------|
+|  agglomerative          |              | downsampled  |      bool    |         False        | True | False |      k       |     int      |          3           |    [3,10]    |  n_neighbors |     int      |          5           |   [2, 1000]  |
+|  dbscan                 |              | downsampled  |      bool    |         False        | True | False |     eps      |    float     |          5           |   [2, 1000]  |              |              |                      |              |
+|  spectral               |              | downsampled  |      bool    |         False        | True | False |      k       |     int      |          3           |    [3,10]    |              |              |                      |              |
+|  ward                   |              | downsampled  |      bool    |         False        | True | False |      k       |     int      |          3           |    [3,10]    |  n_neighbors |     int      |          5           |   [2, 1000]  |
+|  birch                  |              | downsampled  |      bool    |         False        | True | False |      k       |     int      |          3           |    [3,10]    |              |              |                      |              |
+|  affinity_propagation   |              | downsampled  |      bool    |         False        | True | False |    damping   |    float     |         0.5          |   [0.5, 1]   |              |              |                      |              |
+|  mean_shift             |              | downsampled  |      bool    |         False        | True | False |    quantile  |    float     |         0.3          |    [0, 1]    |              |              |                      |              |
+|  kmeans                 |              | downsampled  |      bool    |         False        | True | False |      k       |     int      |          3           |    [3,10]    |              |              |                      |              |
 
 
 # Classification API
