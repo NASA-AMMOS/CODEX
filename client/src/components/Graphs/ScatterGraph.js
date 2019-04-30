@@ -63,13 +63,11 @@ function ScatterGraph(props) {
         config: {
             responsive: true,
             displaylogo: false,
-            modeBarButtonsToRemove: [
-                "sendDataToCloud",
-                "hoverCompareCartesian",
-                "toImage",
-                "select2d",
-                "autoScale2d",
-                "toggleSpikelines"
+            modeBarButtons: [
+                ["lasso2d"],
+                ["zoom2d", "zoomIn2d", "zoomOut2d", "autoScale2d"],
+                ["pan2d"],
+                ["toggleHover"]
             ]
         }
     });
