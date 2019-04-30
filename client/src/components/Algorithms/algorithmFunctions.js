@@ -29,54 +29,6 @@ function buildSubalgoServerRequest(
     };
 }
 
-export function getAlgorithmData(algorithm, selectedFeatures, filename, dataCallback) {
-    const requests = algorithmTypes.SUBALGORITHMS[algorithm].map(subalgo => {
-        const parameters = Object.assign(
-            {
-                downsampled: true,
-                k: algorithmTypes.K_FACTOR,
-                eps: algorithmTypes.EPS,
-                quantile: algorithmTypes.QUANTILE,
-                damping: algorithmTypes.DAMPING,
-                n_neighbors: algorithmTypes.N_NEIGHBORS
-            },
-            subalgo.parameters[0]
-        );
-        return buildSubalgoServerRequest(subalgo, selectedFeatures, filename, parameters);
-    });
-
-    return requests.map(request => {
-        const requestObject = {};
-        const socketWorker = new WorkerSocket();
-
-        socketWorker.addEventListener("message", e => {
-            const inMsg = JSON.parse(e.data);
-
-            if (inMsg.message !== "success") return; // Not handling in-progress messages right now.
-
-            inMsg.algorithmName = request.algorithmName;
-            dataCallback(inMsg);
-        });
-
-        socketWorker.postMessage(
-            JSON.stringify({
-                action: actionTypes.GET_ALGORITHM_DATA,
-                request
-            })
-        );
-
-        requestObject.closeSocket = _ => {
-            socketWorker.postMessage(
-                JSON.stringify({
-                    action: actionTypes.CLOSE_SOCKET
-                })
-            );
-        };
-
-        return requestObject;
-    });
-}
-
 // Gets a full-res subalgo computation
 export function getSubAlgorithmData(
     subalgo,

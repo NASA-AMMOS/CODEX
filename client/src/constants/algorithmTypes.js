@@ -112,6 +112,15 @@ export const SUBALGORITHMS = {
                     value: 3,
                     max: 10,
                     step: 1
+                },
+                {
+                    name: "k",
+                    title: "Number of Clusters",
+                    inputType: "number",
+                    min: 2,
+                    value: 3,
+                    max: 6,
+                    step: 1
                 }
             ]
         },
