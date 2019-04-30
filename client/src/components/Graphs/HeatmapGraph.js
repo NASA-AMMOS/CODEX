@@ -103,7 +103,18 @@ function HeatmapGraph(props) {
             //     ticks: "outside"
             // }
         },
-        config: { displayModeBar: true, responsive: true, displaylogo: false }
+        config: {
+            responsive: true,
+            displaylogo: false,
+            modeBarButtonsToRemove: [
+                "sendDataToCloud",
+                "hoverCompareCartesian",
+                "toImage",
+                "select2d",
+                "autoScale2d",
+                "toggleSpikelines"
+            ]
+        }
     });
 
     function updateChartRevision() {
