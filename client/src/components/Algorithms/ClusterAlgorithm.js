@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useReducer, useMemo } from "react";
+import ReactEcharts from "echarts-for-react";
+import echartsgl from "echarts-gl";
 import { getSubAlgorithmData } from "components/Algorithms/algorithmFunctions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import SubalgoChart from "components/Algorithms/SubalgoChart";

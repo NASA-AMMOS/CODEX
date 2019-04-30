@@ -88,30 +88,7 @@ function handleHelpTextRequest(msg) {
     // TODO: Use a transferable object to return the data array so we aren't copying it back to the main thread
     socket.onmessage = msg => {
         const inMsg = JSON.parse(msg.data);
-        if (inMsg.message === "success") self.postMessage(JSON.stringify(inMsg));
-    };
-}
-
-function handleSimpleRequest(msg) {
-    const socketString = "ws://localhost:8888/codex";
-    socket = new WebSocket(socketString);
-
-    socket.onclose = function() {
-        console.log("Closed Request Socket");
-    };
-
-    socket.onopen = function() {
-        console.log("Opened Request Socket");
-        const cid = Math.random()
-            .toString(36)
-            .substring(8);
-        const req = { ...msg.request, cid };
-        const outMsg = JSON.stringify(req);
-        socket.send(outMsg);
-    };
-
-    socket.onmessage = msg => {
-        const inMsg = JSON.parse(msg.data);
+        console.log(inMsg);
         if (inMsg.message === "success") self.postMessage(JSON.stringify(inMsg));
     };
 }
@@ -127,9 +104,6 @@ self.addEventListener("message", function(e) {
             break;
         case types.GET_HELP_TEXT:
             handleHelpTextRequest(msg);
-            break;
-        case types.SIMPLE_REQUEST:
-            handleSimpleRequest(msg);
             break;
         case types.CLOSE_SOCKET:
             if (socket) socket.close();

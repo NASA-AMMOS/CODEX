@@ -1,14 +1,10 @@
 import React, { useState } from "react";
+import ReactEcharts from "echarts-for-react";
+import echartsgl from "echarts-gl";
 import classnames from "classnames";
-import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import * as uiTypes from "constants/uiTypes";
-
-const DEFAULT_POINT_COLOR = "#3386E6";
 
 // Utility function that creates a set of series based on server return data.
-function createPlotSeries(serverData) {
+export function createPlotSeries(serverData) {
     return serverData.data.reduce(
         (acc, val, idx) => {
             const seriesIndex = serverData.clusters[idx];
@@ -25,58 +21,124 @@ function createPlotSeries(serverData) {
     );
 }
 
-function makeChart(props) {
-    const cols = utils.unzip(props.serverData.data);
-    const chartState = {
-        data: [
-            {
-                x: cols[0],
-                y: cols[1],
-                type: "scattergl",
-                mode: "markers",
-                marker: {
-                    color: cols[0].map((val, idx) => {
-                        const cluster = props.serverData.clusters[idx];
-                        return cluster === -1 ? "#eee" : uiTypes.SELECTIONS_COLOR_PALETTE[cluster];
-                    }),
-                    size: 5
-                },
-                selected: { marker: { color: "#FF0000", size: 2 } },
-                visible: true
-            }
-        ],
-        layout: {
-            autosize: true,
-            margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
-            hovermode: "closest", // Turning off hovermode seems to screw up click handling
-            titlefont: { size: 5 },
-            xaxis: {
-                automargin: true
-            },
-            yaxis: {
-                automargin: true
+// Initializes a simple scatter plot. If no data is passed in, initialize a chart with the loading circle running.
+export function makeSimpleScatterPlot(props) {
+    let series = [];
+    if (props.serverData) {
+        const { data, noise } = createPlotSeries(props.serverData);
+        series = data.map(s => {
+            return {
+                name: "",
+                type: "scatter",
+                large: true,
+                symbolSize: 5,
+                data: s,
+                progressive: 0,
+                animation: true,
+                itemStyle: {
+                    emphasis: {
+                        borderColor: "#eee",
+                        borderWidth: 2
+                    }
+                }
+            };
+        });
+
+        // Set style for noise points.
+        if (noise.length) {
+            series.push({
+                name: "",
+                type: "scatter",
+                large: true,
+                symbolSize: 5,
+                data: noise,
+                progressive: 0,
+                animation: true,
+                itemStyle: {
+                    normal: {
+                        opacity: 1,
+                        color: "#eee",
+                        borderWidth: 0.5,
+                        borderColor: "#aaa"
+                    }
+                }
+            });
+        }
+    }
+
+    const chartOptions = {
+        title: {
+            text: ""
+        },
+        grid: {
+            right: 10,
+            left: 10,
+            top: 10,
+            bottom: 10
+        },
+        axisPointer: {
+            label: {
+                textStyle: {
+                    color: "#292939"
+                }
             }
         },
-        config: {
-            responsive: true,
-            displaylogo: false,
-            displayModeBar: false
-        }
+        legend: {
+            data: [""]
+        },
+        toolbox: {
+            show: false
+        },
+        xAxis: [
+            {
+                type: "value",
+                name: "",
+                nameLocation: "middle",
+                axisLabel: {
+                    show: false
+                },
+                splitLine: { show: true },
+                scale: true,
+                z: 100,
+                nameTextStyle: {
+                    padding: 12,
+                    fontSize: 18
+                }
+            }
+        ],
+        yAxis: [
+            {
+                type: "value",
+                name: "",
+                nameLocation: "middle",
+                axisLabel: {
+                    show: false
+                },
+                splitLine: { show: true },
+                scale: true,
+                z: 100,
+                nameTextStyle: {
+                    padding: 12,
+                    fontSize: 18
+                }
+            }
+        ],
+        series
     };
 
     return (
-        <Plot
-            data={chartState.data}
-            layout={chartState.layout}
-            config={chartState.config}
-            style={{ width: "100%", height: "100%" }}
-            useResizeHandler
+        <ReactEcharts
+            option={chartOptions}
+            notMerge={true}
+            lazyUpdate={true}
+            style={{ height: "100%", width: "100%" }}
+            showLoading={!props.loaded}
         />
     );
 }
 
 // Render the subalgo plot div.
-function SubalgoChart(props) {
+export function SubalgoChart(props) {
     const [hoverState, setHoverState] = useState(false);
 
     const dataPoints = props.serverData ? props.serverData.data : null;
@@ -95,8 +157,6 @@ function SubalgoChart(props) {
     const timeToGenerate =
         props.serverData && props.serverData.eta ? `~${props.serverData.eta.toFixed(2)}s` : "";
 
-    const chart = props.serverData ? makeChart(props) : null;
-
     return (
         <div
             className={containerClasses}
@@ -105,12 +165,7 @@ function SubalgoChart(props) {
             onClick={props.onClick}
         >
             <div className={titleClasses}>{props.titleText}</div>
-            <div className="subalgo-chart-loading" hidden={props.serverData}>
-                <CircularProgress />
-            </div>
-            <div className="subalgo-plot" hidden={!props.serverData}>
-                {chart}
-            </div>
+            <div className="subalgo-plot">{makeSimpleScatterPlot(props)}</div>
             <div className="subalgo-time" hidden={props.previewMode}>
                 {timeToGenerate}
             </div>
