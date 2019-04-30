@@ -37,6 +37,7 @@ import numpy as np
 import numpy.polynomial.polynomial as poly
 from sklearn.metrics import log_loss
 from sklearn import model_selection
+from sklearn.model_selection import GridSearchCV
 
 from sklearn.linear_model import ARDRegression
 from sklearn.ensemble import AdaBoostRegressor
@@ -268,31 +269,33 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
     try:
         if(algorithm == "ARDRegression"):
-            regr = ARDRegression()
+            #regr = ARDRegression(n_iter=parms["n_iter"])
+            print(parms)
+            regr =  GridSearchCV(ARDRegression(), parms, cv=5, scoring='precision')
         elif(algorithm == "AdaBoostRegressor"):
-            regr = AdaBoostRegressor()
+            regr = AdaBoostRegressor(n_estimators=parms["n_estimators"])
         elif(algorithm == "BaggingRegressor"):
-            regr = BaggingRegressor()
+            regr = BaggingRegressor(n_estimators=parms["n_estimators"])
         elif(algorithm == "BayesianRidge"):
-            regr = BayesianRidge()
+            regr = BayesianRidge(n_estimators=parms["n_estimators"])
         elif(algorithm == "CCA"):
-            regr = CCA()
+            regr = CCA(max_iter=parms["max_iter"])
         elif(algorithm == "DecisionTreeRegressor"):
-            regr = DecisionTreeRegressor()
+            regr = DecisionTreeRegressor(max_depth=parms["max_depth"])
         elif(algorithm == "ElasticNet"):
-            regr = ElasticNet()
+            regr = ElasticNet(max_iter=parms["max_iter"])
         elif(algorithm == "ElasticNetCV"):
-            regr = ElasticNetCV()
+            regr = ElasticNetCV(max_iter=parms["max_iter"])
         elif(algorithm == "ExtraTreeRegressor"):
-            regr = ExtraTreeRegressor()
+            regr = ExtraTreeRegressor(max_features=parms["max_features"])
         elif(algorithm == "ExtraTreesRegressor"):
-            regr = ExtraTreesRegressor()
+            regr = ExtraTreesRegressor(max_features=parms["max_features"])
         elif(algorithm == "GaussianProcessRegressor"):
-            regr = GaussianProcessRegressor()
+            regr = GaussianProcessRegressor(n_restarts_optimizer=parms["n_restarts_optimizer"])
         elif(algorithm == "GradientBoostingRegressor"):
-            regr = GradientBoostingRegressor()
+            regr = GradientBoostingRegressor(max_depth=parms["max_depth"])
         elif(algorithm == "HuberRegressor"):
-            regr = HuberRegressor()
+            regr = HuberRegressor(max_iter=parms["max_iter"])
         elif(algorithm == "KNeighborsRegressor"):
             regr = KNeighborsRegressor()
         elif(algorithm == "KernelRidge"):

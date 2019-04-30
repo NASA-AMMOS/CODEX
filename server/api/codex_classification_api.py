@@ -21,6 +21,7 @@ import h5py
 import traceback
 import numpy as np
 from sklearn import model_selection
+from sklearn.model_selection import GridSearchCV
 import random
 
 from sklearn.ensemble import AdaBoostClassifier
@@ -49,6 +50,7 @@ from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import SGDClassifier
 from sklearn.svm import SVC
+
 
 import codex_return_code
 import codex_math
@@ -194,58 +196,85 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
     try:
 
+        cv_count = 5
         if(algorithm == "AdaBoostClassifier"):
-            clf = AdaBoostClassifier(n_estimators=parms["n_estimators"])
+            #clf = AdaBoostClassifier(n_estimators=parms["n_estimators"])
+            clf =  GridSearchCV(AdaBoostClassifier(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "BaggingClassifier"):
-            clf = BaggingClassifier(n_estimators=parms["n_estimators"])
+            #clf = BaggingClassifier(n_estimators=parms["n_estimators"])
+            clf =  GridSearchCV(BaggingClassifier(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "BayesianGaussianMixture"):
-            clf = BayesianGaussianMixture(n_components=parms["n_components"])
+            #clf = BayesianGaussianMixture(n_components=parms["n_components"])
+            clf =  GridSearchCV(BayesianGaussianMixture(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "BernoulliNB"):
-            clf = BernoulliNB(alpha=parms["alpha"])
+            #clf = BernoulliNB(alpha=parms["alpha"])
+            clf =  GridSearchCV(BernoulliNB(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "CalibratedClassifierCV"):
-            clf = CalibratedClassifierCV(method=parms["method"])
+            #clf = CalibratedClassifierCV(method=parms["method"])
+            clf =  GridSearchCV(CalibratedClassifierCV(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "ComplementNB"):
-            clf = ComplementNB(alpha=parms["alpha"])
+            #clf = ComplementNB(alpha=parms["alpha"])
+            clf =  GridSearchCV(ComplementNB(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "DecisionTreeClassifier"):
-            clf = DecisionTreeClassifier(max_depth=parms["max_depth"])
+            #clf = DecisionTreeClassifier(max_depth=parms["max_depth"])
+            clf =  GridSearchCV(DecisionTreeClassifier(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "ExtraTreeClassifier"):
-            clf = ExtraTreeClassifier(max_depth=parms["max_depth"])
+            #clf = ExtraTreeClassifier(max_depth=parms["max_depth"])
+            clf =  GridSearchCV(ExtraTreeClassifier(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "ExtraTreesClassifier"):
-            clf = ExtraTreesClassifier(n_estimators=parms["n_estimators"])
+            #clf = ExtraTreesClassifier(n_estimators=parms["n_estimators"])
+            clf =  GridSearchCV(ExtraTreesClassifier(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "GaussianMixture"):
-            clf = GaussianMixture(n_components=parms["n_components"])
+            #clf = GaussianMixture(n_components=parms["n_components"])
+            clf =  GridSearchCV(GaussianMixture(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "GaussianNB"):
-            clf = GaussianNB(var_smoothing=parms["var_smoothing"])
+            #clf = GaussianNB(var_smoothing=parms["var_smoothing"])
+            clf =  GridSearchCV(GaussianNB(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "GaussianProcessClassifier"):
-            clf = GaussianProcessClassifier(n_restarts_optimizer=parms["n_restarts_optimizer"])
+            #clf = GaussianProcessClassifier(n_restarts_optimizer=parms["n_restarts_optimizer"])
+            clf =  GridSearchCV(GaussianProcessClassifier(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "GradientBoostingClassifier"):
-            clf = GradientBoostingClassifier(n_estimators=parms["n_estimators"])
+            #clf = GradientBoostingClassifier(n_estimators=parms["n_estimators"])
+            clf =  GridSearchCV(GradientBoostingClassifier(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "KNeighborsClassifier"):
-            clf = KNeighborsClassifier(n_neighbors=parms["n_neighbors"])
+            #clf = KNeighborsClassifier(n_neighbors=parms["n_neighbors"])
+            clf =  GridSearchCV(KNeighborsClassifier(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "LabelPropagation"):
-            clf = LabelPropagation(n_neighbors=parms["n_neighbors"])
+            #clf = LabelPropagation(n_neighbors=parms["n_neighbors"])
+            clf =  GridSearchCV(LabelPropagation(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "LabelSpreading"):
-            clf = LabelSpreading(n_neighbors=parms["n_neighbors"])
+            #clf = LabelSpreading(n_neighbors=parms["n_neighbors"])
+            clf =  GridSearchCV(LabelSpreading(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "LinearDiscriminantAnalysis"):
-            clf = LinearDiscriminantAnalysis(n_components=parms["n_components"])
+            #clf = LinearDiscriminantAnalysis(n_components=parms["n_components"])
+            clf =  GridSearchCV(LinearDiscriminantAnalysis(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "LogisticRegression"):
-            clf = LogisticRegression(max_iter=parms["max_iter"])
+            #clf = LogisticRegression(max_iter=parms["max_iter"])
+            clf =  GridSearchCV(LogisticRegression(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "LogisticRegressionCV"):
-            clf = LogisticRegressionCV(max_iter=parms["max_iter"])
+            #clf = LogisticRegressionCV(max_iter=parms["max_iter"])
+            clf =  GridSearchCV(LogisticRegressionCV(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "MLPClassifier"):
-            clf = MLPClassifier(max_iter=parms["max_iter"])
+            #clf = MLPClassifier(max_iter=parms["max_iter"])
+            clf =  GridSearchCV(MLPClassifier(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "MultinomialNB"):
-            clf = MultinomialNB(alpha=parms["alpha"])
+            #clf = MultinomialNB(alpha=parms["alpha"])
+            clf =  GridSearchCV(MultinomialNB(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "NuSVC"):
-            clf = NuSVC(max_iter=parms["max_iter"])
+            #clf = NuSVC(max_iter=parms["max_iter"])
+            clf =  GridSearchCV(NuSVC(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "QuadraticDiscriminantAnalysis"):
-            clf = QuadraticDiscriminantAnalysis(tol=parms["tol"])
+            #clf = QuadraticDiscriminantAnalysis(tol=parms["tol"])
+            clf =  GridSearchCV(QuadraticDiscriminantAnalysis(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "RandomForestClassifier"):
-            clf = RandomForestClassifier(n_estimators=parms["n_estimators"])
+            #clf = RandomForestClassifier(n_estimators=parms["n_estimators"])
+            clf =  GridSearchCV(RandomForestClassifier(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "SGDClassifier"):
-            clf = SGDClassifier(alpha=parms["alpha"])
+            #clf = SGDClassifier(alpha=parms["alpha"])
+            clf =  GridSearchCV(SGDClassifier(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "SVC"):
-            clf = SVC(max_iter=parms["max_iter"])
+            #clf = SVC(max_iter=parms["max_iter"])
+            clf =  GridSearchCV(SVC(), parms, cv=cv_count, scoring='precision')
         else:
             return {'algorithm': algorithm,
                     'data': X.tolist(),
@@ -261,7 +290,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
                 'WARNING': traceback.format_exc()}
 
     # TODO - eta needs to be multipled by number of folds
-    scores = model_selection.cross_val_score(clf, X, y, cv=5)
+    scores = model_selection.cross_val_score(clf, X, y, cv=cv_count)
 
     clf.fit(X, y)
 
