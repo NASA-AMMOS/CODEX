@@ -129,23 +129,23 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         dictionary:
             algorithm (str)          - Name of the classifier which was run.  Will be same as algorithm input argument
             data (numpy.ndarray)     - (samples, features) array of features to cluster
-            clusters (numpy.ndarray) -  array containing cluster index for each sample
-            k (int)                  - number of clusters found
             downsample (int)         - number of data points used in quicklook
-            numClusters (int)        - number of clusters calculated by the algorithm (unique of clusters)
+
 
     Examples:
 
         >>> (inputHash,hashList,template, labelHash) = codex_doctest.doctest_get_data()
     
-        >>> result = run_codex_classification(inputHash, False, labelHash[0], False, "AdaBoostClassifier", {"n_estimators":10})
-    
+        >>> result = run_codex_classification(inputHash, False, labelHash[0], False, "AdaBoostClassifier", {"n_estimators":[10]})
+        >>> print(result["WARNING"])
+        None
     '''
     startTime = time.time()
     result = {'algorithm': algorithm,
               'downsample': downsampled,
               'WARNING': "None"}
 
+    cv_count = 5 # TODO - start getting from front end
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
@@ -194,9 +194,15 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         y = labelHash_dict['data']
         result['y'] = y.tolist()
 
+        unique, counts = np.unique(y, return_counts=True)
+        count_dict = dict(zip(unique, counts))
+        if any(v < cv_count for v in count_dict.values()):
+            return {'algorithm': algorithm,
+                    'downsample': downsampled,
+                    'WARNING': "Label class has less samples than cross val score"}         
+
     try:
 
-        cv_count = 5
         if(algorithm == "AdaBoostClassifier"):
             #clf = AdaBoostClassifier(n_estimators=parms["n_estimators"])
             clf =  GridSearchCV(AdaBoostClassifier(), parms, cv=cv_count, scoring='precision')
@@ -335,11 +341,5 @@ if __name__ == "__main__":
     import doctest
     results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
     sys.exit(results.failed)
-
-
-
-
-
-
 
 

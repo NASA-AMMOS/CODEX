@@ -1,19 +1,20 @@
-import codex_system
-import codex_doctest
-import codex_time_log
-import codex_plot
-import codex_return_code
-import codex_hash
-import pstats
-import cProfile
-import h5py
-import time
-import codex_math
-import codex_downsample
-import codex_read_data_api
-import traceback
-import pysptools.eea.eea
-import pysptools.eea
+'''
+Author: Jack Lightholder
+Date  : 7/15/17
+
+Brief : Dimmensionality reduction algorithms, formatted for CODEX
+
+Notes :
+
+Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
+U.S. Government Sponsorship acknowledged.
+'''
+import sys
+import os
+# Enviornment variable for setting CODEX root directory.
+CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, CODEX_ROOT + '/api/sub/')
+
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import kneighbors_graph
 from sklearn import cluster, datasets
@@ -22,13 +23,24 @@ from scipy import misc
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
-import sys
-import os
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, CODEX_ROOT + '/api/sub/')
+import traceback
+import pysptools.eea.eea
+import pysptools.eea
+import pstats
+import cProfile
+import h5py
+import time
 
 # CODEX Support
+import codex_math
+import codex_downsample
+import codex_read_data_api
+import codex_system
+import codex_doctest
+import codex_time_log
+import codex_plot
+import codex_return_code
+import codex_hash
 
 DEBUG = False
 

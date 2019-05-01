@@ -1,11 +1,4 @@
-import codex_system
-import codex_math
-import codex_downsample
-import codex_doctest
-import codex_hash
-import codex_read_data_api
-import codex_return_code
-import codex_time_log
+
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
@@ -19,6 +12,10 @@ U.S. Government Sponsorship acknowledged.
 '''
 import os
 import sys
+# Enviornment variable for setting CODEX root directory.
+CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, CODEX_ROOT + '/api/sub/')
+
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA, IncrementalPCA, FastICA, LatentDirichletAllocation
@@ -28,11 +25,15 @@ import sklearn
 import collections
 import traceback
 
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, CODEX_ROOT + '/api/sub/')
-
 # CODEX Support
+import codex_system
+import codex_math
+import codex_downsample
+import codex_doctest
+import codex_hash
+import codex_read_data_api
+import codex_return_code
+import codex_time_log
 
 DEBUG = False
 

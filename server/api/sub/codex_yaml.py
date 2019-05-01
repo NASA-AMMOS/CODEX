@@ -1,5 +1,3 @@
-import sys
-import yaml
 '''
 Author: Jack Lightholder
 Date  : 2/7/18
@@ -10,6 +8,8 @@ Notes :
 
 '''
 import os
+import sys
+import yaml
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 

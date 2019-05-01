@@ -1,15 +1,3 @@
-import time
-import collections
-import codex_doctest
-import codex_time_log
-import codex_hash
-import codex_read_data_api
-import codex_return_code
-import traceback
-import numpy as N
-import matplotlib.pyplot as plt
-from scipy import stats
-import sys
 '''
 Author: Jack Lightholder
 Date  : 6/20/17
@@ -22,11 +10,24 @@ Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
 '''
 import os
+import sys
 # Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
+import time
+import collections
+import traceback
+import numpy as N
+import matplotlib.pyplot as plt
+from scipy import stats
+
 # CODEX Support
+import codex_doctest
+import codex_time_log
+import codex_hash
+import codex_read_data_api
+import codex_return_code
 
 DEBUG = False
 

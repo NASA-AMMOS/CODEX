@@ -1,20 +1,3 @@
-import time
-import statistics
-import math
-import codex_math
-import codex_system
-import codex_time_log
-import codex_doctest
-import codex_hash
-import codex_downsample
-import codex_read_data_api
-import codex_return_code
-import h5py
-import traceback
-from skimage.segmentation import quickshift
-from skimage.segmentation import felzenszwalb
-import numpy as np
-import sys
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
@@ -27,11 +10,31 @@ Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
 '''
 import os
+import sys
 # Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
+import h5py
+import traceback
+from skimage.segmentation import quickshift
+from skimage.segmentation import felzenszwalb
+import numpy as np
+import sys
+import time
+import statistics
+import math
+
+
 # CODEX Support
+import codex_math
+import codex_system
+import codex_time_log
+import codex_doctest
+import codex_hash
+import codex_downsample
+import codex_read_data_api
+import codex_return_code
 
 DEBUG = False
 

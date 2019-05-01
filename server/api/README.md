@@ -1,17 +1,21 @@
 
 
 
-## Client Server API
+# Client Server API
 
-# Saving a CODEX Session
+## Saving a CODEX Session
 Client->Server
 {"routine":"save_session", "session_name":<session name>}
 
-# Loading a CODEX Session
+## Loading a CODEX Session
 Client->Server
 {"routine":"load_session", "session_name":<session name>}
 
-# Get List of Saved CODEX Sessions
+Server->Client
+{"session_name":<session name>, "session_data":{"features":[<feature names for sidebar>],"labels":[<label names for sidebar>],"subsets":[<subset names for sidebar>], "downsample":[<downsample names not currently displayed on front end>]}
+
+
+## Get List of Saved CODEX Sessions
 Client->Server
 {"routine":"get_sessions"}
 
@@ -22,111 +26,143 @@ Server->Client
 
 
 
-# Clustering API
+## Clustering API
 
 Example:
-{"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"clustering", 'dataFeatures': [<list of feature strings>], 'file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {'downsampled': True, 'eps': 0.7}, 'dataSelections': [], 'cid': 'wngyu'}
+{"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"clustering", 'dataFeatures': [<list of feature strings>], 'downsampled': False, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {eps': 0.7}, 'dataSelections': [], 'cid': 'wngyu'}
 
 
-|     algorithmName       | Description  | parm 1 name  | parm 1 dtype | parm 1 default value |  parm 1 range | parm 2 name  | parm 2 dtype | parm 2 default value | parm 2 range | parm 3 name  | parm 3 dtype | parm 3 default value | parm 3 range |
-|-------------------------|--------------|--------------|--------------|----------------------|---------------|--------------|--------------|----------------------|--------------|--------------|--------------|----------------------|--------------|
-|  agglomerative          |              | downsampled  |      bool    |         False        | True or False |      k       |     int      |          3           |    [3,10]    |  n_neighbors |     int      |          5           |   [2, 1000]  |
-|  dbscan                 |              | downsampled  |      bool    |         False        | True or False |     eps      |    float     |          5           |   [2, 1000]  |              |              |                      |              |
-|  spectral               |              | downsampled  |      bool    |         False        | True or False |      k       |     int      |          3           |    [3,10]    |              |              |                      |              |
-|  ward                   |              | downsampled  |      bool    |         False        | True or False |      k       |     int      |          3           |    [3,10]    |  n_neighbors |     int      |          5           |   [2, 1000]  |
-|  birch                  |              | downsampled  |      bool    |         False        | True or False |      k       |     int      |          3           |    [3,10]    |              |              |                      |              |
-|  affinity_propagation   |              | downsampled  |      bool    |         False        | True or False |    damping   |    float     |         0.5          |   [0.5, 1]   |              |              |                      |              |
-|  mean_shift             |              | downsampled  |      bool    |         False        | True or False |    quantile  |    float     |         0.3          |    [0, 1]    |              |              |                      |              |
-|  kmeans                 |              | downsampled  |      bool    |         False        | True or False |      k       |     int      |          3           |    [3,10]    |              |              |                      |              |
+|     algorithmName       | Description  | parm 1 name  | parm 1 dtype | parm 1 default value | parm 1 range | parm 2 name  | parm 2 dtype | parm 2 default value | parm 2 range |
+|-------------------------|--------------|--------------|--------------|----------------------|--------------|--------------|--------------|----------------------|--------------|
+|  agglomerative          |              |      k       |     int      |          3           |    [3,10]    |  n_neighbors |     int      |          5           |   [2, 1000]  |
+|  dbscan                 |              |     eps      |    float     |          5           |   [2, 1000]  |              |              |                      |              |
+|  spectral               |              |      k       |     int      |          3           |    [3,10]    |              |              |                      |              |
+|  ward                   |              |      k       |     int      |          3           |    [3,10]    |  n_neighbors |     int      |          5           |   [2, 1000]  |
+|  birch                  |              |      k       |     int      |          3           |    [3,10]    |              |              |                      |              |
+|  affinity_propagation   |              |    damping   |    float     |         0.5          |   [0.5, 1]   |              |              |                      |              |
+|  mean_shift             |              |    quantile  |    float     |         0.3          |    [0, 1]    |              |              |                      |              |
+|  kmeans                 |              |      k       |     int      |          3           |    [3,10]    |              |              |                      |              |
 
 
-# Classification API
-
-Example:
-{"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"classification", 'dataFeatures': [<list of feature strings>], 'file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {'downsampled': [True], 'eps': [0.7], 'k':[1,2,3,4,5]}, 'dataSelections': [], 'cid': 'wngyu'}
-
-
-|         algorithmName          | Description  | parm 1 name  | parm 1 dtype | parm 1 default value |  parm 1 range |     parm 2 name      | parm 2 dtype | parm 2 default value |     parm 2 range   |
-|--------------------------------|--------------|--------------|--------------|----------------------|---------------|----------------------|--------------|----------------------|--------------------|
-| AdaBoostClassifier             |              | downsampled  |      bool    |         False        | True or False | n_estimators         |     int      |          50          |     [1, 100]       |
-| BaggingClassifier              |              | downsampled  |      bool    |         False        | True or False | n_estimators         |     int      |          10          |     [1, 100]       |
-| BayesianGaussianMixture        |              | downsampled  |      bool    |         False        | True or False | n_components         |     int      |           1          |     [1, 100]       |
-| BernoulliNB                    |              | downsampled  |      bool    |         False        | True or False |    alpha             |    float     |           1          |     [0, 100]       |
-| CalibratedClassifierCV         |              | downsampled  |      bool    |         False        | True or False |    method            |    string    |       sigmoid        | sigmoid or isotonic |
-| ComplementNB                   |              | downsampled  |      bool    |         False        | True or False |    alpha             |    float     |           1          |     [0, 100]       |
-| DecisionTreeClassifier         |              | downsampled  |      bool    |         False        | True or False |  max_depth           |     int      |         None         |   None or [1, 1000] |
-| ExtraTreesClassifier           |              | downsampled  |      bool    |         False        | True or False | n_estimators         |     int      |          10          |     [1, 100]       |
-| ExtraTreeClassifier            |              | downsampled  |      bool    |         False        | True or False |  max_depth           |     int      |         None         |   None or [1, 1000] |
-| GaussianMixture                |              | downsampled  |      bool    |         False        | True or False | n_components         |     int      |           1          |     [1, 100]       |
-| GaussianNB                     |              | downsampled  |      bool    |         False        | True or False | var_smoothing        |    float     |         1e-09        |     [0, 100]       |
-| GaussianProcessClassifier      |              | downsampled  |      bool    |         False        | True or False | n_restarts_optimizer |     int      |           0          |     [0, 100]       |
-| GradientBoostingClassifier     |              | downsampled  |      bool    |         False        | True or False | n_estimators         |     int      |          100         |     [1, 1000]      |
-| KNeighborsClassifier           |              | downsampled  |      bool    |         False        | True or False | n_neighbors          |     int      |           5          |     [1, 100]       |
-| LabelPropagation               |              | downsampled  |      bool    |         False        | True or False | n_neighbors          |     int      |           5          |     [1, 100]       |
-| LabelSpreading                 |              | downsampled  |      bool    |         False        | True or False | n_neighbors          |     int      |           5          |     [1, 100]       |
-| LinearDiscriminantAnalysis     |              | downsampled  |      bool    |         False        | True or False | n_components         |     int      |           3          | [1, # features -1] |
-| LogisticRegression             |              | downsampled  |      bool    |         False        | True or False | max_iter             |     int      |          100         |    [1, 10000]      |
-| LogisticRegressionCV           |              | downsampled  |      bool    |         False        | True or False | max_iter             |     int      |          100         |    [1, 10000]      |
-| MLPClassifier                  |              | downsampled  |      bool    |         False        | True or False | max_iter             |     int      |          200         |    [1, 10000]      |
-| MultinomialNB                  |              | downsampled  |      bool    |         False        | True or False |    alpha             |    float     |           1          |     [0, 100]       |
-| NuSVC                          |              | downsampled  |      bool    |         False        | True or False | max_iter             |     int      |          -1          |    [-1, 10000]     |
-| QuadraticDiscriminantAnalysis  |              | downsampled  |      bool    |         False        | True or False | tol                  |    float     |         1.0e-4       |   [1.0e-6, 1.0e-2] |
-| RandomForestClassifier         |              | downsampled  |      bool    |         False        | True or False | n_estimators         |     int      |          10          |     [1, 100]       |
-| SGDClassifier                  |              | downsampled  |      bool    |         False        | True or False |    alpha             |    float     |        0.0001        |     [0, 100]       |
-| SVC                            |              | downsampled  |      bool    |         False        | True or False | max_iter             |     int      |          -1          |    [-1, 10000]     |
-
-
-# Regression API
+## Classification API
 
 Example:
-{"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"regression", 'dataFeatures': [<list of feature strings>], 'file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {'downsampled': [True], 'eps': [0.7], 'k':[1,2,3,4,5,5]}, 'dataSelections': [], 'cid': 'wngyu'}
+{"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"classification", 'dataFeatures': [<list of feature strings>], 'downsampled': False, 'cross_val': 5, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {eps': [0.7], 'k':[1,2,3,4,5]}, 'dataSelections': [], 'cid': 'wngyu'}
 
-|           algorithmName        | Description  | parm 1 name  | parm 1 dtype | parm 1 default value |  parm 1 range |     parm 2 name      | parm 2 dtype | parm 2 default value |     parm 2 range   |
-|--------------------------------|--------------|--------------|--------------|----------------------|---------------|----------------------|--------------|----------------------|--------------------|
-| ARDRegression                  |              | downsampled  |      bool    |         False        | True or False | n_iter               |     int      |         300          |    [1, 10000]      |
-| AdaBoostRegressor              |              | downsampled  |      bool    |         False        | True or False | n_estimators         |     int      |          50          |     [1, 1000]      |
-| BaggingRegressor               |              | downsampled  |      bool    |         False        | True or False | n_estimators         |     int      |          10          |     [1, 1000]      |
-| BayesianRidge                  |              | downsampled  |      bool    |         False        | True or False | n_estimators         |     int      |          300         |     [1, 1000]      |
-| CCA                            |              | downsampled  |      bool    |         False        | True or False | max_iter             |     int      |          500         |     [1, 1000]      |
-| DecisionTreeRegressor          |              | downsampled  |      bool    |         False        | True or False | max_depth            |     int      |         None         |   None or [1, 1000] |
-| ElasticNet                     |              | downsampled  |      bool    |         False        | True or False | max_iter             |     int      |          -1          |    [-1, 10000]     |
-| ElasticNetCV                   |              | downsampled  |      bool    |         False        | True or False | max_iter             |     int      |          -1          |    [-1, 10000]     |
-| ExtraTreeRegressor             |              | downsampled  |      bool    |         False        | True or False | max_features         |     int      |       # features     |    [1, # features] |
-| ExtraTreesRegressor            |              | downsampled  |      bool    |         False        | True or False | max_features         |     int      |       # features     |    [1, # features] |
-| GaussianProcessRegressor       |              | downsampled  |      bool    |         False        | True or False | n_restarts_optimizer |     int      |           0          |        >= 0        |
-| GradientBoostingRegressor      |              | downsampled  |      bool    |         False        | True or False | max_depth            |     int      |           3          |   None or [1, 1000] |
-| HuberRegressor                 |              | downsampled  |      bool    |         False        | True or False | max_iter             |     int      |          100         |    [1, 10000]      |
-| KNeighborsRegressor            |              | downsampled  |      bool    |         False        | True or False |
-| KernelRidge                    |              | downsampled  |      bool    |         False        | True or False |
-| Lars                           |              | downsampled  |      bool    |         False        | True or False |
-| LarsCV                         |              | downsampled  |      bool    |         False        | True or False |
-| Lasso                          |              | downsampled  |      bool    |         False        | True or False |
-| LassoCV                        |              | downsampled  |      bool    |         False        | True or False |
-| LassoLars                      |              | downsampled  |      bool    |         False        | True or False |
-| LassoLarsCV                    |              | downsampled  |      bool    |         False        | True or False |
-| LassoLarsIC                    |              | downsampled  |      bool    |         False        | True or False |
-| LinearRegression               |              | downsampled  |      bool    |         False        | True or False |
-| LinearSVR                      |              | downsampled  |      bool    |         False        | True or False |
-| MLPRegressor                   |              | downsampled  |      bool    |         False        | True or False |
-| MultiTaskElasticNet            |              | downsampled  |      bool    |         False        | True or False |
-| MultiTaskElasticNetCV          |              | downsampled  |      bool    |         False        | True or False |
-| MultiTaskLasso                 |              | downsampled  |      bool    |         False        | True or False |
-| MultiTaskLassoCV               |              | downsampled  |      bool    |         False        | True or False |
-| NuSVR                          |              | downsampled  |      bool    |         False        | True or False |
-| OrthogonalMatchingPursuit      |              | downsampled  |      bool    |         False        | True or False |
-| OrthogonalMatchingPursuitCV    |              | downsampled  |      bool    |         False        | True or False |
-| PLSCanonical                   |              | downsampled  |      bool    |         False        | True or False |
-| PLSRegression                  |              | downsampled  |      bool    |         False        | True or False |
-| PassiveAggressiveRegressor     |              | downsampled  |      bool    |         False        | True or False |
-| RANSACRegressor                |              | downsampled  |      bool    |         False        | True or False |
-| RadiusNeighborsRegressor       |              | downsampled  |      bool    |         False        | True or False |
-| RandomForestRegressor          |              | downsampled  |      bool    |         False        | True or False |
-| Ridge                          |              | downsampled  |      bool    |         False        | True or False |
-| RidgeCV                        |              | downsampled  |      bool    |         False        | True or False |
-| SGDRegressor                   |              | downsampled  |      bool    |         False        | True or False |
-| SVR                            |              | downsampled  |      bool    |         False        | True or False |
-| TheilSenRegressor              |              | downsampled  |      bool    |         False        | True or False |
-| TransformedTargetRegressor     |              | downsampled  |      bool    |         False        | True or False |
+Fields:
+"routine": "algorithm" - always set to algorithm.  Tells the server you're requesting algorithmic data processing.
+"algorithmName": <algirithmName from table below>
+"algorithmType": "classification" - Specifies we're doing classification.  Separates the algorithmic processing from things like regression or clustering.
+"dataFeatures": [<list of feature names>]
+"downsampled": Either False for no downsampling, or a percentage between 1 and 100 (int).
+"cross_val": integer >= 1.  Determines how many times you want to cross validate the experiment.
+"file": Path to the file we're processing data from.
+"guidance": None - Always None for classification algorithmic processing.
+"identification": Not sure, set on front end, not used by server currently.
+"dataSelections": List of selection names to apply to processing.
+"cid": Not sure, set on front end, not used by server currently.
+"parameters": {<sub dictionary of parameters for the given algorithmName>} - Defined in the table below.  Only send the ones specified for the given algorithm. Each key should be a list.
+																			When a range is given by the user, the front end should extend it out.  For example, if the user specified min=5, max=10 & step=2 for key "apple", the front end should send "apple":[5,7,9]
+
+
+|         algorithmName          | Description  |      parm 1 name     | parm 1 dtype | parm 1 default value |     parm 1 range   |
+|--------------------------------|--------------|----------------------|--------------|----------------------|--------------------|
+| AdaBoostClassifier             |              | n_estimators         |     int      |          50          |     [1, 100]       |
+| BaggingClassifier              |              | n_estimators         |     int      |          10          |     [1, 100]       |
+| BayesianGaussianMixture        |              | n_components         |     int      |           1          |     [1, 100]       |
+| BernoulliNB                    |              |    alpha             |    float     |           1          |     [0, 100]       |
+| CalibratedClassifierCV         |              |    method            |    string    |       sigmoid        |sigmoid or isotonic |
+| ComplementNB                   |              |    alpha             |    float     |           1          |     [0, 100]       |
+| DecisionTreeClassifier         |              |  max_depth           |     int      |         None         |  None or [1, 1000] |
+| ExtraTreesClassifier           |              | n_estimators         |     int      |          10          |     [1, 100]       |
+| ExtraTreeClassifier            |              |  max_depth           |     int      |         None         |  None or [1, 1000] |
+| GaussianMixture                |              | n_components         |     int      |           1          |     [1, 100]       |
+| GaussianNB                     |              | var_smoothing        |    float     |         1e-09        |     [0, 100]       |
+| GaussianProcessClassifier      |              | n_restarts_optimizer |     int      |           0          |     [0, 100]       |
+| GradientBoostingClassifier     |              | n_estimators         |     int      |          100         |     [1, 1000]      |
+| KNeighborsClassifier           |              | n_neighbors          |     int      |           5          |     [1, 100]       |
+| LabelPropagation               |              | n_neighbors          |     int      |           5          |     [1, 100]       |
+| LabelSpreading                 |              | n_neighbors          |     int      |           5          |     [1, 100]       |
+| LinearDiscriminantAnalysis     |              | n_components         |     int      |           3          | [1, # features -1] |
+| LogisticRegression             |              | max_iter             |     int      |          100         |    [1, 10000]      |
+| LogisticRegressionCV           |              | max_iter             |     int      |          100         |    [1, 10000]      |
+| MLPClassifier                  |              | max_iter             |     int      |          200         |    [1, 10000]      |
+| MultinomialNB                  |              |    alpha             |    float     |           1          |     [0, 100]       |
+| NuSVC                          |              | max_iter             |     int      |          -1          |    [-1, 10000]     |
+| QuadraticDiscriminantAnalysis  |              | tol                  |    float     |         1.0e-4       |   [1.0e-6, 1.0e-2] |
+| RandomForestClassifier         |              | n_estimators         |     int      |          10          |     [1, 100]       |
+| SGDClassifier                  |              |    alpha             |    float     |        0.0001        |     [0, 100]       |
+| SVC                            |              | max_iter             |     int      |          -1          |    [-1, 10000]     |
+
+
+## Regression API
+
+Example:
+{"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"regression", 'dataFeatures': [<list of feature strings>], 'downsampled': False, 'cross_val': 5, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {eps': [0.7], 'k':[1,2,3,4,5,5]}, 'dataSelections': [], 'cid': 'wngyu'}
+
+Fields:
+"routine": "algorithm" - always set to algorithm.  Tells the server you're requesting algorithmic data processing.
+"algorithmName": <algirithmName from table below>
+"algorithmType": "regression" - Specifies we're doing regression.  Separates the algorithmic processing from things like classification or clustering.
+"dataFeatures": [<list of feature names>]
+"downsampled": Either False for no downsampling, or a percentage between 1 and 100 (int).
+"cross_val": integer >= 1.  Determines how many times you want to cross validate the experiment.
+"file": Path to the file we're processing data from.
+"guidance": None - Always None for regression algorithmic processing.
+"identification": Not sure, set on front end, not used by server currently.
+"dataSelections": List of selection names to apply to processing.
+"cid": Not sure, set on front end, not used by server currently.
+"parameters": {<sub dictionary of parameters for the given algorithmName>} - Defined in the table below.  Only send the ones specified for the given algorithm. Each key should be a list.
+																			When a range is given by the user, the front end should extend it out.  For example, if the user specified min=5, max=10 & step=2 for key "apple", the front end should send "apple":[5,7,9]
+
+
+
+|           algorithmName        | Description  |      parm 1 name     | parm 1 dtype | parm 1 default value |    parm 1 range    |
+|--------------------------------|--------------|----------------------|--------------|----------------------|--------------------|
+| ARDRegression                  |              | n_iter               |     int      |         300          |    [1, 10000]      |
+| AdaBoostRegressor              |              | n_estimators         |     int      |          50          |     [1, 1000]      |
+| BaggingRegressor               |              | n_estimators         |     int      |          10          |     [1, 1000]      |
+| BayesianRidge                  |              | n_estimators         |     int      |          300         |     [1, 1000]      |
+| CCA                            |              | max_iter             |     int      |          500         |     [1, 1000]      |
+| DecisionTreeRegressor          |              | max_depth            |     int      |         None         |  None or [1, 1000] |
+| ElasticNet                     |              | max_iter             |     int      |          -1          |    [-1, 10000]     |
+| ElasticNetCV                   |              | max_iter             |     int      |          -1          |    [-1, 10000]     |
+| ExtraTreeRegressor             |              | max_features         |     int      |       # features     |    [1, # features] |
+| ExtraTreesRegressor            |              | max_features         |     int      |       # features     |    [1, # features] |
+| GaussianProcessRegressor       |              | n_restarts_optimizer |     int      |           0          |        >= 0        |
+| GradientBoostingRegressor      |              | max_depth            |     int      |           3          |  None or [1, 1000] |
+| HuberRegressor                 |              | max_iter             |     int      |          100         |    [1, 10000]      |
+| KNeighborsRegressor            |              | n_neighbors          |     int      |           5          |     [1,1000]       |
+| KernelRidge                    |              |
+| Lars                           |              |
+| LarsCV                         |              |
+| Lasso                          |              |
+| LassoCV                        |              |
+| LassoLars                      |              |
+| LassoLarsCV                    |              |
+| LassoLarsIC                    |              |
+| LinearRegression               |              |
+| LinearSVR                      |              |
+| MLPRegressor                   |              |
+| MultiTaskElasticNet            |              |
+| MultiTaskElasticNetCV          |              |
+| MultiTaskLasso                 |              |
+| MultiTaskLassoCV               |              |
+| NuSVR                          |              |
+| OrthogonalMatchingPursuit      |              |
+| OrthogonalMatchingPursuitCV    |              |
+| PLSCanonical                   |              |
+| PLSRegression                  |              |
+| PassiveAggressiveRegressor     |              |
+| RANSACRegressor                |              |
+| RadiusNeighborsRegressor       |              |
+| RandomForestRegressor          |              |
+| Ridge                          |              |
+| RidgeCV                        |              |
+| SGDRegressor                   |              |
+| SVR                            |              |
+| TheilSenRegressor              |              |
+| TransformedTargetRegressor     |              |
 
 
 

@@ -1,5 +1,3 @@
-import codex_system
-import codex_hash
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
@@ -19,7 +17,8 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 # CODEX library imports
-
+import codex_system
+import codex_hash
 
 def downsample(inputArray, samples=0, percentage=0.0):
     '''

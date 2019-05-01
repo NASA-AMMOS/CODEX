@@ -1,6 +1,3 @@
-import codex_hash
-import codex_yaml
-import codex_return_code
 '''
 Author: Jack Lightholder
 Date  : 2/15/18
@@ -19,7 +16,9 @@ import numpy as np
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
-
+import codex_hash
+import codex_yaml
+import codex_return_code
 
 def get_featureList(featureList):
     '''

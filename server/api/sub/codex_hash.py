@@ -573,6 +573,20 @@ def findHashArray(field, name, hashType):
                 return point
         return None
 
+    elif(hashType == "regressor"):
+
+        for point in regressorList:
+            if(point[field] == name):
+                return point
+        return None
+
+    elif(hashType == "classifier"):
+
+        for point in classifierList:
+            if(point[field] == name):
+                return point
+        return None
+
     else:
         codex_system.codex_log("ERROR: findHashArray - hash not found")
         return None
@@ -803,11 +817,15 @@ def unpickle_data(session_name):
 
     Outputs:
 
-    Notes: 
+    Notes: Currently send all features, downsamples, subsets and labels to the front end on load.
+            This is because plotting is directly on the front end currently, so they need to store all data.
+            This needs to be moved to a back end query functionality, since we'll run out of front end space.
 
     Examples:
 
     >>> unpickle_data("test_session")
+    {'features': ['x1'], 'labels': ['x1'], 'subsets': ['x1'], 'downsample': ['x1']}
+    
     >>> printCacheCount()
     Feature Cache Size           : 1
     Subset Cache Size            : 1
@@ -826,29 +844,51 @@ def unpickle_data(session_name):
     if not os.path.exists(os.path.join(session_path)):
         os.makedirs(session_path)
 
-    ## Save classifier models
+    ## Load classifier models
     pickle_path = os.path.join(session_path, 'classifier_models')
     classifierList = pickle.load(open(pickle_path, "rb"))
 
-    # Save regression models
+    # Load regression models
     pickle_path = os.path.join(session_path, 'regressor_models')
     regressorList = pickle.load(open(pickle_path, "rb"))
 
-    # Save labels
+    # Load labels
     pickle_path = os.path.join(session_path, "label_data")
     labelList = pickle.load(open(pickle_path, "rb"))
 
-    # Save features
+    labels = []
+    for label in labelList:
+        x = findHashArray('hash', label["hash"], "label")
+        labels.append(x['name'])
+
+    # Load features
     pickle_path = os.path.join(session_path, "feature_data")
     featureList = pickle.load(open(pickle_path, "rb"))
 
-    # Save subsets
+    features = []
+    for feature in featureList:
+        x = findHashArray('hash', feature['hash'], 'feature')
+        features.append(x['name'])
+
+    # Load subsets
     pickle_path = os.path.join(session_path, "subset_data")
     subsetList = pickle.load(open(pickle_path, "rb"))
 
-    # Save downsampled features
+    subsets = []
+    for subset in subsetList:
+        x = findHashArray('hash', subset['hash'], "subset")
+        subsets.append(x['name'])
+
+    # Load downsampled features
     pickle_path = os.path.join(session_path, "downsampled_data")
     downsampleList = pickle.load(open(pickle_path, "rb"))
+
+    downsamples = []
+    for downsample in downsampleList:
+        x = findHashArray('hash', downsample['hash'], "downsample")
+        downsamples.append(x['name'])
+
+    return {'features':features, 'labels':labels, 'subsets':subsets, 'downsample':downsamples}
 
 
 def saveModel(modelName, inputModel, modelType):
@@ -912,8 +952,6 @@ def saveModel(modelName, inputModel, modelType):
         return None
 
     return newHash
-
-
 
 
 

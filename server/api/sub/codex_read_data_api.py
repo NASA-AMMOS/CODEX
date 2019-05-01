@@ -79,6 +79,7 @@ def codex_read_csv(file, featureList, hashType):
         try:
             feature_data = feature_data.astype(np.float)
         except BaseException:
+            codex_system.codex_log("Tokenizing {f}.".format(f=feature_name))
             feature_data = codex_system.string2token(feature_data)
 
         feature_hash = codex_hash.hashArray(
