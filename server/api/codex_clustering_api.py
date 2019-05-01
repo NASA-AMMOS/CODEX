@@ -54,24 +54,33 @@ def ml_cluster(
     Examples:
     >>> (inputHash,hashList,template, labelHash) = codex_doctest.doctest_get_data()
 
-    # Missing algorithmType
     >>> result = ml_cluster(inputHash, hashList, None, "kmean", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}, {})
+    {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}
 
     >>> result = ml_cluster(inputHash, hashList, None, "kmeans", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}, {})
+    {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}
 
     >>> result = ml_cluster(inputHash, hashList, None, "mean_shift", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}, {})
+    {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}
 
     >>> result = ml_cluster(inputHash, hashList, None, "birch", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}, {})
+    {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}
 
     >>> result = ml_cluster(inputHash, hashList, None, "ward", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}, {})
+    {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}
 
     >>> result = ml_cluster(inputHash, hashList, None, "spectral", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}, {})
+    {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}
 
     >>> result = ml_cluster(inputHash, hashList, None, "dbscan", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}, {})
+    {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}
 
     >>> result = ml_cluster(inputHash, hashList, None, "agglomerative", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}, {})
+    {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}
 
     >>> result = ml_cluster(inputHash, hashList, None, "affinity_propagation", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}, {})
+    {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9, 'downsampled': 500}
+
     '''
 
     if len(hashList) < 2:
