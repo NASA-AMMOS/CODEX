@@ -16,6 +16,7 @@ import * as algorithmTypes from "constants/algorithmTypes";
 import * as graphActions from "actions/graphActions";
 import * as uiTypes from "constants/uiTypes";
 import * as windowManagerActions from "actions/windowManagerActions";
+import * as classifierActions from "actions/classifierActions";
 
 class TopBar extends Component {
     constructor(props) {
@@ -190,7 +191,12 @@ class TopBar extends Component {
 
                     <Dropdown className="dropdownMain" autoOpen={false}>
                         <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
-                        <Dropdown.Menu>{this.getAlgorithmsMenuItems()}</Dropdown.Menu>
+                        <Dropdown.Menu>
+                            {this.getAlgorithmsMenuItems()}
+                            <MenuItem onSelect={this.props.openClassifierWindow}>
+                                Classifiers
+                            </MenuItem>
+                        </Dropdown.Menu>
                     </Dropdown>
 
                     <Dropdown
@@ -275,7 +281,8 @@ function mapDispatchToProps(dispatch) {
         modeSet: m => dispatch(modeSet(m)),
         createGraph: name => dispatch(graphActions.createGraph(name)),
         createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name)),
-        setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch)
+        setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch),
+        openClassifierWindow: bindActionCreators(classifierActions.openClassifierWindow, dispatch)
     };
 }
 

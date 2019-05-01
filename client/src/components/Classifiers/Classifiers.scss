@@ -1,0 +1,10 @@
+.classifiers-container {
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+}
+
+.classification-row {
+    display: flex;
+    justify-content: space-between;
+}

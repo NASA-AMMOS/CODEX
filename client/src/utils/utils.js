@@ -1,3 +1,8 @@
+import * as actionTypes from "constants/actionTypes";
+
+/* eslint import/no-webpack-loader-syntax: off */
+import WorkerSocket from "worker-loader!workers/socket.worker";
+
 /**
  * Get a unique id number per idName
  * @param {string} idName
@@ -33,4 +38,32 @@ export function zip(ary) {
         acc.push(newRow);
         return acc;
     }, []);
+}
+
+export function makeSimpleRequest(request, dataCallback) {
+    const requestObject = {};
+    const socketWorker = new WorkerSocket();
+
+    socketWorker.addEventListener("message", e => {
+        const inMsg = JSON.parse(e.data);
+
+        inMsg.algorithmName = request.algorithmName;
+        dataCallback(inMsg);
+    });
+
+    socketWorker.postMessage(
+        JSON.stringify({
+            action: actionTypes.SIMPLE_REQUEST,
+            request
+        })
+    );
+
+    requestObject.closeSocket = _ => {
+        socketWorker.postMessage(
+            JSON.stringify({
+                action: actionTypes.CLOSE_SOCKET
+            })
+        );
+    };
+    return requestObject;
 }
