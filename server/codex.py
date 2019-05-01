@@ -306,9 +306,10 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 
             session_name = msg['session_name']
             session_path = os.path.join(CODEX_ROOT, 'sessions', session_name)
+            result['session_name'] = msg['session_name']
 
             if os.path.exists(session_path):
-                codex_hash.unpickle_data(session_name)
+                result['session_data'] = codex_hash.unpickle_data(session_name)
             else:
                 result["WARNING"] = session_name + " does not exist."
 

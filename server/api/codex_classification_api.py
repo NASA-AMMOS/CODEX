@@ -129,17 +129,16 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         dictionary:
             algorithm (str)          - Name of the classifier which was run.  Will be same as algorithm input argument
             data (numpy.ndarray)     - (samples, features) array of features to cluster
-            clusters (numpy.ndarray) -  array containing cluster index for each sample
-            k (int)                  - number of clusters found
             downsample (int)         - number of data points used in quicklook
-            numClusters (int)        - number of clusters calculated by the algorithm (unique of clusters)
+
 
     Examples:
 
         >>> (inputHash,hashList,template, labelHash) = codex_doctest.doctest_get_data()
     
-        >>> result = run_codex_classification(inputHash, False, labelHash[0], False, "AdaBoostClassifier", {"n_estimators":10})
-    
+        >>> result = run_codex_classification(inputHash, False, labelHash[0], False, "AdaBoostClassifier", {"n_estimators":[10]})
+        >>> print(result["WARNING"])
+        None
     '''
     startTime = time.time()
     result = {'algorithm': algorithm,
@@ -342,6 +341,5 @@ if __name__ == "__main__":
     import doctest
     results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
     sys.exit(results.failed)
-
 
 
