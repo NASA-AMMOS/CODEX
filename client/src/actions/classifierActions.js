@@ -31,28 +31,35 @@ export function openClassifierWindow() {
     };
 }
 
-function createClassifierRequest(filename, classifierState) {
+function createClassifierRequest(filename, selectedFeatures, classifierState) {
     return {
         routine: "algorithm",
         algorithmName: classifierState.name,
         algorithmType: "classification",
-        dataFeatures:
-            classifierState.params[0].mode === "range"
-                ? classifierFunctions.createRange(classifierState.params[0])
-                : [],
+        dataFeatures: selectedFeatures.toJS(),
         filename,
         identification: { id: "dev0" },
-        parameters: { downsampled: true, eps: [0.7], k: [1, 2, 3, 4, 5] },
-        dataSelections: []
+        parameters:
+            classifierState.params[0].mode === "range"
+                ? {
+                      [classifierState.params[0].name]: classifierFunctions.createRange(
+                          classifierState.params[0]
+                      )
+                  }
+                : {},
+        dataSelections: [],
+        downsampled: false
     };
 }
 
-export function createClassifierOutput(classifierStates) {
+export function createClassifierOutput(classifierStates, selectedFeatures) {
     return (dispatch, getState) => {
         const filename = getState().data.get("filename");
         const requests = classifierStates
             .filter(classifierState => classifierState.params.length)
-            .map(classifierState => createClassifierRequest(filename, classifierState))
-            .map(utils.makeSimpleRequest);
+            .map(classifierState =>
+                createClassifierRequest(filename, selectedFeatures, classifierState)
+            )
+            .map(req => utils.makeSimpleRequest(req, data => console.log(data)));
     };
 }

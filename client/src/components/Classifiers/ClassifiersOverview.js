@@ -45,7 +45,7 @@ function makeNumericInput(param, classifierName, classifierStateDispatch) {
                         value: e.target.value
                     })
                 }
-            />{" "}
+            />
             <div>Max:</div>
             <input
                 type="number"
@@ -114,7 +114,7 @@ function ClassifiersOverview(props) {
                     classifierStateDispatch({
                         type: "updateEta",
                         name: classifier,
-                        eta: data.eta || "n/a"
+                        eta: data.eta ? Math.ceil(data.eta) : "n/a"
                     });
                 }
             )
@@ -136,7 +136,9 @@ function ClassifiersOverview(props) {
             </ul>
             <Button
                 variant="contained"
-                onClick={_ => props.createClassifierOutput(classifierStates)}
+                onClick={_ =>
+                    props.createClassifierOutput(classifierStates, props.selectedFeatures)
+                }
             >
                 Submit
             </Button>
