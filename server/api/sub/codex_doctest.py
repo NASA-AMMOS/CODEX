@@ -1,8 +1,3 @@
-import codex_hash
-import codex_read_data_api
-from numpy.random import randint
-import numpy as np
-import sys
 '''
 Author: Jack Lightholder
 Date  : 3/5/18
@@ -12,14 +7,18 @@ Brief : Functions to support doctesting CODEX
 Notes :
 '''
 import os
+import sys
 # Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 # Python Libraries
+from numpy.random import randint
+import numpy as np
 
 # CODEX Support
-
+import codex_hash
+import codex_read_data_api
 
 def doctest_get_image_path():
 

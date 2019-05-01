@@ -1,4 +1,3 @@
-import codex_system
 '''
 Author: Jack Lightholder
 Date  : 7/15/18
@@ -23,7 +22,7 @@ from scipy import linalg
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
-
+import codex_system
 
 def codex_impute(data):
     '''

@@ -1,3 +1,28 @@
+'''
+Author: Jack Lightholder
+Date  : 7/15/17
+
+Brief : Segmentation algorithms, formatted for CODEX
+
+Notes :
+
+Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
+U.S. Government Sponsorship acknowledged.
+'''
+import sys
+import os
+# Enviornment variable for setting CODEX root directory.
+CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, CODEX_ROOT + '/api/sub/')
+
+import traceback
+import time
+import math
+from scipy.spatial.distance import euclidean
+import numpy as np
+from fastdtw import fastdtw
+
+# CODEX Support
 import codex_downsample
 import codex_system
 import codex_doctest
@@ -6,19 +31,6 @@ import codex_return_code
 import codex_hash
 import codex_math
 import codex_read_data_api
-import traceback
-import time
-import math
-from scipy.spatial.distance import euclidean
-import numpy as np
-from fastdtw import fastdtw
-import sys
-import os
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, CODEX_ROOT + '/api/sub/')
-
-# CODEX Support
 
 DEBUG = False
 

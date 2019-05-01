@@ -1,11 +1,3 @@
-import codex_hash
-import codex_doctest
-import statistics
-import math
-import codex_system
-import traceback
-import numpy as np
-import sys
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
@@ -18,13 +10,21 @@ Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
 '''
 import os
+import sys
 # Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
+import traceback
+import numpy as np
+import statistics
+import math
 
 DEBUG = False
 
+import codex_system
+import codex_hash
+import codex_doctest
 
 def ml_normalize(
         hashList,

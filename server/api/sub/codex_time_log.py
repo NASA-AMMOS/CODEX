@@ -7,10 +7,12 @@ Brief : Time logging and estimation for CODEX algorithms
 Notes :
 '''
 import os
+import sys
+CODEX_ROOT = os.getenv('CODEX_ROOT')
+
 import time
 import h5py
 import os.path
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -19,8 +21,6 @@ from random import randint
 from heapq import nsmallest
 from os import listdir
 from os.path import isfile, join, isdir
-
-CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 logPath = CODEX_ROOT + "timeLogs/"
 timeLogs = {}

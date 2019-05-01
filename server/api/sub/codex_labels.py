@@ -1,4 +1,3 @@
-import codex_hash
 '''
 Author: Jack Lightholder
 Date  : 2/20/18
@@ -21,7 +20,7 @@ from random import shuffle
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
-
+import codex_hash
 
 def label_swap(labels, dataHash, verbose=False):
     '''
