@@ -270,6 +270,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
             else:
                 subsetHashName = None
 
+
             templateHashName = None
             '''
             templateHashName = msg["dataTemplates"]

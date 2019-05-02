@@ -231,7 +231,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
     if data is None:
         return None
 
-    if subsetHash is not False:
+    if subsetHash is not False  and subsetHash is not None:
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
             codex_system.codex_log(
@@ -277,8 +277,6 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
     try:
         if(algorithm == "ARDRegression"):
-            #regr = ARDRegression(n_iter=parms["n_iter"])
-            print(parms)
             regr =  GridSearchCV(ARDRegression(), parms, cv=cv_count, scoring='precision')
         elif(algorithm == "AdaBoostRegressor"):
             regr = AdaBoostRegressor(n_estimators=parms["n_estimators"])
@@ -380,16 +378,15 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
                 'downsample': downsampled,
                 'WARNING': traceback.format_exc()}
 
-    # TODO - eta needs to be multipled by number of folds
-    scores = model_selection.cross_val_score(regr, X, y, cv=cv_count)
-    result['accuracy'] = scores.mean()
-    result['accuracy_error'] = scores.std() * 2
+    regr.fit(X,y)
 
-    regr.fit(X, y)
+    result["best_parms"] = regr.best_params_
+    result["score"] = regr.scorer_
+    result["best_score"] = regr.best_score_
 
     # TODO - The front end should specify a save name for the model
     model_name = algorithm +  "_" + str(random.random())
-    model_dict = codex_hash.saveModel(model_name, regr, "regressor")
+    model_dict = codex_hash.saveModel(model_name, regr.best_estimator_, "regressor")
     if not model_dict:
         result['WARNING'] = "Model could not be saved."
     else:   
