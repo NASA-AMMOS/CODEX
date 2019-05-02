@@ -121,8 +121,12 @@ function ClassifiersOverview(props) {
         );
     }, []);
 
+    const [crossVal, setCrossVal] = useState(0);
+
     return (
         <div className="classifiers-container">
+            <div>Cross Val:</div>
+            <input type="number" value={crossVal} onChange={e => setCrossVal(e.target.value)} />
             <ul>
                 {classifierStates.map(classifierState => (
                     <li key={classifierState.name} className="classification-row">
@@ -137,7 +141,7 @@ function ClassifiersOverview(props) {
             <Button
                 variant="contained"
                 onClick={_ =>
-                    props.createClassifierOutput(classifierStates, props.selectedFeatures)
+                    props.createClassifierOutput(classifierStates, props.selectedFeatures, crossVal)
                 }
             >
                 Submit

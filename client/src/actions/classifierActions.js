@@ -31,7 +31,7 @@ export function openClassifierWindow() {
     };
 }
 
-function createClassifierRequest(filename, selectedFeatures, classifierState) {
+function createClassifierRequest(filename, selectedFeatures, crossVal, classifierState) {
     return {
         routine: "algorithm",
         algorithmName: classifierState.name,
@@ -48,17 +48,18 @@ function createClassifierRequest(filename, selectedFeatures, classifierState) {
                   }
                 : {},
         dataSelections: [],
-        downsampled: false
+        downsampled: false,
+        cross_val: parseInt(crossVal)
     };
 }
 
-export function createClassifierOutput(classifierStates, selectedFeatures) {
+export function createClassifierOutput(classifierStates, selectedFeatures, crossVal) {
     return (dispatch, getState) => {
         const filename = getState().data.get("filename");
         const requests = classifierStates
             .filter(classifierState => classifierState.params.length)
             .map(classifierState =>
-                createClassifierRequest(filename, selectedFeatures, classifierState)
+                createClassifierRequest(filename, selectedFeatures, crossVal, classifierState)
             )
             .map(req => utils.makeSimpleRequest(req, data => console.log(data)));
     };
