@@ -17,7 +17,6 @@ import {
 import { InitialPosition, Size, Coords, isSmartPosition } from "./domain";
 import { getCordsFromInitialPosition, getBoundaryCoords } from "./utils";
 import { Stacker } from "./stacker";
-import { CSSTransition } from "react-transition-group";
 
 export interface CristalProps {
     children: ReactNode;
@@ -34,6 +33,8 @@ export interface CristalProps {
     onMinimize?: () => void;
     hideHeader?: boolean;
     style?: React.CSSProperties;
+    isActive?: boolean;
+    onClick?: () => void;
 }
 
 export interface CristalState {
@@ -147,6 +148,10 @@ export class Cristal extends Component<CristalProps, CristalState> {
         this.setState({
             isDragging: true
         });
+
+        if (this.props.onClick) {
+            this.props.onClick();
+        }
     };
 
     onMouseMove = (e: MouseEvent) => {
@@ -238,24 +243,23 @@ export class Cristal extends Component<CristalProps, CristalState> {
     startYResize = () => this.setState({ isResizingY: true });
 
     get header() {
-        const { onClose, title, isDraggable, onMinimize } = this.props;
+        const { onClose, title, isDraggable, onMinimize, isActive } = this.props;
 
         const minimizeIcon = onMinimize ? <MinimizeIcon onClick={onMinimize} /> : null;
 
         return (
-            <CSSTransition timeout={500} classNames="window-header" in={this.state.isMounted}>
-                <Header
-                    isDraggable={isDraggable}
-                    innerRef={this.saveHeaderRef}
-                    onMouseDown={this.onMouseDown}
-                >
-                    <Title>{title}</Title>
-                    <ButtonContainer>
-                        {minimizeIcon}
-                        <CloseIcon onClick={onClose} />
-                    </ButtonContainer>
-                </Header>
-            </CSSTransition>
+            <Header
+                isDraggable={isDraggable}
+                innerRef={this.saveHeaderRef}
+                onMouseDown={this.onMouseDown}
+                isActive={isActive}
+            >
+                <Title>{title}</Title>
+                <ButtonContainer>
+                    {minimizeIcon}
+                    <CloseIcon onClick={onClose} />
+                </ButtonContainer>
+            </Header>
         );
     }
 
@@ -284,6 +288,10 @@ export class Cristal extends Component<CristalProps, CristalState> {
         this.setState({
             zIndex: Stacker.getNextIndex(zIndex)
         });
+
+        if (this.props.onClick) {
+            this.props.onClick();
+        }
     };
 
     render() {

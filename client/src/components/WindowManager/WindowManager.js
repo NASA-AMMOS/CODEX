@@ -197,14 +197,30 @@ function makeMinimizedBar(props) {
     );
 }
 
+function usePrevious(value) {
+    const ref = useRef();
+    useEffect(() => {
+        ref.current = value;
+    });
+    return ref.current;
+}
+
 function WindowManager(props) {
     const refs = useRef({}); // Store refs to all the open windows so we can do global window operations
     // Each time the windows list gets updated, delete old refs.
+    const [activeWindow, setActiveWindow] = useState(null);
+
+    const oldWindows = usePrevious(props.windows);
     useEffect(
         _ => {
             Object.keys(refs.current).forEach(key => {
                 if (!refs.current[key]) delete refs.current[key];
             });
+
+            // If there's a new window since the previous render, set it to be the active window.
+            const newWindow =
+                oldWindows && props.windows.find(win => !oldWindows.find(w => w.id === win.id));
+            if (newWindow) setActiveWindow(newWindow.id);
         },
         [props.windows]
     );
@@ -256,6 +272,8 @@ function WindowManager(props) {
                     ref={r => (refs.current[win.id] = r)}
                     onMinimize={_ => props.toggleMinimizeWindow(win.id)}
                     hideHeader={win.minimized}
+                    isActive={activeWindow === win.id}
+                    onClick={_ => setActiveWindow(win.id)}
                     {...settings}
                 >
                     <div className="windowBody">{getWindowContent(win)}</div>

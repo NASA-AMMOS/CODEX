@@ -13,6 +13,7 @@ export interface WrapperProps {
 
 export interface HeaderProps {
     isDraggable?: boolean;
+    isActive?: boolean;
 }
 
 export const minWidth = 200;
@@ -51,6 +52,8 @@ export const Header = styled.div`
     align-items: center;
     justify-content: space-between;
     padding-left: ${padding}px;
+    background-color: ${({ isActive }: HeaderProps) => (isActive ? `#007bff` : `white`)};
+    color: ${({ isActive }: HeaderProps) => (isActive ? `white` : `#181818`)};
 `;
 
 export const BottomRightResizeHandle = styled.div`
