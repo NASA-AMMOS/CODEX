@@ -101,12 +101,10 @@ def ml_cluster(
         
         pca = codex_dimmension_reduction_api.run_codex_dim_reduction(inputHash, subsetHash, {"n_components":2}, downsampled, False, "PCA")
         result = run_codex_clustering(inputHash, subsetHash, downsampled, algorithmName, parms)
-        print(pca['data'].shape)
         result['data'] = pca['data']
 
     except BaseException:
-        codex_system.codex_log(
-            "Failed to clustering algorithm")
+        codex_system.codex_log("Failed to clustering algorithm")
         result['message'] = "Failed to run clustering algorithm"
         codex_system.codex_log(traceback.format_exc())
 
