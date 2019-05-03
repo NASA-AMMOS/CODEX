@@ -54,7 +54,7 @@ function classifierStateReducer(classifierState, action) {
 
 function makeNumericInput(param, classifierName, classifierStateDispatch) {
     return (
-        <React.Fragment key={classifierName}>
+        <React.Fragment>
             <TextField
                 className="parameterInput"
                 fullWidth
@@ -115,7 +115,7 @@ function makeNumericInput(param, classifierName, classifierStateDispatch) {
 
 function makeParamInput(param, classifierName, classifierStateDispatch) {
     return (
-        <React.Fragment>
+        <React.Fragment key={classifierName}>
             <Typography variant="subtitle1">{classifierName}</Typography>
             {param.type === "int" || param.type === "float"
                 ? makeNumericInput(param, classifierName, classifierStateDispatch)
