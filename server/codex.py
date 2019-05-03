@@ -272,13 +272,13 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 
 
             templateHashName = None
-            '''
+            
             templateHashName = msg["dataTemplates"]
             if(templateHashName != []):
                 templateHashName = templateHashName[0]
             else:
                 templateHashName = None
-            '''
+            
 
             hashList = codex_hash.feature2hashList(featureList)
             codex_return_code.logReturnCode(
@@ -319,6 +319,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
             # TODO - Replace this with an error handling scheme at some point
             if (result is None):
                 result = {}
+            
             result['identification'] = msg['identification']
 
         elif (routine == 'guidance'):
