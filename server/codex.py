@@ -273,11 +273,11 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 
             templateHashName = None
             
-            templateHashName = msg["dataTemplates"]
-            if(templateHashName != []):
-                templateHashName = templateHashName[0]
-            else:
-                templateHashName = None
+            #templateHashName = msg["dataTemplates"]
+            #if(templateHashName != []):
+            #    templateHashName = templateHashName[0]
+            #else:
+            #    templateHashName = None
             
 
             hashList = codex_hash.feature2hashList(featureList)
