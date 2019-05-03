@@ -57,13 +57,7 @@ function getWindowContent(win) {
         case uiTypes.HEATMAP_GRAPH:
             return <HeatmapGraph data={win.data} />;
         case algorithmTypes.CLUSTER_ALGORITHM:
-            return (
-                <ClusterAlgorithm
-                    selectedFeatures={win.selectedFeatures}
-                    filename={win.filename}
-                    winId={win.id}
-                />
-            );
+            return <ClusterAlgorithm filename={win.filename} winId={win.id} />;
         case classifierTypes.CLASSIFIER_WINDOW:
             return (
                 <ClassifiersOverview

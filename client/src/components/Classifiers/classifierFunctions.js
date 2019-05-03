@@ -9,7 +9,7 @@ export function getEta(classifier, selectedFeatures, numFeatures, dataCallback) 
         routine: "time",
         algorithmType: "classification",
         algorithmName: classifier,
-        numSamples: selectedFeatures.size,
+        numSamples: selectedFeatures.length,
         numFeatures: numFeatures
     };
 

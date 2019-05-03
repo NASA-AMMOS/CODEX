@@ -6,12 +6,23 @@ import Button from "@material-ui/core/Button";
 import { bindActionCreators } from "redux";
 import "components/Classifiers/Classifiers.scss";
 import { connect } from "react-redux";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
+import InputLabel from "@material-ui/core/InputLabel";
+import FormControl from "@material-ui/core/FormControl";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormGroup from "@material-ui/core/FormGroup";
+import Checkbox from "@material-ui/core/Checkbox";
+import TextField from "@material-ui/core/TextField";
 
 function classifierStateReducer(classifierState, action) {
     switch (action.type) {
         case "updateEta":
             return classifierState.map(classifier =>
-                classifier.name === action.name ? { ...classifier, eta: action.eta } : classifier
+                classifier.name === action.name
+                    ? { ...classifier, eta: action.eta, etaLoaded: true }
+                    : classifier
             );
         case "updateParam":
             return classifierState.map(classifier =>
@@ -26,50 +37,72 @@ function classifierStateReducer(classifierState, action) {
                       }
                     : classifier
             );
+        case "setSelection":
+            return classifierState.map(classifier =>
+                classifier.name === action.classifierName
+                    ? { ...classifier, selected: !classifier.selected }
+                    : classifier
+            );
+        case "setAllSelections":
+            return classifierState.map(classifier => {
+                return { ...classifier, selected: action.selected };
+            });
     }
 }
 
 function makeNumericInput(param, classifierName, classifierStateDispatch) {
     return (
         <React.Fragment>
-            <div>Min:</div>
-            <input
+            <TextField
+                className="parameterInput"
+                fullWidth
+                label={param.minLabel}
+                defaultValue={param.minDefault}
+                helperText={`${param.min} or higher`}
+                margin="normal"
+                variant="filled"
                 type="number"
-                value={param.min}
+                value={param.minValue}
                 onChange={e =>
                     classifierStateDispatch({
                         type: "updateParam",
-                        classifierName,
-                        paramName: param.name,
-                        paramValue: "min",
+                        paramValue: "minValue",
                         value: e.target.value
                     })
                 }
             />
-            <div>Max:</div>
-            <input
+            <TextField
+                className="parameterInput"
+                fullWidth
+                label={param.maxLabel}
+                defaultValue={param.maxDefault}
+                helperText={`Up to ${param.max}`}
+                margin="normal"
+                variant="filled"
                 type="number"
-                value={param.max}
+                value={param.maxValue}
                 onChange={e =>
                     classifierStateDispatch({
                         type: "updateParam",
-                        classifierName,
-                        paramName: param.name,
-                        paramValue: "max",
+                        paramValue: "maxValue",
                         value: e.target.value
                     })
                 }
             />
-            <div>Step:</div>
-            <input
+            <TextField
+                className="parameterInput"
+                fullWidth
+                label={param.stepLabel}
+                defaultValue={param.stepDefault}
+                helperText={`Up to ${param.step}`}
+                margin="normal"
+                variant="filled"
                 type="number"
-                value={param.step}
+                value={param.stepValue}
                 onChange={e =>
                     classifierStateDispatch({
                         type: "updateParam",
-                        classifierName,
-                        paramName: param.name,
-                        paramValue: "step",
+                        paramValue: "maxValue",
                         value: e.target.value
                     })
                 }
@@ -79,21 +112,19 @@ function makeNumericInput(param, classifierName, classifierStateDispatch) {
 }
 
 function makeParamInput(param, classifierName, classifierStateDispatch) {
-    return (
-        <div key={param.name}>
-            {param.type === "int" || param.type === "float"
-                ? makeNumericInput(param, classifierName, classifierStateDispatch)
-                : null}
-        </div>
-    );
+    return param.type === "int" || param.type === "float"
+        ? makeNumericInput(param, classifierName, classifierStateDispatch)
+        : null;
 }
 
 function getInitialParamState() {
     return classifierTypes.CLASSIFIER_TYPES.map(classifier => {
         return {
             name: classifier,
-            eta: "waiting...",
-            params: classifierTypes.CLASSIFIER_PARAMS[classifier] || []
+            eta: null,
+            etaLoaded: false,
+            params: classifierTypes.CLASSIFIER_PARAMS[classifier] || [],
+            selected: true
         };
     });
 }
@@ -104,50 +135,143 @@ function ClassifiersOverview(props) {
         getInitialParamState()
     );
 
+    const selectedFeatures = props.featureList
+        .filter(f => f.get("selected"))
+        .map(f => f.get("name"))
+        .toJS();
+
+    const [crossVal, setCrossVal] = useState(3);
+    const [label, setLabel] = useState(selectedFeatures[0]);
+    const [activeClassifierName, setActiveClassifierName] = useState(classifierStates[0].name);
+
     useEffect(_ => {
         classifierTypes.CLASSIFIER_TYPES.forEach(classifier =>
-            classifierFunctions.getEta(
-                classifier,
-                props.selectedFeatures,
-                props.selectedFeatureLength,
-                data => {
-                    classifierStateDispatch({
-                        type: "updateEta",
-                        name: classifier,
-                        eta: data.eta ? Math.ceil(data.eta) : "n/a"
-                    });
-                }
-            )
+            classifierFunctions.getEta(classifier, selectedFeatures, 100, data => {
+                classifierStateDispatch({
+                    type: "updateEta",
+                    name: classifier,
+                    eta: data.eta && Math.ceil(data.eta)
+                });
+            })
         );
     }, []);
 
-    const [crossVal, setCrossVal] = useState(0);
+    const classifiersSelected = classifierStates.filter(c => c.selected).length;
+    const waitTime = classifierStates.reduce((acc, c) => acc + c.eta, 0);
+    const waitTimeString = classifierStates.every(c => c.etaLoaded)
+        ? waitTime
+            ? `${Math.ceil(waitTime / 60)} minutes approximate run time`
+            : "Run time not available"
+        : "Calculating approximate run time...";
 
     return (
-        <div className="classifiers-container">
-            <div>Cross Val:</div>
-            <input type="number" value={crossVal} onChange={e => setCrossVal(e.target.value)} />
-            <ul>
-                {classifierStates.map(classifierState => (
-                    <li key={classifierState.name} className="classification-row">
-                        <div>{classifierState.name}</div>
-                        <div>ETA:{classifierState.eta}</div>
-                        {classifierState.params.map(param =>
-                            makeParamInput(param, classifierState.name, classifierStateDispatch)
-                        )}
-                    </li>
-                ))}
-            </ul>
-            <Button
-                variant="contained"
-                onClick={_ =>
-                    props.createClassifierOutput(classifierStates, props.selectedFeatures, crossVal)
-                }
-            >
-                Submit
-            </Button>
+        <div className="classifiersContainer">
+            <div className="headerBar">
+                <FormControl>
+                    <InputLabel>Labels</InputLabel>
+                    <Select value={label} onChange={e => setLabel(e.target.value)}>
+                        {selectedFeatures.map(f => (
+                            <MenuItem key={f} value={f}>
+                                {f}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={_ =>
+                        props.createClassifierOutput(classifierStates, selectedFeatures, crossVal)
+                    }
+                >
+                    Run
+                </Button>
+            </div>
+            <hr />
+            <div className="body">
+                <div className="leftCol">
+                    <h5>Select and Configure Classifier(s)</h5>
+                    <div className="buttonRow">
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={_ =>
+                                classifierStateDispatch({
+                                    type: "setAllSelections",
+                                    selected: true
+                                })
+                            }
+                        >
+                            Select All
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={_ =>
+                                classifierStateDispatch({
+                                    type: "setAllSelections",
+                                    selected: false
+                                })
+                            }
+                        >
+                            Select None
+                        </Button>
+                    </div>
+                    <FormGroup classes={{ root: "classifierList" }}>
+                        {classifierStates.map(classifier => (
+                            <FormControlLabel
+                                key={classifier.name}
+                                className="checkboxLabel"
+                                control={
+                                    <Checkbox
+                                        color="primary"
+                                        checked={classifier.selected}
+                                        onChange={_ =>
+                                            classifierStateDispatch({
+                                                type: "setSelection",
+                                                classifierName: classifier.name
+                                            })
+                                        }
+                                    />
+                                }
+                                label={classifier.name}
+                            />
+                        ))}
+                    </FormGroup>
+                </div>
+                <div className="rightCol">
+                    <div className="paramHeader">
+                        <div className="classifierCounts">
+                            <span>{classifiersSelected} Classifiers selected</span>
+                            <span>{waitTimeString}</span>
+                        </div>
+                        <TextField
+                            className="parameterInput"
+                            label="Cross Val"
+                            margin="normal"
+                            variant="filled"
+                            type="number"
+                            value={crossVal}
+                        />
+                    </div>
+                    <hr />
+                    <div className="classifierParams">
+                        {classifierStates
+                            .find(c => c.name === activeClassifierName)
+                            .params.map(param =>
+                                makeParamInput(param, activeClassifierName, classifierStateDispatch)
+                            )}
+                    </div>
+                </div>
+            </div>
         </div>
     );
+}
+
+function mapStateToProps(state) {
+    return {
+        featureList: state.data.get("featureList")
+    };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -158,7 +282,8 @@ function mapDispatchToProps(dispatch) {
         )
     };
 }
+
 export default connect(
-    null,
+    mapStateToProps,
     mapDispatchToProps
 )(ClassifiersOverview);

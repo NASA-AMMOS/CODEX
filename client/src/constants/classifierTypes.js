@@ -63,8 +63,14 @@ export const CLASSIFIER_PARAMS = {
             type: "int",
             mode: "range",
             min: 0,
+            minDefault: 0,
+            minLabel: "Min parameter label",
             max: 50,
+            maxDefault: 50,
+            maxLabel: "Max parameter label",
             step: 1,
+            stepDefault: 1,
+            stepLabel: "Step size",
             displayName: "Number of Estimators"
         }
     ],
@@ -74,8 +80,14 @@ export const CLASSIFIER_PARAMS = {
             type: "int",
             mode: "range",
             min: 0,
+            minDefault: 0,
+            minLabel: "Min parameter label",
             max: 10,
+            maxDefault: 10,
+            maxLabel: "Max parameter label",
             step: 1,
+            stepDefault: 1,
+            stepLabel: "Step size",
             displayName: "Number of Estimators"
         }
     ],
@@ -85,8 +97,14 @@ export const CLASSIFIER_PARAMS = {
             type: "int",
             mode: "range",
             min: 0,
+            minDefault: 0,
             max: 1,
+            maxDefault: 1,
+            maxLabel: "Max parameter label",
             step: 1,
+            stepDefault: 1,
+            stepLabel: "Step size",
+
             displayName: "Number of Components"
         }
     ],
@@ -96,8 +114,15 @@ export const CLASSIFIER_PARAMS = {
             type: "float",
             mode: "range",
             min: 0,
+            minDefault: 0,
+            minLabel: "Min parameter label",
             max: 1,
+            maxDefault: 1,
+            maxLabel: "Max parameter label",
             step: 1,
+            stepDefault: 1,
+            stepLabel: "Step size",
+
             displayName: "Alpha"
         }
     ]

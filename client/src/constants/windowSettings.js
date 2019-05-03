@@ -19,7 +19,7 @@ export const initialSizes = {
         resizeable: false
     },
     [classifierTypes.CLASSIFIER_WINDOW]: {
-        width: 500,
+        width: 750,
         height: 500,
         resizeable: true
     }

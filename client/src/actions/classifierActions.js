@@ -8,26 +8,11 @@ import * as classifierFunctions from "components/Classifiers/classifierFunctions
 import WorkerSocket from "worker-loader!workers/socket.worker";
 
 export function openClassifierWindow() {
-    return (dispatch, getState) => {
-        const colName = getState()
-            .data.get("featureList")
-            .filter(f => f.get("selected"))
-            .map(f => f.get("name"))
-            .get(0);
-
-        actionFunctions.getColumn(colName, dispatch, getState).then(col =>
-            dispatch({
-                type: actionTypes.OPEN_NEW_WINDOW,
-                info: {
-                    windowType: classifierTypes.CLASSIFIER_WINDOW,
-                    selectedFeatures: getState()
-                        .data.get("featureList")
-                        .filter(f => f.get("selected"))
-                        .map(f => f.get("name")),
-                    selectedFeatureLength: col.length
-                }
-            })
-        );
+    return {
+        type: actionTypes.OPEN_NEW_WINDOW,
+        info: {
+            windowType: classifierTypes.CLASSIFIER_WINDOW
+        }
     };
 }
 
@@ -36,7 +21,7 @@ function createClassifierRequest(filename, selectedFeatures, crossVal, classifie
         routine: "algorithm",
         algorithmName: classifierState.name,
         algorithmType: "classification",
-        dataFeatures: selectedFeatures.toJS(),
+        dataFeatures: selectedFeatures,
         filename,
         identification: { id: "dev0" },
         parameters:
