@@ -16,33 +16,52 @@
 
 .body {
     width: 100%;
-    height: 60%;
+    height: 65%;
     display: flex;
 }
 
 .leftCol {
-    width: 35%;
+    width: 40%;
 }
 
 .rightCol {
-    width: 65%;
-    padding-left: 55px;
+    width: 60%;
+    padding-left: 25px;
 }
 
 .buttonRow {
     display: flex;
     justify-content: space-between;
+    margin-top: 5px;
 }
 
 .classifierList {
     overflow-y: scroll;
     height: 100%;
     flex-wrap: nowrap !important;
+    margin-top: 5px;
 }
 
-.checkboxLabel {
+.checkboxRow {
+    display: flex;
+    align-items: center;
     margin-top: -5px;
     margin-bottom: -5px;
+    margin-left: -10px;
+    padding-right: 5px;
+    &:hover,
+    &.active {
+        background-color: #007bff;
+        .checkboxLabel {
+            color: white;
+        }
+    }
+}
+
+.checkboxLabels {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
 }
 
 .paramHeader {
@@ -59,7 +78,7 @@
 
 .classifierParams {
     margin-top: 10px;
-    height: 95%;
+    height: 90%;
     overflow-y: scroll;
 }
 

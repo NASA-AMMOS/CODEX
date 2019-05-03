@@ -15,6 +15,8 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormGroup from "@material-ui/core/FormGroup";
 import Checkbox from "@material-ui/core/Checkbox";
 import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
+import classnames from "classnames";
 
 function classifierStateReducer(classifierState, action) {
     switch (action.type) {
@@ -52,7 +54,7 @@ function classifierStateReducer(classifierState, action) {
 
 function makeNumericInput(param, classifierName, classifierStateDispatch) {
     return (
-        <React.Fragment>
+        <React.Fragment key={classifierName}>
             <TextField
                 className="parameterInput"
                 fullWidth
@@ -112,9 +114,55 @@ function makeNumericInput(param, classifierName, classifierStateDispatch) {
 }
 
 function makeParamInput(param, classifierName, classifierStateDispatch) {
-    return param.type === "int" || param.type === "float"
-        ? makeNumericInput(param, classifierName, classifierStateDispatch)
-        : null;
+    return (
+        <React.Fragment>
+            <Typography variant="subtitle1">{classifierName}</Typography>
+            {param.type === "int" || param.type === "float"
+                ? makeNumericInput(param, classifierName, classifierStateDispatch)
+                : null}
+        </React.Fragment>
+    );
+}
+
+function makeClassifierRow(
+    activeClassifierName,
+    setActiveClassifierName,
+    classifierStateDispatch,
+    classifier
+) {
+    const etaLabel = classifier.eta ? `(${classifier.eta})` : classifier.etaLoaded && "(n/a)";
+    const rowClass = classnames({
+        checkboxRow: true,
+        active: classifier.name === activeClassifierName
+    });
+    return (
+        <React.Fragment key={classifier.name}>
+            <div
+                key={classifier.name}
+                className={rowClass}
+                onClick={_ => setActiveClassifierName(classifier.name)}
+            >
+                <Checkbox
+                    color="primary"
+                    checked={classifier.selected}
+                    onChange={_ =>
+                        classifierStateDispatch({
+                            type: "setSelection",
+                            classifierName: classifier.name
+                        })
+                    }
+                />
+                <div className="checkboxLabels">
+                    <Typography inline className="checkboxLabel">
+                        {classifier.name}
+                    </Typography>
+                    <Typography inline className="checkboxLabel" color="textSecondary">
+                        {etaLabel}
+                    </Typography>
+                </div>
+            </div>
+        </React.Fragment>
+    );
 }
 
 function getInitialParamState() {
@@ -190,7 +238,7 @@ function ClassifiersOverview(props) {
             <hr />
             <div className="body">
                 <div className="leftCol">
-                    <h5>Select and Configure Classifier(s)</h5>
+                    <Typography variant="subtitle1">Select and Configure Classifier(s)</Typography>
                     <div className="buttonRow">
                         <Button
                             variant="outlined"
@@ -218,25 +266,14 @@ function ClassifiersOverview(props) {
                         </Button>
                     </div>
                     <FormGroup classes={{ root: "classifierList" }}>
-                        {classifierStates.map(classifier => (
-                            <FormControlLabel
-                                key={classifier.name}
-                                className="checkboxLabel"
-                                control={
-                                    <Checkbox
-                                        color="primary"
-                                        checked={classifier.selected}
-                                        onChange={_ =>
-                                            classifierStateDispatch({
-                                                type: "setSelection",
-                                                classifierName: classifier.name
-                                            })
-                                        }
-                                    />
-                                }
-                                label={classifier.name}
-                            />
-                        ))}
+                        {classifierStates.map(classifier =>
+                            makeClassifierRow(
+                                activeClassifierName,
+                                setActiveClassifierName,
+                                classifierStateDispatch,
+                                classifier
+                            )
+                        )}
                     </FormGroup>
                 </div>
                 <div className="rightCol">

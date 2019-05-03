@@ -98,6 +98,7 @@ export const CLASSIFIER_PARAMS = {
             mode: "range",
             min: 0,
             minDefault: 0,
+            minLabel: "Min parameter label",
             max: 1,
             maxDefault: 1,
             maxLabel: "Max parameter label",
