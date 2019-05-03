@@ -10,6 +10,7 @@ function buildSubalgoServerRequest(
     selectedFeatures,
     filename,
     parameters,
+    downsampled,
     dataSelections
 ) {
     return {
@@ -25,7 +26,8 @@ function buildSubalgoServerRequest(
         parameters,
         dataSelections: dataSelections.map(({ name, color }) => {
             return { name, color, emphasize: false };
-        })
+        }),
+        downsampled
     };
 }
 
@@ -40,15 +42,18 @@ export function getSubAlgorithmData(
 ) {
     const parameters = subalgo.parameters.reduce(
         (acc, param) => Object.assign(acc, { [param.name]: param.value }),
-        { downsampled }
+        {}
     );
     const request = buildSubalgoServerRequest(
         subalgo,
         selectedFeatures,
         filename,
         parameters,
+        downsampled,
         dataSelections
     );
+
+    console.log(request);
 
     const requestObject = {};
     const socketWorker = new WorkerSocket();
