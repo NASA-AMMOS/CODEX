@@ -130,7 +130,8 @@ function makeClassifierRow(
     classifierStateDispatch,
     classifier
 ) {
-    const etaLabel = classifier.eta ? `(${classifier.eta})` : classifier.etaLoaded && "(n/a)";
+    const eta = classifier.eta && Math.ceil(classifier.eta);
+    const etaLabel = eta ? `(${eta / 60} min)` : classifier.etaLoaded && "(n/a)";
     const rowClass = classnames({
         checkboxRow: true,
         active: classifier.name === activeClassifierName
