@@ -49,9 +49,11 @@
     margin-bottom: -5px;
     margin-left: -10px;
     padding-right: 5px;
-    &:hover,
+    &:hover {
+        background-color: #eee;
+    }
     &.active {
-        background-color: #007bff;
+        background-color: #ccc;
         .checkboxLabel {
             color: white;
         }
