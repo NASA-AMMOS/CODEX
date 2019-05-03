@@ -32,7 +32,7 @@ function makeChart(props) {
             {
                 x: cols[0],
                 y: cols[1],
-                type: "scattergl",
+                type: "scatter",
                 mode: "markers",
                 marker: {
                     color: cols[0].map((val, idx) => {
