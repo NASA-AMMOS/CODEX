@@ -150,9 +150,9 @@ def codex_binned_stat(
         Hash not found. Returning!
 
         >>> featureList = ['L2/RetrievalResults/xco2']
-        >>> hashList = codex_read_data_api.codex_read_hd5(CODEX_ROOT + '../../uploads/lnd_glint_subsample_10000.h5',featureList, "feature")
+        >>> hashList = codex_read_data_api.codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature")
 
-        >>> inputHash = hashList[0]
+        >>> inputHash = hashList[0][0]
         >>> results = codex_binned_stat(inputHash)
 
         #print(results)
@@ -330,5 +330,5 @@ def codex_binned_stat(
 if __name__ == "__main__":
 
     import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
+    results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
     sys.exit(results.failed)
