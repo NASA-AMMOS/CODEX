@@ -32,7 +32,7 @@ function makeChart(props) {
             {
                 x: cols[0],
                 y: cols[1],
-                type: "scattergl",
+                type: "scatter",
                 mode: "markers",
                 marker: {
                     color: cols[0].map((val, idx) => {
@@ -48,7 +48,7 @@ function makeChart(props) {
         layout: {
             autosize: true,
             margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
-            hovermode: "closest", // Turning off hovermode seems to screw up click handling
+            hovermode: false, // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
             xaxis: {
                 automargin: true

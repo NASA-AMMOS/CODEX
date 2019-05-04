@@ -27,7 +27,7 @@ function getTitle(props, helpModeState) {
         case algorithmTypes.SUBALGO_MODE_EDIT_PARAMS:
             return helpModeState.active
                 ? `Help: ${props.subalgoState.humanName}`
-                : "Choose Number of Clusters";
+                : "Choose Algorithm Parameters";
         case algorithmTypes.SUBALGO_MODE_EDIT_OUTPUTS:
             return helpModeState.active
                 ? `Help : ${props.subalgoState.humanName}`

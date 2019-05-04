@@ -93,6 +93,31 @@ function subalgoParamReducer(subalgoStates, action) {
     }
 }
 
+function getSubalgoPreviews(subalgoStates, subalgoStatesDispatch) {
+    return (
+        <div className="algo-container">
+            {subalgoStates.map(subalgoState => (
+                <SubalgoChart
+                    key={subalgoState.name}
+                    name={subalgoState.name}
+                    humanName={subalgoState.humanName}
+                    serverData={subalgoState.serverData}
+                    onClick={_ =>
+                        subalgoStatesDispatch({
+                            type: "changeEditMode",
+                            name: subalgoState.name,
+                            editMode: algorithmTypes.SUBALGO_MODE_EDIT_PARAMS
+                        })
+                    }
+                    editMode={subalgoState.editMode}
+                    loaded={subalgoState.loaded}
+                    titleText={subalgoState.humanName}
+                />
+            ))}
+        </div>
+    );
+}
+
 function ClusterAlgorithm(props) {
     const algorithm = algorithmTypes.CLUSTER_ALGORITHM;
     const algoVerb = "clustering";
@@ -168,30 +193,11 @@ function ClusterAlgorithm(props) {
                     {helpModeState ? <Close /> : <HelpOutline />}
                 </IconButton>
             </div>
-            <div className="algo-container">
-                <AlgorithmHelpContent
-                    hidden={!helpModeState}
-                    guidancePath={`${algoVerb}_page:general_${algoVerb}`}
-                />
-                {subalgoStates.map(subalgoState => (
-                    <SubalgoChart
-                        key={subalgoState.name}
-                        name={subalgoState.name}
-                        humanName={subalgoState.humanName}
-                        serverData={subalgoState.serverData}
-                        onClick={_ =>
-                            subalgoStatesDispatch({
-                                type: "changeEditMode",
-                                name: subalgoState.name,
-                                editMode: algorithmTypes.SUBALGO_MODE_EDIT_PARAMS
-                            })
-                        }
-                        editMode={subalgoState.editMode}
-                        loaded={subalgoState.loaded}
-                        titleText={subalgoState.humanName}
-                    />
-                ))}
-            </div>
+            <AlgorithmHelpContent
+                hidden={!helpModeState}
+                guidancePath={`${algoVerb}_page:general_${algoVerb}`}
+            />
+            {!selectedSubalgo && getSubalgoPreviews(subalgoStates, subalgoStatesDispatch)}
             <div className="subalgo-focus" hidden={!selectedSubalgo}>
                 {!selectedSubalgo ? null : (
                     <SubalgoEdit
