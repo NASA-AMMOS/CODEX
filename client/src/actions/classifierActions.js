@@ -16,12 +16,12 @@ export function openClassifierWindow() {
     };
 }
 
-function createClassifierRequest(filename, selectedFeatures, crossVal, classifierState) {
+function createClassifierRequest(filename, selectedFeatures, crossVal, labelName, classifierState) {
     return {
         routine: "algorithm",
         algorithmName: classifierState.name,
         algorithmType: "classification",
-        dataFeatures: selectedFeatures,
+        dataFeatures: selectedFeatures.filter(f => f !== labelName),
         filename,
         identification: { id: "dev0" },
         parameters:
@@ -34,17 +34,24 @@ function createClassifierRequest(filename, selectedFeatures, crossVal, classifie
                 : {},
         dataSelections: [],
         downsampled: false,
-        cross_val: parseInt(crossVal)
+        cross_val: parseInt(crossVal),
+        labelName
     };
 }
 
-export function createClassifierOutput(classifierStates, selectedFeatures, crossVal) {
+export function createClassifierOutput(classifierStates, selectedFeatures, crossVal, labelName) {
     return (dispatch, getState) => {
         const filename = getState().data.get("filename");
         const requests = classifierStates
             .filter(classifierState => classifierState.params.length)
             .map(classifierState =>
-                createClassifierRequest(filename, selectedFeatures, crossVal, classifierState)
+                createClassifierRequest(
+                    filename,
+                    selectedFeatures,
+                    crossVal,
+                    labelName,
+                    classifierState
+                )
             )
             .map(req => utils.makeSimpleRequest(req, data => console.log(data)));
     };

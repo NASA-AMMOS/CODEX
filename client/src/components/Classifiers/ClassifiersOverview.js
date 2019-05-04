@@ -226,15 +226,22 @@ function ClassifiersOverview(props) {
                         ))}
                     </Select>
                 </FormControl>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={_ =>
-                        props.createClassifierOutput(classifierStates, selectedFeatures, crossVal)
-                    }
-                >
-                    Run
-                </Button>
+                <div>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={_ =>
+                            props.createClassifierOutput(
+                                classifierStates,
+                                selectedFeatures,
+                                crossVal,
+                                label
+                            )
+                        }
+                    >
+                        Run
+                    </Button>
+                </div>
             </div>
             <hr />
             <div className="body">
