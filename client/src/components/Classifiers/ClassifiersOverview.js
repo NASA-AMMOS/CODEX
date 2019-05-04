@@ -240,9 +240,9 @@ function ClassifiersOverview(props) {
             <div className="body">
                 <div className="leftCol">
                     <Typography variant="subtitle1">Select and Configure Classifier(s)</Typography>
-                    <div className="buttonRow">
+                    <div>
                         <Button
-                            variant="outlined"
+                            variant="text"
                             color="primary"
                             onClick={_ =>
                                 classifierStateDispatch({
@@ -254,7 +254,7 @@ function ClassifiersOverview(props) {
                             Select All
                         </Button>
                         <Button
-                            variant="outlined"
+                            variant="text"
                             color="primary"
                             onClick={_ =>
                                 classifierStateDispatch({
