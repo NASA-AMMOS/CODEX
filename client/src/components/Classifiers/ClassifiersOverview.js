@@ -62,7 +62,7 @@ function makeNumericInput(param, classifierName, classifierStateDispatch) {
                 defaultValue={param.minDefault}
                 helperText={`${param.min} or higher`}
                 margin="normal"
-                variant="filled"
+                variant="standard"
                 type="number"
                 value={param.minValue}
                 onChange={e =>
@@ -80,7 +80,7 @@ function makeNumericInput(param, classifierName, classifierStateDispatch) {
                 defaultValue={param.maxDefault}
                 helperText={`Up to ${param.max}`}
                 margin="normal"
-                variant="filled"
+                variant="standard"
                 type="number"
                 value={param.maxValue}
                 onChange={e =>
@@ -98,7 +98,7 @@ function makeNumericInput(param, classifierName, classifierStateDispatch) {
                 defaultValue={param.stepDefault}
                 helperText={`Up to ${param.step}`}
                 margin="normal"
-                variant="filled"
+                variant="standard"
                 type="number"
                 value={param.stepValue}
                 onChange={e =>
@@ -294,7 +294,7 @@ function ClassifiersOverview(props) {
                             className="parameterInput"
                             label="Cross Val"
                             margin="normal"
-                            variant="filled"
+                            variant="standard"
                             type="number"
                             value={crossVal}
                         />
