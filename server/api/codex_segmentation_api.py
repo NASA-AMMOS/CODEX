@@ -210,9 +210,9 @@ def codex_segmentation_quickshift(
         Algorithm: http://scikit-image.org/docs/dev/api/skimage.segmentation.html#quickshift
 
     Examples:
-        >>> featureList = ['L2/RetrievalGeometry/retrieval_latitude/','L2/RetrievalResults/xco2']
-        >>> hashList = codex_read_data_api.codex_read_hd5(CODEX_ROOT + '/../../uploads/lnd_glint_subsample_10000.h5',featureList, "feature")
-        >>> segments = codex_segmentation_quickshift(hashList[0], False, 50, 20.0, 5.0, 2.0)
+        >>> (inputHash,hashList,template,labelHash) = codex_doctest.doctest_get_data()
+
+        >>> segments = codex_segmentation_quickshift(inputHash, False, 50, 20.0, 5.0, 2.0)
         Downsampling to 50 percent
     '''
     startTime = time.time()
@@ -304,9 +304,9 @@ def codex_segmentation_felzenszwalb(
 
     Examples:
 
-        >>> featureList = ['L2/RetrievalGeometry/retrieval_latitude/','L2/RetrievalResults/xco2']
-        >>> hashList = codex_read_data_api.codex_read_hd5(CODEX_ROOT + '/../../uploads/lnd_glint_subsample_10000.h5',featureList, "feature")
-        >>> segments = codex_segmentation_felzenszwalb(hashList[0], False, 50, 3.0, 0.95, 3)
+        >>> (inputHash,hashList,template,labelHash) = codex_doctest.doctest_get_data()
+
+        >>> segments = codex_segmentation_felzenszwalb(inputHash, False, 50, 3.0, 0.95, 3)
         Downsampling to 50 percent
     '''
 
@@ -371,5 +371,5 @@ def codex_segmentation_felzenszwalb(
 if __name__ == "__main__":
 
     import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
+    results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
     sys.exit(results.failed)

@@ -108,13 +108,13 @@ def ml_regression(
     >>> (inputHash, hashList, template, labelHash) = codex_doctest.doctest_get_data()
 
     # Standard use - linear regression
-    #>>> result = ml_regression(inputHash, hashList, None, labelHash, "linear", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5, 'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, {})
+    >>> result = ml_regression(inputHash, hashList, None, labelHash, "linear", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5, 'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, 3, {})
 
     # Standard use - lasso regression
-    #>>> result = ml_regression(inputHash, hashList, None, labelHash, "lasso", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5,'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, {})
+    >>> result = ml_regression(inputHash, hashList, None, labelHash, "lasso", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5,'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, 3, {})
 
     # Standard use - random forest regression
-    #>>> result = ml_regression(inputHash, hashList, None, labelHash, "randomForest", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5,'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, {})
+    >>> result = ml_regression(inputHash, hashList, None, labelHash, "randomForest", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5,'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, 3, {})
 
     '''
 
@@ -169,52 +169,50 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
         >>> (inputHash,hashList,template, labelHash) = codex_doctest.doctest_get_data()
     
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ARDRegression", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "AdaBoostRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "BaggingRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "BayesianRidge", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "CCA", {})
-
-        >>> result = run_codex_regression(inputHash, False, labelHash[0], False, "DecisionTreeRegressor", {})
-
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ElasticNet", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ElasticNetCV", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ExtraTreeRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "ExtraTreesRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "GaussianProcessRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "GradientBoostingRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "HuberRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "KNeighborsRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "KernelRidge", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "Lars", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LarsCV", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "Lasso", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LassoCV", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LassoLars", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LassoLarsCV", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LassoLarsIC", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LinearRegression", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "LinearSVR", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MLPRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MultiTaskElasticNet", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MultiTaskElasticNetCV", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MultiTaskLasso", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "MultiTaskLassoCV", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "NuSVR", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "OrthogonalMatchingPursuit", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "OrthogonalMatchingPursuitCV", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "PLSCanonical", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "PLSRegression", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "PassiveAggressiveRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "RANSACRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "RadiusNeighborsRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "RandomForestRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "Ridge", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "RidgeCV", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "SGDRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "SVR", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "TheilSenRegressor", {})
-        #>>> result = run_codex_regression(inputHash, False, labelHash[0], False, "TransformedTargetRegressor", {})
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "ARDRegression", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "AdaBoostRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "BaggingRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "BayesianRidge", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "CCA", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "DecisionTreeRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "ElasticNet", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "ElasticNetCV", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "ExtraTreeRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "ExtraTreesRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "GaussianProcessRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "GradientBoostingRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "HuberRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "KNeighborsRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "KernelRidge", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "Lars", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "LarsCV", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "Lasso", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "LassoCV", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "LassoLars", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "LassoLarsCV", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "LassoLarsIC", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "LinearRegression", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "LinearSVR", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "MLPRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "MultiTaskElasticNet", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "MultiTaskElasticNetCV", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "MultiTaskLasso", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "MultiTaskLassoCV", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "NuSVR", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "OrthogonalMatchingPursuit", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "OrthogonalMatchingPursuitCV", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "PLSCanonical", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "PLSRegression", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "PassiveAggressiveRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "RANSACRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "RadiusNeighborsRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "RandomForestRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "Ridge", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "RidgeCV", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "SGDRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "SVR", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "TheilSenRegressor", {}, 3)
+        >>> result = run_codex_regression(inputHash, False, labelHash, False, "TransformedTargetRegressor", {}, 3)
 
     '''
     startTime = time.time()
@@ -259,7 +257,8 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
     result['eta'] = codex_time_log.getComputeTimeEstimate("regression", algorithm, samples)
 
-    labelHash_dict = codex_hash.findHashArray("hash", labelHash, "label")
+    # TODO - labels are currently cached under features
+    labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
     if labelHash_dict is None:
         codex_system.codex_log("label hash not found. Returning!")
         return {'algorithm': algorithm,
@@ -273,100 +272,103 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
         unique, counts = np.unique(y, return_counts=True)
         count_dict = dict(zip(unique, counts))
         if any(v < cross_val for v in count_dict.values()):
+            count_dict = dict(zip(unique.astype(str), counts.astype(str)))
             return {'algorithm': algorithm,
                     'downsample': downsampled,
                     'cross_val': cross_val,
+                    'counts': json.dumps(count_dict),
                     'WARNING': "Label class has less samples than cross val score"}  
 
+    scoring = 'r2' # TODO - implement all scoring metrics here: https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
     try:
         if(algorithm == "ARDRegression"):
-            regr =  GridSearchCV(ARDRegression(), parms, cv=cross_val, scoring='precision')
+            regr =  GridSearchCV(ARDRegression(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "AdaBoostRegressor"):
-            regr = AdaBoostRegressor(n_estimators=parms["n_estimators"])
+            regr =  GridSearchCV(AdaBoostRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "BaggingRegressor"):
-            regr = BaggingRegressor(n_estimators=parms["n_estimators"])
+            regr =  GridSearchCV(BaggingRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "BayesianRidge"):
-            regr = BayesianRidge(n_estimators=parms["n_estimators"])
+            regr =  GridSearchCV(BayesianRidge(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "CCA"):
-            regr = CCA(max_iter=parms["max_iter"])
+            regr =  GridSearchCV(CCA(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "DecisionTreeRegressor"):
-            regr = DecisionTreeRegressor(max_depth=parms["max_depth"])
+            regr =  GridSearchCV(DecisionTreeRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "ElasticNet"):
-            regr = ElasticNet(max_iter=parms["max_iter"])
+            regr =  GridSearchCV(ElasticNet(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "ElasticNetCV"):
-            regr = ElasticNetCV(max_iter=parms["max_iter"])
+            regr =  GridSearchCV(ElasticNetCV(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "ExtraTreeRegressor"):
-            regr = ExtraTreeRegressor(max_features=parms["max_features"])
+            regr =  GridSearchCV(ExtraTreeRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "ExtraTreesRegressor"):
-            regr = ExtraTreesRegressor(max_features=parms["max_features"])
+            regr =  GridSearchCV(ExtraTreesRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "GaussianProcessRegressor"):
-            regr = GaussianProcessRegressor(n_restarts_optimizer=parms["n_restarts_optimizer"])
+            regr =  GridSearchCV(GaussianProcessRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "GradientBoostingRegressor"):
-            regr = GradientBoostingRegressor(max_depth=parms["max_depth"])
+            regr =  GridSearchCV(GradientBoostingRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "HuberRegressor"):
-            regr = HuberRegressor(max_iter=parms["max_iter"])
+            regr =  GridSearchCV(HuberRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "KNeighborsRegressor"):
-            regr = KNeighborsRegressor()
+            regr =  GridSearchCV(KNeighborsRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "KernelRidge"):
-            regr = KernelRidge()
+            regr =  GridSearchCV(KernelRidge(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "Lars"):
-            regr = Lars()
+            regr =  GridSearchCV(Lars(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "LarsCV"):
-            regr = LarsCV()
+            regr =  GridSearchCV(LarsCV(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "Lasso"):
-            regr = Lasso()
+            regr =  GridSearchCV(Lasso(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "LassoCV"):
-            regr = LassoCV()
+            regr =  GridSearchCV(LassoCV(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "LassoLars"):
-            regr = LassoLars()
+            regr =  GridSearchCV(LassoLars(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "LassoLarsCV"):
-            regr = LassoLarsCV()
+            regr =  GridSearchCV(LassoLarsCV(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "LassoLarsIC"):
-            regr = LassoLarsIC()
+            regr =  GridSearchCV(LassoLarsIC(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "LinearRegression"):
-            regr = LinearRegression()
+            regr =  GridSearchCV(LinearRegression(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "LinearSVR"):
-            regr = LinearSVR()
+            regr =  GridSearchCV(LinearSVR(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "MLPRegressor"):
-            regr = MLPRegressor()
+            regr =  GridSearchCV(MLPRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "MultiTaskElasticNet"):
-            regr = MultiTaskElasticNet()
+            regr =  GridSearchCV(MultiTaskElasticNet(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "MultiTaskElasticNetCV"):
-            regr = MultiTaskElasticNetCV()
+            regr =  GridSearchCV(MultiTaskElasticNetCV(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "MultiTaskLasso"):
-            regr = MultiTaskLasso()
+            regr =  GridSearchCV(MultiTaskLasso(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "MultiTaskLassoCV"):
-            regr = MultiTaskLassoCV()
+            regr =  GridSearchCV(MultiTaskLassoCV(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "NuSVR"):
-            regr = NuSVR()
+            regr =  GridSearchCV(NuSVR(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "OrthogonalMatchingPursuit"):
-            regr = OrthogonalMatchingPursuit()
+            regr =  GridSearchCV(OrthogonalMatchingPursuit(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "OrthogonalMatchingPursuitCV"):
-            regr = OrthogonalMatchingPursuitCV()
+            regr =  GridSearchCV(OrthogonalMatchingPursuitCV(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "PLSCanonical"):
-            regr = PLSCanonical()
+            regr =  GridSearchCV(PLSCanonical(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "PLSRegression"):
-            regr = PLSRegression()
+            regr =  GridSearchCV(PLSRegression(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "PassiveAggressiveRegressor"):
-            regr = PassiveAggressiveRegressor()
+            regr =  GridSearchCV(PassiveAggressiveRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "RANSACRegressor"):
-            regr = RANSACRegressor()
+            regr =  GridSearchCV(RANSACRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "RadiusNeighborsRegressor"):
-            regr = RadiusNeighborsRegressor()
+            regr =  GridSearchCV(RadiusNeighborsRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "RandomForestRegressor"):
-            regr = RandomForestRegressor()
+            regr =  GridSearchCV(RandomForestRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "Ridge"):
-            regr = Ridge()
+            regr =  GridSearchCV(Ridge(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "RidgeCV"):
-            regr = RidgeCV()
+            regr =  GridSearchCV(RidgeCV(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "SGDRegressor"):
-            regr = SGDRegressor()
+            regr =  GridSearchCV(SGDRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "SVR"):
-            regr = SVR()
+            regr =  GridSearchCV(SVR(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "TheilSenRegressor"):
-            regr = TheilSenRegressor()
+            regr =  GridSearchCV(TheilSenRegressor(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "TransformedTargetRegressor"):
-            regr = TransformedTargetRegressor()
+            regr =  GridSearchCV(TransformedTargetRegressor(), parms, cv=cross_val, scoring=scoring)
         else:
             return {'algorithm': algorithm,
                     'data': X.tolist(),
@@ -383,12 +385,8 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
                 'cross_val': cross_val,
                 'WARNING': traceback.format_exc()}
 
-    clf.fit(X,y)
-    y_pred = clf.predict(X)
-    cm = confusion_matrix(y, y_pred)
-    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-    result['cm_data'] = cm.tolist()
-    result['classes'] = np.unique(y).tolist()
+    regr.fit(X,y)
+    y_pred = regr.predict(X)
 
     result["best_parms"] = regr.best_params_
     result["best_score"] = regr.best_score_

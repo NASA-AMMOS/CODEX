@@ -139,7 +139,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
         >>> (inputHash,hashList,template, labelHash) = codex_doctest.doctest_get_data()
     
-        >>> result = run_codex_classification(inputHash, False, labelHash, False, "AdaBoostClassifier", {"n_estimators":[10]})
+        >>> result = run_codex_classification(inputHash, False, labelHash, False, "AdaBoostClassifier", {"n_estimators":[10]}, 3)
         >>> print(result["WARNING"])
         None
     '''
@@ -184,7 +184,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
     result['eta'] = codex_time_log.getComputeTimeEstimate("classification", algorithm, samples)
 
-
+    # TODO - labels are currently cached under features
     labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
     if labelHash_dict is None:
         codex_system.codex_log("label hash {hash} not found. Returning!".format(hash=labelHash))
@@ -206,60 +206,61 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
                     'counts': json.dumps(count_dict),
                     'WARNING': "Label class has less samples than cross val score"}         
 
+    scoring = 'precision' # TODO - implement all scoring metrics here: https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
     try:
 
         if(algorithm == "AdaBoostClassifier"):
-            clf = GridSearchCV(AdaBoostClassifier(), parms, cv=cross_val, scoring='precision')
+            clf = GridSearchCV(AdaBoostClassifier(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "BaggingClassifier"):
-            clf =  GridSearchCV(BaggingClassifier(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(BaggingClassifier(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "BayesianGaussianMixture"):
-            clf =  GridSearchCV(BayesianGaussianMixture(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(BayesianGaussianMixture(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "BernoulliNB"):
-            clf =  GridSearchCV(BernoulliNB(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(BernoulliNB(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "CalibratedClassifierCV"):
-            clf =  GridSearchCV(CalibratedClassifierCV(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(CalibratedClassifierCV(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "ComplementNB"):
-            clf =  GridSearchCV(ComplementNB(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(ComplementNB(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "DecisionTreeClassifier"):
-            clf =  GridSearchCV(DecisionTreeClassifier(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(DecisionTreeClassifier(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "ExtraTreeClassifier"):
-            clf =  GridSearchCV(ExtraTreeClassifier(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(ExtraTreeClassifier(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "ExtraTreesClassifier"):
-            clf =  GridSearchCV(ExtraTreesClassifier(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(ExtraTreesClassifier(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "GaussianMixture"):
-            clf =  GridSearchCV(GaussianMixture(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(GaussianMixture(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "GaussianNB"):
-            clf =  GridSearchCV(GaussianNB(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(GaussianNB(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "GaussianProcessClassifier"):
-            clf =  GridSearchCV(GaussianProcessClassifier(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(GaussianProcessClassifier(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "GradientBoostingClassifier"):
-            clf =  GridSearchCV(GradientBoostingClassifier(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(GradientBoostingClassifier(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "KNeighborsClassifier"):
-            clf =  GridSearchCV(KNeighborsClassifier(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(KNeighborsClassifier(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "LabelPropagation"):
-            clf =  GridSearchCV(LabelPropagation(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(LabelPropagation(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "LabelSpreading"):
-            clf =  GridSearchCV(LabelSpreading(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(LabelSpreading(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "LinearDiscriminantAnalysis"):
-            clf =  GridSearchCV(LinearDiscriminantAnalysis(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(LinearDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "LogisticRegression"):
-            clf =  GridSearchCV(LogisticRegression(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(LogisticRegression(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "LogisticRegressionCV"):
-            clf =  GridSearchCV(LogisticRegressionCV(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(LogisticRegressionCV(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "MLPClassifier"):
-            clf =  GridSearchCV(MLPClassifier(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(MLPClassifier(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "MultinomialNB"):
-            clf =  GridSearchCV(MultinomialNB(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(MultinomialNB(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "NuSVC"):
-            clf =  GridSearchCV(NuSVC(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(NuSVC(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "QuadraticDiscriminantAnalysis"):
-            clf =  GridSearchCV(QuadraticDiscriminantAnalysis(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(QuadraticDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "RandomForestClassifier"):
-            clf =  GridSearchCV(RandomForestClassifier(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(RandomForestClassifier(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "SGDClassifier"):
-            clf =  GridSearchCV(SGDClassifier(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(SGDClassifier(), parms, cv=cross_val, scoring=scoring)
         elif(algorithm == "SVC"):
-            clf =  GridSearchCV(SVC(), parms, cv=cross_val, scoring='precision')
+            clf =  GridSearchCV(SVC(), parms, cv=cross_val, scoring=scoring)
         else:
             return {'algorithm': algorithm,
                     'data': X.tolist(),

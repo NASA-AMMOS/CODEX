@@ -158,7 +158,7 @@ def codex_template_scan(
 
     Examples:
     >>> featureList = ['L2/RetrievalResults/xco2']
-    >>> hashList = codex_read_data_api.codex_read_hd5(CODEX_ROOT + '/../../uploads/lnd_glint_subsample_10000.h5',featureList, "feature")
+    >>> hashList = codex_read_data_api.codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature")
     >>> inputHash = hashList[0]
     >>> returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     >>> data = returnHash['data']
