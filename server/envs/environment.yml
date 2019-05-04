@@ -6,6 +6,7 @@ channels:
 
 dependencies:
   - python=3.6
+  - coverage
   - h5py
   - numpy=1.14.3
   - scipy
