@@ -304,7 +304,8 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
                 inputHash = inputHash["hash"]
 
             # temporary TODO
-            labelHash = None
+            labelName = msg["labelName"]
+            labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
 
             if (inputHash is not None):
                 result = algorithm_call(inputHash, hashList, subsetHashName,

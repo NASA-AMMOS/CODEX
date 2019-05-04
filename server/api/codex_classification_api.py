@@ -22,7 +22,8 @@ import traceback
 import numpy as np
 from sklearn import model_selection
 from sklearn.model_selection import GridSearchCV
-import random
+import random, json
+from sklearn.metrics import confusion_matrix
 
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import BaggingClassifier
@@ -100,6 +101,7 @@ def ml_classification(
 
     try:
         result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms)
+        codex_system.codex_log("Completed classification run with warnings: {r}".format(r=result["WARNING"]))
     except BaseException:
         codex_system.codex_log(
             "Failed to run classification algorithm")
@@ -136,7 +138,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
         >>> (inputHash,hashList,template, labelHash) = codex_doctest.doctest_get_data()
     
-        >>> result = run_codex_classification(inputHash, False, labelHash[0], False, "AdaBoostClassifier", {"n_estimators":[10]})
+        >>> result = run_codex_classification(inputHash, False, labelHash, False, "AdaBoostClassifier", {"n_estimators":[10]})
         >>> print(result["WARNING"])
         None
     '''
@@ -159,8 +161,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     if subsetHash is not False and subsetHash is not None:
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log(
-                "ERROR: run_codex_classification - subsetHash returned None.")
+            codex_system.codex_log("ERROR: run_codex_classification - subsetHash returned None.")
             return None
 
     if downsampled is not False:
@@ -184,9 +185,9 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     result['eta'] = codex_time_log.getComputeTimeEstimate("classification", algorithm, samples)
 
 
-    labelHash_dict = codex_hash.findHashArray("hash", labelHash, "label")
+    labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
     if labelHash_dict is None:
-        codex_system.codex_log("label hash not found. Returning!")
+        codex_system.codex_log("label hash {hash} not found. Returning!".format(hash=labelHash))
         return {'algorithm': algorithm,
                 'downsample': downsampled,
                 'WARNING': "Label not found in database."}
@@ -197,8 +198,11 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         unique, counts = np.unique(y, return_counts=True)
         count_dict = dict(zip(unique, counts))
         if any(v < cv_count for v in count_dict.values()):
+            count_dict = dict(zip(unique.astype(str), counts.astype(str)))
             return {'algorithm': algorithm,
+                    'cv_count': cv_count,
                     'downsample': downsampled,
+                    'counts': json.dumps(count_dict),
                     'WARNING': "Label class has less samples than cross val score"}         
 
     try:
@@ -270,9 +274,13 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
                 'WARNING': traceback.format_exc()}
 
     clf.fit(X,y)
+    y_pred = clf.predict(X)
+    cm = confusion_matrix(y, y_pred)
+    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    result['cm_data'] = cm.tolist()
+    result['classes'] = np.unique(y).tolist()
 
     result["best_parms"] = clf.best_params_
-    result["score"] = clf.scorer_
     result["best_score"] = clf.best_score_
 
     # TODO - The front end should specify a save name for the model
@@ -284,18 +292,18 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         result['model_name'] = model_dict['name']
         result['model_hash'] = model_dict['hash']
 
-    if subsetHash is False:
-        if downsampled is False:
-            returnCodeString = "codex_regression_api.run_codex_classification('" + inputHash + "',False," + labelHash + ",False," + algorithm + ")\n"
-        else:
-            returnCodeString = "codex_regression_api.run_codex_classification('" + inputHash + "',False," + labelHash + "," + str(downsampled) + "," + algorithm + ")\n"
-    else:
-        if downsampled is False:
-            returnCodeString = "codex_regression_api.run_codex_classification('" + inputHash + "','" + subsetHash + "'," + labelHash + ",False," + algorithm + ")\n"
-        else:
-            returnCodeString = "codex_regression_api.run_codex_classification('" + inputHash + "','" + subsetHash + "'," + labelHash + "," + str(downsampled) + "," + algorithm + ")\n"
+    #if subsetHash is False:
+    #    if downsampled is False:
+    #        returnCodeString = "codex_regression_api.run_codex_classification('" + inputHash + "',False," + labelHash + ",False," + algorithm + ")\n"
+    #    else:
+    #        returnCodeString = "codex_regression_api.run_codex_classification('" + inputHash + "',False," + labelHash + "," + str(downsampled) + "," + algorithm + ")\n"
+    #else:
+    #    if downsampled is False:
+    #        returnCodeString = "codex_regression_api.run_codex_classification('" + inputHash + "','" + subsetHash + "'," + labelHash + ",False," + algorithm + ")\n"
+    #    else:
+    #        returnCodeString = "codex_regression_api.run_codex_classification('" + inputHash + "','" + subsetHash + "'," + labelHash + "," + str(downsampled) + "," + algorithm + ")\n"
 
-    codex_return_code.logReturnCode(returnCodeString)
+    #codex_return_code.logReturnCode(returnCodeString)
     
     
     endTime = time.time()
@@ -313,7 +321,10 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
-
+    #import doctest
+    #results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
+    #sys.exit(results.failed)
+    
+    (inputHash,hashList,template, labelHash) = codex_doctest.doctest_get_data()
+    result = run_codex_classification(inputHash, False, labelHash, False, "AdaBoostClassifier", {"n_estimators":[10]})
+    #print(result)

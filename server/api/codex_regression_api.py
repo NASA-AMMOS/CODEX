@@ -38,6 +38,7 @@ import numpy.polynomial.polynomial as poly
 from sklearn.metrics import log_loss
 from sklearn import model_selection
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import confusion_matrix
 
 from sklearn.linear_model import ARDRegression
 from sklearn.ensemble import AdaBoostRegressor
@@ -378,10 +379,14 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
                 'downsample': downsampled,
                 'WARNING': traceback.format_exc()}
 
-    regr.fit(X,y)
+    clf.fit(X,y)
+    y_pred = clf.predict(X)
+    cm = confusion_matrix(y, y_pred)
+    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    result['cm_data'] = cm.tolist()
+    result['classes'] = np.unique(y).tolist()
 
     result["best_parms"] = regr.best_params_
-    result["score"] = regr.scorer_
     result["best_score"] = regr.best_score_
 
     # TODO - The front end should specify a save name for the model

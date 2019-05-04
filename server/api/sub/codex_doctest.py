@@ -56,10 +56,10 @@ def doctest_get_data():
     templateHashDictionary = codex_hash.hashArray("template", template, "feature")
     templateHash = templateHashDictionary['hash']
 
-    labelHash = codex_read_data_api.codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv', ["labels"], "label")
-    labelHash = labelHash[0]
+    labelHash = codex_read_data_api.codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv', ["labels"], "feature")
+    labelHash = labelHash[0][0]
 
-    #codex_hash.printHashList("label")
+    #codex_hash.printHashList("feature")
     #hashDict = codex_hash.findHashArray("name", "labels", "label")
     #print(hashDict)
 
