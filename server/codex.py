@@ -52,8 +52,8 @@ fileChunks = []
 
 
 def algorithm_call(inputHash, hashList, subsetHashName, templateHashName,
-                   labelHash, algorithmType, algorithmName, downsampled, parms,
-                   result):
+                   algorithmType, algorithmName, downsampled, parms,
+                   result, msg):
     '''
     Inputs:
 
@@ -103,9 +103,16 @@ def algorithm_call(inputHash, hashList, subsetHashName, templateHashName,
             downsampled, parms, result)
 
     elif (algorithmType == "classification"):
+
+        # temporary TODO
+        labelName = msg["labelName"]
+        labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
+
+        cross_val = msg["cross_val"]
+
         result = codex_classification_api.ml_classification(
             inputHash, hashList, subsetHashName, labelHash, algorithmName,
-            downsampled, parms, result)
+            downsampled, parms, cross_val, result)
 
     elif (algorithmType == "segment"):
         result = codex_segmentation_api.ml_segmentation(
@@ -273,13 +280,6 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 
             templateHashName = None
             
-            #templateHashName = msg["dataTemplates"]
-            #if(templateHashName != []):
-            #    templateHashName = templateHashName[0]
-            #else:
-            #    templateHashName = None
-            
-
             hashList = codex_hash.feature2hashList(featureList)
             codex_return_code.logReturnCode(
                 "hashList = codex_hash.feature2hashList(featureList)")
@@ -303,15 +303,12 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
                     'codex_hash.hashArray("Merged", data, "feature")')
                 inputHash = inputHash["hash"]
 
-            # temporary TODO
-            labelName = msg["labelName"]
-            labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
 
             if (inputHash is not None):
                 result = algorithm_call(inputHash, hashList, subsetHashName,
-                                        templateHashName, labelHash,
+                                        templateHashName,
                                         algorithmType, algorithmName,
-                                        downsampled, parms, result)
+                                        downsampled, parms, result, msg)
             else:
                 codex_system.codex_log("Feature hash failure in ml_cluster")
                 result['message'] = "Feature hash failure in ml_cluster"
