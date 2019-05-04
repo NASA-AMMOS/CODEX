@@ -98,13 +98,18 @@ def algorithm_call(inputHash, hashList, subsetHashName, templateHashName,
             parms, result)
 
     elif (algorithmType == "regression"):
+
+        labelName = msg["labelName"]
+        labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
+
+        cross_val = msg["cross_val"]
+
         result = codex_regression_api.ml_regression(
             inputHash, hashList, subsetHashName, labelHash, algorithmName,
-            downsampled, parms, result)
+            downsampled, parms, cross_val, result)
 
     elif (algorithmType == "classification"):
 
-        # temporary TODO
         labelName = msg["labelName"]
         labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
 

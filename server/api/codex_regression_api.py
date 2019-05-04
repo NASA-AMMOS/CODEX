@@ -97,6 +97,7 @@ def ml_regression(
         algorithmName,
         downsampled,
         parms,
+        cross_val,
         result):
     '''
     Inputs:
@@ -127,7 +128,7 @@ def ml_regression(
         subsetHash = False
 
     try:
-        result =  run_codex_regression(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms)
+        result =  run_codex_regression(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, cross_val)
     except BaseException:
         codex_system.codex_log("Failed to run regression algorithm")
         result['message'] = "Failed to run regression algorithm"
@@ -136,7 +137,7 @@ def ml_regression(
 
     return result
 
-def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorithm, parms):
+def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorithm, parms, cross_val):
     '''
     Inputs:
         inputHash (string)  - hash value corresponding to the data to cluster
@@ -219,9 +220,8 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
     startTime = time.time()
     result = {'algorithm': algorithm,
               'downsample': downsampled,
+              'cross_val': cross_val,
               'WARNING': "None"}
-
-    cv_count = 5 # TODO - start getting from front end
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
@@ -264,6 +264,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
         codex_system.codex_log("label hash not found. Returning!")
         return {'algorithm': algorithm,
                 'downsample': downsampled,
+                'cross_val': cross_val,
                 'WARNING': "Label not found in database."}
     else:
         y = labelHash_dict['data']
@@ -271,14 +272,15 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
         unique, counts = np.unique(y, return_counts=True)
         count_dict = dict(zip(unique, counts))
-        if any(v < cv_count for v in count_dict.values()):
+        if any(v < cross_val for v in count_dict.values()):
             return {'algorithm': algorithm,
                     'downsample': downsampled,
+                    'cross_val': cross_val,
                     'WARNING': "Label class has less samples than cross val score"}  
 
     try:
         if(algorithm == "ARDRegression"):
-            regr =  GridSearchCV(ARDRegression(), parms, cv=cv_count, scoring='precision')
+            regr =  GridSearchCV(ARDRegression(), parms, cv=cross_val, scoring='precision')
         elif(algorithm == "AdaBoostRegressor"):
             regr = AdaBoostRegressor(n_estimators=parms["n_estimators"])
         elif(algorithm == "BaggingRegressor"):
@@ -370,6 +372,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
                     'data': X.tolist(),
                     'labels': y.tolist(),
                     'downsample': downsampled,
+                    'cross_val': cross_val,
                     'WARNING': algorithm + " not supported."}
 
     except:
@@ -377,6 +380,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
                 'data': X.tolist(),
                 'labels': y.tolist(),
                 'downsample': downsampled,
+                'cross_val': cross_val,
                 'WARNING': traceback.format_exc()}
 
     clf.fit(X,y)
