@@ -36,6 +36,7 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
 import codex_system
+import codex_doctest
 
 featureList = []
 subsetList = []
@@ -957,6 +958,5 @@ def saveModel(modelName, inputModel, modelType):
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+
+    codex_doctest.run_codex_doctest()

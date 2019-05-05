@@ -18,6 +18,8 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 returnedCodePath = CODEX_ROOT + "returned_code.py"
 contents = []
 
+import codex_doctest
+
 
 def makeReturnCode():
     '''
@@ -92,6 +94,5 @@ def dump_code_to_file():
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+
+    codex_doctest.run_codex_doctest()

@@ -130,10 +130,12 @@ def algorithm_call(msg, result):
         labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
 
         cross_val = msg["cross_val"]
+        search_type = msg["search_type"]
+        scoring = msg["scoring"]
 
         result = codex_regression_api.ml_regression(
             inputHash, hashList, subsetHashName, labelHash, algorithmName,
-            downsampled, parms, cross_val, result)
+            downsampled, parms, scoring, search_type, cross_val, result)
 
     elif (algorithmType == "classification"):
 
@@ -141,10 +143,12 @@ def algorithm_call(msg, result):
         labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
 
         cross_val = msg["cross_val"]
+        search_type = msg["search_type"]
+        scoring = msg["scoring"]
 
         result = codex_classification_api.ml_classification(
             inputHash, hashList, subsetHashName, labelHash, algorithmName,
-            downsampled, parms, cross_val, result)
+            downsampled, parms, scoring, search_type, cross_val, result)
 
     elif (algorithmType == "segment"):
         result = codex_segmentation_api.ml_segmentation(

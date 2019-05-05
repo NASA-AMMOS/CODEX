@@ -56,9 +56,9 @@ def ml_peak_detect(
     Outputs:
 
     Examples:
-    >>> (inputHash, hashList, template, labelHash) = codex_doctest.doctest_get_data()
+    >>> testData = codex_doctest.doctest_get_data()
 
-    #>>> result = ml_peak_detect(hashList, None, "peak_cwt", False, {'peak_width': 3, 'gap_threshold': 5, 'min_snr': 3, 'noise_perc': 10}, {})
+    #>>> result = ml_peak_detect(testData['hashList'], None, "peak_cwt", False, {'peak_width': 3, 'gap_threshold': 5, 'min_snr': 3, 'noise_perc': 10}, {})
 
     '''
     data = codex_hash.mergeHashResults(hashList)
@@ -236,10 +236,6 @@ def codex_scipy_signal_peak_cwt(
 
     Examples:
 
-        >>> featureList = ['L2/RetrievalResults/xco2']
-        >>> hashList = codex_read_data_api.codex_read_hd5(CODEX_ROOT + '/../../uploads/lnd_glint_subsample_10000.h5',featureList, "feature")
-        >>> results = codex_scipy_signal_peak_cwt(hashList[0], False, False, False, 20, 2, 1, 10)
-
     '''
     downsampledHash = None
     startTime = time.time()
@@ -339,9 +335,6 @@ def codex_matlab_findpeaks(
 
     Examples:
 
-    >>> featureList = ['L2/RetrievalResults/xco2']
-    >>> hashList = codex_read_data_api.codex_read_hd5(CODEX_ROOT + '/../../uploads/lnd_glint_subsample_10000.h5',featureList, "feature")
-    >>> results = codex_matlab_findpeaks(hashList[0], False, False, None, 1, 0, "rising", False, False, False)
     '''
     downsampledHash = None
     startTime = time.time()
@@ -415,6 +408,6 @@ def codex_matlab_findpeaks(
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+    codex_doctest.run_codex_doctest()
+
+    

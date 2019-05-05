@@ -53,13 +53,13 @@ def ml_segmentation(
     Outputs:
 
     Examples:
-    >>> (inputHash,hashList,template,labelHash) = codex_doctest.doctest_get_data()
+    >>> testData = codex_doctest.doctest_get_data()
 
     # Standard use
-    >>> result = ml_segmentation(inputHash, hashList, None, "felzenszwalb", False, {'scale': 3, 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {})
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {})
 
     # Scale cannot be cast
-    >>> result = ml_segmentation(inputHash, hashList, None, "felzenszwalb", False, {'scale': "string", 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {})
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': "string", 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {})
     scale parameter not set
     Traceback (most recent call last):
     ...
@@ -67,7 +67,7 @@ def ml_segmentation(
     <BLANKLINE>
 
     # Sigma cannot be cast
-    >>> result = ml_segmentation(inputHash, hashList, None, "felzenszwalb", False, {'scale': 3, 'sigma': "String", 'min_size': 10, 'downsampled': 500}, {})
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': "String", 'min_size': 10, 'downsampled': 500}, {})
     sigma parameter not set
     Traceback (most recent call last):
     ...
@@ -75,7 +75,7 @@ def ml_segmentation(
     <BLANKLINE>
 
     # min_size incorrectly called min_scale
-    >>> result = ml_segmentation(inputHash, hashList, None, "felzenszwalb", False, {'scale': 3, 'sigma': 7, 'min_scale': 10, 'downsampled': 500}, {})
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': 7, 'min_scale': 10, 'downsampled': 500}, {})
     min_size parameter not set
     Traceback (most recent call last):
     ...
@@ -83,7 +83,7 @@ def ml_segmentation(
     <BLANKLINE>
 
     # incorrect algorithmType
-    >>> result = ml_segmentation(inputHash, hashList, None, "felzenszwa", False, {'scale': 3, 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {})
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwa", False, {'scale': 3, 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {})
     Cannot find requested segmentation algorithm
     '''
     data = codex_hash.mergeHashResults(hashList)
@@ -210,9 +210,9 @@ def codex_segmentation_quickshift(
         Algorithm: http://scikit-image.org/docs/dev/api/skimage.segmentation.html#quickshift
 
     Examples:
-        >>> (inputHash,hashList,template,labelHash) = codex_doctest.doctest_get_data()
+        >>> testData = codex_doctest.doctest_get_data()
 
-        >>> segments = codex_segmentation_quickshift(inputHash, False, 50, 20.0, 5.0, 2.0)
+        >>> segments = codex_segmentation_quickshift(testData['inputHash'], False, 50, 20.0, 5.0, 2.0)
         Downsampling to 50 percent
     '''
     startTime = time.time()
@@ -304,9 +304,9 @@ def codex_segmentation_felzenszwalb(
 
     Examples:
 
-        >>> (inputHash,hashList,template,labelHash) = codex_doctest.doctest_get_data()
+        >>> testData = codex_doctest.doctest_get_data()
 
-        >>> segments = codex_segmentation_felzenszwalb(inputHash, False, 50, 3.0, 0.95, 3)
+        >>> segments = codex_segmentation_felzenszwalb(testData['inputHash'], False, 50, 3.0, 0.95, 3)
         Downsampling to 50 percent
     '''
 
@@ -370,6 +370,6 @@ def codex_segmentation_felzenszwalb(
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+    codex_doctest.run_codex_doctest()
+
+    

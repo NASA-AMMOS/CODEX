@@ -46,11 +46,11 @@ def ml_binning(
     Outputs:
 
     Examples:
-    >>> (inputHash, hashList, template, labelHash) = codex_doctest.doctest_get_data()
+    >>> testData = codex_doctest.doctest_get_data()
 
-    >>> result = ml_binning(inputHash, hashList, None, "stats", False, {}, {})
+    >>> result = ml_binning(testData['inputHash'], testData['hashList'], None, "stats", False, {}, {})
 
-    >>> result = ml_binning(inputHash, hashList, None, "stat", False, {}, {})
+    >>> result = ml_binning(testData['inputHash'], testData['hashList'], None, "stat", False, {}, {})
 
     '''
 
@@ -329,6 +329,8 @@ def codex_binned_stat(
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+    codex_doctest.run_codex_doctest()
+
+
+
+    
