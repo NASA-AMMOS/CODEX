@@ -21,4 +21,6 @@ export const SELECTIONS_BRUSH_COLOR = "#ff4500";
 export const SCATTER_GRAPH = "Scatter";
 export const HEATMAP_GRAPH = "Heatmap";
 
+export const SESSIONS_WINDOW = "SESSIONS_WINDOW";
+
 export const GRAPH_TYPES = [SCATTER_GRAPH, HEATMAP_GRAPH];

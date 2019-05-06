@@ -20,6 +20,7 @@ import ClassifierResults from "components/Classifiers/ClassifierResults";
 import * as regressionTypes from "constants/regressionTypes";
 import RegressionsOverview from "components/Regressions/RegressionsOverview";
 import RegressionResults from "components/Regressions/RegressionResults";
+import Sessions from "components/Sessions/Sessions";
 
 function getTwoAxisGraphTitle(win) {
     const selectedFeatures = win.data.get("data")[0];
@@ -55,12 +56,15 @@ function getWindowTitle(win) {
             return "Regression";
         case regressionTypes.REGRESSION_RESULTS_WINDOW:
             return "Regression Results";
+        case uiTypes.SESSIONS_WINDOW:
+            return "Sessions";
         default:
             return "";
     }
 }
 
 function getWindowContent(win) {
+    console.log(ClassifiersOverview, Sessions);
     switch (win.windowType) {
         case uiTypes.SCATTER_GRAPH:
             return <ScatterGraph data={win.data} />;
@@ -94,6 +98,8 @@ function getWindowContent(win) {
             );
         case regressionTypes.REGRESSION_RESULTS_WINDOW:
             return <RegressionResults requests={win.requests} runParams={win.runParams} />;
+        case uiTypes.SESSIONS_WINDOW:
+            return <Sessions />;
     }
 }
 

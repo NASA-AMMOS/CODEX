@@ -1,0 +1,19 @@
+.sessions {
+    overflow: scroll;
+}
+
+.fileName {
+    font-weight: bold;
+}
+
+div:not(:first-child) > .fileName {
+    padding-top: 1em;
+}
+
+.sessionName {
+    cursor: pointer;
+}
+
+.sessionName:hover {
+    color: rgb(238, 22, 60);
+}
