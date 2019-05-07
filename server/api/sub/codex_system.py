@@ -19,6 +19,7 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 import codex_hash
 import codex_yaml
 import codex_return_code
+import codex_doctest
 
 def get_featureList(featureList):
     '''
@@ -206,6 +207,5 @@ def codex_server_memory_check(verbose=False):
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+    codex_doctest.run_codex_doctest()
+

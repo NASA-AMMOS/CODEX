@@ -25,6 +25,8 @@ from os.path import isfile, join, isdir
 logPath = CODEX_ROOT + "timeLogs/"
 timeLogs = {}
 
+import codex_doctest
+
 
 def logTime(domain, algorithm, time, samples, features):
     '''
@@ -158,7 +160,5 @@ def getComputeTimeEstimate(domain, algorithm, inputSamples):
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+    codex_doctest.run_codex_doctest()
 

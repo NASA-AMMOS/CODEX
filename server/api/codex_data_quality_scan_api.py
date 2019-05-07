@@ -36,9 +36,6 @@ import codex_read_data_api
 import codex_return_code
 import codex_system
 
-DEBUG = False
-
-
 def ml_quality_scan(
         inputHash,
         hashList,
@@ -53,11 +50,11 @@ def ml_quality_scan(
     Outputs:
 
     Examples:
-    >>> (inputHash, hashList, template, labelHash) = codex_doctest.doctest_get_data()
+    >>> testData = codex_doctest.doctest_get_data()
 
-    >>> result = ml_quality_scan(inputHash, hashList, None, "oddities", False, {'sigma': 3, 'inside': True}, {})
+    >>> result = ml_quality_scan(testData['inputHash'], testData['hashList'], None, "oddities", False, {'sigma': 3, 'inside': True}, {})
 
-    >>> result = ml_quality_scan(inputHash, hashList, None, "sigma_data", False, {'sigma': 3, 'inside': True}, {})
+    >>> result = ml_quality_scan(testData['inputHash'], testData['hashList'], None, "sigma_data", False, {'sigma': 3, 'inside': True}, {})
 
     '''
 
@@ -133,9 +130,9 @@ def codex_count_oddities(inputHash, subsetHash):
     Examples:
 
     # integer example
-    >>> (inputHash, hashList, template, labelHash) = codex_doctest.doctest_get_data()
+    >>> testData = codex_doctest.doctest_get_data()
 
-    #>>> dictionary = codex_count_oddities(inputHash, False)
+    #>>> dictionary = codex_count_oddities(testData['inputHash'], False)
 
     >>> dictionary = codex_count_oddities(None,False)
     Error: codex_count_oddities: Hash not found
@@ -247,13 +244,8 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside):
     Examples:
 
     # collect data inside sigma range
-    #>>> (inputHash, hashList, template, labelHash) = codex_doctest.doctest_get_data()
-    #Number of features: 2
-    #Merging: L2/RetrievalGeometry/retrieval_latitude/
-    #Merging: L2/RetrievalResults/xco2
-    #>>> info = codex_get_sigma_data(hashList, False, 5, True)
-    #>>> print(info["sigma_low"])
-    #-44.557551384
+    >>> testData = codex_doctest.doctest_get_data()
+
     '''
     startTime = time.time()
 
@@ -341,13 +333,10 @@ def codex_column_correlation(inputHash, subsetHash):
 
     Examples:
 
-        >>> (result, hashList, template, labelHash) = codex_doctest.doctest_get_data()
+        >>> testData = codex_doctest.doctest_get_data()
 
-        >>> results = codex_column_correlation(result, False)
-        >>> print(results["r2_matrix"])
-        [[1.0, -2.853161795732126, -1.2314288431538247, -2.9932817173905875], [-74559.32983956594, 1.0, -74789.74856816106, -30.95240231566171], [-1.2294553183314414, -2.861651124403274, 1.0, -2.9940460016660024], [-1146652.7906432184, -473.1495056418164, -1147887.4694566594, 1.0]]
-        >>> print(results["pearson_matrix"])
-        [[1.0, 0.2104196188909763, -0.11522009527930019, -0.15802735886280825], [0.2104196188909763, 1.0, -0.27030929093357325, -0.06764407021006201], [-0.11522009527930019, -0.27030929093357325, 1.0, 0.05400803814087872], [-0.15802735886280825, -0.06764407021006201, 0.05400803814087872, 1.0]]
+        >>> results = codex_column_correlation(testData['inputHash'], False)
+
         '''
     startTime = time.time()
 
@@ -423,9 +412,9 @@ def codex_column_threshold(
 
     Examples:
 
-        >>> (result,hashList,template, labelHash) = codex_doctest.doctest_get_data()
+        >>> testData = codex_doctest.doctest_get_data()
 
-        >>> dictionary = codex_column_threshold(result, False, 0, 0.000394)
+        >>> dictionary = codex_column_threshold(testData['inputHash'], False, 0, 0.000394)
         >>> print(dictionary["threshold_max"])
         0.000394
 
@@ -484,6 +473,7 @@ def codex_column_threshold(
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+    codex_doctest.run_codex_doctest()
+
+
+    

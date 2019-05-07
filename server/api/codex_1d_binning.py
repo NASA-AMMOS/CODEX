@@ -46,11 +46,11 @@ def ml_binning(
     Outputs:
 
     Examples:
-    >>> (inputHash, hashList, template, labelHash) = codex_doctest.doctest_get_data()
+    >>> testData = codex_doctest.doctest_get_data()
 
-    >>> result = ml_binning(inputHash, hashList, None, "stats", False, {}, {})
+    >>> result = ml_binning(testData['inputHash'], testData['hashList'], None, "stats", False, {}, {})
 
-    >>> result = ml_binning(inputHash, hashList, None, "stat", False, {}, {})
+    >>> result = ml_binning(testData['inputHash'], testData['hashList'], None, "stat", False, {}, {})
 
     '''
 
@@ -150,9 +150,9 @@ def codex_binned_stat(
         Hash not found. Returning!
 
         >>> featureList = ['L2/RetrievalResults/xco2']
-        >>> hashList = codex_read_data_api.codex_read_hd5(CODEX_ROOT + '../../uploads/lnd_glint_subsample_10000.h5',featureList, "feature")
+        >>> hashList = codex_read_data_api.codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature")
 
-        >>> inputHash = hashList[0]
+        >>> inputHash = hashList[0][0]
         >>> results = codex_binned_stat(inputHash)
 
         #print(results)
@@ -329,6 +329,8 @@ def codex_binned_stat(
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+    codex_doctest.run_codex_doctest()
+
+
+
+    

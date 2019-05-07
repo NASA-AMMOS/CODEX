@@ -13,8 +13,8 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 # Python Libraries
-from numpy.random import randint
 import numpy as np
+import random
 
 # CODEX Support
 import codex_hash
@@ -37,12 +37,16 @@ def doctest_get_data():
         doctest function to streamline data ingestion for use
         in clustering unit tests
 
-    Examples:
-        >>> (result, hashList, template, labelHash) = doctest_get_data()
+        TODO - labels are currently stashed in features due to front-end limitations.  
+                Need to convert here when they get moved to their own class.
 
-        >>> print(result)
-        0d07e87434cda0012b55ae432cb612367c6a82c1
+    Examples:
+        >>> testData = doctest_get_data()
+
+        >>> print(testData['inputHash'])
+        34a8c666b260c3968ad2a2010eef03fe4f80e21e
     '''
+
     featureList = ['TiO2', 'FeOT', 'SiO2', 'Total']
     hashList, featureList = codex_read_data_api.codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv', featureList, "feature")
     
@@ -56,21 +60,31 @@ def doctest_get_data():
     templateHashDictionary = codex_hash.hashArray("template", template, "feature")
     templateHash = templateHashDictionary['hash']
 
-    labelHash = codex_read_data_api.codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv', ["labels"], "label")
-    labelHash = labelHash[0]
+    labelHash = codex_read_data_api.codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv', ["labels"], "feature")
+    labelHash = labelHash[0][0]
 
-    #codex_hash.printHashList("label")
-    #hashDict = codex_hash.findHashArray("name", "labels", "label")
-    #print(hashDict)
+    regrLabelData = [] 
+    random.seed(50)
 
-    return (inputHash['hash'], hashList, templateHash, labelHash)
+    for j in range(samples): 
+        regrLabelData.append(random.randint(0, 10))
+
+    regrLabelData = np.asarray(regrLabelData)
+    regrLabelDictionary = codex_hash.hashArray("regrLabelHash", regrLabelData, "feature")
+    regrLabelHash = regrLabelDictionary['hash']
+
+    return {"inputHash":inputHash['hash'], "hashList":hashList, "templateHash": templateHash, "classLabelHash":labelHash, "regrLabelHash": regrLabelHash}
     
+def run_codex_doctest():
+
+    import doctest
+    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
+    sys.exit(results.failed)
 
 if __name__ == "__main__":
 
-    #import doctest
-    #results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
-    #sys.exit(results.failed)
+    run_codex_doctest()
 
-    doctest_get_data()
+
+
 

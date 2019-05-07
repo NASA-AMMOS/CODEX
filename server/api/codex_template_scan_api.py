@@ -50,22 +50,22 @@ def ml_template_scan(
     Outputs:
 
     Examples:
-    >>> (inputHash, hashList, template, labelHash) = codex_doctest.doctest_get_data()
+    >>> testData = codex_doctest.doctest_get_data()
 
     # Missing algorithmType
-    >>> result = ml_template_scan(inputHash, hashList, None, None, "temp", False, {'num_templates': 1, 'scan_jump': 50}, {})
+    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "temp", False, {'num_templates': 1, 'scan_jump': 50}, {})
     Template hash name not given
 
     # Standard usage
-    >>> result = ml_template_scan(inputHash, hashList, None, None, "template", False, {'num_templates': 1, 'scan_jump': 50}, {})
+    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': 50}, {})
     Template hash name not given
 
     # Incorrect num_templates
-    >>> result = ml_template_scan(inputHash, hashList, None, None, "template", False, {'num_templates': "String", 'scan_jump': 50}, {})
+    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': "String", 'scan_jump': 50}, {})
     Template hash name not given
 
     # Incorrect scan_jump
-    >>> result = ml_template_scan(inputHash, hashList, None, None, "template", False, {'num_templates': 1, 'scan_jump': "String"}, {})
+    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': "String"}, {})
     Template hash name not given
     '''
 
@@ -157,26 +157,7 @@ def codex_template_scan(
         indexes  (array)           - mask of template matches. 0 if not similar, 1 if in best template match, 2 if in next, etc.
 
     Examples:
-    >>> featureList = ['L2/RetrievalResults/xco2']
-    >>> hashList = codex_read_data_api.codex_read_hd5(CODEX_ROOT + '/../../uploads/lnd_glint_subsample_10000.h5',featureList, "feature")
-    >>> inputHash = hashList[0]
-    >>> returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
-    >>> data = returnHash['data']
-    >>> minimum = np.amin(data)
-    >>> maximum = np.amax(data)
-    >>> print("Minimum: " + str('%.010f' % minimum))
-    Minimum: 0.0003669114
-    >>> print("Maximum: " + str('%.010f' % maximum))
-    Maximum: 0.0004415099
-    >>> template = np.random.random_integers(minimum, maximum, 100)
-    >>> templateHashDictionary = codex_hash.hashArray("template", template, "feature")
-    >>> templateHash = templateHashDictionary['hash']
-    >>> output = codex_template_scan(inputHash,False,False, templateHash, 1, 1000)
-    >>> print(len(output["indexes"]))
-    10000
 
-    >>> output = codex_template_scan(None,False,False, templateHash, 1, 1000)
-    Error: codex_template_scan: inputHash not found.
     '''
     startTime = time.time()
 
@@ -252,6 +233,4 @@ def codex_template_scan(
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+    codex_doctest.run_codex_doctest()

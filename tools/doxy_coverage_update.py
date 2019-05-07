@@ -363,22 +363,22 @@ if __name__ == "__main__":
             print("Unit Tests Failed.")
             sys.exit(rc)
 	   
-        rc = pep8Report(coveragePathList, PROJECT_ROOT + "/website/pep8/")
+        rc = pep8Report(coveragePathList, PROJECT_ROOT + "../tools/website/pep8/")
         if(rc != 0 and failonfail == True):
             print("Pep8 Report Failed.")
             sys.exit(rc)
 
-        makePep8Index(PROJECT_ROOT + '/website/pep8/')
+        makePep8Index(PROJECT_ROOT + '../tools/website/pep8/')
         
     if(args.websitePath is not None):
         if(args.doxyFilePath is not None):
             contentPath = getDoxyOutputPath(args.doxyFilePath)
             updateWebsite(contentPath,args.websitePath + "/docs/")
 
-        updateWebsite(PROJECT_ROOT + "/website/cov/",args.websitePath + "/cov/")
-        updateWebsite(PROJECT_ROOT + "/website/pep8/", args.websitePath + "/pep8/")
-        updateWebsite(PROJECT_ROOT + "/website/contacts/", args.websitePath + "/contacts/")
-        updateWebsite(PROJECT_ROOT + "/website/", args.websitePath + "/")
+        updateWebsite(PROJECT_ROOT + "../tools/website/cov/",args.websitePath + "/cov/")
+        updateWebsite(PROJECT_ROOT + "../tools/website/pep8/", args.websitePath + "/pep8/")
+        updateWebsite(PROJECT_ROOT + "../tools/website/contacts/", args.websitePath + "/contacts/")
+        updateWebsite(PROJECT_ROOT + "../tools/website/", args.websitePath + "/")
 
     if(args.doctestPath is not None):
         doctestFolder(args.doctestPath)

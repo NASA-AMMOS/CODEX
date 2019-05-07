@@ -14,11 +14,11 @@ import numpy as np
 
 # Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 # CODEX library imports
 import codex_system
 import codex_hash
+import codex_doctest
 
 def downsample(inputArray, samples=0, percentage=0.0):
     '''
@@ -109,6 +109,5 @@ def downsample(inputArray, samples=0, percentage=0.0):
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+
+    codex_doctest.run_codex_doctest()

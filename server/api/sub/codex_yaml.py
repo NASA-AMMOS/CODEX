@@ -12,6 +12,7 @@ import sys
 import yaml
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
+import codex_doctest
 
 def codex_read_yaml(filepath):
     '''
@@ -25,7 +26,7 @@ def codex_read_yaml(filepath):
     This is a unit test
     '''
     with open(filepath, 'r') as ymlfile:
-        cfg = yaml.load(ymlfile)
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
         return cfg
 
 
@@ -52,6 +53,4 @@ def get_guidance_text_block(page, section):
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+    codex_doctest.run_codex_doctest()

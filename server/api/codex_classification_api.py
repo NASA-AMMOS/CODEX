@@ -22,7 +22,9 @@ import traceback
 import numpy as np
 from sklearn import model_selection
 from sklearn.model_selection import GridSearchCV
-import random
+from sklearn.model_selection import RandomizedSearchCV
+import random, json
+from sklearn.metrics import confusion_matrix
 
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import BaggingClassifier
@@ -64,9 +66,6 @@ import codex_dimmension_reduction_api
 import codex_system
 import codex_labels
 
-DEBUG = False
-
-
 def ml_classification(
         inputHash,
         hashList,
@@ -75,6 +74,9 @@ def ml_classification(
         algorithmName,
         downsampled,
         parms,
+        scoring,
+        search_type,
+        cross_val,
         result):
     '''
     Inputs:
@@ -99,7 +101,8 @@ def ml_classification(
         subsetHash = False
 
     try:
-        result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms)
+        result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring)
+        codex_system.codex_log("Completed classification run with warnings: {r}".format(r=result["WARNING"]))
     except BaseException:
         codex_system.codex_log(
             "Failed to run classification algorithm")
@@ -109,7 +112,7 @@ def ml_classification(
 
     return result
 
-def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algorithm,  parms):
+def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algorithm,  parms, search_type, cross_val, scoring):
     '''
     Inputs:
         inputHash (string)  - hash value corresponding to the data to cluster
@@ -131,21 +134,23 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
             data (numpy.ndarray)     - (samples, features) array of features to cluster
             downsample (int)         - number of data points used in quicklook
 
+    Notes:
+        Scoring Metrics: https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
 
     Examples:
 
-        >>> (inputHash,hashList,template, labelHash) = codex_doctest.doctest_get_data()
-    
-        >>> result = run_codex_classification(inputHash, False, labelHash[0], False, "AdaBoostClassifier", {"n_estimators":[10]})
+        >>> testData = codex_doctest.doctest_get_data()
+
+        >>> result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'precision')
         >>> print(result["WARNING"])
         None
     '''
     startTime = time.time()
     result = {'algorithm': algorithm,
               'downsample': downsampled,
+              'cross_val': cross_val,
+              'scoring': scoring,
               'WARNING': "None"}
-
-    cv_count = 5 # TODO - start getting from front end
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
@@ -159,15 +164,11 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     if subsetHash is not False and subsetHash is not None:
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log(
-                "ERROR: run_codex_classification - subsetHash returned None.")
+            codex_system.codex_log("ERROR: run_codex_classification - subsetHash returned None.")
             return None
 
     if downsampled is not False:
-        codex_system.codex_log(
-            "Downsampling to " +
-            str(downsampled) +
-            " percent")
+        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled)
 
@@ -180,15 +181,16 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     result['X'] = X.tolist()
     samples = len(data)
 
-
     result['eta'] = codex_time_log.getComputeTimeEstimate("classification", algorithm, samples)
 
-
-    labelHash_dict = codex_hash.findHashArray("hash", labelHash, "label")
+    # TODO - labels are currently cached under features
+    labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
     if labelHash_dict is None:
-        codex_system.codex_log("label hash not found. Returning!")
+        codex_system.codex_log("label hash {hash} not found. Returning!".format(hash=labelHash))
         return {'algorithm': algorithm,
                 'downsample': downsampled,
+                'cross_val': cross_val,
+                'scoring': scoring,
                 'WARNING': "Label not found in database."}
     else:
         y = labelHash_dict['data']
@@ -196,83 +198,225 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
         unique, counts = np.unique(y, return_counts=True)
         count_dict = dict(zip(unique, counts))
-        if any(v < cv_count for v in count_dict.values()):
+        if any(v < cross_val for v in count_dict.values()):
+            count_dict = dict(zip(unique.astype(str), counts.astype(str)))
             return {'algorithm': algorithm,
+                    'cross_val': cross_val,
                     'downsample': downsampled,
+                    'counts': json.dumps(count_dict),
+                    'scoring': scoring,
                     'WARNING': "Label class has less samples than cross val score"}         
 
     try:
 
         if(algorithm == "AdaBoostClassifier"):
-            clf = GridSearchCV(AdaBoostClassifier(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(AdaBoostClassifier(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf = GridSearchCV(AdaBoostClassifier(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "BaggingClassifier"):
-            clf =  GridSearchCV(BaggingClassifier(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(BaggingClassifier(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(BaggingClassifier(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "BayesianGaussianMixture"):
-            clf =  GridSearchCV(BayesianGaussianMixture(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(BayesianGaussianMixture(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(BayesianGaussianMixture(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "BernoulliNB"):
-            clf =  GridSearchCV(BernoulliNB(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(BernoulliNB(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(BernoulliNB(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "CalibratedClassifierCV"):
-            clf =  GridSearchCV(CalibratedClassifierCV(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(CalibratedClassifierCV(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(CalibratedClassifierCV(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "ComplementNB"):
-            clf =  GridSearchCV(ComplementNB(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(ComplementNB(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(ComplementNB(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "DecisionTreeClassifier"):
-            clf =  GridSearchCV(DecisionTreeClassifier(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(DecisionTreeClassifier(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(DecisionTreeClassifier(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "ExtraTreeClassifier"):
-            clf =  GridSearchCV(ExtraTreeClassifier(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(ExtraTreeClassifier(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(ExtraTreeClassifier(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "ExtraTreesClassifier"):
-            clf =  GridSearchCV(ExtraTreesClassifier(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(ExtraTreesClassifier(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(ExtraTreesClassifier(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "GaussianMixture"):
-            clf =  GridSearchCV(GaussianMixture(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(GaussianMixture(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(GaussianMixture(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "GaussianNB"):
-            clf =  GridSearchCV(GaussianNB(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(GaussianNB(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(GaussianNB(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "GaussianProcessClassifier"):
-            clf =  GridSearchCV(GaussianProcessClassifier(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(GaussianProcessClassifier(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(GaussianProcessClassifier(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "GradientBoostingClassifier"):
-            clf =  GridSearchCV(GradientBoostingClassifier(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(GradientBoostingClassifier(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(GradientBoostingClassifier(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "KNeighborsClassifier"):
-            clf =  GridSearchCV(KNeighborsClassifier(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(KNeighborsClassifier(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(KNeighborsClassifier(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "LabelPropagation"):
-            clf =  GridSearchCV(LabelPropagation(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(LabelPropagation(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(LabelPropagation(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "LabelSpreading"):
-            clf =  GridSearchCV(LabelSpreading(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(LabelSpreading(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(LabelSpreading(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "LinearDiscriminantAnalysis"):
-            clf =  GridSearchCV(LinearDiscriminantAnalysis(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(LinearDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(LinearDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "LogisticRegression"):
-            clf =  GridSearchCV(LogisticRegression(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(LogisticRegression(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(LogisticRegression(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "LogisticRegressionCV"):
-            clf =  GridSearchCV(LogisticRegressionCV(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(LogisticRegressionCV(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(LogisticRegressionCV(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "MLPClassifier"):
-            clf =  GridSearchCV(MLPClassifier(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(MLPClassifier(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(MLPClassifier(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "MultinomialNB"):
-            clf =  GridSearchCV(MultinomialNB(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(MultinomialNB(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(MultinomialNB(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "NuSVC"):
-            clf =  GridSearchCV(NuSVC(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(NuSVC(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(NuSVC(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "QuadraticDiscriminantAnalysis"):
-            clf =  GridSearchCV(QuadraticDiscriminantAnalysis(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(QuadraticDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(QuadraticDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "RandomForestClassifier"):
-            clf =  GridSearchCV(RandomForestClassifier(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(RandomForestClassifier(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(RandomForestClassifier(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "SGDClassifier"):
-            clf =  GridSearchCV(SGDClassifier(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(SGDClassifier(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(SGDClassifier(), parms, cv=cross_val, scoring=scoring)
+
         elif(algorithm == "SVC"):
-            clf =  GridSearchCV(SVC(), parms, cv=cv_count, scoring='precision')
+
+            if search_type == "random":
+                clf = RandomizedSearchCV(SVC(), parms, cv=cross_val, scoring=scoring)
+            else:
+                clf =  GridSearchCV(SVC(), parms, cv=cross_val, scoring=scoring)
+
         else:
             return {'algorithm': algorithm,
                     'data': X.tolist(),
                     'labels': y.tolist(),
                     'downsample': downsampled,
+                    'cross_val': cross_val,
+                    'scoring': scoring,
                     'WARNING': algorithm + " not supported."}
 
     except:
         return {'algorithm': algorithm,
                 'data': X.tolist(),
                 'labels': y.tolist(),
+                'cross_val': cross_val,
                 'downsample': downsampled,
+                'scoring': scoring,
                 'WARNING': traceback.format_exc()}
 
     clf.fit(X,y)
+    y_pred = clf.predict(X)
+    cm = confusion_matrix(y, y_pred)
+    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    result['cm_data'] = cm.tolist()
+    result['classes'] = np.unique(y).tolist()
 
     result["best_parms"] = clf.best_params_
-    result["score"] = clf.scorer_
     result["best_score"] = clf.best_score_
 
     # TODO - The front end should specify a save name for the model
@@ -284,17 +428,8 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         result['model_name'] = model_dict['name']
         result['model_hash'] = model_dict['hash']
 
-    if subsetHash is False:
-        if downsampled is False:
-            returnCodeString = "codex_regression_api.run_codex_classification('" + inputHash + "',False," + labelHash + ",False," + algorithm + ")\n"
-        else:
-            returnCodeString = "codex_regression_api.run_codex_classification('" + inputHash + "',False," + labelHash + "," + str(downsampled) + "," + algorithm + ")\n"
-    else:
-        if downsampled is False:
-            returnCodeString = "codex_regression_api.run_codex_classification('" + inputHash + "','" + subsetHash + "'," + labelHash + ",False," + algorithm + ")\n"
-        else:
-            returnCodeString = "codex_regression_api.run_codex_classification('" + inputHash + "','" + subsetHash + "'," + labelHash + "," + str(downsampled) + "," + algorithm + ")\n"
 
+    returnCodeString = "codex_regression_api.run_codex_classification('{inputHash}','{subsetHash}',{labelHash},{downsampled},{algorithm})\n".format(inputHash=inputHash, subsetHash=subsetHash, labelHash=labelHash, downsampled=downsampled, algorithm=algorithm)
     codex_return_code.logReturnCode(returnCodeString)
     
     
@@ -313,7 +448,5 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+    codex_doctest.run_codex_doctest()
 

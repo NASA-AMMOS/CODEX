@@ -51,9 +51,7 @@ verbose = True
 fileChunks = []
 
 
-def algorithm_call(inputHash, hashList, subsetHashName, templateHashName,
-                   labelHash, algorithmType, algorithmName, downsampled, parms,
-                   result):
+def algorithm_call(msg, result):
     '''
     Inputs:
 
@@ -62,6 +60,35 @@ def algorithm_call(inputHash, hashList, subsetHashName, templateHashName,
     Examples:
 
     '''
+
+    parms = msg['parameters']
+    downsampled = msg["downsampled"]
+    algorithmName = msg['algorithmName']
+    algorithmType = msg["algorithmType"]
+
+    featureList = msg["dataFeatures"]
+    featureList = codex_system.get_featureList(featureList)
+
+    subsetHashName = msg["dataSelections"]
+    if (subsetHashName != []):
+        subsetHashName = subsetHashName[0]
+    else:
+        subsetHashName = None
+
+    hashList = codex_hash.feature2hashList(featureList)
+    codex_return_code.logReturnCode("hashList = codex_hash.feature2hashList(featureList)")
+
+    data = codex_hash.mergeHashResults(hashList)
+    codex_return_code.logReturnCode("data = codex_hash.mergeHashResults(hashList)")
+    inputHash = codex_hash.hashArray('Merged', data, "feature")
+
+    if (inputHash != None):
+        codex_return_code.logReturnCode('codex_hash.hashArray("Merged", data, "feature")')
+        inputHash = inputHash["hash"]
+
+    if (downsampled != False):
+        downsampled = int(downsampled)
+
     if (algorithmType == "binning"):
         result = codex_1d_binning.ml_binning(inputHash, hashList,
                                              subsetHashName, algorithmName,
@@ -98,14 +125,30 @@ def algorithm_call(inputHash, hashList, subsetHashName, templateHashName,
             parms, result)
 
     elif (algorithmType == "regression"):
+
+        labelName = msg["labelName"]
+        labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
+
+        cross_val = msg["cross_val"]
+        search_type = msg["search_type"]
+        scoring = msg["scoring"]
+
         result = codex_regression_api.ml_regression(
             inputHash, hashList, subsetHashName, labelHash, algorithmName,
-            downsampled, parms, result)
+            downsampled, parms, scoring, search_type, cross_val, result)
 
     elif (algorithmType == "classification"):
+
+        labelName = msg["labelName"]
+        labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
+
+        cross_val = msg["cross_val"]
+        search_type = msg["search_type"]
+        scoring = msg["scoring"]
+
         result = codex_classification_api.ml_classification(
             inputHash, hashList, subsetHashName, labelHash, algorithmName,
-            downsampled, parms, result)
+            downsampled, parms, scoring, search_type, cross_val, result)
 
     elif (algorithmType == "segment"):
         result = codex_segmentation_api.ml_segmentation(
@@ -114,8 +157,7 @@ def algorithm_call(inputHash, hashList, subsetHashName, templateHashName,
 
     elif (algorithmType == "template_scan"):
         result = codex_template_scan_api.ml_template_scan(
-            inputHash, hashList, subsetHashName, templateHashName,
-            algorithmName, downsampled, parms, result)
+            inputHash, hashList, subsetHashName, None, algorithmName, downsampled, parms, result)
 
     else:
         result['message'] = "Cannot parse algorithmType"
@@ -259,67 +301,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 
         if (routine == 'algorithm'):
 
-            hashList = []
-
-            featureList = msg["dataFeatures"]
-            featureList = codex_system.get_featureList(featureList)
-
-            subsetHashName = msg["dataSelections"]
-            if (subsetHashName != []):
-                subsetHashName = subsetHashName[0]
-            else:
-                subsetHashName = None
-
-
-            templateHashName = None
-            
-            #templateHashName = msg["dataTemplates"]
-            #if(templateHashName != []):
-            #    templateHashName = templateHashName[0]
-            #else:
-            #    templateHashName = None
-            
-
-            hashList = codex_hash.feature2hashList(featureList)
-            codex_return_code.logReturnCode(
-                "hashList = codex_hash.feature2hashList(featureList)")
-
-            parms = msg['parameters']
-            downsampled = msg["downsampled"]
-
-            if (downsampled != False):
-                downsampled = int(downsampled)
-
-            algorithmName = msg['algorithmName']
-            algorithmType = msg["algorithmType"]
-
-            data = codex_hash.mergeHashResults(hashList)
-            codex_return_code.logReturnCode(
-                "data = codex_hash.mergeHashResults(hashList)")
-            inputHash = codex_hash.hashArray('Merged', data, "feature")
-
-            if (inputHash != None):
-                codex_return_code.logReturnCode(
-                    'codex_hash.hashArray("Merged", data, "feature")')
-                inputHash = inputHash["hash"]
-
-            # temporary TODO
-            labelHash = None
-
-            if (inputHash is not None):
-                result = algorithm_call(inputHash, hashList, subsetHashName,
-                                        templateHashName, labelHash,
-                                        algorithmType, algorithmName,
-                                        downsampled, parms, result)
-            else:
-                codex_system.codex_log("Feature hash failure in ml_cluster")
-                result['message'] = "Feature hash failure in ml_cluster"
-
-            # If anything failed above, the result will be None.
-            # TODO - Replace this with an error handling scheme at some point
-            if (result is None):
-                result = {}
-            
+            result = algorithm_call(msg, result)
             result['identification'] = msg['identification']
 
         elif (routine == 'guidance'):

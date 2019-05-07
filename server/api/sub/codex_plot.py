@@ -9,6 +9,7 @@ import numpy as np
 import os
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
+import codex_doctest
 
 def getColorMap():
     '''
@@ -118,6 +119,5 @@ def codex_plot_peak(data, indexes):
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+
+    codex_doctest.run_codex_doctest()

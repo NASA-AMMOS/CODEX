@@ -23,6 +23,7 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
 import codex_system
+import codex_doctest
 
 def codex_impute(data):
     '''
@@ -95,6 +96,4 @@ def codex_explained_variance_ratio(X, n_components):
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+    codex_doctest.run_codex_doctest()

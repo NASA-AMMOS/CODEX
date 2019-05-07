@@ -21,6 +21,7 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
 import codex_hash
+import codex_doctest
 
 def label_swap(labels, dataHash, verbose=False):
     '''
@@ -143,6 +144,5 @@ def label_swap(labels, dataHash, verbose=False):
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+
+    codex_doctest.run_codex_doctest()

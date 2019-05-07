@@ -35,8 +35,6 @@ import codex_read_data_api
 import codex_return_code
 import codex_time_log
 
-DEBUG = False
-
 
 def ml_dimensionality_reduction(
         inputHash,
@@ -101,13 +99,11 @@ def run_codex_dim_reduction(
 
     Examples:
 
-        >>> (inputHash,labelHash,template, labelHash) = codex_doctest.doctest_get_data()
+        >>> testData = codex_doctest.doctest_get_data()
 
-        >>> result = run_codex_dim_reduction(inputHash, False, {"n_components":2}, False, False, "PCA")
+        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, False, False, "PCA")
 
-        >>> (inputHash,labelHash,template, labelHash) = codex_doctest.doctest_get_data()
-
-        >>> result = run_codex_dim_reduction(inputHash, False, {"n_components":2}, 1, False, "ICA")
+        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, 1, False, "ICA")
         Downsampling to 1 percent.
 
     '''
@@ -188,14 +184,8 @@ def run_codex_dim_reduction(
         len(data),
         data.ndim)
 
-
-    #if(subsetHash is False):
-    #    returnCodeString = "codex_dimmension_reduction_api.codex_decomposition_PCA('" + inputHash + "'," + str(
-    #        False) + "," + str(n_components) + "," + str(incremental) + "," + str(downsampled) + ",False)\n"
-    #else:
-    #    returnCodeString = "codex_dimmension_reduction_api.codex_decomposition_PCA('" + inputHash + "','" + str(
-    #        subsetHash) + "'," + str(n_components) + "," + str(incremental) + "," + str(downsampled) + ",False)\n"
-    #codex_return_code.logReturnCode(returnCodeString)
+    returnCodeString = "codex_dimmension_reduction_api.run_codex_dim_reduction({inputHash},{subsetHash},{parms},{downsampled},{showPlot},{algorithm})\n".format(inputHash=inputHash, subsetHash=subsetHash, parms=parms, downsampled=downsampled, showPlot=showPlot, algorithm=algorithm)
+    codex_return_code.logReturnCode(returnCodeString)
 
     outputHash = codex_hash.hashArray('PCA_', X_transformed, "feature")
 
@@ -217,6 +207,7 @@ def run_codex_dim_reduction(
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+    codex_doctest.run_codex_doctest()
+
+
+    

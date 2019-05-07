@@ -39,7 +39,7 @@ def ml_normalize(
     Outputs:
 
     Examples:
-    >>> (inputHash, hashList, template, labelHash) = codex_doctest.doctest_get_data()
+    >>> testData = codex_doctest.doctest_get_data()
 
     '''
 
@@ -146,6 +146,6 @@ def codex_n(X):
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+    codex_doctest.run_codex_doctest()
+
+    

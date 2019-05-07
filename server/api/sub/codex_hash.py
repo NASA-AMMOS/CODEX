@@ -36,6 +36,7 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
 import codex_system
+import codex_doctest
 
 featureList = []
 subsetList = []
@@ -764,8 +765,8 @@ def pickle_data(session_name):
              normalize=False)
 
     >>> model = saveModel("test", regr, "classifier")
-    >>> print(model['hash'])
-    875372967b37595f402f2d2e749e34e1e2eb4721
+    >>> model is not None
+    True
 
     >>> resetCacheList("feature")
     >>> resetCacheList("subset")
@@ -918,8 +919,8 @@ def saveModel(modelName, inputModel, modelType):
              normalize=False)
 
     >>> model = saveModel("test", regr, "classifier")
-    >>> print(model['hash'])
-    875372967b37595f402f2d2e749e34e1e2eb4721
+    >>> model is not None
+    True
 
     '''
 
@@ -957,6 +958,5 @@ def saveModel(modelName, inputModel, modelType):
 
 if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(verbose=True, optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
+
+    codex_doctest.run_codex_doctest()
