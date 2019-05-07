@@ -8,7 +8,8 @@
     stroke: white;
     fill: white;
 
-    &:hover {
+    &:hover,
+    &.active {
         background-color: white;
         stroke: black;
         fill: black;
