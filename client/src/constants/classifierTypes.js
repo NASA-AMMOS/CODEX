@@ -57,74 +57,181 @@ export const CLASSIFIER_TYPES = [
 ];
 
 export const CLASSIFIER_PARAMS = {
-    [AdaBoostClassifier]: [
-        {
-            name: "n_estimators",
-            type: "int",
-            mode: "range",
-            min: 0,
-            minDefault: 0,
-            minLabel: "Min parameter label",
-            max: 50,
-            maxDefault: 50,
-            maxLabel: "Max parameter label",
-            step: 1,
-            stepDefault: 1,
-            stepLabel: "Step size",
-            displayName: "Number of Estimators"
-        }
-    ],
-    [BaggingClassifier]: [
-        {
-            name: "n_estimators",
-            type: "int",
-            mode: "range",
-            min: 0,
-            minDefault: 0,
-            minLabel: "Min parameter label",
-            max: 10,
-            maxDefault: 10,
-            maxLabel: "Max parameter label",
-            step: 1,
-            stepDefault: 1,
-            stepLabel: "Step size",
-            displayName: "Number of Estimators"
-        }
-    ],
-    [BayesianGaussianMixture]: [
-        {
-            name: "n_components",
-            type: "int",
-            mode: "range",
-            min: 0,
-            minDefault: 0,
-            minLabel: "Min parameter label",
-            max: 1,
-            maxDefault: 1,
-            maxLabel: "Max parameter label",
-            step: 1,
-            stepDefault: 1,
-            stepLabel: "Step size",
-
-            displayName: "Number of Components"
-        }
-    ],
-    [BernoulliNB]: [
-        {
-            name: "alpha",
-            type: "float",
-            mode: "range",
-            min: 0,
-            minDefault: 0,
-            minLabel: "Min parameter label",
-            max: 1,
-            maxDefault: 1,
-            maxLabel: "Max parameter label",
-            step: 1,
-            stepDefault: 1,
-            stepLabel: "Step size",
-
-            displayName: "Alpha"
-        }
-    ]
+    [AdaBoostClassifier]: {
+        name: "n_estimators",
+        mode: "range",
+        params: [
+            {
+                type: "int",
+                name: "min",
+                label: "Min parameter label",
+                default: 0,
+                min: 0,
+                max: 100,
+                helperText: "0 or higher"
+            },
+            {
+                type: "int",
+                name: "max",
+                label: "Max parameter label",
+                default: 100,
+                min: 0,
+                max: 100,
+                helperText: "Up to 100"
+            },
+            {
+                type: "int",
+                name: "step",
+                label: "Step size",
+                default: 1,
+                min: 0,
+                max: 100,
+                helperText: "Between 1 and 100"
+            }
+        ]
+    },
+    [BaggingClassifier]: {
+        name: "n_estimators",
+        mode: "range",
+        params: [
+            {
+                type: "int",
+                name: "min",
+                label: "Min parameter label",
+                default: 0,
+                min: 0,
+                max: 100,
+                helperText: "0 or higher"
+            },
+            {
+                type: "int",
+                name: "max",
+                label: "Max parameter label",
+                default: 10,
+                min: 0,
+                max: 10,
+                helperText: "Up to 10"
+            },
+            {
+                type: "int",
+                name: "step",
+                label: "Step size",
+                default: 1,
+                min: 0,
+                max: 100,
+                helperText: "Between 1 and 100"
+            }
+        ]
+    },
+    [BayesianGaussianMixture]: {
+        name: "n_components",
+        mode: "range",
+        params: [
+            {
+                type: "int",
+                name: "min",
+                label: "Min parameter label",
+                default: 0,
+                min: 0,
+                max: 100,
+                helperText: "0 or higher"
+            },
+            {
+                type: "int",
+                name: "max",
+                label: "Max parameter label",
+                default: 10,
+                min: 0,
+                max: 10,
+                helperText: "Up to 10"
+            },
+            {
+                type: "int",
+                name: "step",
+                label: "Step size",
+                default: 1,
+                min: 0,
+                max: 100,
+                helperText: "Between 1 and 100"
+            }
+        ]
+    },
+    [BernoulliNB]: {
+        name: "alpha",
+        mode: "range",
+        params: [
+            {
+                type: "float",
+                name: "min",
+                label: "Min parameter label",
+                default: 0,
+                min: 0,
+                max: 100,
+                helperText: "0 or higher"
+            },
+            {
+                type: "float",
+                name: "max",
+                label: "Max parameter label",
+                default: 1,
+                min: 0,
+                max: 1,
+                helperText: "Up to 1"
+            },
+            {
+                type: "float",
+                name: "step",
+                label: "Step size",
+                default: 1,
+                min: 0,
+                max: 100,
+                helperText: "Between 0 and 100"
+            }
+        ]
+    },
+    [CalibratedClassifierCV]: {
+        name: "method",
+        params: [
+            {
+                options: ["sigmoid", "isotonic"],
+                default: "sigmoid",
+                name: "method",
+                label: "Method",
+                type: "string"
+            }
+        ]
+    },
+    [ComplementNB]: {
+        name: "alpha",
+        mode: "range",
+        params: [
+            {
+                type: "float",
+                name: "min",
+                label: "Min parameter label",
+                default: 0,
+                min: 0,
+                max: 100,
+                helperText: "0 or higher"
+            },
+            {
+                type: "float",
+                name: "max",
+                label: "Max parameter label",
+                default: 1,
+                min: 0,
+                max: 1,
+                helperText: "Up to 1"
+            },
+            {
+                type: "float",
+                name: "step",
+                label: "Step size",
+                default: 1,
+                min: 0,
+                max: 100,
+                helperText: "Between 0 and 100"
+            }
+        ]
+    }
 };

@@ -16,9 +16,16 @@ export function getEta(classifier, selectedFeatures, numFeatures, dataCallback) 
     return utils.makeSimpleRequest(request, dataCallback);
 }
 
-export function createRange(param) {
+export function createRange(params) {
+    console.log(params);
+    const min =
+        params.find(p => p.name === "min").value || params.find(p => p.name === "min").default;
+    const max =
+        params.find(p => p.name === "max").value || params.find(p => p.name === "max").default;
+    const step =
+        params.find(p => p.name === "step").value || params.find(p => p.name === "step").default;
     const valueList = [];
-    for (let i = param.min; i <= param.max; i += param.step) {
+    for (let i = min; i <= max; i += step) {
         valueList.push(i);
     }
     return valueList;

@@ -16,7 +16,15 @@ export function openClassifierWindow() {
     };
 }
 
-function createClassifierRequest(filename, selectedFeatures, crossVal, labelName, classifierState) {
+function createClassifierRequest(
+    filename,
+    selectedFeatures,
+    crossVal,
+    labelName,
+    searchType,
+    scoring,
+    classifierState
+) {
     return {
         routine: "algorithm",
         algorithmName: classifierState.name,
@@ -25,31 +33,43 @@ function createClassifierRequest(filename, selectedFeatures, crossVal, labelName
         filename,
         identification: { id: "dev0" },
         parameters:
-            classifierState.params[0].mode === "range"
+            classifierState.paramData.mode === "range"
                 ? {
-                      [classifierState.params[0].name]: classifierFunctions.createRange(
-                          classifierState.params[0]
+                      [classifierState.paramData.name]: classifierFunctions.createRange(
+                          classifierState.paramData.params
                       )
                   }
                 : {},
         dataSelections: [],
         downsampled: false,
         cross_val: parseInt(crossVal),
-        labelName
+        labelName,
+        search_type: searchType,
+        scoring
     };
 }
 
-export function createClassifierOutput(classifierStates, selectedFeatures, crossVal, labelName) {
+export function createClassifierOutput(
+    classifierStates,
+    selectedFeatures,
+    crossVal,
+    labelName,
+    searchType,
+    scoring
+) {
     return (dispatch, getState) => {
         const filename = getState().data.get("filename");
         const requests = classifierStates
-            .filter(classifierState => classifierState.params.length)
+            .filter(classifierState => classifierState.paramData)
+            .filter(classifierState => classifierState.selected)
             .map(classifierState =>
                 createClassifierRequest(
                     filename,
                     selectedFeatures,
                     crossVal,
                     labelName,
+                    searchType,
+                    scoring,
                     classifierState
                 )
             )

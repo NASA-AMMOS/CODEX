@@ -31,11 +31,14 @@ function classifierStateReducer(classifierState, action) {
                 classifier.name === action.classifierName
                     ? {
                           ...classifier,
-                          params: classifier.params.map(param =>
-                              param.name === action.paramName
-                                  ? { ...param, [action.paramValue]: action.value }
-                                  : param
-                          )
+                          paramData: {
+                              ...classifier.paramData,
+                              params: classifier.paramData.params.map(param =>
+                                  param.name === action.paramName
+                                      ? { ...param, value: action.value }
+                                      : param
+                              )
+                          }
                       }
                     : classifier
             );
@@ -58,54 +61,21 @@ function makeNumericInput(param, classifierName, classifierStateDispatch) {
             <TextField
                 className="parameterInput"
                 fullWidth
-                label={param.minLabel}
-                defaultValue={param.minDefault}
-                helperText={`${param.min} or higher`}
+                label={param.label}
+                helperText={param.helperText}
                 margin="normal"
                 variant="filled"
                 type="number"
-                value={param.minValue}
+                value={param.value}
                 onChange={e =>
                     classifierStateDispatch({
                         type: "updateParam",
-                        paramValue: "minValue",
-                        value: e.target.value
-                    })
-                }
-            />
-            <TextField
-                className="parameterInput"
-                fullWidth
-                label={param.maxLabel}
-                defaultValue={param.maxDefault}
-                helperText={`Up to ${param.max}`}
-                margin="normal"
-                variant="filled"
-                type="number"
-                value={param.maxValue}
-                onChange={e =>
-                    classifierStateDispatch({
-                        type: "updateParam",
-                        paramValue: "maxValue",
-                        value: e.target.value
-                    })
-                }
-            />
-            <TextField
-                className="parameterInput"
-                fullWidth
-                label={param.stepLabel}
-                defaultValue={param.stepDefault}
-                helperText={`Up to ${param.step}`}
-                margin="normal"
-                variant="filled"
-                type="number"
-                value={param.stepValue}
-                onChange={e =>
-                    classifierStateDispatch({
-                        type: "updateParam",
-                        paramValue: "maxValue",
-                        value: e.target.value
+                        classifierName,
+                        paramName: param.name,
+                        value:
+                            param.type === "int"
+                                ? parseInt(e.target.value)
+                                : parseFloat(e.target.value)
                     })
                 }
             />
@@ -113,15 +83,39 @@ function makeNumericInput(param, classifierName, classifierStateDispatch) {
     );
 }
 
-function makeParamInput(param, classifierName, classifierStateDispatch) {
+function makeStringChoiceInput(param, classifierName, classifierStateDispatch) {
     return (
-        <React.Fragment key={classifierName}>
-            <Typography variant="subtitle1">{classifierName}</Typography>
-            {param.type === "int" || param.type === "float"
-                ? makeNumericInput(param, classifierName, classifierStateDispatch)
-                : null}
-        </React.Fragment>
+        <FormControl>
+            <InputLabel>{param.displayName}</InputLabel>
+            <Select
+                value={param.value || param.default}
+                onChange={e =>
+                    classifierStateDispatch({
+                        type: "updateParam",
+                        classifierName,
+                        paramName: param.name,
+                        value: e.target.value
+                    })
+                }
+            >
+                {param.options.map(f => (
+                    <MenuItem key={f} value={f}>
+                        {f.charAt(0).toUpperCase() + f.slice(1)}
+                    </MenuItem>
+                ))}
+            </Select>
+        </FormControl>
     );
+}
+
+function makeParamInput(param, classifierName, classifierStateDispatch) {
+    switch (param.type) {
+        case "int":
+        case "float":
+            return makeNumericInput(param, classifierName, classifierStateDispatch);
+        case "string":
+            return makeStringChoiceInput(param, classifierName, classifierStateDispatch);
+    }
 }
 
 function makeClassifierRow(
@@ -168,13 +162,14 @@ function makeClassifierRow(
 
 function getInitialParamState() {
     return classifierTypes.CLASSIFIER_TYPES.map(classifier => {
-        return {
+        const state = {
             name: classifier,
             eta: null,
             etaLoaded: false,
-            params: classifierTypes.CLASSIFIER_PARAMS[classifier] || [],
+            paramData: classifierTypes.CLASSIFIER_PARAMS[classifier],
             selected: true
         };
+        return state;
     });
 }
 
@@ -190,6 +185,13 @@ function ClassifiersOverview(props) {
         .toJS();
 
     const [crossVal, setCrossVal] = useState(3);
+
+    const searchTypeOptions = ["grid", "random"];
+    const [searchType, setSearchType] = useState(searchTypeOptions[0]);
+
+    const scoringOptions = ["accuracy", "precision", "recall"];
+    const [scoring, setScoring] = useState(scoringOptions[0]);
+
     const [label, setLabel] = useState(selectedFeatures[0]);
     const [activeClassifierName, setActiveClassifierName] = useState(classifierStates[0].name);
 
@@ -235,7 +237,9 @@ function ClassifiersOverview(props) {
                                 classifierStates,
                                 selectedFeatures,
                                 crossVal,
-                                label
+                                label,
+                                searchType,
+                                scoring
                             )
                         }
                     >
@@ -286,26 +290,60 @@ function ClassifiersOverview(props) {
                 </div>
                 <div className="rightCol">
                     <div className="paramHeader">
-                        <div className="classifierCounts">
-                            <span>{classifiersSelected} Classifiers selected</span>
-                            <span>{waitTimeString}</span>
+                        <div className="row">
+                            <div className="classifierCounts">
+                                <span>{classifiersSelected} Classifiers selected</span>
+                                <span>{waitTimeString}</span>
+                            </div>
+                            <TextField
+                                className="parameterInput"
+                                label="Cross Val"
+                                margin="normal"
+                                variant="filled"
+                                type="number"
+                                value={crossVal}
+                            />
                         </div>
-                        <TextField
-                            className="parameterInput"
-                            label="Cross Val"
-                            margin="normal"
-                            variant="filled"
-                            type="number"
-                            value={crossVal}
-                        />
+                        <div className="row">
+                            <FormControl classes={{ root: "dropdown" }}>
+                                <InputLabel>Search Type</InputLabel>
+                                <Select
+                                    value={searchType}
+                                    onChange={e => setSearchType(e.target.value)}
+                                >
+                                    {searchTypeOptions.map(o => (
+                                        <MenuItem key={o} value={o}>
+                                            {o.charAt(0).toUpperCase() + o.slice(1)}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <FormControl classes={{ root: "dropdown" }}>
+                                <InputLabel>Scoring</InputLabel>
+                                <Select value={scoring} onChange={e => setScoring(e.target.value)}>
+                                    {scoringOptions.map(o => (
+                                        <MenuItem key={o} value={o}>
+                                            {o.charAt(0).toUpperCase() + o.slice(1)}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </div>
                     </div>
                     <hr />
                     <div className="classifierParams">
+                        <Typography variant="subtitle1">{activeClassifierName}</Typography>
                         {classifierStates
                             .find(c => c.name === activeClassifierName)
-                            .params.map(param =>
-                                makeParamInput(param, activeClassifierName, classifierStateDispatch)
-                            )}
+                            .paramData.params.map(param => (
+                                <React.Fragment key={param.name}>
+                                    {makeParamInput(
+                                        param,
+                                        activeClassifierName,
+                                        classifierStateDispatch
+                                    )}
+                                </React.Fragment>
+                            ))}
                     </div>
                 </div>
             </div>

@@ -71,6 +71,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-direction: column;
 }
 
 .classifierCounts {
@@ -87,4 +88,16 @@
 
 .parameterInput {
     display: block;
+}
+
+.row {
+    width: 100%;
+    display: block;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropdown {
+    min-width: 200px !important;
 }
