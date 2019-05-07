@@ -1,0 +1,16 @@
+.controlBar {
+    margin-left: 10px;
+    color: white;
+}
+
+.icon {
+    margin-right: 5px;
+    stroke: white;
+    fill: white;
+
+    &:hover {
+        background-color: white;
+        stroke: black;
+        fill: black;
+    }
+}

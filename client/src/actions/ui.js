@@ -97,3 +97,7 @@ export const addToHistory = (status, kind, description) => ({
     kind,
     description
 });
+
+export function changeGlobalChartState(chartState) {
+    return { type: types.CHANGE_GLOBAL_CHART_STATE, chartState };
+}

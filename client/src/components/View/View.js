@@ -5,6 +5,7 @@ import React, { Component } from "react";
 import Container from "../Container/Container";
 import LeftPanel from "components/LeftPanel/LeftPanel";
 import TopBar from "components/TopBar/TopBar";
+import ControlBar from "components/ControlBar/ControlBar";
 
 class View extends Component {
     render() {
@@ -13,6 +14,7 @@ class View extends Component {
                 <LeftPanel />
                 <div className="rightPanel">
                     <TopBar />
+                    <ControlBar />
                     <Container />
                 </div>
             </div>

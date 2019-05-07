@@ -20,6 +20,8 @@ export default function ui(state = uiState, action, opt_reducer = UiReducer) {
             return opt_reducer.modeSet(state, action);
         case actionTypes.ADD_TO_HISTORY:
             return opt_reducer.addToHistory(state, action);
+        case actionTypes.CHANGE_GLOBAL_CHART_STATE:
+            return opt_reducer.changeGlobalChartState(state, action);
         default:
             return state;
     }

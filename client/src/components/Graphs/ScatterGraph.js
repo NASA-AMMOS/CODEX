@@ -49,7 +49,7 @@ function ScatterGraph(props) {
         layout: {
             autosize: true,
             margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
-            dragmode: "lasso",
+            dragmode: props.globalChartState,
             datarevision: chartRevision,
             hovermode: "closest", // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
@@ -63,12 +63,7 @@ function ScatterGraph(props) {
         config: {
             responsive: true,
             displaylogo: false,
-            modeBarButtons: [
-                ["lasso2d"],
-                ["zoom2d", "zoomIn2d", "zoomOut2d", "autoScale2d"],
-                ["pan2d"],
-                ["toggleHover"]
-            ]
+            modeBarButtons: [["zoomIn2d", "zoomOut2d", "autoScale2d"], ["toggleHover"]]
         }
     });
 
@@ -108,6 +103,14 @@ function ScatterGraph(props) {
             updateChartRevision();
         },
         [props.savedSelections]
+    );
+
+    useEffect(
+        _ => {
+            chartState.layout.dragmode = props.globalChartState; // Weirdly this works, can't do it with setChartState
+            updateChartRevision();
+        },
+        [props.globalChartState]
     );
 
     return (
@@ -174,7 +177,8 @@ function ScatterGraph(props) {
 function mapStateToProps(state) {
     return {
         currentSelection: state.selections.currentSelection,
-        savedSelections: state.selections.savedSelections
+        savedSelections: state.selections.savedSelections,
+        globalChartState: state.ui.get("globalChartState")
     };
 }
 

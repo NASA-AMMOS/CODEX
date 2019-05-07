@@ -125,6 +125,7 @@
         "lint-staged": "^8.1.1",
         "mock-socket": "^7.1.0",
         "node-sass": "^4.11.0",
+        "react-svg-loader": "^3.0.1",
         "sass-loader": "^7.1.0",
         "sinon": "^6.1.4",
         "ts-loader": "^5.3.3",
