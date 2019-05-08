@@ -412,7 +412,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     clf.fit(X,y)
     y_pred = clf.predict(X)
     cm = confusion_matrix(y, y_pred)
-    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    cm = np.round((cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]) * 100)
     result['cm_data'] = cm.tolist()
     result['classes'] = np.unique(y).tolist()
 
