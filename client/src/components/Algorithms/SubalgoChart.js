@@ -58,7 +58,6 @@ function makeChart(props) {
             }
         },
         config: {
-            responsive: true,
             displaylogo: false,
             displayModeBar: false
         }

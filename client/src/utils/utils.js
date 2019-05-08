@@ -40,30 +40,34 @@ export function zip(ary) {
     }, []);
 }
 
-export function makeSimpleRequest(request, dataCallback) {
-    const requestObject = {};
-    const socketWorker = new WorkerSocket();
+export function makeSimpleRequest(request) {
+    let cancel;
+    const req = new Promise((resolve, reject) => {
+        const requestObject = {};
+        const socketWorker = new WorkerSocket();
 
-    socketWorker.addEventListener("message", e => {
-        const inMsg = JSON.parse(e.data);
+        socketWorker.addEventListener("message", e => {
+            const inMsg = JSON.parse(e.data);
 
-        inMsg.algorithmName = request.algorithmName;
-        dataCallback(inMsg);
-    });
+            inMsg.algorithmName = request.algorithmName;
+            resolve(inMsg);
+        });
 
-    socketWorker.postMessage(
-        JSON.stringify({
-            action: actionTypes.SIMPLE_REQUEST,
-            request
-        })
-    );
-
-    requestObject.closeSocket = _ => {
         socketWorker.postMessage(
             JSON.stringify({
-                action: actionTypes.CLOSE_SOCKET
+                action: actionTypes.SIMPLE_REQUEST,
+                request
             })
         );
-    };
-    return requestObject;
+
+        cancel = _ => {
+            socketWorker.postMessage(
+                JSON.stringify({
+                    action: actionTypes.CLOSE_SOCKET
+                })
+            );
+        };
+    });
+
+    return { req, cancel };
 }

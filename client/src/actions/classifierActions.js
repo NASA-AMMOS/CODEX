@@ -55,13 +55,38 @@ export function createClassifierOutput(
     crossVal,
     labelName,
     searchType,
-    scoring
+    scoring,
+    winId
 ) {
     return (dispatch, getState) => {
-        const filename = getState().data.get("filename");
-        const requests = classifierStates
+        // Close classifier options window and open a loading window
+        dispatch({ type: actionTypes.CLOSE_WINDOW, id: winId });
+
+        // Give our new loading "window" an ID
+        const loadingWindowId = Math.random()
+            .toString(36)
+            .substring(7);
+
+        dispatch({
+            type: actionTypes.OPEN_NEW_WINDOW,
+            info: {
+                windowType: classifierTypes.CLASSIFIER_LOADING_WINDOW,
+                minimized: true,
+                minimizedOnly: true,
+                id: loadingWindowId
+            }
+        });
+
+        const classifiersToRun = classifierStates
             .filter(classifierState => classifierState.paramData)
-            .filter(classifierState => classifierState.selected)
+            .filter(classifierState => classifierState.selected);
+
+        const totalEta = classifiersToRun.every(classifierState => classifierState.eta === null)
+            ? null
+            : classifiersToRun.reduce((acc, classifierState) => acc + classifierState.eta, 0);
+
+        const filename = getState().data.get("filename");
+        const requests = classifiersToRun
             .map(classifierState =>
                 createClassifierRequest(
                     filename,
@@ -73,6 +98,21 @@ export function createClassifierOutput(
                     classifierState
                 )
             )
-            .map(req => utils.makeSimpleRequest(req, data => console.log(data)));
+            .map(request => {
+                const { req, _ } = utils.makeSimpleRequest(request);
+                return req;
+            });
+
+        Promise.all(requests).then(requests => {
+            dispatch({ type: actionTypes.CLOSE_WINDOW, id: loadingWindowId });
+            dispatch({
+                type: actionTypes.OPEN_NEW_WINDOW,
+                info: {
+                    windowType: classifierTypes.CLASSIFIER_RESULTS_WINDOW,
+                    data: requests,
+                    runParams: { selectedFeatures, crossVal, labelName }
+                }
+            });
+        });
     };
 }

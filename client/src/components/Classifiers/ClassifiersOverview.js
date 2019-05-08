@@ -4,7 +4,7 @@ import * as classifierFunctions from "components/Classifiers/classifierFunctions
 import * as classifierActions from "actions/classifierActions";
 import Button from "@material-ui/core/Button";
 import { bindActionCreators } from "redux";
-import "components/Classifiers/Classifiers.scss";
+import "components/Classifiers/classifiers.scss";
 import { connect } from "react-redux";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -124,8 +124,9 @@ function makeClassifierRow(
     classifierStateDispatch,
     classifier
 ) {
-    const eta = classifier.eta && Math.ceil(classifier.eta);
-    const etaLabel = eta ? `(${eta / 60} min)` : classifier.etaLoaded && "(n/a)";
+    const etaLabel = classifier.eta
+        ? `(${Math.ceil(classifier.eta / 60)} min)`
+        : classifier.etaLoaded && "(n/a)";
     const rowClass = classnames({
         checkboxRow: true,
         active: classifier.name === activeClassifierName
@@ -196,15 +197,19 @@ function ClassifiersOverview(props) {
     const [activeClassifierName, setActiveClassifierName] = useState(classifierStates[0].name);
 
     useEffect(_ => {
-        classifierTypes.CLASSIFIER_TYPES.forEach(classifier =>
-            classifierFunctions.getEta(classifier, selectedFeatures, 100, data => {
+        const requests = classifierTypes.CLASSIFIER_TYPES.map(classifier => {
+            const { req, cancel } = classifierFunctions.getEta(classifier, selectedFeatures, 100);
+            req.then(data =>
                 classifierStateDispatch({
                     type: "updateEta",
                     name: classifier,
                     eta: data.eta && Math.ceil(data.eta)
-                });
-            })
-        );
+                })
+            );
+            return cancel;
+        });
+
+        return _ => requests.forEach(cancel => cancel());
     }, []);
 
     const classifiersSelected = classifierStates.filter(c => c.selected).length;
@@ -239,7 +244,8 @@ function ClassifiersOverview(props) {
                                 crossVal,
                                 label,
                                 searchType,
-                                scoring
+                                scoring,
+                                props.winId
                             )
                         }
                     >

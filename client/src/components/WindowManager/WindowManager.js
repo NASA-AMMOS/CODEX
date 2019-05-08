@@ -16,6 +16,7 @@ import ShelfPack from "@mapbox/shelf-pack";
 import classnames from "classnames";
 import * as classifierTypes from "constants/classifierTypes";
 import ClassifiersOverview from "components/Classifiers/ClassifiersOverview";
+import ClassifierResults from "components/Classifiers/ClassifierResults";
 
 function getTwoAxisGraphTitle(win) {
     const selectedFeatures = win.data.get("data")[0];
@@ -45,6 +46,10 @@ function getWindowTitle(win) {
             }`;
         case classifierTypes.CLASSIFIER_WINDOW:
             return "Classification";
+        case classifierTypes.CLASSIFIER_LOADING_WINDOW:
+            return "Running Classifiers";
+        case classifierTypes.CLASSIFIER_RESULTS_WINDOW:
+            return "Classification Results";
         default:
             return "";
     }
@@ -69,8 +74,11 @@ function getWindowContent(win) {
                 <ClassifiersOverview
                     selectedFeatures={win.selectedFeatures}
                     selectedFeatureLength={win.selectedFeatureLength}
+                    winId={win.id}
                 />
             );
+        case classifierTypes.CLASSIFIER_RESULTS_WINDOW:
+            return <ClassifierResults data={win.data} runParams={win.runParams} />;
     }
 }
 

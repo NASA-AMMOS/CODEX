@@ -4,7 +4,7 @@ import * as utils from "utils/utils";
 /* eslint import/no-webpack-loader-syntax: off */
 import WorkerSocket from "worker-loader!workers/socket.worker";
 
-export function getEta(classifier, selectedFeatures, numFeatures, dataCallback) {
+export function getEta(classifier, selectedFeatures, numFeatures) {
     const request = {
         routine: "time",
         algorithmType: "classification",
@@ -13,11 +13,10 @@ export function getEta(classifier, selectedFeatures, numFeatures, dataCallback) 
         numFeatures: numFeatures
     };
 
-    return utils.makeSimpleRequest(request, dataCallback);
+    return utils.makeSimpleRequest(request);
 }
 
 export function createRange(params) {
-    console.log(params);
     const min =
         params.find(p => p.name === "min").value || params.find(p => p.name === "min").default;
     const max =

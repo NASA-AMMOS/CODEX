@@ -22,5 +22,10 @@ export const initialSizes = {
         width: 750,
         height: 500,
         resizeable: true
+    },
+    [classifierTypes.CLASSIFIER_RESULTS_WINDOW]: {
+        width: 700,
+        height: 700,
+        resizeable: true
     }
 };
