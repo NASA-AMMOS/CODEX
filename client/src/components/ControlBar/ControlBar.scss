@@ -1,17 +1,26 @@
 .controlBar {
     margin-left: 10px;
+    height: 40px;
     color: white;
 }
 
 .icon {
-    margin-right: 5px;
-    stroke: white;
-    fill: white;
+    margin-right: 10px;
+    padding: 3px;
+    stroke: #eee;
+    fill: #ddd;
+    height: 30px;
+    width: 30px;
+    border-radius: 2px;
 
-    &:hover,
+    &:hover {
+        background-color: #aaa;
+        stroke: white;
+        fill: white;
+    }
     &.active {
-        background-color: white;
-        stroke: black;
-        fill: black;
+        background-color: #007bff;
+        stroke: white;
+        fill: white;
     }
 }
