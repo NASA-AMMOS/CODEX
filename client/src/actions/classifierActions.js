@@ -62,21 +62,6 @@ export function createClassifierOutput(
         // Close classifier options window and open a loading window
         dispatch({ type: actionTypes.CLOSE_WINDOW, id: winId });
 
-        // Give our new loading "window" an ID
-        const loadingWindowId = Math.random()
-            .toString(36)
-            .substring(7);
-
-        dispatch({
-            type: actionTypes.OPEN_NEW_WINDOW,
-            info: {
-                windowType: classifierTypes.CLASSIFIER_LOADING_WINDOW,
-                minimized: true,
-                minimizedOnly: true,
-                id: loadingWindowId
-            }
-        });
-
         const classifiersToRun = classifierStates
             .filter(classifierState => classifierState.paramData)
             .filter(classifierState => classifierState.selected);
@@ -99,20 +84,17 @@ export function createClassifierOutput(
                 )
             )
             .map(request => {
-                const { req, _ } = utils.makeSimpleRequest(request);
-                return req;
+                const { req, cancel } = utils.makeSimpleRequest(request);
+                return { req, cancel, requestObj: request };
             });
 
-        Promise.all(requests).then(requests => {
-            dispatch({ type: actionTypes.CLOSE_WINDOW, id: loadingWindowId });
-            dispatch({
-                type: actionTypes.OPEN_NEW_WINDOW,
-                info: {
-                    windowType: classifierTypes.CLASSIFIER_RESULTS_WINDOW,
-                    data: requests,
-                    runParams: { selectedFeatures, crossVal, labelName }
-                }
-            });
+        dispatch({
+            type: actionTypes.OPEN_NEW_WINDOW,
+            info: {
+                windowType: classifierTypes.CLASSIFIER_RESULTS_WINDOW,
+                requests,
+                runParams: { selectedFeatures, crossVal, labelName, scoring, searchType }
+            }
         });
     };
 }

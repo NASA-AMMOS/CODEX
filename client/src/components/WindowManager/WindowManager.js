@@ -78,7 +78,7 @@ function getWindowContent(win) {
                 />
             );
         case classifierTypes.CLASSIFIER_RESULTS_WINDOW:
-            return <ClassifierResults data={win.data} runParams={win.runParams} />;
+            return <ClassifierResults requests={win.requests} runParams={win.runParams} />;
     }
 }
 
