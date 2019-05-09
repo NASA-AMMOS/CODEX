@@ -289,13 +289,10 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         Examples:
 
         '''
-        if (verbose):
-            print(message)
-
         result = {}
 
         msg = json.loads(message)
-        codex_system.codex_log(str(msg))
+        codex_system.codex_log("{time} : Message from front end: {json}".format(time=now.isoformat(), json=msg))
 
         routine = msg['routine']
 
@@ -503,6 +500,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
             result['message'] = 'success'
 
         stringMsg = json.dumps(result)
+        codex_system.codex_log("{time} : Response to front end: {json}".format(time=now.isoformat(), json=stringMsg))
         return stringMsg
 
 
