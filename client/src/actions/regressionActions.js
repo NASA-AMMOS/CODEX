@@ -1,5 +1,5 @@
 import * as actionTypes from "constants/actionTypes";
-import * as classifierTypes from "constants/classifierTypes";
+import * as regressionTypes from "constants/regressionTypes";
 import * as actionFunctions from "actions/actionFunctions";
 import * as utils from "utils/utils";
 import * as classifierFunctions from "components/Classifiers/classifierFunctions";
@@ -7,11 +7,11 @@ import * as classifierFunctions from "components/Classifiers/classifierFunctions
 /* eslint import/no-webpack-loader-syntax: off */
 import WorkerSocket from "worker-loader!workers/socket.worker";
 
-export function openClassifierWindow() {
+export function openRegressionWindow() {
     return {
         type: actionTypes.OPEN_NEW_WINDOW,
         info: {
-            windowType: classifierTypes.CLASSIFIER_WINDOW
+            windowType: regressionTypes.REGRESSION_WINDOW
         }
     };
 }
@@ -93,7 +93,7 @@ export function createClassifierOutput(
         dispatch({
             type: actionTypes.OPEN_NEW_WINDOW,
             info: {
-                windowType: classifierTypes.CLASSIFIER_RESULTS_WINDOW,
+                windowType: regressionTypes.REGRESSION_RESULTS_WINDOW,
                 requests,
                 runParams: { selectedFeatures, crossVal, labelName, scoring, searchType }
             }

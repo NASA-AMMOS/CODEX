@@ -1,6 +1,7 @@
 import * as uiTypes from "constants/uiTypes";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as classifierTypes from "constants/classifierTypes";
+import * as regressionTypes from "constants/regressionTypes";
 
 export const initialSizes = {
     [uiTypes.SCATTER_GRAPH]: {
@@ -24,6 +25,16 @@ export const initialSizes = {
         resizeable: true
     },
     [classifierTypes.CLASSIFIER_RESULTS_WINDOW]: {
+        width: 700,
+        height: 700,
+        resizeable: true
+    },
+    [regressionTypes.REGRESSION_WINDOW]: {
+        width: 750,
+        height: 500,
+        resizeable: true
+    },
+    [regressionTypes.REGRESSION_RESULTS_WINDOW]: {
         width: 700,
         height: 700,
         resizeable: true

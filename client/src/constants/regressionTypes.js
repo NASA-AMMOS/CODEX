@@ -1,6 +1,5 @@
-export const CLASSIFIER_WINDOW = "CLASSIFIER_WINDOW";
-export const CLASSIFIER_LOADING_WINDOW = "CLASSIFIER_LOADING_WINDOW";
-export const CLASSIFIER_RESULTS_WINDOW = "CLASSIFIER_RESULTS_WINDOW";
+export const REGRESSION_WINDOW = "REGRESSION_WINDOW";
+export const REGRESSION_RESULTS_WINDOW = "REGRESSION_RESULTS_WINDOW";
 
 export const AdaBoostClassifier = "AdaBoostClassifier";
 export const BaggingClassifier = "BaggingClassifier";

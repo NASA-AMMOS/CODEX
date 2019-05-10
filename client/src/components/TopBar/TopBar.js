@@ -17,6 +17,7 @@ import * as graphActions from "actions/graphActions";
 import * as uiTypes from "constants/uiTypes";
 import * as windowManagerActions from "actions/windowManagerActions";
 import * as classifierActions from "actions/classifierActions";
+import * as regressionActions from "actions/regressionActions";
 
 class TopBar extends Component {
     constructor(props) {
@@ -195,6 +196,9 @@ class TopBar extends Component {
                             {this.getAlgorithmsMenuItems()}
                             <MenuItem onSelect={this.props.openClassifierWindow}>
                                 Classifiers
+                            </MenuItem>{" "}
+                            <MenuItem onSelect={this.props.openRegressionWindow}>
+                                Regressions
                             </MenuItem>
                         </Dropdown.Menu>
                     </Dropdown>
@@ -282,7 +286,8 @@ function mapDispatchToProps(dispatch) {
         createGraph: name => dispatch(graphActions.createGraph(name)),
         createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name)),
         setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch),
-        openClassifierWindow: bindActionCreators(classifierActions.openClassifierWindow, dispatch)
+        openClassifierWindow: bindActionCreators(classifierActions.openClassifierWindow, dispatch),
+        openRegressionWindow: bindActionCreators(regressionActions.openRegressionWindow, dispatch)
     };
 }
 

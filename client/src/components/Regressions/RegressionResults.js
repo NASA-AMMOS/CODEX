@@ -105,7 +105,7 @@ function makeBestClassifier(algoStates) {
     );
 }
 
-function ClassifierResults(props) {
+function RegressionResults(props) {
     // Create state objects for each classifier we're running so that we can keep track of them.
     const [algoStates, setAlgoStates] = useState(_ => props.requests.map(req => req.requestObj));
     useEffect(_ => {
@@ -195,4 +195,4 @@ function ClassifierResults(props) {
     );
 }
 
-export default ClassifierResults;
+export default RegressionResults;

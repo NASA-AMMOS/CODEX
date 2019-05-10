@@ -17,6 +17,9 @@ import classnames from "classnames";
 import * as classifierTypes from "constants/classifierTypes";
 import ClassifiersOverview from "components/Classifiers/ClassifiersOverview";
 import ClassifierResults from "components/Classifiers/ClassifierResults";
+import * as regressionTypes from "constants/regressionTypes";
+import RegressionsOverview from "components/Regressions/RegressionsOverview";
+import RegressionResults from "components/Regressions/RegressionResults";
 
 function getTwoAxisGraphTitle(win) {
     const selectedFeatures = win.data.get("data")[0];
@@ -46,10 +49,12 @@ function getWindowTitle(win) {
             }`;
         case classifierTypes.CLASSIFIER_WINDOW:
             return "Classification";
-        case classifierTypes.CLASSIFIER_LOADING_WINDOW:
-            return "Running Classifiers";
         case classifierTypes.CLASSIFIER_RESULTS_WINDOW:
             return "Classification Results";
+        case regressionTypes.REGRESSION_WINDOW:
+            return "Regression";
+        case regressionTypes.REGRESSION_RESULTS_WINDOW:
+            return "Regression Results";
         default:
             return "";
     }
@@ -79,6 +84,16 @@ function getWindowContent(win) {
             );
         case classifierTypes.CLASSIFIER_RESULTS_WINDOW:
             return <ClassifierResults requests={win.requests} runParams={win.runParams} />;
+        case regressionTypes.REGRESSION_WINDOW:
+            return (
+                <RegressionsOverview
+                    selectedFeatures={win.selectedFeatures}
+                    selectedFeatureLength={win.selectedFeatureLength}
+                    winId={win.id}
+                />
+            );
+        case regressionTypes.REGRESSION_RESULTS_WINDOW:
+            return <RegressionResults requests={win.requests} runParams={win.runParams} />;
     }
 }
 

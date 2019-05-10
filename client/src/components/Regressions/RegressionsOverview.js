@@ -179,7 +179,7 @@ function getInitialParamState() {
     });
 }
 
-function ClassifiersOverview(props) {
+function RegressionsOverview(props) {
     // Create and store classifier states
     const [classifierStates, classifierStateDispatch] = useReducer(
         classifierStateReducer,
@@ -226,7 +226,7 @@ function ClassifiersOverview(props) {
 
     // Render the HTML for the page.
     // When the user clicks "run", we fire an action that closes this window, creates server requests for data for each selected
-    // classifier, and then hands them off to a new window defined in ClassifierResult.
+    // classifier, and then hands them off to a new window defined in ClassifierResults.js
     const classifiersSelected = classifierStates.filter(c => c.selected).length;
     const waitTime = classifierStates.reduce((acc, c) => acc + c.eta, 0);
     const waitTimeString = classifierStates.every(c => c.etaLoaded)
@@ -394,4 +394,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(ClassifiersOverview);
+)(RegressionsOverview);
