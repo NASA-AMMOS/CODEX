@@ -229,7 +229,7 @@ def updateCoverage(coveragePathList):
                     print("Exit status: " + str(rc))
                     return rc
 
-    htmlReportCommand = "coverage html -d " + PROJECT_ROOT + "website/cov/"
+    htmlReportCommand = "coverage html -d " + PROJECT_ROOT + "../tools/website/cov/"
     print("Running: " + htmlReportCommand)
 
     rc = subprocess.call(htmlReportCommand, shell=True)
