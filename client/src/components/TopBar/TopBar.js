@@ -18,6 +18,7 @@ import * as uiTypes from "constants/uiTypes";
 import * as windowManagerActions from "actions/windowManagerActions";
 import * as classifierActions from "actions/classifierActions";
 import * as regressionActions from "actions/regressionActions";
+import * as sessionsActions from "actions/sessionsActions";
 
 class TopBar extends Component {
     constructor(props) {
@@ -172,6 +173,23 @@ class TopBar extends Component {
                 />
                 <div id="topBarMenu">
                     <Dropdown className="dropdownMain" autoOpen={false}>
+                        <Dropdown.Toggle className="dropdownToggle" title="Sessions" />
+                        <Dropdown.Menu>
+                            <MenuItem onSelect={this.props.openSessionsWindow}>
+                                Load Session
+                            </MenuItem>
+                            <MenuItem
+                                onSelect={() => {
+                                    sessionsActions.saveSession(
+                                        `${this.props.filename}_${new Date().toISOString()}`
+                                    );
+                                }}
+                            >
+                                Save Session
+                            </MenuItem>
+                        </Dropdown.Menu>
+                    </Dropdown>
+                    <Dropdown className="dropdownMain" autoOpen={false}>
                         <Dropdown.Toggle className="dropdownToggle" title="Files" />
                         <Dropdown.Menu>
                             <MenuItem>
@@ -270,7 +288,8 @@ TopBar.propTypes = {
 const mapStateToProps = state => {
     return {
         data: state.data,
-        ui: state.ui
+        ui: state.ui,
+        filename: state.data.get("filename")
     };
 };
 
@@ -287,7 +306,8 @@ function mapDispatchToProps(dispatch) {
         createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name)),
         setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch),
         openClassifierWindow: bindActionCreators(classifierActions.openClassifierWindow, dispatch),
-        openRegressionWindow: bindActionCreators(regressionActions.openRegressionWindow, dispatch)
+        openRegressionWindow: bindActionCreators(regressionActions.openRegressionWindow, dispatch),
+        openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch)
     };
 }
 
