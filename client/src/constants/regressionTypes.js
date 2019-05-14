@@ -1,250 +1,243 @@
 export const REGRESSION_WINDOW = "REGRESSION_WINDOW";
 export const REGRESSION_RESULTS_WINDOW = "REGRESSION_RESULTS_WINDOW";
 
-export const AdaBoostClassifier = "AdaBoostClassifier";
-export const BaggingClassifier = "BaggingClassifier";
-export const BayesianGaussianMixture = "BayesianGaussianMixture";
-export const BernoulliNB = "BernoulliNB";
-export const CalibratedClassifierCV = "CalibratedClassifierCV";
-export const ComplementNB = "ComplementNB";
-export const DecisionTreeClassifier = "DecisionTreeClassifier";
-export const ExtraTreesClassifier = "ExtraTreesClassifier";
-export const ExtraTreeClassifier = "ExtraTreeClassifier";
-export const GaussianMixture = "GaussianMixture";
-export const GaussianNB = "GaussianNB";
-export const GaussianProcessClassifier = "GaussianProcessClassifier";
-export const GradientBoostingClassifier = "GradientBoostingClassifier";
-export const KNeighborsClassifier = "KNeighborsClassifier";
-export const LabelPropagation = "LabelPropagation";
-export const LabelSpreading = "LabelSpreading";
-export const LinearDiscriminantAnalysis = "LinearDiscriminantAnalysis";
-export const LogisticRegression = "LogisticRegression";
-export const LogisticRegressionCV = "LogisticRegressionCV";
-export const MLPClassifier = "MLPClassifier";
-export const MultinomialNB = "MultinomialNB";
-export const NuSVC = "NuSVC";
-export const QuadraticDiscriminantAnalysis = "QuadraticDiscriminantAnalysis";
-export const RandomForestClassifier = "RandomForestClassifier";
-export const SGDClassifier = "SGDClassifier";
-export const SVC = "SVC";
+export const ARDRegression = "ARDRegression";
+export const AdaBoostRegressor = "AdaBoostRegressor";
+export const BaggingRegressor = "BaggingRegressor";
+export const BayesianRidge = "BayesianRidge";
+export const CCA = "CCA";
+export const DecisionTreeRegressor = "DecisionTreeRegressor";
+export const ElasticNet = "ElasticNet";
+export const ElasticNetCV = "ElasticNetCV";
+export const ExtraTreeRegressor = "ExtraTreeRegressor";
+export const ExtraTreesRegressor = "ExtraTreesRegressor";
+export const GaussianProcessRegressor = "GaussianProcessRegressor";
+export const GaussianBoostingRegressor = "GaussianBoostingRegressor";
+export const GradientBoostingRegressor = "GradientBoostingRegressor";
+export const HuberRegressor = "HuberRegressor";
+export const KNeighborsRegressor = "KNeighborsRegressor";
+export const KernelRidge = "KernelRidge";                
+export const Lars = "Lars";
+export const LarsCV = "LarsCV";                 
+export const Lasso = "Lasso";                  
+export const LassoCV = "LassoCV";        
+export const LassoLars = "LassoLars";                  
+export const LassoLarsCV = "LassoLarsCV";               
+export const LassoLarsIC = "LassoLarsIC";                
+export const LinearRegression = "LinearRegression";                   
+export const LinearSVR = "LinearSVR";
+export const MLPRegressor = "MLPRegressor";                   
+export const MultiTaskElasticNet = "MultiTaskElasticNet";                
+export const MultiTaskElasticNetCV = "MultiTaskElasticNetCV";                  
+export const MultiTaskLasso = "MultiTaskLasso";
+export const MultiTaskLassoCV = "MultiTaskLassoCV";                   
+export const NuSVR = "NuSVR";                  
+export const OrthogonalMatchingPursuit = "OrthogonalMatchingPursuit";                   
+export const OrthogonalMatchingPursuitCV = "OrthogonalMatchingPursuitCV";
+export const PLSCanonical = "PLSCanonical";                   
+export const PLSRegression = "PLSRegression";                  
+export const PassiveAggressiveRegressor = "PassiveAggressiveRegressor";                 
+export const RANSACRegressor = "RANSACRegressor";                
+export const RadiusNeighborsRegressor = "RadiusNeighborsRegressor";                   
+export const RandomForestRegressor = "RandomForestRegressor";       
+export const Ridge = "Ridge";                  
+export const RidgeCV = "RidgeCV";        
+export const SGDRegressor = "SVDRegressor";            
+export const SVR = "SVR";
+export const TheilSenRegressor = "TheilSenRegressor";                   
+export const TransformedTargetRegressor = "TransformedTargetRegressor";
 
-export const CLASSIFIER_TYPES = [
-    AdaBoostClassifier,
-    BaggingClassifier,
-    BayesianGaussianMixture,
-    BernoulliNB,
-    CalibratedClassifierCV,
-    ComplementNB,
-    DecisionTreeClassifier,
-    ExtraTreesClassifier,
-    ExtraTreeClassifier,
-    GaussianMixture,
-    GaussianNB,
-    GaussianProcessClassifier,
-    GradientBoostingClassifier,
-    KNeighborsClassifier,
-    LabelPropagation,
-    LabelSpreading,
-    LinearDiscriminantAnalysis,
-    LogisticRegression,
-    LogisticRegressionCV,
-    MLPClassifier,
-    MultinomialNB,
-    NuSVC,
-    QuadraticDiscriminantAnalysis,
-    RandomForestClassifier,
-    SGDClassifier,
-    SVC
-];
 
-export const CLASSIFIER_PARAMS = {
-    [AdaBoostClassifier]: [
-        {
-            name: "n_estimators",
-            mode: "range",
-            subParams: [
-                {
-                    type: "int",
+export const REGRESSION_TYPES = {
+    ARDRegression,
+    AdaBoostRegressor,
+    BaggingRegressor,
+    BayesianRidge,
+    CCA,
+    DecisionTreeRegressor,
+    ElasticNet,
+    ElasticNetCV,
+    ExtraTreeRegressor,
+    ExtraTreesRegressor,
+    GaussianProcessRegressor,
+    GradientBoostingRegressor,
+    HuberRegressor,
+    KNeighborsRegressor,
+    KernelRidge,
+    Lars,
+    LarsCV,
+    Lasso,
+    LassoCV,
+    LassoLars,
+    LassoLarsCV,
+    LassoLarsIC,
+    LinearRegression,
+    LinearSVR,
+    MLPRegressor,
+    MultiTaskElasticNet,
+    MultiTaskElasticNetCV,
+    MultiTaskLasso,
+    MultiTaskLassoCV,
+    NuSVR,
+    OrthogonalMatchingPursuit,
+    OrthogonalMatchingPursuitCV,
+    PLSCanonical,
+    PLSRegression,
+    PassiveAggressiveRegressor,
+    RANSACRegressor,
+    RadiusNeighborsRegressor,
+    RandomForestRegressor,
+    Ridge,
+    RidgeCV,
+    SGDRegressor,
+    SVR,
+    TheilSenRegressor,
+    TransformedTargetRegressor
+}
+
+
+/*
+    Creates a list of objects that are used to create the forms for ranges 
+*/
+function createRange(min, max, stepSize, type) {
+
+    let minObj = {
+                    type: type,
                     name: "min",
                     label: "Min parameter label",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "1 or higher"
-                },
-                {
-                    type: "int",
+                    default: min,
+                    min: min,
+                    max: max,
+                    helperText: min + " or higher"
+    };
+
+    let maxObj = {
+                    type: type,
                     name: "max",
                     label: "Max parameter label",
                     default: 100,
-                    min: 1,
-                    max: 100,
+                    min: min,
+                    max: max,
                     helperText: "Up to 100"
-                },
-                {
-                    type: "int",
+    };
+
+    let stepSizeObj = {
+                    type: type,
                     name: "step",
                     label: "Step size",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "Between 1 and 100"
-                }
-            ]
+                    default: stepSize,
+                    min: min,
+                    max: max,
+                    helperText: "Between " + min + " and " + max
+    };
+
+    return [minObj, maxObj, stepSizeObj];
+}
+
+export const REGRESSION_PARAMS = {
+    [ARDRegression]: [ 
+        {
+            name: "n_iter",
+            mode: "range",
+            subParams: [
+                /*  
+                    You could put other subParams in here. 
+                    There may be a better way to do this, but
+                    this just reduced alot of code
+                */
+            ].concat(createRange(1, 10000, 1, "int"))
         }
     ],
-    [BaggingClassifier]: [
+    [AdaBoostRegressor]: [
         {
             name: "n_estimators",
             mode: "range",
-            subParams: [
-                {
-                    type: "int",
-                    name: "min",
-                    label: "Min parameter label",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "1 or higher"
-                },
-                {
-                    type: "int",
-                    name: "max",
-                    label: "Max parameter label",
-                    default: 10,
-                    min: 1,
-                    max: 10,
-                    helperText: "Up to 10"
-                },
-                {
-                    type: "int",
-                    name: "step",
-                    label: "Step size",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "Between 1 and 100"
-                }
-            ]
+            subParams: [].concat(createRange(1, 1000, 1, "int"))
         }
     ],
-    [BayesianGaussianMixture]: [
+    [BaggingRegressor]:[
         {
-            name: "n_components",
+            name: "n_estimators",
             mode: "range",
-            subParams: [
-                {
-                    type: "int",
-                    name: "min",
-                    label: "Min parameter label",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "1 or higher"
-                },
-                {
-                    type: "int",
-                    name: "max",
-                    label: "Max parameter label",
-                    default: 10,
-                    min: 1,
-                    max: 10,
-                    helperText: "Up to 10"
-                },
-                {
-                    type: "int",
-                    name: "step",
-                    label: "Step size",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "Between 1 and 100"
-                }
-            ]
+            subParams: [].concat(createRange(1, 1000, 1, "int"))
         }
     ],
-    [BernoulliNB]: [
+    [BayesianRidge]:[
         {
-            name: "alpha",
+            name: "n_estimators",
             mode: "range",
-            subParams: [
-                {
-                    type: "float",
-                    name: "min",
-                    label: "Min parameter label",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "1 or higher"
-                },
-                {
-                    type: "float",
-                    name: "max",
-                    label: "Max parameter label",
-                    default: 1,
-                    min: 1,
-                    max: 1,
-                    helperText: "Up to 1"
-                },
-                {
-                    type: "float",
-                    name: "step",
-                    label: "Step size",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "Between 0 and 100"
-                }
-            ]
+            subParams: [].concat(createRange(1, 1000, 1, "int"))
         }
     ],
-    [CalibratedClassifierCV]: [
+    [CCA]:[
         {
-            name: "method",
-            subParams: [
-                {
-                    options: ["sigmoid", "isotonic"],
-                    default: "sigmoid",
-                    name: "method",
-                    label: "Method",
-                    type: "string"
-                }
-            ]
-        }
-    ],
-    [ComplementNB]: [
-        {
-            name: "alpha",
+            name: "max_iter",
             mode: "range",
-            subParams: [
-                {
-                    type: "float",
-                    name: "min",
-                    label: "Min parameter label",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "1 or higher"
-                },
-                {
-                    type: "float",
-                    name: "max",
-                    label: "Max parameter label",
-                    default: 1,
-                    min: 1,
-                    max: 1,
-                    helperText: "Up to 1"
-                },
-                {
-                    type: "float",
-                    name: "step",
-                    label: "Step size",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "Between 0 and 100"
-                }
-            ]
+            subParams: [].concat(createRange(1, 1000, 1, "int"))
         }
-    ]
-};
+    ],
+    [DecisionTreeRegressor]:[
+        {
+            name: "max_depth",
+            mode: "range",
+            subParams: [].concat(createRange(1, 1000, 1, "int"))
+        }
+    ],
+    [ElasticNet]:[
+        {
+            name: "max_iter",
+            mode: "range",
+            subParams: [].concat(createRange(-1, 10000, 1, "int"))
+        }
+    ],
+    [ElasticNetCV]:[
+        {
+            name: "max_iter",
+            mode: "range",
+            subParams: [].concat(createRange(-1, 10000, 1, "int"))
+        }
+    ],
+    [ExtraTreeRegressor]:[
+        {
+            name: "max_features",
+            mode: "range",
+            subParams: [].concat(createRange(1, 1000, 1, "int"))
+        }
+    ],
+    [ExtraTreesRegressor]:[
+        {
+            name: "max_features",
+            mode: "range",
+            subParams: [].concat(createRange(1, 1000, 1, "int"))
+        }
+    ],
+    [GaussianProcessRegressor]:[
+        {
+            name: "n_restarts_optimizer",
+            mode: "range",
+            subParams: [].concat(createRange(1, 1000, 1, "int"))
+        }
+    ],
+    [GradientBoostingRegressor]:[
+        {
+            name: "max_depth",
+            mode: "range",
+            subParams: [].concat(createRange(1, 1000, 1, "int"))
+        }
+    ],
+    [HuberRegressor]:[
+        {
+            name: "max_iter",
+            mode: "range",
+            subParams: [].concat(createRange(1, 1000, 1, "int"))
+        }
+    ],
+    [KNeighborsRegressor]:[
+        {
+            name: "n_neighbors",
+            mode: "range",
+            subParams: [].concat(createRange(1, 1000, 1, "int"))
+        }
+    ],
+}
+

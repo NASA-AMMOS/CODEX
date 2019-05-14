@@ -1,12 +1,12 @@
-// This component creates a window that allows users to configure a new classifier run.
+// This component creates a window that allows users to configure a new regression run.
 
 import React, { useEffect, useState, useReducer } from "react";
-import * as classifierTypes from "constants/classifierTypes";
-import * as classifierFunctions from "components/Classifiers/classifierFunctions";
-import * as classifierActions from "actions/classifierActions";
+import * as regressionTypes from "constants/regressionTypes";
+import * as regressionFunctions from "components/regressions/regressionFunctions";
+import * as regressionActions from "actions/regressionActions";
 import Button from "@material-ui/core/Button";
 import { bindActionCreators } from "redux";
-import "components/Classifiers/classifiers.scss";
+import "components/regressions/regressions.scss";
 import { connect } from "react-redux";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -20,46 +20,46 @@ import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import classnames from "classnames";
 
-// Reducer to handle changes to each individual classifier's state, which contains info
+// Reducer to handle changes to each individual regression's state, which contains info
 // about parameters and expected run times.
-function classifierStateReducer(classifierState, action) {
+function regressionStateReducer(regressionState, action) {
     switch (action.type) {
         case "updateEta":
-            return classifierState.map(classifier =>
-                classifier.name === action.name
-                    ? { ...classifier, eta: action.eta, etaLoaded: true }
-                    : classifier
+            return regressionState.map(regression =>
+                regression.name === action.name
+                    ? { ...regression, eta: action.eta, etaLoaded: true }
+                    : regression
             );
         case "updateParam":
-            return classifierState.map(classifier =>
-                classifier.name === action.classifierName
+            return regressionState.map(regression =>
+                regression.name === action.regressionName
                     ? {
-                          ...classifier,
+                          ...regression,
                           paramData: {
-                              ...classifier.paramData,
-                              params: classifier.paramData.params.map(param =>
+                              ...regression.paramData,
+                              params: regression.paramData.params.map(param =>
                                   param.name === action.paramName
                                       ? { ...param, value: action.value }
                                       : param
                               )
                           }
                       }
-                    : classifier
+                    : regression
             );
         case "setSelection":
-            return classifierState.map(classifier =>
-                classifier.name === action.classifierName
-                    ? { ...classifier, selected: !classifier.selected }
-                    : classifier
+            return regressionState.map(regression =>
+                regression.name === action.regressionName
+                    ? { ...regression, selected: !regression.selected }
+                    : regression
             );
         case "setAllSelections":
-            return classifierState.map(classifier => {
-                return { ...classifier, selected: action.selected };
+            return regressionState.map(regression => {
+                return { ...regression, selected: action.selected };
             });
     }
 }
 
-function makeNumericInput(param, classifierName, classifierStateDispatch) {
+function makeNumericInput(param, regressionName, regressionStateDispatch) {
     return (
         <React.Fragment key={param.name}>
             <TextField
@@ -72,9 +72,9 @@ function makeNumericInput(param, classifierName, classifierStateDispatch) {
                 type="number"
                 value={param.value}
                 onChange={e =>
-                    classifierStateDispatch({
+                    regressionStateDispatch({
                         type: "updateParam",
-                        classifierName,
+                        regressionName,
                         paramName: param.name,
                         value:
                             param.type === "int"
@@ -87,16 +87,16 @@ function makeNumericInput(param, classifierName, classifierStateDispatch) {
     );
 }
 
-function makeStringChoiceInput(param, classifierName, classifierStateDispatch) {
+function makeStringChoiceInput(param, regressionName, regressionStateDispatch) {
     return (
         <FormControl key={param.name}>
             <InputLabel>{param.displayName}</InputLabel>
             <Select
                 value={param.value || param.default}
                 onChange={e =>
-                    classifierStateDispatch({
+                    regressionStateDispatch({
                         type: "updateParam",
-                        classifierName,
+                        regressionName,
                         paramName: param.name,
                         value: e.target.value
                     })
@@ -112,49 +112,49 @@ function makeStringChoiceInput(param, classifierName, classifierStateDispatch) {
     );
 }
 
-function makeSubParamInput(param, classifierName, classifierStateDispatch) {
+function makeSubParamInput(param, regressionName, regressionStateDispatch) {
     switch (param.type) {
         case "int":
         case "float":
-            return makeNumericInput(param, classifierName, classifierStateDispatch);
+            return makeNumericInput(param, regressionName, regressionStateDispatch);
         case "string":
-            return makeStringChoiceInput(param, classifierName, classifierStateDispatch);
+            return makeStringChoiceInput(param, regressionName, regressionStateDispatch);
     }
 }
 
-function makeClassifierRow(
-    activeClassifierName,
-    setActiveClassifierName,
-    classifierStateDispatch,
-    classifier
+function makeregressionRow(
+    activeregressionName,
+    setActiveregressionName,
+    regressionStateDispatch,
+    regression
 ) {
-    const etaLabel = classifier.eta
-        ? `(${Math.ceil(classifier.eta / 60)} min)`
-        : classifier.etaLoaded && "(n/a)";
+    const etaLabel = regression.eta
+        ? `(${Math.ceil(regression.eta / 60)} min)`
+        : regression.etaLoaded && "(n/a)";
     const rowClass = classnames({
         checkboxRow: true,
-        active: classifier.name === activeClassifierName
+        active: regression.name === activeregressionName
     });
     return (
-        <React.Fragment key={classifier.name}>
+        <React.Fragment key={regression.name}>
             <div
-                key={classifier.name}
+                key={regression.name}
                 className={rowClass}
-                onClick={_ => setActiveClassifierName(classifier.name)}
+                onClick={_ => setActiveregressionName(regression.name)}
             >
                 <Checkbox
                     color="primary"
-                    checked={classifier.selected}
+                    checked={regression.selected}
                     onChange={_ =>
-                        classifierStateDispatch({
+                        regressionStateDispatch({
                             type: "setSelection",
-                            classifierName: classifier.name
+                            regressionName: regression.name
                         })
                     }
                 />
                 <div className="checkboxLabels">
                     <Typography inline className="checkboxLabel">
-                        {classifier.name}
+                        {regression.name}
                     </Typography>
                     <Typography inline className="checkboxLabel" color="textSecondary">
                         {etaLabel}
@@ -165,14 +165,14 @@ function makeClassifierRow(
     );
 }
 
-// Uses the Classifier Types constants file to generate state objects for each classifier.
+// Uses the regression Types constants file to generate state objects for each regression.
 function getInitialParamState() {
-    return classifierTypes.CLASSIFIER_TYPES.map(classifier => {
+    return regressionTypes.regression_TYPES.map(regression => {
         const state = {
-            name: classifier,
+            name: regression,
             eta: null,
             etaLoaded: false,
-            paramData: classifierTypes.CLASSIFIER_PARAMS[classifier],
+            paramData: regressionTypes.regression_PARAMS[regression],
             selected: true
         };
         return state;
@@ -180,9 +180,9 @@ function getInitialParamState() {
 }
 
 function RegressionsOverview(props) {
-    // Create and store classifier states
-    const [classifierStates, classifierStateDispatch] = useReducer(
-        classifierStateReducer,
+    // Create and store regression states
+    const [regressionStates, regressionStateDispatch] = useReducer(
+        regressionStateReducer,
         getInitialParamState()
     );
 
@@ -191,7 +191,7 @@ function RegressionsOverview(props) {
         .map(f => f.get("name"))
         .toJS();
 
-    // Create and store global options for this classifier run
+    // Create and store global options for this regression run
     const [crossVal, setCrossVal] = useState(3);
 
     const searchTypeOptions = ["grid", "random"];
@@ -201,18 +201,18 @@ function RegressionsOverview(props) {
     const [scoring, setScoring] = useState(scoringOptions[0]);
 
     const [label, setLabel] = useState(selectedFeatures[0]);
-    const [activeClassifierName, setActiveClassifierName] = useState(classifierStates[0].name);
+    const [activeregressionName, setActiveregressionName] = useState(regressionStates[0].name);
 
-    // When the window loads, we request time estimates from the server for each classifier -- this effect
-    // handles those Promise returns and updates the classifier states as necessary. It also includes
+    // When the window loads, we request time estimates from the server for each regression -- this effect
+    // handles those Promise returns and updates the regression states as necessary. It also includes
     // a cleanup function that will cancel all requests if the user closes the window.
     useEffect(_ => {
-        const requests = classifierTypes.CLASSIFIER_TYPES.map(classifier => {
-            const { req, cancel } = classifierFunctions.getEta(classifier, selectedFeatures, 100);
+        const requests = regressionTypes.regression_TYPES.map(regression => {
+            const { req, cancel } = regressionFunctions.getEta(regression, selectedFeatures, 100);
             req.then(data =>
-                classifierStateDispatch({
+                regressionStateDispatch({
                     type: "updateEta",
-                    name: classifier,
+                    name: regression,
                     eta: data.eta && Math.ceil(data.eta)
                 })
             );
@@ -226,17 +226,17 @@ function RegressionsOverview(props) {
 
     // Render the HTML for the page.
     // When the user clicks "run", we fire an action that closes this window, creates server requests for data for each selected
-    // classifier, and then hands them off to a new window defined in ClassifierResults.js
-    const classifiersSelected = classifierStates.filter(c => c.selected).length;
-    const waitTime = classifierStates.reduce((acc, c) => acc + c.eta, 0);
-    const waitTimeString = classifierStates.every(c => c.etaLoaded)
+    // regression, and then hands them off to a new window defined in regressionResults.js
+    const regressionsSelected = regressionStates.filter(c => c.selected).length;
+    const waitTime = regressionStates.reduce((acc, c) => acc + c.eta, 0);
+    const waitTimeString = regressionStates.every(c => c.etaLoaded)
         ? waitTime
             ? `${Math.ceil(waitTime / 60)} minutes approximate run time`
             : "Run time not available"
         : "Calculating approximate run time...";
 
     return (
-        <div className="classifiersContainer">
+        <div className="regressionsContainer">
             <div className="headerBar">
                 <FormControl>
                     <InputLabel>Labels</InputLabel>
@@ -253,8 +253,8 @@ function RegressionsOverview(props) {
                         variant="contained"
                         color="primary"
                         onClick={_ =>
-                            props.createClassifierOutput(
-                                classifierStates,
+                            props.createregressionOutput(
+                                regressionStates,
                                 selectedFeatures,
                                 crossVal,
                                 label,
@@ -271,13 +271,13 @@ function RegressionsOverview(props) {
             <hr />
             <div className="body">
                 <div className="leftCol">
-                    <Typography variant="subtitle1">Select and Configure Classifier(s)</Typography>
+                    <Typography variant="subtitle1">Select and Configure regression(s)</Typography>
                     <div>
                         <Button
                             variant="text"
                             color="primary"
                             onClick={_ =>
-                                classifierStateDispatch({
+                                regressionStateDispatch({
                                     type: "setAllSelections",
                                     selected: true
                                 })
@@ -289,7 +289,7 @@ function RegressionsOverview(props) {
                             variant="text"
                             color="primary"
                             onClick={_ =>
-                                classifierStateDispatch({
+                                regressionStateDispatch({
                                     type: "setAllSelections",
                                     selected: false
                                 })
@@ -298,13 +298,13 @@ function RegressionsOverview(props) {
                             Select None
                         </Button>
                     </div>
-                    <FormGroup classes={{ root: "classifierList" }}>
-                        {classifierStates.map(classifier =>
-                            makeClassifierRow(
-                                activeClassifierName,
-                                setActiveClassifierName,
-                                classifierStateDispatch,
-                                classifier
+                    <FormGroup classes={{ root: "regressionList" }}>
+                        {regressionStates.map(regression =>
+                            makeregressionRow(
+                                activeregressionName,
+                                setActiveregressionName,
+                                regressionStateDispatch,
+                                regression
                             )
                         )}
                     </FormGroup>
@@ -312,8 +312,8 @@ function RegressionsOverview(props) {
                 <div className="rightCol">
                     <div className="paramHeader">
                         <div className="row">
-                            <div className="classifierCounts">
-                                <span>{classifiersSelected} Classifiers selected</span>
+                            <div className="regressionCounts">
+                                <span>{regressionsSelected} regressions selected</span>
                                 <span>{waitTimeString}</span>
                             </div>
                             <TextField
@@ -352,10 +352,10 @@ function RegressionsOverview(props) {
                         </div>
                     </div>
                     <hr />
-                    <div className="classifierParams">
-                        <Typography variant="subtitle1">{activeClassifierName}</Typography>
-                        {classifierStates
-                            .find(c => c.name === activeClassifierName)
+                    <div className="regressionParams">
+                        <Typography variant="subtitle1">{activeregressionName}</Typography>
+                        {regressionStates
+                            .find(c => c.name === activeregressionName)
                             .paramData.map(param => (
                                 <React.Fragment key={param.name}>
                                     <hr />
@@ -363,8 +363,8 @@ function RegressionsOverview(props) {
                                     {param.subParams.map(subParam =>
                                         makeSubParamInput(
                                             subParam,
-                                            activeClassifierName,
-                                            classifierStateDispatch
+                                            activeregressionName,
+                                            regressionStateDispatch
                                         )
                                     )}
                                 </React.Fragment>
@@ -384,8 +384,8 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        createClassifierOutput: bindActionCreators(
-            classifierActions.createClassifierOutput,
+        createregressionOutput: bindActionCreators(
+            regressionActions.createregressionOutput,
             dispatch
         )
     };

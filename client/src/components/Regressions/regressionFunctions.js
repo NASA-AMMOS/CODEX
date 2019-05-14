@@ -4,6 +4,7 @@ import * as actionTypes from "constants/actionTypes";
 import * as utils from "utils/utils";
 
 /* eslint import/no-webpack-loader-syntax: off */
+
 import WorkerSocket from "worker-loader!workers/socket.worker";
 
 export function getEta(classifier, selectedFeatures, numFeatures) {

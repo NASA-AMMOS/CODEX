@@ -4,7 +4,7 @@ import Typography from "@material-ui/core/Typography";
 import Plot from "react-plotly.js";
 import classnames from "classnames";
 import Button from "@material-ui/core/Button";
-import "components/Classifiers/classifiers.scss";
+import "components/Regressions/regressions.scss";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
 // Utility to create a Plotly chart for each algorithm data return from the server.
