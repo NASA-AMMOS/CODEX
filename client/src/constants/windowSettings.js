@@ -9,7 +9,7 @@ export const initialSizes = {
         height: 300,
         resizeable: true
     },
-    [uiTypes.HEATMAP_GRAPH]: {
+    [uiTypes.CONTOUR_GRAPH]: {
         width: 300,
         height: 300,
         resizeable: true
