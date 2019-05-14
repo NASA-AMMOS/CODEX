@@ -1,4 +1,4 @@
-import "components/Graphs/HeatmapGraph.css";
+import "components/Graphs/ContourGraph.css";
 
 import React, { useRef, useState, useEffect } from "react";
 import { bindActionCreators } from "redux";
@@ -14,7 +14,7 @@ import ReactResizeDetector from "react-resize-detector";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 
-function binHeatmapData(data) {
+function binContourData(data) {
     /* Create array of all unique values with a tally (row[2]) of how many times they appear.
         This operation can get slow and may need to be optimized in the future (maybe use typed arrays?).
         It's a lot faster to search an array of numbers than an array of arrays,
@@ -50,7 +50,7 @@ function binHeatmapData(data) {
     );
 }
 
-function HeatmapGraph(props) {
+function ControurGraph(props) {
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
     const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
 
@@ -230,4 +230,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(HeatmapGraph);
+)(ControurGraph);
