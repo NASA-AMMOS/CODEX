@@ -272,7 +272,6 @@ export class Cristal extends Component<CristalProps, CristalState> {
     renderResizeHandles = () => {
         const { isResizable } = this.props;
         if (!isResizable) return;
-
         return [
             <RightResizeHandle key="right-resize" onMouseDown={this.startXResize} />,
             <BottomRightResizeHandle

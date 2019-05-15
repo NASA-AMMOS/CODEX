@@ -20,8 +20,8 @@ export const initialSizes = {
         resizable: false
     },
     [classifierTypes.CLASSIFIER_WINDOW]: {
-        width: 750,
-        height: 500,
+        width: 850,
+        height: 600,
         resizable: false
     },
     [classifierTypes.CLASSIFIER_RESULTS_WINDOW]: {
@@ -34,8 +34,8 @@ export const initialSizes = {
         resizable: true
     },
     [regressionTypes.REGRESSION_WINDOW]: {
-        width: 750,
-        height: 500,
+        width: 850,
+        height: 600,
         resizable: false
     },
     [regressionTypes.REGRESSION_RESULTS_WINDOW]: {
