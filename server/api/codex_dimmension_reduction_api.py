@@ -103,6 +103,8 @@ def run_codex_dim_reduction(
     startTime = time.time()
     eta = None
 
+    n_components = parms["n_components"]
+
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         print("Error: codex_decomposition_PCA: Hash not found")
@@ -134,11 +136,11 @@ def run_codex_dim_reduction(
 
         if(algorithm == "PCA"):
 
-            dim_r = PCA(n_components=parms["n_components"])
+            dim_r = PCA(n_components=n_components)
 
         elif(algorithm == "ICA"):
 
-            dim_r = FastICA(n_components=parms["n_components"])
+            dim_r = FastICA(n_components=n_components)
 
         else:
             return {'algorithm': algorithm,
