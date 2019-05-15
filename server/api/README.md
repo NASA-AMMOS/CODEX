@@ -24,7 +24,15 @@ Server->Client
 	Returns list of session names
 
 
+## Dimensionality Reduction API
 
+Example:
+{"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"dimensionality_reduction", 'dataFeatures': [<list of feature strings>], 'downsampled': False, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {n_components': 100}, 'dataSelections': [], 'cid': 'wngyu'}
+
+|         algorithmName          | Description  |      parm 1 name     | parm 1 dtype | parm 1 default         |     parm 1 range     |
+|--------------------------------|--------------|----------------------|--------------|------------------------|----------------------|
+| PCA                            |              | n_components         |     int      |        # features      |     [1, # features]  |
+| ICA                            |              | n_components         |     int      |        # features      |     [1, # features]  |
 
 ## Clustering API
 
