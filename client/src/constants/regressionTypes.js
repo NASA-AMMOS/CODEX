@@ -1,3 +1,5 @@
+import * as constantHelpers from "constants/constantHelpers"
+
 export const REGRESSION_WINDOW = "REGRESSION_WINDOW";
 export const REGRESSION_RESULTS_WINDOW = "REGRESSION_RESULTS_WINDOW";
 
@@ -96,43 +98,6 @@ export const REGRESSION_TYPES = [
 ]
 
 
-/*
-    Creates a list of objects that are used to create the forms for ranges 
-*/
-function createRange(min, max, stepSize, type) {
-
-    let minObj = {
-                    type: type,
-                    name: "min",
-                    label: "Min parameter label",
-                    default: min,
-                    min: min,
-                    max: max,
-                    helperText: min + " or higher"
-    };
-
-    let maxObj = {
-                    type: type,
-                    name: "max",
-                    label: "Max parameter label",
-                    default: 100,
-                    min: min,
-                    max: max,
-                    helperText: "Up to 100"
-    };
-
-    let stepSizeObj = {
-                    type: type,
-                    name: "step",
-                    label: "Step size",
-                    default: stepSize,
-                    min: min,
-                    max: max,
-                    helperText: "Between " + min + " and " + max
-    };
-
-    return [minObj, maxObj, stepSizeObj];
-}
 
 export const REGRESSION_PARAMS = {
     [ARDRegression]: [ 
@@ -145,98 +110,98 @@ export const REGRESSION_PARAMS = {
                     There may be a better way to do this, but
                     this just reduced alot of code
                 */
-            ].concat(createRange(1, 10000, 1, "int"))
+            ].concat(constantHelpers.createRange(1, 10000, 1, "int"))
         }
     ],
     [AdaBoostRegressor]: [
         {
             name: "n_estimators",
             mode: "range",
-            subParams: [].concat(createRange(1, 1000, 1, "int"))
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
         }
     ],
     [BaggingRegressor]:[
         {
             name: "n_estimators",
             mode: "range",
-            subParams: [].concat(createRange(1, 1000, 1, "int"))
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
         }
     ],
     [BayesianRidge]:[
         {
             name: "n_estimators",
             mode: "range",
-            subParams: [].concat(createRange(1, 1000, 1, "int"))
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
         }
     ],
     [CCA]:[
         {
             name: "max_iter",
             mode: "range",
-            subParams: [].concat(createRange(1, 1000, 1, "int"))
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
         }
     ],
     [DecisionTreeRegressor]:[
         {
             name: "max_depth",
             mode: "range",
-            subParams: [].concat(createRange(1, 1000, 1, "int"))
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
         }
     ],
     [ElasticNet]:[
         {
             name: "max_iter",
             mode: "range",
-            subParams: [].concat(createRange(-1, 10000, 1, "int"))
+            subParams: [].concat(constantHelpers.createRange(-1, 10000, 1, "int"))
         }
     ],
     [ElasticNetCV]:[
         {
             name: "max_iter",
             mode: "range",
-            subParams: [].concat(createRange(-1, 10000, 1, "int"))
+            subParams: [].concat(constantHelpers.createRange(-1, 10000, 1, "int"))
         }
     ],
     [ExtraTreeRegressor]:[
         {
             name: "max_features",
             mode: "range",
-            subParams: [].concat(createRange(1, 1000, 1, "int"))
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
         }
     ],
     [ExtraTreesRegressor]:[
         {
             name: "max_features",
             mode: "range",
-            subParams: [].concat(createRange(1, 1000, 1, "int"))
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
         }
     ],
     [GaussianProcessRegressor]:[
         {
             name: "n_restarts_optimizer",
             mode: "range",
-            subParams: [].concat(createRange(1, 1000, 1, "int"))
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
         }
     ],
     [GradientBoostingRegressor]:[
         {
             name: "max_depth",
             mode: "range",
-            subParams: [].concat(createRange(1, 1000, 1, "int"))
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
         }
     ],
     [HuberRegressor]:[
         {
             name: "max_iter",
             mode: "range",
-            subParams: [].concat(createRange(1, 1000, 1, "int"))
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
         }
     ],
     [KNeighborsRegressor]:[
         {
             name: "n_neighbors",
             mode: "range",
-            subParams: [].concat(createRange(1, 1000, 1, "int"))
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
         }
     ],
 }

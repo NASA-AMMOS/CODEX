@@ -1,3 +1,5 @@
+import * as constantHelpers from "constants/constantHelpers"
+
 export const CLASSIFIER_WINDOW = "CLASSIFIER_WINDOW";
 export const CLASSIFIER_LOADING_WINDOW = "CLASSIFIER_LOADING_WINDOW";
 export const CLASSIFIER_RESULTS_WINDOW = "CLASSIFIER_RESULTS_WINDOW";
@@ -63,140 +65,31 @@ export const CLASSIFIER_PARAMS = {
         {
             name: "n_estimators",
             mode: "range",
-            subParams: [
-                {
-                    type: "int",
-                    name: "min",
-                    label: "Min parameter label",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "1 or higher"
-                },
-                {
-                    type: "int",
-                    name: "max",
-                    label: "Max parameter label",
-                    default: 100,
-                    min: 1,
-                    max: 100,
-                    helperText: "Up to 100"
-                },
-                {
-                    type: "int",
-                    name: "step",
-                    label: "Step size",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "Between 1 and 100"
-                }
-            ]
+            subParams: [].concat(constantHelpers.createRange(1, 100, 1, "int"))
         }
     ],
     [BaggingClassifier]: [
         {
             name: "n_estimators",
             mode: "range",
-            subParams: [
-                {
-                    type: "int",
-                    name: "min",
-                    label: "Min parameter label",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "1 or higher"
-                },
-                {
-                    type: "int",
-                    name: "max",
-                    label: "Max parameter label",
-                    default: 10,
-                    min: 1,
-                    max: 10,
-                    helperText: "Up to 10"
-                },
-                {
-                    type: "int",
-                    name: "step",
-                    label: "Step size",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "Between 1 and 100"
-                }
-            ]
+            subParams: [].concat(constantHelpers.createRange(1, 100, 1, "int"))
+
         }
     ],
     [BayesianGaussianMixture]: [
         {
             name: "n_components",
             mode: "range",
-            subParams: [
-                {
-                    type: "int",
-                    name: "min",
-                    label: "Min parameter label",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "1 or higher"
-                },
-                {
-                    type: "int",
-                    name: "max",
-                    label: "Max parameter label",
-                    default: 10,
-                    min: 1,
-                    max: 10,
-                    helperText: "Up to 10"
-                },
-                {
-                    type: "int",
-                    name: "step",
-                    label: "Step size",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "Between 1 and 100"
-                }
-            ]
+            subParams: [].concat(constantHelpers.createRange(1, 100, 1, "int"))
+
         }
     ],
     [BernoulliNB]: [
         {
             name: "alpha",
             mode: "range",
-            subParams: [
-                {
-                    type: "float",
-                    name: "min",
-                    label: "Min parameter label",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "1 or higher"
-                },
-                {
-                    type: "float",
-                    name: "max",
-                    label: "Max parameter label",
-                    default: 1,
-                    min: 1,
-                    max: 1,
-                    helperText: "Up to 1"
-                },
-                {
-                    type: "float",
-                    name: "step",
-                    label: "Step size",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "Between 0 and 100"
-                }
-            ]
+            subParams: [].concat(constantHelpers.createRange(1, 100, 1, "int"))
+
         }
     ],
     [CalibratedClassifierCV]: [
@@ -217,35 +110,7 @@ export const CLASSIFIER_PARAMS = {
         {
             name: "alpha",
             mode: "range",
-            subParams: [
-                {
-                    type: "float",
-                    name: "min",
-                    label: "Min parameter label",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "1 or higher"
-                },
-                {
-                    type: "float",
-                    name: "max",
-                    label: "Max parameter label",
-                    default: 1,
-                    min: 1,
-                    max: 1,
-                    helperText: "Up to 1"
-                },
-                {
-                    type: "float",
-                    name: "step",
-                    label: "Step size",
-                    default: 1,
-                    min: 1,
-                    max: 100,
-                    helperText: "Between 0 and 100"
-                }
-            ]
+            subParams: [].concat(constantHelpers.createRange(1, 100, 1, "int"))
         }
     ]
 };
