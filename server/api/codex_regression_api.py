@@ -644,6 +644,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
     regr.fit(X, y)
     y_pred = regr.predict(X)
+    result["y_pred"] = y_pred.tolist()
 
     result["best_parms"] = regr.best_params_
     result["best_score"] = regr.best_score_
