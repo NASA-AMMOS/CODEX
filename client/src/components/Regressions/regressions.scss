@@ -23,11 +23,13 @@
 
 .leftCol {
     width: 40%;
+    flex: 1;
 }
 
 .rightCol {
     width: 60%;
     padding-left: 25px;
+    flex: 1;
 }
 
 .buttonRow {
@@ -139,6 +141,10 @@
             color: #fff;
         }
     }
+}
+
+.labelDropdown {
+    min-width:100px !important;
 }
 
 .regressionHeader {

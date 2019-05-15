@@ -226,7 +226,7 @@ function RegressionsOverview(props) {
 
     // Render the HTML for the page.
     // When the user clicks "run", we fire an action that closes this window, creates server requests for data for each selected
-    // regression, and then hands them off to a new window defined in regressionResults.js
+    // regression, and then hands them off to a new window defined in RegressionResults.js
     const regressionsSelected = regressionStates.filter(c => c.selected).length;
     const waitTime = regressionStates.reduce((acc, c) => acc + c.eta, 0);
     const waitTimeString = regressionStates.every(c => c.etaLoaded)
@@ -238,7 +238,7 @@ function RegressionsOverview(props) {
     return (
         <div className="regressionsContainer">
             <div className="headerBar">
-                <FormControl>
+                <FormControl className="labelDropdown" >
                     <InputLabel>Labels</InputLabel>
                     <Select value={label} onChange={e => setLabel(e.target.value)}>
                         {selectedFeatures.map(f => (
