@@ -57,22 +57,22 @@ Example:
 Example:
 {"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"classification", 'dataFeatures': [<list of feature strings>], 'downsampled': False, 'cross_val': 5, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'scoring':<scoring type>,'search_type':<"random or grid">, 'parameters': {eps': [0.7], 'k':[1,2,3,4,5]}, 'dataSelections': [], 'cid': 'wngyu'}
 
-Fields:
-"routine": "algorithm" - always set to algorithm.  Tells the server you're requesting algorithmic data processing.
-"algorithmName": <algirithmName from table below>
-"algorithmType": "classification" - Specifies we're doing classification.  Separates the algorithmic processing from things like regression or clustering.
-"dataFeatures": [<list of feature names>]
-"downsampled": Either False for no downsampling, or a percentage between 1 and 100 (int).
-"cross_val": integer >= 1.  Determines how many times you want to cross validate the experiment.
-"file": Path to the file we're processing data from.
-"guidance": None - Always None for classification algorithmic processing.
-"identification": Not sure, set on front end, not used by server currently.
-"dataSelections": List of selection names to apply to processing.
-"cid": Not sure, set on front end, not used by server currently.
-"scoring": The metric for evaluating the equality of the model.  Acceptable keys are: accuracy, balanced_accuracy, average_precision, brier_score_loss, f1, f1_micro, f1_macro, f1_weighted, f1_samples, neg_log_loss, precision, recall, jaccard, roc_auc
-"search_type": Technique for evaluating the parameter space for each algorithm.  Acceptable keys are: "random" or "grid".  
+Fields:<br/>
+"routine": "algorithm" - always set to algorithm.  Tells the server you're requesting algorithmic data processing.<br/>
+"algorithmName": <algirithmName from table below><br/>
+"algorithmType": "classification" - Specifies we're doing classification.  Separates the algorithmic processing from things like regression or clustering.<br/>
+"dataFeatures": [<list of feature names>]<br/>
+"downsampled": Either False for no downsampling, or a percentage between 1 and 100 (int).<br/>
+"cross_val": integer >= 1.  Determines how many times you want to cross validate the experiment.<br/>
+"file": Path to the file we're processing data from.<br/>
+"guidance": None - Always None for classification algorithmic processing.<br/>
+"identification": Not sure, set on front end, not used by server currently.<br/>
+"dataSelections": List of selection names to apply to processing.<br/>
+"cid": Not sure, set on front end, not used by server currently.<br/>
+"scoring": The metric for evaluating the equality of the model.  Acceptable keys are: accuracy, balanced_accuracy, average_precision, brier_score_loss, f1, f1_micro, f1_macro, f1_weighted, f1_samples, neg_log_loss, precision, recall, jaccard, roc_auc<br/>
+"search_type": Technique for evaluating the parameter space for each algorithm.  Acceptable keys are: "random" or "grid".<br/>
 "parameters": {<sub dictionary of parameters for the given algorithmName>} - Defined in the table below.  Only send the ones specified for the given algorithm. Each key should be a list.
-																			When a range is given by the user, the front end should extend it out.  For example, if the user specified min=5, max=10 & step=2 for key "apple", the front end should send "apple":[5,7,9]
+																			When a range is given by the user, the front end should extend it out.  For example, if the user specified min=5, max=10 & step=2 for key "apple", the front end should send "apple":[5,7,9]<br/>
 
 
 
@@ -112,22 +112,22 @@ Fields:
 Example:
 {"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"regression", 'dataFeatures': [<list of feature strings>], 'downsampled': False, 'cross_val': 5, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'scoring':<scoring type>,'search_type':<"random or grid">, 'parameters': {eps': [0.7], 'k':[1,2,3,4,5,5]}, 'dataSelections': [], 'cid': 'wngyu'}
 
-Fields:
-"routine": "algorithm" - always set to algorithm.  Tells the server you're requesting algorithmic data processing.
-"algorithmName": <algirithmName from table below>
-"algorithmType": "regression" - Specifies we're doing regression.  Separates the algorithmic processing from things like classification or clustering.
-"dataFeatures": [<list of feature names>]
-"downsampled": Either False for no downsampling, or a percentage between 1 and 100 (int).
-"cross_val": integer >= 1.  Determines how many times you want to cross validate the experiment.
-"file": Path to the file we're processing data from.
-"guidance": None - Always None for regression algorithmic processing.
-"identification": Not sure, set on front end, not used by server currently.
-"dataSelections": List of selection names to apply to processing.
-"cid": Not sure, set on front end, not used by server currently.
-"scoring": The metric for evaluating the equality of the model.  Acceptable keys are: explained_variance, max_error, neg_mean_absolute_error, neg_mean_squared_error, neg_mean_squared_log_error, neg_median_absolute_error, r2
-"search_type": Technique for evaluating the parameter space for each algorithm.  Acceptable keys are: "random" or "grid".  
+Fields:<br/>
+"routine": "algorithm" - always set to algorithm.  Tells the server you're requesting algorithmic data processing.<br/>
+"algorithmName": <algirithmName from table below><br/>
+"algorithmType": "regression" - Specifies we're doing regression.  Separates the algorithmic processing from things like classification or clustering.<br/>
+"dataFeatures": [<list of feature names>]<br/>
+"downsampled": Either False for no downsampling, or a percentage between 1 and 100 (int).<br/>
+"cross_val": integer >= 1.  Determines how many times you want to cross validate the experiment.<br/>
+"file": Path to the file we're processing data from.<br/>
+"guidance": None - Always None for regression algorithmic processing.<br/>
+"identification": Not sure, set on front end, not used by server currently.<br/>
+"dataSelections": List of selection names to apply to processing.<br/>
+"cid": Not sure, set on front end, not used by server currently.<br/>
+"scoring": The metric for evaluating the equality of the model.  Acceptable keys are: explained_variance, max_error, neg_mean_absolute_error, neg_mean_squared_error, neg_mean_squared_log_error, neg_median_absolute_error, r2<br/>
+"search_type": Technique for evaluating the parameter space for each algorithm.  Acceptable keys are: "random" or "grid".<br/>
 "parameters": {<sub dictionary of parameters for the given algorithmName>} - Defined in the table below.  Only send the ones specified for the given algorithm. Each key should be a list.
-																			When a range is given by the user, the front end should extend it out.  For example, if the user specified min=5, max=10 & step=2 for key "apple", the front end should send "apple":[5,7,9]
+																			When a range is given by the user, the front end should extend it out.  For example, if the user specified min=5, max=10 & step=2 for key "apple", the front end should send "apple":[5,7,9]<br/>
 
 
 
