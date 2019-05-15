@@ -1,4 +1,4 @@
-.classifiersContainer {
+.regressionsContainer {
     width: 100%;
     height: 100%;
 }
@@ -36,7 +36,7 @@
     margin-top: 5px;
 }
 
-.classifierList {
+.regressionList {
     overflow-y: scroll;
     height: 100%;
     flex-wrap: nowrap !important;
@@ -74,13 +74,13 @@
     flex-direction: column;
 }
 
-.classifierCounts {
+.regressionCounts {
     span {
         display: block;
     }
 }
 
-.classifierParams {
+.regressionParams {
     margin-top: 10px;
     height: 70%;
     overflow-y: scroll;
@@ -127,21 +127,21 @@
     margin-left: 20px;
 }
 
-.classifierResult {
+.regressionResult {
     position: relative;
     width: 205px;
     box-shadow: 0px 5px 12px 0px rgba(0, 0, 0, 0.1);
     margin-top: 10px;
     &.selected {
         background: #000;
-        .classifierHeader,
+        .regressionHeader,
         .bestParms {
             color: #fff;
         }
     }
 }
 
-.classifierHeader {
+.regressionHeader {
     width: 90%;
     display: flex;
     justify-content: space-between;

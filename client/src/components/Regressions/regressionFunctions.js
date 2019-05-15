@@ -7,11 +7,11 @@ import * as utils from "utils/utils";
 
 import WorkerSocket from "worker-loader!workers/socket.worker";
 
-export function getEta(classifier, selectedFeatures, numFeatures) {
+export function getEta(regression, selectedFeatures, numFeatures) {
     const request = {
         routine: "time",
-        algorithmType: "classification",
-        algorithmName: classifier,
+        algorithmType: "regression",
+        algorithmName: regression,
         numSamples: selectedFeatures.length,
         numFeatures: numFeatures
     };

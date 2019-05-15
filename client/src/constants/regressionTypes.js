@@ -48,7 +48,7 @@ export const TheilSenRegressor = "TheilSenRegressor";
 export const TransformedTargetRegressor = "TransformedTargetRegressor";
 
 
-export const REGRESSION_TYPES = {
+export const REGRESSION_TYPES = [
     ARDRegression,
     AdaBoostRegressor,
     BaggingRegressor,
@@ -93,7 +93,7 @@ export const REGRESSION_TYPES = {
     SVR,
     TheilSenRegressor,
     TransformedTargetRegressor
-}
+]
 
 
 /*

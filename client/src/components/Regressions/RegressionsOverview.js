@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useReducer } from "react";
 import * as regressionTypes from "constants/regressionTypes";
-import * as regressionFunctions from "components/regressions/regressionFunctions";
+import * as regressionFunctions from "components/Regressions/regressionFunctions";
 import * as regressionActions from "actions/regressionActions";
 import Button from "@material-ui/core/Button";
 import { bindActionCreators } from "redux";
@@ -123,8 +123,8 @@ function makeSubParamInput(param, regressionName, regressionStateDispatch) {
 }
 
 function makeregressionRow(
-    activeregressionName,
-    setActiveregressionName,
+    activeRegressionName,
+    setActiveRegressionName,
     regressionStateDispatch,
     regression
 ) {
@@ -133,14 +133,14 @@ function makeregressionRow(
         : regression.etaLoaded && "(n/a)";
     const rowClass = classnames({
         checkboxRow: true,
-        active: regression.name === activeregressionName
+        active: regression.name === activeRegressionName
     });
     return (
         <React.Fragment key={regression.name}>
             <div
                 key={regression.name}
                 className={rowClass}
-                onClick={_ => setActiveregressionName(regression.name)}
+                onClick={_ => setActiveRegressionName(regression.name)}
             >
                 <Checkbox
                     color="primary"
@@ -167,12 +167,12 @@ function makeregressionRow(
 
 // Uses the regression Types constants file to generate state objects for each regression.
 function getInitialParamState() {
-    return regressionTypes.regression_TYPES.map(regression => {
+    return regressionTypes.REGRESSION_TYPES.map(regression => {
         const state = {
             name: regression,
             eta: null,
             etaLoaded: false,
-            paramData: regressionTypes.regression_PARAMS[regression],
+            paramData: regressionTypes.REGRESSION_PARAMS[regression],
             selected: true
         };
         return state;
@@ -201,13 +201,13 @@ function RegressionsOverview(props) {
     const [scoring, setScoring] = useState(scoringOptions[0]);
 
     const [label, setLabel] = useState(selectedFeatures[0]);
-    const [activeregressionName, setActiveregressionName] = useState(regressionStates[0].name);
+    const [activeRegressionName, setActiveRegressionName] = useState(regressionStates[0].name);
 
     // When the window loads, we request time estimates from the server for each regression -- this effect
     // handles those Promise returns and updates the regression states as necessary. It also includes
     // a cleanup function that will cancel all requests if the user closes the window.
     useEffect(_ => {
-        const requests = regressionTypes.regression_TYPES.map(regression => {
+        const requests = regressionTypes.REGRESSION_TYPES.map(regression => {
             const { req, cancel } = regressionFunctions.getEta(regression, selectedFeatures, 100);
             req.then(data =>
                 regressionStateDispatch({
@@ -253,7 +253,7 @@ function RegressionsOverview(props) {
                         variant="contained"
                         color="primary"
                         onClick={_ =>
-                            props.createregressionOutput(
+                            props.createRegressionOutput(
                                 regressionStates,
                                 selectedFeatures,
                                 crossVal,
@@ -301,8 +301,8 @@ function RegressionsOverview(props) {
                     <FormGroup classes={{ root: "regressionList" }}>
                         {regressionStates.map(regression =>
                             makeregressionRow(
-                                activeregressionName,
-                                setActiveregressionName,
+                                activeRegressionName,
+                                setActiveRegressionName,
                                 regressionStateDispatch,
                                 regression
                             )
@@ -353,9 +353,9 @@ function RegressionsOverview(props) {
                     </div>
                     <hr />
                     <div className="regressionParams">
-                        <Typography variant="subtitle1">{activeregressionName}</Typography>
+                        <Typography variant="subtitle1">{activeRegressionName}</Typography>
                         {regressionStates
-                            .find(c => c.name === activeregressionName)
+                            .find(c => c.name === activeRegressionName)
                             .paramData.map(param => (
                                 <React.Fragment key={param.name}>
                                     <hr />
@@ -363,7 +363,7 @@ function RegressionsOverview(props) {
                                     {param.subParams.map(subParam =>
                                         makeSubParamInput(
                                             subParam,
-                                            activeregressionName,
+                                            activeRegressionName,
                                             regressionStateDispatch
                                         )
                                     )}
@@ -384,8 +384,8 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        createregressionOutput: bindActionCreators(
-            regressionActions.createregressionOutput,
+        createRegressionOutput: bindActionCreators(
+            regressionActions.createRegressionOutput,
             dispatch
         )
     };

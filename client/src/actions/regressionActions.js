@@ -2,7 +2,7 @@ import * as actionTypes from "constants/actionTypes";
 import * as regressionTypes from "constants/regressionTypes";
 import * as actionFunctions from "actions/actionFunctions";
 import * as utils from "utils/utils";
-import * as classifierFunctions from "components/Classifiers/classifierFunctions";
+import * as regressionFunctions from "components/regressions/regressionFunctions";
 
 /* eslint import/no-webpack-loader-syntax: off */
 import WorkerSocket from "worker-loader!workers/socket.worker";
@@ -16,28 +16,28 @@ export function openRegressionWindow() {
     };
 }
 
-// Creates a request object for a classifier run that can be converted to JSON and sent to the server.
-function createClassifierRequest(
+// Creates a request object for a regression run that can be converted to JSON and sent to the server.
+function createRegressionRequest(
     filename,
     selectedFeatures,
     crossVal,
     labelName,
     searchType,
     scoring,
-    classifierState
+    regressionState
 ) {
     return {
         routine: "algorithm",
-        algorithmName: classifierState.name,
-        algorithmType: "classification",
+        algorithmName: regressionState.name,
+        algorithmType: "regression",
         dataFeatures: selectedFeatures.filter(f => f !== labelName),
         filename,
         identification: { id: "dev0" },
         parameters:
-            classifierState.paramData.mode === "range"
+            regressionState.paramData.mode === "range"
                 ? {
-                      [classifierState.paramData.name]: classifierFunctions.createRange(
-                          classifierState.paramData.params
+                      [regressionState.paramData.name]: regressionFunctions.createRange(
+                          regressionState.paramData.params
                       )
                   }
                 : {},
@@ -50,13 +50,13 @@ function createClassifierRequest(
     };
 }
 
-/* Function to run a set of selected classifiers and their user-selected inputs.
-Creates a server request for each chosen classifier, sends that request to the server,
-closes the classifier select window and opens a new one while handing off the server requests (as Promises)
-to the ClassifierResults window. */
+/* Function to run a set of selected regressions and their user-selected inputs.
+Creates a server request for each chosen regression, sends that request to the server,
+closes the regression select window and opens a new one while handing off the server requests (as Promises)
+to the regressionResults window. */
 
-export function createClassifierOutput(
-    classifierStates,
+export function createRegressionOutput(
+    regressionStates,
     selectedFeatures,
     crossVal,
     labelName,
@@ -65,24 +65,24 @@ export function createClassifierOutput(
     winId
 ) {
     return (dispatch, getState) => {
-        // Close classifier options window and open a loading window
+        // Close regression options window and open a loading window
         dispatch({ type: actionTypes.CLOSE_WINDOW, id: winId });
 
-        const classifiersToRun = classifierStates
-            .filter(classifierState => classifierState.paramData)
-            .filter(classifierState => classifierState.selected);
+        const regressionsToRun = regressionStates
+            .filter(regressionState => regressionState.paramData)
+            .filter(regressionState => regressionState.selected);
 
         const filename = getState().data.get("filename");
-        const requests = classifiersToRun
-            .map(classifierState =>
-                createClassifierRequest(
+        const requests = regressionsToRun
+            .map(regressionState =>
+                createRegressionRequest(
                     filename,
                     selectedFeatures,
                     crossVal,
                     labelName,
                     searchType,
                     scoring,
-                    classifierState
+                    regressionState
                 )
             )
             .map(request => {

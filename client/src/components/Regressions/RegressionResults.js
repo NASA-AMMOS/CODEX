@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useReducer } from "react";
-import * as classifierTypes from "constants/classifierTypes";
+import * as regressionTypes from "constants/regressionTypes";
 import Typography from "@material-ui/core/Typography";
 import Plot from "react-plotly.js";
 import classnames from "classnames";
@@ -9,7 +9,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 
 // Utility to create a Plotly chart for each algorithm data return from the server.
 // We show a loading progress indicator if the data hasn't arrived yet.
-function makeClassifierPlot(algo) {
+function makeRegressionPlot(algo) {
     if (!algo || !algo.data)
         return (
             <div className="chartLoading">
@@ -73,10 +73,10 @@ function makeClassifierPlot(algo) {
     );
 }
 
-// Finds the highest-scoring classifier and generates its chart data.
-// (Doesn't display until all classifier returns come back from server.)
-function makeBestClassifier(algoStates) {
-    const bestClassifier =
+// Finds the highest-scoring regression and generates its chart data.
+// (Doesn't display until all regression returns come back from server.)
+function makeBestRegression(algoStates) {
+    const bestRegression =
         algoStates.every(algo => algo.data) &&
         algoStates.reduce((acc, algo) => {
             if (!acc) return { name: algo.data.algorithmName, score: algo.data.best_score };
@@ -87,17 +87,17 @@ function makeBestClassifier(algoStates) {
 
     return (
         <div>
-            <Typography variant="h6">Best Classifier</Typography>
-            <div className="classifierResult">
-                <div className="classifierHeader">
-                    {bestClassifier ? bestClassifier.name : "Loading..."}
-                    <span hidden={!bestClassifier} className="percentage">
-                        {Math.ceil(bestClassifier.score * 100)}%
+            <Typography variant="h6">Best Regression</Typography>
+            <div className="regressionResult">
+                <div className="regressionHeader">
+                    {bestRegression ? bestRegression.name : "Loading..."}
+                    <span hidden={!bestRegression} className="percentage">
+                        {Math.ceil(bestRegression.score * 100)}%
                     </span>
                 </div>
                 <div className="plot">
-                    {makeClassifierPlot(
-                        algoStates.find(algo => algo.algorithmName === bestClassifier.name)
+                    {makeRegressionPlot(
+                        algoStates.find(algo => algo.algorithmName === bestRegression.name)
                     )}
                 </div>
             </div>
@@ -106,7 +106,7 @@ function makeBestClassifier(algoStates) {
 }
 
 function RegressionResults(props) {
-    // Create state objects for each classifier we're running so that we can keep track of them.
+    // Create state objects for each regression we're running so that we can keep track of them.
     const [algoStates, setAlgoStates] = useState(_ => props.requests.map(req => req.requestObj));
     useEffect(_ => {
         // As each request promise resolves with server data, update the state.
@@ -128,7 +128,7 @@ function RegressionResults(props) {
         };
     }, []);
 
-    // State getter and setter for the list of currently selected classifiers
+    // State getter and setter for the list of currently selected regressions
     const [selectedAlgos, setSelectedAlgos] = useState([]);
     function toggleSelected(name) {
         setSelectedAlgos(
@@ -141,7 +141,7 @@ function RegressionResults(props) {
     return (
         <div>
             <div className="resultRow leftAligned">
-                {makeBestClassifier(algoStates)}
+                {makeBestRegression(algoStates)}
                 <div className="runParams">
                     <Typography variant="h6">Global Run Parameters</Typography>
                     <ul className="bestParms">
@@ -158,18 +158,18 @@ function RegressionResults(props) {
                     </ul>
                 </div>
             </div>
-            <Typography variant="h6">All Classifiers</Typography>
+            <Typography variant="h6">All Regressions</Typography>
             <div className="resultRow">
                 {algoStates.map(algo => (
                     <div
                         key={algo.algorithmName}
                         className={classnames({
-                            classifierResult: true,
+                            regressionResult: true,
                             selected: selectedAlgos.includes(algo.algorithmName)
                         })}
                     >
                         <div
-                            className="classifierHeader"
+                            className="regressionHeader"
                             onClick={_ => toggleSelected(algo.algorithmName)}
                         >
                             {algo.algorithmName.length <= 20
@@ -179,7 +179,7 @@ function RegressionResults(props) {
                                 {algo.loaded && Math.ceil(algo.data.best_score * 100)}%
                             </span>
                         </div>
-                        <div className="plot">{makeClassifierPlot(algo)}</div>
+                        <div className="plot">{makeRegressionPlot(algo)}</div>
                         <ul className="bestParms" hidden={!algo.data}>
                             {algo.data &&
                                 Object.entries(algo.data.best_parms).map(([name, val]) => (
