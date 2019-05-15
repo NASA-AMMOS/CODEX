@@ -11,7 +11,7 @@ function alertNotEnoughFeatures() {
 function canBuildGraph(graphMode, dataState) {
     switch (graphMode) {
         case uiTypes.SCATTER_GRAPH:
-        case uiTypes.HEATMAP_GRAPH:
+        case uiTypes.CONTOUR_GRAPH:
             if (dataState.get("featureList").filter(f => f.get("selected")).size < 2) {
                 alertNotEnoughFeatures();
                 return false;
