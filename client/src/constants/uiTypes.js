@@ -19,8 +19,8 @@ export const SELECTIONS_MASTER_COLOR = "#335ce4";
 export const SELECTIONS_BRUSH_COLOR = "#ff4500";
 
 export const SCATTER_GRAPH = "Scatter";
-export const HEATMAP_GRAPH = "Heatmap";
+export const CONTOUR_GRAPH = "Contour";
 
 export const SESSIONS_WINDOW = "SESSIONS_WINDOW";
 
-export const GRAPH_TYPES = [SCATTER_GRAPH, HEATMAP_GRAPH];
+export const GRAPH_TYPES = [SCATTER_GRAPH, CONTOUR_GRAPH];

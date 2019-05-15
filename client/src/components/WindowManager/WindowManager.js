@@ -6,7 +6,7 @@ import React, { useState, useLayoutEffect, useEffect, useRef } from "react";
 
 import ClusterAlgorithm from "components/Algorithms/ClusterAlgorithm";
 import Cristal from "react-cristal/src";
-import HeatmapGraph from "components/Graphs/HeatmapGraph";
+import ContourGraph from "components/Graphs/ContourGraph";
 import ScatterGraph from "components/Graphs/ScatterGraph";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as uiTypes from "constants/uiTypes";
@@ -40,7 +40,7 @@ function previewAllowed(win) {
 function getWindowTitle(win) {
     switch (win.windowType) {
         case uiTypes.SCATTER_GRAPH:
-        case uiTypes.HEATMAP_GRAPH:
+        case uiTypes.CONTOUR_GRAPH:
             return getTwoAxisGraphTitle(win);
         case algorithmTypes.CLUSTER_ALGORITHM:
             return `Algorithm: ${win.windowType}`;
@@ -68,8 +68,8 @@ function getWindowContent(win) {
     switch (win.windowType) {
         case uiTypes.SCATTER_GRAPH:
             return <ScatterGraph data={win.data} />;
-        case uiTypes.HEATMAP_GRAPH:
-            return <HeatmapGraph data={win.data} />;
+        case uiTypes.CONTOUR_GRAPH:
+            return <ContourGraph data={win.data} />;
         case algorithmTypes.CLUSTER_ALGORITHM:
             return (
                 <ClusterAlgorithm
