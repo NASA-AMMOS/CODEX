@@ -197,7 +197,8 @@ function RegressionsOverview(props) {
     const searchTypeOptions = ["grid", "random"];
     const [searchType, setSearchType] = useState(searchTypeOptions[0]);
 
-    const scoringOptions = ["accuracy", "precision", "recall"];
+    //todo refactor these out
+    const scoringOptions = ["explained_variance", "max_error", "neg_mean_absolute_error", "neg_mean_squared_error", "neg_mean_squared_log_error", "neg_median_absolute_error", "r2"];
     const [scoring, setScoring] = useState(scoringOptions[0]);
 
     const [label, setLabel] = useState(selectedFeatures[0]);

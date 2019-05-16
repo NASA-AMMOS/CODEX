@@ -238,7 +238,7 @@ function ClassifiersOverview(props) {
     return (
         <div className="classifiersContainer">
             <div className="headerBar">
-                <FormControl>
+                <FormControl className="labelDropdown">
                     <InputLabel>Labels</InputLabel>
                     <Select value={label} onChange={e => setLabel(e.target.value)}>
                         {selectedFeatures.map(f => (

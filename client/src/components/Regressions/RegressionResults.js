@@ -34,27 +34,30 @@ function makeRegressionPlot(algo) {
     //     }
     // }
 
+    // Initial chart settings. These need to be kept in state and updated as necessary
+    
     const chartOptions = {
         data: [
             {
-                x: [...algo.data.classes].sort((a, b) => a - b),
-                y: [...algo.data.classes].sort((a, b) => b - a).map(idx => `Label ${idx}`),
-                z: algo.data.cm_data,
-                type: "heatmap",
-                showscale: false,
-                xgap: 2,
-                ygap: 2
+                x: [...algo.data.y_pred].sort((a, b) => a - b),
+                y: [...algo.data.y].sort((a, b) => b - a).map(idx => `Label ${idx}`),
+                type: "scattergl",
+                mode: "markers",
+                marker: { color: algo.data.y_pred.map((val, idx) => "#3386E6"), size: 2 },
+                selected: { marker: { color: "#FF0000", size: 2 } },
+                visible: true
             }
         ],
         layout: {
-            xaxis: { type: "category", automargin: true, ticklen: 0 },
             autosize: true,
             margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
-            hovermode: false, // Turning off hovermode seems to screw up click handling
+            hovermode: "closest", // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
+            xaxis: {
+                automargin: true
+            },
             yaxis: {
-                automargin: true,
-                ticklen: 0
+                automargin: true
             }
         },
         config: {
@@ -62,6 +65,7 @@ function makeRegressionPlot(algo) {
             displayModeBar: false
         }
     };
+
     return (
         <Plot
             data={chartOptions.data}
