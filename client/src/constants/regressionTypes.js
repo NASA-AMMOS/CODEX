@@ -97,6 +97,55 @@ export const REGRESSION_TYPES = [
     TransformedTargetRegressor
 ]
 
+let lowerBetter = function(a,b) {
+    //lower is better
+    let sub = a - b;
+    if (sub > 0)
+        return -1;
+    else if (sub == 0)
+        return 0;
+    else
+        return 1;
+};
+
+let higherBetter = function(a,b) {
+    //higher is better
+    let sub = a - b;
+    if (sub > 0)
+        return 1;
+    else if (sub == 0)
+        return 0;
+    else
+        return -1;
+};
+
+let absHigherBetter = function (a, b) {
+    //higher is better
+    let sub = Math.abs(a) - Math.abs(b);
+    if (sub > 0)
+        return 1;
+    else if (sub == 0)
+        return 0;
+    else
+        return -1;
+}
+/*
+    For some of the scoring methods lower is better, higher is 
+    better, or closer to zero is better. These act as comparison functions
+    to be used when doing something like selecting the best algorithm 
+    out of a set of algorithms.
+    The function returns -1 if a is worse then b, 0 if they are the same, 
+    or 1 if a is better than b
+*/
+export const REGRESSION_SCORING_FUNCTIONS = {
+    explained_variance : higherBetter,
+    max_error: lowerBetter,
+    neg_mean_absolute_error: lowerBetter,
+    neg_mean_squared_error: lowerBetter,
+    neg_mean_squared_log_error: lowerBetter,
+    neg_median_absolute_error: lowerBetter,
+    r2: absHigherBetter
+}
 
 
 export const REGRESSION_PARAMS = {

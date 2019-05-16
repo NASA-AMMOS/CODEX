@@ -26,7 +26,8 @@ export const initialSizes = {
     },
     [classifierTypes.CLASSIFIER_RESULTS_WINDOW]: {
         width: 700,
-        height: 700
+        height: 700,
+        resizable: false
     },
     [uiTypes.SESSIONS_WINDOW]: {
         width: 500,
@@ -41,6 +42,6 @@ export const initialSizes = {
     [regressionTypes.REGRESSION_RESULTS_WINDOW]: {
         width: 700,
         height: 700,
-        resizable: true
+        resizable: false
     }
 };

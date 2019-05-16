@@ -16,9 +16,6 @@ function makeRegressionPlot(algo) {
                 <CircularProgress />
             </div>
         );
-
-    console.log(algo.data);
-
     // const annotations = [];
 
     // for (let x = 0; x < algo.data.classes.length; x++) {
@@ -36,16 +33,32 @@ function makeRegressionPlot(algo) {
 
     // Initial chart settings. These need to be kept in state and updated as necessary
     
+    const dataMax = (function() {
+        let max = algo.data.y[0];
+        const concatData = algo.data.y.concat(algo.data.y_pred); 
+        for (let i = 0; i < concatData.length; i++) {
+            max = concatData[i] > max ? concatData[i] : max;
+        }
+
+        return max;
+    })();
+
     const chartOptions = {
         data: [
             {
-                x: [...algo.data.y_pred].sort((a, b) => a - b),
-                y: [...algo.data.y].sort((a, b) => b - a).map(idx => `Label ${idx}`),
+                x: [...algo.data.y_pred],
+                y: [...algo.data.y],
                 type: "scattergl",
                 mode: "markers",
                 marker: { color: algo.data.y_pred.map((val, idx) => "#3386E6"), size: 2 },
                 selected: { marker: { color: "#FF0000", size: 2 } },
                 visible: true
+            },
+            {
+                type: 'line',
+                x : [0, dataMax],
+                y : [0, dataMax],
+                mode : 'lines'
             }
         ],
         layout: {
@@ -53,17 +66,20 @@ function makeRegressionPlot(algo) {
             margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
             hovermode: "closest", // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
+            showlegend: false,
             xaxis: {
                 automargin: true
             },
             yaxis: {
-                automargin: true
+                automargin: true,
+                scaleanchor : "x",
+                scaleratio: 1
             }
         },
         config: {
             displaylogo: false,
             displayModeBar: false
-        }
+        },
     };
 
     return (
@@ -83,21 +99,20 @@ function makeBestRegression(algoStates) {
     const bestRegression =
         algoStates.every(algo => algo.data) &&
         algoStates.reduce((acc, algo) => {
-            if (!acc) return { name: algo.data.algorithmName, score: algo.data.best_score };
-            return algo.data.best_score > acc.score
-                ? { name: algo.data.algorithmName, score: algo.data.best_score }
+            if (!acc) return { name: algo.algorithmName, score: algo.data.best_score, scoring: algo.scoring };
+            //accesses a comparison funciton from regressionTypes because higher is not always better
+            let comparison = regressionTypes.REGRESSION_SCORING_FUNCTIONS[algo.scoring](algo.data.best_score, acc.score);
+            return comparison > 0
+                ? { name: algo.algorithmName, score: algo.data.best_score, scoring: algo.scoring}
                 : acc;
         }, null);
-
     return (
         <div>
             <Typography variant="h6">Best Regression</Typography>
             <div className="regressionResult">
                 <div className="regressionHeader">
                     {bestRegression ? bestRegression.name : "Loading..."}
-                    <span hidden={!bestRegression} className="percentage">
-                        {Math.ceil(bestRegression.score * 100)}%
-                    </span>
+                    {makeRegressionScore(bestRegression)}
                 </div>
                 <div className="plot">
                     {makeRegressionPlot(
@@ -105,6 +120,18 @@ function makeBestRegression(algoStates) {
                     )}
                 </div>
             </div>
+        </div>
+    );
+}
+
+function makeRegressionScore(algo) {
+    const scoreStringFunctions = {
+
+    }
+
+    return (
+        <div>
+            {algo.score != undefined ? algo.score.toString().substring(0,4) : undefined}
         </div>
     );
 }
@@ -179,9 +206,11 @@ function RegressionResults(props) {
                             {algo.algorithmName.length <= 20
                                 ? algo.algorithmName
                                 : algo.algorithmName.slice(0, 17) + "..."}
-                            <span className="percentage" hidden={!algo.loaded}>
-                                {algo.loaded && Math.ceil(algo.data.best_score * 100)}%
-                            </span>
+                            {makeRegressionScore({
+                                name:algo.algorithmName,
+                                score: algo.data != undefined ? algo.data.best_score: 0.0,
+                                scoring: algo.scoring
+                            })}
                         </div>
                         <div className="plot">{makeRegressionPlot(algo)}</div>
                         <ul className="bestParms" hidden={!algo.data}>
