@@ -172,6 +172,10 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
     >>> testData = codex_doctest.doctest_get_data()
 
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ARDRegression", {}, "grid", 3, 'fake_score')
+    >>> print(result["WARNING"])
+    fake_score not a valid scoring metric for regression.
+
     >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ARDRegression", {}, "grid", 3, 'explained_variance')
     >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "AdaBoostRegressor", {}, "grid", 3, 'explained_variance')
     >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "BaggingRegressor", {}, "grid", 3, 'explained_variance')
@@ -255,6 +259,11 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
     samples = len(data)
 
     result['eta'] = codex_time_log.getComputeTimeEstimate("regression", algorithm, samples)
+
+    accepted_scoring_metrics = ["explained_variance", "max_error", "neg_mean_absolute_error", "neg_mean_squared_error", "neg_mean_squared_log_error", "neg_median_absolute_error", "r2"]
+    if scoring not in accepted_scoring_metrics:
+        result["WARNING"] = "{scoring} not a valid scoring metric for regression.".format(scoring=scoring)
+        return result
 
     # TODO - labels are currently cached under features
     labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")

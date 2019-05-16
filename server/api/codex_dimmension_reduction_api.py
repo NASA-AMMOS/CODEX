@@ -63,13 +63,6 @@ def ml_dimensionality_reduction(
         subsetHash = False
 
     try:
-        n_components = int(parms['n_components'])
-    except BaseException:
-        codex_system.codex_log("n_components parameter not set")
-        result['message'] = "n_components parameter not set"
-        return None
-
-    try:
         result = run_codex_dim_reduction(inputHash, subsetHash, parms, downsampled, False, algorithmName)
     except BaseException:
         codex_system.codex_log(

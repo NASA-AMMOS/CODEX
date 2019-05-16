@@ -141,6 +141,10 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
         >>> testData = codex_doctest.doctest_get_data()
 
+        >>> result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'fake_scoring_metric')
+        >>> print(result["WARNING"])
+        fake_scoring_metric not a valid scoring metric for classification.
+
         >>> result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'precision')
         >>> print(result["WARNING"])
         None
@@ -182,6 +186,11 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     samples = len(data)
 
     result['eta'] = codex_time_log.getComputeTimeEstimate("classification", algorithm, samples)
+
+    accepted_scoring_metrics = ["accuracy", "balanced_accuracy", "average_precision", "brier_score_loss", "f1, f1_micro", "f1_macro", "f1_weighted", "f1_samples", "neg_log_loss", "precision", "recall", "jaccard", "roc_auc"]
+    if scoring not in accepted_scoring_metrics:
+        result["WARNING"] = "{scoring} not a valid scoring metric for classification.".format(scoring=scoring)
+        return result
 
     # TODO - labels are currently cached under features
     labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
