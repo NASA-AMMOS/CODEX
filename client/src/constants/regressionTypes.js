@@ -204,5 +204,162 @@ export const REGRESSION_PARAMS = {
             subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
         }
     ],
+    [KernelRidge]:[
+        {
+            name: "degree",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 10, 1, "int"))
+        }
+    ],
+    [Lars]:[
+        {
+            name: "eps",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 100, 1, "float"))
+        }
+    ],
+    [Lasso]:[
+        {
+            name: "alpha",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 100, 1, "float"))
+        }
+    ],
+    [LassoLars]:[
+        {
+            name: "max_iter",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 10000, 1, "int"))
+        }
+    ],
+    [LassoLarsIC]:[
+        {
+            name: "max_iter",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 10000, 1, "int"))
+        }
+    ],
+    [LinearRegression]:[
+        {
+            name: "n_jobss",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(-1, 8, 1, "int"))
+        }
+    ],
+    [LinearSVR]:[
+        {
+            name: "max_iter",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 10000, 1, "int"))
+        }
+    ],
+    [MLPRegressor]:[
+        {
+            name: "max_iter",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 10000, 1, "int"))
+        }
+    ],
+    [MultiTaskElasticNet]:[
+        {
+            name: "max_iter",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 10000, 1, "int"))
+        }
+    ],
+    [MultiTaskLasso]:[
+        {
+            name: "n_neighbors",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 10000, 1, "int"))
+        }
+    ],
+    [NuSVR]:[
+        {
+            name: "max_iter",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(-1, 10000, 1, "int"))
+        }
+    ],
+    [OrthogonalMatchingPursuit]:[
+        {
+            name: "n_nonzero_coefs",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
+        }
+    ],
+    [PLSCanonical]:[
+        {
+            name: "max_iter",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(-1, 10000, 1, "int"))
+        }
+    ],
+    [PLSRegression]:[
+        {
+            name: "max_iter",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(-1, 10000 , 1, "int"))
+        }
+    ],
+    [PassiveAggressiveRegressor]:[
+        {
+            name: "max_iter",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(-1, 10000, 1, "int"))
+        }
+    ],
+    //everything past here is wrong becasue the api docs are not updated
+    //i might just go in and look at them at some point
+    [RANSACRegressor]:[
+        {
+            name: "n_neighbors",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
+        }
+    ],
+    [RadiusNeighborsRegressor]:[
+        {
+            name: "n_neighbors",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
+        }
+    ],
+    [RandomForestRegressor]:[
+        {
+            name: "n_neighbors",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
+        }
+    ],
+    [Ridge]:[
+        {
+            name: "n_neighbors",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
+        }
+    ],
+    [SGDRegressor]:[
+        {
+            name: "n_neighbors",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
+        }
+    ],
+    [TheilSenRegressor]:[
+        {
+            name: "n_neighbors",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
+        }
+    ],
+    [TransformedTargetRegressor]:[
+        {
+            name: "n_neighbors",
+            mode: "range",
+            subParams: [].concat(constantHelpers.createRange(1, 1000, 1, "int"))
+        }
+    ],
+
 }
 

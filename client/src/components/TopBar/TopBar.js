@@ -213,10 +213,10 @@ class TopBar extends Component {
                         <Dropdown.Menu>
                             {this.getAlgorithmsMenuItems()}
                             <MenuItem onSelect={this.props.openClassifierWindow}>
-                                Classifiers
+                                Classifier
                             </MenuItem>{" "}
                             <MenuItem onSelect={this.props.openRegressionWindow}>
-                                Regressions
+                                Regression
                             </MenuItem>
                         </Dropdown.Menu>
                     </Dropdown>
