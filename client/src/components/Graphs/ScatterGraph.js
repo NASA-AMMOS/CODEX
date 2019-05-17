@@ -48,7 +48,7 @@ function ScatterGraph(props) {
         ],
         layout: {
             autosize: true,
-            margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
+            margin: { l: 0, r: 0, t: 0, b: 0, pad: 10 }, // Axis tick labels are drawn in the margin space
             dragmode: props.globalChartState,
             datarevision: chartRevision,
             hovermode: "closest", // Turning off hovermode seems to screw up click handling
@@ -58,7 +58,8 @@ function ScatterGraph(props) {
             },
             yaxis: {
                 automargin: true
-            }
+            },
+
         },
         config: {
             responsive: true,
