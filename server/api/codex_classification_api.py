@@ -420,6 +420,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
     clf.fit(X,y)
     y_pred = clf.predict(X)
+
     cm = confusion_matrix(y, y_pred)
     cm = np.round((cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]) * 100)
     result['cm_data'] = cm.tolist()
@@ -457,5 +458,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
-
+    #codex_doctest.run_codex_doctest()
+    testData = codex_doctest.doctest_get_data()
+    result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'precision')
+    print(result['WARNING'])

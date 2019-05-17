@@ -45,6 +45,11 @@ def downsample(inputArray, samples=0, percentage=0.0):
     >>> print(len(result))
     50
 
+    # More samples than in array
+    >>> result = downsample(array,samples=250)
+    >>> print(len(result))
+    200
+
     >>> codex_hash.resetCacheList("downsample")
     >>> result1 = downsample(array, samples=50)
     >>> result2 = downsample(array, samples=50)
@@ -80,13 +85,11 @@ def downsample(inputArray, samples=0, percentage=0.0):
             usedSamples = totalPoints
 
     else:
-        codex_system.codex_log(
-            "ERROR: downsample - samples and percentage both 0.")
+        codex_system.codex_log("ERROR: downsample - samples and percentage both 0.")
         usedSamples = totalPoints
 
     # first, check if this downsampling has already been done before
-    existingHashCheck = codex_hash.findHashArray(
-        "name", inputHashCode, "downsample")
+    existingHashCheck = codex_hash.findHashArray("name", inputHashCode, "downsample")
 
     if(existingHashCheck is not None and existingHashCheck["samples"] == usedSamples):
         outputArray = existingHashCheck["data"]

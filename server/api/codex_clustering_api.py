@@ -137,7 +137,8 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
 
     startTime = time.time()
     result = {'algorithm': algorithm,
-              'downsample': downsampled}
+              'downsample': downsampled,
+              "WARNING":None}
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
@@ -156,12 +157,13 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
                 "ERROR: run_codex_clustering - subsetHash returned None.")
             return None
 
+    downsampled = 10000
     if downsampled is not False:
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+        codex_system.codex_log("Downsampling to {downsampled} samples".format(downsampled=downsampled))
         samples = len(data)
-        data = codex_downsample.downsample(data, percentage=downsampled)
-        result['eta'] = codex_time_log.getComputeTimeEstimate(
-            "clustering", algorithm, samples)
+        data = codex_downsample.downsample(data, samples=downsampled)
+        result['eta'] = codex_time_log.getComputeTimeEstimate("clustering", algorithm, samples)
+        codex_system.codex_log("Downsampled to {samples} samples".format(samples=len(data)))
 
     if data.ndim < 2:
         codex_system.codex_log(
@@ -278,6 +280,4 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
 if __name__ == "__main__":
 
     codex_doctest.run_codex_doctest()
-
-
     
