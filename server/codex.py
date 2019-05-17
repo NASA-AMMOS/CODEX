@@ -23,6 +23,7 @@ import concurrent.futures
 import base64, threading, datetime, functools, tornado, json
 from os import listdir
 from os.path import isfile, join, isdir
+import json
 
 # CODEX API
 import codex_1d_binning
@@ -37,18 +38,62 @@ import codex_regression_api
 import codex_segmentation_api
 import codex_template_scan_api
 import codex_classification_api
+import codex_workflow
 
 # CODEX Support
 import codex_system
 import codex_hash, codex_return_code
 import codex_downsample, codex_yaml
 import codex_time_log
+import codex_doctest
 
 # create a `ThreadPoolExecutor` instance
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
 
 verbose = True
 fileChunks = []
+
+
+def workflow_call(msg, result):
+    '''
+    Inputs:
+
+    Outputs:
+
+    Examples:
+
+    '''
+
+    featureList = msg["dataFeatures"]
+    featureList = codex_system.get_featureList(featureList)
+
+    subsetHashName = msg["dataSelections"]
+    if (subsetHashName != []):
+        subsetHashName = subsetHashName[0]
+    else:
+        subsetHashName = None
+
+    hashList = codex_hash.feature2hashList(featureList)
+    codex_return_code.logReturnCode("hashList = codex_hash.feature2hashList(featureList)")
+
+    data = codex_hash.mergeHashResults(hashList)
+    codex_return_code.logReturnCode("data = codex_hash.mergeHashResults(hashList)")
+    inputHash = codex_hash.hashArray('Merged', data, "feature")
+
+    if (inputHash != None):
+
+        codex_return_code.logReturnCode('codex_hash.hashArray("Merged", data, "feature")')
+        inputHash = inputHash["hash"]
+
+
+    if ('workflow' == "explain_this"):
+
+        codex_workflow.explain_this(inputHash, subsetHashName, result)
+
+    else:
+        result['message'] = "Cannot parse algorithmType"
+
+    return result
 
 
 def algorithm_call(msg, result):
@@ -259,7 +304,8 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
     connection = set()
 
     def open(self):
-        print("Websocket opened")
+        codex_system.codex_log("{self}".format(self=self))
+        codex_system.codex_log("Websocket opened")
 
     def check_origin(self, origin):
         return True
@@ -301,6 +347,11 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
             result = algorithm_call(msg, result)
             result['identification'] = msg['identification']
 
+        elif (routine == 'workflow'):
+
+            result = workflow_call(msg, result)
+            result['identification'] = msg['identification']
+
         elif (routine == 'guidance'):
 
             guidance = msg["guidance"]
@@ -336,9 +387,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         elif (routine == "get_sessions"):
 
             path = os.path.join(CODEX_ROOT, 'sessions')
-            result['sessions'] = [
-                f for f in listdir(path) if isdir(join(path, f))
-            ]
+            result['sessions'] = [f for f in listdir(path) if isdir(join(path, f))]
 
         elif (routine == 'time'):
 

@@ -100,7 +100,7 @@ def ml_cluster(
     try:
         
         pca = codex_dimmension_reduction_api.run_codex_dim_reduction(inputHash, subsetHash, {"n_components":2}, downsampled, False, "PCA")
-        result = run_codex_clustering(inputHash, subsetHash, downsampled, algorithmName, parms)
+        result = run_codex_clustering(pca['outputHash'], subsetHash, False, algorithmName, parms)
         result['data'] = pca['data']
 
     except BaseException:
@@ -157,7 +157,6 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
                 "ERROR: run_codex_clustering - subsetHash returned None.")
             return None
 
-    downsampled = 10000
     if downsampled is not False:
         codex_system.codex_log("Downsampling to {downsampled} samples".format(downsampled=downsampled))
         samples = len(data)
@@ -201,10 +200,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
 
         elif(algorithm == "spectral"):
 
-            cluster_alg = cluster.SpectralClustering(
-                n_clusters=int(parms['k']),
-                eigen_solver='arpack',
-                affinity="nearest_neighbors")
+            cluster_alg = cluster.SpectralClustering(n_clusters=int(parms['k']), eigen_solver='arpack', affinity="nearest_neighbors")
 
         elif(algorithm == "dbscan"):
 
@@ -279,5 +275,10 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    #codex_doctest.run_codex_doctest()
+
+    testData = codex_doctest.doctest_get_data()
+    result = ml_cluster(testData['inputHash'], testData['hashList'], None, "kmeans", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {})
+
+
     
