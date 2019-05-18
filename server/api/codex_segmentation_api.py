@@ -274,7 +274,6 @@ def codex_segmentation_quickshift(
         "max_dist": max_dist,
         'downsample': downsampled}
 
-    print(output)
     return output
 
 

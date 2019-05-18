@@ -119,11 +119,12 @@ def run_codex_dim_reduction(
                 "ERROR: codex_dimmension_reudction - PCA - subsetHash returned None.")
             return None
 
+    full_samples = len(data)
     if(downsampled is not False):
         codex_system.codex_log("Downsampling to {ds} samples.".format(ds=downsampled))
-        samples = len(data)
         data = codex_downsample.downsample(data, samples=downsampled)
-        eta = codex_time_log.getComputeTimeEstimate("dimension_reduction", algorithm, samples)
+
+    eta = codex_time_log.getComputeTimeEstimate("dimension_reduction", algorithm, full_samples)
 
     data = codex_math.codex_impute(data)
 

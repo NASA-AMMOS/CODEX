@@ -244,6 +244,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
             codex_system.codex_log("ERROR: run_codex_regression - subsetHash returned None.")
             return None
 
+    full_samples = len(data)
     if downsampled is not False:
         codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
         samples = len(data)
@@ -256,9 +257,8 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
     X = data
     X = codex_math.codex_impute(X)
     result['X'] = X.tolist()
-    samples = len(data)
 
-    result['eta'] = codex_time_log.getComputeTimeEstimate("regression", algorithm, samples)
+    result['eta'] = codex_time_log.getComputeTimeEstimate("regression", algorithm, full_samples)
 
     accepted_scoring_metrics = ["explained_variance", "max_error", "neg_mean_absolute_error", "neg_mean_squared_error", "neg_mean_squared_log_error", "neg_median_absolute_error", "r2"]
     if scoring not in accepted_scoring_metrics:

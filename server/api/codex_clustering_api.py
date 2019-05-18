@@ -142,8 +142,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
-        codex_system.codex_log(
-            "Clustering: run_codex_clustering: Hash not found. Returning!")
+        codex_system.codex_log("Clustering: run_codex_clustering: Hash not found. Returning!")
         return None
 
     data = returnHash['data']
@@ -157,13 +156,13 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
                 "ERROR: run_codex_clustering - subsetHash returned None.")
             return None
 
+    full_samples = len(data)
     if downsampled is not False:
         codex_system.codex_log("Downsampling to {downsampled} samples".format(downsampled=downsampled))
         data = codex_downsample.downsample(data, samples=downsampled)
         codex_system.codex_log("Downsampled to {samples} samples".format(samples=len(data)))
-        
-    samples = len(data)
-    result['eta'] = codex_time_log.getComputeTimeEstimate("clustering", algorithm, samples)
+
+    result['eta'] = codex_time_log.getComputeTimeEstimate("clustering", algorithm, full_samples)
     if data.ndim < 2:
         codex_system.codex_log(
             "ERROR: run_codex_clustering - insufficient data dimmensions")
@@ -275,10 +274,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
 
 if __name__ == "__main__":
 
-    #codex_doctest.run_codex_doctest()
-
-    testData = codex_doctest.doctest_get_data()
-    result = ml_cluster(testData['inputHash'], testData['hashList'], None, "kmeans", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {})
+    codex_doctest.run_codex_doctest()
 
 
     

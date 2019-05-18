@@ -531,8 +531,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
             lines = f.readlines()
             outString = "".join(lines)
             outStringEncoded = outString.encode('ascii')
-            result['code'] = str(
-                base64.b64encode(outStringEncoded).decode('utf-8'))
+            result['code'] = str(base64.b64encode(outStringEncoded).decode('utf-8'))
             result['message'] = 'success'
 
         else:

@@ -4,29 +4,39 @@
 # Client Server API
 
 ## Saving a CODEX Session
-Client->Server
+Client->Server Example JSON
 {"routine":"save_session", "session_name":<session name>}
 
 ## Loading a CODEX Session
-Client->Server
+Client->Server Example JSON
 {"routine":"load_session", "session_name":<session name>}
 
-Server->Client
+Server->Client Example JSON
 {"session_name":<session name>, "session_data":{"features":[<feature names for sidebar>],"labels":[<label names for sidebar>],"subsets":[<subset names for sidebar>], "downsample":[<downsample names not currently displayed on front end>]}
 
 
 ## Get List of Saved CODEX Sessions
-Client->Server
+Client->Server Example JSON
 {"routine":"get_sessions"}
 
-Server->Client
+Server->Client Example JSON
 {"sessions":[<session name1>, <session name2>]}
 	Returns list of session names
 
 
+## Downloading CODEX Code
+This routine will download the python code, generated based on your CODEX session.  Returns the base64 ascii utf-8 encoding of the file, which the front-end should then download as a file for the user.
+
+Client->Server Example JSON
+{'routine': 'download_code', 'cid': 'inhkh'} 
+
+Server->Client Example JSON
+{"code": "aW1wdfgdfg...l34gerg45JykK", "message": "success", "cid": "inhkh"}
+
+
 ## Dimensionality Reduction API
 
-Example:
+Client->Server Example JSON:
 {"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"dimensionality_reduction", 'dataFeatures': [<list of feature strings>], 'downsampled': False, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {n_components': 100}, 'dataSelections': [], 'cid': 'wngyu'}
 
 |         algorithmName          | Description  |      parm 1 name     | parm 1 dtype | parm 1 default         |     parm 1 range     |
@@ -36,7 +46,7 @@ Example:
 
 ## Clustering API
 
-Example:
+Client->Server Example JSON:
 {"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"clustering", 'dataFeatures': [<list of feature strings>], 'downsampled': False, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {eps': 0.7}, 'dataSelections': [], 'cid': 'wngyu'}
 
 
@@ -54,7 +64,7 @@ Example:
 
 ## Classification API
 
-Example:
+Client->Server Example JSON:
 {"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"classification", 'dataFeatures': [<list of feature strings>], 'downsampled': False, 'cross_val': 5, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'scoring':<scoring type>,'search_type':<"random or grid">, 'parameters': {eps': [0.7], 'k':[1,2,3,4,5]}, 'dataSelections': [], 'cid': 'wngyu'}
 
 Fields:<br/>
@@ -109,7 +119,7 @@ Fields:<br/>
 
 ## Regression API
 
-Example:
+Client->Server Example JSON:
 {"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"regression", 'dataFeatures': [<list of feature strings>], 'downsampled': False, 'cross_val': 5, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'scoring':<scoring type>,'search_type':<"random or grid">, 'parameters': {eps': [0.7], 'k':[1,2,3,4,5,5]}, 'dataSelections': [], 'cid': 'wngyu'}
 
 Fields:<br/>
