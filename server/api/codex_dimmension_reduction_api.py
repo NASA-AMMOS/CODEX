@@ -96,8 +96,8 @@ def run_codex_dim_reduction(
 
         >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, False, False, "PCA")
 
-        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, 1, False, "ICA")
-        Downsampling to 1 percent.
+        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, 500, False, "ICA")
+        Downsampling to 500 samples.
 
     '''
     startTime = time.time()
@@ -107,7 +107,7 @@ def run_codex_dim_reduction(
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
-        print("Error: codex_decomposition_PCA: Hash not found")
+        print("Error: run_codex_dim_reduction: Hash not found")
         return
 
     data = returnHash['data']
@@ -115,8 +115,7 @@ def run_codex_dim_reduction(
     if(subsetHash is not False):
         data, datName = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log(
-                "ERROR: codex_dimmension_reudction - PCA - subsetHash returned None.")
+            codex_system.codex_log("ERROR: run_codex_dim_reduction: subsetHash returned None.")
             return None
 
     full_samples = len(data)
@@ -129,8 +128,7 @@ def run_codex_dim_reduction(
     data = codex_math.codex_impute(data)
 
     if(data.ndim > n_components):
-        codex_system.codex_log(
-            "ERROR: codex_dimension_reduction - PCA - features (" + str(data.ndim) +") > requested components (" +str(n_components) +")")
+        codex_system.codex_log("ERROR: run_codex_dim_reduction: features (" + str(data.ndim) +") > requested components (" +str(n_components) +")")
         return None
 
     try:
@@ -201,10 +199,6 @@ def run_codex_dim_reduction(
 
 if __name__ == "__main__":
 
-    #codex_doctest.run_codex_doctest()
+    codex_doctest.run_codex_doctest()
 
-    testData = codex_doctest.doctest_get_data()
 
-    result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, False, False, "PCA")
-
-    

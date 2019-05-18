@@ -44,6 +44,14 @@ Client->Server Example JSON:<br/>
 | PCA                            |              | n_components         |     int      |        # features      |     [1, # features]  |
 | ICA                            |              | n_components         |     int      |        # features      |     [1, # features]  |
 
+
+Server->Client Example JSON:<br/>
+{'eta': 0.02315640208697078, 'algorithm': 'PCA', 'data': [[-11.115906215282186, -4.235958394220638], [-0.8582352792774531, 7.622008233024563], [11.974141494559637, -3.3860498388039253]], 'explained_variance_ratio': [75, 100], 'inputHash': '34a8c666b260c3968ad2a2010eef03fe4f80e21e', 'subsetHash': False, 'outputHash': 'cc5fa052e0f581733051d57c3a6738d50b46d0d7', 'n_components': 2, 'downsample': 3}
+
+explained_variance: percentage of the data explained by that number of components.  Length will be the same as the n_components field.  These values are the Y axis values on the graph. X axis values are 1->n_components.
+
+
+
 ## Clustering API
 
 Client->Server Example JSON:<br/>
