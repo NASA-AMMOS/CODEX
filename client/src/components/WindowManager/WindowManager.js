@@ -8,6 +8,7 @@ import ClusterAlgorithm from "components/Algorithms/ClusterAlgorithm";
 import Cristal from "react-cristal/src";
 import ContourGraph from "components/Graphs/ContourGraph";
 import ScatterGraph from "components/Graphs/ScatterGraph";
+import TimeSeriesGraph from "components/Graphs/TimeSeriesGraph";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as uiTypes from "constants/uiTypes";
 import * as windowManagerActions from "actions/windowManagerActions";
@@ -27,6 +28,18 @@ function getTwoAxisGraphTitle(win) {
     return `${selectedFeatures[0]} vs ${selectedFeatures[1]}`;
 }
 
+function getMultiAxisGraphTitle(win) {
+    const selectedFeatures = win.data.get("data")[0];
+    let retString = "";
+
+    for (let i = 0; i < selectedFeatures.length - 1; i++) {
+        retString = retString + selectedFeatures[i] + " vs ";
+    }
+    retString = retString + selectedFeatures[selectedFeatures.length - 1];
+
+    return retString;
+}
+
 function previewAllowed(win) {
     switch (win.windowType) {
         case algorithmTypes.CLUSTER_ALGORITHM:
@@ -41,7 +54,8 @@ function getWindowTitle(win) {
     switch (win.windowType) {
         case uiTypes.SCATTER_GRAPH:
         case uiTypes.CONTOUR_GRAPH:
-            return getTwoAxisGraphTitle(win);
+        case uiTypes.TIME_SERIES_GRAPH:
+            return getMultiAxisGraphTitle(win);
         case algorithmTypes.CLUSTER_ALGORITHM:
             return `Algorithm: ${win.windowType}`;
         case algorithmTypes.ALGO_LOADING_WINDOW:
@@ -82,12 +96,13 @@ function getWindowStyleing(win) {
 }
 
 function getWindowContent(win) {
-    console.log(ClassifiersOverview, Sessions);
     switch (win.windowType) {
         case uiTypes.SCATTER_GRAPH:
             return <ScatterGraph data={win.data} />;
         case uiTypes.CONTOUR_GRAPH:
             return <ContourGraph data={win.data} />;
+        case uiTypes.TIME_SERIES_GRAPH:
+            return <TimeSeriesGraph data={win.data} />;
         case algorithmTypes.CLUSTER_ALGORITHM:
             return (
                 <ClusterAlgorithm

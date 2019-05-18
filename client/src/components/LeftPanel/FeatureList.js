@@ -9,6 +9,15 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 function createFeature(props, feature) {
     const name = feature.get("name");
     const selected = feature.get("selected");
+
+    const featureMouseEnter = function() {
+        console.log("onMouseEnter");
+    };
+
+    const featureMouseLeave = function() {
+        console.log("onMouseLeave");
+    };
+
     return (
         <li
             className={classnames({ feature: true, selected })}
@@ -19,6 +28,8 @@ function createFeature(props, feature) {
                     ? props.featureUnselect(name, e.shiftKey)
                     : props.featureSelect(name, e.shiftKey);
             }}
+            onMouseEnter={featureMouseEnter}
+            onMouseLeave={featureMouseLeave}
         >
             <div className="checkbox" />
             <span>{name}</span>

@@ -94,6 +94,7 @@ function subalgoParamReducer(subalgoStates, action) {
 }
 
 function getSubalgoPreviews(subalgoStates, subalgoStatesDispatch) {
+    console.log(subalgoStates);
     return (
         <div className="algo-container">
             {subalgoStates.map(subalgoState => (

@@ -14,6 +14,11 @@ export const initialSizes = {
         height: 300,
         resizable: true
     },
+    [uiTypes.TIME_SERIES_GRAPH]: {
+        width: 500,
+        height: 400,
+        resizable: true
+    },
     [algorithmTypes.CLUSTER_ALGORITHM]: {
         width: 900,
         height: 600,

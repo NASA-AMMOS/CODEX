@@ -1,0 +1,25 @@
+.chart-container {
+    width: 100%;
+    height: 100%;
+}
+
+.initialGraph {
+    width: 250px;
+    height: 250px;
+}
+
+.xAxisLabel {
+    position: absolute;
+    right: 17px;
+    bottom: 24px;
+    font-weight: bold;
+    pointer-events: none;
+}
+
+.yAxisLabel {
+    position: absolute;
+    left: 38px;
+    top: 30px;
+    font-weight: bold;
+    pointer-events: none;
+}

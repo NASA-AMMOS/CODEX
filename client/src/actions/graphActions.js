@@ -17,6 +17,9 @@ function canBuildGraph(graphMode, dataState) {
                 return false;
             }
             break;
+        case uiTypes.TIME_SERIES_GRAPH:
+            //todo figure out the requirements for a time series graph
+            return true;
     }
     return true;
 }
