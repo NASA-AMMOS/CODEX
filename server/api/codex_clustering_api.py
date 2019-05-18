@@ -152,8 +152,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
     if subsetHash is not False:
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log(
-                "ERROR: run_codex_clustering - subsetHash returned None.")
+            codex_system.codex_log("ERROR: run_codex_clustering - subsetHash returned None.")
             return None
 
     full_samples = len(data)

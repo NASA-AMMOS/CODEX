@@ -73,7 +73,7 @@ def doctest_get_data():
     regrLabelDictionary = codex_hash.hashArray("regrLabelHash", regrLabelData, "feature")
     regrLabelHash = regrLabelDictionary['hash']
 
-    return {"inputHash":inputHash['hash'], "hashList":hashList, "templateHash": templateHash, "classLabelHash":labelHash, "regrLabelHash": regrLabelHash}
+    return {"inputHash":inputHash['hash'], 'featureNames':featureList, "hashList":hashList, "templateHash": templateHash, "classLabelHash":labelHash, "regrLabelHash": regrLabelHash}
     
 def run_codex_doctest():
 

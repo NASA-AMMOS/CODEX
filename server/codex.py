@@ -67,6 +67,10 @@ def workflow_call(msg, result):
     featureList = msg["dataFeatures"]
     featureList = codex_system.get_featureList(featureList)
 
+    labelName = msg["labelName"]
+    labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
+
+
     subsetHashName = msg["dataSelections"]
     if (subsetHashName != []):
         subsetHashName = subsetHashName[0]
@@ -86,12 +90,11 @@ def workflow_call(msg, result):
         inputHash = inputHash["hash"]
 
 
-    if ('workflow' == "explain_this"):
-
-        codex_workflow.explain_this(inputHash, subsetHashName, result)
-
+    if(msg['workflow'] == "explain_this"):
+        result = codex_workflow.explain_this(inputHash, featureList, subsetHashName, labelHash, result)
     else:
-        result['message'] = "Cannot parse algorithmType"
+        result['message'] = "Cannot parse workflow"
+
 
     return result
 
