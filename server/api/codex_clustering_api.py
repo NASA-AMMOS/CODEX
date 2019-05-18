@@ -159,11 +159,11 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
 
     if downsampled is not False:
         codex_system.codex_log("Downsampling to {downsampled} samples".format(downsampled=downsampled))
-        samples = len(data)
         data = codex_downsample.downsample(data, samples=downsampled)
-        result['eta'] = codex_time_log.getComputeTimeEstimate("clustering", algorithm, samples)
         codex_system.codex_log("Downsampled to {samples} samples".format(samples=len(data)))
-
+        
+    samples = len(data)
+    result['eta'] = codex_time_log.getComputeTimeEstimate("clustering", algorithm, samples)
     if data.ndim < 2:
         codex_system.codex_log(
             "ERROR: run_codex_clustering - insufficient data dimmensions")
