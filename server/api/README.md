@@ -27,16 +27,16 @@ Server->Client Example JSON
 ## Downloading CODEX Code
 This routine will download the python code, generated based on your CODEX session.  Returns the base64 ascii utf-8 encoding of the file, which the front-end should then download as a file for the user.
 
-Client->Server Example JSON
+Client->Server Example JSON:<br/>
 {'routine': 'download_code', 'cid': 'inhkh'} 
 
-Server->Client Example JSON
+Server->Client Example JSON:<br/>
 {"code": "aW1wdfgdfg...l34gerg45JykK", "message": "success", "cid": "inhkh"}
 
 
 ## Dimensionality Reduction API
 
-Client->Server Example JSON:
+Client->Server Example JSON:<br/>
 {"routine":"algorithm", "algorithmName":name string, "algorithmType":"dimensionality_reduction", 'dataFeatures': [list of feature strings], 'downsampled': False, file': "doctest.csv", 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {n_components': 100}, 'dataSelections': [], 'cid': 'wngyu'}
 
 |         algorithmName          | Description  |      parm 1 name     | parm 1 dtype | parm 1 default         |     parm 1 range     |
@@ -46,7 +46,7 @@ Client->Server Example JSON:
 
 ## Clustering API
 
-Client->Server Example JSON:
+Client->Server Example JSON:<br/>
 {"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"clustering", 'dataFeatures': [<list of feature strings>], 'downsampled': False, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {eps': 0.7}, 'dataSelections': [], 'cid': 'wngyu'}
 
 
@@ -64,7 +64,7 @@ Client->Server Example JSON:
 
 ## Classification API
 
-Client->Server Example JSON:
+Client->Server Example JSON:<br/>
 {"routine":"algorithm", "algorithmName":name string, "algorithmType":"classification", 'dataFeatures': [list of feature strings], 'downsampled': False, 'cross_val': 5, file': "doctest.csv", 'guidance': None, 'identification': {'id': 'dev0'}, 'scoring':scoring type,'search_type':"random or grid", 'parameters': {eps': [0.7], 'k':[1,2,3,4,5]}, 'dataSelections': [], 'cid': 'wngyu'}
 
 Fields:<br/>
@@ -119,7 +119,7 @@ Fields:<br/>
 
 ## Regression API
 
-Client->Server Example JSON:
+Client->Server Example JSON:<br/>
 {"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"regression", 'dataFeatures': [list of feature strings], 'downsampled': False, 'cross_val': 5, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'scoring':<scoring type>,'search_type':<"random or grid">, 'parameters': {eps': [0.7], 'k':[1,2,3,4,5,5]}, 'dataSelections': [], 'cid': 'wngyu'}
 
 Fields:<br/>
@@ -189,15 +189,15 @@ Fields:<br/>
 "Explain This" is an interactive page for users to provide a binary classification, and see the decision tree which explains how those populations are different.  It's a workflow which summarizes results for novice users.
 
 
-Client->Server Example JSON
+Client->Server Example JSON:<br/>
 {'routine': 'workflow', 'dataSelections': [], 'labelName': 'labels', 'workflow':'explain_this', 'dataFeatures': ['TiO2', 'Al2O3', 'FeOT', 'MgO'], 'file': 'doctest.csv', 'cid': '8ksjk', 'identification': {'id': 'dev0'},}
 
 
-Server->Client JSON Structure:
+Server->Client JSON Structure:<br/>
 {'file': 'doctest.csv', 'cid': '8ksjk', 'identification': {'id': 'dev0'}, 'y':y_labels, 'data': feature data, 'tree_sweep': list of dictionaries for each tree}
 
 
-Top Level Keys:
+Top Level Keys:<br/>
 'WARNING': Logging of any errors in server processing.  None if no errors were encountered.<br>
 "identification": Not sure, set on front end, not used by server currently.<br/>
 "cid": Not sure, set on front end, not used by server currently.<br/>
@@ -207,7 +207,7 @@ Top Level Keys:
 'tree_sweep': List of dictionaries for each possible tree scenario between 1 feature and the total number of features delivered.  Each dictionary in the list will be used at one place on the slider bar, with the first dictionary being the slider bar all the way to the left and the last dictionary being the slider bar all the way to the right.  Internal dictionary definition for each value in the list defined below.
 
 
-Tree_Sweep Dictionary Structure & Keys:
+Tree_Sweep Dictionary Structure & Keys:<br/>
 'feature_rank': Sorted rank of all features used in the analysis.  First feature in the list was the most important.
 'feature_weights': Rank % scores tied to feature_rank.  First value in the list will be the % relevance for the first feature in feature_rank.  All %s and should add up to 100%.  Might just want to visualize features with weights > 0.
 'score': percentage accuracy (0-100) for the given tree.
