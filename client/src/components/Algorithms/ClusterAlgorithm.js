@@ -139,7 +139,7 @@ function ClusterAlgorithm(props) {
                 subalgo,
                 props.selectedFeatures,
                 props.filename,
-                true,
+                500,
                 [],
                 inMsg => {
                     subalgoStatesDispatch({ type: "updateData", inMsg });
@@ -166,7 +166,7 @@ function ClusterAlgorithm(props) {
                     subalgo,
                     props.selectedFeatures,
                     props.filename,
-                    true,
+                    500,
                     [],
                     inMsg => {
                         subalgoStatesDispatch({ type: "updateData", inMsg });

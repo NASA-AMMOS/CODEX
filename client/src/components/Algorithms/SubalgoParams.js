@@ -119,7 +119,7 @@ function SubalgoParams(props) {
                     subalgo,
                     props.selectedFeatures,
                     props.filename,
-                    true,
+                    500,
                     [],
                     inMsg =>
                         previewDispatch({

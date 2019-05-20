@@ -4,39 +4,57 @@
 # Client Server API
 
 ## Saving a CODEX Session
-Client->Server
+Client->Server Example JSON
 {"routine":"save_session", "session_name":<session name>}
 
 ## Loading a CODEX Session
-Client->Server
+Client->Server Example JSON
 {"routine":"load_session", "session_name":<session name>}
 
-Server->Client
+Server->Client Example JSON
 {"session_name":<session name>, "session_data":{"features":[<feature names for sidebar>],"labels":[<label names for sidebar>],"subsets":[<subset names for sidebar>], "downsample":[<downsample names not currently displayed on front end>]}
 
 
 ## Get List of Saved CODEX Sessions
-Client->Server
+Client->Server Example JSON
 {"routine":"get_sessions"}
 
-Server->Client
+Server->Client Example JSON
 {"sessions":[<session name1>, <session name2>]}
 	Returns list of session names
 
 
+## Downloading CODEX Code
+This routine will download the python code, generated based on your CODEX session.  Returns the base64 ascii utf-8 encoding of the file, which the front-end should then download as a file for the user.
+
+Client->Server Example JSON:<br/>
+{'routine': 'download_code', 'cid': 'inhkh'} 
+
+Server->Client Example JSON:<br/>
+{"code": "aW1wdfgdfg...l34gerg45JykK", "message": "success", "cid": "inhkh"}
+
+
 ## Dimensionality Reduction API
 
-Example:
-{"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"dimensionality_reduction", 'dataFeatures': [<list of feature strings>], 'downsampled': False, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {n_components': 100}, 'dataSelections': [], 'cid': 'wngyu'}
+Client->Server Example JSON:<br/>
+{"routine":"algorithm", "algorithmName":name string, "algorithmType":"dimensionality_reduction", 'dataFeatures': [list of feature strings], 'downsampled': False, file': "doctest.csv", 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {n_components': 100}, 'dataSelections': [], 'cid': 'wngyu'}
 
 |         algorithmName          | Description  |      parm 1 name     | parm 1 dtype | parm 1 default         |     parm 1 range     |
 |--------------------------------|--------------|----------------------|--------------|------------------------|----------------------|
 | PCA                            |              | n_components         |     int      |        # features      |     [1, # features]  |
 | ICA                            |              | n_components         |     int      |        # features      |     [1, # features]  |
 
+
+Server->Client Example JSON:<br/>
+{'eta': 0.02315640208697078, 'algorithm': 'PCA', 'data': [[-11.115906215282186, -4.235958394220638], [-0.8582352792774531, 7.622008233024563], [11.974141494559637, -3.3860498388039253]], 'explained_variance_ratio': [75, 100], 'inputHash': '34a8c666b260c3968ad2a2010eef03fe4f80e21e', 'subsetHash': False, 'outputHash': 'cc5fa052e0f581733051d57c3a6738d50b46d0d7', 'n_components': 2, 'downsample': 3}
+
+explained_variance: percentage of the data explained by that number of components.  Length will be the same as the n_components field.  These values are the Y axis values on the graph. X axis values are 1->n_components.
+
+
+
 ## Clustering API
 
-Example:
+Client->Server Example JSON:<br/>
 {"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"clustering", 'dataFeatures': [<list of feature strings>], 'downsampled': False, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'parameters': {eps': 0.7}, 'dataSelections': [], 'cid': 'wngyu'}
 
 
@@ -54,14 +72,14 @@ Example:
 
 ## Classification API
 
-Example:
-{"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"classification", 'dataFeatures': [<list of feature strings>], 'downsampled': False, 'cross_val': 5, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'scoring':<scoring type>,'search_type':<"random or grid">, 'parameters': {eps': [0.7], 'k':[1,2,3,4,5]}, 'dataSelections': [], 'cid': 'wngyu'}
+Client->Server Example JSON:<br/>
+{"routine":"algorithm", "algorithmName":name string, "algorithmType":"classification", 'dataFeatures': [list of feature strings], 'downsampled': False, 'cross_val': 5, file': "doctest.csv", 'guidance': None, 'identification': {'id': 'dev0'}, 'scoring':scoring type,'search_type':"random or grid", 'parameters': {eps': [0.7], 'k':[1,2,3,4,5]}, 'dataSelections': [], 'cid': 'wngyu'}
 
 Fields:<br/>
 "routine": "algorithm" - always set to algorithm.  Tells the server you're requesting algorithmic data processing.<br/>
-"algorithmName": <algirithmName from table below><br/>
+"algorithmName": algirithmName from table below<br/>
 "algorithmType": "classification" - Specifies we're doing classification.  Separates the algorithmic processing from things like regression or clustering.<br/>
-"dataFeatures": [<list of feature names>]<br/>
+"dataFeatures": list of feature names<br/>
 "downsampled": Either False for no downsampling, or a percentage between 1 and 100 (int).<br/>
 "cross_val": integer >= 1.  Determines how many times you want to cross validate the experiment.<br/>
 "file": Path to the file we're processing data from.<br/>
@@ -71,7 +89,7 @@ Fields:<br/>
 "cid": Not sure, set on front end, not used by server currently.<br/>
 "scoring": The metric for evaluating the equality of the model.  Acceptable keys are: accuracy, balanced_accuracy, average_precision, brier_score_loss, f1, f1_micro, f1_macro, f1_weighted, f1_samples, neg_log_loss, precision, recall, jaccard, roc_auc<br/>
 "search_type": Technique for evaluating the parameter space for each algorithm.  Acceptable keys are: "random" or "grid".<br/>
-"parameters": {<sub dictionary of parameters for the given algorithmName>} - Defined in the table below.  Only send the ones specified for the given algorithm. Each key should be a list.
+"parameters": sub dictionary of parameters for the given algorithmName - Defined in the table below.  Only send the ones specified for the given algorithm. Each key should be a list.
 																			When a range is given by the user, the front end should extend it out.  For example, if the user specified min=5, max=10 & step=2 for key "apple", the front end should send "apple":[5,7,9]<br/>
 
 
@@ -109,14 +127,14 @@ Fields:<br/>
 
 ## Regression API
 
-Example:
-{"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"regression", 'dataFeatures': [<list of feature strings>], 'downsampled': False, 'cross_val': 5, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'scoring':<scoring type>,'search_type':<"random or grid">, 'parameters': {eps': [0.7], 'k':[1,2,3,4,5,5]}, 'dataSelections': [], 'cid': 'wngyu'}
+Client->Server Example JSON:<br/>
+{"routine":"algorithm", "algorithmName":<name string>, "algorithmType":"regression", 'dataFeatures': [list of feature strings], 'downsampled': False, 'cross_val': 5, file': <file name>, 'guidance': None, 'identification': {'id': 'dev0'}, 'scoring':<scoring type>,'search_type':<"random or grid">, 'parameters': {eps': [0.7], 'k':[1,2,3,4,5,5]}, 'dataSelections': [], 'cid': 'wngyu'}
 
 Fields:<br/>
 "routine": "algorithm" - always set to algorithm.  Tells the server you're requesting algorithmic data processing.<br/>
-"algorithmName": <algirithmName from table below><br/>
+"algorithmName": algirithmName from table below<br/>
 "algorithmType": "regression" - Specifies we're doing regression.  Separates the algorithmic processing from things like classification or clustering.<br/>
-"dataFeatures": [<list of feature names>]<br/>
+"dataFeatures": [list of feature names]<br/>
 "downsampled": Either False for no downsampling, or a percentage between 1 and 100 (int).<br/>
 "cross_val": integer >= 1.  Determines how many times you want to cross validate the experiment.<br/>
 "file": Path to the file we're processing data from.<br/>
@@ -126,7 +144,7 @@ Fields:<br/>
 "cid": Not sure, set on front end, not used by server currently.<br/>
 "scoring": The metric for evaluating the equality of the model.  Acceptable keys are: explained_variance, max_error, neg_mean_absolute_error, neg_mean_squared_error, neg_mean_squared_log_error, neg_median_absolute_error, r2<br/>
 "search_type": Technique for evaluating the parameter space for each algorithm.  Acceptable keys are: "random" or "grid".<br/>
-"parameters": {<sub dictionary of parameters for the given algorithmName>} - Defined in the table below.  Only send the ones specified for the given algorithm. Each key should be a list.
+"parameters": sub dictionary of parameters for the given algorithmName - Defined in the table below.  Only send the ones specified for the given algorithm. Each key should be a list.
 																			When a range is given by the user, the front end should extend it out.  For example, if the user specified min=5, max=10 & step=2 for key "apple", the front end should send "apple":[5,7,9]<br/>
 
 
@@ -173,6 +191,36 @@ Fields:<br/>
 | TheilSenRegressor              |              |                      |              |                        |                      |
 | TransformedTargetRegressor     |              |                      |              |                        |                      |
 
+
+
+## Explain This API 
+"Explain This" is an interactive page for users to provide a binary classification, and see the decision tree which explains how those populations are different.  It's a workflow which summarizes results for novice users.
+
+
+Client->Server Example JSON:<br/>
+{'routine': 'workflow', 'dataSelections': [], 'labelName': 'labels', 'workflow':'explain_this', 'dataFeatures': ['TiO2', 'Al2O3', 'FeOT', 'MgO'], 'file': 'doctest.csv', 'cid': '8ksjk', 'identification': {'id': 'dev0'},}
+
+
+Server->Client JSON Structure:<br/>
+{'file': 'doctest.csv', 'cid': '8ksjk', 'identification': {'id': 'dev0'}, 'y':y_labels, 'data': feature data, 'tree_sweep': list of dictionaries for each tree}
+
+
+Top Level Keys:<br/>
+'WARNING': Logging of any errors in server processing.  None if no errors were encountered.<br>
+"identification": Not sure, set on front end, not used by server currently.<br/>
+"cid": Not sure, set on front end, not used by server currently.<br/>
+'file': File for which the base features originated.<br>
+'y': Binary classification labels used in analysis. Not currently needed by the front-end.<br>
+'data': Feature data used in classification.  Not currently needed by the front-end.<br>
+'tree_sweep': List of dictionaries for each possible tree scenario between 1 feature and the total number of features delivered.  Each dictionary in the list will be used at one place on the slider bar, with the first dictionary being the slider bar all the way to the left and the last dictionary being the slider bar all the way to the right.  Internal dictionary definition for each value in the list defined below.
+
+
+Tree_Sweep Dictionary Structure & Keys:<br/>
+'feature_rank': Sorted rank of all features used in the analysis.  First feature in the list was the most important.
+'feature_weights': Rank % scores tied to feature_rank.  First value in the list will be the % relevance for the first feature in feature_rank.  All %s and should add up to 100%.  Might just want to visualize features with weights > 0.
+'score': percentage accuracy (0-100) for the given tree.
+'max_features': Maximum number of features used in analysis.  This will increase by one for every dictionary in the tree_sweep list. 
+'json_tree': Data structure outlining the tree structure for visualization.  Built based on https://planspace.org/20151129-see_sklearn_trees_with_d3/
 
 
 

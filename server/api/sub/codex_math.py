@@ -90,6 +90,7 @@ def codex_explained_variance_ratio(X, n_components):
     exp_var_ratio = explained_variance_ / total_var
     exp_var_ratio = exp_var_ratio[:n_components]
     exp_var_ratio = np.cumsum(exp_var_ratio)
+    exp_var_ratio = np.around(exp_var_ratio * 100)
 
     return exp_var_ratio
 

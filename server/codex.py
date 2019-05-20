@@ -1,4 +1,15 @@
-from tornado import web, ioloop, websocket, gen
+'''
+Author: Jack Lightholder
+Date  : 7/19/17
+
+Brief : 
+
+Notes :
+
+Copyright 2019 California Institute of Technology.  ALL RIGHTS RESERVED.
+U.S. Government Sponsorship acknowledged.
+'''
+
 import os
 ## Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
@@ -6,234 +17,40 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 import sys
 sys.path.insert(1, CODEX_ROOT + '/api/')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
-import ssl
-import time, h5py, codex_plot
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-from scipy import misc
-from random import randint
-from sklearn import cluster, datasets
-from sklearn.neighbors import kneighbors_graph
-from sklearn.preprocessing import StandardScaler
-from decimal import *
+
+from tornado import web
+from tornado import ioloop
+from tornado import websocket
+from tornado import gen
 from concurrent.futures import ProcessPoolExecutor
 from tornado.ioloop import IOLoop
+import ssl
 import concurrent.futures
-import base64, threading, datetime, functools, tornado, json
-from os import listdir
-from os.path import isfile, join, isdir
+import base64
+import threading
+import datetime
+import functools
+import tornado
 import json
 
-# CODEX API
-import codex_1d_binning
-import codex_clustering_api
-import codex_data_quality_scan_api
-import codex_dimmension_reduction_api
-import codex_endmembers
-import codex_normalize
-import codex_peak_detection_api
+# CODEX 
+import codex_workflow_manager
+import codex_algorithm_manager
+import codex_guidance_manager
 import codex_read_data_api
-import codex_regression_api
-import codex_segmentation_api
-import codex_template_scan_api
-import codex_classification_api
-import codex_workflow
-
-# CODEX Support
 import codex_system
-import codex_hash, codex_return_code
-import codex_downsample, codex_yaml
+import codex_hash
+import codex_return_code
 import codex_time_log
 import codex_doctest
+import codex_session_manager
+import codex_data_manager
+import codex_analysis_manager
 
 # create a `ThreadPoolExecutor` instance
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
 
-verbose = True
 fileChunks = []
-
-
-def workflow_call(msg, result):
-    '''
-    Inputs:
-
-    Outputs:
-
-    Examples:
-
-    '''
-
-    featureList = msg["dataFeatures"]
-    featureList = codex_system.get_featureList(featureList)
-
-    subsetHashName = msg["dataSelections"]
-    if (subsetHashName != []):
-        subsetHashName = subsetHashName[0]
-    else:
-        subsetHashName = None
-
-    hashList = codex_hash.feature2hashList(featureList)
-    codex_return_code.logReturnCode("hashList = codex_hash.feature2hashList(featureList)")
-
-    data = codex_hash.mergeHashResults(hashList)
-    codex_return_code.logReturnCode("data = codex_hash.mergeHashResults(hashList)")
-    inputHash = codex_hash.hashArray('Merged', data, "feature")
-
-    if (inputHash != None):
-
-        codex_return_code.logReturnCode('codex_hash.hashArray("Merged", data, "feature")')
-        inputHash = inputHash["hash"]
-
-
-    if ('workflow' == "explain_this"):
-
-        codex_workflow.explain_this(inputHash, subsetHashName, result)
-
-    else:
-        result['message'] = "Cannot parse algorithmType"
-
-    return result
-
-
-def algorithm_call(msg, result):
-    '''
-    Inputs:
-
-    Outputs:
-
-    Examples:
-
-    '''
-
-    parms = msg['parameters']
-    downsampled = msg["downsampled"]
-    algorithmName = msg['algorithmName']
-    algorithmType = msg["algorithmType"]
-
-    featureList = msg["dataFeatures"]
-    featureList = codex_system.get_featureList(featureList)
-
-    subsetHashName = msg["dataSelections"]
-    if (subsetHashName != []):
-        subsetHashName = subsetHashName[0]
-    else:
-        subsetHashName = None
-
-    hashList = codex_hash.feature2hashList(featureList)
-    codex_return_code.logReturnCode("hashList = codex_hash.feature2hashList(featureList)")
-
-    data = codex_hash.mergeHashResults(hashList)
-    codex_return_code.logReturnCode("data = codex_hash.mergeHashResults(hashList)")
-    inputHash = codex_hash.hashArray('Merged', data, "feature")
-
-    if (inputHash != None):
-        codex_return_code.logReturnCode('codex_hash.hashArray("Merged", data, "feature")')
-        inputHash = inputHash["hash"]
-
-    if (downsampled != False):
-        downsampled = int(downsampled)
-
-    if (algorithmType == "binning"):
-        result = codex_1d_binning.ml_binning(inputHash, hashList,
-                                             subsetHashName, algorithmName,
-                                             downsampled, parms, result)
-
-    elif (algorithmType == "clustering"):
-        result = codex_clustering_api.ml_cluster(inputHash, hashList,
-                                                 subsetHashName, algorithmName,
-                                                 downsampled, parms, result)
-
-    elif (algorithmType == "data_quality_scan"):
-        result = codex_data_quality_scan_api.ml_quality_scan(
-            inputHash, hashList, subsetHashName, algorithmName, downsampled,
-            parms, result)
-
-    elif (algorithmType == "dimensionality_reduction"):
-        result = codex_dimmension_reduction_api.ml_dimensionality_reduction(
-            inputHash, hashList, subsetHashName, algorithmName, downsampled,
-            parms, result)
-
-    elif (algorithmType == "endmember"):
-        result = codex_endmembers.ml_endmember(inputHash, hashList,
-                                               subsetHashName, algorithmName,
-                                               downsampled, parms, result)
-
-    elif (algorithmType == "normalize"):
-        result = codex_normalize.ml_normalize(inputHash, hashList,
-                                              subsetHashName, algorithmName,
-                                              downsampled, parms, result)
-
-    elif (algorithmType == "peak_detect"):
-        result = codex_peak_detection_api.ml_peak_detect(
-            inputHash, hashList, subsetHashName, algorithmName, downsampled,
-            parms, result)
-
-    elif (algorithmType == "regression"):
-
-        labelName = msg["labelName"]
-        labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
-
-        cross_val = msg["cross_val"]
-        search_type = msg["search_type"]
-        scoring = msg["scoring"]
-
-        result = codex_regression_api.ml_regression(
-            inputHash, hashList, subsetHashName, labelHash, algorithmName,
-            downsampled, parms, scoring, search_type, cross_val, result)
-
-    elif (algorithmType == "classification"):
-
-        labelName = msg["labelName"]
-        labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
-
-        cross_val = msg["cross_val"]
-        search_type = msg["search_type"]
-        scoring = msg["scoring"]
-
-        result = codex_classification_api.ml_classification(
-            inputHash, hashList, subsetHashName, labelHash, algorithmName,
-            downsampled, parms, scoring, search_type, cross_val, result)
-
-    elif (algorithmType == "segment"):
-        result = codex_segmentation_api.ml_segmentation(
-            inputHash, hashList, subsetHashName, algorithmName, downsampled,
-            parms, result)
-
-    elif (algorithmType == "template_scan"):
-        result = codex_template_scan_api.ml_template_scan(
-            inputHash, hashList, subsetHashName, None, algorithmName, downsampled, parms, result)
-
-    else:
-        result['message'] = "Cannot parse algorithmType"
-
-    return result
-
-
-def get_guidance(guidance, result):
-    '''
-    Inputs:
-
-    Outputs:
-
-    Examples:
-
-    '''
-    split = guidance.split(":")
-    if (len(split) == 2):
-        guidanceString = codex_yaml.get_guidance_text_block(split[0], split[1])
-        if (guidanceString is not None):
-            result["guidance"] = guidanceString
-        else:
-            result[
-                "message"] = guidance + " does not exist in YAML guidance file"
-            result["guidance"] = ""
-    else:
-        result["message"] = "Incorrect request formatting"
-        result["guidance"] = ""
-
-    return result
-
 
 class uploadSocket(tornado.websocket.WebSocketHandler):
     def open(self):
@@ -263,9 +80,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
             if (fileExtension == "csv"):
                 hashList, featureList = codex_read_data_api.codex_read_csv(
                     filepath, None, "feature")
-                codex_return_code.logReturnCode(
-                    "hashList = codex_read_data_api.codex_read_csv('" +
-                    filepath + "', None, 'feature')")
+                codex_return_code.logReturnCode("hashList = codex_read_data_api.codex_read_csv('{filepath}', None, 'feature')".format(filepath=filepath))
 
             elif (fileExtension == "h5"):
                 hashList, featureList = codex_read_data_api.codex_read_hd5(
@@ -275,11 +90,8 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
                     filepath + "', None, 'feature')")
 
             elif (fileExtension == "npy"):
-                hashList, featureList = codex_read_data_api.codex_read_npy(
-                    filepath, None, "feature")
-                codex_return_code.logReturnCode(
-                    "hashList = codex_read_data_api.codex_read_npy('" +
-                    filepath + "', None, 'feature')")
+                hashList, featureList = codex_read_data_api.codex_read_npy(filepath, None, "feature")
+                codex_return_code.logReturnCode("hashList = codex_read_data_api.codex_read_npy('" +filepath + "', None, 'feature')")
 
             else:
                 result['message'] = "Currently unsupported filetype"
@@ -335,226 +147,50 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         Examples:
 
         '''
-        result = {}
-
         msg = json.loads(message)
+        result = msg
         codex_system.codex_log("{time} : Message from front end: {json}".format(time=now.isoformat(), json=msg))
 
         routine = msg['routine']
 
-        if (routine == 'algorithm'):
-
-            result = algorithm_call(msg, result)
-            result['identification'] = msg['identification']
-
-        elif (routine == 'workflow'):
-
-            result = workflow_call(msg, result)
-            result['identification'] = msg['identification']
-
-        elif (routine == 'guidance'):
-
-            guidance = msg["guidance"]
-
-            if (guidance is not None):
-                result = get_guidance(guidance, result)
-            else:
-                result['message'] = 'guidance none'
-
-            result['identification'] = msg['identification']
-
+        if(routine == 'algorithm'):
+            result = codex_algorithm_manager.algorithm_call(msg, result)
+        elif(routine == 'workflow'):
+            result = codex_workflow_manager.workflow_call(msg, result)
+        elif(routine == 'guidance'):
+            result = codex_guidance_manager.get_guidance(msg, result)
         elif (routine == "save_session"):
-
-            session_name = msg['session_name']
-            session_path = os.path.join(CODEX_ROOT, 'sessions', session_name)
-
-            if not os.path.exists(session_path):
-                codex_hash.pickle_data(session_name)
-            else:
-                result["WARNING"] = session_name + " already exists."
-
+            result = codex_session_manager.save_session(msg, result)
         elif (routine == "load_session"):
-
-            session_name = msg['session_name']
-            session_path = os.path.join(CODEX_ROOT, 'sessions', session_name)
-            result['session_name'] = msg['session_name']
-
-            if os.path.exists(session_path):
-                result['session_data'] = codex_hash.unpickle_data(session_name)
-            else:
-                result["WARNING"] = session_name + " does not exist."
-
+            result = codex_session_manager.load_session(msg, result)
         elif (routine == "get_sessions"):
-
-            path = os.path.join(CODEX_ROOT, 'sessions')
-            result['sessions'] = [f for f in listdir(path) if isdir(join(path, f))]
-
+            result = codex_session_manager.get_sessions(msg, result)
         elif (routine == 'time'):
-
-            algorithmType = msg['algorithmType']
-            algorithmName = msg['algorithmName']
-            numSamples = int(msg['numSamples'])
-
-            # TODO - extend computeTimeEstimate to factor in number of features
-            numFeatures = int(msg['numFeatures'])
-
-            eta = codex_time_log.getComputeTimeEstimate(
-                algorithmType, algorithmName, numSamples)
-
-            result['eta'] = eta
-            result['message'] = 'success'
-            result['algorithmType'] = msg['algorithmType']
-            result['algorithmName'] = msg['algorithmName']
-            result['numSamples'] = int(msg['numSamples'])
-            result['numFeatures'] = int(msg['numFeatures'])
-
+            result = codex_eta_manager.get_time_estimate(msg, result)
         elif (routine == 'arrange'):
 
             activity = msg["activity"]
-            hashType = msg['hashType']
-
             if (activity == "add"):
-
-                data = msg["data"]
-                maskLength = msg["length"]
-                encoded = data.encode("ascii")
-                decoded = base64.decodebytes(encoded)
-                resultString = "".join(["{:08b}".format(x) for x in decoded])
-
-                numResults = len(resultString)
-                delta = abs(numResults - maskLength)
-
-                maskTmp = np.zeros(numResults)
-
-                for x in range(0, numResults):
-                    maskTmp[x] = int(resultString[x])
-
-                mask = maskTmp[delta:]
-
-                if (hashType == "selection"):
-                    hashResult = codex_hash.hashArray(msg["name"], mask,
-                                                      "subset")
-                elif (hashType == "feature"):
-                    hashResult = codex_hash.hashArray(msg["name"], mask,
-                                                      "feature")
-                else:
-                    result["message"] = 'failure'
-
-                result['message'] = 'success'
-
+                result = codex_data_manager.add_data(msg, result)
             elif (activity == "get"):
-
-                names = msg["name"]
-                data = []
-                status = True
-
-                for name in names:
-                    if (hashType == "selection"):
-                        array = codex_hash.findHashArray(
-                            "name", name, "subset")
-                    elif (hashType == "feature"):
-                        array = codex_hash.findHashArray(
-                            "name", name, "feature")
-                    elif (hashType == "downsample"):
-                        array = codex_hash.findHashArray(
-                            "name", name, "downsample")
-                    elif (hashType == "label"):
-                        array = codex_hash.findHashArray("name", name, "label")
-                    else:
-                        result["message"] = 'failure'
-
-                    if not array:
-                        result[
-                            "message"] = 'failed to find ' + name + ' feature '
-                        status = False
-                        break
-                    else:
-                        data.append(array['data'])
-
-                if (status):
-                    return_data = np.column_stack(data)
-                    result['data'] = return_data.tolist()
-
+                result = codex_data_manager.get_data(msg, result)
             elif (activity == "delete"):
-
-                name = msg["name"]
-
-                if (hashType == "selection"):
-                    status = codex_hash.deleteHashName(name, "subset")
-                elif (hashType == "feature"):
-                    status = codex_hash.deleteHashName(name, "feature")
-                elif (hashType == "downsample"):
-                    status = codex_hash.deleteHashName(name, "downsample")
-                elif (hashType == "label"):
-                    status = codex_hash.deleteHashName(name, "label")
-                else:
-                    result["message"] = 'failure'
-                    status = False
-
-                if (status == True):
-                    result['message'] = 'success'
-                else:
-                    result['message'] = 'failure'
-
+                result = codex_data_manager.delete_data(msg, result)
             elif (activity == "update"):
-
-                field = msg["field"]
-                old = msg["old"]
-                new = msg["new"]
-
-                if (hashType == "selection"):
-                    status = codex_hash.hashUpdate(field, new, old, "subset")
-                elif (hashType == "feature"):
-                    status = codex_hash.hashUpdate(field, new, old, "feature")
-                elif (hashType == "downsample"):
-                    status = codex_hash.hashUpdate(field, new, old,
-                                                   "downsample")
-                elif (hashType == "label"):
-                    status = codex_hash.hashUpdate(field, new, old, "label")
-                else:
-                    result["message"] = 'failure'
-                    status = False
-
-                if (status == True):
-                    result['message'] = 'success'
-                else:
-                    result['message'] = 'failure'
-
+                result = codex_data_manager.update_data(msg, result)
+            elif (activity == "metrics"):
+                result = codex_data_manager.get_data_metrics(msg, result)
             else:
-
                 result['message'] = 'failure'
 
         elif (routine == 'download_code'):
-
-            codex_return_code.dump_code_to_file()
-            f = open(CODEX_ROOT + "returned_code.py", "r")
-            lines = f.readlines()
-            outString = "".join(lines)
-            outStringEncoded = outString.encode('ascii')
-            result['code'] = str(
-                base64.b64encode(outStringEncoded).decode('utf-8'))
-            result['message'] = 'success'
-
+            result = codex_analysis_manager.download_code(msg, result)
         else:
-
             result['message'] = 'Unknown Routine'
-
-        # If anything failed above, the result will be None.
-        # TODO - Replace this with an error handling scheme at some point
-        if (result is None):
-            result = {}
-
-        result['cid'] = msg['cid']
-        if 'message' not in result:
-            result['message'] = 'success'
 
         stringMsg = json.dumps(result)
         codex_system.codex_log("{time} : Response to front end: {json}".format(time=now.isoformat(), json=stringMsg))
         return stringMsg
-
-
-def routine_add_selection(msg):
-    routineResult = {}
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -586,7 +222,6 @@ if __name__ == '__main__':
 
     codex_time_log.getTimeLogDict()
 
-    # Tornado Websocket
     app = make_app()
     if (len(sys.argv) > 1) and (sys.argv[1] == '-ssl'):
         ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
@@ -596,5 +231,6 @@ if __name__ == '__main__':
         app = tornado.httpserver.HTTPServer(app, ssl_options=ssl_ctx)
     else:
         app = tornado.httpserver.HTTPServer(app)
+
     app.listen(8888)
     ioloop.IOLoop.instance().start()

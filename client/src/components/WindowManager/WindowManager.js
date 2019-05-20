@@ -77,24 +77,6 @@ function getWindowTitle(win) {
     }
 }
 
-/*
-    Right now this function returns styleing for the window associated with 
-    what the window contains. This may be useful later. When I tried to use
-    this as a part of the styleing when creating a Cristal component down below
-    the program crashed. So I am just going to make certain components non-resizable
-*/
-function getWindowStyleing(win) {
-    switch (win.windowType) {
-        case regressionTypes.REGRESSION_WINDOW:
-            return {
-                minWidth: 750,
-                minHeight: 500
-            };
-        default:
-            return null;
-    }
-}
-
 function getWindowContent(win) {
     switch (win.windowType) {
         case uiTypes.SCATTER_GRAPH:
@@ -301,7 +283,9 @@ function WindowManager(props) {
     const windows = props.windows
         .filter(win => !win.minimizedOnly)
         .map((win, idx) => {
-            const { width, height, resizable } = windowSettings.initialSizes[win.windowType];
+            const { width, height, resizeable, minSize } = windowSettings.initialSizes[
+                win.windowType
+            ];
 
             // If we can't find a ref for this window, it's new, and we calculate an initial position for it
             const initialPos = refs.current[win.id]
@@ -311,11 +295,12 @@ function WindowManager(props) {
             const settings = win.settings || {
                 title: getWindowTitle(win),
                 children: null,
-                isResizable: resizable,
+                isResizable: resizeable,
                 isDraggable: true,
                 initialPosition: initialPos,
                 restrictToParentDiv: true,
-                initialSize: { width, height}
+                initialSize: { width, height },
+                minSize
             };
 
             // This is a bit of an odd return fragment, but we want to avoid re-rendering the window's content.
