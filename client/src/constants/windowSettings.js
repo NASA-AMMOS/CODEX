@@ -7,41 +7,45 @@ export const initialSizes = {
     [uiTypes.SCATTER_GRAPH]: {
         width: 300,
         height: 300,
-        resizable: true
+        resizeable: true
     },
     [uiTypes.CONTOUR_GRAPH]: {
         width: 300,
         height: 300,
-        resizable: true
+        resizeable: true
     },
     [algorithmTypes.CLUSTER_ALGORITHM]: {
         width: 900,
         height: 600,
-        resizable: false
+        resizeable: false
     },
     [classifierTypes.CLASSIFIER_WINDOW]: {
         width: 850,
         height: 600,
-        resizable: false
+        resizeable: false
     },
     [classifierTypes.CLASSIFIER_RESULTS_WINDOW]: {
         width: 700,
         height: 700,
-        resizable: false
+        resizeable: false
     },
     [uiTypes.SESSIONS_WINDOW]: {
         width: 500,
         height: 500,
-        resizable: true
+        resizeable: true
     },
     [regressionTypes.REGRESSION_WINDOW]: {
         width: 850,
         height: 600,
-        resizable: false
+        minSize: {
+            width: 750,
+            height: 500
+        },
+        resizeable: true
     },
     [regressionTypes.REGRESSION_RESULTS_WINDOW]: {
         width: 700,
         height: 700,
-        resizable: false
+        resizeable: false
     }
 };

@@ -7,8 +7,11 @@ import {
     ClassAttributes
 } from "react";
 
+import { Size } from "./domain";
+
 export interface WrapperProps {
     isActive: boolean;
+    minSize?: Size;
 }
 
 export interface HeaderProps {
@@ -16,8 +19,8 @@ export interface HeaderProps {
     isActive?: boolean;
 }
 
-export const minWidth = 200;
-export const minHeight = 200;
+export const defaultWidth = 200;
+export const defaultHeight = 200;
 export const padding = 10;
 
 const wrapperStyles = ({ isActive }: WrapperProps) => {
@@ -38,8 +41,8 @@ export const Wrapper = styled.div`
     background: white;
     border-radius: 3px;
     box-shadow: rgba(0, 0, 0, 0.25) 0px 2px 5px, rgba(0, 0, 0, 0.1) 0px 1px 1px;
-    min-width: ${minWidth}px;
-    min-height: ${minHeight}px;
+    min-width: ${({ minSize }: WrapperProps) => (minSize ? minSize.width : defaultWidth)}px
+    min-height: ${({ minSize }: WrapperProps) => (minSize ? minSize.height : defaultHeight)}px
     user-select: none;
 `;
 
