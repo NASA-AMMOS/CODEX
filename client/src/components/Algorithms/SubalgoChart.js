@@ -39,7 +39,7 @@ function makeChart(props) {
                         const cluster = props.serverData.clusters[idx];
                         return cluster === -1 ? "#eee" : uiTypes.SELECTIONS_COLOR_PALETTE[cluster];
                     }),
-                    size: 5
+                    size: 2
                 },
                 selected: { marker: { color: "#FF0000", size: 2 } },
                 visible: true
