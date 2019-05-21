@@ -4,16 +4,16 @@ import * as uiTypes from "constants/uiTypes";
 import * as windowManagerActions from "actions/windowManagerActions";
 import * as actionFunctions from "actions/actionFunctions";
 
-function alertNotEnoughFeatures() {
-    alert("Please select 2 features in the features list to create this graph.");
+function alertNotRightNumberOfFeatures() {
+    alert("Please select exactly 2 features in the features list to create this graph.");
 }
 
 function canBuildGraph(graphMode, dataState) {
     switch (graphMode) {
         case uiTypes.SCATTER_GRAPH:
         case uiTypes.CONTOUR_GRAPH:
-            if (dataState.get("featureList").filter(f => f.get("selected")).size < 2) {
-                alertNotEnoughFeatures();
+            if (dataState.get("featureList").filter(f => f.get("selected")).size != 2) {
+                alertNotRightNumberOfFeatures();
                 return false;
             }
             break;
