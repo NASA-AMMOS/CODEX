@@ -266,7 +266,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
     codex_return_code.logReturnCode(returnCodeString)
     '''
 
-
+    result['message'] = "success"
     return result
 
 

@@ -681,6 +681,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
         len(X),
         X.ndim)
 
+    result['message'] = "success"
     return result
 
 

@@ -190,7 +190,8 @@ def run_codex_dim_reduction(
         'subsetHash': subsetHash,
         'outputHash': outputHash["hash"],
         'n_components': n_components,
-        'downsample': downsampled}
+        'downsample': downsampled,
+        'message':"success"}
 
     return output
 
