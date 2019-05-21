@@ -16,6 +16,8 @@ import * as uiTypes from "constants/uiTypes";
 import DimensionalityReductionsOverview from "components/DimensionalityReduction/DimensionalityReductionsOverview";
 import DimensionalityReductionResults from "components/DimensionalityReduction/DimensionalityReductionResults";
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
+import * as workflowTypes from "constants/workflowTypes";
+import ExplainThis from "components/ExplainThis/ExplainThis";
 
 export function getWindowTitle(win) {
     switch (win.windowType) {
@@ -43,6 +45,8 @@ export function getWindowTitle(win) {
             return "Dimensionality Reduction";
         case dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW:
             return "Dimensionality Reduction Results";
+        case workflowTypes.EXPLAIN_THIS:
+            return "Explain This";
         default:
             return "";
     }
@@ -92,6 +96,15 @@ export function getWindowContent(win) {
             return (
                 <DimensionalityReductionResults requests={win.requests} runParams={win.runParams} />
             );
+        case workflowTypes.EXPLAIN_THIS:
+            return (
+                <ExplainThis
+                    selectedFeatures={win.selectedFeatures}
+                    selectedFeaturesLength={win.selectedFeaturesLength}
+                    winId={win.id}
+                />
+            );
+
     }
 }
 

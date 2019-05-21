@@ -3,6 +3,7 @@ import * as algorithmTypes from "constants/algorithmTypes";
 import * as classifierTypes from "constants/classifierTypes";
 import * as regressionTypes from "constants/regressionTypes";
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
+import * as workflowTypes from "constants/workflowTypes";
 
 export const initialSizes = {
     [uiTypes.SCATTER_GRAPH]: {
@@ -62,6 +63,11 @@ export const initialSizes = {
     [dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW]: {
         width: 700,
         height: 375,
+        resizeable: true
+    },
+    [workflowTypes.EXPLAIN_THIS]: {
+        width: 700,
+        height: 500,
         resizeable: true
     }
 };
