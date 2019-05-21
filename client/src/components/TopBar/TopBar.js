@@ -9,7 +9,6 @@ import React, { Component } from "react";
 
 import { brushClear } from "actions/data";
 import { openAlgorithm, openReport, openDevelopment, brushtypeSet, modeSet } from "actions/ui";
-import Import from "components/Import/Import";
 import LoadingBar from "components/LoadingBar/LoadingBar";
 import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
@@ -20,6 +19,8 @@ import * as classifierActions from "actions/classifierActions";
 import * as regressionActions from "actions/regressionActions";
 import * as sessionsActions from "actions/sessionsActions";
 import * as dimensionalityReductionActions from "actions/dimensionalityReductionActions";
+import * as exportActions from "actions/exportActions";
+import * as dataActions from "actions/data";
 
 class TopBar extends Component {
     constructor(props) {
@@ -193,14 +194,18 @@ class TopBar extends Component {
                     <Dropdown className="dropdownMain" autoOpen={false}>
                         <Dropdown.Toggle className="dropdownToggle" title="Files" />
                         <Dropdown.Menu>
-                            <MenuItem>
-                                <Import
-                                    setProgress={p => {
-                                        this.setLoadingPercent(p);
-                                    }}
-                                    completedLoad={() => {}}
+                            <MenuItem style={{ position: "relative" }}>
+                                <input
+                                    className="inputfile"
+                                    multiple={false}
+                                    name="files[]"
+                                    type="file"
+                                    onChange={e => this.props.fileLoad(e.target.files)}
+                                    accept=".csv,.npy,.h5"
                                 />
+                                Import
                             </MenuItem>
+                            <MenuItem onSelect={this.props.requestServerExport}>Export</MenuItem>
                         </Dropdown.Menu>
                     </Dropdown>
 
@@ -314,7 +319,9 @@ function mapDispatchToProps(dispatch) {
         openDimensionalityReductionWindow: bindActionCreators(
             dimensionalityReductionActions.openDimensionalityReductionWindow,
             dispatch
-        )
+        ),
+        requestServerExport: bindActionCreators(exportActions.requestServerExport, dispatch),
+        fileLoad: bindActionCreators(dataActions.fileLoad, dispatch)
     };
 }
 

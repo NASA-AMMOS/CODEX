@@ -82,3 +82,14 @@
     opacity: 0;
     transition: opacity 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95);
 }
+
+.inputfile {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
