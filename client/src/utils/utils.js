@@ -71,3 +71,11 @@ export function makeSimpleRequest(request) {
 
     return { req, cancel };
 }
+
+export function range(start, stop) {
+    const values = [];
+    for (let i = start; i < stop; i++) {
+        values.push(i);
+    }
+    return values;
+}

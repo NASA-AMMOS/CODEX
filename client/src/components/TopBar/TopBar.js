@@ -19,6 +19,7 @@ import * as windowManagerActions from "actions/windowManagerActions";
 import * as classifierActions from "actions/classifierActions";
 import * as regressionActions from "actions/regressionActions";
 import * as sessionsActions from "actions/sessionsActions";
+import * as dimensionalityReductionActions from "actions/dimensionalityReductionActions";
 
 class TopBar extends Component {
     constructor(props) {
@@ -214,9 +215,12 @@ class TopBar extends Component {
                             {this.getAlgorithmsMenuItems()}
                             <MenuItem onSelect={this.props.openClassifierWindow}>
                                 Classifier
-                            </MenuItem>{" "}
+                            </MenuItem>
                             <MenuItem onSelect={this.props.openRegressionWindow}>
                                 Regression
+                            </MenuItem>
+                            <MenuItem onSelect={this.props.openDimensionalityReductionWindow}>
+                                Dimensionality Reduction
                             </MenuItem>
                         </Dropdown.Menu>
                     </Dropdown>
@@ -296,7 +300,6 @@ const mapStateToProps = state => {
 function mapDispatchToProps(dispatch) {
     return {
         brushClear: () => dispatch(brushClear()),
-
         openAlgorithm: (d, n, w, h) => dispatch(openAlgorithm(d, n, w, h)),
         openReport: (d, n, w, h) => dispatch(openReport(d, n, w, h)),
         openDevelopment: (d, n) => dispatch(openDevelopment(d, n)),
@@ -307,7 +310,11 @@ function mapDispatchToProps(dispatch) {
         setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch),
         openClassifierWindow: bindActionCreators(classifierActions.openClassifierWindow, dispatch),
         openRegressionWindow: bindActionCreators(regressionActions.openRegressionWindow, dispatch),
-        openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch)
+        openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch),
+        openDimensionalityReductionWindow: bindActionCreators(
+            dimensionalityReductionActions.openDimensionalityReductionWindow,
+            dispatch
+        )
     };
 }
 

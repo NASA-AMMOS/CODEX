@@ -20,7 +20,7 @@ export const SELECTIONS_BRUSH_COLOR = "#ff4500";
 
 export const SCATTER_GRAPH = "Scatter";
 export const CONTOUR_GRAPH = "Contour";
-export const TIME_SERIES_GRAPH  = "Time Series";
+export const TIME_SERIES_GRAPH = "Time Series";
 
 export const SESSIONS_WINDOW = "SESSIONS_WINDOW";
 

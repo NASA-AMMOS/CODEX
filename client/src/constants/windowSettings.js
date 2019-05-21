@@ -2,6 +2,7 @@ import * as uiTypes from "constants/uiTypes";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as classifierTypes from "constants/classifierTypes";
 import * as regressionTypes from "constants/regressionTypes";
+import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
 
 export const initialSizes = {
     [uiTypes.SCATTER_GRAPH]: {
@@ -17,7 +18,7 @@ export const initialSizes = {
     [uiTypes.TIME_SERIES_GRAPH]: {
         width: 500,
         height: 400,
-        resizable: true
+        resizeable: true
     },
     [algorithmTypes.CLUSTER_ALGORITHM]: {
         width: 900,
@@ -52,5 +53,15 @@ export const initialSizes = {
         width: 700,
         height: 700,
         resizeable: false
+    },
+    [dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_WINDOW]: {
+        width: 700,
+        height: 500,
+        resizable: true
+    },
+    [dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW]: {
+        width: 700,
+        height: 375,
+        resizeable: true
     }
 };
