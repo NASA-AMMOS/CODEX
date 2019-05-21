@@ -3,120 +3,12 @@ import "components/WindowManager/WindowManagerStyles.scss";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import React, { useState, useLayoutEffect, useEffect, useRef } from "react";
+import ShelfPack from "@mapbox/shelf-pack";
 
-import ClusterAlgorithm from "components/Algorithms/ClusterAlgorithm";
 import Cristal from "react-cristal/src";
-import ContourGraph from "components/Graphs/ContourGraph";
-import ScatterGraph from "components/Graphs/ScatterGraph";
-import TimeSeriesGraph from "components/Graphs/TimeSeriesGraph";
-import * as algorithmTypes from "constants/algorithmTypes";
-import * as uiTypes from "constants/uiTypes";
+import * as windowContentFunctions from "components/WindowManager/windowContentFunctions";
 import * as windowManagerActions from "actions/windowManagerActions";
 import * as windowSettings from "constants/windowSettings";
-import ShelfPack from "@mapbox/shelf-pack";
-import classnames from "classnames";
-import * as classifierTypes from "constants/classifierTypes";
-import ClassifiersOverview from "components/Classifiers/ClassifiersOverview";
-import ClassifierResults from "components/Classifiers/ClassifierResults";
-import * as regressionTypes from "constants/regressionTypes";
-import RegressionsOverview from "components/Regressions/RegressionsOverview";
-import RegressionResults from "components/Regressions/RegressionResults";
-import Sessions from "components/Sessions/Sessions";
-
-function getTwoAxisGraphTitle(win) {
-    const selectedFeatures = win.data.get("data")[0];
-    return `${selectedFeatures[0]} vs ${selectedFeatures[1]}`;
-}
-
-function getMultiAxisGraphTitle(win) {
-    const selectedFeatures = win.data.get("data")[0];
-    let retString = "";
-
-    for (let i = 0; i < selectedFeatures.length - 1; i++) {
-        retString = retString + selectedFeatures[i] + " vs ";
-    }
-    retString = retString + selectedFeatures[selectedFeatures.length - 1];
-
-    return retString;
-}
-
-function previewAllowed(win) {
-    switch (win.windowType) {
-        case algorithmTypes.CLUSTER_ALGORITHM:
-        case algorithmTypes.ALGO_LOADING_WINDOW:
-            return false;
-        default:
-            return true;
-    }
-}
-
-function getWindowTitle(win) {
-    switch (win.windowType) {
-        case uiTypes.SCATTER_GRAPH:
-        case uiTypes.CONTOUR_GRAPH:
-        case uiTypes.TIME_SERIES_GRAPH:
-            return getMultiAxisGraphTitle(win);
-        case algorithmTypes.CLUSTER_ALGORITHM:
-            return `Algorithm: ${win.windowType}`;
-        case algorithmTypes.ALGO_LOADING_WINDOW:
-            return `Loading Algorithm ${
-                win.loadingSecRemaining ? "(" + win.loadingSecRemaining + "s)" : ""
-            }`;
-        case classifierTypes.CLASSIFIER_WINDOW:
-            return "Classification";
-        case classifierTypes.CLASSIFIER_RESULTS_WINDOW:
-            return "Classification Results";
-        case regressionTypes.REGRESSION_WINDOW:
-            return "Regression";
-        case regressionTypes.REGRESSION_RESULTS_WINDOW:
-            return "Regression Results";
-        case uiTypes.SESSIONS_WINDOW:
-            return "Sessions";
-        default:
-            return "";
-    }
-}
-
-function getWindowContent(win) {
-    switch (win.windowType) {
-        case uiTypes.SCATTER_GRAPH:
-            return <ScatterGraph data={win.data} />;
-        case uiTypes.CONTOUR_GRAPH:
-            return <ContourGraph data={win.data} />;
-        case uiTypes.TIME_SERIES_GRAPH:
-            return <TimeSeriesGraph data={win.data} />;
-        case algorithmTypes.CLUSTER_ALGORITHM:
-            return (
-                <ClusterAlgorithm
-                    filename={win.filename}
-                    winId={win.id}
-                    selectedFeatures={win.selectedFeatures}
-                />
-            );
-        case classifierTypes.CLASSIFIER_WINDOW:
-            return (
-                <ClassifiersOverview
-                    selectedFeatures={win.selectedFeatures}
-                    selectedFeatureLength={win.selectedFeatureLength}
-                    winId={win.id}
-                />
-            );
-        case classifierTypes.CLASSIFIER_RESULTS_WINDOW:
-            return <ClassifierResults requests={win.requests} runParams={win.runParams} />;
-        case regressionTypes.REGRESSION_WINDOW:
-            return (
-                <RegressionsOverview
-                    selectedFeatures={win.selectedFeatures}
-                    selectedFeatureLength={win.selectedFeatureLength}
-                    winId={win.id}
-                />
-            );
-        case regressionTypes.REGRESSION_RESULTS_WINDOW:
-            return <RegressionResults requests={win.requests} runParams={win.runParams} />;
-        case uiTypes.SESSIONS_WINDOW:
-            return <Sessions />;
-    }
-}
 
 function tileWindowsFromPackedObject(refAry, packed) {
     refAry.forEach(([key], idx) => {
@@ -234,7 +126,7 @@ function makeMinimizedBar(props) {
                         onMouseOut={_ => props.setWindowHover(win.id, false)}
                         className="minimizedWindow"
                     >
-                        <div className="title">{getWindowTitle(win)}</div>
+                        <div className="title">{windowContentFunctions.getWindowTitle(win)}</div>
                     </div>
                 ))}
         </div>
@@ -293,7 +185,7 @@ function WindowManager(props) {
                 : getNewWindowPosition(props, refs, width, height);
 
             const settings = win.settings || {
-                title: getWindowTitle(win),
+                title: windowContentFunctions.getWindowTitle(win),
                 children: null,
                 isResizable: resizeable,
                 isDraggable: true,
@@ -323,7 +215,7 @@ function WindowManager(props) {
                     onClick={_ => setActiveWindow(win.id)}
                     {...settings}
                 >
-                    <div className="windowBody">{getWindowContent(win)}</div>
+                    <div className="windowBody">{windowContentFunctions.getWindowContent(win)}</div>
                 </Cristal>
             );
         });
