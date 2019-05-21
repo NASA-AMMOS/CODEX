@@ -1,43 +1,43 @@
 import * as actionTypes from "constants/actionTypes";
-import * as classifierTypes from "constants/classifierTypes";
+import * as classificationTypes from "constants/classificationTypes";
 import * as actionFunctions from "actions/actionFunctions";
 import * as utils from "utils/utils";
-import * as classifierFunctions from "components/Classifiers/classifierFunctions";
+import * as classificationFunctions from "components/Classification/classificationFunctions";
 
 /* eslint import/no-webpack-loader-syntax: off */
 import WorkerSocket from "worker-loader!workers/socket.worker";
 
-export function openClassifierWindow() {
+export function openClassificationWindow() {
     return {
         type: actionTypes.OPEN_NEW_WINDOW,
         info: {
-            windowType: classifierTypes.CLASSIFIER_WINDOW
+            windowType: classificationTypes.CLASSIFICATION_WINDOW
         }
     };
 }
 
-// Creates a request object for a classifier run that can be converted to JSON and sent to the server.
-function createClassifierRequest(
+// Creates a request object for a classification run that can be converted to JSON and sent to the server.
+function createClassificationRequest(
     filename,
     selectedFeatures,
     crossVal,
     labelName,
     searchType,
     scoring,
-    classifierState
+    classificationState
 ) {
     return {
         routine: "algorithm",
-        algorithmName: classifierState.name,
+        algorithmName: classificationState.name,
         algorithmType: "classification",
         dataFeatures: selectedFeatures.filter(f => f !== labelName),
         filename,
         identification: { id: "dev0" },
         parameters:
-            classifierState.paramData.mode === "range"
+            classificationState.paramData.mode === "range"
                 ? {
-                      [classifierState.paramData.name]: classifierFunctions.createRange(
-                          classifierState.paramData.params
+                      [classificationState.paramData.name]: classificationFunctions.createRange(
+                          classificationState.paramData.params
                       )
                   }
                 : {},
@@ -50,13 +50,13 @@ function createClassifierRequest(
     };
 }
 
-/* Function to run a set of selected classifiers and their user-selected inputs.
-Creates a server request for each chosen classifier, sends that request to the server,
-closes the classifier select window and opens a new one while handing off the server requests (as Promises)
-to the ClassifierResults window. */
+/* Function to run a set of selected classifications and their user-selected inputs.
+Creates a server request for each chosen classification, sends that request to the server,
+closes the classification select window and opens a new one while handing off the server requests (as Promises)
+to the ClassificationResults window. */
 
-export function createClassifierOutput(
-    classifierStates,
+export function createClassificationOutput(
+    classificationStates,
     selectedFeatures,
     crossVal,
     labelName,
@@ -65,24 +65,24 @@ export function createClassifierOutput(
     winId
 ) {
     return (dispatch, getState) => {
-        // Close classifier options window and open a loading window
+        // Close classification options window and open a loading window
         dispatch({ type: actionTypes.CLOSE_WINDOW, id: winId });
 
-        const classifiersToRun = classifierStates
-            .filter(classifierState => classifierState.paramData)
-            .filter(classifierState => classifierState.selected);
+        const classificationsToRun = classificationStates
+            .filter(classificationState => classificationState.paramData)
+            .filter(classificationState => classificationState.selected);
 
         const filename = getState().data.get("filename");
-        const requests = classifiersToRun
-            .map(classifierState =>
-                createClassifierRequest(
+        const requests = classificationsToRun
+            .map(classificationState =>
+                createClassificationRequest(
                     filename,
                     selectedFeatures,
                     crossVal,
                     labelName,
                     searchType,
                     scoring,
-                    classifierState
+                    classificationState
                 )
             )
             .map(request => {
@@ -93,7 +93,7 @@ export function createClassifierOutput(
         dispatch({
             type: actionTypes.OPEN_NEW_WINDOW,
             info: {
-                windowType: classifierTypes.CLASSIFIER_RESULTS_WINDOW,
+                windowType: classificationTypes.CLASSIFICATION_RESULTS_WINDOW,
                 requests,
                 runParams: { selectedFeatures, crossVal, labelName, scoring, searchType }
             }

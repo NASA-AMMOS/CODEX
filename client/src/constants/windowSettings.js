@@ -1,6 +1,6 @@
 import * as uiTypes from "constants/uiTypes";
 import * as algorithmTypes from "constants/algorithmTypes";
-import * as classifierTypes from "constants/classifierTypes";
+import * as classificationTypes from "constants/classificationTypes";
 import * as regressionTypes from "constants/regressionTypes";
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
 import * as workflowTypes from "constants/workflowTypes";
@@ -26,12 +26,12 @@ export const initialSizes = {
         height: 600,
         resizeable: false
     },
-    [classifierTypes.CLASSIFIER_WINDOW]: {
+    [classificationTypes.CLASSIFICATION_WINDOW]: {
         width: 850,
         height: 600,
         resizeable: false
     },
-    [classifierTypes.CLASSIFIER_RESULTS_WINDOW]: {
+    [classificationTypes.CLASSIFICATION_RESULTS_WINDOW]: {
         width: 700,
         height: 700,
         resizeable: false

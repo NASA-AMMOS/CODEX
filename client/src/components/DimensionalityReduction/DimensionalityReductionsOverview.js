@@ -1,4 +1,4 @@
-// This component creates a window that allows users to configure a new classifier run.
+// This component creates a window that allows users to configure a new classification run.
 
 import React, { useEffect, useState, useReducer } from "react";
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
@@ -20,7 +20,7 @@ import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import classnames from "classnames";
 
-// Reducer to handle changes to each individual classifier's state, which contains info
+// Reducer to handle changes to each individual classification's state, which contains info
 // about parameters and expected run times.
 function drStateReducer(drState, action) {
     switch (action.type) {
@@ -97,16 +97,16 @@ function makeNumericInput(subParam, paramName, drName, drStateDispatch, options)
     );
 }
 
-function makeStringChoiceInput(param, classifierName, classifierStateDispatch) {
+function makeStringChoiceInput(param, classificationName, classificationStateDispatch) {
     return (
         <FormControl key={param.name}>
             <InputLabel>{param.displayName}</InputLabel>
             <Select
                 value={param.value || param.default}
                 onChange={e =>
-                    classifierStateDispatch({
+                    classificationStateDispatch({
                         type: "updateParam",
-                        classifierName,
+                        classificationName,
                         paramName: param.name,
                         value: e.target.value
                     })
@@ -186,7 +186,7 @@ function getInitialParamState(props) {
 }
 
 function DimensionalityReductionsOverview(props) {
-    // Create and store classifier states
+    // Create and store classification states
     const [drStates, drStateDispatch] = useReducer(drStateReducer, getInitialParamState(props));
 
     const selectedFeatures = props.featureList
@@ -194,7 +194,7 @@ function DimensionalityReductionsOverview(props) {
         .map(f => f.get("name"))
         .toJS();
 
-    // Create and store global options for this classifier run
+    // Create and store global options for this classification run
     const [crossVal, setCrossVal] = useState(3);
 
     const searchTypeOptions = ["grid", "random"];
@@ -229,7 +229,7 @@ function DimensionalityReductionsOverview(props) {
 
     // Render the HTML for the page.
     // When the user clicks "run", we fire an action that closes this window, creates server requests for data for each selected
-    // classifier, and then hands them off to a new window defined in ClassifierResult.
+    // classification, and then hands them off to a new window defined in ClassificationResult.
     const drsSelected = drStates.filter(c => c.selected).length;
     const waitTime = drStates.reduce((acc, c) => acc + c.eta, 0);
     const waitTimeString = drStates.every(c => c.etaLoaded)
@@ -239,7 +239,7 @@ function DimensionalityReductionsOverview(props) {
         : "Calculating approximate run time...";
 
     return (
-        <div className="classifiersContainer">
+        <div className="classificationsContainer">
             <div className="headerBar">
                 <div>
                     <Button
@@ -281,7 +281,7 @@ function DimensionalityReductionsOverview(props) {
                             Select None
                         </Button>
                     </div>
-                    <FormGroup classes={{ root: "classifierList" }}>
+                    <FormGroup classes={{ root: "classificationList" }}>
                         {drStates.map(dr =>
                             makeDrRow(activeDrName, setActiveDrName, drStateDispatch, dr)
                         )}
@@ -290,14 +290,14 @@ function DimensionalityReductionsOverview(props) {
                 <div className="rightCol">
                     <div className="paramHeader">
                         <div className="row">
-                            <div className="classifierCounts">
+                            <div className="classificationCounts">
                                 <span>{drsSelected} Reductions selected</span>
                                 <span>{waitTimeString}</span>
                             </div>
                         </div>
                     </div>
                     <hr />
-                    <div className="classifierParams">
+                    <div className="classificationParams">
                         <Typography variant="subtitle1">{activeDrName}</Typography>
                         {drStates
                             .find(c => c.name === activeDrName)

@@ -15,6 +15,8 @@ import ReactResizeDetector from "react-resize-detector";
 
 function ExplainThis(props) {
 
+    console.log(props);
+
 	return (
 		<div>
 			Test

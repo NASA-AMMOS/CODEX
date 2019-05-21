@@ -1,74 +1,74 @@
 import * as constantHelpers from "constants/constantHelpers"
 
-export const CLASSIFIER_WINDOW = "CLASSIFIER_WINDOW";
-export const CLASSIFIER_LOADING_WINDOW = "CLASSIFIER_LOADING_WINDOW";
-export const CLASSIFIER_RESULTS_WINDOW = "CLASSIFIER_RESULTS_WINDOW";
+export const CLASSIFICATION_WINDOW = "CLASSIFICATION_WINDOW";
+export const CLASSIFICATION_LOADING_WINDOW = "CLASSIFICATION_LOADING_WINDOW";
+export const CLASSIFICATION_RESULTS_WINDOW = "CLASSIFICATION_RESULTS_WINDOW";
 
-export const AdaBoostClassifier = "AdaBoostClassifier";
-export const BaggingClassifier = "BaggingClassifier";
+export const AdaBoostClassification = "AdaBoostClassification";
+export const BaggingClassification = "BaggingClassification";
 export const BayesianGaussianMixture = "BayesianGaussianMixture";
 export const BernoulliNB = "BernoulliNB";
-export const CalibratedClassifierCV = "CalibratedClassifierCV";
+export const CalibratedClassificationCV = "CalibratedClassificationCV";
 export const ComplementNB = "ComplementNB";
-export const DecisionTreeClassifier = "DecisionTreeClassifier";
-export const ExtraTreesClassifier = "ExtraTreesClassifier";
-export const ExtraTreeClassifier = "ExtraTreeClassifier";
+export const DecisionTreeClassification = "DecisionTreeClassification";
+export const ExtraTreesClassification = "ExtraTreesClassification";
+export const ExtraTreeClassification = "ExtraTreeClassification";
 export const GaussianMixture = "GaussianMixture";
 export const GaussianNB = "GaussianNB";
-export const GaussianProcessClassifier = "GaussianProcessClassifier";
-export const GradientBoostingClassifier = "GradientBoostingClassifier";
-export const KNeighborsClassifier = "KNeighborsClassifier";
+export const GaussianProcessClassification = "GaussianProcessClassification";
+export const GradientBoostingClassification = "GradientBoostingClassification";
+export const KNeighborsClassification = "KNeighborsClassification";
 export const LabelPropagation = "LabelPropagation";
 export const LabelSpreading = "LabelSpreading";
 export const LinearDiscriminantAnalysis = "LinearDiscriminantAnalysis";
 export const LogisticRegression = "LogisticRegression";
 export const LogisticRegressionCV = "LogisticRegressionCV";
-export const MLPClassifier = "MLPClassifier";
+export const MLPClassification = "MLPClassification";
 export const MultinomialNB = "MultinomialNB";
 export const NuSVC = "NuSVC";
 export const QuadraticDiscriminantAnalysis = "QuadraticDiscriminantAnalysis";
-export const RandomForestClassifier = "RandomForestClassifier";
-export const SGDClassifier = "SGDClassifier";
+export const RandomForestClassification = "RandomForestClassification";
+export const SGDClassification = "SGDClassification";
 export const SVC = "SVC";
 
-export const CLASSIFIER_TYPES = [
-    AdaBoostClassifier,
-    BaggingClassifier,
+export const CLASSIFICATION_TYPES = [
+    AdaBoostClassification,
+    BaggingClassification,
     BayesianGaussianMixture,
     BernoulliNB,
-    CalibratedClassifierCV,
+    CalibratedClassificationCV,
     ComplementNB,
-    DecisionTreeClassifier,
-    ExtraTreesClassifier,
-    ExtraTreeClassifier,
+    DecisionTreeClassification,
+    ExtraTreesClassification,
+    ExtraTreeClassification,
     GaussianMixture,
     GaussianNB,
-    GaussianProcessClassifier,
-    GradientBoostingClassifier,
-    KNeighborsClassifier,
+    GaussianProcessClassification,
+    GradientBoostingClassification,
+    KNeighborsClassification,
     LabelPropagation,
     LabelSpreading,
     LinearDiscriminantAnalysis,
     LogisticRegression,
     LogisticRegressionCV,
-    MLPClassifier,
+    MLPClassification,
     MultinomialNB,
     NuSVC,
     QuadraticDiscriminantAnalysis,
-    RandomForestClassifier,
-    SGDClassifier,
+    RandomForestClassification,
+    SGDClassification,
     SVC
 ];
 
-export const CLASSIFIER_PARAMS = {
-    [AdaBoostClassifier]: [
+export const CLASSIFICATION_PARAMS = {
+    [AdaBoostClassification]: [
         {
             name: "n_estimators",
             mode: "range",
             subParams: [].concat(constantHelpers.createRange(1, 100, 1, "int"))
         }
     ],
-    [BaggingClassifier]: [
+    [BaggingClassification]: [
         {
             name: "n_estimators",
             mode: "range",
@@ -92,7 +92,7 @@ export const CLASSIFIER_PARAMS = {
 
         }
     ],
-    [CalibratedClassifierCV]: [
+    [CalibratedClassificationCV]: [
         {
             name: "method",
             subParams: [

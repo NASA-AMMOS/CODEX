@@ -17,7 +17,7 @@ import * as uiTypes from "constants/uiTypes";
 import * as workflowTypes from "constants/workflowTypes";
 import * as workflowActions from "actions/workflowActions";
 import * as windowManagerActions from "actions/windowManagerActions";
-import * as classifierActions from "actions/classifierActions";
+import * as classificationActions from "actions/classificationActions";
 import * as regressionActions from "actions/regressionActions";
 import * as sessionsActions from "actions/sessionsActions";
 import * as dimensionalityReductionActions from "actions/dimensionalityReductionActions";
@@ -233,8 +233,8 @@ class TopBar extends Component {
                         <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
                         <Dropdown.Menu>
                             {this.getAlgorithmsMenuItems()}
-                            <MenuItem onSelect={this.props.openClassifierWindow}>
-                                Classifier
+                            <MenuItem onSelect={this.props.openClassificationWindow}>
+                                Classification
                             </MenuItem>
                             <MenuItem onSelect={this.props.openRegressionWindow}>
                                 Regression
@@ -341,7 +341,7 @@ function mapDispatchToProps(dispatch) {
         createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name)),
         createWorkflow: name => dispatch(workflowActions.createWorkflow(name)),
         setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch),
-        openClassifierWindow: bindActionCreators(classifierActions.openClassifierWindow, dispatch),
+        openClassificationWindow: bindActionCreators(classificationActions.openClassificationWindow, dispatch),
         openRegressionWindow: bindActionCreators(regressionActions.openRegressionWindow, dispatch),
         openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch),
         openDimensionalityReductionWindow: bindActionCreators(

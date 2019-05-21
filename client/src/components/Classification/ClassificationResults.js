@@ -1,15 +1,15 @@
 import React, { useEffect, useState, useReducer } from "react";
-import * as classifierTypes from "constants/classifierTypes";
+import * as classificationTypes from "constants/classificationTypes";
 import Typography from "@material-ui/core/Typography";
 import Plot from "react-plotly.js";
 import classnames from "classnames";
 import Button from "@material-ui/core/Button";
-import "components/Classifiers/classifiers.scss";
+import "components/Classification/classification.scss";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
 // Utility to create a Plotly chart for each algorithm data return from the server.
 // We show a loading progress indicator if the data hasn't arrived yet.
-function makeClassifierPlot(algo) {
+function makeClassificationPlot(algo) {
     if (!algo || !algo.data)
         return (
             <div className="chartLoading">
@@ -78,7 +78,7 @@ function makeClassifierPlot(algo) {
                 yref: 'y1',
                 x: algo.data.classes[j],
                 y: algo.data.classes[i],
-                text: value,
+                text: value + "%",
                 font: {
                     family: 'Arial',
                     size: 12,
@@ -102,10 +102,10 @@ function makeClassifierPlot(algo) {
     );
 }
 
-// Finds the highest-scoring classifier and generates its chart data.
-// (Doesn't display until all classifier returns come back from server.)
-function makeBestClassifier(algoStates) {
-    const bestClassifier =
+// Finds the highest-scoring classification and generates its chart data.
+// (Doesn't display until all classification returns come back from server.)
+function makeBestClassification(algoStates) {
+    const bestClassification =
         algoStates.every(algo => algo.data) &&
         algoStates.reduce((acc, algo) => {
             if (!acc) return { name: algo.data.algorithmName, score: algo.data.best_score };
@@ -116,17 +116,17 @@ function makeBestClassifier(algoStates) {
 
     return (
         <div>
-            <Typography variant="h6">Best Classifier</Typography>
-            <div className="classifierResult">
-                <div className="classifierHeader">
-                    {bestClassifier ? bestClassifier.name : "Loading..."}
-                    <span hidden={!bestClassifier} className="percentage">
-                        {Math.ceil(bestClassifier.score * 100)}%
+            <Typography variant="h6">Best Classification</Typography>
+            <div className="classificationResult">
+                <div className="classificationHeader">
+                    {bestClassification ? bestClassification.name : "Loading..."}
+                    <span hidden={!bestClassification} className="percentage">
+                        {Math.ceil(bestClassification.score * 100)}%
                     </span>
                 </div>
                 <div className="plot">
-                    {makeClassifierPlot(
-                        algoStates.find(algo => algo.algorithmName === bestClassifier.name)
+                    {makeClassificationPlot(
+                        algoStates.find(algo => algo.algorithmName === bestClassification.name)
                     )}
                 </div>
             </div>
@@ -134,8 +134,8 @@ function makeBestClassifier(algoStates) {
     );
 }
 
-function ClassifierResults(props) {
-    // Create state objects for each classifier we're running so that we can keep track of them.
+function ClassificationResults(props) {
+    // Create state objects for each classification we're running so that we can keep track of them.
     const [algoStates, setAlgoStates] = useState(_ => props.requests.map(req => req.requestObj));
     useEffect(_ => {
         // As each request promise resolves with server data, update the state.
@@ -157,7 +157,7 @@ function ClassifierResults(props) {
         };
     }, []);
 
-    // State getter and setter for the list of currently selected classifiers
+    // State getter and setter for the list of currently selected classifications
     const [selectedAlgos, setSelectedAlgos] = useState([]);
     function toggleSelected(name) {
         setSelectedAlgos(
@@ -168,9 +168,9 @@ function ClassifierResults(props) {
     }
 
     return (
-        <div className="classifierResults">
+        <div className="classificationResults">
             <div className="resultRow leftAligned">
-                {makeBestClassifier(algoStates)}
+                {makeBestClassification(algoStates)}
                 <div className="runParams">
                     <Typography variant="h6">Global Run Parameters</Typography>
                     <ul className="bestParms">
@@ -187,18 +187,18 @@ function ClassifierResults(props) {
                     </ul>
                 </div>
             </div>
-            <Typography variant="h6">All Classifiers</Typography>
+            <Typography variant="h6">All Classifications</Typography>
             <div className="resultRow">
                 {algoStates.map(algo => (
                     <div
                         key={algo.algorithmName}
                         className={classnames({
-                            classifierResult: true,
+                            classificationResult: true,
                             selected: selectedAlgos.includes(algo.algorithmName)
                         })}
                     >
                         <div
-                            className="classifierHeader"
+                            className="classificationHeader"
                             onClick={_ => toggleSelected(algo.algorithmName)}
                         >
                             {algo.algorithmName.length <= 20
@@ -208,7 +208,7 @@ function ClassifierResults(props) {
                                 {algo.loaded && Math.ceil(algo.data.best_score * 100)}%
                             </span>
                         </div>
-                        <div className="plot">{makeClassifierPlot(algo)}</div>
+                        <div className="plot">{makeClassificationPlot(algo)}</div>
                         <ul className="bestParms" hidden={!algo.data}>
                             {algo.data &&
                                 Object.entries(algo.data.best_parms).map(([name, val]) => (
@@ -224,4 +224,4 @@ function ClassifierResults(props) {
     );
 }
 
-export default ClassifierResults;
+export default ClassificationResults;
