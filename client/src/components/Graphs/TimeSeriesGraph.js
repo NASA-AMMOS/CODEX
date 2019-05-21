@@ -9,6 +9,7 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
+import Plotly from 'plotly.js';
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 
@@ -27,8 +28,8 @@ function generatePlotData(features) {
         data[i] = {
             x: timeAxis,
             y: features[i],
-            xaxis: 'x'+(i+1),
-            yaxis: 'y'+(i+1),
+            xaxis: 'x',
+            yaxis: 'y1',
             type: "scattergl",
             mode: "lines",
             visible: true,
@@ -36,6 +37,42 @@ function generatePlotData(features) {
         };
     }
     return data;
+}
+
+function generateLayouts(features) {
+    let layouts = [];
+
+    for(let index = 0; index < features.length; index++) {
+        let layout = {
+            autosize: true,
+            margin: { l: 0, r: 5, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
+            dragmode: "select",
+            hovermode: "compare", // Turning off hovermode seems to screw up click handling
+            titlefont: { size: 5 },
+            xaxis: {
+                automargin: true
+            },
+            yaxis: {
+                automargin: true,
+                fixedrange: true,
+                showline: false
+            }
+        };
+
+        //putting x axis only on the last one
+        if (index != (features.length - 1)){
+            layout.xaxis.visible = false;
+            layout.margin.l = 20;
+        }
+        //add axis title
+        layout.yaxis.title = {
+            text:features[index][0]
+        };
+
+        layouts.push(layout);
+    }
+
+    return layouts;
 }
 
 function TimeSeriesGraph(props) {
@@ -49,94 +86,50 @@ function TimeSeriesGraph(props) {
         setContextMenuPosition({ top: e.clientY, left: e.clientX });
     }
 
-    const chart = useRef(null);
     const features = utils.unzip(props.data.get("data"));
 
-    // The plotly react element only changes when the revision is incremented.
-    const [chartRevision, setChartRevision] = useState(0);
+    const chartRefs = features.map((feat) => useRef(null));
 
-    // Initial chart settings. These need to be kept in state and updated as necessary
-    const [chartState, setChartState] = useState({
-        data: generatePlotData(features),
-        layout: {
-            autosize: true,
-            margin: { l: 5, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space
-            dragmode: props.globalChartState,
-            datarevision: chartRevision,
-            hovermode: "closest", // Turning off hovermode seems to screw up click handling
-            titlefont: { size: 5 },
-            xaxis: {
-                automargin: true
-            },
-            yaxis: {
-                automargin: true
-            },
-            grid: {
-                rows: features.length,
-                columns: 1,
-                pattern: 'independent',
-            }
-        },
-        config: {
-            responsive: true,
-            displaylogo: false,
-            modeBarButtons: [["zoomIn2d", "zoomOut2d", "autoScale2d"], ["toggleHover"]]
-        }
-    });
+    let data = generatePlotData(features);
 
-    function updateChartRevision() {
-        const revision = chartRevision + 1;
-        setChartState({
-            ...chartState,
+    let layouts = generateLayouts(features);
 
-            layout: { ...chartState.layout, datarevision: revision }
+    let subPlots = data.map((dataElement,index) => (
+        <TimeSeriesSubGraph
+            data={dataElement}
+            chart={chartRefs[index]}
+            layout={layouts[index]}
+            globalChartState={props.globalChartState}
+        />
+    ));
+
+    function relayout(ed, divs) {
+        divs.forEach((div, i) => {
+            let x = div.layout.xaxis;
+            if (ed["xaxis.autorange"] && x.autorange) return;
+            if (x.range[0] != ed["xaxis.range[0]"] || x.range[1] != ed["xaxis.range[1]"])
+                Plotly.relayout(div, ed);      
         });
-        setChartRevision(revision);
     }
 
-    // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
-    useEffect(
-        _ => {
-            if (!props.currentSelection) return;
-            chartState.data[0].selectedpoints = props.currentSelection;
-            updateChartRevision();
-        },
-        [props.currentSelection]
-    );
-
-    useEffect(
-        _ => {
-            chartState.layout.dragmode = props.globalChartState; // Weirdly this works, can't do it with setChartState
-            updateChartRevision();
-        },
-        [props.globalChartState]
-    );
+    subPlots.forEach((plot) => {
+        window.addEventListener("plotly_relayout", function(ed) {
+            console.log(ed);
+            relayout(ed, subPlots);
+        });
+    });
 
     return (
         <React.Fragment>
             <ReactResizeDetector
                 handleWidth
                 handleHeight
-                onResize={_ => chart.current.resizeHandler()}
+                onResize={_ => (chartRefs.forEach((chart) => chart.current.resizeHandler()))}
             />
             <div className="chart-container" onContextMenu={handleContextMenu}>
-                <Plot
-                    ref={chart}
-                    data={chartState.data}
-                    layout={chartState.layout}
-                    config={chartState.config}
-                    style={{ width: "100%", height: "100%" }}
-                    useResizeHandler
-                    onInitialized={figure => setChartState(figure)}
-                    onUpdate={figure => setChartState(figure)}
-                    onClick={e => {
-                        if (e.event.button === 2) return;
-                        props.setCurrentSelection([]);
-                    }}
-                    onSelected={e => {
-                        if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
-                    }}
-                />
+                <ul className="time-series-plot-container"> 
+                    {subPlots}
+                </ul>
             </div>
             <Popover
                 id="simple-popper"
@@ -168,6 +161,60 @@ function TimeSeriesGraph(props) {
             </Popover>
         </React.Fragment>
         
+    );
+}
+
+
+function TimeSeriesSubGraph(props) {
+     // The plotly react element only changes when the revision is incremented.
+    const [chartRevision, setChartRevision] = useState(0);
+    const [chartState, setChartState] = useState({
+        data: [props.data],
+        layout: props.layout,
+        config: {
+            responsive: true,
+            displaylogo: false,
+        }
+    });
+
+    function updateChartRevision() {
+        const revision = chartRevision + 1;
+        setChartState({
+            ...chartState,
+            layout: { ...chartState.layout, datarevision: revision }
+        });
+        setChartRevision(revision);
+    }
+
+    // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
+    useEffect(
+        _ => {
+            if (!props.currentSelection) return;
+            chartState.data.selectedpoints = props.currentSelection;
+            updateChartRevision();
+        },
+        [props.currentSelection]
+    );
+    
+    return (
+        <Plot
+            className="time-series-subplot"
+            ref={props.chart}
+            data={chartState.data}
+            layout={chartState.layout}
+            config={chartState.config}
+            style={{ width: "100%", height: "100%" }}
+            useResizeHandler
+            onInitialized={figure => setChartState(figure)}
+            onUpdate={figure => setChartState(figure)}
+            onClick={e => {
+                if (e.event.button === 2) return;
+                props.setCurrentSelection([]);
+            }}
+            /*onSelected={e => {
+                if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
+            }}*/
+        />
     );
 }
 
