@@ -17,8 +17,6 @@ function makeClassifierPlot(algo) {
             </div>
         );
 
-    console.log(algo.data);
-
     // const annotations = [];
 
     // for (let x = 0; x < algo.data.classes.length; x++) {
@@ -41,6 +39,7 @@ function makeClassifierPlot(algo) {
                 y: [...algo.data.classes].sort((a, b) => b - a).map(idx => `Label ${idx}`),
                 z: algo.data.cm_data,
                 type: "heatmap",
+                colorscale: 'Reds',
                 showscale: false,
                 xgap: 2,
                 ygap: 2
@@ -55,13 +54,43 @@ function makeClassifierPlot(algo) {
             yaxis: {
                 automargin: true,
                 ticklen: 0
-            }
+            },
+            annotations: []
         },
         config: {
             displaylogo: false,
             displayModeBar: false
         }
     };
+
+    //add annotations
+    for (let i = 0; i < algo.data.cm_data.length; i++) {
+        for (let j = 0; j < algo.data.cm_data[i].length; j++) {
+            let value = algo.data.cm_data[i][j];
+
+            let colorValue = value < 0.5 ? 'black' : 'white';
+
+            console.log(algo.data.classes[j]);
+            console.log(value);
+
+            let annotation =  {
+                xref: 'x1',
+                yref: 'y1',
+                x: algo.data.classes[j],
+                y: algo.data.classes[i],
+                text: value,
+                font: {
+                    family: 'Arial',
+                    size: 12,
+                    color: colorValue
+                },
+                showarrow: false,
+            };
+
+            chartOptions.layout.annotations.push(annotation);
+        }
+    }
+
     return (
         <Plot
             data={chartOptions.data}
