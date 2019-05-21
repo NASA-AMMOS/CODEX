@@ -179,7 +179,7 @@ function getInitialParamState() {
     });
 }
 
-function ClassificationsOverview(props) {
+function ClassificationOverview(props) {
     // Create and store classification states
     const [classificationStates, classificationStateDispatch] = useReducer(
         classificationStateReducer,
@@ -394,4 +394,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(ClassificationsOverview);
+)(ClassificationOverview);
