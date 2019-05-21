@@ -55,6 +55,18 @@ export const openDevelopment = (dataState, name, width, height) => ({
 });
 
 /**
+ * Handle an OPEN_WORKFLOW
+ * @return {object} non-dispatched action object
+ */
+export const openWorkflow = (dataState, name, width, height) => ({
+    type: types.OPEN_WORKFLOW,
+    dataState,
+    name,
+    width,
+    height
+});
+
+/**
  * Handle a BRUSHTYPE_SET
  * @param {string} brushtype - 'rectangle', 'freehand'
  * @return {object} non-dispatched action object

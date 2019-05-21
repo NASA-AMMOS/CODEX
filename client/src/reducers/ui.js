@@ -3,6 +3,7 @@ import UiReducer from "reducers/reducerFunctions/UiReducer";
 import * as actionTypes from "constants/actionTypes";
 
 export default function ui(state = uiState, action, opt_reducer = UiReducer) {
+    console.log(opt_reducer.openGraph);
     switch (action.type) {
         case actionTypes.OPEN_GRAPH:
             return opt_reducer.openGraph(state, action);
@@ -12,6 +13,8 @@ export default function ui(state = uiState, action, opt_reducer = UiReducer) {
             return opt_reducer.openReport(state, action);
         case actionTypes.OPEN_DEVELOPMENT:
             return opt_reducer.openDevelopment(state, action);
+        case actionTypes.OPEN_WORKFLOW:
+            return opt_reducer.openWorkflow(state, action);
         // case actionTypes.BRUSHTYPE_SET:
         //     return opt_reducer.brushtypeSet(state, action);
         // case actionTypes.BRUSHID_SET:
