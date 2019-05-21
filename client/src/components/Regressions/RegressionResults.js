@@ -32,10 +32,10 @@ function makeRegressionPlot(algo) {
     // }
 
     // Initial chart settings. These need to be kept in state and updated as necessary
-    
+
     const dataMax = (function() {
         let max = algo.data.y[0];
-        const concatData = algo.data.y.concat(algo.data.y_pred); 
+        const concatData = algo.data.y.concat(algo.data.y_pred);
         for (let i = 0; i < concatData.length; i++) {
             max = concatData[i] > max ? concatData[i] : max;
         }
@@ -55,10 +55,10 @@ function makeRegressionPlot(algo) {
                 visible: true
             },
             {
-                type: 'line',
-                x : [0, dataMax],
-                y : [0, dataMax],
-                mode : 'lines'
+                type: "line",
+                x: [0, dataMax],
+                y: [0, dataMax],
+                mode: "lines"
             }
         ],
         layout: {
@@ -72,14 +72,14 @@ function makeRegressionPlot(algo) {
             },
             yaxis: {
                 automargin: true,
-                scaleanchor : "x",
+                scaleanchor: "x",
                 scaleratio: 1
             }
         },
         config: {
             displaylogo: false,
             displayModeBar: false
-        },
+        }
     };
 
     return (
@@ -99,11 +99,19 @@ function makeBestRegression(algoStates) {
     const bestRegression =
         algoStates.every(algo => algo.data) &&
         algoStates.reduce((acc, algo) => {
-            if (!acc) return { name: algo.algorithmName, score: algo.data.best_score, scoring: algo.scoring };
+            if (!acc)
+                return {
+                    name: algo.algorithmName,
+                    score: algo.data.best_score,
+                    scoring: algo.scoring
+                };
             //accesses a comparison funciton from regressionTypes because higher is not always better
-            let comparison = regressionTypes.REGRESSION_SCORING_FUNCTIONS[algo.scoring](algo.data.best_score, acc.score);
+            let comparison = regressionTypes.REGRESSION_SCORING_FUNCTIONS[algo.scoring](
+                algo.data.best_score,
+                acc.score
+            );
             return comparison > 0
-                ? { name: algo.algorithmName, score: algo.data.best_score, scoring: algo.scoring}
+                ? { name: algo.algorithmName, score: algo.data.best_score, scoring: algo.scoring }
                 : acc;
         }, null);
     return (
@@ -125,15 +133,9 @@ function makeBestRegression(algoStates) {
 }
 
 function makeRegressionScore(algo) {
-    const scoreStringFunctions = {
+    const scoreStringFunctions = {};
 
-    }
-
-    return (
-        <div>
-            {algo.score != undefined ? algo.score.toString().substring(0,4) : undefined}
-        </div>
-    );
+    return <div>{algo.score != undefined ? algo.score.toString().substring(0, 4) : undefined}</div>;
 }
 
 function RegressionResults(props) {
@@ -170,7 +172,7 @@ function RegressionResults(props) {
     }
 
     return (
-        <div>
+        <div className="regressionResults">
             <div className="resultRow leftAligned">
                 {makeBestRegression(algoStates)}
                 <div className="runParams">
@@ -207,8 +209,8 @@ function RegressionResults(props) {
                                 ? algo.algorithmName
                                 : algo.algorithmName.slice(0, 17) + "..."}
                             {makeRegressionScore({
-                                name:algo.algorithmName,
-                                score: algo.data != undefined ? algo.data.best_score: 0.0,
+                                name: algo.algorithmName,
+                                score: algo.data != undefined ? algo.data.best_score : 0.0,
                                 scoring: algo.scoring
                             })}
                         </div>

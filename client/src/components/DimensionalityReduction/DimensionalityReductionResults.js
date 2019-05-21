@@ -138,7 +138,7 @@ function DimensionalityReductionResults(props) {
     }
 
     return (
-        <div>
+        <div className="drResults">
             <Typography variant="h6">All Reductions</Typography>
             <div className="resultRow">
                 {algoStates.map(algo => (

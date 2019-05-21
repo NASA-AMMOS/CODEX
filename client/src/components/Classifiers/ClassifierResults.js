@@ -139,7 +139,7 @@ function ClassifierResults(props) {
     }
 
     return (
-        <div>
+        <div className="classifierResults">
             <div className="resultRow leftAligned">
                 {makeBestClassifier(algoStates)}
                 <div className="runParams">
