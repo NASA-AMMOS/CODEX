@@ -24,6 +24,7 @@ import time
 import sklearn
 import collections
 import traceback
+import inspect
 
 # CODEX Support
 import codex_system
@@ -65,8 +66,7 @@ def ml_dimensionality_reduction(
     try:
         result = run_codex_dim_reduction(inputHash, subsetHash, parms, downsampled, False, algorithmName)
     except BaseException:
-        codex_system.codex_log(
-            "Failed to run dimensionality reduction analysis")
+        codex_system.codex_log("Failed to run dimensionality reduction analysis")
         result['message'] = "Failed to run dimensionality reduction analysis"
         codex_system.codex_log(traceback.format_exc())
         return None
@@ -94,12 +94,13 @@ def run_codex_dim_reduction(
 
         >>> testData = codex_doctest.doctest_get_data()
 
-        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, False, False, "PCA")
+        >>> result = run_codex_dim_reduction(testData['inputHash'], "", {"n_components":2}, False, False, "PCA")
 
-        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, 500, False, "ICA")
+        >>> result = run_codex_dim_reduction(testData['inputHash'], "", {"n_components":2}, 500, False, "ICA")
         Downsampling to 500 samples.
 
     '''
+    codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
 
@@ -161,8 +162,7 @@ def run_codex_dim_reduction(
                 'WARNING': traceback.format_exc()}
 
     if showPlot:
-        codex_plot.plot_dimensionality(
-            exp_var_ratio, "PCA Explained Variance", show=True)
+        codex_plot.plot_dimensionality(exp_var_ratio, "PCA Explained Variance", show=True)
 
     X_transformed = dim_r.fit_transform(data)
     exp_var_ratio = codex_math.codex_explained_variance_ratio(X_transformed, n_components)
@@ -175,9 +175,6 @@ def run_codex_dim_reduction(
         computeTime,
         len(data),
         data.ndim)
-
-    returnCodeString = "codex_dimmension_reduction_api.run_codex_dim_reduction({inputHash},{subsetHash},{parms},{downsampled},{showPlot},{algorithm})\n".format(inputHash=inputHash, subsetHash=subsetHash, parms=parms, downsampled=downsampled, showPlot=showPlot, algorithm=algorithm)
-    codex_return_code.logReturnCode(returnCodeString)
 
     outputHash = codex_hash.hashArray('PCA_', X_transformed, "feature")
 
@@ -201,5 +198,4 @@ def run_codex_dim_reduction(
 if __name__ == "__main__":
 
     codex_doctest.run_codex_doctest()
-
 

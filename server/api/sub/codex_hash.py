@@ -404,8 +404,7 @@ def hashArray(arrayName, inputArray, hashType):
     elif(hashType == "NOSAVE"):
         pass
     else:
-        codex_system.codex_log(
-            "ERROR: Hash type not recognized! Not logged for future use.")
+        codex_system.codex_log("ERROR: Hash type not recognized! Not logged for future use.")
         return None
 
     return newHash

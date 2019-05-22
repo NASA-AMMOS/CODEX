@@ -32,6 +32,7 @@ import datetime
 import functools
 import tornado
 import json
+import inspect
 
 # CODEX 
 import codex_workflow_manager
@@ -46,6 +47,7 @@ import codex_doctest
 import codex_session_manager
 import codex_data_manager
 import codex_analysis_manager
+import codex_eta_manager
 
 # create a `ThreadPoolExecutor` instance
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
@@ -80,18 +82,16 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
             if (fileExtension == "csv"):
                 hashList, featureList = codex_read_data_api.codex_read_csv(
                     filepath, None, "feature")
-                codex_return_code.logReturnCode("hashList = codex_read_data_api.codex_read_csv('{filepath}', None, 'feature')".format(filepath=filepath))
+                codex_return_code.logReturnCode(inspect.currentframe())
 
             elif (fileExtension == "h5"):
                 hashList, featureList = codex_read_data_api.codex_read_hd5(
                     filepath, None, "feature")
-                codex_return_code.logReturnCode(
-                    "hashList = codex_read_data_api.codex_read_h5('" +
-                    filepath + "', None, 'feature')")
+                codex_return_code.logReturnCode(inspect.currentframe())
 
             elif (fileExtension == "npy"):
                 hashList, featureList = codex_read_data_api.codex_read_npy(filepath, None, "feature")
-                codex_return_code.logReturnCode("hashList = codex_read_data_api.codex_read_npy('" +filepath + "', None, 'feature')")
+                codex_return_code.logReturnCode(inspect.currentframe())
 
             else:
                 result['message'] = "Currently unsupported filetype"

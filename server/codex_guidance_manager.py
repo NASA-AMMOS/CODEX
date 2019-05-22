@@ -38,13 +38,16 @@ def get_guidance(msg, result):
         guidanceString = codex_yaml.get_guidance_text_block(split[0], split[1])
         if (guidanceString is not None):
             result["guidance"] = guidanceString
+            result["message"] = "success"
         else:
             result[
                 "message"] = guidance + " does not exist in YAML guidance file"
             result["guidance"] = ""
+            result["message"] = "failure"
     else:
         result["message"] = "Incorrect request formatting"
         result["guidance"] = ""
+        result["message"] = "failure"
 
     return result
 

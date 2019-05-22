@@ -17,7 +17,7 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 import time
-import h5py
+import inspect
 import traceback
 import numpy as np
 from sklearn import model_selection
@@ -438,10 +438,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         result['model_name'] = model_dict['name']
         result['model_hash'] = model_dict['hash']
 
-
-    returnCodeString = "codex_regression_api.run_codex_classification('{inputHash}','{subsetHash}',{labelHash},{downsampled},{algorithm})\n".format(inputHash=inputHash, subsetHash=subsetHash, labelHash=labelHash, downsampled=downsampled, algorithm=algorithm)
-    codex_return_code.logReturnCode(returnCodeString)
-    
+    codex_return_code.logReturnCode(inspect.currentframe())
     
     endTime = time.time()
     computeTime = endTime - startTime
@@ -459,5 +456,8 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    #codex_doctest.run_codex_doctest()
+    testData = codex_doctest.doctest_get_data()
 
+    result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'precision')
+    

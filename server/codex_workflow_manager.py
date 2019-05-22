@@ -17,10 +17,12 @@ import sys
 sys.path.insert(1, CODEX_ROOT + '/api/')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
-
+import inspect
 import codex_workflow
 import codex_doctest
 import codex_return_code
+import codex_system
+import codex_hash
 
 def workflow_call(msg, result):
     '''
@@ -54,7 +56,7 @@ def workflow_call(msg, result):
 
     if (inputHash != None):
 
-        codex_return_code.logReturnCode('codex_hash.hashArray("Merged", data, "feature")')
+        codex_return_code.logReturnCode(inspect.currentframe())
         inputHash = inputHash["hash"]
 
 

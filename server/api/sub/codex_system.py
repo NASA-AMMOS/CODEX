@@ -21,6 +21,8 @@ import codex_yaml
 import codex_return_code
 import codex_doctest
 
+import inspect
+
 def get_featureList(featureList):
     '''
     Inputs:
@@ -38,12 +40,13 @@ def get_featureList(featureList):
 
     '''
 
-    featureString = "featureList =['"
-    for feature_name in featureList:
-        featureString += (feature_name + "','")
-    featureString = featureString.rstrip(",'")
-    featureString += "']"
-    codex_return_code.logReturnCode(featureString)
+    # TODO - do I need featureString?
+    #featureString = "featureList =['"
+    #for feature_name in featureList:
+    #    featureString += (feature_name + "','")
+    #featureString = featureString.rstrip(",'")
+    #featureString += "']"
+    codex_return_code.logReturnCode(inspect.currentframe())
 
     return featureList
 

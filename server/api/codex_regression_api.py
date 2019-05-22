@@ -26,7 +26,7 @@ import codex_time_log
 import codex_hash
 import sys
 import random
-
+import inspect
 import sklearn
 import subprocess
 import h5py
@@ -668,9 +668,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
         result['model_hash'] = model_dict['hash']
 
 
-    returnCodeString = "codex_regression_api.run_codex_regression('{inputHash}','{subsetHash}',{labelHash},{downsampled},{algorithm})\n".format(inputHash=inputHash, subsetHash=subsetHash, labelHash=labelHash, downsampled=downsampled, algorithm=algorithm)
-    codex_return_code.logReturnCode(returnCodeString)
-    
+    codex_return_code.logReturnCode(inspect.currentframe())
     
     endTime = time.time()
     computeTime = endTime - startTime

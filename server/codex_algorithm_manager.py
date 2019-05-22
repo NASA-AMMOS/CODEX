@@ -17,6 +17,7 @@ import sys
 sys.path.insert(1, CODEX_ROOT + '/api/')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
+import inspect
 import codex_1d_binning
 import codex_clustering_api
 import codex_data_quality_scan_api
@@ -59,14 +60,14 @@ def algorithm_call(msg, result):
         subsetHashName = None
 
     hashList = codex_hash.feature2hashList(featureList)
-    codex_return_code.logReturnCode("hashList = codex_hash.feature2hashList(featureList)")
+    codex_return_code.logReturnCode(inspect.currentframe())
 
     data = codex_hash.mergeHashResults(hashList)
-    codex_return_code.logReturnCode("data = codex_hash.mergeHashResults(hashList)")
+    codex_return_code.logReturnCode(inspect.currentframe())
     inputHash = codex_hash.hashArray('Merged', data, "feature")
 
     if (inputHash != None):
-        codex_return_code.logReturnCode('codex_hash.hashArray("Merged", data, "feature")')
+        codex_return_code.logReturnCode(inspect.currentframe())
         inputHash = inputHash["hash"]
 
     if (downsampled != False):

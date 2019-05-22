@@ -26,6 +26,7 @@ import time
 import statistics
 import math
 import h5py
+import inspect
 
 # CODEX Support
 import codex_doctest
@@ -190,14 +191,7 @@ def codex_count_oddities(inputHash, subsetHash):
             if(feature[x] == 0):
                 zero_count += 1
 
-    if(subsetHash == False):
-        returnCodeString = "codex_data_quality_scan_api.codex_count_oddities('" + inputHash + "'," + str(
-            subsetHash) + ")"
-    else:
-        returnCodeString = "codex_data_quality_scan_api.codex_count_oddities('" + inputHash + "','" + str(
-            subsetHash) + "')"
-
-    codex_return_code.logReturnCode(returnCodeString)
+    codex_return_code.logReturnCode(inspect.currentframe())
 
     endTime = time.time()
     computeTime = endTime - startTime

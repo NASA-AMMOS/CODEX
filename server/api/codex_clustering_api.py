@@ -14,6 +14,7 @@ import os
 import sys
 import time
 import h5py
+import inspect
 import traceback
 import numpy as np
 from sklearn.neighbors import kneighbors_graph
@@ -256,15 +257,12 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
     # temporary to not change API right now
     merged_hash = codex_hash.hashArray("temporary", X, "feature")
     label_hash = codex_hash.hashArray(merged_hash["hash"], y_pred, "label")
-    y_pred = codex_labels.label_swap(y_pred, merged_hash["hash"])
 
-    '''
-    if subsetHash is False:
-        returnCodeString = "codex_clustering_api.codex_clustering_kmeans('" + inputHash + "',False," + str(k) + "," + str(True) + "," + str(downsampled) + ")\n"
-    else:
-        returnCodeString = "codex_clustering_api.codex_clustering_kmeans('" + inputHash + "','" + subsetHash + "'," + str(k) + "," + str(True) + "," + str(downsampled) + ")\n"
-    codex_return_code.logReturnCode(returnCodeString)
-    '''
+    # TODO - turn back on label swap
+    #y_pred = codex_labels.label_swap(y_pred, merged_hash["hash"])
+
+    codex_return_code.logReturnCode(inspect.currentframe())
+
 
     result['message'] = "success"
     return result
