@@ -32,6 +32,7 @@ function HeatmapGraph(props) {
     const yAxis = data[0][1];
 
     const cols = utils.unzip(data.slice(1));
+    console.log(cols);
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
     // Initial chart settings. These need to be kept in state and updated as necessary
@@ -40,7 +41,7 @@ function HeatmapGraph(props) {
             {
                 x: [...cols[0]].sort((a, b) => a - b),
                 y: [...cols[1]].sort((a, b) => b - a).map(idx => `Label ${idx}`),
-                z: []
+                z: [],
                 type: "heatmap",
                 colorscale: 'Reds',
                 showscale: false,
