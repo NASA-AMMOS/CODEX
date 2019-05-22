@@ -1,4 +1,4 @@
-// Utility functions for classifiers
+// Utility functions for classifications
 
 import * as actionTypes from "constants/actionTypes";
 import * as utils from "utils/utils";

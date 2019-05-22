@@ -1,7 +1,7 @@
 import React from "react";
 
-import ClassifierResults from "components/Classifiers/ClassifierResults";
-import ClassifiersOverview from "components/Classifiers/ClassifiersOverview";
+import ClassificationResults from "components/Classification/ClassificationResults";
+import ClassificationOverview from "components/Classification/ClassificationOverview";
 import ClusterAlgorithm from "components/Algorithms/ClusterAlgorithm";
 import ContourGraph from "components/Graphs/ContourGraph";
 import RegressionResults from "components/Regressions/RegressionResults";
@@ -10,11 +10,13 @@ import ScatterGraph from "components/Graphs/ScatterGraph";
 import Sessions from "components/Sessions/Sessions";
 import TimeSeriesGraph from "components/Graphs/TimeSeriesGraph";
 import * as algorithmTypes from "constants/algorithmTypes";
-import * as classifierTypes from "constants/classifierTypes";
+import * as classificationTypes from "constants/classificationTypes";
 import * as regressionTypes from "constants/regressionTypes";
 import * as uiTypes from "constants/uiTypes";
 import DimensionalityReductionResults from "components/DimensionalityReduction/DimensionalityReductionResults";
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
+import * as workflowTypes from "constants/workflowTypes";
+import ExplainThis from "components/ExplainThis/ExplainThis";
 
 export function getWindowTitle(win) {
     switch (win.windowType) {
@@ -28,9 +30,9 @@ export function getWindowTitle(win) {
             return `Loading Algorithm ${
                 win.loadingSecRemaining ? "(" + win.loadingSecRemaining + "s)" : ""
             }`;
-        case classifierTypes.CLASSIFIER_WINDOW:
+        case classificationTypes.CLASSIFICATION_WINDOW:
             return "Classification";
-        case classifierTypes.CLASSIFIER_RESULTS_WINDOW:
+        case classificationTypes.CLASSIFICATION_RESULTS_WINDOW:
             return "Classification Results";
         case regressionTypes.REGRESSION_WINDOW:
             return "Regression";
@@ -40,6 +42,8 @@ export function getWindowTitle(win) {
             return "Sessions";
         case dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW:
             return "Dimensionality Reduction Results";
+        case workflowTypes.EXPLAIN_THIS:
+            return "Explain This";
         default:
             return "";
     }
@@ -61,16 +65,16 @@ export function getWindowContent(win) {
                     selectedFeatures={win.selectedFeatures}
                 />
             );
-        case classifierTypes.CLASSIFIER_WINDOW:
+        case classificationTypes.CLASSIFICATION_WINDOW:
             return (
-                <ClassifiersOverview
+                <ClassificationOverview
                     selectedFeatures={win.selectedFeatures}
                     selectedFeatureLength={win.selectedFeatureLength}
                     winId={win.id}
                 />
             );
-        case classifierTypes.CLASSIFIER_RESULTS_WINDOW:
-            return <ClassifierResults requests={win.requests} runParams={win.runParams} />;
+        case classificationTypes.CLASSIFICATION_RESULTS_WINDOW:
+            return <ClassificationResults requests={win.requests} runParams={win.runParams} />;
         case regressionTypes.REGRESSION_WINDOW:
             return (
                 <RegressionsOverview
@@ -86,6 +90,14 @@ export function getWindowContent(win) {
         case dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW:
             return (
                 <DimensionalityReductionResults requests={win.requests} runParams={win.runParams} />
+            );
+        case workflowTypes.EXPLAIN_THIS:
+            return (
+                <ExplainThis
+                    selectedFeatures={win.selectedFeatures}
+                    selectedFeaturesLength={win.selectedFeaturesLength}
+                    winId={win.id}
+                />
             );
     }
 }

@@ -1,12 +1,12 @@
-// This component creates a window that allows users to configure a new classifier run.
+// This component creates a window that allows users to configure a new classification run.
 
 import React, { useEffect, useState, useReducer } from "react";
-import * as classifierTypes from "constants/classifierTypes";
-import * as classifierFunctions from "components/Classifiers/classifierFunctions";
-import * as classifierActions from "actions/classifierActions";
+import * as classificationTypes from "constants/classificationTypes";
+import * as classificationFunctions from "components/Classification/classificationFunctions";
+import * as classificationActions from "actions/classificationActions";
 import Button from "@material-ui/core/Button";
 import { bindActionCreators } from "redux";
-import "components/Classifiers/classifiers.scss";
+import "components/Classification/classification.scss";
 import { connect } from "react-redux";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -20,46 +20,46 @@ import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import classnames from "classnames";
 
-// Reducer to handle changes to each individual classifier's state, which contains info
+// Reducer to handle changes to each individual classification's state, which contains info
 // about parameters and expected run times.
-function classifierStateReducer(classifierState, action) {
+function classificationStateReducer(classificationState, action) {
     switch (action.type) {
         case "updateEta":
-            return classifierState.map(classifier =>
-                classifier.name === action.name
-                    ? { ...classifier, eta: action.eta, etaLoaded: true }
-                    : classifier
+            return classificationState.map(classification =>
+                classification.name === action.name
+                    ? { ...classification, eta: action.eta, etaLoaded: true }
+                    : classification
             );
         case "updateParam":
-            return classifierState.map(classifier =>
-                classifier.name === action.classifierName
+            return classificationState.map(classification =>
+                classification.name === action.classificationName
                     ? {
-                          ...classifier,
+                          ...classification,
                           paramData: {
-                              ...classifier.paramData,
-                              params: classifier.paramData.params.map(param =>
+                              ...classification.paramData,
+                              params: classification.paramData.params.map(param =>
                                   param.name === action.paramName
                                       ? { ...param, value: action.value }
                                       : param
                               )
                           }
                       }
-                    : classifier
+                    : classification
             );
         case "setSelection":
-            return classifierState.map(classifier =>
-                classifier.name === action.classifierName
-                    ? { ...classifier, selected: !classifier.selected }
-                    : classifier
+            return classificationState.map(classification =>
+                classification.name === action.classificationName
+                    ? { ...classification, selected: !classification.selected }
+                    : classification
             );
         case "setAllSelections":
-            return classifierState.map(classifier => {
-                return { ...classifier, selected: action.selected };
+            return classificationState.map(classification => {
+                return { ...classification, selected: action.selected };
             });
     }
 }
 
-function makeNumericInput(param, classifierName, classifierStateDispatch) {
+function makeNumericInput(param, classificationName, classificationStateDispatch) {
     return (
         <React.Fragment key={param.name}>
             <TextField
@@ -72,9 +72,9 @@ function makeNumericInput(param, classifierName, classifierStateDispatch) {
                 type="number"
                 value={param.value}
                 onChange={e =>
-                    classifierStateDispatch({
+                    classificationStateDispatch({
                         type: "updateParam",
-                        classifierName,
+                        classificationName,
                         paramName: param.name,
                         value:
                             param.type === "int"
@@ -87,16 +87,16 @@ function makeNumericInput(param, classifierName, classifierStateDispatch) {
     );
 }
 
-function makeStringChoiceInput(param, classifierName, classifierStateDispatch) {
+function makeStringChoiceInput(param, classificationName, classificationStateDispatch) {
     return (
         <FormControl key={param.name}>
             <InputLabel>{param.displayName}</InputLabel>
             <Select
                 value={param.value || param.default}
                 onChange={e =>
-                    classifierStateDispatch({
+                    classificationStateDispatch({
                         type: "updateParam",
-                        classifierName,
+                        classificationName,
                         paramName: param.name,
                         value: e.target.value
                     })
@@ -112,49 +112,49 @@ function makeStringChoiceInput(param, classifierName, classifierStateDispatch) {
     );
 }
 
-function makeSubParamInput(param, classifierName, classifierStateDispatch) {
+function makeSubParamInput(param, classificationName, classificationStateDispatch) {
     switch (param.type) {
         case "int":
         case "float":
-            return makeNumericInput(param, classifierName, classifierStateDispatch);
+            return makeNumericInput(param, classificationName, classificationStateDispatch);
         case "string":
-            return makeStringChoiceInput(param, classifierName, classifierStateDispatch);
+            return makeStringChoiceInput(param, classificationName, classificationStateDispatch);
     }
 }
 
-function makeClassifierRow(
-    activeClassifierName,
-    setActiveClassifierName,
-    classifierStateDispatch,
-    classifier
+function makeClassificationRow(
+    activeClassificationName,
+    setActiveClassificationName,
+    classificationStateDispatch,
+    classification
 ) {
-    const etaLabel = classifier.eta
-        ? `(${Math.ceil(classifier.eta / 60)} min)`
-        : classifier.etaLoaded && "(n/a)";
+    const etaLabel = classification.eta
+        ? `(${Math.ceil(classification.eta / 60)} min)`
+        : classification.etaLoaded && "(n/a)";
     const rowClass = classnames({
         checkboxRow: true,
-        active: classifier.name === activeClassifierName
+        active: classification.name === activeClassificationName
     });
     return (
-        <React.Fragment key={classifier.name}>
+        <React.Fragment key={classification.name}>
             <div
-                key={classifier.name}
+                key={classification.name}
                 className={rowClass}
-                onClick={_ => setActiveClassifierName(classifier.name)}
+                onClick={_ => setActiveClassificationName(classification.name)}
             >
                 <Checkbox
                     color="primary"
-                    checked={classifier.selected}
+                    checked={classification.selected}
                     onChange={_ =>
-                        classifierStateDispatch({
+                        classificationStateDispatch({
                             type: "setSelection",
-                            classifierName: classifier.name
+                            classificationName: classification.name
                         })
                     }
                 />
                 <div className="checkboxLabels">
                     <Typography inline className="checkboxLabel">
-                        {classifier.name}
+                        {classification.name}
                     </Typography>
                     <Typography inline className="checkboxLabel" color="textSecondary">
                         {etaLabel}
@@ -165,24 +165,24 @@ function makeClassifierRow(
     );
 }
 
-// Uses the Classifier Types constants file to generate state objects for each classifier.
+// Uses the Classification Types constants file to generate state objects for each classification.
 function getInitialParamState() {
-    return classifierTypes.CLASSIFIER_TYPES.map(classifier => {
+    return classificationTypes.CLASSIFICATION_TYPES.map(classification => {
         const state = {
-            name: classifier,
+            name: classification,
             eta: null,
             etaLoaded: false,
-            paramData: classifierTypes.CLASSIFIER_PARAMS[classifier],
+            paramData: classificationTypes.CLASSIFICATION_PARAMS[classification],
             selected: true
         };
         return state;
     });
 }
 
-function ClassifiersOverview(props) {
-    // Create and store classifier states
-    const [classifierStates, classifierStateDispatch] = useReducer(
-        classifierStateReducer,
+function ClassificationOverview(props) {
+    // Create and store classification states
+    const [classificationStates, classificationStateDispatch] = useReducer(
+        classificationStateReducer,
         getInitialParamState()
     );
 
@@ -191,7 +191,7 @@ function ClassifiersOverview(props) {
         .map(f => f.get("name"))
         .toJS();
 
-    // Create and store global options for this classifier run
+    // Create and store global options for this classification run
     const [crossVal, setCrossVal] = useState(3);
 
     const searchTypeOptions = ["grid", "random"];
@@ -201,18 +201,24 @@ function ClassifiersOverview(props) {
     const [scoring, setScoring] = useState(scoringOptions[0]);
 
     const [label, setLabel] = useState(selectedFeatures[0]);
-    const [activeClassifierName, setActiveClassifierName] = useState(classifierStates[0].name);
+    const [activeClassificationName, setActiveClassificationName] = useState(
+        classificationStates[0].name
+    );
 
-    // When the window loads, we request time estimates from the server for each classifier -- this effect
-    // handles those Promise returns and updates the classifier states as necessary. It also includes
+    // When the window loads, we request time estimates from the server for each classification -- this effect
+    // handles those Promise returns and updates the classification states as necessary. It also includes
     // a cleanup function that will cancel all requests if the user closes the window.
     useEffect(_ => {
-        const requests = classifierTypes.CLASSIFIER_TYPES.map(classifier => {
-            const { req, cancel } = classifierFunctions.getEta(classifier, selectedFeatures, 100);
+        const requests = classificationTypes.CLASSIFICATION_TYPES.map(classification => {
+            const { req, cancel } = classificationFunctions.getEta(
+                classification,
+                selectedFeatures,
+                100
+            );
             req.then(data =>
-                classifierStateDispatch({
+                classificationStateDispatch({
                     type: "updateEta",
-                    name: classifier,
+                    name: classification,
                     eta: data.eta && Math.ceil(data.eta)
                 })
             );
@@ -226,17 +232,17 @@ function ClassifiersOverview(props) {
 
     // Render the HTML for the page.
     // When the user clicks "run", we fire an action that closes this window, creates server requests for data for each selected
-    // classifier, and then hands them off to a new window defined in ClassifierResult.
-    const classifiersSelected = classifierStates.filter(c => c.selected).length;
-    const waitTime = classifierStates.reduce((acc, c) => acc + c.eta, 0);
-    const waitTimeString = classifierStates.every(c => c.etaLoaded)
+    // classification, and then hands them off to a new window defined in ClassificationResult.
+    const classificationsSelected = classificationStates.filter(c => c.selected).length;
+    const waitTime = classificationStates.reduce((acc, c) => acc + c.eta, 0);
+    const waitTimeString = classificationStates.every(c => c.etaLoaded)
         ? waitTime
             ? `${Math.ceil(waitTime / 60)} minutes approximate run time`
             : "Run time not available"
         : "Calculating approximate run time...";
 
     return (
-        <div className="classifiersContainer">
+        <div className="classificationsContainer">
             <div className="headerBar">
                 <FormControl className="labelDropdown">
                     <InputLabel>Labels</InputLabel>
@@ -253,8 +259,8 @@ function ClassifiersOverview(props) {
                         variant="contained"
                         color="primary"
                         onClick={_ =>
-                            props.createClassifierOutput(
-                                classifierStates,
+                            props.createClassificationOutput(
+                                classificationStates,
                                 selectedFeatures,
                                 crossVal,
                                 label,
@@ -271,13 +277,15 @@ function ClassifiersOverview(props) {
             <hr />
             <div className="body">
                 <div className="leftCol">
-                    <Typography variant="subtitle1">Select and Configure Classifier(s)</Typography>
+                    <Typography variant="subtitle1">
+                        Select and Configure Classification(s)
+                    </Typography>
                     <div>
                         <Button
                             variant="text"
                             color="primary"
                             onClick={_ =>
-                                classifierStateDispatch({
+                                classificationStateDispatch({
                                     type: "setAllSelections",
                                     selected: true
                                 })
@@ -289,7 +297,7 @@ function ClassifiersOverview(props) {
                             variant="text"
                             color="primary"
                             onClick={_ =>
-                                classifierStateDispatch({
+                                classificationStateDispatch({
                                     type: "setAllSelections",
                                     selected: false
                                 })
@@ -298,13 +306,13 @@ function ClassifiersOverview(props) {
                             Select None
                         </Button>
                     </div>
-                    <FormGroup classes={{ root: "classifierList" }}>
-                        {classifierStates.map(classifier =>
-                            makeClassifierRow(
-                                activeClassifierName,
-                                setActiveClassifierName,
-                                classifierStateDispatch,
-                                classifier
+                    <FormGroup classes={{ root: "classificationList" }}>
+                        {classificationStates.map(classification =>
+                            makeClassificationRow(
+                                activeClassificationName,
+                                setActiveClassificationName,
+                                classificationStateDispatch,
+                                classification
                             )
                         )}
                     </FormGroup>
@@ -312,8 +320,8 @@ function ClassifiersOverview(props) {
                 <div className="rightCol">
                     <div className="paramHeader">
                         <div className="row">
-                            <div className="classifierCounts">
-                                <span>{classifiersSelected} Classifiers selected</span>
+                            <div className="classificationCounts">
+                                <span>{classificationsSelected} Classifications selected</span>
                                 <span>{waitTimeString}</span>
                             </div>
                             <TextField
@@ -352,10 +360,10 @@ function ClassifiersOverview(props) {
                         </div>
                     </div>
                     <hr />
-                    <div className="classifierParams">
-                        <Typography variant="subtitle1">{activeClassifierName}</Typography>
-                        {classifierStates
-                            .find(c => c.name === activeClassifierName)
+                    <div className="classificationParams">
+                        <Typography variant="subtitle1">{activeClassificationName}</Typography>
+                        {classificationStates
+                            .find(c => c.name === activeClassificationName)
                             .paramData.map(param => (
                                 <React.Fragment key={param.name}>
                                     <hr />
@@ -363,8 +371,8 @@ function ClassifiersOverview(props) {
                                     {param.subParams.map(subParam =>
                                         makeSubParamInput(
                                             subParam,
-                                            activeClassifierName,
-                                            classifierStateDispatch
+                                            activeClassificationName,
+                                            classificationStateDispatch
                                         )
                                     )}
                                 </React.Fragment>
@@ -384,8 +392,8 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        createClassifierOutput: bindActionCreators(
-            classifierActions.createClassifierOutput,
+        createClassificationOutput: bindActionCreators(
+            classificationActions.createClassificationOutput,
             dispatch
         )
     };
@@ -394,4 +402,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(ClassifiersOverview);
+)(ClassificationOverview);

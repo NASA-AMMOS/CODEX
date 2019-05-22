@@ -4,27 +4,7 @@ import * as uiTypes from "constants/uiTypes";
 import * as windowManagerActions from "actions/windowManagerActions";
 import * as actionFunctions from "actions/actionFunctions";
 
-function alertNotRightNumberOfFeatures() {
-    alert("Please select exactly 2 features in the features list to create this graph.");
-}
-
-function canBuildGraph(graphMode, dataState) {
-    switch (graphMode) {
-        case uiTypes.SCATTER_GRAPH:
-        case uiTypes.CONTOUR_GRAPH:
-            if (dataState.get("featureList").filter(f => f.get("selected")).size != 2) {
-                alertNotRightNumberOfFeatures();
-                return false;
-            }
-            break;
-        case uiTypes.TIME_SERIES_GRAPH:
-            //todo figure out the requirements for a time series graph
-            return true;
-    }
-    return true;
-}
-
-export function createGraph(graphMode, selectedFeatures) {
+export function createWorkflow(workflowType, selectedFeatures) {
     return (dispatch, getState) => {
         // Get selected feature list from current state if none specified
         selectedFeatures =
@@ -34,13 +14,12 @@ export function createGraph(graphMode, selectedFeatures) {
                 .filter(f => f.get("selected"))
                 .map(f => f.get("name"))
                 .toJS();
-
-        if (!canBuildGraph(graphMode, getState().data)) return { type: actionTypes.NO_ACTION };
+        console.log(workflowType);
 
         Promise.all(
             selectedFeatures.map(feature => actionFunctions.getColumn(feature, dispatch, getState))
         ).then(cols => {
-            const graphData = cols.reduce((acc, col) => {
+            const workflowData = cols.reduce((acc, col) => {
                 col.forEach((val, idx) => {
                     acc[idx] = acc[idx] || [];
                     acc[idx].push(val);
@@ -51,8 +30,8 @@ export function createGraph(graphMode, selectedFeatures) {
             dispatch({
                 type: actionTypes.OPEN_NEW_WINDOW,
                 info: {
-                    windowType: graphMode,
-                    data: getState().data.set("data", graphData)
+                    windowType: workflowType,
+                    data: getState().data.set("data", workflowData)
                 }
             });
         });

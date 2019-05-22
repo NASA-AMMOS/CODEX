@@ -1,8 +1,9 @@
 import * as uiTypes from "constants/uiTypes";
 import * as algorithmTypes from "constants/algorithmTypes";
-import * as classifierTypes from "constants/classifierTypes";
+import * as classificationTypes from "constants/classificationTypes";
 import * as regressionTypes from "constants/regressionTypes";
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
+import * as workflowTypes from "constants/workflowTypes";
 
 export const initialSizes = {
     [uiTypes.SCATTER_GRAPH]: {
@@ -25,12 +26,12 @@ export const initialSizes = {
         height: 600,
         resizeable: false
     },
-    [classifierTypes.CLASSIFIER_WINDOW]: {
+    [classificationTypes.CLASSIFICATION_WINDOW]: {
         width: 850,
         height: 600,
         resizeable: false
     },
-    [classifierTypes.CLASSIFIER_RESULTS_WINDOW]: {
+    [classificationTypes.CLASSIFICATION_RESULTS_WINDOW]: {
         width: 700,
         height: 700,
         resizeable: false
@@ -57,6 +58,11 @@ export const initialSizes = {
     [dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW]: {
         width: 700,
         height: 375,
+        resizeable: true
+    },
+    [workflowTypes.EXPLAIN_THIS]: {
+        width: 700,
+        height: 500,
         resizeable: true
     }
 };

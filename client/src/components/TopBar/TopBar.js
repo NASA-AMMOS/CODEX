@@ -8,14 +8,23 @@ import PropTypes from "prop-types";
 import React, { Component } from "react";
 
 import { brushClear } from "actions/data";
-import { openAlgorithm, openReport, openDevelopment, brushtypeSet, modeSet } from "actions/ui";
+import {
+    openAlgorithm,
+    openReport,
+    openDevelopment,
+    openWorkflow,
+    brushtypeSet,
+    modeSet
+} from "actions/ui";
 import LoadingBar from "components/LoadingBar/LoadingBar";
 import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as graphActions from "actions/graphActions";
 import * as uiTypes from "constants/uiTypes";
+import * as workflowTypes from "constants/workflowTypes";
+import * as workflowActions from "actions/workflowActions";
 import * as windowManagerActions from "actions/windowManagerActions";
-import * as classifierActions from "actions/classifierActions";
+import * as classificationActions from "actions/classificationActions";
 import * as regressionActions from "actions/regressionActions";
 import * as sessionsActions from "actions/sessionsActions";
 import * as dimensionalityReductionActions from "actions/dimensionalityReductionActions";
@@ -44,6 +53,19 @@ class TopBar extends Component {
         this.setLoadingPercent = this.setLoadingPercent.bind(this);
         this.toggleIndeterminateLoading = this.toggleIndeterminateLoading.bind(this);
         this.setMessageText = this.setMessageText.bind(this);
+    }
+
+    getWorkflowMenuItems() {
+        return workflowTypes.WORKFLOW_TYPES.map(workflow => (
+            <MenuItem
+                key={workflow}
+                onSelect={() => {
+                    this.props.createWorkflow(workflow);
+                }}
+            >
+                {workflow}
+            </MenuItem>
+        ));
     }
 
     getGraphMenuItems() {
@@ -218,8 +240,8 @@ class TopBar extends Component {
                         <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
                         <Dropdown.Menu>
                             {this.getAlgorithmsMenuItems()}
-                            <MenuItem onSelect={this.props.openClassifierWindow}>
-                                Classifier
+                            <MenuItem onSelect={this.props.openClassificationWindow}>
+                                Classification
                             </MenuItem>
                             <MenuItem onSelect={this.props.openRegressionWindow}>
                                 Regression
@@ -252,6 +274,14 @@ class TopBar extends Component {
                                 Create range slider window
                             </MenuItem>
                         </Dropdown.Menu>
+                    </Dropdown>
+                    <Dropdown
+                        style={{ display: devDisplay }}
+                        className="dropdownMain"
+                        autoOpen={false}
+                    >
+                        <Dropdown.Toggle className="dropdownToggle" title="Workflows" />
+                        <Dropdown.Menu>{this.getWorkflowMenuItems()}</Dropdown.Menu>
                     </Dropdown>
 
                     <div className="triTopLeft" />
@@ -287,6 +317,7 @@ TopBar.propTypes = {
     brushClear: PropTypes.func.isRequired,
     openAlgorithm: PropTypes.func.isRequired,
     openReport: PropTypes.func.isRequired,
+    openWorkflow: PropTypes.func.isRequired,
     brushtypeSet: PropTypes.func.isRequired,
     modeSet: PropTypes.func.isRequired,
     createGraph: PropTypes.func.isRequired,
@@ -308,12 +339,17 @@ function mapDispatchToProps(dispatch) {
         openAlgorithm: (d, n, w, h) => dispatch(openAlgorithm(d, n, w, h)),
         openReport: (d, n, w, h) => dispatch(openReport(d, n, w, h)),
         openDevelopment: (d, n) => dispatch(openDevelopment(d, n)),
+        openWorkflow: (d, n) => dispatch(openWorkflow(d, n)),
         brushtypeSet: t => dispatch(brushtypeSet(t)),
         modeSet: m => dispatch(modeSet(m)),
         createGraph: name => dispatch(graphActions.createGraph(name)),
         createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name)),
+        createWorkflow: name => dispatch(workflowActions.createWorkflow(name)),
         setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch),
-        openClassifierWindow: bindActionCreators(classifierActions.openClassifierWindow, dispatch),
+        openClassificationWindow: bindActionCreators(
+            classificationActions.openClassificationWindow,
+            dispatch
+        ),
         openRegressionWindow: bindActionCreators(regressionActions.openRegressionWindow, dispatch),
         openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch),
         openDimensionalityReductionWindow: bindActionCreators(
