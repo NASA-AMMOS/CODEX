@@ -70,9 +70,6 @@ function makeClassificationPlot(algo) {
 
             let colorValue = value < 0.5 ? 'black' : 'white';
 
-            console.log(algo.data.classes[j]);
-            console.log(value);
-
             let annotation =  {
                 xref: 'x1',
                 yref: 'y1',

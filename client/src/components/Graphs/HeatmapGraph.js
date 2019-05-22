@@ -50,7 +50,7 @@ function binContourData(data) {
     );
 }
 
-function ControurGraph(props) {
+function HeatmapGraph(props) {
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
     const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
 
@@ -75,45 +75,30 @@ function ControurGraph(props) {
     const [chartState, setChartState] = useState({
         data: [
             {
-                x: cols[0],
-                y: cols[1],
-                ncontours: 20,
-                colorscale: "Hot",
-                reversescale: true,
+                x: [...data.classes].sort((a, b) => a - b),
+                y: [...data.classes].sort((a, b) => b - a).map(idx => `Label ${idx}`),
+                type: "heatmap",
+                colorscale: 'Reds',
                 showscale: false,
-                type: "histogram2dcontour"
-                // mode: "markers",
-                // marker: { color: cols[0].map((val, idx) => DEFAULT_POINT_COLOR), size: 2 },
-                // selected: { marker: { color: "#FF0000", size: 2 } },
-                // visible: true
+                xgap: 2,
+                ygap: 2
             }
         ],
         layout: {
+            xaxis: { type: "category", automargin: true, ticklen: 0 },
             autosize: true,
-            margin: { l: 35, r: 0, t: 0, b: 25 }, // Axis tick labels are drawn in the margin space
-            dragmode: "lasso",
-            datarevision: chartRevision,
-            hovermode: "closest"
-            // xaxis: {
-            //     autotick: true,
-            //     ticks: "outside"
-            // },
-            // yaxis: {
-            //     autotick: true,
-            //     ticks: "outside"
-            // }
+            margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
+            hovermode: false, // Turning off hovermode seems to screw up click handling
+            titlefont: { size: 5 },
+            yaxis: {
+                automargin: true,
+                ticklen: 0
+            },
+            annotations: []
         },
         config: {
-            responsive: true,
             displaylogo: false,
-            modeBarButtonsToRemove: [
-                "sendDataToCloud",
-                "hoverCompareCartesian",
-                "toImage",
-                "select2d",
-                "autoScale2d",
-                "toggleSpikelines"
-            ]
+            displayModeBar: false
         }
     });
 
@@ -125,31 +110,6 @@ function ControurGraph(props) {
         });
         setChartRevision(revision);
     }
-
-    // // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
-    // useEffect(
-    //     _ => {
-    //         if (!props.currentSelection) return;
-    //         chartState.data[0].selectedpoints = props.currentSelection;
-    //         updateChartRevision();
-    //     },
-    //     [props.currentSelection]
-    // );
-
-    // // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
-    // useEffect(
-    //     _ => {
-    //         props.savedSelections.forEach(selection => {
-    //             selection.rowIndices.forEach(row => {
-    //                 chartState.data[0].marker.color[row] = selection.active
-    //                     ? selection.color
-    //                     : DEFAULT_POINT_COLOR;
-    //             });
-    //         });
-    //         updateChartRevision();
-    //     },
-    //     [props.savedSelections]
-    // );
 
     return (
         <React.Fragment>
@@ -229,4 +189,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(ControurGraph);
+)(HeatmapGraph);

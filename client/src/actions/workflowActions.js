@@ -1,39 +1,63 @@
 import * as actionTypes from "constants/actionTypes";
+import * as workflowType from "constants/workflowTypes";
 import * as uiActions from "actions/ui";
 import * as uiTypes from "constants/uiTypes";
+import * as utils from "utils/utils";
 import * as windowManagerActions from "actions/windowManagerActions";
 import * as actionFunctions from "actions/actionFunctions";
 
+
+export function getExplainThisWindowAction(request) {
+    return {
+        type: actionTypes.OPEN_NEW_WINDOW,
+        info: {
+            windowType: workflowType.EXPLAIN_THIS_WINDOW,
+            request:request
+        }
+    };
+}
+
+function createExplainThisRequest(
+    filename,
+    labelName,
+    dataFeatures) {
+
+    return {
+        routine: 'workflow',
+        dataSelections: [],
+        labelName: labelName,
+        workflow: "explain_this",
+        dataFeatures: dataFeatures,
+        file: filename,
+        cid: "8ksjk",
+        identification: {id: 'dev0'}
+    }
+}
+
 export function createWorkflow(workflowType, selectedFeatures) {
+    //right now this assumes that the workflow type is the explain this page
     return (dispatch, getState) => {
         // Get selected feature list from current state if none specified
-        selectedFeatures =
-            selectedFeatures ||
-            getState()
-                .data.get("featureList")
-                .filter(f => f.get("selected"))
-                .map(f => f.get("name"))
-                .toJS();
-        console.log(workflowType);
+        let selectedFeatures =
+                getState()
+                    .data.get("featureList")
+                    .filter(f => f.get("selected"))
+                    .map(f => f.get("name"))
+                    .toJS();
 
-        Promise.all(
-            selectedFeatures.map(feature => actionFunctions.getColumn(feature, dispatch, getState))
-        ).then(cols => {
-            const workflowData = cols.reduce((acc, col) => {
-                col.forEach((val, idx) => {
-                    acc[idx] = acc[idx] || [];
-                    acc[idx].push(val);
-                });
-                return acc;
-            }, []);
+        const filename = getState().data.get("filename");
 
-            dispatch({
-                type: actionTypes.OPEN_NEW_WINDOW,
-                info: {
-                    windowType: workflowType,
-                    data: getState().data.set("data", workflowData)
-                }
-            });
-        });
+        //todo actually setup a form for selecting a feature that gets sent to 
+        //the user as a label
+        const labelName = selectedFeatures[0];
+        
+        const request= createExplainThisRequest(
+            filename,
+            labelName,
+            selectedFeatures
+        );
+
+        //pass the request to the workflow
+        dispatch(getExplainThisWindowAction(utils.makeSimpleRequest(request)));
     };
 }

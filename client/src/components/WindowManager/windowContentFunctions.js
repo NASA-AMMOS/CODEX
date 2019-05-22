@@ -7,6 +7,7 @@ import ContourGraph from "components/Graphs/ContourGraph";
 import RegressionResults from "components/Regressions/RegressionResults";
 import RegressionsOverview from "components/Regressions/RegressionsOverview";
 import ScatterGraph from "components/Graphs/ScatterGraph";
+import HeatmapGraph from "components/Graphs/HeatmapGraph";
 import Sessions from "components/Sessions/Sessions";
 import TimeSeriesGraph from "components/Graphs/TimeSeriesGraph";
 import * as algorithmTypes from "constants/algorithmTypes";
@@ -23,6 +24,7 @@ export function getWindowTitle(win) {
     switch (win.windowType) {
         case uiTypes.SCATTER_GRAPH:
         case uiTypes.CONTOUR_GRAPH:
+        case uiTypes.HEATMAP_GRAPH:
         case uiTypes.TIME_SERIES_GRAPH:
             return getMultiAxisGraphTitle(win);
         case algorithmTypes.CLUSTER_ALGORITHM:
@@ -60,6 +62,8 @@ export function getWindowContent(win) {
             return <ContourGraph data={win.data} />;
         case uiTypes.TIME_SERIES_GRAPH:
             return <TimeSeriesGraph data={win.data} />;
+        case uiTypes.HEATMAP_GRAPH:
+            return <HeatmapGraph data={win.data} />;
         case algorithmTypes.CLUSTER_ALGORITHM:
             return (
                 <ClusterAlgorithm
@@ -96,11 +100,10 @@ export function getWindowContent(win) {
             return (
                 <DimensionalityReductionResults requests={win.requests} runParams={win.runParams} />
             );
-        case workflowTypes.EXPLAIN_THIS:
+        case workflowTypes.EXPLAIN_THIS_WINDOW:
             return (
                 <ExplainThis
-                    selectedFeatures={win.selectedFeatures}
-                    selectedFeaturesLength={win.selectedFeaturesLength}
+                    request={win.request}
                     winId={win.id}
                 />
             );

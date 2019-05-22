@@ -21,7 +21,8 @@ export const SELECTIONS_BRUSH_COLOR = "#ff4500";
 export const SCATTER_GRAPH = "Scatter";
 export const CONTOUR_GRAPH = "Contour";
 export const TIME_SERIES_GRAPH = "Time Series";
+export const HEATMAP_GRAPH = "Heat Map";
 
 export const SESSIONS_WINDOW = "SESSIONS_WINDOW";
 
-export const GRAPH_TYPES = [SCATTER_GRAPH, CONTOUR_GRAPH, TIME_SERIES_GRAPH];
+export const GRAPH_TYPES = [SCATTER_GRAPH, CONTOUR_GRAPH, TIME_SERIES_GRAPH, HEATMAP_GRAPH];

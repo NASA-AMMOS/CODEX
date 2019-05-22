@@ -16,6 +16,11 @@ export const initialSizes = {
         height: 300,
         resizeable: true
     },
+    [uiTypes.HEATMAP_GRAPH]: {
+        width:300,
+        height:300,
+        resizeable: true
+    },
     [uiTypes.TIME_SERIES_GRAPH]: {
         width: 500,
         height: 400,
@@ -65,7 +70,7 @@ export const initialSizes = {
         height: 375,
         resizeable: true
     },
-    [workflowTypes.EXPLAIN_THIS]: {
+    [workflowTypes.EXPLAIN_THIS_WINDOW]: {
         width: 700,
         height: 500,
         resizeable: true
