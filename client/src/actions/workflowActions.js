@@ -49,7 +49,7 @@ export function createWorkflow(workflowType, selectedFeatures) {
 
         //todo actually setup a form for selecting a feature that gets sent to 
         //the user as a label
-        const labelName = selectedFeatures[0];
+        const labelName = "labels";
 
         selectedFeatures = selectedFeatures.slice(1);
         
