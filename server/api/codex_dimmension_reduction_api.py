@@ -94,9 +94,9 @@ def run_codex_dim_reduction(
 
         >>> testData = codex_doctest.doctest_get_data()
 
-        >>> result = run_codex_dim_reduction(testData['inputHash'], "", {"n_components":2}, False, False, "PCA")
+        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, False, False, "PCA")
 
-        >>> result = run_codex_dim_reduction(testData['inputHash'], "", {"n_components":2}, 500, False, "ICA")
+        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, 500, False, "ICA")
         Downsampling to 500 samples.
 
     '''

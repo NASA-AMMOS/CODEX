@@ -149,6 +149,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         >>> print(result["WARNING"])
         None
     '''
+    codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     result = {'algorithm': algorithm,
               'downsample': downsampled,
@@ -438,8 +439,6 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         result['model_name'] = model_dict['name']
         result['model_hash'] = model_dict['hash']
 
-    codex_return_code.logReturnCode(inspect.currentframe())
-    
     endTime = time.time()
     computeTime = endTime - startTime
     codex_time_log.logTime(

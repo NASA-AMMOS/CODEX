@@ -222,6 +222,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
     >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "TransformedTargetRegressor", {}, "grid", 3, 'explained_variance')
 
     '''
+    codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     result = {'algorithm': algorithm,
               'downsample': downsampled,
@@ -667,9 +668,6 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
         result['model_name'] = model_dict['name']
         result['model_hash'] = model_dict['hash']
 
-
-    codex_return_code.logReturnCode(inspect.currentframe())
-    
     endTime = time.time()
     computeTime = endTime - startTime
     codex_time_log.logTime(

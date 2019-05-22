@@ -62,6 +62,10 @@ def logReturnCode(frame):
                     value[dict_key] = dict_value.tolist()
                     ndarray_keys.append(dict_key)
 
+                # TODO - do these need to be back in byte configuration to actually be used again?
+                if isinstance(dict_value, bytes):
+                    value[dict_key] = str(dict_value)
+
             resolved_ndarray_keys = []
             for key in ndarray_keys:
                 value[key] = '"{key}":np.array(({payload}))'.format(key=key, payload=value[key])

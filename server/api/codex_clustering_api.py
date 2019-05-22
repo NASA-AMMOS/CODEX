@@ -133,9 +133,8 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
     Examples:
 
     '''
-
+    codex_return_code.logReturnCode(inspect.currentframe())
     codex_system.codex_log(str(parms))
-
     startTime = time.time()
     result = {'algorithm': algorithm,
               'downsample': downsampled,
@@ -260,9 +259,6 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
 
     # TODO - turn back on label swap
     #y_pred = codex_labels.label_swap(y_pred, merged_hash["hash"])
-
-    codex_return_code.logReturnCode(inspect.currentframe())
-
 
     result['message'] = "success"
     return result
