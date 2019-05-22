@@ -54,11 +54,6 @@ export const initialSizes = {
         height: 700,
         resizeable: false
     },
-    [dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_WINDOW]: {
-        width: 700,
-        height: 500,
-        resizable: true
-    },
     [dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW]: {
         width: 700,
         height: 375,

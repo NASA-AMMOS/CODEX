@@ -1,6 +1,5 @@
 import * as constantHelpers from "constants/constantHelpers";
 
-export const DIMENSIONALITY_REDUCTION_WINDOW = "DIMENSIONALITY_REDUCTION_WINDOW";
 export const DIMENSIONALITY_REDUCTION_RESULTS_WINDOW = "DIMENSIONALITY_REDUCTION_RESULTS_WINDOW";
 
 export const PCA = "PCA";

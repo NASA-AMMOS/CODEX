@@ -13,7 +13,6 @@ import * as algorithmTypes from "constants/algorithmTypes";
 import * as classifierTypes from "constants/classifierTypes";
 import * as regressionTypes from "constants/regressionTypes";
 import * as uiTypes from "constants/uiTypes";
-import DimensionalityReductionsOverview from "components/DimensionalityReduction/DimensionalityReductionsOverview";
 import DimensionalityReductionResults from "components/DimensionalityReduction/DimensionalityReductionResults";
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
 
@@ -39,8 +38,6 @@ export function getWindowTitle(win) {
             return "Regression Results";
         case uiTypes.SESSIONS_WINDOW:
             return "Sessions";
-        case dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_WINDOW:
-            return "Dimensionality Reduction";
         case dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW:
             return "Dimensionality Reduction Results";
         default:
@@ -86,8 +83,6 @@ export function getWindowContent(win) {
             return <RegressionResults requests={win.requests} runParams={win.runParams} />;
         case uiTypes.SESSIONS_WINDOW:
             return <Sessions />;
-        case dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_WINDOW:
-            return <DimensionalityReductionsOverview winId={win.id} />;
         case dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW:
             return (
                 <DimensionalityReductionResults requests={win.requests} runParams={win.runParams} />

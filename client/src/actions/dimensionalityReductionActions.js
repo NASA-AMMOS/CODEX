@@ -4,11 +4,44 @@ import * as dimensionalityReductionFunctions from "components/DimensionalityRedu
 import * as utils from "utils/utils";
 
 export function openDimensionalityReductionWindow() {
-    return {
-        type: actionTypes.OPEN_NEW_WINDOW,
-        info: {
-            windowType: dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_WINDOW
-        }
+    return (dispatch, getState) => {
+        const selectedFeatures = getState()
+            .data.get("featureList")
+            .filter(f => f.get("selected"))
+            .map(f => f.get("name"))
+            .toJS();
+
+        const requests = dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_TYPES.map(dr => {
+            return {
+                name: dr,
+                paramData: dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_PARAMS[dr].map(
+                    param =>
+                        Object.assign(param, {
+                            subParams: param.subParams.map(subParam =>
+                                Object.assign(subParam, {
+                                    value: selectedFeatures.length
+                                })
+                            )
+                        })
+                )
+            };
+        })
+            .map(drstate =>
+                createDrRequest(getState().data.get("filename"), selectedFeatures, drstate)
+            )
+            .map(request => {
+                const { req, cancel } = utils.makeSimpleRequest(request);
+                return { req, cancel, requestObj: request };
+            });
+
+        dispatch({
+            type: actionTypes.OPEN_NEW_WINDOW,
+            info: {
+                windowType: dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW,
+                requests,
+                runParams: { selectedFeatures }
+            }
+        });
     };
 }
 
@@ -24,32 +57,5 @@ function createDrRequest(filename, selectedFeatures, drstate) {
         parameters: { [drstate.paramData[0].name]: drstate.paramData[0].subParams[0].value }, // UGH! This is really hacky and should be fixed when we refactor all these algo functions.
         dataSelections: [],
         downsampled: false
-    };
-}
-
-export function createDrOutput(drstates, selectedFeatures, winId) {
-    return (dispatch, getState) => {
-        dispatch({ type: actionTypes.CLOSE_WINDOW, id: winId });
-
-        const drsToRun = drstates
-            .filter(drstate => drstate.paramData)
-            .filter(drstate => drstate.selected);
-
-        const filename = getState().data.get("filename");
-        const requests = drsToRun
-            .map(drstate => createDrRequest(filename, selectedFeatures, drstate))
-            .map(request => {
-                const { req, cancel } = utils.makeSimpleRequest(request);
-                return { req, cancel, requestObj: request };
-            });
-
-        dispatch({
-            type: actionTypes.OPEN_NEW_WINDOW,
-            info: {
-                windowType: dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW,
-                requests,
-                runParams: { selectedFeatures }
-            }
-        });
     };
 }
