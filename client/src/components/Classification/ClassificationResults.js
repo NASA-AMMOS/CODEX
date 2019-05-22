@@ -17,21 +17,6 @@ function makeClassificationPlot(algo) {
             </div>
         );
 
-    // const annotations = [];
-
-    // for (let x = 0; x < algo.data.classes.length; x++) {
-    //     for (let y = 0; y < algo.data.classes.length; y++) {
-    //         const annotation = {
-    //             xref: "x1",
-    //             yref: "y1",
-    //             x: algo.data.classes[x],
-    //             y: algo.data.classes[y],
-    //             text: algo.data.cm_data[x][y]
-    //         };
-    //         annotations.push(annotation);
-    //     }
-    // }
-
     const chartOptions = {
         data: [
             {

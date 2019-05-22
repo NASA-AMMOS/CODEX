@@ -14,42 +14,6 @@ import ReactResizeDetector from "react-resize-detector";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 
-function binContourData(data) {
-    /* Create array of all unique values with a tally (row[2]) of how many times they appear.
-        This operation can get slow and may need to be optimized in the future (maybe use typed arrays?).
-        It's a lot faster to search an array of numbers than an array of arrays,
-        so we use zip/unzip functions to break the data into columns and then back again. */
-
-    // return data.slice(1).map(row => row.map(Math.round));
-    // return [];
-
-    const cols = utils.unzip(data.slice(1));
-
-    return cols;
-    const yCol = cols[1].slice(1);
-
-    return utils.zip(
-        cols[0].slice(1).reduce(
-            (acc, xVal, idx) => {
-                const yVal = yCol[idx];
-                const x = Math.round(xVal);
-                const y = Math.round(yVal);
-
-                const itemIndex = acc[0].findIndex((val, i) => val === x && acc[1][i] === y);
-                if (itemIndex !== -1) {
-                    acc[2][itemIndex]++;
-                } else {
-                    acc[0].push(x);
-                    acc[1].push(y);
-                    acc[2].push(1);
-                }
-                return acc;
-            },
-            [[], [], []]
-        )
-    );
-}
-
 function HeatmapGraph(props) {
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
     const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
@@ -70,13 +34,13 @@ function HeatmapGraph(props) {
     const cols = utils.unzip(data.slice(1));
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
-
     // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState({
         data: [
             {
-                x: [...data.classes].sort((a, b) => a - b),
-                y: [...data.classes].sort((a, b) => b - a).map(idx => `Label ${idx}`),
+                x: [...cols[0]].sort((a, b) => a - b),
+                y: [...cols[1]].sort((a, b) => b - a).map(idx => `Label ${idx}`),
+                z: []
                 type: "heatmap",
                 colorscale: 'Reds',
                 showscale: false,
