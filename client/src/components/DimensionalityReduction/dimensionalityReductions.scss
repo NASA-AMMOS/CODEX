@@ -109,6 +109,12 @@
     margin: 0 auto;
     width: 200px;
     height: 200px;
+
+    .chartSlider {
+        padding-left: 35px;
+        width: 185px;
+        margin-top: 10px;
+    }
 }
 
 .drResults .resultRow {
@@ -172,10 +178,4 @@
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.chartSlider {
-    padding-left: 35px;
-    width: 185px;
-    margin-top: 10px;
 }

@@ -90,6 +90,7 @@ function ExplainThisTree(props) {
           .text(function(d) { return d.name; })
           .style("fill-opacity", 1e-6);
 
+<<<<<<< HEAD
       // Transition nodes to their new position.
       let nodeUpdate = node.transition()
           .duration(duration)

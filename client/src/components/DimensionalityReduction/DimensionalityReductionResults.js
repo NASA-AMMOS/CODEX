@@ -4,7 +4,7 @@ import Typography from "@material-ui/core/Typography";
 import Plot from "react-plotly.js";
 import classnames from "classnames";
 import Button from "@material-ui/core/Button";
-import "components/Regressions/regressions.scss";
+import "components/DimensionalityReduction/dimensionalityReductions.scss";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import * as utils from "utils/utils";
 import Slider from "@material-ui/lab/Slider";
@@ -12,7 +12,7 @@ import Plotly from "plotly.js";
 
 // Utility to create a Plotly chart for each algorithm data return from the server.
 // We show a loading progress indicator if the data hasn't arrived yet.
-function makeDRPlot(algo, changeSliderVal) {
+function makeDRPlot(algo, maxYRange, changeSliderVal) {
     if (!algo || !algo.data)
         return (
             <div className="chartLoading">
@@ -35,7 +35,7 @@ function makeDRPlot(algo, changeSliderVal) {
                 },
                 hoverinfo: "text",
                 text: algo.data.explained_variance_ratio.map(
-                    (r, idx) => `Features: ${idx + 1}, Ratio: ${r}`
+                    (r, idx) => `Components: ${idx + 1} <br> Explained Variance: ${r}%`
                 )
             }
         ],
@@ -49,7 +49,8 @@ function makeDRPlot(algo, changeSliderVal) {
                 automargin: true
             },
             yaxis: {
-                automargin: true
+                automargin: true,
+                range: [0, maxYRange]
             }
         },
         config: {
@@ -72,18 +73,17 @@ function makeDRPlot(algo, changeSliderVal) {
                 divId={id}
                 onBeforeHover={e => console.log(e)}
             />
-            <div className="chartSlider">
-                <Slider
-                    value={algo.sliderVal}
-                    min={1}
-                    max={algo.dataFeatures.length}
-                    step={1}
-                    onChange={(_, val) => {
-                        Plotly.Fx.hover(id, [{ curveNumber: 0, pointNumber: val - 1 }]);
-                        changeSliderVal(algo.algorithmName, val);
-                    }}
-                />
-            </div>
+            <Slider
+                classes={{ root: "chartSlider" }}
+                value={algo.sliderVal}
+                min={1}
+                max={algo.dataFeatures.length}
+                step={1}
+                onChange={(_, val) => {
+                    Plotly.Fx.hover(id, [{ curveNumber: 0, pointNumber: val - 1 }]);
+                    changeSliderVal(algo.algorithmName, val);
+                }}
+            />
         </React.Fragment>
     );
 }
@@ -137,6 +137,13 @@ function DimensionalityReductionResults(props) {
         );
     }
 
+    const maxYRange = Math.max(
+        ...algoStates.reduce(
+            (acc, algo) => (algo.data ? acc.concat(algo.data.explained_variance_ratio) : acc),
+            []
+        )
+    );
+
     return (
         <div className="drResults">
             <Typography variant="h6">All Reductions</Typography>
@@ -157,7 +164,7 @@ function DimensionalityReductionResults(props) {
                                 ? algo.algorithmName
                                 : algo.algorithmName.slice(0, 17) + "..."}
                         </div>
-                        <div className="plot">{makeDRPlot(algo, changeSliderVal)}</div>
+                        <div className="plot">{makeDRPlot(algo, maxYRange, changeSliderVal)}</div>
                     </div>
                 ))}
             </div>

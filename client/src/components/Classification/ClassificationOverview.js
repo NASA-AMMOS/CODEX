@@ -201,14 +201,20 @@ function ClassificationOverview(props) {
     const [scoring, setScoring] = useState(scoringOptions[0]);
 
     const [label, setLabel] = useState(selectedFeatures[0]);
-    const [activeClassificationName, setActiveClassificationName] = useState(classificationStates[0].name);
+    const [activeClassificationName, setActiveClassificationName] = useState(
+        classificationStates[0].name
+    );
 
     // When the window loads, we request time estimates from the server for each classification -- this effect
     // handles those Promise returns and updates the classification states as necessary. It also includes
     // a cleanup function that will cancel all requests if the user closes the window.
     useEffect(_ => {
         const requests = classificationTypes.CLASSIFICATION_TYPES.map(classification => {
-            const { req, cancel } = classificationFunctions.getEta(classification, selectedFeatures, 100);
+            const { req, cancel } = classificationFunctions.getEta(
+                classification,
+                selectedFeatures,
+                100
+            );
             req.then(data =>
                 classificationStateDispatch({
                     type: "updateEta",
@@ -271,7 +277,9 @@ function ClassificationOverview(props) {
             <hr />
             <div className="body">
                 <div className="leftCol">
-                    <Typography variant="subtitle1">Select and Configure Classification(s)</Typography>
+                    <Typography variant="subtitle1">
+                        Select and Configure Classification(s)
+                    </Typography>
                     <div>
                         <Button
                             variant="text"

@@ -8,7 +8,14 @@ import PropTypes from "prop-types";
 import React, { Component } from "react";
 
 import { brushClear } from "actions/data";
-import { openAlgorithm, openReport, openDevelopment, openWorkflow, brushtypeSet, modeSet } from "actions/ui";
+import {
+    openAlgorithm,
+    openReport,
+    openDevelopment,
+    openWorkflow,
+    brushtypeSet,
+    modeSet
+} from "actions/ui";
 import LoadingBar from "components/LoadingBar/LoadingBar";
 import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
@@ -274,9 +281,7 @@ class TopBar extends Component {
                         autoOpen={false}
                     >
                         <Dropdown.Toggle className="dropdownToggle" title="Workflows" />
-                        <Dropdown.Menu>
-                            {this.getWorkflowMenuItems()}
-                        </Dropdown.Menu>
+                        <Dropdown.Menu>{this.getWorkflowMenuItems()}</Dropdown.Menu>
                     </Dropdown>
 
                     <div className="triTopLeft" />
@@ -341,7 +346,10 @@ function mapDispatchToProps(dispatch) {
         createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name)),
         createWorkflow: name => dispatch(workflowActions.createWorkflow(name)),
         setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch),
-        openClassificationWindow: bindActionCreators(classificationActions.openClassificationWindow, dispatch),
+        openClassificationWindow: bindActionCreators(
+            classificationActions.openClassificationWindow,
+            dispatch
+        ),
         openRegressionWindow: bindActionCreators(regressionActions.openRegressionWindow, dispatch),
         openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch),
         openDimensionalityReductionWindow: bindActionCreators(

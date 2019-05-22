@@ -39,7 +39,7 @@ function makeClassificationPlot(algo) {
                 y: [...algo.data.classes].sort((a, b) => b - a).map(idx => `Label ${idx}`),
                 z: algo.data.cm_data,
                 type: "heatmap",
-                colorscale: 'Reds',
+                colorscale: "Reds",
                 showscale: false,
                 xgap: 2,
                 ygap: 2
@@ -68,20 +68,20 @@ function makeClassificationPlot(algo) {
         for (let j = 0; j < algo.data.cm_data[i].length; j++) {
             let value = algo.data.cm_data[i][j];
 
-            let colorValue = value < 0.5 ? 'black' : 'white';
+            let colorValue = value < 0.5 ? "black" : "white";
 
-            let annotation =  {
-                xref: 'x1',
-                yref: 'y1',
+            let annotation = {
+                xref: "x1",
+                yref: "y1",
                 x: algo.data.classes[j],
                 y: algo.data.classes[i],
                 text: value + "%",
                 font: {
-                    family: 'Arial',
+                    family: "Arial",
                     size: 12,
                     color: colorValue
                 },
-                showarrow: false,
+                showarrow: false
             };
 
             chartOptions.layout.annotations.push(annotation);

@@ -172,8 +172,6 @@ function WindowManager(props) {
         [props.tileActionPending]
     );
 
-    console.log(props.windows);
-
     const windows = props.windows
         .filter(win => !win.minimizedOnly)
         .map((win, idx) => {

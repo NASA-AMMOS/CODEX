@@ -36,7 +36,7 @@ export function createGraph(graphMode, selectedFeatures) {
                 .toJS();
 
         if (!canBuildGraph(graphMode, getState().data)) return { type: actionTypes.NO_ACTION };
-        
+
         Promise.all(
             selectedFeatures.map(feature => actionFunctions.getColumn(feature, dispatch, getState))
         ).then(cols => {

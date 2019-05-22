@@ -1,4 +1,4 @@
-import * as constantHelpers from "constants/constantHelpers"
+import * as constantHelpers from "constants/constantHelpers";
 
 export const CLASSIFICATION_WINDOW = "CLASSIFICATION_WINDOW";
 export const CLASSIFICATION_LOADING_WINDOW = "CLASSIFICATION_LOADING_WINDOW";
@@ -73,7 +73,6 @@ export const CLASSIFICATION_PARAMS = {
             name: "n_estimators",
             mode: "range",
             subParams: [].concat(constantHelpers.createRange(1, 100, 1, "int"))
-
         }
     ],
     [BayesianGaussianMixture]: [
@@ -81,7 +80,6 @@ export const CLASSIFICATION_PARAMS = {
             name: "n_components",
             mode: "range",
             subParams: [].concat(constantHelpers.createRange(1, 100, 1, "int"))
-
         }
     ],
     [BernoulliNB]: [
@@ -89,7 +87,6 @@ export const CLASSIFICATION_PARAMS = {
             name: "alpha",
             mode: "range",
             subParams: [].concat(constantHelpers.createRange(1, 100, 1, "int"))
-
         }
     ],
     [CalibratedClassificationCV]: [
