@@ -28,6 +28,7 @@ import codex_time_log
 import codex_hash
 import codex_read_data_api
 import codex_return_code
+import inspect
 
 DEBUG = False
 
@@ -315,13 +316,7 @@ def codex_binned_stat(
     computeTime = endTime - startTime
     codex_time_log.logTime("binning", "1d", computeTime, len(x), x.ndim)
 
-    if(subsetHash is False):
-        returnCodeString = "codex_1d_binning.codex_binned_stat('" + inputHash + "',False," + str(
-            bins) + "," + str(y) + "," + str(limits) + "," + str(func) + "," + str(ignore_outliers) + ")"
-    else:
-        returnCodeString = "codex_1d_binning.codex_binned_stat('" + inputHash + "','" + subsetHash + "'," + str(
-            bins) + "," + str(y) + "," + str(limits) + "," + str(func) + "," + str(ignore_outliers) + ")"
-    codex_return_code.logReturnCode(returnCodeString)
+    codex_return_code.logReturnCode(inspect.currentframe())
 
     dictionary = {"bin_centers": bins.tolist(), 'values': values.tolist()}
     return dictionary

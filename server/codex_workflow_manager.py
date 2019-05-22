@@ -48,14 +48,13 @@ def workflow_call(msg, result):
         subsetHashName = None
 
     hashList = codex_hash.feature2hashList(featureList)
-    codex_return_code.logReturnCode("hashList = codex_hash.feature2hashList(featureList)")
+    codex_return_code.logReturnCode(inspect.currentframe())
 
     data = codex_hash.mergeHashResults(hashList)
-    codex_return_code.logReturnCode("data = codex_hash.mergeHashResults(hashList)")
+    codex_return_code.logReturnCode(inspect.currentframe())
     inputHash = codex_hash.hashArray('Merged', data, "feature")
 
     if (inputHash != None):
-
         codex_return_code.logReturnCode(inspect.currentframe())
         inputHash = inputHash["hash"]
 
