@@ -284,14 +284,7 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside):
     mean_value_string = np.array2string(mean_value)
     std_value_string = np.array2string(std_value)
 
-    if(subsetHash == False):
-        returnCodeString = "codex_data_quality_scan_api.codex_get_sigma_data('" + inputHash + "'," + str(
-            subsetHash) + "," + str(sigma) + "," + str(inside) + ")"
-    else:
-        returnCodeString = "codex_data_quality_scan_api.codex_get_sigma_data('" + inputHash + "','" + str(
-            subsetHash) + "'," + str(sigma) + "," + str(inside) + ")"
-
-    codex_return_code.logReturnCode(returnCodeString)
+    codex_return_code.logReturnCode(inspect.currentframe())
 
     endTime = time.time()
     computeTime = endTime - startTime
@@ -362,14 +355,8 @@ def codex_column_correlation(inputHash, subsetHash):
             pearsonArray[x, y] = pearson[0]
             r2Array[x, y] = r2_score(f1_data, f2_data)
 
-    if(subsetHash == False):
-        returnCodeString = "codex_data_quality_scan_api.codex_column_correlation('" + inputHash + "'," + str(
-            subsetHash) + ")"
-    else:
-        returnCodeString = "codex_data_quality_scan_api.codex_column_correlation('" + inputHash + "','" + str(
-            subsetHash) + "')"
 
-    codex_return_code.logReturnCode(returnCodeString)
+    codex_return_code.logReturnCode(inspect.currentframe())
 
     endTime = time.time()
     computeTime = endTime - startTime

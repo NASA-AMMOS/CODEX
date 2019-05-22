@@ -14,7 +14,7 @@ import ReactResizeDetector from "react-resize-detector";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 
-function squashDataIntoBuckets()
+function squashDataIntoBuckets(){}
 
 function HeatmapGraph(props) {
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
