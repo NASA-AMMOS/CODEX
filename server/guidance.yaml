@@ -519,6 +519,13 @@ regression_page:
         Sample data
 
 
+explain_this_page:
+
+    general_explain_this: |
+
+        Sample Data
+
+
 classification_page:
 
     general_classification: |
