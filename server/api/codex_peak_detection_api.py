@@ -22,6 +22,7 @@ from detect_peaks import detect_peaks
 from scipy.signal import find_peaks_cwt
 import matplotlib.pyplot as plt
 import numpy as np
+import inspect
 
 # CODEX Support
 import codex_math
@@ -283,14 +284,7 @@ def codex_scipy_signal_peak_cwt(
     if(showPlot):
         codex_plot.codex_plot_peak(data, indexes)
 
-    if(subsetHash == False):
-        returnCodeString = "codex_peak_detection_api.codex_scipy_signal_peak_cwt('" + inputHash + "'," + str(subsetHash) + ",True," + str(
-            downsampled) + "," + str(peak_width) + "," + str(gap_threshold) + "," + str(min_snr) + "," + str(noise_perc) + ")"
-    else:
-        returnCodeString = "codex_peak_detection_api.codex_scipy_signal_peak_cwt('" + inputHash + "','" + str(subsetHash) + "',True," + str(
-            downsampled) + "," + str(peak_width) + "," + str(gap_threshold) + "," + str(min_snr) + "," + str(noise_perc) + ")"
-
-    codex_return_code.logReturnCode(returnCodeString)
+    codex_return_code.logReturnCode(inspect.currentframe())
 
     dictionary = {
         'eta': eta,
@@ -336,6 +330,7 @@ def codex_matlab_findpeaks(
     Examples:
 
     '''
+    codex_return_code.logReturnCode(inspect.currentframe())
     downsampledHash = None
     startTime = time.time()
     eta = None
@@ -387,15 +382,6 @@ def codex_matlab_findpeaks(
 
     if(showPlot):
         codex_plot.codex_plot_peak(data, indexes)
-
-    if(subsetHash == False):
-        returnCodeString = "codex_peak_detection_api.codex_matlab_findpeaks('" + inputHash + "'," + str(subsetHash) + "," + str(downsampled) + "," + str(
-            mph) + "," + str(mpd) + "," + str(threshold) + ",'" + str(edge) + "'," + str(kpsh) + "," + str(valley) + "," + str(showPlot) + ")"
-    else:
-        returnCodeString = "codex_peak_detection_api.codex_matlab_findpeaks('" + inputHash + "','" + str(subsetHash) + "'," + str(downsampled) + "," + str(
-            mph) + "," + str(mpd) + "," + str(threshold) + ",'" + str(edge) + "'," + str(kpsh) + "," + str(valley) + "," + str(showPlot) + ")"
-
-    codex_return_code.logReturnCode(returnCodeString)
 
     dictionary = {
         'eta': eta,

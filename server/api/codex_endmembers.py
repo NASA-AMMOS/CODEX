@@ -30,6 +30,7 @@ import pstats
 import cProfile
 import h5py
 import time
+import inspect
 
 # CODEX Support
 import codex_math
@@ -169,6 +170,7 @@ def codex_ATGP(inputHash, subsetHash, q, downsampled):
 
     >>> result = codex_ATGP(testData['inputHash'], False, 3, False)
     '''
+    codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
 
@@ -214,14 +216,6 @@ def codex_ATGP(inputHash, subsetHash, q, downsampled):
         len(data),
         data.ndim)
 
-    if(subsetHash is False):
-        returnCodeString = "codex_endmembers.codex_ATGP('" + inputHash + "',False," + str(
-            q) + "," + str(downsampled) + ")\n"
-    else:
-        returnCodeString = "codex_endmembers.codex_ATGP('" + inputHash + \
-            "','" + subsetHash + "'," + str(q) + "," + str(downsampled) + ")\n"
-    codex_return_code.logReturnCode(returnCodeString)
-
     return dictionary
 
 
@@ -242,6 +236,7 @@ def codex_FIPPI(inputHash, subsetHash, q, downsampled):
 
     >>> result = codex_FIPPI(testData['inputHash'], False, 1, False)
     '''
+    codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
 
@@ -292,14 +287,6 @@ def codex_FIPPI(inputHash, subsetHash, q, downsampled):
             results[0]), 'endmember_vector': np.array_str(
             results[1]), 'downsample': downsampled}
 
-    if(subsetHash is False):
-        returnCodeString = "codex_endmembers.codex_FIPPI('" + inputHash + "',False," + str(
-            q) + "," + str(downsampled) + ")\n"
-    else:
-        returnCodeString = "codex_endmembers.codex_FIPPI('" + inputHash + \
-            "','" + subsetHash + "'," + str(q) + "," + str(downsampled) + ")\n"
-    codex_return_code.logReturnCode(returnCodeString)
-
     return dictionary
 
 
@@ -321,6 +308,7 @@ def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled):
 
     >>> result = codex_PPI(testData['inputHash'], False, 3, 1, False)
     '''
+    codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
 
@@ -365,14 +353,6 @@ def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled):
         'eta': eta, 'endmember_array': np.array_str(
             results[0]), 'endmember_vector': np.array_str(
             results[1]), 'downsample': downsampled}
-
-    if(subsetHash is False):
-        returnCodeString = "codex_endmembers.codex_PPI('" + inputHash + "',False," + str(
-            q) + "," + str(numSkewers) + "," + str(downsampled) + ")\n"
-    else:
-        returnCodeString = "codex_endmembers.codex_PPI('" + inputHash + "','" + subsetHash + "'," + str(
-            q) + "," + str(numSkewers) + "," + str(downsampled) + ")\n"
-    codex_return_code.logReturnCode(returnCodeString)
 
     return dictionary
 
