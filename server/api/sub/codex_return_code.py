@@ -54,6 +54,8 @@ def logReturnCode(frame):
             arg_string = "{arg}='{value}'".format(arg=arg, value=value)
         elif isinstance(value, list):
             arg_string = "{arg}={value}".format(arg=arg, value=value)
+        elif isinstance(value, tuple):
+            arg_string = "{arg}={value}".format(arg=arg, value=value)
         elif isinstance(value, dict):
 
             ndarray_keys = []
