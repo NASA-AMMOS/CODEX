@@ -448,7 +448,6 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         len(X),
         X.ndim)
 
-    result['message'] = "success"
     return result
 
 
