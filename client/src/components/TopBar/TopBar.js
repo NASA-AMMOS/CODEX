@@ -204,7 +204,7 @@ class TopBar extends Component {
                             </MenuItem>
                             <MenuItem
                                 onSelect={() => {
-                                    sessionsActions.saveSession(
+                                    this.props.saveSession(
                                         `${this.props.filename}_${new Date().toISOString()}`
                                     );
                                 }}
@@ -352,6 +352,7 @@ function mapDispatchToProps(dispatch) {
         ),
         openRegressionWindow: bindActionCreators(regressionActions.openRegressionWindow, dispatch),
         openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch),
+        saveSession: bindActionCreators(sessionsActions.saveSession, dispatch),
         openDimensionalityReductionWindow: bindActionCreators(
             dimensionalityReductionActions.openDimensionalityReductionWindow,
             dispatch
