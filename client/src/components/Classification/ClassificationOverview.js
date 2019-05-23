@@ -1,5 +1,4 @@
 // This component creates a window that allows users to configure a new classification run.
-
 import React, { useEffect, useState, useReducer } from "react";
 import * as classificationTypes from "constants/classificationTypes";
 import * as classificationFunctions from "components/Classification/classificationFunctions";
@@ -19,6 +18,59 @@ import Checkbox from "@material-ui/core/Checkbox";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import classnames from "classnames";
+import HelpContent from "components/Help/HelpContent";
+import HelpOutline from "@material-ui/icons/HelpOutline";
+import Close from "@material-ui/icons/Close";
+import IconButton from "@material-ui/core/IconButton";
+
+
+function ClassificationHeaderBar(props) {
+
+    return (
+        <div className="headerBar">
+            <FormControl className="labelDropdown">
+                <InputLabel>Labels</InputLabel>
+                <Select value={props.label} onChange={e => props.setLabel(e.target.value)}>
+                    {props.selectedFeatures.map(f => (
+                        <MenuItem key={f} value={f}>
+                            {f}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+            <div>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={_ => props.createClassificationOutput(...props.classificationOutputParams)}
+                >
+                    Run
+                </Button>
+                
+            <IconButton onClick={_ => props.setHelpModeState(state => !state)}>
+                <HelpOutline />
+            </IconButton>
+            </div>
+        </div>
+    );
+}
+
+function HelpBarHeader(props) {
+
+    return (
+        <div className="headerBar">
+            <h2>
+                {props.title}
+            </h2>
+            <IconButton 
+                className="closeButton" 
+                onClick={_ => props.setHelpModeState(state => !state)}
+            >
+                <Close />
+            </IconButton>
+        </div>
+    );
+}
 
 // Reducer to handle changes to each individual classification's state, which contains info
 // about parameters and expected run times.
@@ -200,7 +252,7 @@ function ClassificationOverview(props) {
     const scoringOptions = ["accuracy", "precision", "recall"];
     const [scoring, setScoring] = useState(scoringOptions[0]);
 
-    const [label, setLabel] = useState(selectedFeatures[0]);
+    
     const [activeClassificationName, setActiveClassificationName] = useState(
         classificationStates[0].name
     );
@@ -230,6 +282,9 @@ function ClassificationOverview(props) {
         };
     }, []);
 
+    const [helpModeState, setHelpModeState] = useState(false);
+    const algoVerb = "classification";
+
     // Render the HTML for the page.
     // When the user clicks "run", we fire an action that closes this window, creates server requests for data for each selected
     // classification, and then hands them off to a new window defined in ClassificationResult.
@@ -241,41 +296,41 @@ function ClassificationOverview(props) {
             : "Run time not available"
         : "Calculating approximate run time...";
 
+    const [label, setLabel] = useState(selectedFeatures[0]);
+
+    const classificationOutput = [
+        classificationStates,
+        selectedFeatures,
+        crossVal,
+        label,
+        searchType,
+        scoring,
+        props.winId
+    ];
+
     return (
         <div className="classificationsContainer">
-            <div className="headerBar">
-                <FormControl className="labelDropdown">
-                    <InputLabel>Labels</InputLabel>
-                    <Select value={label} onChange={e => setLabel(e.target.value)}>
-                        {selectedFeatures.map(f => (
-                            <MenuItem key={f} value={f}>
-                                {f}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-                <div>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={_ =>
-                            props.createClassificationOutput(
-                                classificationStates,
-                                selectedFeatures,
-                                crossVal,
-                                label,
-                                searchType,
-                                scoring,
-                                props.winId
-                            )
-                        }
-                    >
-                        Run
-                    </Button>
-                </div>
-            </div>
+            { !helpModeState ?
+                <ClassificationHeaderBar
+                    selectedFeatures = {selectedFeatures}
+                    classificationOutputParams = {classificationOutput}
+                    createClassificationOutput = {props.createClassificationOutput}
+                    setHelpModeState = {setHelpModeState}
+                    label = {label}
+                    setLabel = {setLabel}
+                />
+                :
+                <HelpBarHeader
+                    setHelpModeState = {setHelpModeState}
+                    title={"Classification Page Help"}
+                />
+            }
             <hr />
-            <div className="body">
+            <HelpContent
+                hidden={!helpModeState}
+                guidancePath={`${algoVerb}_page:general_${algoVerb}`}
+            />
+            <div className="body" hidden={helpModeState}>
                 <div className="leftCol">
                     <Typography variant="subtitle1">
                         Select and Configure Classification(s)

@@ -191,7 +191,9 @@ function ExplainThis(props) {
     //wraps the promise loading in a lifecycle handler
     useEffect(_ => {
         //handle the loading of the data request promise
+        console.log(props.request);
         props.request.req.then(data => {
+            console.log("Loading data");
             console.log(data);
             setDataState(
                 Object.assign(dataState, {data})
