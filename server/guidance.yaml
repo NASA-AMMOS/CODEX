@@ -274,20 +274,6 @@ binning_page:
 
       #1-Dimensional
 
-regression_page:
-
-    general_regression: |
-      # Regression
-      ###Title
-      * [Wikipedia](https://en.wikipedia.org/wiki/Regression_analysis)
-
-      Fill out with general information about regression data anlysis techniques.
-    
-
-    linear: |
-
-      #Linear regression
-      * [Wikipedia](https://en.wikipedia.org/wiki/Regression_analysis#Linear_regression)
 
 endmember_page:
 
@@ -349,6 +335,299 @@ quality_scan_page:
     sigma_data: |
 
       #Sigma Data
+
+regression_page:
+
+    general_regression: |
+
+        Sample data
+
+    ARDRegression: |
+
+        Sample data
+
+    AdaBoostRegressor: |
+
+        Sample data
+
+    BaggingRegressor: |
+
+        Sample data
+
+    BayesianRidge: |
+
+        Sample data
+
+    CCA: |
+
+        Sample data
+
+    DecisionTreeRegressor: |
+
+        Sample data
+
+    ElasticNet: |
+
+        Sample data
+
+    ElasticNetCV: |
+
+        Sample data
+
+    ExtraTreeRegressor: |
+
+        Sample data
+
+    ExtraTreesRegressor: |
+
+        Sample data
+
+    GaussianProcessRegressor: |
+
+        Sample data
+
+    GradientBoostingRegressor: |
+
+        Sample data
+
+    HuberRegressor: |
+
+        Sample data
+
+    KNeighborsRegressor: |
+
+        Sample data
+
+    KernelRidge: |
+
+        Sample data
+
+    Lars: |
+
+        Sample data
+
+    LarsCV: |
+
+        Sample data
+
+    Lasso: |
+
+        Sample data
+
+    LassoCV: |
+
+        Sample data
+
+    LassoLars: |
+
+        Sample data
+
+    LassoLarsCV: |
+
+        Sample data
+
+    LassoLarsIC: |
+
+        Sample data
+
+    LinearRegression: |
+
+        Sample data
+
+    LinearSVR: |
+
+        Sample data
+
+    MLPRegressor: |
+
+        Sample data
+
+    MultiTaskElasticNet: |
+
+        Sample data
+
+    MultiTaskElasticNetCV: |
+
+        Sample data
+
+    MultiTaskLasso: |
+
+        Sample data
+
+    MultiTaskLassoCV: |
+
+        Sample data
+
+    NuSVR: |
+
+        Sample data
+
+    OrthogonalMatchingPursuit: |
+
+        Sample data
+
+    OrthogonalMatchingPursuitCV: |
+
+        Sample data
+
+    PLSCanonical: |
+
+        Sample data
+
+    PLSRegression: |
+
+        Sample data
+
+    PassiveAggressiveRegressor: |
+
+        Sample data
+
+    RANSACRegressor: |
+
+        Sample data
+
+    RadiusNeighborsRegressor: |
+
+        Sample data
+
+    RandomForestRegressor: |
+
+        Sample data
+
+    Ridge: |
+
+        Sample data
+
+    RidgeCV: |
+
+        Sample data
+
+    SGDRegressor: |
+
+        Sample data
+
+    SVR: |
+
+        Sample data
+
+    TheilSenRegressor: |
+
+        Sample data
+
+    TransformedTargetRegressor: |
+
+        Sample data
+
+
+classification_page:
+
+    general_classification: |
+
+        Sample data
+
+    AdaBoostClassifier: |
+
+        Sample data
+
+    BaggingClassifier: |
+
+        Sample data
+
+    BayesianGaussianMixture: |
+
+        Sample data
+
+    BernoulliNB: |
+
+        Sample data
+
+    CalibratedClassifierCV: |
+
+        Sample data
+
+    ComplementNB: |
+
+        Sample data
+
+    DecisionTreeClassifier: |
+
+        Sample data
+
+    ExtraTreesClassifier: |
+
+        Sample data
+
+    ExtraTreeClassifier: |
+
+        Sample data
+
+    GaussianMixture: |
+
+        Sample data
+
+    GaussianNB: |
+
+        Sample data
+
+    GaussianProcessClassifier: |
+
+        Sample data
+
+    GradientBoostingClassifier: |
+
+        Sample data
+
+    KNeighborsClassifier: |
+
+        Sample data
+
+    LabelPropagation: |
+
+        Sample data
+
+    LabelSpreading: |
+
+        Sample data
+
+    LinearDiscriminantAnalysis: |
+
+        Sample data
+
+    LogisticRegression: |
+
+        Sample data
+
+    LogisticRegressionCV: |
+
+        Sample data
+
+    MLPClassifier: |
+
+        Sample data
+
+    MultinomialNB: |
+
+        Sample data
+
+    NuSVC: |
+
+        Sample data
+
+    QuadraticDiscriminantAnalysis: |
+
+        Sample data
+
+    RandomForestClassifier: |
+
+        Sample data
+
+    SGDClassifier: |
+
+        Sample data
+
+    SVC: |
+
+        Sample data
 
 # Unit tests
 unit_tests:

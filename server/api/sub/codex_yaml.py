@@ -41,6 +41,12 @@ def get_guidance_text_block(page, section):
     >>> print(result)
     This is a unit test
 
+    >>> result = get_guidance_text_block('classification_page', 'CalibratedClassifierCV')
+    >>> print(result)
+    <BLANKLINE>
+    Sample data
+    <BLANKLINE>  
+
     >>> result = get_guidance_text_block('unit_tests', 'not_a_test')
     '''
     yaml = codex_read_yaml(CODEX_ROOT + "guidance.yaml")
