@@ -532,11 +532,11 @@ classification_page:
 
         Sample data
 
-    AdaBoostClassifier: |
+    AdaBoostClassification: |
 
         Sample data
 
-    BaggingClassifier: |
+    BaggingClassification: |
 
         Sample data
 
@@ -548,7 +548,7 @@ classification_page:
 
         Sample data
 
-    CalibratedClassifierCV: |
+    CalibratedClassificationCV: |
 
         Sample data
 
@@ -556,15 +556,15 @@ classification_page:
 
         Sample data
 
-    DecisionTreeClassifier: |
+    DecisionTreeClassification: |
 
         Sample data
 
-    ExtraTreesClassifier: |
+    ExtraTreesClassification: |
 
         Sample data
 
-    ExtraTreeClassifier: |
+    ExtraTreeClassification: |
 
         Sample data
 
@@ -576,15 +576,15 @@ classification_page:
 
         Sample data
 
-    GaussianProcessClassifier: |
+    GaussianProcessClassification: |
 
         Sample data
 
-    GradientBoostingClassifier: |
+    GradientBoostingClassification: |
 
         Sample data
 
-    KNeighborsClassifier: |
+    KNeighborsClassification: |
 
         Sample data
 
@@ -608,7 +608,7 @@ classification_page:
 
         Sample data
 
-    MLPClassifier: |
+    MLPClassification: |
 
         Sample data
 
@@ -624,11 +624,11 @@ classification_page:
 
         Sample data
 
-    RandomForestClassifier: |
+    RandomForestClassification: |
 
         Sample data
 
-    SGDClassifier: |
+    SGDClassification: |
 
         Sample data
 
