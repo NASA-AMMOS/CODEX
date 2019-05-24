@@ -31,7 +31,7 @@ def save_session(msg, result):
     session_path = os.path.join(CODEX_ROOT, 'sessions', session_name)
 
     if not os.path.exists(session_path):
-        codex_hash.pickle_data(session_name)
+        codex_hash.pickle_data(session_name, msg['state'])
     else:
         result["WARNING"] = session_name + " already exists."
 

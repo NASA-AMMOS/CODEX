@@ -746,7 +746,7 @@ def applySubsetMask(featureArray, subsetHash):
         return outData, returnDict['name']
 
 
-def pickle_data(session_name):
+def pickle_data(session_name, front_end_state):
     '''
     Inputs:
 
@@ -810,6 +810,9 @@ def pickle_data(session_name):
     pickle_path = os.path.join(session_path, "downsampled_data")
     pickle.dump(downsampleList, open(pickle_path, 'wb'))
 
+    # Save front end state
+    pickle_path = os.path.join(session_path, "client_state")
+    pickle.dump(front_end_state, open(pickle_path, 'wb'))
 
 def unpickle_data(session_name):
     '''
@@ -888,7 +891,11 @@ def unpickle_data(session_name):
         x = findHashArray('hash', downsample['hash'], "downsample")
         downsamples.append(x['name'])
 
-    return {'features':features, 'labels':labels, 'subsets':subsets, 'downsample':downsamples}
+    # Load client state
+    pickle_path = os.path.join(session_path, "client_state")
+    state = pickle.load(open(pickle_path, "rb"))
+
+    return {'features':features, 'labels':labels, 'subsets':subsets, 'downsample':downsamples, 'state':state}
 
 
 def saveModel(modelName, inputModel, modelType):

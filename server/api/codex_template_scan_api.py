@@ -21,6 +21,7 @@ import math
 from scipy.spatial.distance import euclidean
 import numpy as np
 from fastdtw import fastdtw
+import inspect
 
 # CODEX Support
 import codex_downsample
@@ -159,6 +160,7 @@ def codex_template_scan(
     Examples:
 
     '''
+    codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
@@ -215,14 +217,6 @@ def codex_template_scan(
     endTime = time.time()
     computeTime = endTime - startTime
     codex_time_log.logTime("template_scan", "dtw", computeTime, len(X), X.ndim)
-
-    if(subsetHash is False):
-        returnCodeString = "codex_template_scan_api.codex_template_scan('" + inputHash + "',False," + str(
-            downsampled) + ",'" + templateHash + "'," + str(num_templates) + "," + str(scan_jump) + ")"
-    else:
-        returnCodeString = "codex_template_scan_api.codex_template_scan('" + inputHash + "','" + subsetHash + "'," + str(
-            downsampled) + ",'" + templateHash + "'," + str(num_templates) + "," + str(scan_jump) + ")"
-    codex_return_code.logReturnCode(returnCodeString)
 
     uniques = np.unique(similarAreas)
     locationsFound = len(uniques) - 1

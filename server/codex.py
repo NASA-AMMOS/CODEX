@@ -180,14 +180,13 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
                 result = codex_data_manager.update_data(msg, result)
             elif (activity == "metrics"):
                 result = codex_data_manager.get_data_metrics(msg, result)
-            else:
-                result['message'] = 'failure'
 
         elif (routine == 'download_code'):
             result = codex_analysis_manager.download_code(msg, result)
         else:
             result['message'] = 'Unknown Routine'
 
+        result['message'] = "success"
         stringMsg = json.dumps(result)
         codex_system.codex_log("{time} : Response to front end: {json}".format(time=now.isoformat(), json=stringMsg))
         return stringMsg

@@ -24,7 +24,7 @@ import sys
 import time
 import statistics
 import math
-
+import inspect
 
 # CODEX Support
 import codex_math
@@ -215,6 +215,7 @@ def codex_segmentation_quickshift(
         >>> segments = codex_segmentation_quickshift(testData['inputHash'], False, 50, 20.0, 5.0, 2.0)
         Downsampling to 50 percent
     '''
+    codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
 
@@ -257,14 +258,6 @@ def codex_segmentation_quickshift(
 
     # temporary to not change API right now
     merged_hash = codex_hash.hashArray("temporary", data, "feature")
-
-    if(subsetHash is False):
-        returnCodeString = "codex_segmentation_api.codex_segmentation_quickshift('" + inputHash + "',False," + str(
-            downsampled) + "," + str(kernel_size) + "," + str(sigma) + "," + str(max_dist) + ")"
-    else:
-        returnCodeString = "codex_segmentation_api.codex_segmentation_quickshift('" + inputHash + "','" + subsetHash + "'," + str(
-            downsampled) + "," + str(kernel_size) + "," + str(sigma) + "," + str(max_dist) + ")"
-    codex_return_code.logReturnCode(returnCodeString)
 
     output = {
         'eta': eta,
@@ -310,7 +303,7 @@ def codex_segmentation_felzenszwalb(
         >>> segments = codex_segmentation_felzenszwalb(testData['inputHash'], False, 50, 3.0, 0.95, 3)
         Downsampling to 50 percent
     '''
-
+    codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
 
@@ -349,14 +342,6 @@ def codex_segmentation_felzenszwalb(
 
     # temporary to not change API right now
     merged_hash = codex_hash.hashArray("temporary", data, "feature")
-
-    if(subsetHash is False):
-        returnCodeString = "codex_segmentation_api.codex_segmentation_felzenszwalb('" + inputHash + "',False," + str(
-            downsampled) + "," + str(scale) + "," + str(sigma) + "," + str(min_size) + ")"
-    else:
-        returnCodeString = "codex_segmentation_api.codex_segmentation_felzenszwalb('" + inputHash + "','" + subsetHash + "'," + str(
-            downsampled) + "," + str(scale) + "," + str(sigma) + "," + str(min_size) + ")"
-    codex_return_code.logReturnCode(returnCodeString)
 
     output = {
         'eta': eta,

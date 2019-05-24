@@ -152,7 +152,6 @@ def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
 
         result["tree_sweep"].append(dictionary)
 
-    result['message'] = "success"
     return result
 
 

@@ -139,6 +139,7 @@ def codex_count_oddities(inputHash, subsetHash):
     Error: codex_count_oddities: Hash not found
 
     '''
+    codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
@@ -191,8 +192,6 @@ def codex_count_oddities(inputHash, subsetHash):
             if(feature[x] == 0):
                 zero_count += 1
 
-    codex_return_code.logReturnCode(inspect.currentframe())
-
     endTime = time.time()
     computeTime = endTime - startTime
     codex_time_log.logTime(
@@ -241,6 +240,7 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside):
     >>> testData = codex_doctest.doctest_get_data()
 
     '''
+    codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
@@ -284,8 +284,6 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside):
     mean_value_string = np.array2string(mean_value)
     std_value_string = np.array2string(std_value)
 
-    codex_return_code.logReturnCode(inspect.currentframe())
-
     endTime = time.time()
     computeTime = endTime - startTime
     codex_time_log.logTime(
@@ -325,6 +323,7 @@ def codex_column_correlation(inputHash, subsetHash):
         >>> results = codex_column_correlation(testData['inputHash'], False)
 
         '''
+    codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
@@ -355,8 +354,6 @@ def codex_column_correlation(inputHash, subsetHash):
             pearsonArray[x, y] = pearson[0]
             r2Array[x, y] = r2_score(f1_data, f2_data)
 
-
-    codex_return_code.logReturnCode(inspect.currentframe())
 
     endTime = time.time()
     computeTime = endTime - startTime
@@ -400,6 +397,7 @@ def codex_column_threshold(
         0.000394
 
     '''
+    codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     returnList = []
 
@@ -426,15 +424,6 @@ def codex_column_threshold(
 
     returnArray = np.asarray(returnList)
     dataPercentage = (inThresholdCount / samples) * 100
-
-    if(subsetHash == False):
-        returnCodeString = "codex_data_quality_scan_api.codex_column_threshold('" + inputHash + "'," + str(
-            subsetHash) + "," + str(threshold_min) + "," + str(threshold_max) + ")"
-    else:
-        returnCodeString = "codex_data_quality_scan_api.codex_column_threshold('" + inputHash + "','" + str(
-            subsetHash) + "'," + str(threshold_min) + "," + str(threshold_max) + ")"
-
-    codex_return_code.logReturnCode(returnCodeString)
 
     endTime = time.time()
     computeTime = endTime - startTime
