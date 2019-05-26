@@ -1,6 +1,6 @@
 '''
 Author: Jack Lightholder
-Date  : 2/7/18
+Date  : 5/27/19
 
 Brief : YAML read/write/manipulate library for CODEX
 
@@ -28,33 +28,6 @@ def codex_read_yaml(filepath):
     with open(filepath, 'r') as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
         return cfg
-
-
-def get_guidance_text_block(page, section):
-    '''
-    Inputs:
-
-    Outputs:
-
-    Examples:
-    >>> result = get_guidance_text_block('unit_tests', 'test')
-    >>> print(result)
-    This is a unit test
-
-    >>> result = get_guidance_text_block('classification_page', 'CalibratedClassifierCV')
-    >>> print(result)
-    <BLANKLINE>
-    Sample data
-    <BLANKLINE>  
-
-    >>> result = get_guidance_text_block('unit_tests', 'not_a_test')
-    '''
-    yaml = codex_read_yaml(CODEX_ROOT + "guidance.yaml")
-
-    try:
-        return yaml[page][section]
-    except BaseException:
-        return None
 
 
 if __name__ == "__main__":

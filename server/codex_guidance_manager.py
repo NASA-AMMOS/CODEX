@@ -17,7 +17,7 @@ import sys
 sys.path.insert(1, CODEX_ROOT + '/api/')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
-import codex_yaml
+import codex_guidance
 import codex_doctest
 
 
@@ -35,7 +35,7 @@ def get_guidance(msg, result):
     split = guidance.split(":")
     
     if (len(split) == 2):
-        guidanceString = codex_yaml.get_guidance_text_block(split[0], split[1])
+        guidanceString = codex_guidance.get_guidance_text_block(split[0], split[1])
         if (guidanceString is not None):
             result["guidance"] = guidanceString
             result["message"] = "success"
