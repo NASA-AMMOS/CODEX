@@ -779,7 +779,7 @@ def pickle_data(session_name, front_end_state):
     >>> hashResult = hashArray("x1", x1, "downsample")
     >>> hashResult = hashArray("x1", x1, "label")
     
-    >>> pickle_data("test_session")
+    >>> pickle_data("test_session", {"front_end_payload":"payload_value"})
 
     '''
     session_path = os.path.join(CODEX_ROOT, 'sessions', session_name)
@@ -827,7 +827,7 @@ def unpickle_data(session_name):
     Examples:
 
     >>> unpickle_data("test_session")
-    {'features': ['x1'], 'labels': ['x1'], 'subsets': ['x1'], 'downsample': ['x1']}
+    {'features': ['x1'], 'labels': ['x1'], 'subsets': ['x1'], 'downsample': ['x1'], 'state': {'front_end_payload': 'payload_value'}}
     
     >>> printCacheCount()
     Feature Cache Size           : 1
