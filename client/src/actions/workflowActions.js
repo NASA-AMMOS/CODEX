@@ -50,16 +50,17 @@ export function createWorkflow(workflowType, selectedFeatures) {
         //todo actually setup a form for selecting a feature that gets sent to 
         //the user as a label
         const labelName = "labels";
-
-        selectedFeatures = selectedFeatures.slice(1);
         
-        const request= createExplainThisRequest(
+        const request = createExplainThisRequest(
             filename,
             labelName,
             selectedFeatures
         );
 
+        const requestMade = utils.makeSimpleRequest(request);
+        request.requestObject = request;
+
         //pass the request to the workflow
-        dispatch(getExplainThisWindowAction(utils.makeSimpleRequest(request)));
+        dispatch(getExplainThisWindowAction(requestMade));
     };
 }

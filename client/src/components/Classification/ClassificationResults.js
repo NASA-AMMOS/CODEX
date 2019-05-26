@@ -6,6 +6,10 @@ import classnames from "classnames";
 import Button from "@material-ui/core/Button";
 import "components/Classification/classification.scss";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import HelpContent from "components/Help/HelpContent";
+import HelpOutline from "@material-ui/icons/HelpOutline";
+import Close from "@material-ui/icons/Close";
+import IconButton from "@material-ui/core/IconButton";
 
 // Utility to create a Plotly chart for each algorithm data return from the server.
 // We show a loading progress indicator if the data hasn't arrived yet.

@@ -74,7 +74,7 @@ export function createClassificationOutput(
 
         const filename = getState().data.get("filename");
         const requests = classificationsToRun
-            .map(classificationState =>
+           .map(classificationState =>
                 createClassificationRequest(
                     filename,
                     selectedFeatures,

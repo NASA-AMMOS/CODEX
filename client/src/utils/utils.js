@@ -45,7 +45,7 @@ export function makeSimpleRequest(request) {
     const req = new Promise((resolve, reject) => {
         const requestObject = {};
         const socketWorker = new WorkerSocket();
-
+        
         socketWorker.addEventListener("message", e => {
             const inMsg = JSON.parse(e.data);
 
