@@ -20,7 +20,13 @@ dependencies:
   - pandas
   - pillow
   - psutil
+  - certifi=2018.11.29 # required for mlib
+  - basemap=1.2.0 #required for mlib
+  - jsoncpp # required for mlib
+  - pip
   - pip:
     - pysptools
     - scikit-image
     - fastdtw
+    - vtk==8.1.2 # required for mlib
+    - mlib-python36/

@@ -14,7 +14,6 @@ from sklearn.preprocessing import StandardScaler
 import h5py
 import csv
 import time
-import matplotlib.pyplot as plt
 import pandas as pd
 import os
 import errno
@@ -109,13 +108,6 @@ def codex_read_image(file, show=False):
         bits = image.bits
 
     x, y = image.size
-
-    if(show):
-        if(image.mode == "L"):
-            imgplot = plt.imshow(image, cmap='gray')
-        else:
-            imgplot = plt.imshow(image)
-        plt.show()
 
     pixels = list(image.getdata())
     width, height = image.size

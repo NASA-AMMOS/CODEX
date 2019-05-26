@@ -1,0 +1,32 @@
+name: mlib36
+
+channels:
+  - maxibor # uses this source to install tsne with conda instead of pip
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.6
+  - basemap
+  - cycler
+  - cython
+  - h5py
+  - ipython  # to have a nice python console
+  - matplotlib
+  - mne
+  - netCDF4
+  - numpy
+  - pandas
+  - progressbar2
+  - proj4  # Needed for basemap to import
+  - pytest
+  - scipy
+  - seaborn
+  - scikit-learn
+  - statsmodels
+  # - tsne # problem running on centos servers when installing with pip
+  - pip:
+      - mpltools
+ #    - tsne
+      
+

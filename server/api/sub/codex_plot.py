@@ -3,8 +3,12 @@ import h5py
 import time
 from random import randint
 from scipy import misc
-import matplotlib.image as mpimg
+
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
 import numpy as np
 import os
 CODEX_ROOT = os.getenv('CODEX_ROOT')

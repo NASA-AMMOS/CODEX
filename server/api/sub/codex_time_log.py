@@ -14,8 +14,6 @@ import time
 import h5py
 import os.path
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 from scipy import misc
 from random import randint
 from heapq import nsmallest

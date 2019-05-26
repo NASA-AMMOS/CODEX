@@ -19,6 +19,7 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 import codex_system
 import codex_hash
 import codex_doctest
+from mlib.spanning import mask_spanning_subset
 
 def downsample(inputArray, samples=0, percentage=0.0):
     '''
@@ -67,8 +68,13 @@ def downsample(inputArray, samples=0, percentage=0.0):
     inputHash = codex_hash.hashArray("NOSAVE", inputArray, "NOSAVE")
     inputHashCode = inputHash["hash"]
 
+
+    method = "complex"
     # convert to list
-    inputList = inputArray.tolist()
+    if(method == "simple"):
+        inputList = inputArray.tolist()
+    else:
+        inputList = inputArray.T.tolist()
 
     totalPoints = len(inputList)
 
@@ -80,8 +86,7 @@ def downsample(inputArray, samples=0, percentage=0.0):
         if(percentage <= 100 and percentage >= 0):
             usedSamples = int(float(percentage / 100) * totalPoints)
         else:
-            codex_system.codex_log(
-                "ERROR: downsample - perceange out of bounds 0-100")
+            codex_system.codex_log("ERROR: downsample - perceange out of bounds 0-100")
             usedSamples = totalPoints
 
     else:
@@ -91,18 +96,35 @@ def downsample(inputArray, samples=0, percentage=0.0):
     # first, check if this downsampling has already been done before
     existingHashCheck = codex_hash.findHashArray("name", inputHashCode, "downsample")
 
+    # Check if raw length is already less than requested downsample rate.
+    #   If it is, use that, otherwise, resample.
     if(existingHashCheck is not None and existingHashCheck["samples"] == usedSamples):
         outputArray = existingHashCheck["data"]
 
     else:
 
         try:
-            outputList = random.sample(inputList, usedSamples)
+
+            if(method == "simple"):
+
+                outputList = random.sample(inputList, usedSamples)
+
+                # Convert back to numpy array
+                outputArray = np.asarray(outputList)
+
+            else:
+
+                mask_, array_ = mask_spanning_subset(inputList, usedSamples)
+                outputArray = inputArray[mask_]
+
         except BaseException:
+
+            codex_system.codex_log("ERROR: downsample - failed to downsample.")
             outputList = inputList
 
-        # Convert back to numpy array
-        outputArray = np.asarray(outputList)
+            # Convert back to numpy array
+            outputArray = np.asarray(outputList)
+
 
     # Hash the downsampled output, using the hash of the input in place of the name.
     #	Later look up using this, w.r.t origin data

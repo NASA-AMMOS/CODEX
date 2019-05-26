@@ -1,0 +1,50 @@
+# This is not a pip requirements file (yet).
+# This is just recording the packages mlib depends on.
+
+* python packages to install
+  - cycler
+  - h5py
+  - matplotlib
+    - mpl_toolkits
+    - pylab
+  - mne
+  - mpltools
+  - netCDF4
+  - numpy
+  - pandas
+  - progressbar
+  - scipy
+  - seaborn
+  - sklearn
+  - statsmodels
+  - tsne
+
+* python standard packages used
+  - calendar
+  - collections
+  - cPickle
+  - datetime
+  - doctest
+  - filecmp
+  - gc
+  - glob
+  - gzip
+  - itertools
+  - math
+  - os
+  - pdb
+  - pickle
+  - pprint
+  - random
+  - re
+  - resource
+  - shutil
+  - socket
+  - string
+  - subprocess
+  - sys
+  - time
+  - traceback
+  - types
+  - warnings
+

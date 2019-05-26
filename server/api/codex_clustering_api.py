@@ -132,6 +132,10 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
 
     Examples:
 
+    >>> testData = codex_doctest.doctest_get_data()
+
+    >>> run_codex_clustering()
+
     '''
     codex_return_code.logReturnCode(inspect.currentframe())
     codex_system.codex_log(str(parms))
@@ -267,7 +271,8 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms):
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
-
+    #codex_doctest.run_codex_doctest()
+    testData = codex_doctest.doctest_get_data()
+    run_codex_clustering(testData['inputHash'], False, 500, "kmeans", {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9})
 
     
