@@ -69,10 +69,12 @@ def downsample(inputArray, samples=0, percentage=0.0):
     inputHash = codex_hash.hashArray("NOSAVE", inputArray, "NOSAVE")
     inputHashCode = inputHash["hash"]
 
+    if inputArray.ndim == 1:
+        inputList = [inputArray.tolist()]
+    else:
+        inputList = inputArray.T.tolist()
 
-    inputList = inputArray.T.tolist()
-
-    totalPoints = len(inputList)
+    totalPoints = len(inputList[0])
 
     # if number of samples is provided, use
     if(samples != 0):
@@ -122,6 +124,5 @@ def downsample(inputArray, samples=0, percentage=0.0):
 
 
 if __name__ == "__main__":
-
 
     codex_doctest.run_codex_doctest()
