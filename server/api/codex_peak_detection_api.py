@@ -20,7 +20,6 @@ import h5py
 import traceback
 from detect_peaks import detect_peaks
 from scipy.signal import find_peaks_cwt
-import matplotlib.pyplot as plt
 import numpy as np
 import inspect
 

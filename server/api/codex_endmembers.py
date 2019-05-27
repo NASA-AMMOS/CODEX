@@ -20,8 +20,6 @@ from sklearn.neighbors import kneighbors_graph
 from sklearn import cluster, datasets
 from random import randint
 from scipy import misc
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
 import numpy as np
 import traceback
 import pysptools.eea.eea

@@ -32,7 +32,6 @@ import subprocess
 import h5py
 import time
 import traceback
-import matplotlib.pyplot as plt
 import numpy as np
 import numpy.polynomial.polynomial as poly
 from sklearn.metrics import log_loss

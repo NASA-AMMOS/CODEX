@@ -20,7 +20,6 @@ import traceback
 from sklearn.metrics import r2_score
 from scipy import stats
 import numpy.polynomial.chebyshev
-import matplotlib.pyplot as plt
 import numpy as np
 import time
 import statistics

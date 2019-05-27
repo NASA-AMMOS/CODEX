@@ -19,7 +19,6 @@ import time
 import collections
 import traceback
 import numpy as N
-import matplotlib.pyplot as plt
 from scipy import stats
 
 # CODEX Support

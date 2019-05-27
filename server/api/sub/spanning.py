@@ -7,12 +7,149 @@
 # -----------------------------------------------------------------
 
 import numpy as N
-import mlib.numeric as NUM
 import scipy.spatial.distance as SD
 
 # This scaling term "spaces out" decimal_year time measure to be directly comparible with lat/lon in degrees
 # for the purpose of distance metrics, spanning, and other comparisons.
 DECIMAL_YEAR_TO_LATITUDE_SCALING = 1736729.0  # (latitude degrees per decimal year)
+
+# Normalize an array of data in various ways
+# kind determines which normalization style to use:
+#  None, 'none', False                = Do not alter data, a noop
+#  'standardize','standard','z', True = utilizes (v-mean)/std (range -Inf to Inf for outliers, std = 1, mean = 0)
+#  'scaling','scale', 'flat'          = utilizes (v-vmin)/(vmax-vmin) (range 0-1 guarenteed, outliers may push bulk/mean to similar values)
+def normalize(vals, kind='standardize'):
+    # various ways to say I don't want to normalize at all
+    if (kind is None) or (kind == False) or (kind.lower() in ('none', 'no')): kind = 'none'
+
+    # Default value is standardization (safest of all methods)
+    if kind == True: kind = 'standardize'
+
+    request = kind.lower()
+    if request in ('none'): return vals
+    if request in ('standardize', 'standard', 'z'): return standardize(vals)
+    if request in ('scale', 'scaling', 'flat'): return scale(vals)
+
+    raise Exception("Unknown normalization requested", kind)
+
+def standardize(var):
+    """ Standardize a variable (unit standard deviation, szero mean).
+
+    >>> standardize (N.arange(5))
+    array([-1.26491106, -0.63245553,  0.        ,  0.63245553,  1.26491106])
+
+    >>> standardize (N.arange(10,5,-1))
+    array([ 1.26491106,  0.63245553,  0.        , -0.63245553, -1.26491106])
+
+    >>> standardize (N.arange(5)+1)
+    array([-1.26491106, -0.63245553,  0.        ,  0.63245553,  1.26491106])
+
+    >>> standardize([1,N.nan])
+    array([ nan,  nan])
+
+    >>> standardize([])
+    []
+
+    """
+
+    if is_iterable(var) and len(var) == 0: return []
+
+    std = N.std(N.array(var, dtype=N.float64), ddof=1)
+    return (N.array(var) - N.mean(var)) / std
+
+# ---------------------------
+def is_iterable(item):
+    """ Checks whether an item is an iterable or a singleton.
+    >>> is_iterable("hello")
+    False
+    >>> is_iterable(2)
+    False
+    >>> is_iterable([2,])
+    True
+    >>> print is_not_iterable(2) == (not is_iterable(2))
+    True
+    """
+    return hasattr(item, '__iter__')
+
+
+def scale(var):
+    """ Scale a variable to fit between 0 and 1, alternate normalization.
+
+    >>> scale (N.arange(5))
+    array([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ])
+
+    >>> scale (N.arange(10,5,-1))
+    array([ 1.  ,  0.75,  0.5 ,  0.25,  0.  ])
+
+    >>> scale (N.arange(5)+1)
+    array([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ])
+
+    >>> scale([1,N.nan])
+    array([ nan,  nan])
+
+    >>> scale([])
+    []
+
+    """
+
+    if is_iterable(var) and len(var) == 0: return []
+
+    nmax = N.max(var)
+    nmin = N.min(var)
+    return (N.array(var, dtype='float64') - nmin) / (nmax - nmin)
+
+
+# -----------------------
+def separating_noise(vals, divisor=100.0):
+    """ Separating noise is uniform random noise that separates all values in an array from each other maximally without causing
+    ambiguation even between the two closest points (ignoring truly redundant points).
+    The maximum noise added is default 1/100.0 the minimum datapoint spacing (divisor = 100).
+    This is extremely useful when attempting to span a list of similar integers, as almost immediately all distances between
+    sampled and remaining points reduces to zero due to the small number of permitted array values.
+
+    Args:
+        vals   : (possibly redundant) values to separate
+        divisor: how much smaller the separating noise interval should be than the smallest non-zero distance between neighbors
+
+    Return:
+        separating_noise: Properly scaled noise ready to add to the source vals for separation
+
+    >>> N.random.seed(0)
+    >>> separating_noise( (1,1,1,2,2,3,4,5,9) )
+    array([ 0.00048814,  0.00215189,  0.00102763,  0.00044883, -0.00076345,
+            0.00145894, -0.00062413,  0.00391773,  0.00463663])
+
+    >>> N.random.seed(0)
+    >>> separating_noise( (1,1,1,2,2,3,4,5,9), divisor = 100000 )
+    array([  4.88135039e-07,   2.15189366e-06,   1.02763376e-06,
+             4.48831830e-07,  -7.63452007e-07,   1.45894113e-06,
+            -6.24127887e-07,   3.91773001e-06,   4.63662761e-06])
+
+    >>> N.random.seed(0)
+    >>> separating_noise ( (1,1,1) )
+    array([ 0.0488135 ,  0.21518937,  0.10276338])
+
+    >>> N.random.seed(0)
+    >>> separating_noise( (1,1,1,2,2,3,4,5,N.nan) )
+    array([ 0.00048814,  0.00215189,  0.00102763,  0.00044883, -0.00076345,
+            0.00145894, -0.00062413,  0.00391773,  0.00463663])
+
+    """
+
+    # First step is to decide on the lowest decimal required to represent actual change in the data
+    # To do so, find the points with the smallest delta in the problem, ignoring redundant values
+
+    # remove redundant values, sort them, look for the minimum delta
+    # heapsort is the fastest sort if no stability is desired, and requires no additional workspace memory
+    sorted_unique_list = N.sort(
+        N.array(list(set([x for x in vals if (x is not None and x is not N.nan)])), dtype=N.float64), kind='heapsort')
+    if len(sorted_unique_list) < 2:
+        smallest_delta = divisor
+    else:
+        smallest_delta = N.min(N.diff(sorted_unique_list))
+    #    print "Separating noise magnitude:",smallest_delta / divisor
+
+    return smallest_delta / float(divisor) * (N.random.random(len(vals)) - 0.5)
 
 
 def mask_spanning_subset(feature_array_list, number, progressbar=False, normalization='standardize', weight_array=None,
@@ -303,14 +440,14 @@ def mask_spanning_subset(feature_array_list, number, progressbar=False, normaliz
 
     # if requested, add separating noise
     if separate_values:
-        for f in range(numfeat): sdata[:, f] += NUM.separating_noise(sdata[:, f])
+        for f in range(numfeat): sdata[:, f] += separating_noise(sdata[:, f])
 
     # But if data is 1D, normalization is irrelevant
     # if numfeat < 2: normalization = None
     # Assume equal weights if no weight_array specified
     if weight_array is None: weight_array = N.ones(numfeat)
     # We must scale the incoming data so we can use a distance metric usefully
-    for f in range(numfeat): sdata[:, f] = NUM.normalize(sdata[:, f], kind=normalization) * weight_array[f]
+    for f in range(numfeat): sdata[:, f] = normalize(sdata[:, f], kind=normalization) * weight_array[f]
 
     #    print L.log_time_and_mem(TST,"initialization, normalization, noise addition")
 

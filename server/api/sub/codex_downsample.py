@@ -11,6 +11,7 @@ import sklearn
 import random
 import sys
 import numpy as np
+import traceback
 
 # Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
@@ -19,7 +20,7 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 import codex_system
 import codex_hash
 import codex_doctest
-from mlib.spanning import mask_spanning_subset
+from spanning import mask_spanning_subset
 
 def downsample(inputArray, samples=0, percentage=0.0):
     '''
@@ -69,12 +70,7 @@ def downsample(inputArray, samples=0, percentage=0.0):
     inputHashCode = inputHash["hash"]
 
 
-    method = "complex"
-    # convert to list
-    if(method == "simple"):
-        inputList = inputArray.tolist()
-    else:
-        inputList = inputArray.T.tolist()
+    inputList = inputArray.T.tolist()
 
     totalPoints = len(inputList)
 
@@ -105,25 +101,18 @@ def downsample(inputArray, samples=0, percentage=0.0):
 
         try:
 
-            if(method == "simple"):
-
-                outputList = random.sample(inputList, usedSamples)
-
-                # Convert back to numpy array
-                outputArray = np.asarray(outputList)
-
-            else:
-
-                mask_, array_ = mask_spanning_subset(inputList, usedSamples)
-                outputArray = inputArray[mask_]
+            mask_, array_ = mask_spanning_subset(inputList, usedSamples)
+            outputArray = inputArray[mask_]
 
         except BaseException:
 
-            codex_system.codex_log("ERROR: downsample - failed to downsample.")
+
+            codex_system.codex_log("ERROR: downsample - failed to downsample.\n\n{trace}".format(trace=traceback.format_exc()))
             outputList = inputList
 
             # Convert back to numpy array
             outputArray = np.asarray(outputList)
+            outputArray = outputArray.T
 
 
     # Hash the downsampled output, using the hash of the input in place of the name.

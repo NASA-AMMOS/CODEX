@@ -17,7 +17,6 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA, FastICA
 import h5py
 import time
