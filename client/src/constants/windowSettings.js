@@ -17,8 +17,8 @@ export const initialSizes = {
         resizeable: true
     },
     [uiTypes.HEATMAP_GRAPH]: {
-        width:300,
-        height:300,
+        width:500,
+        height:500,
         resizeable: true
     },
     [uiTypes.TIME_SERIES_GRAPH]: {

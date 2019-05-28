@@ -14,6 +14,10 @@ import ReactResizeDetector from "react-resize-detector";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 
+function GraphWrapper(props) {
+
+}
+
 function ControurGraph(props) {
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
     const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
@@ -89,32 +93,7 @@ function ControurGraph(props) {
         });
         setChartRevision(revision);
     }
-
-    // // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
-    // useEffect(
-    //     _ => {
-    //         if (!props.currentSelection) return;
-    //         chartState.data[0].selectedpoints = props.currentSelection;
-    //         updateChartRevision();
-    //     },
-    //     [props.currentSelection]
-    // );
-
-    // // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
-    // useEffect(
-    //     _ => {
-    //         props.savedSelections.forEach(selection => {
-    //             selection.rowIndices.forEach(row => {
-    //                 chartState.data[0].marker.color[row] = selection.active
-    //                     ? selection.color
-    //                     : DEFAULT_POINT_COLOR;
-    //             });
-    //         });
-    //         updateChartRevision();
-    //     },
-    //     [props.savedSelections]
-    // );
-
+    
     return (
         <React.Fragment>
             <ReactResizeDetector
