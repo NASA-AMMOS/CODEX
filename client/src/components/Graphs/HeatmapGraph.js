@@ -28,20 +28,30 @@ function interpolateColor(color1, color2, factor) {
 }
 
 // My function to interpolate between two colors completely, returning an array
-function interpolateColors(color1, color2, steps) {
+function interpolateColors(color1, color2, steps, scaling) {
     let stepFactor = 1 / (steps - 1),
         interpolatedColorArray = [];
 
     color1 = color1.match(/\d+/g).map(Number);
     color2 = color2.match(/\d+/g).map(Number);
 
-    let percentage = 1.0/(Math.pow(10, steps));
+    let percentage = 0.0;
+
+    if(scaling === "log") {
+        percentage = 1.0/(Math.pow(10, steps));
+    } else { //assumed linear
+        percentage = 0.0;
+    }
 
     for(let i = 0; i < steps; i++) {
         const interpolatedColor = interpolateColor(color1, color2, stepFactor * i);
         interpolatedColorArray.push([percentage , "rgb("+interpolatedColor[0]+","+interpolatedColor[1]+","+interpolatedColor[2]+")"]);
         
-        percentage *= 10;
+        if (scaling === "log") {
+            percentage *= 10; 
+        } else { //assumed linear
+            percentage += (1.0/steps);
+        }
     }
 
     return interpolatedColorArray;
@@ -86,7 +96,6 @@ function squashDataIntoBuckets(data, numBuckets){
 function generateRange(low, high, increment) {
 
     let range = [];
-    console.log()
     for(let i = low; i < high; i+=increment) {
         range.push(i);
     }
@@ -109,7 +118,8 @@ function HeatmapGraph(props) {
 
     let defaultBucketCount = 50;
 
-    const interpolatedColors = interpolateColors("rgb(250, 250, 250)", "rgb(250, 0, 0)", 1);
+    const interpolatedColors = interpolateColors("rgb(255, 255, 255)", "rgb(255, 0, 0)", 10, "linear");
+    console.log(interpolatedColors);
     
     //calculate range of data for axis labels
     const unzippedCols = utils.unzip(props.data.get("data").slice(1));
@@ -117,7 +127,6 @@ function HeatmapGraph(props) {
     const [yMin, yMax] = dataRange(unzippedCols[1]);
 
     const cols = squashDataIntoBuckets(props.data.get("data"), defaultBucketCount);
-    console.log(cols);
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
     // Initial chart settings. These need to be kept in state and updated as necessary
