@@ -1,24 +1,17 @@
-import "components/Graphs/ContourGraph.css";
-
+import "components/Graphs/GraphWrapper.css";
 import React, { useRef, useState, useEffect } from "react";
 import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
 import { connect } from "react-redux";
+import * as selectionActions from "actions/selectionActions";
 import Popover from "@material-ui/core/Popover";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 
 function GraphWrapper(props) {
-
-}
-
-function ControurGraph(props) {
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
     const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
 
@@ -29,100 +22,18 @@ function ControurGraph(props) {
         setContextMenuPosition({ top: e.clientY, left: e.clientX });
     }
 
-    const chart = useRef(null);
-    const data = props.data.get("data");
-
-    const xAxis = data[0][0];
-    const yAxis = data[0][1];
-
-    const cols = utils.unzip(data.slice(1));
-    // The plotly react element only changes when the revision is incremented.
-    const [chartRevision, setChartRevision] = useState(0);
-
-    // Initial chart settings. These need to be kept in state and updated as necessary
-    const [chartState, setChartState] = useState({
-        data: [
-            {
-                x: cols[0],
-                y: cols[1],
-                ncontours: 20,
-                colorscale: "Hot",
-                reversescale: true,
-                showscale: false,
-                type: "histogram2dcontour"
-                // mode: "markers",
-                // marker: { color: cols[0].map((val, idx) => DEFAULT_POINT_COLOR), size: 2 },
-                // selected: { marker: { color: "#FF0000", size: 2 } },
-                // visible: true
-            }
-        ],
-        layout: {
-            autosize: true,
-            margin: { l: 35, r: 0, t: 0, b: 25 }, // Axis tick labels are drawn in the margin space
-            dragmode: "lasso",
-            datarevision: chartRevision,
-            hovermode: "closest"
-            // xaxis: {
-            //     autotick: true,
-            //     ticks: "outside"
-            // },
-            // yaxis: {
-            //     autotick: true,
-            //     ticks: "outside"
-            // }
-        },
-        config: {
-            responsive: true,
-            displaylogo: false,
-            modeBarButtonsToRemove: [
-                "sendDataToCloud",
-                "hoverCompareCartesian",
-                "toImage",
-                "select2d",
-                "autoScale2d",
-                "toggleSpikelines"
-            ]
-        }
-    });
-
-    function updateChartRevision() {
-        const revision = chartRevision + 1;
-        setChartState({
-            ...chartState,
-            layout: { ...chartState.layout, datarevision: revision }
-        });
-        setChartRevision(revision);
-    }
-    
     return (
         <React.Fragment>
             <ReactResizeDetector
                 handleWidth
                 handleHeight
-                onResize={_ => chart.current.resizeHandler()}
+                onResize={_ => props.chart.current.resizeHandler()}
             />
             <div className="chart-container" onContextMenu={handleContextMenu}>
-                <Plot
-                    ref={chart}
-                    data={chartState.data}
-                    layout={chartState.layout}
-                    config={chartState.config}
-                    style={{ width: "100%", height: "100%" }}
-                    useResizeHandler
-                    onInitialized={figure => setChartState(figure)}
-                    onUpdate={figure => setChartState(figure)}
-                    onClick={e => {
-                        if (e.event.button === 2) return;
-                        props.setCurrentSelection([]);
-                    }}
-                    onSelected={e => {
-                        if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
-                    }}
-                />
+                {props.children}
             </div>
-
-            <div className="xAxisLabel">{xAxis}</div>
-            <div className="yAxisLabel">{yAxis}</div>
+            <div className="xAxisLabel">{props.xAxis != undefined ? props.xAxis : ""}</div>
+            <div className="yAxisLabel">{props.yAxis != undefined ? props.yAxis : ""}</div>
             <Popover
                 id="simple-popper"
                 open={contextMenuVisible}
@@ -172,4 +83,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(ControurGraph);
+)(GraphWrapper);
