@@ -135,7 +135,7 @@ def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
     result['tree_sweep'] = []
 
     samples_, features_ = X.shape
-    for i in range(1, features_ + 1):
+    for i in range(1, 7):
 
         dictionary = {}
         clf = DecisionTreeClassifier(max_features=i)
