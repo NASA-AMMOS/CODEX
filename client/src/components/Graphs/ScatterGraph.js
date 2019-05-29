@@ -54,10 +54,12 @@ function ScatterGraph(props) {
             hovermode: "closest", // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
             xaxis: {
-                automargin: true
+                automargin: true,
+                title:xAxis
             },
             yaxis: {
-                automargin: true
+                automargin: true,
+                title:yAxis
             },
 
         },
@@ -140,9 +142,6 @@ function ScatterGraph(props) {
                     }}
                 />
             </div>
-
-            <div className="xAxisLabel">{xAxis}</div>
-            <div className="yAxisLabel">{yAxis}</div>
             <Popover
                 id="simple-popper"
                 open={contextMenuVisible}

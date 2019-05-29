@@ -4,64 +4,15 @@ import React, { useRef, useState, useEffect } from "react";
 import { bindActionCreators } from "redux";
 import * as selectionActions from "actions/selectionActions";
 import { connect } from "react-redux";
-import Popover from "@material-ui/core/Popover";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
 import * as utils from "utils/utils";
-import ReactResizeDetector from "react-resize-detector";
+import GraphWrapper from "components/Graphs/GraphWrapper.js";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 
-function binContourData(data) {
-    /* Create array of all unique values with a tally (row[2]) of how many times they appear.
-        This operation can get slow and may need to be optimized in the future (maybe use typed arrays?).
-        It's a lot faster to search an array of numbers than an array of arrays,
-        so we use zip/unzip functions to break the data into columns and then back again. */
-
-    // return data.slice(1).map(row => row.map(Math.round));
-    // return [];
-
-    const cols = utils.unzip(data.slice(1));
-
-    return cols;
-    const yCol = cols[1].slice(1);
-
-    return utils.zip(
-        cols[0].slice(1).reduce(
-            (acc, xVal, idx) => {
-                const yVal = yCol[idx];
-                const x = Math.round(xVal);
-                const y = Math.round(yVal);
-
-                const itemIndex = acc[0].findIndex((val, i) => val === x && acc[1][i] === y);
-                if (itemIndex !== -1) {
-                    acc[2][itemIndex]++;
-                } else {
-                    acc[0].push(x);
-                    acc[1].push(y);
-                    acc[2].push(1);
-                }
-                return acc;
-            },
-            [[], [], []]
-        )
-    );
-}
-
-function ControurGraph(props) {
-    const [contextMenuVisible, setContextMenuVisible] = useState(false);
-    const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
-
-    function handleContextMenu(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        setContextMenuVisible(true);
-        setContextMenuPosition({ top: e.clientY, left: e.clientX });
-    }
-
+function ContourGraph(props) {
     const chart = useRef(null);
+
     const data = props.data.get("data");
 
     const xAxis = data[0][0];
@@ -126,107 +77,23 @@ function ControurGraph(props) {
         setChartRevision(revision);
     }
 
-    // // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
-    // useEffect(
-    //     _ => {
-    //         if (!props.currentSelection) return;
-    //         chartState.data[0].selectedpoints = props.currentSelection;
-    //         updateChartRevision();
-    //     },
-    //     [props.currentSelection]
-    // );
-
-    // // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
-    // useEffect(
-    //     _ => {
-    //         props.savedSelections.forEach(selection => {
-    //             selection.rowIndices.forEach(row => {
-    //                 chartState.data[0].marker.color[row] = selection.active
-    //                     ? selection.color
-    //                     : DEFAULT_POINT_COLOR;
-    //             });
-    //         });
-    //         updateChartRevision();
-    //     },
-    //     [props.savedSelections]
-    // );
-
     return (
-        <React.Fragment>
-            <ReactResizeDetector
-                handleWidth
-                handleHeight
-                onResize={_ => chart.current.resizeHandler()}
+        <GraphWrapper
+            xAxis = {xAxis}
+            yAxis = {yAxis}
+            chart = {chart}
+        >
+            <Plot
+                ref={chart}
+                data={chartState.data}
+                layout={chartState.layout}
+                config={chartState.config}
+                style={{ width: "100%", height: "100%" }}
+                useResizeHandler
+                onInitialized={figure => setChartState(figure)}
+                onUpdate={figure => setChartState(figure)}
             />
-            <div className="chart-container" onContextMenu={handleContextMenu}>
-                <Plot
-                    ref={chart}
-                    data={chartState.data}
-                    layout={chartState.layout}
-                    config={chartState.config}
-                    style={{ width: "100%", height: "100%" }}
-                    useResizeHandler
-                    onInitialized={figure => setChartState(figure)}
-                    onUpdate={figure => setChartState(figure)}
-                    onClick={e => {
-                        if (e.event.button === 2) return;
-                        props.setCurrentSelection([]);
-                    }}
-                    onSelected={e => {
-                        if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
-                    }}
-                />
-            </div>
-
-            <div className="xAxisLabel">{xAxis}</div>
-            <div className="yAxisLabel">{yAxis}</div>
-            <Popover
-                id="simple-popper"
-                open={contextMenuVisible}
-                anchorReference="anchorPosition"
-                anchorPosition={{ top: contextMenuPosition.top, left: contextMenuPosition.left }}
-                anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left"
-                }}
-                transformOrigin={{
-                    vertical: "top",
-                    horizontal: "left"
-                }}
-            >
-                <ClickAwayListener onClickAway={_ => setContextMenuVisible(false)}>
-                    <List>
-                        <ListItem
-                            button
-                            onClick={_ => {
-                                setContextMenuVisible(false);
-                                props.saveCurrentSelection();
-                            }}
-                        >
-                            Save Selection
-                        </ListItem>
-                    </List>
-                </ClickAwayListener>
-            </Popover>
-        </React.Fragment>
+        </GraphWrapper>
     );
 }
-
-function mapStateToProps(state) {
-    return {
-        currentSelection: state.selections.currentSelection,
-        savedSelections: state.selections.savedSelections
-    };
-}
-
-function mapDispatchToProps(dispatch) {
-    return {
-        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
-        saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
-    };
-}
-
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(ControurGraph);
+export default ContourGraph;

@@ -9,7 +9,6 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
-import Plotly from 'plotly.js';
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 
@@ -28,12 +27,11 @@ function generatePlotData(features) {
         data[i] = {
             x: timeAxis,
             y: features[i],
-            xaxis: 'x',
+            xaxis: 'x'+(i+1),
             yaxis: 'y1',
             type: "scattergl",
             mode: "lines",
-            visible: true,
-            name: features[i][0]
+            visible: true
         };
     }
     return data;
@@ -45,17 +43,18 @@ function generateLayouts(features) {
     for(let index = 0; index < features.length; index++) {
         let layout = {
             autosize: true,
-            margin: { l: 0, r: 5, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
-            dragmode: "select",
+            margin: { l: 15, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space
+            dragmode: 'lasso',
             hovermode: "compare", // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
             xaxis: {
                 automargin: true
             },
             yaxis: {
+                title:features[index][0],
                 automargin: true,
                 fixedrange: true,
-                showline: false
+                showline: false,
             }
         };
 
@@ -94,31 +93,6 @@ function TimeSeriesGraph(props) {
 
     let layouts = generateLayouts(features);
 
-    let subPlots = data.map((dataElement,index) => (
-        <TimeSeriesSubGraph
-            data={dataElement}
-            chart={chartRefs[index]}
-            layout={layouts[index]}
-            globalChartState={props.globalChartState}
-        />
-    ));
-
-    function relayout(ed, divs) {
-        divs.forEach((div, i) => {
-            let x = div.layout.xaxis;
-            if (ed["xaxis.autorange"] && x.autorange) return;
-            if (x.range[0] != ed["xaxis.range[0]"] || x.range[1] != ed["xaxis.range[1]"])
-                Plotly.relayout(div, ed);      
-        });
-    }
-
-    subPlots.forEach((plot) => {
-        window.addEventListener("plotly_relayout", function(ed) {
-            console.log(ed);
-            relayout(ed, subPlots);
-        });
-    });
-
     return (
         <React.Fragment>
             <ReactResizeDetector
@@ -128,7 +102,16 @@ function TimeSeriesGraph(props) {
             />
             <div className="chart-container" onContextMenu={handleContextMenu}>
                 <ul className="time-series-plot-container"> 
-                    {subPlots}
+                    {
+                        data.map((dataElement,index) => (
+                            <TimeSeriesSubGraph
+                                data={dataElement}
+                                chart={chartRefs[index]}
+                                layout={layouts[index]}
+                                globalChartState={props.globalChartState}
+                            />
+                        ))
+                    }
                 </ul>
             </div>
             <Popover
@@ -195,6 +178,15 @@ function TimeSeriesSubGraph(props) {
         },
         [props.currentSelection]
     );
+    //handle this later
+
+    useEffect(
+        _ => {
+            chartState.layout.dragmode = props.globalChartState; // Weirdly this works, can't do it with setChartState
+            updateChartRevision();
+        },
+        [props.globalChartState]
+    );
     
     return (
         <Plot
@@ -211,9 +203,9 @@ function TimeSeriesSubGraph(props) {
                 if (e.event.button === 2) return;
                 props.setCurrentSelection([]);
             }}
-            /*onSelected={e => {
+            onSelected={e => {
                 if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
-            }}*/
+            }}
         />
     );
 }
