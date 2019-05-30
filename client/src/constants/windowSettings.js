@@ -16,6 +16,11 @@ export const initialSizes = {
         height: 500,
         resizeable: true
     },
+    [uiTypes.VIOLIN_PLOT_GRAPH]: {
+        width: 500,
+        height: 500,
+        resizeable: true
+    },
     [uiTypes.HEATMAP_GRAPH]: {
         width:500,
         height:500,
