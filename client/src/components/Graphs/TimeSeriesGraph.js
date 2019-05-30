@@ -11,6 +11,7 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
+import GraphWrapper from "components/Graphs/GraphWrapper";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 
@@ -75,16 +76,6 @@ function generateLayouts(features) {
 }
 
 function TimeSeriesGraph(props) {
-    const [contextMenuVisible, setContextMenuVisible] = useState(false);
-    const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
-
-    function handleContextMenu(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        setContextMenuVisible(true);
-        setContextMenuPosition({ top: e.clientY, left: e.clientX });
-    }
-
     const features = utils.unzip(props.data.get("data"));
 
     const chartRefs = features.map((feat) => useRef(null));
@@ -92,15 +83,11 @@ function TimeSeriesGraph(props) {
     let data = generatePlotData(features);
 
     let layouts = generateLayouts(features);
-
+    
     return (
-        <React.Fragment>
-            <ReactResizeDetector
-                handleWidth
-                handleHeight
-                onResize={_ => (chartRefs.forEach((chart) => chart.current.resizeHandler()))}
-            />
-            <div className="chart-container" onContextMenu={handleContextMenu}>
+        <GraphWrapper
+            resizeHandler = {_ => (chartRefs.forEach((chart) => chart.current.resizeHandler()))}
+        >
                 <ul className="time-series-plot-container"> 
                     {
                         data.map((dataElement,index) => (
@@ -113,37 +100,8 @@ function TimeSeriesGraph(props) {
                         ))
                     }
                 </ul>
-            </div>
-            <Popover
-                id="simple-popper"
-                open={contextMenuVisible}
-                anchorReference="anchorPosition"
-                anchorPosition={{ top: contextMenuPosition.top, left: contextMenuPosition.left }}
-                anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left"
-                }}
-                transformOrigin={{
-                    vertical: "top",
-                    horizontal: "left"
-                }}
-            >
-                <ClickAwayListener onClickAway={_ => setContextMenuVisible(false)}>
-                    <List>
-                        <ListItem
-                            button
-                            onClick={_ => {
-                                setContextMenuVisible(false);
-                                props.saveCurrentSelection();
-                            }}
-                        >
-                            Save Selection
-                        </ListItem>
-                    </List>
-                </ClickAwayListener>
-            </Popover>
-        </React.Fragment>
-        
+
+        </GraphWrapper>
     );
 }
 

@@ -15,6 +15,10 @@ function GraphWrapper(props) {
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
     const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
 
+    //you either need a custom resize handler or to give GraphWrapper chart
+    const resizeHandler = props.resizeHandler != undefined ? 
+        props.resizeHandler : _ => props.chart.current.resizeHandler();
+
     function handleContextMenu(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -27,13 +31,11 @@ function GraphWrapper(props) {
             <ReactResizeDetector
                 handleWidth
                 handleHeight
-                onResize={_ => props.chart.current.resizeHandler()}
+                onResize={resizeHandler}
             />
             <div className="chart-container" onContextMenu={handleContextMenu}>
                 {props.children}
             </div>
-            <div className="xAxisLabel">{props.xAxis != undefined ? props.xAxis : ""}</div>
-            <div className="yAxisLabel">{props.yAxis != undefined ? props.yAxis : ""}</div>
             <Popover
                 id="simple-popper"
                 open={contextMenuVisible}

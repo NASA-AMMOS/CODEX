@@ -25,6 +25,8 @@ function canBuildGraph(graphMode, dataState) {
         case uiTypes.TIME_SERIES_GRAPH:
             //todo figure out the requirements for a time series graph
             return true;
+        case uiTypes.BOX_PLOT_GRAPH:
+            return true;
         case uiTypes.HEATMAP_GRAPH:
             if (dataState.get("featureList").filter(f => f.get("selected")).size != 2) {
                 alertNotRightNumberOfFeatures();

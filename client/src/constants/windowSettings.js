@@ -7,13 +7,13 @@ import * as workflowTypes from "constants/workflowTypes";
 
 export const initialSizes = {
     [uiTypes.SCATTER_GRAPH]: {
-        width: 300,
-        height: 300,
+        width: 500,
+        height: 500,
         resizeable: true
     },
     [uiTypes.CONTOUR_GRAPH]: {
-        width: 300,
-        height: 300,
+        width: 500,
+        height: 500,
         resizeable: true
     },
     [uiTypes.HEATMAP_GRAPH]: {
@@ -22,6 +22,11 @@ export const initialSizes = {
         resizeable: true
     },
     [uiTypes.TIME_SERIES_GRAPH]: {
+        width: 500,
+        height: 400,
+        resizeable: true
+    },
+    [uiTypes.BOX_PLOT_GRAPH]: {
         width: 500,
         height: 400,
         resizeable: true

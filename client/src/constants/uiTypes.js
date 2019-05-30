@@ -22,7 +22,8 @@ export const SCATTER_GRAPH = "Scatter";
 export const CONTOUR_GRAPH = "Contour";
 export const TIME_SERIES_GRAPH = "Time Series";
 export const HEATMAP_GRAPH = "Heat Map";
+export const BOX_PLOT_GRAPH = "Box Plot Graph";
 
 export const SESSIONS_WINDOW = "SESSIONS_WINDOW";
 
-export const GRAPH_TYPES = [SCATTER_GRAPH, CONTOUR_GRAPH, TIME_SERIES_GRAPH, HEATMAP_GRAPH];
+export const GRAPH_TYPES = [SCATTER_GRAPH, CONTOUR_GRAPH, TIME_SERIES_GRAPH, HEATMAP_GRAPH, BOX_PLOT_GRAPH];

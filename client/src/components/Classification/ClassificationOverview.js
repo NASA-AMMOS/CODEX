@@ -308,6 +308,7 @@ function ClassificationOverview(props) {
         props.winId
     ];
 
+
     return (
         <div className="classificationsContainer">
             { !helpModeState ?

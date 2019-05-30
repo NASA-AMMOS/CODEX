@@ -44,15 +44,19 @@ function ContourGraph(props) {
             margin: { l: 35, r: 0, t: 0, b: 25 }, // Axis tick labels are drawn in the margin space
             dragmode: "lasso",
             datarevision: chartRevision,
-            hovermode: "closest"
-            // xaxis: {
-            //     autotick: true,
-            //     ticks: "outside"
-            // },
-            // yaxis: {
-            //     autotick: true,
-            //     ticks: "outside"
-            // }
+            hovermode: "closest",
+            xaxis: {
+                autotick: true,
+                automargin:true,
+                ticks: "outside",
+                title: xAxis
+            },
+            yaxis: {
+                autotick: true,
+                automargin:true,
+                ticks: "outside",
+                title: yAxis
+            }
         },
         config: {
             responsive: true,
@@ -79,8 +83,6 @@ function ContourGraph(props) {
 
     return (
         <GraphWrapper
-            xAxis = {xAxis}
-            yAxis = {yAxis}
             chart = {chart}
         >
             <Plot

@@ -8,6 +8,7 @@ import RegressionResults from "components/Regressions/RegressionResults";
 import RegressionsOverview from "components/Regressions/RegressionsOverview";
 import ScatterGraph from "components/Graphs/ScatterGraph";
 import HeatmapGraph from "components/Graphs/HeatmapGraph";
+import BoxPlotGraph from "components/Graphs/BoxPlotGraph";
 import Sessions from "components/Sessions/Sessions";
 import TimeSeriesGraph from "components/Graphs/TimeSeriesGraph";
 import * as algorithmTypes from "constants/algorithmTypes";
@@ -23,6 +24,7 @@ export function getWindowTitle(win) {
     switch (win.windowType) {
         case uiTypes.SCATTER_GRAPH:
         case uiTypes.CONTOUR_GRAPH:
+        case uiTypes.BOX_PLOT_GRAPH:
         case uiTypes.HEATMAP_GRAPH:
         case uiTypes.TIME_SERIES_GRAPH:
             return getMultiAxisGraphTitle(win);
@@ -61,6 +63,8 @@ export function getWindowContent(win) {
             return <TimeSeriesGraph data={win.data} />;
         case uiTypes.HEATMAP_GRAPH:
             return <HeatmapGraph data={win.data} />;
+        case uiTypes.BOX_PLOT_GRAPH:
+            return <BoxPlotGraph data={win.data} />;
         case algorithmTypes.CLUSTER_ALGORITHM:
             return (
                 <ClusterAlgorithm
