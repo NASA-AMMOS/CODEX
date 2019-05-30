@@ -134,6 +134,8 @@ def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
     result['data'] = X.tolist()
     result['tree_sweep'] = []
 
+    max_depth = 6
+
     samples_, features_ = X.shape
     if(features_ < 6):
     	trees_ = features_
@@ -142,7 +144,7 @@ def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
     for i in range(1, trees_):
 
         dictionary = {}
-        clf = DecisionTreeClassifier(max_features=i)
+        clf = DecisionTreeClassifier(max_features=i, max_depth = max_depth)
         clf.fit(X,y)
 
         dictionary['json_tree'] = export_json_tree(clf, featureNames, ["Main Data","Isolated Data"])
