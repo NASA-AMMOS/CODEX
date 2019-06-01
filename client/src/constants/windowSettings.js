@@ -76,8 +76,8 @@ export const initialSizes = {
         resizeable: true
     },
     [workflowTypes.EXPLAIN_THIS_WINDOW]: {
-        width: 1000,
-        height: 500,
-        resizeable: true
+        width: 750,
+        height: 600,
+        resizeable: false
     }
 };

@@ -2,4 +2,35 @@
 	height:100%;
 	width:100%;
 	display:flex;
+	flex-direction:column;
+	padding-left: 5px;
+	padding-right: 5px;
+	padding:10px;
+	padding-top:0px;
+}
+
+.feature-list {
+	display: inline-block;
+	padding-bottom:10px;
+}
+
+.feature-list-header {
+    color: rgba(0, 0, 0, 0.87);
+    font-size: 1.25rem;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-weight: 500;
+    line-height: 1.6;
+    letter-spacing: 0.0075em;
+    display: inline;
+}
+
+.feature-list li {
+	display: inline;
+	border-bottom: 2px solid black;
+  	margin: 10px 0;
+}
+
+.tree-container {
+	width:100%;
+	flex:1;
 }

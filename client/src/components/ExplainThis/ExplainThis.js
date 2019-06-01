@@ -9,6 +9,8 @@ import ReactResizeDetector from "react-resize-detector";
 import * as d3 from "d3";
 import rd3 from 'react-d3-library';
 import "components/ExplainThis/ExplainThis.scss";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
 
 /**
  * A linear interpolator for value[0].
@@ -24,11 +26,9 @@ function mean_interpolation(root) {
     if (node.value[0] > max) {
       max = node.value[0];
     }
-
     if (node.value[0] < min) {
       min = node.value[0];
     }
-
     if (node.children) {
       node.children.forEach(recurse);
     }
@@ -54,22 +54,45 @@ function toggle(d) {
     d.children = d._children;
     d._children = null;
   }
+
+  if (hasLeafChildren(d)) {
+    toggleAll(d);
+  }
+}
+
+function toggleAll(d) {
+  if (d && d.children) {
+    d.children.forEach(toggleAll);
+    toggle(d);
+  }
 }
 
 // Node labels
 function node_label(d) {
-  if (d.type === "leaf") {
-    // leaf
-    var formatter = d3.format(".2f");
-    var vals = [];
-    d.value.forEach(function(v) {
-        vals.push(formatter(v));
+  return d.name.substring(0,d.name.length - 13);
+}
+
+function isLeaf(d) {
+  return (d.leaf === "true");
+}
+
+function hasLeafChildren(d) {
+  if (d.children != undefined && d.children != null) {
+    let has = true;
+    d.children.forEach((child) => {
+      has = has && isLeaf(child);
     });
-    return "[" + vals.join(", ") + "]";
-  } else {
-    // split node
-    return d.name.substring(0,d.name.length - 13);
+
+    return has;
+  } else if (d._children != undefined && d._children != null) {
+    let has = true;
+    d._children.forEach((child) => {
+      has = has && isLeaf(child);
+    });
+
+    return has;
   }
+  return false;
 }
 
 /**
@@ -93,26 +116,23 @@ function mix_colors(d) {
 
 function generateTree(treeData, svgRef){
   //setup margins and size for the d3 window
-  let margin = {top: 20, right: 20, bottom: 20, left: 60},
+  let margin = {top: 10, right: 20, bottom: 10, left: 60},
+      i = 0,
       width = svgRef.clientWidth - margin.right - margin.left,
       height = svgRef.clientHeight - margin.top - margin.bottom,
-      i = 0,
       rect_width = 80,
       rect_height = 20,
       max_link_width = 20,
       min_link_width = 1.5,
-      char_to_pxl = 10,
       root;
 
-  var tree = d3.layout.tree()
-      .size([height, width]);
+  let tree = d3.layout.tree()
+              .size([height,width]);
 
   var diagonal = d3.svg.diagonal()
       .projection(function(d) { return [d.y, d.x]; });
 
   var vis = d3.select(svgRef)
-      .attr("width", width + margin.right + margin.left)
-      .attr("height", height + margin.top + margin.bottom)
     .append("svg:g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -135,13 +155,6 @@ function generateTree(treeData, svgRef){
                                .domain([0, n_samples])
                                .range([min_link_width, max_link_width]);
 
-    function toggleAll(d) {
-      if (d && d.children) {
-        d.children.forEach(toggleAll);
-        toggle(d);
-      }
-    }
-
     // Initialize the display to show a few nodes.
     root.children.forEach(toggleAll);
 
@@ -155,7 +168,19 @@ function generateTree(treeData, svgRef){
     var nodes = tree.nodes(root).reverse();
 
     // Normalize for fixed-depth.
-    nodes.forEach(function(d) { d.y = d.depth * 120; });
+    nodes.forEach(
+      function(d) {
+        let firstDepth = 30;
+        let yscale = 120;
+        if (d.depth == 0) {
+          d.y = 0;
+        } else if (d.depth == 1) {
+          d.y = firstDepth;
+        } else {
+          d.y = firstDepth + yscale * (d.depth - 1); 
+        }
+      }
+    );
 
     // Update the nodes…
     var node = vis.selectAll("g.node")
@@ -165,7 +190,7 @@ function generateTree(treeData, svgRef){
     var nodeEnter = node.enter().append("svg:g")
         .attr("class", "node")
         .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-        .on("click", function(d) { toggle(d); update(d); });
+        .on("click", function(d) {toggle(d); update(d); });
 
     function getBB(selection) {
       selection.each(function(d){d.bbox = this.getBBox();});
@@ -176,6 +201,7 @@ function generateTree(treeData, svgRef){
         .attr("text-anchor", "middle")
         .text(node_label)
         .style("fill-opacity", 1e-6)
+        .style("opacity", function(d) {return isLeaf(d) ? 0 : 1})
         .call(getBB);
 
     let rectPadding = 10;
@@ -187,8 +213,10 @@ function generateTree(treeData, svgRef){
         .attr("y", function(d){return -d.bbox.height/2})
         .attr("rx", function(d) { return d.type === "split" ? 2 : 0;})
         .attr("ry", function(d) { return d.type === "split" ? 2 : 0;})
+        .style("margin", 20)
         .style("stroke", function(d) { return d.type === "split" ? "steelblue" : "olivedrab";})
-        .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+        .style("fill", function(d) { return !hasLeafChildren(d) && d._children ? "lightsteelblue" : "#fff"; })
+        .style("opacity", function(d) {return isLeaf(d) ? 0 : 1});
 
     // Transition nodes to their new position.
     var nodeUpdate = node.transition()
@@ -196,9 +224,8 @@ function generateTree(treeData, svgRef){
         .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
     nodeUpdate.select("rect")
-        .attr("width", function(d){ return d.bbox.width + rectPadding})
-        .attr("height", function(d){return d.bbox.height})
-        .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+        .style("fill", function(d) { return !hasLeafChildren(d) && d._children ? "lightsteelblue" : "#fff"; })
+        .style("opacity", function(d) {return isLeaf(d) ? 0 : 1});
 
     nodeUpdate.select("text")
         .style("fill-opacity", 1);
@@ -231,7 +258,8 @@ function generateTree(treeData, svgRef){
         .duration(duration)
         .attr("d", diagonal)
         .style("stroke-width", function(d) {return link_stoke_scale(d.target.samples);})
-        .style("stroke", stroke_callback);
+        .style("stroke", stroke_callback)
+        .style("opacity", function(d) {return isLeaf(d.target) ? 0 : 1});
 
     // Transition links to their new position.
     link.transition()
@@ -239,7 +267,8 @@ function generateTree(treeData, svgRef){
         .attr("d", diagonal)
         .style("stroke-width", function(d) {return link_stoke_scale(d.target.samples);})
         .style("stroke", stroke_callback)
-        .style("fill","none");//this line is used to fix the rendering of the black background stuff
+        .style("fill","none")//this line is used to fix the rendering of the black background stuff
+        .style("opacity", function(d) {return isLeaf(d.target) ? 0 : 1});
 
     // Transition exiting nodes to the parent's new position.
     link.exit().transition()
@@ -256,8 +285,24 @@ function generateTree(treeData, svgRef){
       d.y0 = d.y;
     });
   }
-  console.log(treeData);
   load_dataset(treeData);
+}
+
+function FeatureList(props) {
+  return (
+    <React.Fragment>
+      <List className="feature-list">
+        <ListItem> 
+          <h6 className="feature-list-header">Feature List</h6>
+        </ListItem>
+        {
+          props.features.map((feature) => {
+            return <ListItem> {feature} </ListItem>
+          })
+        }
+      </List>
+    </React.Fragment>
+  );
 }
 
 function ExplainThisTree(props) {
@@ -276,18 +321,15 @@ function ExplainThisTree(props) {
     useEffect(_ => {
         if (!svgRef)
             return;
+        console.log(JSON.stringify(props.treeData.json_tree, null, 2));
 
-        let treeData = props.treeData.json_tree;
-
-        generateTree(treeData, svgRef);
-
-    },[]);
-    
+        generateTree(props.treeData.json_tree, svgRef);
+        
+    }, []);
 
     return (
-        <svg ref={(element) => {svgRef = element}}
-             height="100%"
-             width="100%"
+        <svg className="tree-container" 
+            ref={(element) => {svgRef = element}}
         >
         </svg>
     );
@@ -303,7 +345,7 @@ function ExplainThis(props) {
         .map(f => f.get("name"))
         .toJS();
 
-    //wraps the promise loading in a lifecycle handler
+    //handles the request object asynchronous loading
     useEffect(_ => {
         //handle the loading of the data request promise
         props.request.req.then(data => {
@@ -317,9 +359,9 @@ function ExplainThis(props) {
 
     }, []);
 
-    //only pulling the tree right now
 	return (
 		<div className="explain-this-container">
+      <FeatureList features={selectedFeatures}/>
 			<ExplainThisTree
         treeData={!dataState ? undefined : dataState.tree_sweep[0]}
       />
