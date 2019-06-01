@@ -34,7 +34,7 @@ def get_guidance_text_block(page, section):
 
     >>> result = get_guidance_text_block('unit_tests', 'not_a_test')
     '''
-    yaml = codex_yaml.codex_read_yaml(CODEX_ROOT + "guidance.yaml")
+    yaml = codex_yaml.codex_read_yaml(os.path.join(CODEX_ROOT, "guidance.yaml"))
 
     try:
         return yaml[page][section]
