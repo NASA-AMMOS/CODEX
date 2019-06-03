@@ -12,51 +12,27 @@ import "components/ExplainThis/ExplainThis.scss";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 
-/**
- * A linear interpolator for value[0].
- *
- * Useful for link coloring in regression trees.
- */
-function mean_interpolation(root) {
-
-  var max = 1e-9,
-      min = 1e9;
-
-  function recurse(node) {
-    if (node.value[0] > max) {
-      max = node.value[0];
-    }
-    if (node.value[0] < min) {
-      min = node.value[0];
-    }
-    if (node.children) {
-      node.children.forEach(recurse);
-    }
-  }
-  recurse(root);
-
-  var scale = d3.scale.linear().domain([min, max])
-                               .range(["#2166AC","#B2182B"]);
-
-  function interpolator(d) {
-    return scale(d.target.value[0]);
-  }
-
-  return interpolator;
-}
-
 // Toggle children.
 function toggle(d) {
-  if (d.children) {
-    d.children.forEach((d) => {
-      if (!d.leaf) {
-        d.hidden = !d.hidden;
-        toggle(d);
-      }
-    });
+  //decide base
+  if (d.children && childrenHidden(d)) {
+    toggleRecursive(d, false);
+  } else if (d.children && !childrenHidden(d)) {
+    toggleRecursive(d, true);
   }
 }
 
+//recursively turns everything off
+function toggleRecursive(d, signal) {
+  if (d.children) {
+      d.children.forEach((d) => {
+        if (!d.leaf) {
+          d.hidden = signal;
+          toggleRecursive(d, signal);
+        }
+      });
+    }
+}
 
 // Node labels
 function node_label(d) {
@@ -92,17 +68,16 @@ function childrenHidden(d) {
  */
 function mix_colors(d) {
 
-  var color_map = d3.scale.category10();
-  var value = Object.values(d.target.proportions);
+  var values = Object.values(d.target.proportions);
   var sum = d.target.proportions.class_0 + d.target.proportions.class_1;
-  var col = d3.rgb(0, 0, 0);
-  value.forEach(function(val, i) {
-    var label_color = d3.rgb(color_map(i));
-    var mix_coef = val / sum;
-    col.r += mix_coef * label_color.r;
-    col.g += mix_coef * label_color.g;
-    col.b += mix_coef * label_color.b;
-  });
+
+  var color_map = d3.scale.linear()
+    .domain([0, 1])
+    .range(["blue", "red"]);
+
+  var col = d3.rgb(color_map(values[0]/sum));
+  console.log(col);
+
   return col;
 } 
 
@@ -143,7 +118,6 @@ function generateTree(treeData, svgRef){
   var stroke_callback = "#ccc";
 
   function load_dataset(json) {
-    console.log(json);
     root = json;
     root.x0 = 0;
     root.y0 = 0;
