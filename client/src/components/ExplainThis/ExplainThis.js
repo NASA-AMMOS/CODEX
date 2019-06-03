@@ -48,51 +48,43 @@ function mean_interpolation(root) {
 // Toggle children.
 function toggle(d) {
   if (d.children) {
-    d._children = d.children;
-    d.children = null;
-  } else {
-    d.children = d._children;
-    d._children = null;
-  }
-
-  if (hasLeafChildren(d)) {
-    toggleAll(d);
+    d.children.forEach((d) => {
+      if (!d.leaf) {
+        d.hidden = !d.hidden;
+        toggle(d);
+      }
+    });
   }
 }
 
-function toggleAll(d) {
-  if (d && d.children) {
-    d.children.forEach(toggleAll);
-    toggle(d);
-  }
-}
 
 // Node labels
 function node_label(d) {
   return d.name.substring(0,d.name.length - 13);
 }
 
-function isLeaf(d) {
-  return (d.leaf === "true");
-}
-
 function hasLeafChildren(d) {
   if (d.children != undefined && d.children != null) {
     let has = true;
     d.children.forEach((child) => {
-      has = has && isLeaf(child);
+      has = has && child.leaf;
     });
 
     return has;
-  } else if (d._children != undefined && d._children != null) {
-    let has = true;
-    d._children.forEach((child) => {
-      has = has && isLeaf(child);
-    });
-
-    return has;
-  }
+  } 
   return false;
+}
+
+function childrenHidden(d) {
+  if (d.leaf)
+    return true;
+  let hidden = true;
+
+  d.children.forEach((d) => {
+    hidden = hidden && d.hidden;
+  });
+
+  return hidden;
 }
 
 /**
@@ -151,6 +143,7 @@ function generateTree(treeData, svgRef){
   var stroke_callback = "#ccc";
 
   function load_dataset(json) {
+    console.log(json);
     root = json;
     root.x0 = 0;
     root.y0 = 0;
@@ -178,7 +171,6 @@ function generateTree(treeData, svgRef){
     // Normalize for fixed-depth.
     nodes.forEach(
       function(d) {
-        console.log(d);
         let firstDepth = 30;
 
         let yscale = 120;
@@ -199,7 +191,7 @@ function generateTree(treeData, svgRef){
     var nodeEnter = node.enter().append("svg:g")
         .attr("class", "node")
         .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-        .on("click", function(d) {toggle(d); update(d); });
+        .on("click", function(d) {if(!d.hidden){toggle(d); update(d); }});
 
     function getBB(selection) {
       selection.each(function(d){d.bbox = this.getBBox();});
@@ -210,7 +202,7 @@ function generateTree(treeData, svgRef){
         .attr("text-anchor", "middle")
         .text(node_label)
         .style("fill-opacity", 1e-6)
-        .style("opacity", function(d) {return isLeaf(d) ? 0 : 1})
+        .style("opacity", function(d) {return d.hidden ? 0 : 1})
         .call(getBB);
 
     let rectPadding = 10;
@@ -224,8 +216,8 @@ function generateTree(treeData, svgRef){
         .attr("ry", function(d) { return d.type === "split" ? 2 : 0;})
         .style("margin", 20)
         .style("stroke", function(d) { return d.type === "split" ? "steelblue" : "olivedrab";})
-        .style("fill", function(d) { return !hasLeafChildren(d) && d._children ? "lightsteelblue" : "#fff"; })
-        .style("opacity", function(d) {return isLeaf(d) ? 0 : 1});
+        .style("fill", function(d) { return !hasLeafChildren(d) && childrenHidden(d) ? "lightsteelblue" : "#fff"; })
+        .style("opacity", function(d) {return d.leaf || !d.hidden ? 0 : 1});
 
     // Transition nodes to their new position.
     var nodeUpdate = node.transition()
@@ -233,11 +225,11 @@ function generateTree(treeData, svgRef){
         .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
     nodeUpdate.select("rect")
-        .style("fill", function(d) { return !hasLeafChildren(d) && d._children ? "lightsteelblue" : "#fff"; })
-        .style("opacity", function(d) {return isLeaf(d) ? 0 : 1});
+        .style("fill", function(d) { return !hasLeafChildren(d) && childrenHidden(d) ? "lightsteelblue" : "#fff"; })
+        .style("opacity", function(d) {return d.hidden ? 0 : 1});
 
     nodeUpdate.select("text")
-        .style("fill-opacity", 1);
+        .style("fill-opacity", function(d) {return d.hidden ? 0 : 1});
 
     // Transition exiting nodes to the parent's new position.
     var nodeExit = node.exit().transition()
@@ -268,7 +260,7 @@ function generateTree(treeData, svgRef){
         .attr("d", diagonal)
         .style("stroke-width", function(d) {return link_stoke_scale(d.target.samples);})
         .style("stroke", stroke_callback)
-        .style("opacity", function(d) {return isLeaf(d.target) ? 0 : 1});
+        .style("opacity", function(d) {return d.target.hidden ? 0 : 1});
 
     // Transition links to their new position.
     link.transition()
@@ -277,7 +269,7 @@ function generateTree(treeData, svgRef){
         .style("stroke-width", function(d) {return link_stoke_scale(d.target.samples);})
         .style("stroke", stroke_callback)
         .style("fill","none")//this line is used to fix the rendering of the black background stuff
-        .style("opacity", function(d) {return isLeaf(d.target) ? 0 : 1});
+        .style("opacity", function(d) {return d.target.hidden ? 0 : 1});
 
     // Transition exiting nodes to the parent's new position.
     link.exit().transition()
