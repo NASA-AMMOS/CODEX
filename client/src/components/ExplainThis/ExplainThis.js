@@ -126,15 +126,23 @@ function generateTree(treeData, svgRef){
       min_link_width = 1.5,
       root;
 
+  //might change this later to be dynamic based on the number of leaf nodes
+  let maxDepth = 6;
+
+  let nodeSize = [
+    height/Math.pow(2, maxDepth),
+    width/Math.pow(2, maxDepth)
+  ];
+
   let tree = d3.layout.tree()
-              .size([height,width]);
+              .nodeSize(nodeSize);
 
   var diagonal = d3.svg.diagonal()
       .projection(function(d) { return [d.y, d.x]; });
 
   var vis = d3.select(svgRef)
     .append("svg:g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      .attr("transform", "translate(" + margin.left + "," + (margin.top + height/2) + ")");
 
   // global scale for link width
   var link_stoke_scale = d3.scale.linear();
@@ -156,7 +164,7 @@ function generateTree(treeData, svgRef){
                                .range([min_link_width, max_link_width]);
 
     // Initialize the display to show a few nodes.
-    root.children.forEach(toggleAll);
+    //root.children.forEach(toggleAll);
 
     update(root);
   }
@@ -170,15 +178,16 @@ function generateTree(treeData, svgRef){
     // Normalize for fixed-depth.
     nodes.forEach(
       function(d) {
+        console.log(d);
         let firstDepth = 30;
+
         let yscale = 120;
         if (d.depth == 0) {
           d.y = 0;
-        } else if (d.depth == 1) {
-          d.y = firstDepth;
         } else {
           d.y = firstDepth + yscale * (d.depth - 1); 
         }
+
       }
     );
 
@@ -321,7 +330,6 @@ function ExplainThisTree(props) {
     useEffect(_ => {
         if (!svgRef)
             return;
-        console.log(JSON.stringify(props.treeData.json_tree, null, 2));
 
         generateTree(props.treeData.json_tree, svgRef);
         
@@ -383,3 +391,5 @@ export default connect(
     mapStateToProps,
     mapDispatchToProps
 )(ExplainThis);
+
+
