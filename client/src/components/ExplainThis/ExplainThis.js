@@ -63,23 +63,29 @@ function childrenHidden(d) {
   return hidden;
 }
 
-/**
- * Mixes colors according to the relative frequency of classes.
- */
-function mix_colors(d) {
 
-  var values = Object.values(d.target.proportions);
-  var sum = d.target.proportions.class_0 + d.target.proportions.class_1;
 
-  var color_map = d3.scale.linear()
-    .domain([0, 1])
-    .range(["blue", "red"]);
+function calculateNumLeafNodes(treeData) {
+  let num = 0;
+  if (hasLeafChildren(treeData))
+    num++;
 
-  var col = d3.rgb(color_map(values[0]/sum));
-  console.log(col);
+  let left = treeData.children != undefined ? calculateNumLeafNodes(treeData.children[0]) : 0;
+  let right = treeData.children != undefined ? calculateNumLeafNodes(treeData.children[1]) : 0;
 
-  return col;
-} 
+  num += left + right;
+
+  return num;
+}
+
+function textSize(text) {
+    if (!d3) return;
+    var container = d3.select('body').append('svg');
+    container.append('text').attr({ x: -99999, y: -99999 }).text(text);
+    var size = container.node().getBBox();
+    container.remove();
+    return { width: size.width, height: size.height };
+}
 
 function generateTree(treeData, svgRef){
   //setup margins and size for the d3 window
@@ -89,17 +95,33 @@ function generateTree(treeData, svgRef){
       height = svgRef.clientHeight - margin.top - margin.bottom,
       rect_width = 80,
       rect_height = 20,
-      max_link_width = 20,
-      min_link_width = 1.5,
+      max_link_width = 28,
+      min_link_width = 3,
       root;
 
   //might change this later to be dynamic based on the number of leaf nodes
   let maxDepth = 6;
-
+  let numLeafs = calculateNumLeafNodes(treeData);
   let nodeSize = [
-    height/Math.pow(2, maxDepth),
-    width/Math.pow(2, maxDepth)
+    height/(Math.pow(2, maxDepth)),
+    width/(maxDepth)
   ];
+
+  var color_map = d3.scale.linear()
+    .domain([0, 0.5, 1])
+    .range(["blue","lightgray", "red"]);
+
+  /**
+   * Mixes colors according to the relative frequency of classes.
+   */
+  function mix_colors(d) {
+    var values = Object.values(d.target.proportions);
+    var sum = d.target.proportions.class_0 + d.target.proportions.class_1;
+
+    var col = d3.rgb(color_map(values[0]/sum));
+
+    return col;
+  } 
 
   let tree = d3.layout.tree()
               .nodeSize(nodeSize);
@@ -109,7 +131,47 @@ function generateTree(treeData, svgRef){
 
   var vis = d3.select(svgRef)
     .append("svg:g")
-      .attr("transform", "translate(" + margin.left + "," + (margin.top + height/2) + ")");
+      .attr("transform", "translate(" + margin.left + "," + (height/2) + ")");
+
+  let barHeight = 20;
+  let gradientContainer = d3.select(svgRef)
+      .append("svg:g")
+      .attr("transform", "translate(" + (width/4) + "," + 10 + ")");
+  console.log();
+  gradientContainer.append('text')
+      .text("Class 0")
+      .attr("x", -10 - textSize("Class 0").width)
+      .attr("y", 5 + barHeight/2);
+
+  gradientContainer.append('text')
+      .text("Class 1")
+      .attr("x", width/2 + 10)
+      .attr("y", 5 + barHeight/2);
+
+  var linearGradient = gradientContainer.append("defs")
+      .append("linearGradient")
+      .attr("id", "linear-gradient");
+    
+  linearGradient.append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", color_map(0));
+
+  linearGradient.append("stop")
+      .attr("offset", "50%")
+      .attr("stop-color", color_map(0.5));
+
+  linearGradient.append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", color_map(1));
+
+  let gradientRect = gradientContainer.append("rect")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("width", width/2)
+      .attr("height", barHeight)
+      .style("stroke", "black")
+      .style("stroke-width", 2)
+      .style("fill", "url(#linear-gradient)"); 
 
   // global scale for link width
   var link_stoke_scale = d3.scale.linear();
@@ -146,14 +208,13 @@ function generateTree(treeData, svgRef){
     nodes.forEach(
       function(d) {
         let firstDepth = 30;
-
         let yscale = 120;
+
         if (d.depth == 0) {
           d.y = 0;
         } else {
           d.y = firstDepth + yscale * (d.depth - 1); 
         }
-
       }
     );
 
@@ -264,6 +325,9 @@ function generateTree(treeData, svgRef){
 }
 
 function FeatureList(props) {
+  if (props.features == undefined) {
+    return <div>Loading ...</div>;
+  }
   return (
     <React.Fragment>
       <List className="feature-list">
@@ -271,8 +335,11 @@ function FeatureList(props) {
           <h6 className="feature-list-header">Feature List</h6>
         </ListItem>
         {
-          props.features.map((feature) => {
-            return <ListItem> {feature} </ListItem>
+          props.features.map((feature, index) => {
+            return <ListItem> 
+                        <span className="feature-list-item">{feature}</span>
+                        <span className="importances-number"> / {props.importances[index]}% </span>
+                    </ListItem>
           })
         }
       </List>
@@ -312,13 +379,7 @@ function ExplainThisTree(props) {
 function ExplainThis(props) {
     //make a data state object to hold the data in the request
     const [dataState, setDataState] = useState(undefined);
-        
-    //get the selected features from state
-    const selectedFeatures = props.featureList
-        .filter(f => f.get("selected"))
-        .map(f => f.get("name"))
-        .toJS();
-
+      
     //handles the request object asynchronous loading
     useEffect(_ => {
         //handle the loading of the data request promise
@@ -333,11 +394,21 @@ function ExplainThis(props) {
 
     }, []);
 
+    console.log(dataState);
+
+    //todo make this list several trees
+    //get the selected features from state
+    const rankedFeatures = !dataState ? undefined : dataState.tree_sweep[0].feature_rank;
+
+    const treeData = !dataState ? undefined : dataState.tree_sweep[0];
+
+    const importances = !dataState ? undefined : dataState.tree_sweep[0].feature_weights;
+
 	return (
 		<div className="explain-this-container">
-      <FeatureList features={selectedFeatures}/>
+      <FeatureList features={rankedFeatures} importances={importances}/>
 			<ExplainThisTree
-        treeData={!dataState ? undefined : dataState.tree_sweep[0]}
+        treeData={treeData}
       />
 		</div>
 	);
