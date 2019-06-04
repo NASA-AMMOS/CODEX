@@ -18,6 +18,7 @@ import traceback
 import numpy as np
 from sklearn.neighbors import kneighbors_graph
 from sklearn import cluster
+from sklearn.model_selection import train_test_split
 
 
 # Enviornment variable for setting CODEX root directory.
@@ -34,7 +35,29 @@ import codex_system
 import codex_labels
 from sklearn.tree import DecisionTreeClassifier
 
-def export_json_tree(clf, features, labels, node_index=0):
+def get_proportion_tree_sums(clf, X_test, y_test):
+    """
+    This function returns a json tree representing the proportion of
+    a given class flowing through a certain branch in the decision tree.
+    This data is used to visualize color and thickness on the frontend.
+    """
+
+    node_indicator = clf.decision_path(X_test)
+    #an array with the numer of times a sample passed through each node
+    sum_array = node_indicator.toarray().sum(axis=0)
+    indices = np.arange(len(node_indicator.toarray()))
+
+    class_1_indices = indices[y_test[indices]==0]
+    class_2_indices = indices[y_test[indices]==1]
+
+    class_1_sum = node_indicator.toarray()[class_1_indices].sum(axis=0)
+    class_2_sum = node_indicator.toarray()[class_2_indices].sum(axis=0)
+
+    combined_sums = np.array(list(zip(class_1_sum, class_2_sum)))
+
+    return combined_sums
+
+def export_json_tree(clf, features, labels, proportion_tree_sums, node_index=0):
     """Structure of rules in a fit decision tree classifier
 
     Parameters
@@ -53,14 +76,35 @@ def export_json_tree(clf, features, labels, node_index=0):
         count_labels = zip(clf.tree_.value[node_index, 0], labels)
         node['name'] = ', '.join(('{} of {}'.format(int(count), label)
                                   for count, label in count_labels))
+        node['samples'] = proportion_tree_sums[node_index,0].item() + proportion_tree_sums[node_index,1].item()
+        node['proportions'] = {
+            "class_0":proportion_tree_sums[node_index,0].item(),
+            "class_1":proportion_tree_sums[node_index,1].item()
+        } 
+        node['leaf'] = True;
+        node['hidden'] = True;
     else:
         feature = features[clf.tree_.feature[node_index]]
         threshold = clf.tree_.threshold[node_index]
         node['name'] = '{} > {}'.format(feature, threshold)
         left_index = clf.tree_.children_left[node_index]
         right_index = clf.tree_.children_right[node_index]
-        node['children'] = [export_json_tree(clf, features, labels, right_index),
-                            export_json_tree(clf, features, labels, left_index)]
+        node['samples'] = proportion_tree_sums[node_index,0].item() + proportion_tree_sums[node_index,1].item()
+        node['proportions'] = {
+            "class_0":proportion_tree_sums[node_index,0].item(),
+            "class_1":proportion_tree_sums[node_index,1].item()
+        } 
+        node['leaf'] = False;
+        node['hidden'] = False;
+        node['children'] = [export_json_tree(clf, features, labels, proportion_tree_sums, left_index), 
+                            export_json_tree(clf, features, labels, proportion_tree_sums, right_index)]
+    """
+    node['children'] = []
+    if clf.tree_.children_left[left_index] != -1:
+        node['children'].append(export_json_tree(clf, features, labels, proportion_tree_sums, left_index))
+    if clf.tree_.children_left[right_index] != -1:
+        node['children'].append(export_json_tree(clf, features, labels, proportion_tree_sums, right_index))
+    """
     return node
 
 def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
@@ -129,14 +173,14 @@ def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
         codex_system.codex_log("ERROR: explain_this - insufficient data dimmensions")
         return None
 
-    X = data
-    X = codex_math.codex_impute(X)
-    result['data'] = X.tolist()
+    X_train, X_test, y_train, y_test = train_test_split(data, y, random_state=0)
+    X_train = codex_math.codex_impute(X_train)
+    result['data'] = X_train.tolist()
     result['tree_sweep'] = []
 
     max_depth = 6
 
-    samples_, features_ = X.shape
+    samples_, features_ = X_train.shape
     if(features_ < 6):
     	trees_ = features_
     else:
@@ -145,17 +189,19 @@ def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
 
         dictionary = {}
         clf = DecisionTreeClassifier(max_features=i, max_depth = max_depth)
-        clf.fit(X,y)
+        clf.fit(X_train,y_train)
 
-        dictionary['json_tree'] = export_json_tree(clf, featureNames, ["Main Data","Isolated Data"])
-        dictionary["score"] = np.round(clf.score(X,y) * 100)
+        proportion_tree_sums = get_proportion_tree_sums(clf, X_test, y_test)
+
+        dictionary['json_tree'] = export_json_tree(clf, featureNames, ["Main Data","Isolated Data"], proportion_tree_sums)
+        dictionary["score"] = np.round(clf.score(X_train,y_train) * 100)
         dictionary["max_features"] = clf.max_features_
 
         feature_weights, feature_rank = zip(*sorted(zip(clf.feature_importances_, featureNames), reverse=True))
         feature_weights = np.asarray(feature_weights).astype(float)
         dictionary["feature_rank"] = feature_rank
         dictionary["feature_weights"] = (np.round(feature_weights * 100)).tolist()
-
+        
         result["tree_sweep"].append(dictionary)
 
     return result

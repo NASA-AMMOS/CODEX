@@ -150,9 +150,8 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         msg = json.loads(message)
         result = msg
         codex_system.codex_log("{time} : Message from front end: {json}".format(time=now.isoformat(), json=msg))
-
+        
         routine = msg['routine']
-
         if(routine == 'algorithm'):
             result = codex_algorithm_manager.algorithm_call(msg, result)
         elif(routine == 'workflow'):
@@ -168,8 +167,8 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         elif (routine == 'time'):
             result = codex_eta_manager.get_time_estimate(msg, result)
         elif (routine == 'arrange'):
-
             activity = msg["activity"]
+
             if (activity == "add"):
                 result = codex_data_manager.add_data(msg, result)
             elif (activity == "get"):
