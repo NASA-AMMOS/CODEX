@@ -46,6 +46,7 @@ export const featureAdd = (featureName, featureData) => ({
     featureData
 });
 
+
 /**
  * Select a feature
  * @param {string} feature feature name

@@ -1,22 +1,15 @@
-import React, { Component } from "react";
+import React, { Component , useState} from "react";
 import "components/LeftPanel/FeatureList.scss";
 import { connect } from "react-redux";
 import classnames from "classnames";
 import { bindActionCreators } from "redux";
 import * as dataActions from "actions/data";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import FeatureData from "components/LeftPanel/FeatureData";
 
 function createFeature(props, feature) {
     const name = feature.get("name");
     const selected = feature.get("selected");
-
-    const featureMouseEnter = function() {
-        console.log("onMouseEnter");
-    };
-
-    const featureMouseLeave = function() {
-        console.log("onMouseLeave");
-    };
 
     return (
         <li
@@ -28,8 +21,6 @@ function createFeature(props, feature) {
                     ? props.featureUnselect(name, e.shiftKey)
                     : props.featureSelect(name, e.shiftKey);
             }}
-            onMouseEnter={featureMouseEnter}
-            onMouseLeave={featureMouseLeave}
         >
             <div className="checkbox" />
             <span>{name}</span>
@@ -41,6 +32,8 @@ function FeatureList(props) {
     const activeCount = props.featureList.filter(f => f.get("selected")).size;
     const shownCount = activeCount;
     const totalCount = props.featureList.size;
+
+    const [statsHidden, setStatsHidden] = useState(true);
 
     const featureItems = props.featureList
         .filter(f =>
@@ -54,10 +47,14 @@ function FeatureList(props) {
         .map(f => createFeature(props, f));
 
     return (
-        <React.Fragment>
+        <div className="feature-lists-container">
             <div className="Features">
                 <div className="header">
                     <div className="title">Features</div>
+                    <span className="stats-toggle"
+                          onClick={function(){setStatsHidden(!statsHidden)}}>
+                             {statsHidden ? "stats off" : "stats on"} 
+                    </span>
                     <span className="counts">
                         {activeCount}/{shownCount}/{totalCount}
                     </span>
@@ -69,7 +66,11 @@ function FeatureList(props) {
                     <ul>{featureItems}</ul>
                 </div>
             </div>
-        </React.Fragment>
+            <FeatureData statsHidden={statsHidden} 
+                featureListLoading={props.featureListLoading}
+                featureList={featureItems}
+            />
+        </div>
     );
 }
 

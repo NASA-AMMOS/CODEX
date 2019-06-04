@@ -64,6 +64,7 @@ export default class DataReducer {
      * @return {Map} new state
      */
     static featureAdd(state, action) {
+        console.log(state.toJS());
         //make sure featureName is unique
         let foundUniqueName = false;
         let uniqueNameIndex = 0;

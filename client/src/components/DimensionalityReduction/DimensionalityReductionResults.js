@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useReducer, useRef } from "react";
 import * as regressionTypes from "constants/regressionTypes";
+import * as dataActions from "actions/data";
 import Typography from "@material-ui/core/Typography";
 import Plot from "react-plotly.js";
 import classnames from "classnames";
@@ -8,7 +9,9 @@ import "components/DimensionalityReduction/dimensionalityReductions.scss";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import * as utils from "utils/utils";
 import Slider from "@material-ui/lab/Slider";
-import Plotly from "plotly.js";
+import Plotly from "plotly.js"
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
 
 // Utility to create a Plotly chart for each algorithm data return from the server.
 // We show a loading progress indicator if the data hasn't arrived yet.
@@ -71,7 +74,7 @@ function makeDRPlot(algo, maxYRange, changeSliderVal) {
                 style={{ width: "100%", height: "100%" }}
                 useResizeHandler
                 divId={id}
-                onBeforeHover={e => console.log(e)}
+                //onBeforeHover={e => console.log(e)}
             />
             <Slider
                 classes={{ root: "chartSlider" }}
@@ -118,6 +121,12 @@ function DimensionalityReductionResults(props) {
                             : algo
                     )
                 );
+                //update the redux feature state with the new data
+                console.log(data);
+                //this is subject to change
+                let featureName = data.algorithm;
+                let featureData = data.data;
+                props.featureAdd(featureName,featureData);
             });
         });
 
@@ -172,4 +181,18 @@ function DimensionalityReductionResults(props) {
     );
 }
 
-export default DimensionalityReductionResults;
+function mapStateToProps(state) {
+    return {};
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        featureAdd: bindActionCreators(dataActions.featureAdd, dispatch),
+        //featureAdd:function(){console.log("Yeety");}
+    };
+}
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(DimensionalityReductionResults)

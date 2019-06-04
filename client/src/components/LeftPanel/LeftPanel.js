@@ -23,29 +23,31 @@ function LeftPanel() {
     }
 
     return (
-        <div className="Panel">
-            <div id="content">
-                <Title />
-                <div id="contents">
-                    <div id="right">
-                        <div className="PanelOptions">
-                            <div id="filter">
-                                <input
-                                    type="text"
-                                    placeholder="Filter"
-                                    onInput={e => setFilterString(e.target.value)}
-                                />
+        <React.Fragment>
+            <div className="Panel">
+                <div id="content">
+                    <Title />
+                    <div id="contents">
+                        <div id="right">
+                            <div className="PanelOptions">
+                                <div id="filter">
+                                    <input
+                                        type="text"
+                                        placeholder="Filter"
+                                        onInput={e => setFilterString(e.target.value)}
+                                    />
+                                </div>
+                                <div id="onOffAll" className={onOffAll} onClick={toggleOnOffAll}>
+                                    {onOffAll}
+                                </div>
                             </div>
-                            <div id="onOffAll" className={onOffAll} onClick={toggleOnOffAll}>
-                                {onOffAll}
-                            </div>
+                            <FeatureList filterString={filterString} onOffAll={onOffAll} />
+                            <SelectionList />
                         </div>
-                        <FeatureList filterString={filterString} onOffAll={onOffAll} />
-                        <SelectionList />
                     </div>
                 </div>
             </div>
-        </div>
+        </React.Fragment>
     );
 }
 

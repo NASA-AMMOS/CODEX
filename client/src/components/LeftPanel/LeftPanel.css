@@ -2,6 +2,7 @@
     display: flex;
     /*border-right: 6px solid #7d39e0;*/
     /*z-index: 2000000000;*/
+    position:relative;
 }
 
 .Panel #border {
@@ -33,6 +34,7 @@
     position: relative;
     box-sizing: border-box;
     /*z-index: 10;*/
+    border-right: 1px solid #DDDDDD;
 }
 
 .Panel #right {
@@ -96,3 +98,4 @@
 .Panel .PanelOptions #onOffAll.off {
     border-bottom: 2px solid #e53434;
 }
+
