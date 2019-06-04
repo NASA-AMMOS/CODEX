@@ -25,7 +25,7 @@ function FeatureData(props) {
         );
     }
 
-    console.log(props.featureList[0]);
+    console.log(props.featureList.toJS());
 
     let {req, cancel} = makeStatisticsRequest(props.featureList);
 
