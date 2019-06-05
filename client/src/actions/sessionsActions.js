@@ -49,6 +49,16 @@ export function loadSession(sessionName) {
                 data: data.session_data.features,
                 filename: ""
             });
+            data.session_data.state.windowManager.windows.map(windowData => {
+                //  TODO: Reproduce individual windows based on window data.
+                //                dispatch({
+                //                    type: types.OPEN_NEW_WINDOW,
+                //                    info: {
+                //                        windowType: windowData.windowType,
+                //                        data: windowData.data
+                //                    }
+                //                });
+            });
         });
     };
 }
