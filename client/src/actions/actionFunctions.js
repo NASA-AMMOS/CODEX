@@ -7,7 +7,6 @@ function loadColumnFromServer(feature) {
         const socketWorker = new WorkerSocket();
 
         socketWorker.addEventListener("message", e => {
-            console.log(JSON.parse(e.data));
             const data = JSON.parse(e.data).data.map(ary => ary[0]);
             resolve(data);
         });

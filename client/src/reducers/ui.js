@@ -3,7 +3,6 @@ import UiReducer from "reducers/reducerFunctions/UiReducer";
 import * as actionTypes from "constants/actionTypes";
 
 export default function ui(state = uiState, action, opt_reducer = UiReducer) {
-    console.log(opt_reducer.openGraph);
     switch (action.type) {
         case actionTypes.OPEN_GRAPH:
             return opt_reducer.openGraph(state, action);

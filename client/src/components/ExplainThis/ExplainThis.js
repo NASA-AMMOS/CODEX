@@ -14,7 +14,7 @@ import ListItem from "@material-ui/core/ListItem";
 
 // Toggle children.
 function toggle(d) {
-  //decide base
+//decide base
   if (d.children && childrenHidden(d)) {
     toggleRecursive(d, false);
   } else if (d.children && !childrenHidden(d)) {
