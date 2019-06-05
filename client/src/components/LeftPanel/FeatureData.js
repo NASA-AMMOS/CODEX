@@ -25,10 +25,12 @@ function FeatureData(props) {
         );
     }
 
-    console.log(props.featureList.toJS());
+    let names = props.featureList.map((feature) => {
+        return feature.name;
+    });
 
-    let {req, cancel} = makeStatisticsRequest(props.featureList);
-
+    let {req, cancel} = makeStatisticsRequest(names);
+    //todo setup useEffect for cleanup
     req.then(data => {
         console.log(data);
     });

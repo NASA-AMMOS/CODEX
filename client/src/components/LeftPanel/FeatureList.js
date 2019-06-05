@@ -68,7 +68,7 @@ function FeatureList(props) {
             </div>
             <FeatureData statsHidden={statsHidden} 
                 featureListLoading={props.featureListLoading}
-                featureList={featureItems}
+                featureList={props.featureList.toJS()}
             />
         </div>
     );

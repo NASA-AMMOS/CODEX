@@ -43,7 +43,6 @@ def get_data_metrics(msg, result):
 
     result = get_data(msg, result)
     data = result['data']
-    
     del result['data']
 
     result['min'] = np.min(data)
@@ -116,7 +115,6 @@ def get_data(msg, result):
     >>> result = get_data(message, {})
     '''
 
-    codex_system.codex_log(msg['name'])
     hashType = msg['hashType']
     names = msg["name"]
     data = []
