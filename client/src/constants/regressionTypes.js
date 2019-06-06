@@ -1,4 +1,4 @@
-import * as constantHelpers from "constants/constantHelpers"
+import * as constantHelpers from "constants/constantHelpers";
 
 export const REGRESSION_WINDOW = "REGRESSION_WINDOW";
 export const REGRESSION_RESULTS_WINDOW = "REGRESSION_RESULTS_WINDOW";

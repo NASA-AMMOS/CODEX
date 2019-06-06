@@ -31,7 +31,7 @@ function createExplainThisRequest(
         file: filename,
         cid: "8ksjk",
         identification: {id: 'dev0'}
-    }
+    };
 }
 
 export function createWorkflow(workflowType, selectedFeatures) {

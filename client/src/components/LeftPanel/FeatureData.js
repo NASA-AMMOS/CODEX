@@ -8,7 +8,6 @@ function processFloatingPointNumber(number) {
     if((roundedNumber+"").length > 6 ) {
         //convert to scientific notation
         newNumber = roundedNumber.toExponential(1);
-        console.log(newNumber)
     } else {
         newNumber = roundedNumber;
     }
@@ -43,16 +42,16 @@ function StatisticsRow(props) {
     let mean = processFloatingPointNumber(props.stats.mean);
     let median = processFloatingPointNumber(props.stats.median);
 
-    let [featureTypeData, setFeatureTypeData] = useState({c:false, r:false})
+    let [featureTypeData, setFeatureTypeData] = useState({c:false, r:false});
 
     return (
         <tr className="feature-statistics-row">
             <td className={featureTypeData.c ? "lit" : "dim"} 
-                onClick={function() {setFeatureTypeData({r:featureTypeData.r, c: !featureTypeData.c})}}>
+                onClick={function() {setFeatureTypeData({r:featureTypeData.r, c: !featureTypeData.c});}}>
                  C 
             </td>
             <td className={featureTypeData.r ? "lit" : "dim"}
-                onClick={function() { setFeatureTypeData({r:!featureTypeData.r, c: featureTypeData.c})}}>
+                onClick={function() { setFeatureTypeData({r:!featureTypeData.r, c: featureTypeData.c});}}>
                  R 
             </td>
             <td> {mean} </td>
@@ -89,7 +88,7 @@ function FeatureData(props) {
                     return {
                         ...statsData,
                         [data.name[0]]: data
-                    }
+                    };
                 });
             });
         });
@@ -113,7 +112,7 @@ function FeatureData(props) {
                     <table className="stats-table">
                         {
                             names.map((name) => {
-                                return <StatisticsRow stats={statsData[name]}/>
+                                return <StatisticsRow key={name} stats={statsData[name]}/>;
                             })
                         }
                     </table>

@@ -78,9 +78,9 @@ function calculateNumLeafNodes(treeData) {
 
 function textSize(text) {
     if (!d3) return;
-    var container = d3.select('body').append('svg');
+    let container = d3.select('body').append('svg');
     container.append('text').attr({ x: -99999, y: -99999 }).text(text);
-    var size = container.node().getBBox();
+    let size = container.node().getBBox();
     container.remove();
     return { width: size.width, height: size.height };
 }
@@ -105,7 +105,7 @@ function generateTree(treeData, svgRef){
         width/(maxDepth)
     ];
 
-    var color_map = d3.scale.linear()
+    let color_map = d3.scale.linear()
         .domain([0, 0.5, 1])
         .range(["blue","lightgray", "red"]);
 
@@ -113,10 +113,10 @@ function generateTree(treeData, svgRef){
     * Mixes colors according to the relative frequency of classes.
     */
     function mix_colors(d) {
-        var values = Object.values(d.target.proportions);
-        var sum = d.target.proportions.class_0 + d.target.proportions.class_1;
+        let values = Object.values(d.target.proportions);
+        let sum = d.target.proportions.class_0 + d.target.proportions.class_1;
 
-        var col = d3.rgb(color_map(values[0]/sum));
+        let col = d3.rgb(color_map(values[0]/sum));
 
         return col;
     } 
@@ -124,10 +124,10 @@ function generateTree(treeData, svgRef){
     let tree = d3.layout.tree()
         .nodeSize(nodeSize);
 
-    var diagonal = d3.svg.diagonal()
+    let diagonal = d3.svg.diagonal()
         .projection(function(d) { return [d.y, d.x]; });
 
-    var vis = d3.select(svgRef)
+    let vis = d3.select(svgRef)
         .append("svg:g")
             .attr("transform", "translate(" + margin.left + "," + (height/2) + ")");
 
@@ -146,7 +146,7 @@ function generateTree(treeData, svgRef){
         .attr("x", width/2 + 10)
         .attr("y", 5 + barHeight/2);
 
-    var linearGradient = gradientContainer.append("defs")
+    let linearGradient = gradientContainer.append("defs")
         .append("linearGradient")
         .attr("id", "linear-gradient");
 
@@ -172,17 +172,17 @@ function generateTree(treeData, svgRef){
         .style("fill", "url(#linear-gradient)"); 
 
     // global scale for link width
-    var link_stoke_scale = d3.scale.linear();
+    let link_stoke_scale = d3.scale.linear();
 
     // stroke style of link - either color or function
-    var stroke_callback = "#ccc";
+    let stroke_callback = "#ccc";
 
     function load_dataset(json) {
         root = json;
         root.x0 = 0;
         root.y0 = 0;
 
-        var n_samples = root.samples;
+        let n_samples = root.samples;
 
         stroke_callback = mix_colors;
 
@@ -197,10 +197,10 @@ function generateTree(treeData, svgRef){
     }
 
     function update(source) {
-        var duration = d3.event && d3.event.altKey ? 5000 : 500;
+        let duration = d3.event && d3.event.altKey ? 5000 : 500;
 
         // Compute the new tree layout.
-        var nodes = tree.nodes(root).reverse();
+        let nodes = tree.nodes(root).reverse();
 
         // Normalize for fixed-depth.
         nodes.forEach(
@@ -217,11 +217,11 @@ function generateTree(treeData, svgRef){
         );
 
         // Update the nodes…
-        var node = vis.selectAll("g.node")
+        let node = vis.selectAll("g.node")
             .data(nodes, function(d) { return d.id || (d.id = ++i); });
 
         // Enter any new nodes at the parent's previous position.
-        var nodeEnter = node.enter().append("svg:g")
+        let nodeEnter = node.enter().append("svg:g")
             .attr("class", "node")
             .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
             .on("click", function(d) {if(!d.hidden){toggle(d); update(d); }});
@@ -235,39 +235,39 @@ function generateTree(treeData, svgRef){
             .attr("text-anchor", "middle")
             .text(node_label)
             .style("fill-opacity", 1e-6)
-            .style("opacity", function(d) {return d.hidden ? 0 : 1})
+            .style("opacity", function(d) {return d.hidden ? 0 : 1;})
             .call(getBB);
 
         let rectPadding = 10;
 
         nodeEnter.insert("rect","text")
-            .attr("width", function(d){return d.bbox.width + rectPadding})
-            .attr("height", function(d){return d.bbox.height})
-            .attr("x",function(d){return -d.bbox.width/2 - rectPadding/2})
-            .attr("y", function(d){return -d.bbox.height/2})
+            .attr("width", function(d){return d.bbox.width + rectPadding;})
+            .attr("height", function(d){return d.bbox.height;})
+            .attr("x",function(d){return -d.bbox.width/2 - rectPadding/2;})
+            .attr("y", function(d){return -d.bbox.height/2;})
             .attr("rx", function(d) { return d.type === "split" ? 2 : 0;})
             .attr("ry", function(d) { return d.type === "split" ? 2 : 0;})
             .style("margin", 20)
             .style("stroke", function(d) { return d.type === "split" ? "steelblue" : "olivedrab";})
-            .style("fill", function(d) { return !hasLeafChildren(d) && childrenHidden(d) ? "lightsteelblue" : "#fff"; })
-            .style("opacity", function(d) {return d.leaf || !d.hidden ? 0 : 1});
+            .style("fill", function(d) { return !hasLeafChildren(d) && childrenHidden(d) ? "lightsteelblue" : "#fff";})
+            .style("opacity", function(d) {return d.leaf || !d.hidden ? 0 : 1;});
 
         // Transition nodes to their new position.
-        var nodeUpdate = node.transition()
+        let nodeUpdate = node.transition()
             .duration(duration)
-            .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+            .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")";});
 
         nodeUpdate.select("rect")
-            .style("fill", function(d) { return !hasLeafChildren(d) && childrenHidden(d) ? "lightsteelblue" : "#fff"; })
-            .style("opacity", function(d) {return d.hidden ? 0 : 1});
+            .style("fill", function(d) { return !hasLeafChildren(d) && childrenHidden(d) ? "lightsteelblue" : "#fff";})
+            .style("opacity", function(d) {return d.hidden ? 0 : 1;});
 
         nodeUpdate.select("text")
-            .style("fill-opacity", function(d) {return d.hidden ? 0 : 1});
+            .style("fill-opacity", function(d) {return d.hidden ? 0 : 1;});
 
         // Transition exiting nodes to the parent's new position.
-        var nodeExit = node.exit().transition()
+        let nodeExit = node.exit().transition()
             .duration(duration)
-            .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+            .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")";})
             .remove();
 
         nodeExit.select("rect")
@@ -278,14 +278,14 @@ function generateTree(treeData, svgRef){
             .style("fill-opacity", 1e-6);
 
         // Update the links
-        var link = vis.selectAll("path.link")
+        let link = vis.selectAll("path.link")
             .data(tree.links(nodes), function(d) { return d.target.id; });
 
         // Enter any new links at the parent's previous position.
         link.enter().insert("svg:path", "g")
             .attr("class", "link")
             .attr("d", function(d) {
-                var o = {x: source.x0, y: source.y0};
+                let o = {x: source.x0, y: source.y0};
                 return diagonal({source: o, target: o});
             })
             .transition()
@@ -293,7 +293,7 @@ function generateTree(treeData, svgRef){
             .attr("d", diagonal)
             .style("stroke-width", function(d) {return link_stoke_scale(d.target.samples);})
             .style("stroke", stroke_callback)
-            .style("opacity", function(d) {return d.target.hidden ? 0 : 1});
+            .style("opacity", function(d) {return d.target.hidden ? 0 : 1;});
 
         // Transition links to their new position.
         link.transition()
@@ -302,13 +302,13 @@ function generateTree(treeData, svgRef){
             .style("stroke-width", function(d) {return link_stoke_scale(d.target.samples);})
             .style("stroke", stroke_callback)
             .style("fill","none")//this line is used to fix the rendering of the black background stuff
-            .style("opacity", function(d) {return d.target.hidden ? 0 : 1});
+            .style("opacity", function(d) {return d.target.hidden ? 0 : 1;});
 
         // Transition exiting nodes to the parent's new position.
         link.exit().transition()
             .duration(duration)
             .attr("d", function(d) {
-                var o = {x: source.x, y: source.y};
+                let o = {x: source.x, y: source.y};
                 return diagonal({source: o, target: o});
             })
             .remove();
@@ -335,10 +335,10 @@ function FeatureList(props) {
                 </ListItem>
                 {
                     props.features.map((feature, index) => {
-                        return <ListItem> 
+                        return <ListItem key={index}> 
                             <span className="feature-list-item">{feature}</span>
                             <span className="importances-number"> / {props.importances[index]}% </span>
-                            </ListItem>
+                            </ListItem>;
                     })
                 }
             </List>
@@ -370,8 +370,7 @@ function ExplainThisTree(props) {
     return (
         <svg className="tree-container" 
             ref={(element) => {svgRef = element}}
-        >
-        </svg>
+        />
     );
 }
 

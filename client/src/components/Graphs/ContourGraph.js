@@ -140,12 +140,12 @@ function filterPolygon(pts) {
 
 
 function polygonTester(ptsIn) {
-    var pts = ptsIn.slice();
-    var xmin = pts[0][0];
-    var xmax = xmin;
-    var ymin = pts[0][1];
-    var ymax = ymin;
-    var i;
+    let pts = ptsIn.slice();
+    let xmin = pts[0][0];
+    let xmax = xmin;
+    let ymin = pts[0][1];
+    let ymax = ymin;
+    let i;
 
     pts.push(pts[0]);
     for(i = 1; i < pts.length; i++) {
@@ -158,8 +158,8 @@ function polygonTester(ptsIn) {
     // do we have a rectangle? Handle this here, so we can use the same
     // tester for the rectangular case without sacrificing speed
 
-    var isRect = false;
-    var rectFirstEdgeTest;
+    let isRect = false;
+    let rectFirstEdgeTest;
 
     if(pts.length === 5) {
         if(pts[0][0] === pts[1][0]) { // vert, horz, vert, horz
@@ -180,8 +180,8 @@ function polygonTester(ptsIn) {
     }
 
     function rectContains(pt, omitFirstEdge) {
-        var x = pt[0];
-        var y = pt[1];
+        let x = pt[0];
+        let y = pt[1];
 
         if(x < xmin || x > xmax || y < ymin || y > ymax) {
             // pt is outside the bounding box of polygon
@@ -193,23 +193,23 @@ function polygonTester(ptsIn) {
     }
 
     function contains(pt, omitFirstEdge) {
-        var x = pt[0];
-        var y = pt[1];
+        let x = pt[0];
+        let y = pt[1];
 
         if( x < xmin || x > xmax || y < ymin || y > ymax) {
             // pt is outside the bounding box of polygon
             return false;
         }
 
-        var imax = pts.length;
-        var x1 = pts[0][0];
-        var y1 = pts[0][1];
-        var crossings = 0;
-        var i;
-        var x0;
-        var y0;
-        var xmini;
-        var ycross;
+        let imax = pts.length;
+        let x1 = pts[0][0];
+        let y1 = pts[0][1];
+        let crossings = 0;
+        let i;
+        let x0;
+        let y0;
+        let xmini;
+        let ycross;
 
         for(i = 1; i < imax; i++) {
             // find all crossings of a vertical line upward from pt with
@@ -259,8 +259,8 @@ function polygonTester(ptsIn) {
     }
 
     // detect if poly is degenerate
-    var degenerate = true;
-    var lastPt = pts[0];
+    let degenerate = true;
+    let lastPt = pts[0];
     for(i = 1; i < pts.length; i++) {
         if(lastPt[0] !== pts[i][0] || lastPt[1] !== pts[i][1]) {
             degenerate = false;

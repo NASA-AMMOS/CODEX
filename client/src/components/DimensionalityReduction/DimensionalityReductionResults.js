@@ -9,7 +9,7 @@ import "components/DimensionalityReduction/dimensionalityReductions.scss";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import * as utils from "utils/utils";
 import Slider from "@material-ui/lab/Slider";
-import Plotly from "plotly.js"
+import Plotly from "plotly.js";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 
@@ -195,4 +195,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(DimensionalityReductionResults)
+)(DimensionalityReductionResults);
