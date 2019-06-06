@@ -546,7 +546,7 @@ def findHashArray(field, name, hashType):
     '''
 
     if(hashType == "feature"):
-
+        
         for point in featureList:
             if(point[field] == name):
                 return point
