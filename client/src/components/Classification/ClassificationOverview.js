@@ -23,7 +23,6 @@ import HelpOutline from "@material-ui/icons/HelpOutline";
 import Close from "@material-ui/icons/Close";
 import IconButton from "@material-ui/core/IconButton";
 
-
 function ClassificationHeaderBar(props) {
 
     return (
