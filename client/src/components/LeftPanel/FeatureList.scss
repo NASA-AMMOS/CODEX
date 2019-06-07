@@ -1,13 +1,13 @@
 .feature-lists-container {
     height: 40vh;
     display: flex;
-    flex-direction:column;
+    flex-direction: column;
 
     .Features {
         display: flex;
         flex-flow: column;
         width: 100%;
-        height:100%;
+        height: 100%;
         flex: 1;
         box-sizing: border-box;
         color: white;
@@ -21,6 +21,7 @@
             font-family: "lato_bold", sans-serif;
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
             padding: 0 5px;
+            height: 25px;
 
             .title {
                 font-weight: bold;
@@ -41,11 +42,14 @@
 
         .list {
             direction: "ltr";
-            width:100%;
+            width: 100%;
             overflow-y: scroll;
 
             ul {
                 padding-left: 10px;
+                li {
+                    height: 22px;
+                }
             }
 
             .feature {
@@ -79,31 +83,45 @@
                 }
             }
         }
-        
     }
 
     .feature-statistics-panel {
         position: absolute;
         margin-left: 100%;
         height: 40vh;
-        width:100%;
-        overflow-y: scroll;      
-        border: 1px solid #DDDDDD;
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
+        width: 300px;
+        color: #bbb;
+        background-color: #061427;
+        z-index: 999; //this is to ensure it is above the window layout
+        border: 1px solid #dddddd;
+        .label-row {
             font-family: "lato_bold", sans-serif;
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
             padding: 0 5px;
-
-            .title {
-                font-weight: bold;
+            height: 25px;
+            td {
+                padding-right: 10px;
             }
+        }
+        .stats-container {
+            height: calc(40vh - 25px);
+            overflow-y: scroll;
+            .stats-table {
+                height: 100%;
+                tr {
+                    line-height: 20px; //necesary to make the height 22
+                    td {
+                        padding-right: 10px;
+                    }
+                }
 
-            .counts {
-                color: #bbb;
-                font-size: 14px;
+                .dim {
+                    color: #666666;
+                }
+
+                .lit {
+                    color: #eeeeee;
+                }
             }
         }
     }

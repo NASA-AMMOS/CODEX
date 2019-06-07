@@ -9,9 +9,13 @@ import "components/DimensionalityReduction/dimensionalityReductions.scss";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import * as utils from "utils/utils";
 import Slider from "@material-ui/lab/Slider";
-import Plotly from "plotly.js"
+import Plotly from "plotly.js";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
+import HelpContent from "components/Help/HelpContent";
+import HelpOutline from "@material-ui/icons/HelpOutline";
+import Close from "@material-ui/icons/Close";
+import IconButton from "@material-ui/core/IconButton";
 
 // Utility to create a Plotly chart for each algorithm data return from the server.
 // We show a loading progress indicator if the data hasn't arrived yet.
@@ -91,6 +95,30 @@ function makeDRPlot(algo, maxYRange, changeSliderVal) {
     );
 }
 
+function DimensionalityReductionHeader(props) {
+    return (
+        <React.Fragment>
+            <Typography variant="h6">All Reductions</Typography>
+            <IconButton onClick={_ => props.setHelpModeState(state => !state)}>
+                <HelpOutline />
+            </IconButton>
+        </React.Fragment>
+    );
+}
+
+function HelpBarHeader(props) {
+    return (
+        <div className="headerBar">
+            <IconButton
+                className="closeButton"
+                onClick={_ => props.setHelpModeState(state => !state)}
+            >
+                <Close />
+            </IconButton>
+        </div>
+    );
+}
+
 function makeAlgoState(req) {
     // Separate the request object from the promise and cleanup functions
     const state = req.requestObj;
@@ -126,7 +154,7 @@ function DimensionalityReductionResults(props) {
                 //this is subject to change
                 let featureName = data.algorithm;
                 let featureData = data.data;
-                props.featureAdd(featureName,featureData);
+                props.featureAdd(featureName, featureData);
             });
         });
 
@@ -153,29 +181,47 @@ function DimensionalityReductionResults(props) {
         )
     );
 
+    const [helpModeState, setHelpModeState] = useState(false);
+    const algoVerb = "dimensionality_reduction";
+
     return (
         <div className="drResults">
-            <Typography variant="h6">All Reductions</Typography>
-            <div className="resultRow">
-                {algoStates.map(algo => (
-                    <div
-                        key={algo.algorithmName}
-                        className={classnames({
-                            regressionResult: true,
-                            selected: selectedAlgos.includes(algo.algorithmName)
-                        })}
-                    >
+            {!helpModeState ? (
+                <DimensionalityReductionHeader setHelpModeState={setHelpModeState} />
+            ) : (
+                <HelpBarHeader
+                    setHelpModeState={setHelpModeState}
+                    title={"Dimensionality Reduction Page Help"}
+                />
+            )}
+            <HelpContent
+                hidden={!helpModeState}
+                guidancePath={`${algoVerb}_page:general_${algoVerb}`}
+            />
+            <div className="non-help-container" hidden={helpModeState}>
+                <div className="resultRow">
+                    {algoStates.map(algo => (
                         <div
-                            className="regressionHeader"
-                            onClick={_ => toggleSelected(algo.algorithmName)}
+                            key={algo.algorithmName}
+                            className={classnames({
+                                regressionResult: true,
+                                selected: selectedAlgos.includes(algo.algorithmName)
+                            })}
                         >
-                            {algo.algorithmName.length <= 20
-                                ? algo.algorithmName
-                                : algo.algorithmName.slice(0, 17) + "..."}
+                            <div
+                                className="regressionHeader"
+                                onClick={_ => toggleSelected(algo.algorithmName)}
+                            >
+                                {algo.algorithmName.length <= 20
+                                    ? algo.algorithmName
+                                    : algo.algorithmName.slice(0, 17) + "..."}
+                            </div>
+                            <div className="plot">
+                                {makeDRPlot(algo, maxYRange, changeSliderVal)}
+                            </div>
                         </div>
-                        <div className="plot">{makeDRPlot(algo, maxYRange, changeSliderVal)}</div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
         </div>
     );
@@ -187,12 +233,11 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        featureAdd: bindActionCreators(dataActions.featureAdd, dispatch),
-        //featureAdd:function(){console.log("Yeety");}
+        featureAdd: bindActionCreators(dataActions.featureAdd, dispatch)
     };
 }
 
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(DimensionalityReductionResults)
+)(DimensionalityReductionResults);
