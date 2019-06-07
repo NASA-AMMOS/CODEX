@@ -2,6 +2,7 @@
 	"presets": ["env", "react", "stage-2"],
 	"env": {
 		"development": {
+                        "plugins": ["@babel/plugin-transform-regenerator"],
 			"presets": ["react-hmre"]
 		}
 	}

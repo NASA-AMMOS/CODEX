@@ -7,7 +7,7 @@ const webpack = require("webpack");
 
 module.exports = {
     mode: "development",
-    entry: ["webpack-hot-middleware/client?reload=true", "./src/index.js"],
+    entry: ["webpack-hot-middleware/client?reload=true", "babel-polyfill", "./src/index.js"],
     output: {
         path: path.resolve(__dirname, "dist"),
         filename: "bundle.js",
