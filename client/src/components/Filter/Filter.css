@@ -1,0 +1,47 @@
+.Filter {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    height: 100%;
+
+    padding: 5px;
+}
+
+.Filter__expr {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-begin;
+
+    font-family: "bitstreamvera", monospace;
+}
+
+.Filter__expr:not(.Filter__expr--valid) > input {
+    color: red;
+}
+
+.Filter__expr-msg {
+    color: red;
+}
+
+.Filter__expr-features {
+    text-align: right;
+    font-size: 0.7em;
+    color: gray;
+}
+
+.Filter__heatmap {
+    flex-grow: 1;
+}
+
+.Filter__nameinput {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.Filter__nameinput > input {
+    flex-grow: 2;
+}
