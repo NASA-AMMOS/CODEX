@@ -216,6 +216,26 @@ export const brushClear = () => ({
 });
 
 /**
+ * Retain a feature (for reference counting)
+ * @param {string} featureName
+ * @return {object} non-dispatched action object
+ */
+export const featureRetain = featureName => ({
+    type: types.FEATURE_LIFETIME_RETAIN,
+    feature: featureName
+});
+
+/**
+ * Release a feature (for reference counting)
+ * @param {string} featureName
+ * @return {object} non-dispatched action object
+ */
+export const featureRelease = featureName => ({
+    type: types.FEATURE_LIFETIME_RELEASE,
+    feature: featureName
+});
+
+/**
  * Add a dataset to the store
  * @param {string} featureName
  * @param {array} data

@@ -383,12 +383,19 @@ export default class DataReducer {
             );
     }
 
+    /**
+     * Add a dataset into the loaded state
+     * @param {Map} state current state
+     * @param {object} action action
+     * @return {Map} new state
+     */
     static addDataset(state, action) {
-        const newDataset = {
+        const newDataset = Immutable.fromJS({
             feature: action.feature,
             data: action.data,
-            clusters: action.clusters
-        };
+            clusters: action.clusters,
+            references: 0
+        });
         return state.set("loadedData", state.get("loadedData").push(newDataset));
     }
 
@@ -398,6 +405,55 @@ export default class DataReducer {
             state
                 .get("featureList")
                 .push(Immutable.fromJS({ name: action.feature, selected: false }))
+        );
+    }
+
+    /**
+     * Handle a FEATURE_LIFETIME_RETAIN (reference counting)
+     * @param {Map} state current state
+     * @param {object} action action
+     * @return {Map} new state
+     */
+    static featureRetain(state, action) {
+        const targetIndex = state
+            .get("loadedData")
+            .findIndex(obj => obj.get("feature") === action.feature);
+
+        if (targetIndex === -1) {
+            console.warn(
+                "Attempting to set feature lifetime info for a feature that is not yet loaded!"
+            );
+            return state;
+        }
+
+        const refCount = state.getIn(["loadedData", targetIndex, "references"]);
+
+        return state.setIn(["loadedData", targetIndex, "references"], refCount + 1);
+    }
+
+    /**
+     * Handle a FEATURE_LIFETIME_RELEASE (reference counting)
+     * @param {Map} state current state
+     * @param {object} action action
+     * @return {Map} new state
+     */
+    static featureRelease(state, action) {
+        const targetIndex = state
+            .get("loadedData")
+            .findIndex(obj => obj.get("feature") === action.feature);
+
+        if (targetIndex === -1) {
+            console.warn(
+                "Attempting to set feature lifetime info for a feature that is not yet loaded!"
+            );
+            return state;
+        }
+
+        const refCount = state.getIn(["loadedData", targetIndex, "references"]);
+
+        return state.setIn(
+            ["loadedData", targetIndex, "references"],
+            refCount > 0 ? refCount - 1 : 0
         );
     }
 }
