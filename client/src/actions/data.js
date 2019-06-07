@@ -46,7 +46,6 @@ export const featureAdd = (featureName, featureData) => ({
     featureData
 });
 
-
 /**
  * Select a feature
  * @param {string} feature feature name
@@ -214,4 +213,16 @@ export const brushUpdateArea = (mode, area, xAxisFeature, yAxisFeature) => ({
  */
 export const brushClear = () => ({
     type: types.BRUSH_CLEAR
+});
+
+/**
+ * Add a dataset to the store
+ * @param {string} featureName
+ * @param {array} data
+ * @return {object} non-dispatched action object
+ */
+export const addDataset = (featureName, data) => ({
+    type: types.ADD_DATASET,
+    feature: featureName,
+    data
 });

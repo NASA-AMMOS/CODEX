@@ -24,8 +24,8 @@ function loadColumnFromServer(feature) {
 function getStoredColumn(feature, getState) {
     const col = getState()
         .data.get("loadedData")
-        .find(dataset => feature === dataset.feature);
-    if (col) return col.data;
+        .find(dataset => feature === dataset.get("feature"));
+    if (col) return col.get("data").toJS();
 }
 
 // If we've already gotten and saved this column from the server, this function gets it from the state.
