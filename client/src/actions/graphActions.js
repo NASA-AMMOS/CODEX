@@ -8,16 +8,16 @@ function alertNotRightNumberOfFeatures() {
     alert("Please select exactly 2 features in the features list to create this graph.");
 }
 
-function canBuildGraph(graphMode, dataState) {
+function canBuildGraph(graphMode, selectedFeatures) {
     switch (graphMode) {
         case uiTypes.SCATTER_GRAPH:
-            if (dataState.get("featureList").filter(f => f.get("selected")).size != 2) {
+            if (selectedFeatures.length != 2) {
                 alertNotRightNumberOfFeatures();
                 return false;
             }
             break;
         case uiTypes.CONTOUR_GRAPH:
-            if (dataState.get("featureList").filter(f => f.get("selected")).size != 2) {
+            if (selectedFeatures.length != 2) {
                 alertNotRightNumberOfFeatures();
                 return false;
             }
@@ -30,7 +30,7 @@ function canBuildGraph(graphMode, dataState) {
         case uiTypes.BOX_PLOT_GRAPH:
             return true;
         case uiTypes.HEATMAP_GRAPH:
-            if (dataState.get("featureList").filter(f => f.get("selected")).size != 2) {
+            if (selectedFeatures.length != 2) {
                 alertNotRightNumberOfFeatures();
                 return false;
             }
@@ -50,7 +50,7 @@ export function createGraph(graphMode, selectedFeatures) {
                 .map(f => f.get("name"))
                 .toJS();
 
-        if (!canBuildGraph(graphMode, getState().data)) return { type: actionTypes.NO_ACTION };
+        if (!canBuildGraph(graphMode, selectedFeatures)) return { type: actionTypes.NO_ACTION };
 
         Promise.all(
             selectedFeatures.map(feature => actionFunctions.getColumn(feature, dispatch, getState))
