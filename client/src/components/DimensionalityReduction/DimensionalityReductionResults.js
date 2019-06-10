@@ -109,11 +109,11 @@ function DimensionalityReductionHeader(props) {
 function HelpBarHeader(props) {
     return (
         <div className="headerBar">
-            <IconButton 
-                className="closeButton" 
+            <IconButton
+                className="closeButton"
                 onClick={_ => props.setHelpModeState(state => !state)}
             >
-                <Close /> 
+                <Close />
             </IconButton>
         </div>
     );
@@ -154,7 +154,7 @@ function DimensionalityReductionResults(props) {
                 //this is subject to change
                 let featureName = data.algorithm;
                 let featureData = data.data;
-                props.featureAdd(featureName,featureData);
+                props.featureAdd(featureName, featureData);
             });
         });
 
@@ -186,16 +186,14 @@ function DimensionalityReductionResults(props) {
 
     return (
         <div className="drResults">
-            { !helpModeState ?
-                <DimensionalityReductionHeader
-                    setHelpModeState = {setHelpModeState}
-                />
-                :
+            {!helpModeState ? (
+                <DimensionalityReductionHeader setHelpModeState={setHelpModeState} />
+            ) : (
                 <HelpBarHeader
-                    setHelpModeState = {setHelpModeState}
+                    setHelpModeState={setHelpModeState}
                     title={"Dimensionality Reduction Page Help"}
                 />
-            }
+            )}
             <HelpContent
                 hidden={!helpModeState}
                 guidancePath={`${algoVerb}_page:general_${algoVerb}`}
@@ -218,7 +216,9 @@ function DimensionalityReductionResults(props) {
                                     ? algo.algorithmName
                                     : algo.algorithmName.slice(0, 17) + "..."}
                             </div>
-                            <div className="plot">{makeDRPlot(algo, maxYRange, changeSliderVal)}</div>
+                            <div className="plot">
+                                {makeDRPlot(algo, maxYRange, changeSliderVal)}
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -233,7 +233,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        featureAdd: bindActionCreators(dataActions.featureAdd, dispatch),
+        featureAdd: bindActionCreators(dataActions.featureAdd, dispatch)
     };
 }
 

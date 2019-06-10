@@ -25,10 +25,9 @@ import Close from "@material-ui/icons/Close";
 import IconButton from "@material-ui/core/IconButton";
 
 function RegressionHeaderBar(props) {
-
     return (
         <div className="headerBar">
-            <FormControl className="labelDropdown" >
+            <FormControl className="labelDropdown">
                 <InputLabel>Labels</InputLabel>
                 <Select value={props.label} onChange={e => props.setLabel(e.target.value)}>
                     {props.selectedFeatures.map(f => (
@@ -46,9 +45,9 @@ function RegressionHeaderBar(props) {
                 >
                     Run
                 </Button>
-            <IconButton onClick={_ => props.setHelpModeState(state => !state)}>
-                <HelpOutline />
-            </IconButton>
+                <IconButton onClick={_ => props.setHelpModeState(state => !state)}>
+                    <HelpOutline />
+                </IconButton>
             </div>
         </div>
     );
@@ -57,14 +56,12 @@ function RegressionHeaderBar(props) {
 function HelpBarHeader(props) {
     return (
         <div className="headerBar">
-            <h2>
-                {props.title}
-            </h2>
-            <IconButton 
-                className="closeButton" 
+            <h2>{props.title}</h2>
+            <IconButton
+                className="closeButton"
                 onClick={_ => props.setHelpModeState(state => !state)}
             >
-                <Close /> 
+                <Close />
             </IconButton>
         </div>
     );
@@ -248,7 +245,15 @@ function RegressionsOverview(props) {
     const [searchType, setSearchType] = useState(searchTypeOptions[0]);
 
     //todo refactor these out
-    const scoringOptions = ["explained_variance", "max_error", "neg_mean_absolute_error", "neg_mean_squared_error", "neg_mean_squared_log_error", "neg_median_absolute_error", "r2"];
+    const scoringOptions = [
+        "explained_variance",
+        "max_error",
+        "neg_mean_absolute_error",
+        "neg_mean_squared_error",
+        "neg_mean_squared_log_error",
+        "neg_median_absolute_error",
+        "r2"
+    ];
     const [scoring, setScoring] = useState(scoringOptions[0]);
 
     const [label, setLabel] = useState(selectedFeatures[0]);
@@ -301,22 +306,19 @@ function RegressionsOverview(props) {
 
     return (
         <div className="regressionsContainer">
-            { !helpModeState ?
+            {!helpModeState ? (
                 <RegressionHeaderBar
-                    selectedFeatures = {selectedFeatures}
-                    regressionOutputParams = {regressionOutput}
-                    createRegressionOutput = {props.createRegressionOutput}
-                    setHelpModeState = {setHelpModeState}
-                    label = {label}
-                    setLabel = {setLabel}
+                    selectedFeatures={selectedFeatures}
+                    regressionOutputParams={regressionOutput}
+                    createRegressionOutput={props.createRegressionOutput}
+                    setHelpModeState={setHelpModeState}
+                    label={label}
+                    setLabel={setLabel}
                 />
-                :
-                <HelpBarHeader
-                    setHelpModeState = {setHelpModeState}
-                    title={"Regression Page Help"}
-                />
-            }
-            <hr/>
+            ) : (
+                <HelpBarHeader setHelpModeState={setHelpModeState} title={"Regression Page Help"} />
+            )}
+            <hr />
             <HelpContent
                 hidden={!helpModeState}
                 guidancePath={`${algoVerb}_page:general_${algoVerb}`}

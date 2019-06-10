@@ -24,7 +24,6 @@ import Close from "@material-ui/icons/Close";
 import IconButton from "@material-ui/core/IconButton";
 
 function ClassificationHeaderBar(props) {
-
     return (
         <div className="headerBar">
             <FormControl className="labelDropdown">
@@ -41,28 +40,27 @@ function ClassificationHeaderBar(props) {
                 <Button
                     variant="contained"
                     color="primary"
-                    onClick={_ => props.createClassificationOutput(...props.classificationOutputParams)}
+                    onClick={_ =>
+                        props.createClassificationOutput(...props.classificationOutputParams)
+                    }
                 >
                     Run
                 </Button>
-                
-            <IconButton onClick={_ => props.setHelpModeState(state => !state)}>
-                <HelpOutline />
-            </IconButton>
+
+                <IconButton onClick={_ => props.setHelpModeState(state => !state)}>
+                    <HelpOutline />
+                </IconButton>
             </div>
         </div>
     );
 }
 
 function HelpBarHeader(props) {
-
     return (
         <div className="headerBar">
-            <h2>
-                {props.title}
-            </h2>
-            <IconButton 
-                className="closeButton" 
+            <h2>{props.title}</h2>
+            <IconButton
+                className="closeButton"
                 onClick={_ => props.setHelpModeState(state => !state)}
             >
                 <Close />
@@ -251,7 +249,6 @@ function ClassificationOverview(props) {
     const scoringOptions = ["accuracy", "precision", "recall"];
     const [scoring, setScoring] = useState(scoringOptions[0]);
 
-    
     const [activeClassificationName, setActiveClassificationName] = useState(
         classificationStates[0].name
     );
@@ -307,24 +304,23 @@ function ClassificationOverview(props) {
         props.winId
     ];
 
-
     return (
         <div className="classificationsContainer">
-            { !helpModeState ?
+            {!helpModeState ? (
                 <ClassificationHeaderBar
-                    selectedFeatures = {selectedFeatures}
-                    classificationOutputParams = {classificationOutput}
-                    createClassificationOutput = {props.createClassificationOutput}
-                    setHelpModeState = {setHelpModeState}
-                    label = {label}
-                    setLabel = {setLabel}
+                    selectedFeatures={selectedFeatures}
+                    classificationOutputParams={classificationOutput}
+                    createClassificationOutput={props.createClassificationOutput}
+                    setHelpModeState={setHelpModeState}
+                    label={label}
+                    setLabel={setLabel}
                 />
-                :
+            ) : (
                 <HelpBarHeader
-                    setHelpModeState = {setHelpModeState}
+                    setHelpModeState={setHelpModeState}
                     title={"Classification Page Help"}
                 />
-            }
+            )}
             <hr />
             <HelpContent
                 hidden={!helpModeState}

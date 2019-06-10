@@ -20,12 +20,12 @@ function transposeRagged(z) {
     let zlen = z.length;
     let i, j;
     // Maximum row length:
-    for(i = 0; i < zlen; i++) maxlen = Math.max(maxlen, z[i].length);
+    for (i = 0; i < zlen; i++) maxlen = Math.max(maxlen, z[i].length);
 
     let t = new Array(maxlen);
-    for(i = 0; i < maxlen; i++) {
+    for (i = 0; i < maxlen; i++) {
         t[i] = new Array(zlen);
-        for(j = 0; j < zlen; j++) t[i][j] = z[j][i];
+        for (j = 0; j < zlen; j++) t[i][j] = z[j][i];
     }
 
     return t;
@@ -33,25 +33,25 @@ function transposeRagged(z) {
 
 // our own dot function so that we don't need to include numeric
 function dot(x, y) {
-    if(!(x.length && y.length) || x.length !== y.length) return null;
+    if (!(x.length && y.length) || x.length !== y.length) return null;
 
     let len = x.length;
     let out;
     let i;
 
-    if(x[0].length) {
+    if (x[0].length) {
         // mat-vec or mat-mat
         out = new Array(len);
-        for(i = 0; i < len; i++) out[i] = dot(x[i], y);
-    } else if(y[0].length) {
+        for (i = 0; i < len; i++) out[i] = dot(x[i], y);
+    } else if (y[0].length) {
         // vec-mat
         let yTranspose = transposeRagged(y);
         out = new Array(yTranspose.length);
-        for(i = 0; i < yTranspose.length; i++) out[i] = dot(x, yTranspose[i]);
+        for (i = 0; i < yTranspose.length; i++) out[i] = dot(x, yTranspose[i]);
     } else {
         // vec-vec
         out = 0;
-        for(i = 0; i < len; i++) out += x[i] * y[i];
+        for (i = 0; i < len; i++) out += x[i] * y[i];
     }
 
     return out;
@@ -67,7 +67,7 @@ function dot(x, y) {
  *      before the line counts as bent
  * @returns boolean: true means this segment is bent, false means straight
  */
- function isSegmentBent(pts, start, end, tolerance) {
+function isSegmentBent(pts, start, end, tolerance) {
     let startPt = pts[start];
     let segment = [pts[end][0] - startPt[0], pts[end][1] - startPt[1]];
     let segmentSquared = dot(segment, segment);
@@ -77,12 +77,16 @@ function dot(x, y) {
     let part;
     let partParallel;
 
-    for(i = start + 1; i < end; i++) {
+    for (i = start + 1; i < end; i++) {
         part = [pts[i][0] - startPt[0], pts[i][1] - startPt[1]];
         partParallel = dot(part, segment);
 
-        if(partParallel < 0 || partParallel > segmentSquared ||
-            Math.abs(dot(part, unitPerp)) > tolerance) return true;
+        if (
+            partParallel < 0 ||
+            partParallel > segmentSquared ||
+            Math.abs(dot(part, unitPerp)) > tolerance
+        )
+            return true;
     }
     return false;
 }
@@ -112,10 +116,10 @@ function filterPolygon(pts) {
         let iLast = doneRawIndex;
         ptsFiltered.splice(doneFilteredIndex + 1);
 
-        for(let i = iLast + 1; i < pts.length; i++) {
-            if(i === pts.length - 1 || isSegmentBent(pts, iLast, i + 1, tolerance)) {
+        for (let i = iLast + 1; i < pts.length; i++) {
+            if (i === pts.length - 1 || isSegmentBent(pts, iLast, i + 1, tolerance)) {
                 ptsFiltered.push(pts[i]);
-                if(ptsFiltered.length < prevFilterLen - 2) {
+                if (ptsFiltered.length < prevFilterLen - 2) {
                     doneRawIndex = i;
                     doneFilteredIndex = ptsFiltered.length - 1;
                 }
@@ -124,9 +128,8 @@ function filterPolygon(pts) {
         }
     }
 
-    if(pts.length > 1) {
+    if (pts.length > 1) {
         let lastPt = pts.pop();
-
 
         addPt(lastPt);
     }
@@ -138,7 +141,6 @@ function filterPolygon(pts) {
     };
 }
 
-
 function polygonTester(ptsIn) {
     let pts = ptsIn.slice();
     let xmin = pts[0][0];
@@ -148,7 +150,7 @@ function polygonTester(ptsIn) {
     let i;
 
     pts.push(pts[0]);
-    for(i = 1; i < pts.length; i++) {
+    for (i = 1; i < pts.length; i++) {
         xmin = Math.min(xmin, pts[i][0]);
         xmax = Math.max(xmax, pts[i][0]);
         ymin = Math.min(ymin, pts[i][1]);
@@ -161,20 +163,22 @@ function polygonTester(ptsIn) {
     let isRect = false;
     let rectFirstEdgeTest;
 
-    if(pts.length === 5) {
-        if(pts[0][0] === pts[1][0]) { // vert, horz, vert, horz
-            if(pts[2][0] === pts[3][0] &&
-                    pts[0][1] === pts[3][1] &&
-                    pts[1][1] === pts[2][1]) {
+    if (pts.length === 5) {
+        if (pts[0][0] === pts[1][0]) {
+            // vert, horz, vert, horz
+            if (pts[2][0] === pts[3][0] && pts[0][1] === pts[3][1] && pts[1][1] === pts[2][1]) {
                 isRect = true;
-                rectFirstEdgeTest = function(pt) { return pt[0] === pts[0][0]; };
+                rectFirstEdgeTest = function(pt) {
+                    return pt[0] === pts[0][0];
+                };
             }
-        } else if(pts[0][1] === pts[1][1]) { // horz, vert, horz, vert
-            if(pts[2][1] === pts[3][1] &&
-                    pts[0][0] === pts[3][0] &&
-                    pts[1][0] === pts[2][0]) {
+        } else if (pts[0][1] === pts[1][1]) {
+            // horz, vert, horz, vert
+            if (pts[2][1] === pts[3][1] && pts[0][0] === pts[3][0] && pts[1][0] === pts[2][0]) {
                 isRect = true;
-                rectFirstEdgeTest = function(pt) { return pt[1] === pts[0][1]; };
+                rectFirstEdgeTest = function(pt) {
+                    return pt[1] === pts[0][1];
+                };
             }
         }
     }
@@ -183,11 +187,11 @@ function polygonTester(ptsIn) {
         let x = pt[0];
         let y = pt[1];
 
-        if(x < xmin || x > xmax || y < ymin || y > ymax) {
+        if (x < xmin || x > xmax || y < ymin || y > ymax) {
             // pt is outside the bounding box of polygon
             return false;
         }
-        if(omitFirstEdge && rectFirstEdgeTest(pt)) return false;
+        if (omitFirstEdge && rectFirstEdgeTest(pt)) return false;
 
         return true;
     }
@@ -196,7 +200,7 @@ function polygonTester(ptsIn) {
         let x = pt[0];
         let y = pt[1];
 
-        if( x < xmin || x > xmax || y < ymin || y > ymax) {
+        if (x < xmin || x > xmax || y < ymin || y > ymax) {
             // pt is outside the bounding box of polygon
             return false;
         }
@@ -211,7 +215,7 @@ function polygonTester(ptsIn) {
         let xmini;
         let ycross;
 
-        for(i = 1; i < imax; i++) {
+        for (i = 1; i < imax; i++) {
             // find all crossings of a vertical line upward from pt with
             // polygon segments
             // crossings exactly at xmax don't count, unless the point is
@@ -222,35 +226,35 @@ function polygonTester(ptsIn) {
             y1 = pts[i][1];
             xmini = Math.min(x0, x1);
 
-            if(x < xmini || x > Math.max(x0, x1) || y > Math.max(y0, y1)) {
+            if (x < xmini || x > Math.max(x0, x1) || y > Math.max(y0, y1)) {
                 // outside the bounding box of this segment, it's only a crossing
                 // if it's below the box.
 
                 continue;
-            } else if(y < Math.min(y0, y1)) {
+            } else if (y < Math.min(y0, y1)) {
                 // don't count the left-most point of the segment as a crossing
                 // because we don't want to double-count adjacent crossings
                 // UNLESS the polygon turns past vertical at exactly this x
                 // Note that this is repeated below, but we can't factor it out
                 // because
-                if(x !== xmini) crossings++;
+                if (x !== xmini) crossings++;
             } else {
                 // inside the bounding box, check the actual line intercept
 
                 // vertical segment - we know already that the point is exactly
                 // on the segment, so mark the crossing as exactly at the point.
-                if(x1 === x0) ycross = y;
+                if (x1 === x0) ycross = y;
                 // any other angle
-                else ycross = y0 + (x - x0) * (y1 - y0) / (x1 - x0);
+                else ycross = y0 + ((x - x0) * (y1 - y0)) / (x1 - x0);
 
                 // exactly on the edge: counts as inside the polygon, unless it's the
                 // first edge and we're omitting it.
-                if(y === ycross) {
-                    if(i === 1 && omitFirstEdge) return false;
+                if (y === ycross) {
+                    if (i === 1 && omitFirstEdge) return false;
                     return true;
                 }
 
-                if(y <= ycross && x !== xmini) crossings++;
+                if (y <= ycross && x !== xmini) crossings++;
             }
         }
 
@@ -261,8 +265,8 @@ function polygonTester(ptsIn) {
     // detect if poly is degenerate
     let degenerate = true;
     let lastPt = pts[0];
-    for(i = 1; i < pts.length; i++) {
-        if(lastPt[0] !== pts[i][0] || lastPt[1] !== pts[i][1]) {
+    for (i = 1; i < pts.length; i++) {
+        if (lastPt[0] !== pts[i][0] || lastPt[1] !== pts[i][1]) {
             degenerate = false;
             break;
         }
@@ -281,7 +285,9 @@ function polygonTester(ptsIn) {
 }
 
 function getPointIndicesFromPolygon(lassoPoints, dataPoints) {
-    let zippedLassoPoints = [lassoPoints.x, lassoPoints.y][0].map((col, i) => dataPoints.map(row => row[i]));
+    let zippedLassoPoints = [lassoPoints.x, lassoPoints.y][0].map((col, i) =>
+        dataPoints.map(row => row[i])
+    );
     let filteredPolygon = filterPolygon(zippedLassoPoints);
 
     let polygonTest = polygonTester(filteredPolygon.filtered);
@@ -290,11 +296,10 @@ function getPointIndicesFromPolygon(lassoPoints, dataPoints) {
     let pointIndices = [];
 
     for (let i = 0; i < zippedPoints.length; i++) {
-        if (polygonTest.contains(zippedPoints[i],true))
-            pointIndices.push(i);
+        if (polygonTest.contains(zippedPoints[i], true)) pointIndices.push(i);
     }
 
-    console.log(pointIndices.length)
+    console.log(pointIndices.length);
 
     return pointIndices;
 }
@@ -336,13 +341,13 @@ function ContourGraph(props) {
             hovermode: "closest",
             xaxis: {
                 autotick: true,
-                automargin:true,
+                automargin: true,
                 ticks: "outside",
                 title: xAxis
             },
             yaxis: {
                 autotick: true,
-                automargin:true,
+                automargin: true,
                 ticks: "outside",
                 title: yAxis
             }
@@ -381,7 +386,7 @@ function ContourGraph(props) {
     );*/
 
     // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
-   /* useEffect(
+    /* useEffect(
         _ => {
             chartState.data[0].marker.color = chartState.data[0].marker.color.map(
                 _ => DEFAULT_POINT_COLOR
@@ -399,9 +404,7 @@ function ContourGraph(props) {
     );*/
 
     return (
-        <GraphWrapper
-            chart = {chart}
-        >
+        <GraphWrapper chart={chart}>
             <Plot
                 ref={chart}
                 data={chartState.data}

@@ -22,8 +22,8 @@ export const initialSizes = {
         resizeable: true
     },
     [uiTypes.HEATMAP_GRAPH]: {
-        width:500,
-        height:500,
+        width: 500,
+        height: 500,
         resizeable: true
     },
     [uiTypes.TIME_SERIES_GRAPH]: {
@@ -79,5 +79,10 @@ export const initialSizes = {
         width: 750,
         height: 600,
         resizeable: false
+    },
+    [workflowTypes.FILTER_WINDOW]: {
+        width: 750,
+        height: 600,
+        resizeable: true
     }
 };

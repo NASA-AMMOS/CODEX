@@ -46,7 +46,6 @@ export const featureAdd = (featureName, featureData) => ({
     featureData
 });
 
-
 /**
  * Select a feature
  * @param {string} feature feature name
@@ -214,4 +213,36 @@ export const brushUpdateArea = (mode, area, xAxisFeature, yAxisFeature) => ({
  */
 export const brushClear = () => ({
     type: types.BRUSH_CLEAR
+});
+
+/**
+ * Retain a feature (for reference counting)
+ * @param {string} featureName
+ * @return {object} non-dispatched action object
+ */
+export const featureRetain = featureName => ({
+    type: types.FEATURE_LIFETIME_RETAIN,
+    feature: featureName
+});
+
+/**
+ * Release a feature (for reference counting)
+ * @param {string} featureName
+ * @return {object} non-dispatched action object
+ */
+export const featureRelease = featureName => ({
+    type: types.FEATURE_LIFETIME_RELEASE,
+    feature: featureName
+});
+
+/**
+ * Add a dataset to the store
+ * @param {string} featureName
+ * @param {array} data
+ * @return {object} non-dispatched action object
+ */
+export const addDataset = (featureName, data) => ({
+    type: types.ADD_DATASET,
+    feature: featureName,
+    data
 });

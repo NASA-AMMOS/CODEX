@@ -20,6 +20,8 @@ import DimensionalityReductionResults from "components/DimensionalityReduction/D
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
 import * as workflowTypes from "constants/workflowTypes";
 import ExplainThis from "components/ExplainThis/ExplainThis";
+import Filter from "components/Filter/Filter";
+import DataWrapper from "components/DataWrapper/DataWrapper";
 
 export function getWindowTitle(win) {
     switch (win.windowType) {
@@ -50,6 +52,8 @@ export function getWindowTitle(win) {
             return "Dimensionality Reduction Results";
         case workflowTypes.EXPLAIN_THIS:
             return "Explain This";
+        case workflowTypes.FILTER:
+            return "Filter";
         default:
             return "";
     }
@@ -68,7 +72,7 @@ export function getWindowContent(win) {
         case uiTypes.BOX_PLOT_GRAPH:
             return <BoxPlotGraph data={win.data} />;
         case uiTypes.VIOLIN_PLOT_GRAPH:
-            return <ViolinPlotGraph data={win.data}/>;
+            return <ViolinPlotGraph data={win.data} />;
         case algorithmTypes.CLUSTER_ALGORITHM:
             return (
                 <ClusterAlgorithm
@@ -104,11 +108,12 @@ export function getWindowContent(win) {
                 <DimensionalityReductionResults requests={win.requests} runParams={win.runParams} />
             );
         case workflowTypes.EXPLAIN_THIS_WINDOW:
+            return <ExplainThis request={win.request} winId={win.id} />;
+        case workflowTypes.FILTER_WINDOW:
             return (
-                <ExplainThis
-                    request={win.request}
-                    winId={win.id}
-                />
+                <DataWrapper>
+                    <Filter />
+                </DataWrapper>
             );
     }
 }
