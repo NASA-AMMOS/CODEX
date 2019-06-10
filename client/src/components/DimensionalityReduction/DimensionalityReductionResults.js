@@ -69,6 +69,7 @@ function makeDRPlot(algo, maxYRange, changeSliderVal) {
     const id = Math.random()
         .toString(36)
         .substring(8);
+        
     return (
         <React.Fragment>
             <Plot
