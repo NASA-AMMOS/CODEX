@@ -165,10 +165,8 @@ function TimeSeriesSubGraph(props) {
             onInitialized={figure => setChartState(figure)}
             onUpdate={figure => setChartState(figure)}
             onClick={e => {
-                console.log(props.currentSelection);
                 if (e.event.button === 2) return;
                 props.setCurrentSelection([]);
-                console.log(props.currentSelection)
             }}
             onSelected={e => {
                 if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
