@@ -230,8 +230,8 @@ function WindowManager(props) {
 
 function mapStateToProps(state) {
     return {
-        windows: state.windowManager.get("windows"),
-        tileActionPending: state.windowManager.get("tileActionPending")
+        windows: state.windowManager.windows,
+        tileActionPending: state.windowManager.tileActionPending
     };
 }
 

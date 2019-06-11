@@ -71,7 +71,7 @@ function ControlBar(props) {
 
 function mapStateToProps(state) {
     return {
-        windows: state.windowManager.get("windows").toJS(),
+        windows: state.windowManager.windows,
         globalChartState: state.ui.get("globalChartState")
     };
 }
