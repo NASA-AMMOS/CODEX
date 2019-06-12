@@ -41,6 +41,7 @@ export interface CristalProps {
 export interface CristalState {
     x: number;
     y: number;
+    title?: string;
     isResizable?: boolean;
     isDragging: boolean;
     isResizingX: boolean;
@@ -64,6 +65,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
     state: CristalState = {
         x: padding,
         y: padding,
+        title: this.props.title,
         isResizable: this.props.isResizable,
         isDragging: false,
         isResizingX: false,
@@ -246,7 +248,8 @@ export class Cristal extends Component<CristalProps, CristalState> {
     startYResize = () => this.setState({ isResizingY: true });
 
     get header() {
-        const { onClose, title, isDraggable, onMinimize, isActive } = this.props;
+        const { onClose, isDraggable, onMinimize, isActive } = this.props;
+        const { title } = this.state;
 
         const minimizeIcon = onMinimize ? <MinimizeIcon onClick={onMinimize} /> : null;
 
