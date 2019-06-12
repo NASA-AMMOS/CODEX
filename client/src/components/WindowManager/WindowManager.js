@@ -175,25 +175,25 @@ function WindowManager(props) {
     const windows = props.windows
         .filter(win => !win.minimizedOnly)
         .map((win, idx) => {
-            const { width, height, resizeable, minSize } = windowSettings.initialSizes[
-                win.windowType
-            ];
+            const windowElement = windowContentFunctions.getWindowContent(win);
 
+            const { width, height, resizeable, minSize } = windowSettings.defaultInitialSize;
             // If we can't find a ref for this window, it's new, and we calculate an initial position for it
             const initialPos = refs.current[win.id]
                 ? "top-left"
                 : getNewWindowPosition(props, refs, width, height);
 
-            const settings = win.settings || {
-                title: windowContentFunctions.getWindowTitle(win),
-                children: null,
-                isResizable: resizeable,
-                isDraggable: true,
-                initialPosition: initialPos,
-                restrictToParentDiv: true,
-                initialSize: { width, height },
-                minSize
-            };
+            const settings = windowElement.windowSettings ||
+                win.settings || {
+                    title: windowContentFunctions.getWindowTitle(win),
+                    children: null,
+                    isResizable: resizeable,
+                    isDraggable: true,
+                    initialPosition: initialPos,
+                    restrictToParentDiv: true,
+                    initialSize: { width, height },
+                    minSize
+                };
 
             // This is a bit of an odd return fragment, but we want to avoid re-rendering the window's content.
             // If the window is minimized, we retain the Cristal (draggable window) reference, but keep it hidden.
@@ -215,7 +215,11 @@ function WindowManager(props) {
                     onClick={_ => setActiveWindow(win.id)}
                     {...settings}
                 >
-                    <div className="windowBody">{windowContentFunctions.getWindowContent(win)}</div>
+                    <div className="windowBody">
+                        {React.cloneElement(windowContentFunctions.getWindowContent(win), {
+                            __wm_parent_ref: refs.current[win.id]
+                        })}
+                    </div>
                 </Cristal>
             );
         });

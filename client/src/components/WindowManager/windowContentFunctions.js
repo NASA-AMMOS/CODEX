@@ -110,11 +110,7 @@ export function getWindowContent(win) {
         case workflowTypes.EXPLAIN_THIS_WINDOW:
             return <ExplainThis request={win.request} winId={win.id} />;
         case workflowTypes.FILTER_WINDOW:
-            return (
-                <DataWrapper>
-                    <Filter />
-                </DataWrapper>
-            );
+            return <Filter />;
     }
 }
 
