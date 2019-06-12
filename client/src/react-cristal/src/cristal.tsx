@@ -41,6 +41,7 @@ export interface CristalProps {
 export interface CristalState {
     x: number;
     y: number;
+    isResizable?: boolean;
     isDragging: boolean;
     isResizingX: boolean;
     isResizingY: boolean;
@@ -63,6 +64,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
     state: CristalState = {
         x: padding,
         y: padding,
+        isResizable: this.props.isResizable,
         isDragging: false,
         isResizingX: false,
         isResizingY: false,
@@ -271,7 +273,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
     }
 
     renderResizeHandles = () => {
-        const { isResizable } = this.props;
+        const { isResizable } = this.state;
         if (!isResizable) return;
         return [
             <RightResizeHandle key="right-resize" onMouseDown={this.startXResize} />,
