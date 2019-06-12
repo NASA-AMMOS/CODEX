@@ -50,7 +50,7 @@ export function getWindowTitle(win) {
             return "Sessions";
         case dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW:
             return "Dimensionality Reduction Results";
-        case workflowTypes.EXPLAIN_THIS:
+        case workflowTypes.EXPLAIN_THIS_WINDOW:
             return "Explain This";
         case workflowTypes.FILTER:
             return "Filter";
@@ -108,7 +108,7 @@ export function getWindowContent(win) {
                 <DimensionalityReductionResults requests={win.requests} runParams={win.runParams} />
             );
         case workflowTypes.EXPLAIN_THIS_WINDOW:
-            return <ExplainThis request={win.request} winId={win.id} />;
+            return <ExplainThis winId={win.id} />;
         case workflowTypes.FILTER_WINDOW:
             return (
                 <DataWrapper>

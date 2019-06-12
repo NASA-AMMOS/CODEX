@@ -87,22 +87,21 @@ function BoxPlotGraph(props) {
         <GraphWrapper
             resizeHandler = {_ => (chartRefs.forEach((chart) => chart.current.resizeHandler()))}
         >
-                <ul className="box-plot-container"> 
-                    {
-                        data.map((dataElement,index) => (
-                            <BoxPlotSubGraph
-                                data={dataElement}
-                                chart={chartRefs[index]}
-                                layout={layouts[index]}
-                                globalChartState={props.globalChartState}
-                                setCurrentSelection={props.setCurrentSelection}
-                                currentSelection={props.currentSelection}
-                                savedSelections={props.savedSelections}
-                            />
-                        ))
-                    }
-                </ul>
-
+            <ul className="box-plot-container"> 
+                {
+                    data.map((dataElement,index) => (
+                        <BoxPlotSubGraph
+                            data={dataElement}
+                            chart={chartRefs[index]}
+                            layout={layouts[index]}
+                            globalChartState={props.globalChartState}
+                            setCurrentSelection={props.setCurrentSelection}
+                            currentSelection={props.currentSelection}
+                            savedSelections={props.savedSelections}
+                        />
+                    ))
+                }
+            </ul>
         </GraphWrapper>
     );
 }

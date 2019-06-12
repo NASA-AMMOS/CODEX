@@ -1,16 +1,21 @@
-import React, { useRef, useState, useEffect } from "react";
-import { bindActionCreators } from "redux";
+import React, { useRef, useState, useEffect} from "react";
+import { bindActionCreators} from "redux";
 import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
+import { connect} from "react-redux";
 import Popover from "@material-ui/core/Popover";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 import * as d3 from "d3";
-import rd3 from "react-d3-library";
 import "components/ExplainThis/ExplainThis.scss";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import InputLabel from "@material-ui/core/InputLabel";
+import FormControl from "@material-ui/core/FormControl";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
+import Slider from "@material-ui/lab/Slider";
 
 // Toggle children.
 function toggle(d) {
@@ -34,9 +39,32 @@ function toggleRecursive(d, signal) {
     }
 }
 
+function processFloatingPointNumber(number) {
+    let roundedNumber = Math.round(number * Math.pow(10, 2)) / Math.pow(10, 2);
+    let newNumber = "";
+    //see if has decimal
+    if ((roundedNumber + "").length > 4) {
+        //convert to scientific notation
+        newNumber = roundedNumber.toExponential(1);
+    } else {
+        newNumber = roundedNumber;
+    }
+
+    return newNumber;
+}
+
 // Node labels
 function node_label(d) {
-    return d.name.substring(0, d.name.length - 13);
+    //split on spaces
+    //shorten the name
+    //shorten the number 
+    //add them back together
+    let split = d.name.split(" ");
+    let float = processFloatingPointNumber(parseFloat(split[2])); //truncate to two decimal places
+    let featureName = split[0];
+    let name =featureName.length > 8 ? featureName.substring(0,3) + "..." + featureName.substring(featureName.length - 3) : featureName;
+
+    return name + split[1] + float;
 }
 
 function hasLeafChildren(d) {
@@ -87,8 +115,10 @@ function textSize(text) {
 }
 
 function generateTree(treeData, svgRef) {
+
+    let barHeight = 20;
     //setup margins and size for the d3 window
-    let margin = { top: 10, right: 20, bottom: 10, left: 60 },
+    let margin = { top: barHeight + 5, right: 20, bottom: 10, left: 60 },
         i = 0,
         width = svgRef.clientWidth - margin.right - margin.left,
         height = svgRef.clientHeight - margin.top - margin.bottom,
@@ -129,9 +159,8 @@ function generateTree(treeData, svgRef) {
     let vis = d3
         .select(svgRef)
         .append("svg:g")
-        .attr("transform", "translate(" + margin.left + "," + height / 2 + ")");
+        .attr("transform", "translate(" + margin.left + "," + (margin.top + (height / 2)) + ")");
 
-    let barHeight = 20;
     let gradientContainer = d3
         .select(svgRef)
         .append("svg:g")
@@ -213,9 +242,9 @@ function generateTree(treeData, svgRef) {
 
         // Normalize for fixed-depth.
         nodes.forEach(function(d) {
-            let firstDepth = 30;
+            let firstDepth = 50;
             let yscale = 120;
-
+                d.x+=50;
             if (d.depth == 0) {
                 d.y = 0;
             } else {
@@ -387,18 +416,81 @@ function generateTree(treeData, svgRef) {
     load_dataset(treeData);
 }
 
+function ChooseLabel(props) {
+    return (
+        <React.Fragment>
+            <p className="feature-list-header">Choose Label</p>
+            <br/>
+            <FormControl className="labelDropdown">
+                <InputLabel>Labels</InputLabel>
+                <Select value={props.label} onChange={e => props.setLabel(e.target.value)}>
+                    {props.selectedFeatures.map(f => (
+                        <MenuItem key={f} value={f}>
+                            {f}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+        </React.Fragment>
+    );
+}
+
+
+function TreeSweepScroller(props) {
+    if (!props.tree_sweep)
+        return <div className="tree-sweep-scroller"> Loading ... </div>;
+    const [listClass, setListClass] = useState([]);
+
+    const currentSelectionRef = useRef(null);
+
+    useEffect(_ => {
+        setListClass(
+            props.tree_sweep.map((val, idx) => {
+                return idx == props.treeIndex ? "tree-info-selected tree-info" : "tree-info";
+            })
+        );
+    }, [props.tree_sweep, props.treeIndex]);
+
+    return (
+        <div className="tree-sweep-scroller">
+            <ul className="tree-sweep-list">
+                {
+                    props.tree_sweep.map((tree, idx) => {
+                        return <li key={idx} className={listClass[idx] ? listClass[idx] : "tree-info"}> 
+                            <p>Score : {tree.score}</p>
+                            <p>Features : {tree.max_features}</p>
+                        </li>;
+                    })
+                }
+            </ul>
+            <Slider
+                value={props.treeIndex}
+                min={0}
+                max={props.tree_sweep.length - 1}
+                step={1}
+                onChange={(_, val) => {
+                    props.setTreeIndex(val);
+                    //scroll tree sweep list
+
+
+                }}
+            />
+        </div>
+    );
+}
+
 function FeatureList(props) {
-    if (props.features == undefined) {
+    if (props.rankedFeatures == undefined) {
         return <div>Loading ...</div>;
     }
 
     return (
-        <React.Fragment>
-            <List className="feature-list">
+        <div className="feature-list">
+            <List className="used-features feature-list-block">
                 <ListItem>
-                    <h6 className="feature-list-header">Feature List</h6>
+                    <p className="feature-list-header">Used Features</p>
                 </ListItem>
-                {props.features.map((feature, index) => {
+                {props.rankedFeatures.map((feature, index) => {
                     return (
                         <ListItem key={index}>
                             <span className="feature-list-item">{feature}</span>
@@ -410,28 +502,27 @@ function FeatureList(props) {
                     );
                 })}
             </List>
-        </React.Fragment>
+            <List className="unused-features feature-list-block">
+                <ListItem> 
+                    <p className="feature-list-header">Unused Features</p>
+                </ListItem>
+            </List>
+            <div className="label-chooser feature-list-block">
+                <ChooseLabel selectedFeatures={props.features} label={props.label} setLabel={props.setLabel}/>
+            </div>
+        </div>
     );
 }
 
 function ExplainThisTree(props) {
-    if (!props.treeData) {
-        return (
-            <div className="chartLoading">
-                <CircularProgress />
-            </div>
-        );
-    }
-
     //declaring svgRef so that the callback in the jsx below can reach it
     let svgRef = null;
-
     //wraps the entire functionality in lifecycle methods
     useEffect(_ => {
         if (!svgRef) return;
-
+        d3.selectAll("svg > *").remove();
         generateTree(props.treeData.json_tree, svgRef);
-    }, []);
+    }, [props.treeData]);
 
     return (
         <svg
@@ -443,42 +534,95 @@ function ExplainThisTree(props) {
     );
 }
 
+function createExplainThisRequest(filename, labelName, dataFeatures) {
+    return {
+        routine: "workflow",
+        dataSelections: [],
+        labelName: labelName,
+        workflow: "explain_this",
+        dataFeatures: dataFeatures,
+        file: filename,
+        cid: "8ksjk",
+        identification: { id: "dev0" }
+    };
+}
+
 function ExplainThis(props) {
     //make a data state object to hold the data in the request
     const [dataState, setDataState] = useState(undefined);
 
+    const defaultLabelName = "labels";
+    const [label, setLabel] = useState(defaultLabelName);
+    const [treeIndex, setTreeIndex] = useState(0);
+
     //handles the request object asynchronous loading
     useEffect(_ => {
         //handle the loading of the data request promise
-        props.request.req.then(data => {
+        // Get selected feature list from current state if none specified
+        let selectedFeatures = props.featureList
+            .filter(f => f.get("selected"))
+            .map(f => f.get("name"))
+            .toJS();
+
+        //todo actually setup a form for selecting a feature that gets sent to
+        //the user as a label
+        const request = createExplainThisRequest(props.filename, label, selectedFeatures);
+
+        const requestMade = utils.makeSimpleRequest(request);
+        requestMade.req.then(data => {
             setDataState(data);
         });
 
         //cancels the request if the window is closed
         return function cleanup() {
-            props.request.cancel();
+            requestMade.cancel();
         };
-    }, []);
+    }, [label]);
 
-    //todo make this list several trees
-    //get the selected features from state
-    const rankedFeatures = !dataState ? undefined : dataState.tree_sweep[0].feature_rank;
-
-    const treeData = !dataState ? undefined : dataState.tree_sweep[0];
-
-    const importances = !dataState ? undefined : dataState.tree_sweep[0].feature_weights;
-
-    return (
-        <div className="explain-this-container">
-            <FeatureList features={rankedFeatures} importances={importances} />
-            <ExplainThisTree treeData={treeData} />
-        </div>
-    );
+    if (!dataState) {
+        return (
+            <div className="chartLoading">
+                <CircularProgress />
+            </div>
+        );
+    } else if (!dataState.tree_sweep) {
+        return (
+            <div className="explain-this-container">
+                <FeatureList 
+                    features={props.featureList.map(f => f.get("name"))}
+                    rankedFeatures={[]} 
+                    importances={[]} 
+                    label={label} 
+                    setLabel={setLabel}
+                />
+                <div className="load-failure">
+                    Choose a different feature as your label. 
+                </div>
+            </div>
+        );
+    } else {
+        return (
+            <div className="explain-this-container">
+                <FeatureList 
+                    features={props.featureList.map(f => f.get("name"))}
+                    rankedFeatures={dataState.tree_sweep[treeIndex].feature_rank} 
+                    importances={dataState.tree_sweep[treeIndex].feature_weights} 
+                    label={label} 
+                    setLabel={setLabel}/>
+                <TreeSweepScroller 
+                    setTreeIndex={setTreeIndex}
+                    tree_sweep={dataState.tree_sweep}
+                    treeIndex={treeIndex}/>
+                <ExplainThisTree treeData={dataState.tree_sweep[treeIndex]}/>
+            </div>
+        );
+    }
 }
 
 function mapStateToProps(state) {
     return {
-        featureList: state.data.get("featureList")
+        featureList: state.data.get("featureList"),
+        filename: state.data.get("filename")
     };
 }
 
