@@ -7,6 +7,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 import * as d3 from "d3";
+import Plot from "react-plotly.js";
 import "components/ExplainThis/ExplainThis.scss";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -118,7 +119,7 @@ function generateTree(treeData, svgRef) {
 
     let barHeight = 20;
     //setup margins and size for the d3 window
-    let margin = { top: barHeight + 5, right: 20, bottom: 10, left: 60 },
+    let margin = { top: 0, right: 20, bottom: 10, left: 60 },
         i = 0,
         width = svgRef.clientWidth - margin.right - margin.left,
         height = svgRef.clientHeight - margin.top - margin.bottom,
@@ -131,7 +132,7 @@ function generateTree(treeData, svgRef) {
     //might change this later to be dynamic based on the number of leaf nodes
     let maxDepth = 6;
     let numLeafs = calculateNumLeafNodes(treeData);
-    let nodeSize = [height / Math.pow(2, maxDepth), width / maxDepth];
+    let nodeSize = [height / Math.pow(2, maxDepth)+3, width / maxDepth+3];
 
     let color_map = d3.scale
         .linear()
@@ -159,7 +160,7 @@ function generateTree(treeData, svgRef) {
     let vis = d3
         .select(svgRef)
         .append("svg:g")
-        .attr("transform", "translate(" + margin.left + "," + (margin.top + (height / 2)) + ")");
+        .attr("transform", "translate(" + margin.left + "," + ((height / 2) - 20) + ")");
 
     let gradientContainer = d3
         .select(svgRef)
@@ -416,6 +417,19 @@ function generateTree(treeData, svgRef) {
     load_dataset(treeData);
 }
 
+function createExplainThisRequest(filename, labelName, dataFeatures) {
+    return {
+        routine: "workflow",
+        dataSelections: [],
+        labelName: labelName,
+        workflow: "explain_this",
+        dataFeatures: dataFeatures,
+        file: filename,
+        cid: "8ksjk",
+        identification: { id: "dev0" }
+    };
+}
+
 function ChooseLabel(props) {
     return (
         <React.Fragment>
@@ -442,28 +456,61 @@ function TreeSweepScroller(props) {
     const [listClass, setListClass] = useState([]);
 
     const currentSelectionRef = useRef(null);
+    const xVals = [...Array(props.tree_sweep.length).keys()]
+    const chartOptions = {
+        data: [
+            {
+                x: xVals,
+                y: props.tree_sweep.map((tree) => {
+                    return tree.score;
+                }),
+                type: "scatter",
+                mode: "lines+markers",
+                //visible: true,
+                marker: {
+                    color: xVals.map(val => (val === props.treeIndex ? "#F5173E" : "#3386E6")),
+                    size: 6
+                },
+                hoverinfo: "text",
+               //text: algo.data.explained_variance_ratio.map(
+               //     (r, idx) => `Components: ${idx + 1} <br> Explained Variance: ${r}%`
+               // )
+            }
+        ],
+        layout: {
+            autosize: true,
+            margin: { l: 0, r: 5, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
+            hovermode: "closest", // Turning off hovermode seems to screw up click handling
+            titlefont: { size: 5 },
+            showlegend: false,
+            xaxis: {
+                automargin: true
+            },
+            yaxis: {
+                automargin: true,
+                range: [0, 100]
+            }
+        },
+        config: {
+            displaylogo: false,
+            displayModeBar: false
+        }
+    };
 
-    useEffect(_ => {
-        setListClass(
-            props.tree_sweep.map((val, idx) => {
-                return idx == props.treeIndex ? "tree-info-selected tree-info" : "tree-info";
-            })
-        );
-    }, [props.tree_sweep, props.treeIndex]);
 
     return (
-        <div className="tree-sweep-scroller">
-            <ul className="tree-sweep-list">
-                {
-                    props.tree_sweep.map((tree, idx) => {
-                        return <li key={idx} className={listClass[idx] ? listClass[idx] : "tree-info"}> 
-                            <p>Score : {tree.score}</p>
-                            <p>Features : {tree.max_features}</p>
-                        </li>;
-                    })
-                }
-            </ul>
+        <React.Fragment>
+            <Plot
+                className="tree-sweep-plot"
+                data={chartOptions.data}
+                layout={chartOptions.layout}
+                config={chartOptions.config}
+                useResizeHandler
+                //divId={id}
+                //onBeforeHover={e => console.log(e)}
+            />
             <Slider
+                className="tree-sweep-slider"
                 value={props.treeIndex}
                 min={0}
                 max={props.tree_sweep.length - 1}
@@ -471,11 +518,9 @@ function TreeSweepScroller(props) {
                 onChange={(_, val) => {
                     props.setTreeIndex(val);
                     //scroll tree sweep list
-
-
                 }}
             />
-        </div>
+        </React.Fragment>
     );
 }
 
@@ -486,7 +531,7 @@ function FeatureList(props) {
 
     return (
         <div className="feature-list">
-            <List className="used-features feature-list-block">
+            <List className="used-features">
                 <ListItem>
                     <p className="feature-list-header">Used Features</p>
                 </ListItem>
@@ -502,13 +547,14 @@ function FeatureList(props) {
                     );
                 })}
             </List>
-            <List className="unused-features feature-list-block">
-                <ListItem> 
-                    <p className="feature-list-header">Unused Features</p>
-                </ListItem>
-            </List>
-            <div className="label-chooser feature-list-block">
+            <div className="label-chooser">
                 <ChooseLabel selectedFeatures={props.features} label={props.label} setLabel={props.setLabel}/>
+            </div>
+            <div className="tree-sweep-scroller">
+                <TreeSweepScroller 
+                    setTreeIndex={props.setTreeIndex}
+                    tree_sweep={props.tree_sweep}
+                    treeIndex={props.treeIndex}/>
             </div>
         </div>
     );
@@ -520,7 +566,7 @@ function ExplainThisTree(props) {
     //wraps the entire functionality in lifecycle methods
     useEffect(_ => {
         if (!svgRef) return;
-        d3.selectAll("svg > *").remove();
+        d3.selectAll(".tree-container > *").remove();
         generateTree(props.treeData.json_tree, svgRef);
     }, [props.treeData]);
 
@@ -534,18 +580,7 @@ function ExplainThisTree(props) {
     );
 }
 
-function createExplainThisRequest(filename, labelName, dataFeatures) {
-    return {
-        routine: "workflow",
-        dataSelections: [],
-        labelName: labelName,
-        workflow: "explain_this",
-        dataFeatures: dataFeatures,
-        file: filename,
-        cid: "8ksjk",
-        identification: { id: "dev0" }
-    };
-}
+
 
 function ExplainThis(props) {
     //make a data state object to hold the data in the request
@@ -608,12 +643,12 @@ function ExplainThis(props) {
                     rankedFeatures={dataState.tree_sweep[treeIndex].feature_rank} 
                     importances={dataState.tree_sweep[treeIndex].feature_weights} 
                     label={label} 
-                    setLabel={setLabel}/>
-                <TreeSweepScroller 
+                    setLabel={setLabel}
                     setTreeIndex={setTreeIndex}
                     tree_sweep={dataState.tree_sweep}
                     treeIndex={treeIndex}/>
-                <ExplainThisTree treeData={dataState.tree_sweep[treeIndex]}/>
+                <ExplainThisTree 
+                    treeData={dataState.tree_sweep[treeIndex]}/>
             </div>
         );
     }

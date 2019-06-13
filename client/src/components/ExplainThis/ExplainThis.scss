@@ -8,38 +8,8 @@
 	padding:10px;
 	padding-top:0px;
 
-    .tree-sweep-scroller {
-      border-bottom: 3px solid black;
-      padding-bottom:20px;
-
-      .tree-sweep-list {
-          display: flex;
-          flex-direction: row;
-          padding: 0;        
-          overflow-x: scroll;
-          list-style: none;
-
-          .tree-info {
-            min-width: 120px;
-            padding:3px;
-            margin:5px;
-            border: 1px solid black;
-
-            p {
-                padding:0;
-                margin: 0;
-            }
-          }
-
-          .tree-info-selected {
-            color:white;
-            background-color:black;
-          }
-        }
-    }
-
     .feature-list {
-        height:120px;
+        height:220px;
         border-bottom: 3px solid black;
         width:100%;
         display: flex;
@@ -58,26 +28,33 @@
             height:20px;
         }
 
-        .feature-list-block {
-            width:33%;
-            overflow-y: scroll;
+        .usede-features {
+            width:25%;
         }
 
         .label-chooser {  
             padding-left: 16px;
-        }
-        /*
-        .used-features {
+            width:25%;
         }
 
-        .unused-features {
+        .tree-sweep-scroller {
+            margin-bottom: 20px;
+            width:50%;
+
+            .tree-sweep-slider {
+                margin:20px;
+            }
+
+            .tree-sweep-plot{
+                height:90%;
+                width:100%;
+            }
         }
-    */
     }
 
     .tree-container {
         width:100%;
-        height:600px;
+        height:500px;
         flex:1;
     }
 }
