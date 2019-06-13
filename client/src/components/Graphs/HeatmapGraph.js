@@ -133,6 +133,7 @@ function HeatmapGraph(props) {
             }
         ],
         layout: {
+            dragmode:'lasso',
             xaxis: { 
                 title:xAxis,
                 automargin: true, 
@@ -184,6 +185,7 @@ function HeatmapGraph(props) {
                     props.setCurrentSelection([]);
                 }}
                 onSelected={e => {
+                    console.log(e);
                     if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
                 }}
             />

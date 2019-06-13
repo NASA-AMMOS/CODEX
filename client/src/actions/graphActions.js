@@ -22,6 +22,8 @@ function canBuildGraph(graphMode, selectedFeatures) {
                 return false;
             }
             break;
+        case uiTypes.HISTOGRAM_GRAPH:
+            return true;
         case uiTypes.TIME_SERIES_GRAPH:
             //todo figure out the requirements for a time series graph
             return true;
