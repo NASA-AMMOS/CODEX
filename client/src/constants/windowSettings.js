@@ -5,6 +5,13 @@ import * as regressionTypes from "constants/regressionTypes";
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
 import * as workflowTypes from "constants/workflowTypes";
 
+export const defaultInitialSize = {
+    width: 650,
+    height: 500,
+    resizeable: true
+};
+
+// DEPRECATED
 export const initialSizes = {
     [uiTypes.SCATTER_GRAPH]: {
         width: 500,
@@ -79,10 +86,5 @@ export const initialSizes = {
         width: 750,
         height: 600,
         resizeable: false
-    },
-    [workflowTypes.FILTER_WINDOW]: {
-        width: 750,
-        height: 600,
-        resizeable: true
     }
 };
