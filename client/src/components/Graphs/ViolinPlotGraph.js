@@ -22,7 +22,7 @@ function generatePlotData(features) {
     for (let i = 0; i < features.length; i++) {
         data[i] = {
             y: features[i],
-            yaxis: 'y'+(i),
+            yaxis: 'y',
             type: "violin",
             visible: true,
             name:features[i][0],

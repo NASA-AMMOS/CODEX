@@ -21,7 +21,7 @@ function generatePlotData(features) {
     for (let i = 0; i < features.length; i++) {
         data[i] = {
             y: features[i],
-            yaxis: 'y'+(i),
+            yaxis: 'y',
             type: "box",
             visible: true,
             name:features[i][0]
@@ -121,7 +121,7 @@ function BoxPlotSubGraph(props) {
     function getPointsInRange(range) {
         let dataToParse = chartState.data[0].y;
         let ret = [];
-
+        console.log(range);
         dataToParse.forEach((data,idx) => {
             if (data < range.y[1] && data > range.y[0])
                 ret.push(idx);
@@ -206,6 +206,7 @@ function BoxPlotSubGraph(props) {
             }}
             onSelected={e => {
                 if (!e) return;
+                //fix range
                 let points = getPointsInRange(e.range);
                 props.setCurrentSelection(points);
             }}
