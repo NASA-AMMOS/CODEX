@@ -28,18 +28,39 @@
             height:20px;
         }
 
-        .usede-features {
-            width:25%;
+        .used-features {
+            width:35%;
+            overflow-y: scroll;
+            padding:16px;
         }
 
-        .label-chooser {  
-            padding-left: 16px;
+        .right-pane {
             width:25%;
+            display: flex;
+            flex-direction: column;
+
+            .label-chooser {  
+                padding-left: 16px;
+                height: 50%;
+            }
+
+            .button-container {
+                height:50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                .run-button {
+                    height: 40%;
+                    width: 60%;
+                }
+            }
+
         }
+        
 
         .tree-sweep-scroller {
             margin-bottom: 20px;
-            width:50%;
+            width:40%;
 
             .tree-sweep-slider {
                 margin:20px;
@@ -54,7 +75,7 @@
 
     .tree-container {
         width:100%;
-        height:500px;
+        height:600px;
         flex:1;
     }
 }

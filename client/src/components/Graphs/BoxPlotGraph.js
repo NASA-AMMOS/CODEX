@@ -121,7 +121,7 @@ function BoxPlotSubGraph(props) {
     function getPointsInRange(range) {
         let dataToParse = chartState.data[0].y;
         let ret = [];
-        
+
         dataToParse.forEach((data,idx) => {
             if (data < range.y[1] && data > range.y[0])
                 ret.push(idx);
