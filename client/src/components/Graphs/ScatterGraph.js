@@ -74,7 +74,6 @@ function ScatterGraph(props) {
         const revision = chartRevision + 1;
         setChartState({
             ...chartState,
-
             layout: { ...chartState.layout, datarevision: revision }
         });
         setChartRevision(revision);
@@ -93,9 +92,6 @@ function ScatterGraph(props) {
     // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
     useEffect(
         _ => {
-            chartState.data[0].marker.color = chartState.data[0].marker.color.map(
-                _ => DEFAULT_POINT_COLOR
-            );
             props.savedSelections.forEach(selection => {
                 selection.rowIndices.forEach(row => {
                     chartState.data[0].marker.color[row] = selection.active
@@ -134,6 +130,7 @@ function ScatterGraph(props) {
                     onInitialized={figure => setChartState(figure)}
                     onUpdate={figure => setChartState(figure)}
                     onClick={e => {
+                        console.log("click");
                         if (e.event.button === 2) return;
                         props.setCurrentSelection([]);
                     }}

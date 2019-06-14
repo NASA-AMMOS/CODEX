@@ -10,6 +10,7 @@ import RegressionsOverview from "components/Regressions/RegressionsOverview";
 import ScatterGraph from "components/Graphs/ScatterGraph";
 import HeatmapGraph from "components/Graphs/HeatmapGraph";
 import BoxPlotGraph from "components/Graphs/BoxPlotGraph";
+import HistogramGraph from "components/Graphs/HistogramGraph";
 import Sessions from "components/Sessions/Sessions";
 import TimeSeriesGraph from "components/Graphs/TimeSeriesGraph";
 import * as algorithmTypes from "constants/algorithmTypes";
@@ -28,7 +29,11 @@ export function getWindowTitle(win) {
         case uiTypes.SCATTER_GRAPH:
         case uiTypes.CONTOUR_GRAPH:
         case uiTypes.BOX_PLOT_GRAPH:
+            return getMultiAxisGraphTitle(win);
+        case uiTypes.HISTOGRAM_GRAPH:
+            return getMultiAxisGraphTitle(win);
         case uiTypes.VIOLIN_PLOT_GRAPH:
+            return getMultiAxisGraphTitle(win);
         case uiTypes.HEATMAP_GRAPH:
         case uiTypes.TIME_SERIES_GRAPH:
             return getMultiAxisGraphTitle(win);
@@ -50,7 +55,7 @@ export function getWindowTitle(win) {
             return "Sessions";
         case dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW:
             return "Dimensionality Reduction Results";
-        case workflowTypes.EXPLAIN_THIS:
+        case workflowTypes.EXPLAIN_THIS_WINDOW:
             return "Explain This";
         case workflowTypes.FILTER:
             return "Filter";
@@ -73,6 +78,8 @@ export function getWindowContent(win) {
             return <BoxPlotGraph data={win.data} />;
         case uiTypes.VIOLIN_PLOT_GRAPH:
             return <ViolinPlotGraph data={win.data} />;
+        case uiTypes.HISTOGRAM_GRAPH:
+            return <HistogramGraph data={win.data} />;
         case algorithmTypes.CLUSTER_ALGORITHM:
             return (
                 <ClusterAlgorithm
@@ -108,7 +115,7 @@ export function getWindowContent(win) {
                 <DimensionalityReductionResults requests={win.requests} runParams={win.runParams} />
             );
         case workflowTypes.EXPLAIN_THIS_WINDOW:
-            return <ExplainThis request={win.request} winId={win.id} />;
+            return <ExplainThis winId={win.id} />;
         case workflowTypes.FILTER_WINDOW:
             return <Filter />;
     }

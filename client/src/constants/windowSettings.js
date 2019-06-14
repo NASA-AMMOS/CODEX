@@ -43,6 +43,11 @@ export const initialSizes = {
         height: 400,
         resizeable: true
     },
+    [uiTypes.HISTOGRAM_GRAPH]: {
+        width: 500,
+        height: 400,
+        resizeable: true
+    },
     [uiTypes.BOX_PLOT_GRAPH]: {
         width: 500,
         height: 400,
@@ -89,7 +94,7 @@ export const initialSizes = {
     },
     [workflowTypes.EXPLAIN_THIS_WINDOW]: {
         width: 750,
-        height: 600,
+        height: 650,
         resizeable: false
     }
 };

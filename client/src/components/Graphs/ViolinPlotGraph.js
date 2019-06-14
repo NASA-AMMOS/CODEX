@@ -22,7 +22,7 @@ function generatePlotData(features) {
     for (let i = 0; i < features.length; i++) {
         data[i] = {
             y: features[i],
-            yaxis: 'y'+(i),
+            yaxis: 'y',
             type: "violin",
             visible: true,
             name:features[i][0],
@@ -41,7 +41,8 @@ function generateLayouts(features) {
         let layout = {
             autosize: true,
             margin: { l: 15, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space
-            dragmode: 'lasso',
+            dragmode: 'select',
+            selectdirection: 'v',
             hovermode: "compare", // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
             xaxis: {
@@ -51,13 +52,31 @@ function generateLayouts(features) {
             yaxis: {
                 automargin: true,
                 fixedrange: true
-            }
+            },
+            shapes: []
         };
 
         layouts.push(layout);
     }
 
     return layouts;
+}
+
+function createRectangle(range) {
+
+    return {
+            type: 'rect',
+            xref: 'x',
+            yref: 'y',
+            x0: -.5,
+            y0: range.y[0],
+            x1: .5,
+            y1: range.y[1],
+            fillcolor: 'rgba(255,0,0,.5)',
+            line: {
+                width: 0
+            }
+        }
 }
 
 function ViolinPlotGraph(props) {
@@ -80,7 +99,9 @@ function ViolinPlotGraph(props) {
                                 data={dataElement}
                                 chart={chartRefs[index]}
                                 layout={layouts[index]}
-                                globalChartState={props.globalChartState}
+                                setCurrentSelection={props.setCurrentSelection}
+                                currentSelection={props.currentSelection}
+                                savedSelections={props.savedSelections}
                             />
                         ))
                     }
@@ -93,6 +114,7 @@ function ViolinPlotGraph(props) {
 function ViolinPlotSubGraph(props) {
      // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
+
     const [chartState, setChartState] = useState({
         data: [props.data],
         layout: props.layout,
@@ -102,6 +124,29 @@ function ViolinPlotSubGraph(props) {
         }
     });
 
+    function getPointsInRange(range) {
+        let dataToParse = chartState.data[0].y;
+        let ret = [];
+
+        dataToParse.forEach((data,idx) => {
+            if (data < range.y[1] && data > range.y[0])
+                ret.push(idx);
+        });
+
+        return ret;
+    }
+
+    function getRangeFromIndices(indices) {
+        let min = chartState.data[0].y[indices[0]];
+        let max = chartState.data[0].y[indices[0]];
+        indices.forEach((row) => {
+            min = chartState.data[0].y[row] < min ? chartState.data[0].y[row] : min;
+            max = chartState.data[0].y[row] > max ? chartState.data[0].y[row] : max;
+        });
+
+        return {y:[min,max]};
+    }
+
     function updateChartRevision() {
         const revision = chartRevision + 1;
         setChartState({
@@ -110,6 +155,46 @@ function ViolinPlotSubGraph(props) {
         });
         setChartRevision(revision);
     }
+
+    // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
+    useEffect(
+        _ => {
+            //clear shapes
+            chartState.layout.shapes = [];
+
+            props.savedSelections.forEach(selection => {
+                //todo update selection state with ranges
+                //create rectangle
+                //todo make this more efficient with sets or something
+                const rect = createRectangle(
+                    getRangeFromIndices(selection.rowIndices)
+                );
+                if (!chartState.layout.shapes.contains(rect))
+                    chartState.layout.shapes.push(rect);
+            });
+            updateChartRevision();
+        },
+        [props.savedSelections]
+    );
+
+    // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
+    useEffect(
+        _ => {
+            if (!props.currentSelection) return;
+            //clear shapes
+            chartState.layout.shapes = [];
+            if (props.currentSelection.length == 0)
+                return;
+            //add a rectangle
+            let rect = createRectangle(getRangeFromIndices(props.currentSelection));
+            chartState.layout.shapes.push(rect);
+
+            updateChartRevision();
+        },
+        [props.currentSelection]
+    );
+
+    //handle this later
 
     return (
         <Plot
@@ -122,9 +207,34 @@ function ViolinPlotSubGraph(props) {
             useResizeHandler
             onInitialized={figure => setChartState(figure)}
             onUpdate={figure => setChartState(figure)}
+            onClick={e => {
+                if (e.event.button === 2) return;
+                props.setCurrentSelection([]);
+            }}
+            onSelected={e => {
+                if (!e) return;
+                let points = getPointsInRange(e.range);
+                props.setCurrentSelection(points);
+            }}
         />
     );
 }
 
+function mapStateToProps(state) {
+    return {
+        currentSelection: state.selections.currentSelection,
+        savedSelections: state.selections.savedSelections
+    };
+}
 
-export default ViolinPlotGraph;
+function mapDispatchToProps(dispatch) {
+    return {
+        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
+        saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
+    };
+}
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(ViolinPlotGraph);

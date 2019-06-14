@@ -1,4 +1,4 @@
-import "components/Graphs/BoxPlotGraph.css";
+import "components/Graphs/HistogramGraph.css";
 
 import React, { useRef, useState, useEffect } from "react";
 import { bindActionCreators } from "redux";
@@ -16,15 +16,17 @@ import GraphWrapper from "components/Graphs/GraphWrapper";
 const DEFAULT_POINT_COLOR = "#3386E6";
 
 function generatePlotData(features) {
+
     let data = [];
 
     for (let i = 0; i < features.length; i++) {
         data[i] = {
-            y: features[i],
+            x: features[i],
+            xaxis: 'x',
             yaxis: 'y',
-            type: "box",
-            visible: true,
-            name:features[i][0]
+            type: "histogram",
+            //marker: { color: features[i].map((val, idx) => DEFAULT_POINT_COLOR), size:2 },
+            //selected: { marker: { color: "#FF0000", size: 5 } },
         };
     }
     return data;
@@ -35,20 +37,15 @@ function generateLayouts(features) {
 
     for(let index = 0; index < features.length; index++) {
         let layout = {
-            autosize: true,
-            margin: { l: 15, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space
             dragmode: 'select',
-            selectdirection: 'v',
+            selectdirection: 'h',
+            margin: { l: 50, r: 5, t: 20, b: 20 }, // Axis tick labels are drawn in the margin space
             hovermode: "compare", // Turning off hovermode seems to screw up click handling
-            titlefont: { size: 5 },
-            xaxis: {
-                automargin: true,
-                showline:false,
-            },
             yaxis: {
-                automargin: true,
-                fixedrange: true
-            }
+                title:features[index][0],
+                fixedrange: true,
+            },
+            shapes:[]
         };
 
         layouts.push(layout);
@@ -57,24 +54,7 @@ function generateLayouts(features) {
     return layouts;
 }
 
-function createRectangle(range) {
-
-    return {
-            type: 'rect',
-            xref: 'x',
-            yref: 'y',
-            x0: -.5,
-            y0: range.y[0],
-            x1: .5,
-            y1: range.y[1],
-            fillcolor: 'rgba(255,0,0,.5)',
-            line: {
-                width: 0
-            }
-        }
-}
-
-function BoxPlotGraph(props) {
+function HistogramGraph(props) {
     const features = utils.unzip(props.data.get("data"));
 
     const chartRefs = features.map((feat) => useRef(null));
@@ -82,19 +62,18 @@ function BoxPlotGraph(props) {
     let data = generatePlotData(features);
 
     let layouts = generateLayouts(features);
-    
+
     return (
         <GraphWrapper
             resizeHandler = {_ => (chartRefs.forEach((chart) => chart.current.resizeHandler()))}
         >
-            <ul className="box-plot-container"> 
+            <ul className="histogram-graph-container"> 
                 {
                     data.map((dataElement,index) => (
-                        <BoxPlotSubGraph
-                            data={dataElement}
+                        <HistogramSubGraph
+                            data={data[index]}
                             chart={chartRefs[index]}
                             layout={layouts[index]}
-                            globalChartState={props.globalChartState}
                             setCurrentSelection={props.setCurrentSelection}
                             currentSelection={props.currentSelection}
                             savedSelections={props.savedSelections}
@@ -106,7 +85,25 @@ function BoxPlotGraph(props) {
     );
 }
 
-function BoxPlotSubGraph(props) {
+function createRectangle(range) {
+    return {
+            type: 'rect',
+            xref: 'x',
+            yref: 'paper',
+            x0: range.x[0],
+            y0: 0,
+            x1: range.x[1],
+            y1: 1,
+            fillcolor: 'rgba(255,0,0,.5)',
+            line: {
+                width: 0
+            }
+        }
+}
+
+
+
+function HistogramSubGraph(props) {
      // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
     const [chartState, setChartState] = useState({
@@ -118,28 +115,7 @@ function BoxPlotSubGraph(props) {
         }
     });
 
-    function getPointsInRange(range) {
-        let dataToParse = chartState.data[0].y;
-        let ret = [];
-        
-        dataToParse.forEach((data,idx) => {
-            if (data < range.y[1] && data > range.y[0])
-                ret.push(idx);
-        });
-
-        return ret;
-    }
-
-    function getRangeFromIndices(indices) {
-        let min = chartState.data[0].y[indices[0]];
-        let max = chartState.data[0].y[indices[0]];
-        indices.forEach((row) => {
-            min = chartState.data[0].y[row] < min ? chartState.data[0].y[row] : min;
-            max = chartState.data[0].y[row] > max ? chartState.data[0].y[row] : max;
-        });
-
-        return {y:[min,max]};
-    }
+    const [yRange, setYRange] = useState([0,0]);
 
     function updateChartRevision() {
         const revision = chartRevision + 1;
@@ -148,6 +124,29 @@ function BoxPlotSubGraph(props) {
             layout: { ...chartState.layout, datarevision: revision }
         });
         setChartRevision(revision);
+    }
+
+    function getPointsInRange(range) {
+        let dataToParse = chartState.data[0].x;
+        let ret = [];
+        
+        dataToParse.forEach((data,idx) => {
+            if (data < range.x[1] && data > range.x[0])
+                ret.push(idx);
+        });
+
+        return ret;
+    }
+
+    function getRangeFromIndices(indices) {
+        let min = chartState.data[0].x[indices[0]];
+        let max = chartState.data[0].x[indices[0]];
+        indices.forEach((row) => {
+            min = chartState.data[0].x[row] < min ? chartState.data[0].x[row] : min;
+            max = chartState.data[0].x[row] > max ? chartState.data[0].x[row] : max;
+        });
+
+        return {x:[min,max]};
     }
 
     // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
@@ -187,11 +186,11 @@ function BoxPlotSubGraph(props) {
             updateChartRevision();
         },
         [props.currentSelection]
-    );
-
+    ); 
+    
     return (
         <Plot
-            className="box-subplot"
+            className="histogram-subplot"
             ref={props.chart}
             data={chartState.data}
             layout={chartState.layout}
@@ -210,6 +209,7 @@ function BoxPlotSubGraph(props) {
                 let points = getPointsInRange(e.range);
                 props.setCurrentSelection(points);
             }}
+
         />
     );
 }
@@ -228,7 +228,8 @@ function mapDispatchToProps(dispatch) {
     };
 }
 
+
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(BoxPlotGraph);
+)(HistogramGraph);

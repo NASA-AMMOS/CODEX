@@ -30,9 +30,10 @@ function generatePlotData(features) {
             y: features[i],
             xaxis: 'x'+(i+1),
             yaxis: 'y1',
-            type: "scattergl",
-            mode: "lines",
-            visible: true
+            mode: "lines+markers",
+            type: "scatter",
+            marker: { color: features[i].map((val, idx) => DEFAULT_POINT_COLOR), size:2 },
+            selected: { marker: { color: "#FF0000", size: 5 } },
         };
     }
     return data;
@@ -43,31 +44,24 @@ function generateLayouts(features) {
 
     for(let index = 0; index < features.length; index++) {
         let layout = {
-            autosize: true,
-            margin: { l: 15, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space
-            dragmode: 'lasso',
+            dragmode: 'select',
+            selectdirection: 'h',
+            margin: { l: 40, r: 5, t: 5, b: 0 }, // Axis tick labels are drawn in the margin space
             hovermode: "compare", // Turning off hovermode seems to screw up click handling
-            titlefont: { size: 5 },
-            xaxis: {
-                automargin: true
-            },
             yaxis: {
                 title:features[index][0],
-                automargin: true,
                 fixedrange: true,
-                showline: false,
-            }
+            },
         };
 
-        //putting x axis only on the last one
-        if (index != (features.length - 1)){
-            layout.xaxis.visible = false;
-            layout.margin.l = 20;
+        let axisLabel = "xaxis"+(index+1);
+        layout[axisLabel] = {};
+
+        if (index != (features.length - 1)) {
+            layout[axisLabel].visible = false;
+        } else {
+            layout.margin.b = 25;
         }
-        //add axis title
-        layout.yaxis.title = {
-            text:features[index][0]
-        };
 
         layouts.push(layout);
     }
@@ -88,19 +82,21 @@ function TimeSeriesGraph(props) {
         <GraphWrapper
             resizeHandler = {_ => (chartRefs.forEach((chart) => chart.current.resizeHandler()))}
         >
-                <ul className="time-series-plot-container"> 
-                    {
-                        data.map((dataElement,index) => (
-                            <TimeSeriesSubGraph
-                                data={dataElement}
-                                chart={chartRefs[index]}
-                                layout={layouts[index]}
-                                globalChartState={props.globalChartState}
-                            />
-                        ))
-                    }
-                </ul>
-
+            <ul className="time-series-plot-container"> 
+                {
+                    data.map((dataElement,index) => (
+                        <TimeSeriesSubGraph
+                            axisKey={"x"+(index+1)}
+                            data={data[index]}
+                            chart={chartRefs[index]}
+                            layout={layouts[index]}
+                            setCurrentSelection={props.setCurrentSelection}
+                            currentSelection={props.currentSelection}
+                            savedSelections={props.savedSelections}
+                        />
+                    ))
+                }
+            </ul>
         </GraphWrapper>
     );
 }
@@ -127,24 +123,35 @@ function TimeSeriesSubGraph(props) {
         setChartRevision(revision);
     }
 
+    // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
+    useEffect(
+        _ => {
+            chartState.data[0].marker.color = chartState.data[0].marker.color.map(
+                _ => DEFAULT_POINT_COLOR
+            );
+
+            props.savedSelections.forEach(selection => {
+                selection.rowIndices.forEach(row => {
+                    chartState.data[0].marker.color[row] = selection.active
+                        ? selection.color
+                        : DEFAULT_POINT_COLOR;
+                });
+            });
+            updateChartRevision();
+        },
+        [props.savedSelections]
+    );
+
     // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
     useEffect(
         _ => {
             if (!props.currentSelection) return;
-            chartState.data.selectedpoints = props.currentSelection;
+            chartState.data[0].selectedpoints = props.currentSelection;
             updateChartRevision();
         },
         [props.currentSelection]
     );
     //handle this later
-
-    useEffect(
-        _ => {
-            chartState.layout.dragmode = props.globalChartState; // Weirdly this works, can't do it with setChartState
-            updateChartRevision();
-        },
-        [props.globalChartState]
-    );
     
     return (
         <Plot
@@ -164,6 +171,7 @@ function TimeSeriesSubGraph(props) {
             onSelected={e => {
                 if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
             }}
+
         />
     );
 }
@@ -171,8 +179,7 @@ function TimeSeriesSubGraph(props) {
 function mapStateToProps(state) {
     return {
         currentSelection: state.selections.currentSelection,
-        savedSelections: state.selections.savedSelections,
-        globalChartState: state.ui.get("globalChartState")
+        savedSelections: state.selections.savedSelections
     };
 }
 
@@ -182,6 +189,7 @@ function mapDispatchToProps(dispatch) {
         saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
     };
 }
+
 
 export default connect(
     mapStateToProps,
