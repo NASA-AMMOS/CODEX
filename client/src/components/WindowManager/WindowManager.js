@@ -177,8 +177,6 @@ function WindowManager(props) {
         .map((win, idx) => {
             const windowElement = windowContentFunctions.getWindowContent(win);
 
-            console.log("re-evaluating window list", win);
-
             //const { width, height, resizeable, minSize } = windowSettings.defaultInitialSettings;
 
             // If we can't find a ref for this window, it's new, and we calculate an initial position for it
