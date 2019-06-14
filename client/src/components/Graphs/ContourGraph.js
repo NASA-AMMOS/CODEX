@@ -299,8 +299,6 @@ function getPointIndicesFromPolygon(lassoPoints, dataPoints) {
         if (polygonTest.contains(zippedPoints[i], true)) pointIndices.push(i);
     }
 
-    console.log(pointIndices.length);
-
     return pointIndices;
 }
 
@@ -374,34 +372,6 @@ function ContourGraph(props) {
         });
         setChartRevision(revision);
     }
-
-    // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
-    /*useEffect(
-        _ => {
-            if (!props.currentSelection) return;
-            chartState.data[0].selectedpoints = props.currentSelection;
-            updateChartRevision();
-        },
-        [props.currentSelection]
-    );*/
-
-    // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
-    /* useEffect(
-        _ => {
-            chartState.data[0].marker.color = chartState.data[0].marker.color.map(
-                _ => DEFAULT_POINT_COLOR
-            );
-            props.savedSelections.forEach(selection => {
-                selection.rowIndices.forEach(row => {
-                    chartState.data[0].marker.color[row] = selection.active
-                        ? selection.color
-                        : DEFAULT_POINT_COLOR;
-                });
-            });
-            updateChartRevision();
-        },
-        [props.savedSelections]
-    );*/
 
     return (
         <GraphWrapper chart={chart}>

@@ -14,6 +14,7 @@ import ReactResizeDetector from "react-resize-detector";
 import GraphWrapper from "components/Graphs/GraphWrapper";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
+const DEFAULT_SELECTION_COLOR = "#FF0000";
 
 function generatePlotData(features) {
     let data = [];
@@ -48,7 +49,8 @@ function generateLayouts(features) {
             yaxis: {
                 automargin: true,
                 fixedrange: true
-            }
+            },
+            shapes: []
         };
 
         layouts.push(layout);
@@ -57,8 +59,8 @@ function generateLayouts(features) {
     return layouts;
 }
 
-function createRectangle(range) {
-
+function createRectangle(range, color) {
+    let opaqueColor = color + "80";
     return {
             type: 'rect',
             xref: 'x',
@@ -67,7 +69,7 @@ function createRectangle(range) {
             y0: range.y[0],
             x1: .5,
             y1: range.y[1],
-            fillcolor: 'rgba(255,0,0,.5)',
+            fillcolor: opaqueColor,
             line: {
                 width: 0
             }
@@ -109,6 +111,7 @@ function BoxPlotGraph(props) {
 function BoxPlotSubGraph(props) {
      // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
+
     const [chartState, setChartState] = useState({
         data: [props.data],
         layout: props.layout,
@@ -150,43 +153,35 @@ function BoxPlotSubGraph(props) {
         setChartRevision(revision);
     }
 
-    // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
+    //effect hook that manages the creation of selection rectangles
     useEffect(
         _ => {
-            //clear shapes
+            //add range to the selection state and optimize this
             chartState.layout.shapes = [];
-            if(!props.savedSelections) return;
 
-            props.savedSelections.forEach(selection => {
-                //todo update selection state with ranges
-                //create rectangle
-                //todo make this more efficient with sets or something
-                const rect = createRectangle(
-                    getRangeFromIndices(selection.rowIndices)
-                );
-                if (!chartState.layout.shapes.contains(rect))
-                    chartState.layout.shapes.push(rect);
+            const mappedSavedSelections = props.savedSelections.map((selection) => {
+                return {indices:selection.rowIndices, color:selection.color};
             });
+
+            let allSelections = [...mappedSavedSelections];
+            if (props.currentSelection.length != 0)
+                allSelections.push({indices: props.currentSelection, color: DEFAULT_SELECTION_COLOR});
+            
+            //check to see if there are any selections to render
+            if (allSelections.length != 0) {
+                allSelections.forEach(selection => {
+                    const selectionRange = getRangeFromIndices(selection.indices);
+                    const rect = createRectangle(
+                        selectionRange,
+                        selection.color
+                    );
+
+                    chartState.layout.shapes.push(rect);
+                });
+            }   
             updateChartRevision();
         },
-        [props.savedSelections]
-    );
-
-    // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
-    useEffect(
-        _ => {
-            if (!props.currentSelection) return;
-            //clear shapes
-            chartState.layout.shapes = [];
-            if (props.currentSelection.length == 0)
-                return;
-            //add a rectangle
-            let rect = createRectangle(getRangeFromIndices(props.currentSelection));
-            chartState.layout.shapes.push(rect);
-
-            updateChartRevision();
-        },
-        [props.currentSelection]
+        [props.savedSelections, props.currentSelection]
     );
 
     return (
@@ -201,7 +196,7 @@ function BoxPlotSubGraph(props) {
             onInitialized={figure => setChartState(figure)}
             onUpdate={figure => setChartState(figure)}
             onClick={e => {
-                if (e.event.button === 2) return;
+                if (e.event.button === 2 || e.event.ctrlKey) return;
                 props.setCurrentSelection([]);
             }}
             onSelected={e => {

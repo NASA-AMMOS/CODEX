@@ -11,20 +11,11 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
+import GraphWrapper from "components/Graphs/GraphWrapper";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 
 function ScatterGraph(props) {
-    const [contextMenuVisible, setContextMenuVisible] = useState(false);
-    const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
-
-    function handleContextMenu(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        setContextMenuVisible(true);
-        setContextMenuPosition({ top: e.clientY, left: e.clientX });
-    }
-
     const chart = useRef(null);
     const cols = utils.unzip(props.data.get("data"));
     const xAxis = cols[0][0];
@@ -41,15 +32,15 @@ function ScatterGraph(props) {
                 y: cols[1],
                 type: "scattergl",
                 mode: "markers",
-                marker: { color: cols[0].map((val, idx) => DEFAULT_POINT_COLOR), size: 2 },
-                selected: { marker: { color: "#FF0000", size: 2 } },
+                marker: { color: cols[0].map((val, idx) => DEFAULT_POINT_COLOR), size: 5 },
+                selected: { marker: { color: "#FF0000", size: 5 } },
                 visible: true
             }
         ],
         layout: {
             autosize: true,
             margin: { l: 0, r: 0, t: 0, b: 0, pad: 10 }, // Axis tick labels are drawn in the margin space
-            dragmode: props.globalChartState,
+            dragmode: "lasso",
             datarevision: chartRevision,
             hovermode: "closest", // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
@@ -104,78 +95,35 @@ function ScatterGraph(props) {
         [props.savedSelections]
     );
 
-    useEffect(
-        _ => {
-            chartState.layout.dragmode = props.globalChartState; // Weirdly this works, can't do it with setChartState
-            updateChartRevision();
-        },
-        [props.globalChartState]
-    );
-
     return (
-        <React.Fragment>
-            <ReactResizeDetector
-                handleWidth
-                handleHeight
-                onResize={_ => chart.current.resizeHandler()}
+       <GraphWrapper
+            chart = {chart}
+        >
+            <Plot
+                ref={chart}
+                data={chartState.data}
+                layout={chartState.layout}
+                config={chartState.config}
+                style={{ width: "100%", height: "100%" }}
+                useResizeHandler
+                onInitialized={figure => setChartState(figure)}
+                onUpdate={figure => setChartState(figure)}
+                onClick={e => {
+                    if (e.event.button === 2 || e.event.ctrlKey) return;
+                    props.setCurrentSelection([]);
+                }}
+                onSelected={e => {
+                    if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
+                }}
             />
-            <div className="chart-container" onContextMenu={handleContextMenu}>
-                <Plot
-                    ref={chart}
-                    data={chartState.data}
-                    layout={chartState.layout}
-                    config={chartState.config}
-                    style={{ width: "100%", height: "100%" }}
-                    useResizeHandler
-                    onInitialized={figure => setChartState(figure)}
-                    onUpdate={figure => setChartState(figure)}
-                    onClick={e => {
-                        console.log("click");
-                        if (e.event.button === 2) return;
-                        props.setCurrentSelection([]);
-                    }}
-                    onSelected={e => {
-                        if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
-                    }}
-                />
-            </div>
-            <Popover
-                id="simple-popper"
-                open={contextMenuVisible}
-                anchorReference="anchorPosition"
-                anchorPosition={{ top: contextMenuPosition.top, left: contextMenuPosition.left }}
-                anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left"
-                }}
-                transformOrigin={{
-                    vertical: "top",
-                    horizontal: "left"
-                }}
-            >
-                <ClickAwayListener onClickAway={_ => setContextMenuVisible(false)}>
-                    <List>
-                        <ListItem
-                            button
-                            onClick={_ => {
-                                setContextMenuVisible(false);
-                                props.saveCurrentSelection();
-                            }}
-                        >
-                            Save Selection
-                        </ListItem>
-                    </List>
-                </ClickAwayListener>
-            </Popover>
-        </React.Fragment>
+        </GraphWrapper>
     );
 }
 
 function mapStateToProps(state) {
     return {
         currentSelection: state.selections.currentSelection,
-        savedSelections: state.selections.savedSelections,
-        globalChartState: state.ui.get("globalChartState")
+        savedSelections: state.selections.savedSelections
     };
 }
 
