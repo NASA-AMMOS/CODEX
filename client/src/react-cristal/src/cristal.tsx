@@ -28,6 +28,7 @@ export interface CristalProps {
     onClose?: () => void;
     onMove?: (state: CristalState) => void;
     onResize?: (state: CristalState) => void;
+    onResizeEnd?: (state: CristalState) => void;
     className?: string;
     restrictToParentDiv?: boolean;
     onMinimize?: () => void;
@@ -36,12 +37,13 @@ export interface CristalProps {
     isActive?: boolean;
     onClick?: () => void;
     minSize?: Size;
+    width?: number;
+    height?: number;
 }
 
 export interface CristalState {
     x: number;
     y: number;
-    title?: string;
     isResizable?: boolean;
     isDragging: boolean;
     isResizingX: boolean;
@@ -65,13 +67,14 @@ export class Cristal extends Component<CristalProps, CristalState> {
     state: CristalState = {
         x: padding,
         y: padding,
-        title: this.props.title,
         isResizable: this.props.isResizable,
         isDragging: false,
         isResizingX: false,
         isResizingY: false,
         zIndex: Stacker.getNextIndex(),
-        isMounted: false
+        isMounted: false,
+        width: this.props.width,
+        height: this.props.height
     };
 
     componentDidMount() {
@@ -85,6 +88,16 @@ export class Cristal extends Component<CristalProps, CristalState> {
         document.removeEventListener("mousemove", this.onMouseMove);
         document.removeEventListener("mouseup", this.onMouseUp);
         window.removeEventListener("resize", this.onWindowResize);
+    }
+
+    componentWillReceiveProps(props: CristalProps) {
+        // force a rerender when the width/height props change
+        if (this.state.width !== props.width) {
+            this.setState( { width: props.width } );
+        }
+        if (this.state.height !== props.height) {
+            this.setState( { height: props.height } );
+        }
     }
 
     // TODO-PERF: debounce
@@ -218,6 +231,14 @@ export class Cristal extends Component<CristalProps, CristalState> {
         }
     };
 
+    notifyResizeEnd = () => {
+        const { onResizeEnd } = this.props;
+
+        if (onResizeEnd) {
+            onResizeEnd(this.state);
+        }
+    };
+
     get isResizing(): boolean {
         const { isResizingX, isResizingY } = this.state;
 
@@ -225,6 +246,10 @@ export class Cristal extends Component<CristalProps, CristalState> {
     }
 
     onMouseUp = () => {
+        const { isResizingX, isResizingY } = this.state;
+        if ( isResizingX || isResizingY ) {
+            this.notifyResizeEnd()
+        }
         this.setState({
             isDragging: false,
             isResizingX: false,
@@ -248,8 +273,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
     startYResize = () => this.setState({ isResizingY: true });
 
     get header() {
-        const { onClose, isDraggable, onMinimize, isActive } = this.props;
-        const { title } = this.state;
+        const { onClose, isDraggable, onMinimize, isActive, title } = this.props;
 
         const minimizeIcon = onMinimize ? <MinimizeIcon onClick={onMinimize} /> : null;
 

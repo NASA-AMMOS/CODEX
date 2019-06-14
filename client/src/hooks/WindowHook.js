@@ -1,101 +1,61 @@
 import React, { useLayoutEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import * as wmActions from "actions/windowManagerActions";
+import { defaultInitialSettings } from "constants/windowSettings";
 
 /*
  * Basically, this hook:
- *      1) checks if a ref was passed down from the window manager
- *      2) if so, sets the initial window settings
+ *      1) checks if an ID was passed down from the window manager
+ *      2) if so, sets the initial window settings on the store
  *      3) if so, exports a wrapped reference. Otherwise, exports a dummy ref (so as not to wreck things depending on it)
  */
 
-const wrapRef = ref => ({
-    isWindow: true,
-
-    resize: (width, height) => ref.setState({ width, height }),
-
-    get width() {
-        return ref.state.width;
-    },
-    get height() {
-        return ref.state.height;
-    },
-    get isResizable() {
-        return ref.state.isResizable;
-    },
-    get title() {
-        return ref.state.title;
-    },
-
-    set width(width) {
-        ref.setState({ width });
-    },
-    set height(height) {
-        ref.setState({ height });
-    },
-    set title(title) {
-        ref.setState({ title });
-    },
-    set isResizable(isResizable) {
-        ref.setState({ isResizable });
-    },
-
-    close: () => ref.props.onClose()
-});
-
-const createDummyObj = () => {
-    const warn = () => console.warn("Window not mounted by a window manager!");
+const wrapWindow = (win, dispatch) => {
     return {
-        isWindow: false,
+        resizeX: width => dispatch(wmActions.resizeWindow(win.id, { width })),
+        resizeY: height => dispatch(wmActions.resizeWindow(win.id, { height })),
+        resize: (width, height) => dispatch(wmActions.resizeWindow(win.id, { width, height })),
+        setTitle: title => dispatch(wmActions.setTitle(win.id, title)),
+        setResizable: isResizable => dispatch(wmActions.setWindowResizable(win.id, isResizable)),
+        ...win
+    };
+};
 
+const wrapDummy = () => {
+    const warn = () => console.warn("Window not mounted from window manager!");
+    return {
+        resizeX: warn,
+        resizeY: warn,
         resize: warn,
-
-        get width() {
-            warn();
-            return 0;
-        },
-        get height() {
-            warn();
-            return 0;
-        },
-        get isResizable() {
-            warn();
-            return false;
-        },
-        get title() {
-            warn();
-            return "";
-        },
-
-        set width(v) {
-            warn();
-        },
-        set height(v) {
-            warn();
-        },
-        set isResizable(v) {
-            warn();
-        },
-        set title(v) {
-            warn();
-        },
-
-        close: warn()
+        setTitle: warn,
+        setResizable: warn,
+        ...defaultInitialSettings
     };
 };
 
 function useWindowManager(props, initialSettings) {
-    if (props.__wm_parent_ref) {
-        console.log(props.__wm_parent_ref);
+    const dispatch = useDispatch();
+    const domain = useSelector(state => state.windowManager);
+    console.log(domain);
+    let window_obj = {};
+
+    if (props.__wm_parent_id) {
+        console.log(props.__wm_parent_id);
+        window_obj = domain.windows.filter(win => win.id === props.__wm_parent_id)[0];
+        window_obj = wrapWindow(window_obj, dispatch);
+    } else {
+        window_obj = wrapDummy();
     }
 
     // set our initial settings
     useLayoutEffect(() => {
-        if (props.__wm_parent_ref && initialSettings !== undefined) {
+        if (props.__wm_parent_id && initialSettings !== undefined) {
             // apply our initial settings to the ref
-            props.__wm_parent_ref.setState(initialSettings);
+            dispatch(wmActions.updateWindowInfo(props.__wm_parent_id, initialSettings));
         }
-    }); // <- only run on first render
+    }, []); // <- only run on first render
 
-    return props.__wm_parent_ref ? wrapRef(props.__wm_parent_ref) : createDummyObj();
+    return window_obj;
 }
 
 export default useWindowManager;

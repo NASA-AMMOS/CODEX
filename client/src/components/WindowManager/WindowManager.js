@@ -126,7 +126,7 @@ function makeMinimizedBar(props) {
                         onMouseOut={_ => props.setWindowHover(win.id, false)}
                         className="minimizedWindow"
                     >
-                        <div className="title">{windowContentFunctions.getWindowTitle(win)}</div>
+                        <div className="title">{win.title}</div>
                     </div>
                 ))}
         </div>
@@ -177,23 +177,27 @@ function WindowManager(props) {
         .map((win, idx) => {
             const windowElement = windowContentFunctions.getWindowContent(win);
 
-            const { width, height, resizeable, minSize } = windowSettings.defaultInitialSize;
+            console.log("re-evaluating window list", win);
+
+            //const { width, height, resizeable, minSize } = windowSettings.defaultInitialSettings;
+
             // If we can't find a ref for this window, it's new, and we calculate an initial position for it
             const initialPos = refs.current[win.id]
                 ? "top-left"
-                : getNewWindowPosition(props, refs, width, height);
+                : getNewWindowPosition(props, refs, win.width, win.height);
 
-            const settings = windowElement.windowSettings ||
-                win.settings || {
-                    title: windowContentFunctions.getWindowTitle(win),
-                    children: null,
-                    isResizable: resizeable,
-                    isDraggable: true,
-                    initialPosition: initialPos,
-                    restrictToParentDiv: true,
-                    initialSize: { width, height },
-                    minSize
-                };
+            const settings = {
+                title: win.title || windowContentFunctions.getWindowTitle(win),
+                children: null,
+                isResizable: win.resizeable,
+                isDraggable: true,
+                initialPosition: initialPos,
+                restrictToParentDiv: true,
+                initialSize: { width: win.width, height: win.height },
+                minSize: win.resizable,
+                width: win.width,
+                height: win.height
+            };
 
             // This is a bit of an odd return fragment, but we want to avoid re-rendering the window's content.
             // If the window is minimized, we retain the Cristal (draggable window) reference, but keep it hidden.
@@ -211,13 +215,16 @@ function WindowManager(props) {
                     ref={r => (refs.current[win.id] = r)}
                     onMinimize={_ => props.toggleMinimizeWindow(win.id)}
                     hideHeader={win.minimized}
+                    onResizeEnd={state =>
+                        props.resizeWindow(win.id, { width: state.width, height: state.height })
+                    }
                     isActive={activeWindow === win.id}
                     onClick={_ => setActiveWindow(win.id)}
                     {...settings}
                 >
                     <div className="windowBody">
                         {React.cloneElement(windowContentFunctions.getWindowContent(win), {
-                            __wm_parent_ref: refs.current[win.id]
+                            __wm_parent_id: win.id
                         })}
                     </div>
                 </Cristal>
@@ -248,7 +255,8 @@ function mapDispatchToProps(dispatch) {
             windowManagerActions.toggleMinimizeWindow,
             dispatch
         ),
-        setWindowHover: bindActionCreators(windowManagerActions.setWindowHover, dispatch)
+        setWindowHover: bindActionCreators(windowManagerActions.setWindowHover, dispatch),
+        resizeWindow: bindActionCreators(windowManagerActions.resizeWindow, dispatch)
     };
 }
 

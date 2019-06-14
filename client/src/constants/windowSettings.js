@@ -5,10 +5,15 @@ import * as regressionTypes from "constants/regressionTypes";
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
 import * as workflowTypes from "constants/workflowTypes";
 
-export const defaultInitialSize = {
+export const defaultInitialSettings = {
     width: 650,
     height: 500,
-    resizeable: true
+    resizeable: true,
+    title: "",
+    minSize: {
+        width: 100,
+        height: 100
+    }
 };
 
 // DEPRECATED
