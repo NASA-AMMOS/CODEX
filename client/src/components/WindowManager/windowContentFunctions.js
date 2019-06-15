@@ -22,7 +22,8 @@ import * as dimensionalityReductionTypes from "constants/dimensionalityReduction
 import * as workflowTypes from "constants/workflowTypes";
 import ExplainThis from "components/ExplainThis/ExplainThis";
 import Filter from "components/Filter/Filter";
-import DataWrapper from "components/DataWrapper/DataWrapper";
+import * as windowTypes from "constants/windowTypes";
+import Debugger from "components/Debug/Debug";
 
 export function getWindowTitle(win) {
     switch (win.windowType) {
@@ -118,6 +119,8 @@ export function getWindowContent(win) {
             return <ExplainThis winId={win.id} />;
         case workflowTypes.FILTER_WINDOW:
             return <Filter />;
+        case windowTypes.DEBUG_WINDOW:
+            return <Debugger />;
     }
 }
 

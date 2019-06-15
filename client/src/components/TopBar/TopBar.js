@@ -21,6 +21,7 @@ import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as graphActions from "actions/graphActions";
 import * as uiTypes from "constants/uiTypes";
+import * as windowTypes from "constants/windowTypes";
 import * as workflowTypes from "constants/workflowTypes";
 import * as workflowActions from "actions/workflowActions";
 import * as windowManagerActions from "actions/windowManagerActions";
@@ -273,6 +274,11 @@ class TopBar extends Component {
                             >
                                 Create range slider window
                             </MenuItem>
+                            <MenuItem
+                                onSelect={() => this.props.openWindow(windowTypes.DEBUG_WINDOW)}
+                            >
+                                Open debug window
+                            </MenuItem>
                         </Dropdown.Menu>
                     </Dropdown>
                     <Dropdown
@@ -342,6 +348,7 @@ function mapDispatchToProps(dispatch) {
         openWorkflow: (d, n) => dispatch(openWorkflow(d, n)),
         brushtypeSet: t => dispatch(brushtypeSet(t)),
         modeSet: m => dispatch(modeSet(m)),
+        openWindow: n => dispatch(windowManagerActions.openNewWindow({ windowType: n })),
         createGraph: name => dispatch(graphActions.createGraph(name)),
         createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name)),
         createWorkflow: name => dispatch(workflowActions.createWorkflow(name)),

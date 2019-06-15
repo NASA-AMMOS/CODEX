@@ -5,10 +5,11 @@ export default class WindowManagerReducer {
     static openNewWindow(state, action) {
         // Add an ID to the window
         let id =
-            action.info.id ||
-            Math.random()
-                .toString(36)
-                .substring(7);
+            action.info && "id" in action.info
+                ? action.info.id
+                : Math.random()
+                      .toString(36)
+                      .substring(7);
 
         const info = {
             ...action.info,

@@ -175,10 +175,6 @@ function WindowManager(props) {
     const windows = props.windows
         .filter(win => !win.minimizedOnly)
         .map((win, idx) => {
-            const windowElement = windowContentFunctions.getWindowContent(win);
-
-            //const { width, height, resizeable, minSize } = windowSettings.defaultInitialSettings;
-
             // If we can't find a ref for this window, it's new, and we calculate an initial position for it
             const initialPos = refs.current[win.id]
                 ? "top-left"
