@@ -16,8 +16,6 @@ export default class WindowManagerReducer {
             ...defaultInitialSettings
         };
 
-        console.log(defaultInitialSettings, info);
-
         return {
             ...state,
             windows: [...state.windows, info]

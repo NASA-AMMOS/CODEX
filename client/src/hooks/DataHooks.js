@@ -74,7 +74,7 @@ export function useFeatures(features) {
         return () => {
             let out = [];
             for (let feature of cleanupFeatureList.current) {
-                console.log("releasing " + feature);
+                //console.log("releasing " + feature);
                 out.push(featureRelease(feature));
             }
             dispatch(batchActions(out));
@@ -87,14 +87,14 @@ export function useFeatures(features) {
     const loadedData = domain.get("loadedData");
     const loadedFeatures = Set(loadedData.map(f => f.get("feature")));
 
-    console.log("new vs old features: ", features.toJS(), oldFeatures.toJS());
+    //console.log("new vs old features: ", features.toJS(), oldFeatures.toJS());
 
     // final cleanup
 
     let outgoing = oldFeatures.subtract(features); // features that have been added since last call
     let incoming = features.subtract(oldFeatures);
 
-    console.log("features incoming / outgoing: ", incoming.toJS(), outgoing.toJS());
+    //console.log("features incoming / outgoing: ", incoming.toJS(), outgoing.toJS());
 
     // deal with incoming features
     let needsload = incoming.subtract(loadedFeatures);
@@ -134,8 +134,6 @@ export function useLiveFeatures() {
         .get("featureList")
         .filter(f => f.get("selected"))
         .map(f => f.get("name"));
-
-    console.log("selected_features: ", selectedFeatures.toJS());
 
     return useFeatures(selectedFeatures);
 }
