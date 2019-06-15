@@ -394,8 +394,9 @@ export default class DataReducer {
             feature: action.feature,
             data: action.data,
             clusters: action.clusters,
-            references: 0
+            references: action.autoRef ? 1 : 0
         });
+
         return state.set("loadedData", state.get("loadedData").push(newDataset));
     }
 
