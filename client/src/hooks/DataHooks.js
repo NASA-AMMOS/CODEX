@@ -5,6 +5,7 @@ import * as actionTypes from "constants/actionTypes";
 import { addDataset, featureRetain, featureRelease } from "actions/data";
 import { fromJS, Set } from "immutable";
 import { batchActions } from "redux-batched-actions";
+import * as selectionActions from "actions/selectionActions.js";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -113,8 +114,10 @@ export function useFeatures(features) {
 
     //console.log('batched promises (pre-resolve): ', actionsToDispatch);
     Promise.all(actionsToDispatch).then(actions => {
-        // console.log(actions);
-        dispatch(batchActions(actions));
+        // don't dispatch an empty batched action
+        if (actions.length > 0) {
+            dispatch(batchActions(actions));
+        }
     });
 
     // if this is the case, then we're probably done resolving
@@ -156,4 +159,29 @@ export function usePinnedFeatures() {
     }, []); // run once
 
     return useFeatures(pinned);
+}
+
+/**
+ * Get saved selections
+ * @return {array} saved selections array + setter function
+ */
+export function useSavedSelections() {
+    const dispatch = useDispatch();
+    const savedSelections = useSelector(state => state.selections.savedSelections);
+
+    return [
+        savedSelections,
+        (id, indices) => dispatch(selectionActions.saveNewSelection(id, indices))
+    ];
+}
+
+/**
+ * Get current selection
+ * @return {array} current lasso selection + setter function
+ */
+export function useCurrentSelection() {
+    const dispatch = useDispatch();
+    const currentSelection = useSelector(state => state.selections.currentSelection);
+
+    return [currentSelection, indices => dispatch(selectionActions.setCurrentSelection(indices))];
 }
