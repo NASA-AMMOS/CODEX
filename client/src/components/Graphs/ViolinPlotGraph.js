@@ -11,7 +11,7 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
-import GraphWrapper from "components/Graphs/GraphWrapper";
+import GraphWrapper, {useBoxSelection} from "components/Graphs/GraphWrapper";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_SELECTION_COLOR = "#FF0000";
@@ -63,23 +63,6 @@ function generateLayouts(features) {
     return layouts;
 }
 
-function createRectangle(range, color) {
-    let opaqueColor = color + "80";
-    return {
-            type: 'rect',
-            xref: 'x',
-            yref: 'y',
-            x0: -.5,
-            y0: range.y[0],
-            x1: .5,
-            y1: range.y[1],
-            fillcolor: opaqueColor,
-            line: {
-                width: 0
-            }
-        }
-}
-
 function ViolinPlotGraph(props) {
     const features = utils.unzip(props.data.get("data"));
 
@@ -124,29 +107,6 @@ function ViolinPlotSubGraph(props) {
         }
     });
 
-    function getPointsInRange(range) {
-        let dataToParse = chartState.data[0].y;
-        let ret = [];
-
-        dataToParse.forEach((data,idx) => {
-            if (data < range.y[1] && data > range.y[0])
-                ret.push(idx);
-        });
-
-        return ret;
-    }
-
-    function getRangeFromIndices(indices) {
-        let min = chartState.data[0].y[indices[0]];
-        let max = chartState.data[0].y[indices[0]];
-        indices.forEach((row) => {
-            min = chartState.data[0].y[row] < min ? chartState.data[0].y[row] : min;
-            max = chartState.data[0].y[row] > max ? chartState.data[0].y[row] : max;
-        });
-
-        return {y:[min,max]};
-    }
-
     function updateChartRevision() {
         const revision = chartRevision + 1;
         setChartState({
@@ -155,38 +115,15 @@ function ViolinPlotSubGraph(props) {
         });
         setChartRevision(revision);
     }
+    
+    const [selectionShapes] = useBoxSelection("vertical", props.currentSelection, props.savedSelections, chartState.data[0].y);
 
-    //effect hook that manages the creation of selection rectangles
-    useEffect(
-        _ => {
-            //add range to the selection state and optimize this
-            chartState.layout.shapes = [];
+    useEffect(_ => {
+        chartState.layout.shapes = selectionShapes;
 
-            const mappedSavedSelections = props.savedSelections.map((selection) => {
-                return {indices:selection.rowIndices, color:selection.color};
-            });
-
-            let allSelections = [...mappedSavedSelections];
-            if (props.currentSelection.length != 0)
-                allSelections.push({indices: props.currentSelection, color: DEFAULT_SELECTION_COLOR});
-            
-            //check to see if there are any selections to render
-            if (allSelections.length != 0) {
-                allSelections.forEach(selection => {
-                    const selectionRange = getRangeFromIndices(selection.indices);
-                    const rect = createRectangle(
-                        selectionRange,
-                        selection.color
-                    );
-
-                    chartState.layout.shapes.push(rect);
-                });
-            }   
-            updateChartRevision();
-        },
-        [props.savedSelections, props.currentSelection]
-    );
-
+        updateChartRevision();
+    }, [selectionShapes]);
+    
 
     return (
         <Plot
@@ -204,8 +141,9 @@ function ViolinPlotSubGraph(props) {
                 props.setCurrentSelection([]);
             }}
             onSelected={e => {
-                if (!e) return;
-                let points = getPointsInRange(e.range);
+                if (!e) return; 
+                let points = utils.indicesInRange(chartState.data[0].y, e.range.y[0], e.range.y[1]);
+
                 props.setCurrentSelection(points);
             }}
         />

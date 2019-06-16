@@ -10,6 +10,89 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import ReactResizeDetector from "react-resize-detector";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
+const DEFAULT_SELECTION_COLOR = "#FF0000";
+
+export const useBoxSelection = (type, currentSelection, savedSelections, data) => {
+    //ignoring type for now. 
+    const [shapes, setShapes] = useState([]);
+
+    const createRectangle = (range, color) => {
+        let opaqueColor = color + "80";
+        let rect = {
+            type: 'rect',
+            xref: 'x',
+            yref: 'y',
+            fillcolor: opaqueColor,
+            line: {
+                width: 0
+            }
+        };
+
+        if (type === "vertical") {
+            rect = {
+                ...rect,
+                x0: -.5,
+                y0: range.min,
+                x1: .5,
+                y1: range.max
+            };
+        } else if (type === "horizontal") {
+            return {
+                ...rect,
+                yref:"paper",
+                x0: range.min,
+                y0: 0,
+                x1: range.max,
+                y1: 1,
+            };
+        }
+        return rect;
+    }
+
+    const getRangeFromIndices = (indices) => {
+        let min = data[indices[0]];
+        let max = data[indices[0]];
+        indices.forEach((row) => {
+            min = data[row] < min ? data[row] : min;
+            max = data[row] > max ? data[row] : max;
+        });
+        return {min: min, max: max};
+    }
+
+    //effect hook that manages the creation of selection rectangles
+    useEffect(
+        _ => {
+            //add range to the selection state and optimize this
+            let newShapes = [];
+
+            const mappedSavedSelections = savedSelections.map((selection) => {
+                return {indices:selection.rowIndices, color:selection.color};
+            });
+
+            let allSelections = [...mappedSavedSelections];
+            if (currentSelection.length != 0)
+                allSelections.push({indices: currentSelection, color: DEFAULT_SELECTION_COLOR});
+            
+            //check to see if there are any selections to render
+            if (allSelections.length != 0) {
+                allSelections.forEach(selection => {
+                    const selectionRange = getRangeFromIndices(selection.indices);
+                    const rect = createRectangle(
+                        selectionRange,
+                        selection.color
+                    );
+
+                    newShapes.push(rect);
+                });
+            }   
+
+            setShapes(newShapes);
+        },
+        [savedSelections, currentSelection]
+    );
+
+    return [shapes];
+}
 
 function GraphWrapper(props) {
     const [contextMenuVisible, setContextMenuVisible] = useState(false);

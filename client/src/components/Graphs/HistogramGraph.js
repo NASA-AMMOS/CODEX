@@ -11,7 +11,7 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
-import GraphWrapper from "components/Graphs/GraphWrapper";
+import GraphWrapper, {useBoxSelection} from "components/Graphs/GraphWrapper";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_SELECTION_COLOR = "#FF0000";
@@ -84,26 +84,6 @@ function HistogramGraph(props) {
     );
 }
 
-function createRectangle(range, color) {
-    let opaqueColor = color + "80";
-    return {
-            type: 'rect',
-            xref: 'x',
-            yref: 'paper',
-            x0: range.x[0],
-            y0: 0,
-            x1: range.x[1],
-            y1: 1,
-            fillcolor:  opaqueColor,
-            line: {
-                width: 0
-            },
-            visible: true
-        }
-}
-
-
-
 function HistogramSubGraph(props) {
      // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
@@ -127,59 +107,13 @@ function HistogramSubGraph(props) {
         setChartRevision(revision);
     }
 
-    function getPointsInRange(range) {
-        let dataToParse = chartState.data[0].x;
-        let ret = [];
-        
-        dataToParse.forEach((data,idx) => {
-            if (data < range.x[1] && data > range.x[0])
-                ret.push(idx);
-        });
+    const [selectionShapes] = useBoxSelection("horizontal", props.currentSelection, props.savedSelections, chartState.data[0].x);
 
-        return ret;
-    }
+    useEffect(_ => {
+        chartState.layout.shapes = selectionShapes;
 
-    function getRangeFromIndices(indices) {
-        let min = chartState.data[0].x[indices[0]];
-        let max = chartState.data[0].x[indices[0]];
-        indices.forEach((row) => {
-            min = chartState.data[0].x[row] < min ? chartState.data[0].x[row] : min;
-            max = chartState.data[0].x[row] > max ? chartState.data[0].x[row] : max;
-        });
-
-        return {x:[min,max]};
-    }
-
-    //effect hook that manages the creation of selection rectangles
-    useEffect(
-        _ => {
-            //add range to the selection state and optimize this
-            chartState.layout.shapes = [];
-
-            const mappedSavedSelections = props.savedSelections.map((selection) => {
-                return {indices:selection.rowIndices, color:selection.color};
-            });
-
-            let allSelections = [...mappedSavedSelections];
-            if (props.currentSelection.length != 0)
-                allSelections.push({indices: props.currentSelection, color: DEFAULT_SELECTION_COLOR});
-            
-            //check to see if there are any selections to render
-            if (allSelections.length != 0) {
-                allSelections.forEach(selection => {
-                    const selectionRange = getRangeFromIndices(selection.indices);
-                    const rect = createRectangle(
-                        selectionRange,
-                        selection.color
-                    );
-
-                    chartState.layout.shapes.push(rect);
-                });
-            }   
-            updateChartRevision();
-        },
-        [props.savedSelections, props.currentSelection]
-    );
+        updateChartRevision();
+    }, [selectionShapes]);
     
     return (
         <Plot
@@ -199,7 +133,7 @@ function HistogramSubGraph(props) {
             onSelected={e => {
                 if (!e) return;
                 //fix range
-                let points = getPointsInRange(e.range);
+                let points = utils.indicesInRange(chartState.data[0].x, e.range.x[0], e.range.x[1]);
                 props.setCurrentSelection(points);
             }}
 

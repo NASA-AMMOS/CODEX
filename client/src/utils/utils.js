@@ -79,3 +79,14 @@ export function range(start, stop) {
     }
     return values;
 }
+
+export function indicesInRange(data, min, max) {
+    const indices = [];
+    for (let i = 0; i < data.length; i++) {
+        if (data[i] >= min && data[i] <= max) {
+            indices.push(i);
+        }
+    }
+
+    return indices;
+}

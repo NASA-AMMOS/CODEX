@@ -11,7 +11,7 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
-import GraphWrapper from "components/Graphs/GraphWrapper";
+import GraphWrapper, {useBoxSelection} from "components/Graphs/GraphWrapper";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 
@@ -28,12 +28,10 @@ function generatePlotData(features) {
         data[i] = {
             x: timeAxis,
             y: features[i],
-            xaxis: 'x'+(i+1),
+            xaxis: 'x',
             yaxis: 'y1',
-            mode: "lines+markers",
+            mode: "lines",
             type: "scatter",
-            marker: { color: features[i].map((val, idx) => DEFAULT_POINT_COLOR), size:2 },
-            selected: { marker: { color: "#FF0000", size: 5 } },
         };
     }
     return data;
@@ -123,35 +121,14 @@ function TimeSeriesSubGraph(props) {
         setChartRevision(revision);
     }
 
-    // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
-    useEffect(
-        _ => {
-            chartState.data[0].marker.color = chartState.data[0].marker.color.map(
-                _ => DEFAULT_POINT_COLOR
-            );
+    const [selectionShapes] = useBoxSelection("horizontal", props.currentSelection, props.savedSelections, chartState.data[0].x);
 
-            props.savedSelections.forEach(selection => {
-                selection.rowIndices.forEach(row => {
-                    chartState.data[0].marker.color[row] = selection.active
-                        ? selection.color
-                        : DEFAULT_POINT_COLOR;
-                });
-            });
-            updateChartRevision();
-        },
-        [props.savedSelections]
-    );
+    useEffect(_ => {
+        chartState.layout.shapes = selectionShapes;
 
-    // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
-    useEffect(
-        _ => {
-            if (!props.currentSelection) return;
-            chartState.data[0].selectedpoints = props.currentSelection;
-            updateChartRevision();
-        },
-        [props.currentSelection]
-    );
-    //handle this later
+        updateChartRevision();
+    }, [selectionShapes]);
+
     
     return (
         <Plot
@@ -165,11 +142,13 @@ function TimeSeriesSubGraph(props) {
             onInitialized={figure => setChartState(figure)}
             onUpdate={figure => setChartState(figure)}
             onClick={e => {
-                if (e.event.button === 2) return;
+                if (e.event.button === 2 || e.event.ctrlKey) return;
                 props.setCurrentSelection([]);
             }}
             onSelected={e => {
-                if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
+                if (!e) return;
+                let points = utils.indicesInRange(chartState.data[0].x, e.range.x[0], e.range.x[1]);
+                props.setCurrentSelection(points);
             }}
 
         />
