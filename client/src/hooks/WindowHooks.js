@@ -11,12 +11,35 @@ import { defaultInitialSettings } from "constants/windowSettings";
  */
 
 const wrapWindow = (win, dispatch) => {
+    // dispatchers are wrapped to avoid unnecessary rerenders by triggering actions
+    // this greatly simplifies components using this, as they can simply "set and forget"
+    // instead of checking that they haven't already set a value
     return {
-        resizeX: width => dispatch(wmActions.resizeWindow(win.id, { width })),
-        resizeY: height => dispatch(wmActions.resizeWindow(win.id, { height })),
-        resize: (width, height) => dispatch(wmActions.resizeWindow(win.id, { width, height })),
-        setTitle: title => dispatch(wmActions.setTitle(win.id, title)),
-        setResizable: isResizable => dispatch(wmActions.setWindowResizable(win.id, isResizable)),
+        resizeX: width => {
+            if (this.width !== width) {
+                dispatch(wmActions.resizeWindow(win.id, { width }));
+            }
+        },
+        resizeY: height => {
+            if (this.height !== height) {
+                dispatch(wmActions.resizeWindow(win.id, { height }));
+            }
+        },
+        resize: (width, height) => {
+            if (this.width !== width || this.height !== height) {
+                dispatch(wmActions.resizeWindow(win.id, { width, height }));
+            }
+        },
+        setTitle: title => {
+            if (this.title === title) {
+                dispatch(wmActions.setTitle(win.id, title));
+            }
+        },
+        setResizable: isResizable => {
+            if (this.isResizable === isResizable) {
+                dispatch(wmActions.setWindowResizable(win.id, isResizable));
+            }
+        },
         ...win
     };
 };
@@ -33,7 +56,7 @@ const wrapDummy = () => {
     };
 };
 
-function useWindowManager(props, initialSettings) {
+export function useWindowManager(props, initialSettings) {
     const dispatch = useDispatch();
     const domain = useSelector(state => state.windowManager);
     let window_obj = {};
