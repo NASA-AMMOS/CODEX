@@ -16,27 +16,27 @@ const wrapWindow = (win, dispatch) => {
     // instead of checking that they haven't already set a value
     return {
         resizeX: width => {
-            if (this.width !== width) {
+            if (win.width !== width) {
                 dispatch(wmActions.resizeWindow(win.id, { width }));
             }
         },
         resizeY: height => {
-            if (this.height !== height) {
+            if (win.height !== height) {
                 dispatch(wmActions.resizeWindow(win.id, { height }));
             }
         },
         resize: (width, height) => {
-            if (this.width !== width || this.height !== height) {
+            if (win.width !== width || win.height !== height) {
                 dispatch(wmActions.resizeWindow(win.id, { width, height }));
             }
         },
         setTitle: title => {
-            if (this.title === title) {
-                dispatch(wmActions.setTitle(win.id, title));
+            if (win.title !== title) {
+                dispatch(wmActions.setWindowTitle(win.id, title));
             }
         },
         setResizable: isResizable => {
-            if (this.isResizable === isResizable) {
+            if (win.isResizable === isResizable) {
                 dispatch(wmActions.setWindowResizable(win.id, isResizable));
             }
         },

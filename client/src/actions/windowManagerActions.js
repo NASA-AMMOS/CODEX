@@ -27,7 +27,7 @@ export function resizeWindow(id, size) {
 }
 
 export function setWindowTitle(id, title) {
-    return { type: actionTypes.WINDOW.SET_TITLE, id, title };
+    return { type: actionTypes.WINDOW_SET_TITLE, id, title };
 }
 
 export function setWindowResizable(id, isResizable) {
