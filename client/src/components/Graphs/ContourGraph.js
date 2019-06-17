@@ -312,7 +312,7 @@ function ContourGraph(props) {
 
     // plug through props
     const cols = props.data.map(f => f.get("data")).toJS();
-    const xAxis = props.data.get(0).get("feature");
+    const xAxis = props.data.getIn([0, "feature"]);
     const yAxis = props.data.getIn([1, "feature"]);
 
     //const cols = utils.unzip(data.slice(1));
@@ -422,13 +422,7 @@ export default props => {
     }
 
     if (features.size === 2) {
-        console.log(features.map(f => f.get("data")));
-        win.setTitle(
-            features
-                .map(f => f.get("feature"))
-                .toJS()
-                .join(" vs ")
-        );
+        win.setTitle(features.map(f => f.get("feature")).join(" vs "));
         return (
             <ContourGraph
                 currentSelection={currentSelection}

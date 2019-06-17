@@ -25,7 +25,7 @@ function ScatterGraph(props) {
 
     // plug through data props
     const cols = props.data.map(f => f.get("data")).toJS();
-    const xAxis = props.data.get(0).get("feature");
+    const xAxis = props.data.getIn([0, "feature"]);
     const yAxis = props.data.getIn([1, "feature"]);
 
     // The plotly react element only changes when the revision is incremented.
@@ -144,7 +144,6 @@ export default props => {
     }
 
     if (features.size === 2) {
-        console.log(features.map(f => f.get("data")));
         win.setTitle(
             features
                 .map(f => f.get("feature"))
