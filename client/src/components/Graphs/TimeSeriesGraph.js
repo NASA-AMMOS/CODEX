@@ -13,6 +13,11 @@ import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
 
+import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import { useCurrentSelection, useSavedSelections, usePinnedFeatures } from "hooks/DataHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+import { useGlobalChartState } from "hooks/UiHooks";
+
 const DEFAULT_POINT_COLOR = "#3386E6";
 
 function generatePlotData(features) {
@@ -68,7 +73,8 @@ function generateLayouts(features) {
 }
 
 function TimeSeriesGraph(props) {
-    const features = utils.unzip(props.data.get("data"));
+    //const features = utils.unzip(props.data.get("data"));
+    const features = props.data.map(f => f.get("data")).toJS();
 
     const chartRefs = features.map(feat => useRef(null));
 
@@ -158,21 +164,49 @@ function TimeSeriesSubGraph(props) {
     );
 }
 
-function mapStateToProps(state) {
-    return {
-        currentSelection: state.selections.currentSelection,
-        savedSelections: state.selections.savedSelections
-    };
-}
+export default props => {
+    const win = useWindowManager(props, {
+        width: 500,
+        height: 500,
+        resizeable: true,
+        title: "Time Series Graph"
+    });
 
-function mapDispatchToProps(dispatch) {
-    return {
-        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
-        saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
-    };
-}
+    const [currentSelection, setCurrentSelection] = useCurrentSelection();
+    const [savedSelections, saveCurrentSelection] = useSavedSelections();
+    const [globalChartState, setGlobalChartState] = useGlobalChartState();
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(TimeSeriesGraph);
+    const features = usePinnedFeatures();
+
+    if (features === null) {
+        return <WindowCircularProgress />;
+    }
+
+    if (features.size === 2) {
+        console.log(features.map(f => f.get("data")));
+        win.setTitle(
+            features
+                .map(f => f.get("feature"))
+                .toJS()
+                .join(" vs ")
+        );
+        return (
+            <TimeSeriesGraph
+                currentSelection={currentSelection}
+                setCurrentSelection={setCurrentSelection}
+                savedSelections={savedSelections}
+                saveCurrentSelection={saveCurrentSelection}
+                globalChartState={globalChartState}
+                data={features}
+            />
+        );
+    } else {
+        return (
+            <WindowError>
+                Please select exactly two features
+                <br />
+                in the features list to use this graph.
+            </WindowError>
+        );
+    }
+};
