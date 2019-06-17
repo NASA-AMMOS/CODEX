@@ -181,7 +181,7 @@ function WindowManager(props) {
                 : getNewWindowPosition(props, refs, win.width, win.height);
 
             const settings = {
-                title: win.title || windowContentFunctions.getWindowTitle(win),
+                title: win.title,
                 children: null,
                 isResizable: win.resizeable,
                 isDraggable: true,

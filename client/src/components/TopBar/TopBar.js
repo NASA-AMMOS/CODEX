@@ -70,11 +70,13 @@ class TopBar extends Component {
     }
 
     getGraphMenuItems() {
-        return uiTypes.GRAPH_TYPES.map(graph => (
+        // WINDOW TYPES
+
+        return windowTypes.graphs.map(graph => (
             <MenuItem
                 key={graph}
                 onSelect={() => {
-                    this.props.createGraph(graph);
+                    this.props.openWindow(graph);
                 }}
             >
                 {graph}
