@@ -106,13 +106,13 @@
             width:60%;
             height: 40vh;
             color: #bbb;
-            background-color: #061427;
             z-index: 999; //this is to ensure it is above the window layout
             padding-left:3px;
             .stats-container {
                 height: calc(40vh - 25px);
                 .stats-table {
                     
+                background-color: #061427;
                     tr {
                         height:16px;
                         line-height: 16px; //necesary to make the height 22
