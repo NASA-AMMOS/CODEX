@@ -9,6 +9,7 @@ import Cristal from "react-cristal/src";
 import * as windowContentFunctions from "components/WindowManager/windowContentFunctions";
 import * as windowManagerActions from "actions/windowManagerActions";
 import * as windowSettings from "constants/windowSettings";
+import WindowErrorBoundary from "components/WindowHelpers/WindowErrorBoundary";
 
 function tileWindowsFromPackedObject(refAry, packed) {
     refAry.forEach(([key], idx) => {
@@ -217,9 +218,11 @@ function WindowManager(props) {
                     {...settings}
                 >
                     <div className="windowBody">
-                        {React.cloneElement(windowContentFunctions.getWindowContent(win), {
-                            __wm_parent_id: win.id
-                        })}
+                        <WindowErrorBoundary verbose={true}>
+                            {React.cloneElement(windowContentFunctions.getWindowContent(win), {
+                                __wm_parent_id: win.id
+                            })}
+                        </WindowErrorBoundary>
                     </div>
                 </Cristal>
             );
