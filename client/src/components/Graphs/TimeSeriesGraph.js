@@ -182,31 +182,20 @@ export default props => {
         return <WindowCircularProgress />;
     }
 
-    if (features.size === 2) {
-        console.log(features.map(f => f.get("data")));
-        win.setTitle(
-            features
-                .map(f => f.get("feature"))
-                .toJS()
-                .join(" vs ")
-        );
-        return (
-            <TimeSeriesGraph
-                currentSelection={currentSelection}
-                setCurrentSelection={setCurrentSelection}
-                savedSelections={savedSelections}
-                saveCurrentSelection={saveCurrentSelection}
-                globalChartState={globalChartState}
-                data={features}
-            />
-        );
-    } else {
-        return (
-            <WindowError>
-                Please select exactly two features
-                <br />
-                in the features list to use this graph.
-            </WindowError>
-        );
-    }
+    win.setTitle(
+        features
+            .map(f => f.get("feature"))
+            .toJS()
+            .join(" vs ")
+    );
+    return (
+        <TimeSeriesGraph
+            currentSelection={currentSelection}
+            setCurrentSelection={setCurrentSelection}
+            savedSelections={savedSelections}
+            saveCurrentSelection={saveCurrentSelection}
+            globalChartState={globalChartState}
+            data={features}
+        />
+    );
 };
