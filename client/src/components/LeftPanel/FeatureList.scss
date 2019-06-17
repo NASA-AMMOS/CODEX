@@ -107,8 +107,9 @@
             height: calc(40vh - 25px);
             overflow-y: scroll;
             .stats-table {
-                height: 100%;
+                
                 tr {
+                    height:20px;
                     line-height: 20px; //necesary to make the height 22
                     td {
                         padding-right: 10px;
