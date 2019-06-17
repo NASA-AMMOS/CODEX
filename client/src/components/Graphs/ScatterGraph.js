@@ -217,10 +217,9 @@ export default props => {
     } else {
         return (
             <WindowError>
-                {" "}
                 Please select exactly two features
                 <br />
-                in the features list to use this graph!{" "}
+                in the features list to use this graph.
             </WindowError>
         );
     }
