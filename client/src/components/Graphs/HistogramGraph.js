@@ -13,6 +13,11 @@ import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
 
+import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import { useCurrentSelection, useSavedSelections, usePinnedFeatures } from "hooks/DataHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+import { useGlobalChartState } from "hooks/UiHooks";
+
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_SELECTION_COLOR = "#FF0000";
 
@@ -21,7 +26,7 @@ function generatePlotData(features) {
 
     for (let i = 0; i < features.length; i++) {
         data[i] = {
-            x: features[i],
+            x: features[i].data,
             xaxis: "x",
             yaxis: "y",
             type: "histogram"
@@ -53,7 +58,7 @@ function generateLayouts(features) {
 }
 
 function HistogramGraph(props) {
-    const features = utils.unzip(props.data.get("data"));
+    const features = props.data.toJS();
 
     const chartRefs = features.map(feat => useRef(null));
 
@@ -68,6 +73,7 @@ function HistogramGraph(props) {
             <ul className="histogram-graph-container">
                 {data.map((dataElement, index) => (
                     <HistogramSubGraph
+                        key={index}
                         data={data[index]}
                         chart={chartRefs[index]}
                         layout={layouts[index]}
@@ -159,7 +165,41 @@ function mapDispatchToProps(dispatch) {
     };
 }
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(HistogramGraph);
+export default props => {
+    const win = useWindowManager(props, {
+        width: 500,
+        height: 500,
+        resizeable: true,
+        title: "Histogram"
+    });
+
+    const [currentSelection, setCurrentSelection] = useCurrentSelection();
+    const [savedSelections, saveCurrentSelection] = useSavedSelections();
+    const [globalChartState, setGlobalChartState] = useGlobalChartState();
+
+    const features = usePinnedFeatures();
+
+    if (features === null) {
+        return <WindowCircularProgress />;
+    }
+    if (features.size === 0) {
+        return <WindowError> Please select at least one feature to use this graph.</WindowError>;
+    }
+
+    win.setTitle(
+        features
+            .map(f => f.get("feature"))
+            .toJS()
+            .join(" vs ")
+    );
+    return (
+        <HistogramGraph
+            currentSelection={currentSelection}
+            setCurrentSelection={setCurrentSelection}
+            savedSelections={savedSelections}
+            saveCurrentSelection={saveCurrentSelection}
+            globalChartState={globalChartState}
+            data={features}
+        />
+    );
+};
