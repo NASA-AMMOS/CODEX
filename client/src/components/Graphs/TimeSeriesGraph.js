@@ -181,6 +181,9 @@ export default props => {
     if (features === null) {
         return <WindowCircularProgress />;
     }
+    if (features.size === 0) {
+        return <WindowError> Please select at least one feature to use this graph.</WindowError>;
+    }
 
     win.setTitle(
         features
