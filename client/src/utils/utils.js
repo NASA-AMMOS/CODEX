@@ -45,7 +45,7 @@ export function makeSimpleRequest(request) {
     const req = new Promise((resolve, reject) => {
         const requestObject = {};
         const socketWorker = new WorkerSocket();
-        
+
         socketWorker.addEventListener("message", e => {
             const inMsg = JSON.parse(e.data);
 
@@ -78,4 +78,15 @@ export function range(start, stop) {
         values.push(i);
     }
     return values;
+}
+
+export function indicesInRange(data, min, max) {
+    const indices = [];
+    for (let i = 0; i < data.length; i++) {
+        if (data[i] >= min && data[i] <= max) {
+            indices.push(i);
+        }
+    }
+
+    return indices;
 }

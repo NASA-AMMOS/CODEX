@@ -11,7 +11,7 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
-import GraphWrapper from "components/Graphs/GraphWrapper";
+import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 
@@ -28,12 +28,10 @@ function generatePlotData(features) {
         data[i] = {
             x: timeAxis,
             y: features[i],
-            xaxis: 'x'+(i+1),
-            yaxis: 'y1',
-            mode: "lines+markers",
-            type: "scatter",
-            marker: { color: features[i].map((val, idx) => DEFAULT_POINT_COLOR), size:2 },
-            selected: { marker: { color: "#FF0000", size: 5 } },
+            xaxis: "x",
+            yaxis: "y1",
+            mode: "lines",
+            type: "scatter"
         };
     }
     return data;
@@ -42,22 +40,22 @@ function generatePlotData(features) {
 function generateLayouts(features) {
     let layouts = [];
 
-    for(let index = 0; index < features.length; index++) {
+    for (let index = 0; index < features.length; index++) {
         let layout = {
-            dragmode: 'select',
-            selectdirection: 'h',
+            dragmode: "select",
+            selectdirection: "h",
             margin: { l: 40, r: 5, t: 5, b: 0 }, // Axis tick labels are drawn in the margin space
             hovermode: "compare", // Turning off hovermode seems to screw up click handling
             yaxis: {
-                title:features[index][0],
-                fixedrange: true,
-            },
+                title: features[index][0],
+                fixedrange: true
+            }
         };
 
-        let axisLabel = "xaxis"+(index+1);
+        let axisLabel = "xaxis" + (index + 1);
         layout[axisLabel] = {};
 
-        if (index != (features.length - 1)) {
+        if (index != features.length - 1) {
             layout[axisLabel].visible = false;
         } else {
             layout.margin.b = 25;
@@ -72,45 +70,42 @@ function generateLayouts(features) {
 function TimeSeriesGraph(props) {
     const features = utils.unzip(props.data.get("data"));
 
-    const chartRefs = features.map((feat) => useRef(null));
+    const chartRefs = features.map(feat => useRef(null));
 
     let data = generatePlotData(features);
 
     let layouts = generateLayouts(features);
-    
+
     return (
         <GraphWrapper
-            resizeHandler = {_ => (chartRefs.forEach((chart) => chart.current.resizeHandler()))}
+            resizeHandler={_ => chartRefs.forEach(chart => chart.current.resizeHandler())}
         >
-            <ul className="time-series-plot-container"> 
-                {
-                    data.map((dataElement,index) => (
-                        <TimeSeriesSubGraph
-                            axisKey={"x"+(index+1)}
-                            data={data[index]}
-                            chart={chartRefs[index]}
-                            layout={layouts[index]}
-                            setCurrentSelection={props.setCurrentSelection}
-                            currentSelection={props.currentSelection}
-                            savedSelections={props.savedSelections}
-                        />
-                    ))
-                }
+            <ul className="time-series-plot-container">
+                {data.map((dataElement, index) => (
+                    <TimeSeriesSubGraph
+                        axisKey={"x" + (index + 1)}
+                        data={data[index]}
+                        chart={chartRefs[index]}
+                        layout={layouts[index]}
+                        setCurrentSelection={props.setCurrentSelection}
+                        currentSelection={props.currentSelection}
+                        savedSelections={props.savedSelections}
+                    />
+                ))}
             </ul>
         </GraphWrapper>
     );
 }
 
-
 function TimeSeriesSubGraph(props) {
-     // The plotly react element only changes when the revision is incremented.
+    // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
     const [chartState, setChartState] = useState({
         data: [props.data],
         layout: props.layout,
         config: {
             responsive: true,
-            displaylogo: false,
+            displaylogo: false
         }
     });
 
@@ -123,36 +118,22 @@ function TimeSeriesSubGraph(props) {
         setChartRevision(revision);
     }
 
-    // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
-    useEffect(
-        _ => {
-            chartState.data[0].marker.color = chartState.data[0].marker.color.map(
-                _ => DEFAULT_POINT_COLOR
-            );
-
-            props.savedSelections.forEach(selection => {
-                selection.rowIndices.forEach(row => {
-                    chartState.data[0].marker.color[row] = selection.active
-                        ? selection.color
-                        : DEFAULT_POINT_COLOR;
-                });
-            });
-            updateChartRevision();
-        },
-        [props.savedSelections]
+    const [selectionShapes] = useBoxSelection(
+        "horizontal",
+        props.currentSelection,
+        props.savedSelections,
+        chartState.data[0].x
     );
 
-    // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
     useEffect(
         _ => {
-            if (!props.currentSelection) return;
-            chartState.data[0].selectedpoints = props.currentSelection;
+            chartState.layout.shapes = selectionShapes;
+
             updateChartRevision();
         },
-        [props.currentSelection]
+        [selectionShapes]
     );
-    //handle this later
-    
+
     return (
         <Plot
             className="time-series-subplot"
@@ -165,13 +146,14 @@ function TimeSeriesSubGraph(props) {
             onInitialized={figure => setChartState(figure)}
             onUpdate={figure => setChartState(figure)}
             onClick={e => {
-                if (e.event.button === 2) return;
+                if (e.event.button === 2 || e.event.ctrlKey) return;
                 props.setCurrentSelection([]);
             }}
             onSelected={e => {
-                if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
+                if (!e) return;
+                let points = utils.indicesInRange(chartState.data[0].x, e.range.x[0], e.range.x[1]);
+                props.setCurrentSelection(points);
             }}
-
         />
     );
 }
@@ -189,7 +171,6 @@ function mapDispatchToProps(dispatch) {
         saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
     };
 }
-
 
 export default connect(
     mapStateToProps,

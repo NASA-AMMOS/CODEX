@@ -1,13 +1,14 @@
-import React, { useRef, useState, useEffect} from "react";
-import { bindActionCreators} from "redux";
+import React, { useRef, useState, useEffect } from "react";
+import { bindActionCreators } from "redux";
 import * as selectionActions from "actions/selectionActions";
-import { connect} from "react-redux";
+import { connect } from "react-redux";
 import Popover from "@material-ui/core/Popover";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 import * as d3 from "d3";
 import Plot from "react-plotly.js";
+import Button from "@material-ui/core/Button";
 import "components/ExplainThis/ExplainThis.scss";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -58,12 +59,15 @@ function processFloatingPointNumber(number) {
 function node_label(d) {
     //split on spaces
     //shorten the name
-    //shorten the number 
+    //shorten the number
     //add them back together
     let split = d.name.split(" ");
     let float = processFloatingPointNumber(parseFloat(split[2])); //truncate to two decimal places
     let featureName = split[0];
-    let name =featureName.length > 8 ? featureName.substring(0,3) + "..." + featureName.substring(featureName.length - 3) : featureName;
+    let name =
+        featureName.length > 8
+            ? featureName.substring(0, 2) + "..." + featureName.substring(featureName.length - 2)
+            : featureName;
 
     return name + split[1] + float;
 }
@@ -116,23 +120,22 @@ function textSize(text) {
 }
 
 function generateTree(treeData, svgRef) {
-
     let barHeight = 20;
     //setup margins and size for the d3 window
-    let margin = { top: 0, right: 20, bottom: 10, left: 60 },
+    let margin = { top: 0, right: 20, bottom: 10, left: 65 },
         i = 0,
         width = svgRef.clientWidth - margin.right - margin.left,
         height = svgRef.clientHeight - margin.top - margin.bottom,
         rect_width = 80,
         rect_height = 20,
-        max_link_width = 28,
-        min_link_width = 3,
+        max_link_width = 20,
+        min_link_width = 1,
         root;
 
     //might change this later to be dynamic based on the number of leaf nodes
     let maxDepth = 6;
     let numLeafs = calculateNumLeafNodes(treeData);
-    let nodeSize = [height / Math.pow(2, maxDepth)+3, width / maxDepth+3];
+    let nodeSize = [8, width / maxDepth + 3];
 
     let color_map = d3.scale
         .linear()
@@ -160,7 +163,7 @@ function generateTree(treeData, svgRef) {
     let vis = d3
         .select(svgRef)
         .append("svg:g")
-        .attr("transform", "translate(" + margin.left + "," + ((height / 2) - 20) + ")");
+        .attr("transform", "translate(" + margin.left + "," + (height / 2 - 20) + ")");
 
     let gradientContainer = d3
         .select(svgRef)
@@ -243,9 +246,12 @@ function generateTree(treeData, svgRef) {
 
         // Normalize for fixed-depth.
         nodes.forEach(function(d) {
-            let firstDepth = 50;
+            let firstDepth = 30;
             let yscale = 120;
-                d.x+=50;
+            d.x += 50;
+            if (hasLeafChildren(d) && d.depth == 1) {
+                firstDepth = 150;
+            }
             if (d.depth == 0) {
                 d.y = 0;
             } else {
@@ -288,7 +294,11 @@ function generateTree(treeData, svgRef) {
             .style("opacity", function(d) {
                 return d.hidden ? 0 : 1;
             })
-            .call(getBB);
+            .call(getBB)
+            .append("svg:title")
+            .text(function(d) {
+                return d.name;
+            });
 
         let rectPadding = 10;
 
@@ -432,9 +442,8 @@ function createExplainThisRequest(filename, labelName, dataFeatures) {
 
 function ChooseLabel(props) {
     return (
-        <React.Fragment>
+        <div className="label-chooser">
             <p className="feature-list-header">Choose Label</p>
-            <br/>
             <FormControl className="labelDropdown">
                 <InputLabel>Labels</InputLabel>
                 <Select value={props.label} onChange={e => props.setLabel(e.target.value)}>
@@ -445,23 +454,21 @@ function ChooseLabel(props) {
                     ))}
                 </Select>
             </FormControl>
-        </React.Fragment>
+        </div>
     );
 }
 
-
 function TreeSweepScroller(props) {
-    if (!props.tree_sweep)
-        return <div className="tree-sweep-scroller"> Loading ... </div>;
+    if (!props.tree_sweep) return <div className="tree-sweep-scroller"> Loading ... </div>;
     const [listClass, setListClass] = useState([]);
 
     const currentSelectionRef = useRef(null);
-    const xVals = [...Array(props.tree_sweep.length).keys()]
+    const xVals = [...Array(props.tree_sweep.length).keys()];
     const chartOptions = {
         data: [
             {
                 x: xVals,
-                y: props.tree_sweep.map((tree) => {
+                y: props.tree_sweep.map(tree => {
                     return tree.score;
                 }),
                 type: "scatter",
@@ -472,16 +479,13 @@ function TreeSweepScroller(props) {
                     size: 6
                 },
                 hoverinfo: "text",
-               //text: algo.data.explained_variance_ratio.map(
-               //     (r, idx) => `Components: ${idx + 1} <br> Explained Variance: ${r}%`
-               // )
+                text: props.tree_sweep.map((r, idx) => `Score ${r.score} at depth ${idx + 1}`)
             }
         ],
         layout: {
             autosize: true,
-            margin: { l: 0, r: 5, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
+            margin: { l: 20, r: 0, t: 40, b: 0 }, // Axis tick labels are drawn in the margin space
             hovermode: "closest", // Turning off hovermode seems to screw up click handling
-            titlefont: { size: 5 },
             showlegend: false,
             xaxis: {
                 automargin: true
@@ -489,6 +493,13 @@ function TreeSweepScroller(props) {
             yaxis: {
                 automargin: true,
                 range: [0, 100]
+            },
+            title: {
+                text: "Score vs Tree Depth",
+                font: {
+                    family: "Roboto, Helvetica, Arial, sans-serif",
+                    size: 18
+                }
             }
         },
         config: {
@@ -496,7 +507,6 @@ function TreeSweepScroller(props) {
             displayModeBar: false
         }
     };
-
 
     return (
         <React.Fragment>
@@ -531,6 +541,13 @@ function FeatureList(props) {
 
     return (
         <div className="feature-list">
+            <div className="tree-sweep-scroller">
+                <TreeSweepScroller
+                    setTreeIndex={props.setTreeIndex}
+                    tree_sweep={props.tree_sweep}
+                    treeIndex={props.treeIndex}
+                />
+            </div>
             <List className="used-features">
                 <ListItem>
                     <p className="feature-list-header">Used Features</p>
@@ -547,14 +564,24 @@ function FeatureList(props) {
                     );
                 })}
             </List>
-            <div className="label-chooser">
-                <ChooseLabel selectedFeatures={props.features} label={props.label} setLabel={props.setLabel}/>
-            </div>
-            <div className="tree-sweep-scroller">
-                <TreeSweepScroller 
-                    setTreeIndex={props.setTreeIndex}
-                    tree_sweep={props.tree_sweep}
-                    treeIndex={props.treeIndex}/>
+            <div className="right-pane">
+                <ChooseLabel
+                    selectedFeatures={props.features}
+                    label={props.label}
+                    setLabel={props.setLabel}
+                />
+                <div className="button-container">
+                    <Button
+                        className="run-button"
+                        variant="contained"
+                        color="primary"
+                        onClick={_ => {
+                            props.setTriggerFlag(!props.triggerFlag);
+                        }}
+                    >
+                        Run
+                    </Button>
+                </div>
             </div>
         </div>
     );
@@ -564,11 +591,15 @@ function ExplainThisTree(props) {
     //declaring svgRef so that the callback in the jsx below can reach it
     let svgRef = null;
     //wraps the entire functionality in lifecycle methods
-    useEffect(_ => {
-        if (!svgRef) return;
-        d3.selectAll(".tree-container > *").remove();
-        generateTree(props.treeData.json_tree, svgRef);
-    }, [props.treeData]);
+    useEffect(
+        _ => {
+            if (!svgRef) return;
+            d3.selectAll(".tree-container > *").remove();
+            console.log(props.treeData);
+            generateTree(props.treeData.json_tree, svgRef);
+        },
+        [props.treeData]
+    );
 
     return (
         <svg
@@ -580,8 +611,6 @@ function ExplainThisTree(props) {
     );
 }
 
-
-
 function ExplainThis(props) {
     //make a data state object to hold the data in the request
     const [dataState, setDataState] = useState(undefined);
@@ -589,30 +618,35 @@ function ExplainThis(props) {
     const defaultLabelName = "labels";
     const [label, setLabel] = useState(defaultLabelName);
     const [treeIndex, setTreeIndex] = useState(0);
+    const [triggerFlag, setTriggerFlag] = useState(true);
 
     //handles the request object asynchronous loading
-    useEffect(_ => {
-        //handle the loading of the data request promise
-        // Get selected feature list from current state if none specified
-        let selectedFeatures = props.featureList
-            .filter(f => f.get("selected"))
-            .map(f => f.get("name"))
-            .toJS();
+    useEffect(
+        _ => {
+            //handle the loading of the data request promise
+            // Get selected feature list from current state if none specified
+            console.log("resetting tree");
+            let selectedFeatures = props.featureList
+                .filter(f => f.get("selected"))
+                .map(f => f.get("name"))
+                .toJS();
 
-        //todo actually setup a form for selecting a feature that gets sent to
-        //the user as a label
-        const request = createExplainThisRequest(props.filename, label, selectedFeatures);
+            //todo actually setup a form for selecting a feature that gets sent to
+            //the user as a label
+            const request = createExplainThisRequest(props.filename, label, selectedFeatures);
 
-        const requestMade = utils.makeSimpleRequest(request);
-        requestMade.req.then(data => {
-            setDataState(data);
-        });
+            const requestMade = utils.makeSimpleRequest(request);
+            requestMade.req.then(data => {
+                setDataState(data);
+            });
 
-        //cancels the request if the window is closed
-        return function cleanup() {
-            requestMade.cancel();
-        };
-    }, [label]);
+            //cancels the request if the window is closed
+            return function cleanup() {
+                requestMade.cancel();
+            };
+        },
+        [label, triggerFlag]
+    );
 
     if (!dataState) {
         return (
@@ -623,32 +657,34 @@ function ExplainThis(props) {
     } else if (!dataState.tree_sweep) {
         return (
             <div className="explain-this-container">
-                <FeatureList 
+                <FeatureList
                     features={props.featureList.map(f => f.get("name"))}
-                    rankedFeatures={[]} 
-                    importances={[]} 
-                    label={label} 
+                    rankedFeatures={[]}
+                    importances={[]}
+                    label={label}
                     setLabel={setLabel}
+                    setTriggerFlag={setTriggerFlag}
+                    triggerFlag={triggerFlag}
                 />
-                <div className="load-failure">
-                    Choose a different feature as your label. 
-                </div>
+                <div className="load-failure">Choose a different feature as your label.</div>
             </div>
         );
     } else {
         return (
             <div className="explain-this-container">
-                <FeatureList 
+                <FeatureList
                     features={props.featureList.map(f => f.get("name"))}
-                    rankedFeatures={dataState.tree_sweep[treeIndex].feature_rank} 
-                    importances={dataState.tree_sweep[treeIndex].feature_weights} 
-                    label={label} 
+                    rankedFeatures={dataState.tree_sweep[treeIndex].feature_rank}
+                    importances={dataState.tree_sweep[treeIndex].feature_weights}
+                    label={label}
                     setLabel={setLabel}
                     setTreeIndex={setTreeIndex}
                     tree_sweep={dataState.tree_sweep}
-                    treeIndex={treeIndex}/>
-                <ExplainThisTree 
-                    treeData={dataState.tree_sweep[treeIndex]}/>
+                    setTriggerFlag={setTriggerFlag}
+                    triggerFlag={triggerFlag}
+                    treeIndex={treeIndex}
+                />
+                <ExplainThisTree treeData={dataState.tree_sweep[treeIndex]} />
             </div>
         );
     }
