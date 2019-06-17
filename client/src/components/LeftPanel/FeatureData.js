@@ -35,8 +35,12 @@ function makeStatisticsRequests(features) {
 }
 
 function StatisticsRow(props) {
-    if (props.stats == undefined) {
-        return <tr> Loading ... </tr>;
+    if (props.stats === undefined) {
+        return (
+            <tr>
+                <td> Loading ... </td>
+            </tr>
+        );
     }
 
     let mean = processFloatingPointNumber(props.stats.mean);
@@ -123,9 +127,11 @@ function FeatureData(props) {
                 </div>
                 <div className="stats-container">
                     <table className="stats-table">
-                        {names.map(name => {
-                            return <StatisticsRow key={name} stats={statsData[name]} />;
-                        })}
+                        <tbody>
+                            {names.map(name => {
+                                return <StatisticsRow key={name} stats={statsData[name]} />;
+                            })}
+                        </tbody>
                     </table>
                 </div>
             </div>
