@@ -13,6 +13,11 @@ import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
 
+import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import { useCurrentSelection, useSavedSelections, usePinnedFeatures } from "hooks/DataHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+import { useGlobalChartState } from "hooks/UiHooks";
+
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_SELECTION_COLOR = "#FF0000";
 
@@ -21,11 +26,11 @@ function generatePlotData(features) {
 
     for (let i = 0; i < features.length; i++) {
         data[i] = {
-            y: features[i],
+            y: features[i].data,
             yaxis: "y",
             type: "violin",
             visible: true,
-            name: features[i][0],
+            name: features[i].name,
             box: {
                 visible: true
             }
@@ -63,7 +68,9 @@ function generateLayouts(features) {
 }
 
 function ViolinPlotGraph(props) {
-    const features = utils.unzip(props.data.get("data"));
+    //const features = utils.unzip(props.data.get("data"));
+
+    const features = props.data.toJS();
 
     const chartRefs = features.map(feat => useRef(null));
 
@@ -78,6 +85,7 @@ function ViolinPlotGraph(props) {
             <ul className="box-plot-container">
                 {data.map((dataElement, index) => (
                     <ViolinPlotSubGraph
+                        key={index}
                         data={dataElement}
                         chart={chartRefs[index]}
                         layout={layouts[index]}
@@ -154,21 +162,41 @@ function ViolinPlotSubGraph(props) {
     );
 }
 
-function mapStateToProps(state) {
-    return {
-        currentSelection: state.selections.currentSelection,
-        savedSelections: state.selections.savedSelections
-    };
-}
+export default props => {
+    const win = useWindowManager(props, {
+        width: 500,
+        height: 500,
+        resizeable: true,
+        title: "Violin Graph"
+    });
 
-function mapDispatchToProps(dispatch) {
-    return {
-        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
-        saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
-    };
-}
+    const [currentSelection, setCurrentSelection] = useCurrentSelection();
+    const [savedSelections, saveCurrentSelection] = useSavedSelections();
+    const [globalChartState, setGlobalChartState] = useGlobalChartState();
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(ViolinPlotGraph);
+    const features = usePinnedFeatures();
+
+    if (features === null) {
+        return <WindowCircularProgress />;
+    }
+    if (features.size === 0) {
+        return <WindowError> Please select at least one feature to use this graph.</WindowError>;
+    }
+
+    win.setTitle(
+        features
+            .map(f => f.get("feature"))
+            .toJS()
+            .join(" vs ")
+    );
+    return (
+        <ViolinPlotGraph
+            currentSelection={currentSelection}
+            setCurrentSelection={setCurrentSelection}
+            savedSelections={savedSelections}
+            saveCurrentSelection={saveCurrentSelection}
+            globalChartState={globalChartState}
+            data={features}
+        />
+    );
+};
