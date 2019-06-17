@@ -1,6 +1,9 @@
 import React, { Component, useState, useEffect } from "react";
 import * as utils from "utils/utils";
+import * as actionFunctions from "actions/actionFunctions";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import { Sparklines, SparklinesLine } from 'react-sparklines';
+
 function processFloatingPointNumber(number) {
     let roundedNumber = Math.round(number * Math.pow(10, 2)) / Math.pow(10, 2);
     let newNumber = "";
@@ -68,6 +71,11 @@ function StatisticsRow(props) {
             </td>
             <td> {mean} </td>
             <td> {median} </td>
+            <td>
+                <Sparklines data={props.data}  style={{ fill: "none" , height:"20px", width:"100%"}}>
+                    <SparklinesLine color="white" />
+                </Sparklines>
+            </td>
         </tr>
     );
 }
@@ -121,6 +129,7 @@ function FeatureData(props) {
                                 <td>R</td>
                                 <td>mean</td>
                                 <td>median</td>
+                                <td>sparkline</td>
                             </tr>
                         </tbody>
                     </table>
@@ -129,7 +138,7 @@ function FeatureData(props) {
                     <table className="stats-table">
                         <tbody>
                             {names.map(name => {
-                                return <StatisticsRow key={name} stats={statsData[name]} />;
+                                return <StatisticsRow key={name} stats={statsData[name]}/>;
                             })}
                         </tbody>
                     </table>
