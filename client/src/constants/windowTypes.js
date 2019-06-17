@@ -34,8 +34,19 @@ export const TIME_SERIES_GRAPH = "Time Series";
 export const HEATMAP_GRAPH = "Heat Map";
 export const BOX_PLOT_GRAPH = "Box Plot";
 export const HISTOGRAM_GRAPH = "Histogram";
+export const graphs = [
+    SCATTER_GRAPH,
+    CONTOUR_GRAPH,
+    VIOLIN_PLOT_GRAPH,
+    TIME_SERIES_GRAPH,
+    HEATMAP_GRAPH,
+    BOX_PLOT_GRAPH,
+    HISTOGRAM_GRAPH
+];
+
 export const SESSIONS_WINDOW = "SESSIONS_WINDOW";
 
 // workflowTypes
 export const EXPLAIN_THIS_WINDOW = "EXPLAIN_THIS_WINDOW";
 export const FILTER_WINDOW = "FILTER_WINDOW";
+export const workflows = [EXPLAIN_THIS_WINDOW, FILTER_WINDOW];
