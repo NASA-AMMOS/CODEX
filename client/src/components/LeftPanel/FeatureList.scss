@@ -1,19 +1,11 @@
 .feature-lists-container {
     height: 40vh;
-    display: flex;
-    flex-direction: column;
 
-    .Features {
+    .header-container {
         display: flex;
-        flex-flow: column;
-        width: 100%;
-        height: 100%;
-        flex: 1;
-        box-sizing: border-box;
+        flex-direction: row;
         color: white;
-        font-family: "bitstreamvera", monospace;
-        border: 1px solid transparent;
-
+        height:25px;
         .header {
             display: flex;
             justify-content: space-between;
@@ -21,7 +13,6 @@
             font-family: "lato_bold", sans-serif;
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
             padding: 0 5px;
-            height: 25px;
 
             .title {
                 font-weight: bold;
@@ -33,97 +24,128 @@
             }
         }
 
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-        }
-
-        .list {
-            direction: "ltr";
-            width: 100%;
-            overflow-y: scroll;
-
-            ul {
-                padding-left: 10px;
-                li {
-                    height: 22px;
-                }
-            }
-
-            .feature {
-                font-family: "bitstreamvera", monospace;
-                color: #bbb;
-                font-size: 14px;
-                cursor: pointer;
-
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                justify-content: flex-start;
-
-                &:hover {
-                    background-color: rgba(255, 255, 255, 0.7);
-                    color: black;
-                }
-
-                &.selected {
-                    color: black;
-                    background-color: white !important;
-                }
-
-                .checkbox {
-                    height: 13px;
-                    width: 13px;
-                    border-radius: 2px;
-                    margin-right: 7px;
-                    margin-left: 5px;
-                    background-color: #5d6673;
-                }
-            }
-        }
-    }
-
-    .feature-statistics-panel {
-        position: absolute;
-        margin-left: 100%;
-        height: 40vh;
-        width: 300px;
-        color: #bbb;
-        background-color: #061427;
-        z-index: 999; //this is to ensure it is above the window layout
-        border: 1px solid #dddddd;
         .label-row {
+            width:60%;
             font-family: "lato_bold", sans-serif;
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
             padding: 0 5px;
-            height: 25px;
             td {
                 padding-right: 10px;
             }
         }
-        .stats-container {
-            height: calc(40vh - 25px);
-            overflow-y: scroll;
-            .stats-table {
-                
-                tr {
-                    height:20px;
-                    line-height: 20px; //necesary to make the height 22
-                    td {
-                        padding-right: 10px;
+    }
+
+    .scroll-container {
+        display: flex;
+        flex-direction: row;
+        overflow-y: scroll;
+        height:calc(100% - 25px);
+
+        .Features {
+            display: flex;
+            flex-flow: column;
+            width: 40%;
+            height: calc(100% - 25px);
+            flex: 1;
+            color: white;
+            font-family: "bitstreamvera", monospace;
+
+            .loading {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+            }
+
+            .list {
+                direction: "ltr";
+                width: 100%;
+
+                ul {
+                    padding-left: 10px;
+                    li {
+                        height: 22px;
                     }
                 }
 
-                .dim {
-                    color: #666666;
-                }
+                .feature {
+                    font-family: "bitstreamvera", monospace;
+                    color: #bbb;
+                    font-size: 14px;
+                    cursor: pointer;
 
-                .lit {
-                    color: #eeeeee;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: flex-start;
+
+                    &:hover {
+                        background-color: rgba(255, 255, 255, 0.7);
+                        color: black;
+                    }
+
+                    &.selected {
+                        color: black;
+                        background-color: white !important;
+                    }
+
+                    .checkbox {
+                        height: 13px;
+                        width: 13px;
+                        border-radius: 2px;
+                        margin-right: 7px;
+                        margin-left: 5px;
+                        background-color: #5d6673;
+                    }
+                }
+            }
+        }
+
+        .feature-statistics-panel {
+            position: relative;
+            width:60%;
+            height: 40vh;
+            color: #bbb;
+            background-color: #061427;
+            z-index: 999; //this is to ensure it is above the window layout
+            padding-left:3px;
+            .stats-container {
+                height: calc(40vh - 25px);
+                .stats-table {
+                    
+                    tr {
+                        height:16px;
+                        line-height: 16px; //necesary to make the height 22
+                        td {
+                            padding-right: 10px;
+                        }
+                    }
+
+                    .dim {
+                        color: #666666;
+                    }
+
+                    .lit {
+                        color: #eeeeee;
+                    }
                 }
             }
         }
     }
+}
+
+.stats-hidden {
+    width:100%;
+}
+
+.stats-not-hidden {
+    width:250%;
+}
+
+.stats-hidden-header {
+    width:100%;
+}
+
+.stats-not-hidden-header {
+    width:40%;
 }
