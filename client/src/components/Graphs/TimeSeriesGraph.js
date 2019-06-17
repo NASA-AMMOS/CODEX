@@ -89,6 +89,7 @@ function TimeSeriesGraph(props) {
             <ul className="time-series-plot-container">
                 {data.map((dataElement, index) => (
                     <TimeSeriesSubGraph
+                        key={index}
                         axisKey={"x" + (index + 1)}
                         data={data[index]}
                         chart={chartRefs[index]}
