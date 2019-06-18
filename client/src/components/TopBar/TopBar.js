@@ -19,7 +19,6 @@ import {
 import LoadingBar from "components/LoadingBar/LoadingBar";
 import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
-import * as graphActions from "actions/graphActions";
 import * as uiTypes from "constants/uiTypes";
 import * as windowTypes from "constants/windowTypes";
 import * as workflowTypes from "constants/workflowTypes";
@@ -325,7 +324,6 @@ TopBar.propTypes = {
     openWorkflow: PropTypes.func.isRequired,
     brushtypeSet: PropTypes.func.isRequired,
     modeSet: PropTypes.func.isRequired,
-    createGraph: PropTypes.func.isRequired,
     setWindowTileAction: PropTypes.func.isRequired
 };
 
@@ -348,7 +346,6 @@ function mapDispatchToProps(dispatch) {
         brushtypeSet: t => dispatch(brushtypeSet(t)),
         modeSet: m => dispatch(modeSet(m)),
         openWindow: n => dispatch(windowManagerActions.openNewWindow({ windowType: n })),
-        createGraph: name => dispatch(graphActions.createGraph(name)),
         createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name)),
         createWorkflow: name => dispatch(workflowActions.createWorkflow(name)),
         setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch),

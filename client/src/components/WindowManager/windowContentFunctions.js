@@ -25,46 +25,6 @@ import Filter from "components/Filter/Filter";
 import * as windowTypes from "constants/windowTypes";
 import Debugger from "components/Debug/Debug";
 
-export function getWindowTitle(win) {
-    switch (win.windowType) {
-        case uiTypes.SCATTER_GRAPH:
-        case uiTypes.CONTOUR_GRAPH:
-        case uiTypes.BOX_PLOT_GRAPH:
-            return getMultiAxisGraphTitle(win);
-        case uiTypes.HISTOGRAM_GRAPH:
-            return getMultiAxisGraphTitle(win);
-        case uiTypes.VIOLIN_PLOT_GRAPH:
-            return getMultiAxisGraphTitle(win);
-        case uiTypes.HEATMAP_GRAPH:
-        case uiTypes.TIME_SERIES_GRAPH:
-            return getMultiAxisGraphTitle(win);
-        case algorithmTypes.CLUSTER_ALGORITHM:
-            return `Algorithm: ${win.windowType}`;
-        case algorithmTypes.ALGO_LOADING_WINDOW:
-            return `Loading Algorithm ${
-                win.loadingSecRemaining ? "(" + win.loadingSecRemaining + "s)" : ""
-            }`;
-        case classificationTypes.CLASSIFICATION_WINDOW:
-            return "Classification";
-        case classificationTypes.CLASSIFICATION_RESULTS_WINDOW:
-            return "Classification Results";
-        case regressionTypes.REGRESSION_WINDOW:
-            return "Regression";
-        case regressionTypes.REGRESSION_RESULTS_WINDOW:
-            return "Regression Results";
-        case uiTypes.SESSIONS_WINDOW:
-            return "Sessions";
-        case dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW:
-            return "Dimensionality Reduction Results";
-        case workflowTypes.EXPLAIN_THIS_WINDOW:
-            return "Explain This";
-        case workflowTypes.FILTER:
-            return "Filter";
-        default:
-            return "";
-    }
-}
-
 export function getWindowContent(win) {
     switch (win.windowType) {
         case uiTypes.SCATTER_GRAPH:
@@ -122,23 +82,6 @@ export function getWindowContent(win) {
         case windowTypes.DEBUG_WINDOW:
             return <Debugger />;
     }
-}
-
-function getTwoAxisGraphTitle(win) {
-    const selectedFeatures = win.data.get("data")[0];
-    return `${selectedFeatures[0]} vs ${selectedFeatures[1]}`;
-}
-
-function getMultiAxisGraphTitle(win) {
-    const selectedFeatures = win.data.get("data")[0];
-    let retString = "";
-
-    for (let i = 0; i < selectedFeatures.length - 1; i++) {
-        retString = retString + selectedFeatures[i] + " vs ";
-    }
-    retString = retString + selectedFeatures[selectedFeatures.length - 1];
-
-    return retString;
 }
 
 export function previewAllowed(win) {
