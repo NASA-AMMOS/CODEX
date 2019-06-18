@@ -56,6 +56,13 @@ class TopBar extends Component {
         this.setMessageText = this.setMessageText.bind(this);
     }
 
+    createMenuItem(window_type, title) {
+        return (
+            <MenuItem key={window_type} onSelect={() => this.props.openWindow(window_type)}>
+                {title || window_type}
+            </MenuItem>
+        );
+    }
     getWorkflowMenuItems() {
         return workflowTypes.WORKFLOW_TYPES.map(workflow => (
             <MenuItem
@@ -71,17 +78,7 @@ class TopBar extends Component {
 
     getGraphMenuItems() {
         // WINDOW TYPES
-
-        return windowTypes.graphs.map(graph => (
-            <MenuItem
-                key={graph}
-                onSelect={() => {
-                    this.props.openWindow(graph);
-                }}
-            >
-                {graph}
-            </MenuItem>
-        ));
+        return windowTypes.graphs.map(graph => this.createMenuItem(graph));
     }
 
     getAlgorithmsMenuItems() {
@@ -177,10 +174,6 @@ class TopBar extends Component {
         }
     }
 
-    componentDidMount() {
-        //controller.setMessageText = this.setMessageText;
-    }
-
     render() {
         let devDisplay = "inline-block";
         // Don't show the development dropdown in production mode
@@ -242,15 +235,19 @@ class TopBar extends Component {
                     <Dropdown className="dropdownMain" autoOpen={false}>
                         <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
                         <Dropdown.Menu>
-                            {this.getAlgorithmsMenuItems()}
-                            <MenuItem onSelect={this.props.openClassificationWindow}>
-                                Classification
-                            </MenuItem>
-                            <MenuItem onSelect={this.props.openRegressionWindow}>
-                                Regression
-                            </MenuItem>
+                            {this.createMenuItem(windowTypes.CLUSTER_ALGORITHM)}
+                            {this.createMenuItem(
+                                windowTypes.CLASSIFICATION_WINDOW,
+                                "Classification"
+                            )}
+                            {this.createMenuItem(windowTypes.REGRESSION_WINDOW, "Regression")}
+
+                            {this.createMenuItem(
+                                windowTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW,
+                                "Dimensionality Reduction"
+                            )}
                             <MenuItem onSelect={this.props.openDimensionalityReductionWindow}>
-                                Dimensionality Reduction
+                                Dimensionality Reduction (legacy)
                             </MenuItem>
                         </Dropdown.Menu>
                     </Dropdown>

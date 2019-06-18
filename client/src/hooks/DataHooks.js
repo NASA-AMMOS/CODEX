@@ -5,7 +5,8 @@ import * as actionTypes from "constants/actionTypes";
 import { addDataset, featureRetain, featureRelease } from "actions/data";
 import { fromJS, Set } from "immutable";
 import { batchActions } from "redux-batched-actions";
-import * as selectionActions from "actions/selectionActions.js";
+import * as selectionActions from "actions/selectionActions";
+import * as dataActions from "actions/data";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -184,4 +185,43 @@ export function useCurrentSelection() {
     const currentSelection = useSelector(state => state.selections.currentSelection);
 
     return [currentSelection, indices => dispatch(selectionActions.setCurrentSelection(indices))];
+}
+
+/**
+ * Get the names of the currently selected features
+ * @return {array} currently selected names + setter function
+ */
+export function useSelectedFeatureNames() {
+    const dispatch = useDispatch();
+    const currentFeatures = useSelector(state => state.data.get("featureList"))
+        .filter(f => f.get("selected"))
+        .map(f => f.get("name"));
+
+    const setCurrentFeatures = sels => {
+        // Here, perform a diff to figure out the minimum number of switches we need
+        sels = Set(sels);
+        const current = Set(currentFeatures);
+
+        // first, figure out what features are leaving the set
+        const removalActions = current
+            .subtract(sels)
+            .toJS()
+            .map(n => dataActions.featureUnselect(n));
+
+        // now, all that's left is to add all the other actions
+        const additionActions = sels.toJS().map(n => dataActions.featureSelect(n));
+
+        // dispatch all at once to avoid multiple rerenders
+        dispatch(batchActions([...removalActions, ...additionActions]));
+    };
+
+    return [currentFeatures, setCurrentFeatures];
+}
+
+/**
+ * Get the current filename
+ * @return {string} current file name
+ */
+export function useFilename() {
+    return useSelector(state => state.data.get("filename"));
 }
