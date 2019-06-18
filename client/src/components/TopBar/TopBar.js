@@ -19,8 +19,8 @@ import {
 import LoadingBar from "components/LoadingBar/LoadingBar";
 import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
-import * as graphActions from "actions/graphActions";
 import * as uiTypes from "constants/uiTypes";
+import * as windowTypes from "constants/windowTypes";
 import * as workflowTypes from "constants/workflowTypes";
 import * as workflowActions from "actions/workflowActions";
 import * as windowManagerActions from "actions/windowManagerActions";
@@ -55,6 +55,13 @@ class TopBar extends Component {
         this.setMessageText = this.setMessageText.bind(this);
     }
 
+    createMenuItem(window_type, title) {
+        return (
+            <MenuItem key={window_type} onSelect={() => this.props.openWindow(window_type)}>
+                {title || window_type}
+            </MenuItem>
+        );
+    }
     getWorkflowMenuItems() {
         return workflowTypes.WORKFLOW_TYPES.map(workflow => (
             <MenuItem
@@ -69,16 +76,8 @@ class TopBar extends Component {
     }
 
     getGraphMenuItems() {
-        return uiTypes.GRAPH_TYPES.map(graph => (
-            <MenuItem
-                key={graph}
-                onSelect={() => {
-                    this.props.createGraph(graph);
-                }}
-            >
-                {graph}
-            </MenuItem>
-        ));
+        // WINDOW TYPES
+        return windowTypes.graphs.map(graph => this.createMenuItem(graph));
     }
 
     getAlgorithmsMenuItems() {
@@ -174,10 +173,6 @@ class TopBar extends Component {
         }
     }
 
-    componentDidMount() {
-        //controller.setMessageText = this.setMessageText;
-    }
-
     render() {
         let devDisplay = "inline-block";
         // Don't show the development dropdown in production mode
@@ -239,15 +234,19 @@ class TopBar extends Component {
                     <Dropdown className="dropdownMain" autoOpen={false}>
                         <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
                         <Dropdown.Menu>
-                            {this.getAlgorithmsMenuItems()}
-                            <MenuItem onSelect={this.props.openClassificationWindow}>
-                                Classification
-                            </MenuItem>
-                            <MenuItem onSelect={this.props.openRegressionWindow}>
-                                Regression
-                            </MenuItem>
+                            {this.createMenuItem(windowTypes.CLUSTER_ALGORITHM)}
+                            {this.createMenuItem(
+                                windowTypes.CLASSIFICATION_WINDOW,
+                                "Classification"
+                            )}
+                            {this.createMenuItem(windowTypes.REGRESSION_WINDOW, "Regression")}
+
+                            {this.createMenuItem(
+                                windowTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW,
+                                "Dimensionality Reduction"
+                            )}
                             <MenuItem onSelect={this.props.openDimensionalityReductionWindow}>
-                                Dimensionality Reduction
+                                Dimensionality Reduction (legacy)
                             </MenuItem>
                         </Dropdown.Menu>
                     </Dropdown>
@@ -272,6 +271,11 @@ class TopBar extends Component {
                                 }}
                             >
                                 Create range slider window
+                            </MenuItem>
+                            <MenuItem
+                                onSelect={() => this.props.openWindow(windowTypes.DEBUG_WINDOW)}
+                            >
+                                Open debug window
                             </MenuItem>
                         </Dropdown.Menu>
                     </Dropdown>
@@ -320,7 +324,6 @@ TopBar.propTypes = {
     openWorkflow: PropTypes.func.isRequired,
     brushtypeSet: PropTypes.func.isRequired,
     modeSet: PropTypes.func.isRequired,
-    createGraph: PropTypes.func.isRequired,
     setWindowTileAction: PropTypes.func.isRequired
 };
 
@@ -342,7 +345,7 @@ function mapDispatchToProps(dispatch) {
         openWorkflow: (d, n) => dispatch(openWorkflow(d, n)),
         brushtypeSet: t => dispatch(brushtypeSet(t)),
         modeSet: m => dispatch(modeSet(m)),
-        createGraph: name => dispatch(graphActions.createGraph(name)),
+        openWindow: n => dispatch(windowManagerActions.openNewWindow({ windowType: n })),
         createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name)),
         createWorkflow: name => dispatch(workflowActions.createWorkflow(name)),
         setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch),

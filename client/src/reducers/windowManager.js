@@ -24,6 +24,12 @@ export default function windowManager(
             return opt_reducer.setWindowHover(state, action);
         case actionTypes.UPDATE_WINDOW_INFO:
             return opt_reducer.updateWindowInfo(state, action);
+        case actionTypes.WINDOW_RESIZE:
+            return opt_reducer.resizeWindow(state, action);
+        case actionTypes.WINDOW_SET_RESIZABLE:
+            return opt_reducer.setWindowResizable(state, action);
+        case actionTypes.WINDOW_SET_TITLE:
+            return opt_reducer.setWindowTitle(state, action);
         default:
             return state;
     }

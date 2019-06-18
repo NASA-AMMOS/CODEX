@@ -11,7 +11,12 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
-import GraphWrapper, {useBoxSelection} from "components/Graphs/GraphWrapper";
+import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
+
+import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import { useCurrentSelection, useSavedSelections, usePinnedFeatures } from "hooks/DataHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+import { useGlobalChartState } from "hooks/UiHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 
@@ -20,11 +25,11 @@ function generatePlotData(features) {
 
     for (let i = 0; i < features.length; i++) {
         data[i] = {
-            y: features[i],
-            yaxis: 'y',
+            y: features[i].data,
+            yaxis: "y",
             type: "box",
             visible: true,
-            name:features[i][0]
+            name: features[i].feature
         };
     }
     return data;
@@ -33,17 +38,17 @@ function generatePlotData(features) {
 function generateLayouts(features) {
     let layouts = [];
 
-    for(let index = 0; index < features.length; index++) {
+    for (let index = 0; index < features.length; index++) {
         let layout = {
             autosize: true,
             margin: { l: 15, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space
-            dragmode: 'select',
-            selectdirection: 'v',
+            dragmode: "select",
+            selectdirection: "v",
             hovermode: "compare", // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
             xaxis: {
                 automargin: true,
-                showline:false,
+                showline: false
             },
             yaxis: {
                 automargin: true,
@@ -59,39 +64,39 @@ function generateLayouts(features) {
 }
 
 function BoxPlotGraph(props) {
-    const features = utils.unzip(props.data.get("data"));
+    //const features = utils.unzip(props.data.get("data"));
+    const features = props.data.toJS();
 
-    const chartRefs = features.map((feat) => useRef(null));
+    const chartRefs = features.map(feat => useRef(null));
 
     let data = generatePlotData(features);
 
     let layouts = generateLayouts(features);
-    
+
     return (
         <GraphWrapper
-            resizeHandler = {_ => (chartRefs.forEach((chart) => chart.current.resizeHandler()))}
+            resizeHandler={_ => chartRefs.forEach(chart => chart.current.resizeHandler())}
         >
-            <ul className="box-plot-container"> 
-                {
-                    data.map((dataElement,index) => (
-                        <BoxPlotSubGraph
-                            data={dataElement}
-                            chart={chartRefs[index]}
-                            layout={layouts[index]}
-                            globalChartState={props.globalChartState}
-                            setCurrentSelection={props.setCurrentSelection}
-                            currentSelection={props.currentSelection}
-                            savedSelections={props.savedSelections}
-                        />
-                    ))
-                }
+            <ul className="box-plot-container">
+                {data.map((dataElement, index) => (
+                    <BoxPlotSubGraph
+                        key={index}
+                        data={dataElement}
+                        chart={chartRefs[index]}
+                        layout={layouts[index]}
+                        globalChartState={props.globalChartState}
+                        setCurrentSelection={props.setCurrentSelection}
+                        currentSelection={props.currentSelection}
+                        savedSelections={props.savedSelections}
+                    />
+                ))}
             </ul>
         </GraphWrapper>
     );
 }
 
 function BoxPlotSubGraph(props) {
-     // The plotly react element only changes when the revision is incremented.
+    // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
 
     const [chartState, setChartState] = useState({
@@ -99,7 +104,7 @@ function BoxPlotSubGraph(props) {
         layout: props.layout,
         config: {
             responsive: true,
-            displaylogo: false,
+            displaylogo: false
         }
     });
 
@@ -114,13 +119,21 @@ function BoxPlotSubGraph(props) {
         setChartRevision(revision);
     }
 
-    const [selectionShapes] = useBoxSelection("vertical", props.currentSelection, props.savedSelections, chartState.data[0].y);
+    const [selectionShapes] = useBoxSelection(
+        "vertical",
+        props.currentSelection,
+        props.savedSelections,
+        chartState.data[0].y
+    );
 
-    useEffect(_ => {
-        chartState.layout.shapes = selectionShapes;
+    useEffect(
+        _ => {
+            chartState.layout.shapes = selectionShapes;
 
-        updateChartRevision();
-    }, [selectionShapes]);
+            updateChartRevision();
+        },
+        [selectionShapes]
+    );
 
     return (
         <Plot
@@ -147,6 +160,7 @@ function BoxPlotSubGraph(props) {
     );
 }
 
+/*
 function mapStateToProps(state) {
     return {
         currentSelection: state.selections.currentSelection,
@@ -164,4 +178,45 @@ function mapDispatchToProps(dispatch) {
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(BoxPlotGraph);
+)(BoxPlotGraph); */
+
+// wrapped data selector
+export default props => {
+    const win = useWindowManager(props, {
+        width: 500,
+        height: 500,
+        resizeable: true,
+        title: "Box Plot"
+    });
+
+    const [currentSelection, setCurrentSelection] = useCurrentSelection();
+    const [savedSelections, saveCurrentSelection] = useSavedSelections();
+    const [globalChartState, setGlobalChartState] = useGlobalChartState();
+
+    const features = usePinnedFeatures();
+
+    if (features === null) {
+        return <WindowCircularProgress />;
+    }
+
+    if (features.size === 0) {
+        return <WindowError> Please select at least one feature to use this graph.</WindowError>;
+    }
+
+    win.setTitle(
+        features
+            .map(f => f.get("feature"))
+            .toJS()
+            .join(" vs ")
+    );
+    return (
+        <BoxPlotGraph
+            currentSelection={currentSelection}
+            setCurrentSelection={setCurrentSelection}
+            savedSelections={savedSelections}
+            saveCurrentSelection={saveCurrentSelection}
+            globalChartState={globalChartState}
+            data={features}
+        />
+    );
+};

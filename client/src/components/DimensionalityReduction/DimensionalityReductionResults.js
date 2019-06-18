@@ -16,6 +16,7 @@ import HelpContent from "components/Help/HelpContent";
 import HelpOutline from "@material-ui/icons/HelpOutline";
 import Close from "@material-ui/icons/Close";
 import IconButton from "@material-ui/core/IconButton";
+import { useWindowManager } from "hooks/WindowHooks";
 
 // Utility to create a Plotly chart for each algorithm data return from the server.
 // We show a loading progress indicator if the data hasn't arrived yet.
@@ -69,7 +70,7 @@ function makeDRPlot(algo, maxYRange, changeSliderVal) {
     const id = Math.random()
         .toString(36)
         .substring(8);
-        
+
     return (
         <React.Fragment>
             <Plot
@@ -128,6 +129,12 @@ function makeAlgoState(req) {
 }
 
 function DimensionalityReductionResults(props) {
+    const win = useWindowManager(props, {
+        title: "Dimensionality Reduction Results",
+        width: 700,
+        height: 375,
+        resizeable: true
+    });
     // Create state objects for each DR we're running so that we can keep track of them.
     const [algoStates, setAlgoStates] = useState(_ => props.requests.map(makeAlgoState));
 

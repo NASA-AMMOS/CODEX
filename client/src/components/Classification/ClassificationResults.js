@@ -10,6 +10,7 @@ import HelpContent from "components/Help/HelpContent";
 import HelpOutline from "@material-ui/icons/HelpOutline";
 import Close from "@material-ui/icons/Close";
 import IconButton from "@material-ui/core/IconButton";
+import { useWindowManager } from "hooks/WindowHooks";
 
 // Utility to create a Plotly chart for each algorithm data return from the server.
 // We show a loading progress indicator if the data hasn't arrived yet.
@@ -121,6 +122,13 @@ function makeBestClassification(algoStates) {
 }
 
 function ClassificationResults(props) {
+    const win = useWindowManager(props, {
+        width: 700,
+        height: 700,
+        resizeable: false,
+        title: "Classification Results"
+    });
+
     // Create state objects for each classification we're running so that we can keep track of them.
     const [algoStates, setAlgoStates] = useState(_ => props.requests.map(req => req.requestObj));
     useEffect(_ => {

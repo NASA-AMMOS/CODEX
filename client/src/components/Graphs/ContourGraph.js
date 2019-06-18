@@ -8,6 +8,11 @@ import Plot from "react-plotly.js";
 import * as utils from "utils/utils";
 import GraphWrapper from "components/Graphs/GraphWrapper.js";
 
+import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import { useCurrentSelection, useSavedSelections, usePinnedFeatures } from "hooks/DataHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+import { useGlobalChartState } from "hooks/UiHooks";
+
 const DEFAULT_POINT_COLOR = "#3386E6";
 
 /**
@@ -305,12 +310,12 @@ function getPointIndicesFromPolygon(lassoPoints, dataPoints) {
 function ContourGraph(props) {
     const chart = useRef(null);
 
-    const data = props.data.get("data");
+    // plug through props
+    const cols = props.data.map(f => f.get("data")).toJS();
+    const xAxis = props.data.getIn([0, "feature"]);
+    const yAxis = props.data.getIn([1, "feature"]);
 
-    const xAxis = data[0][0];
-    const yAxis = data[0][1];
-
-    const cols = utils.unzip(data.slice(1));
+    //const cols = utils.unzip(data.slice(1));
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
 
@@ -397,22 +402,44 @@ function ContourGraph(props) {
         </GraphWrapper>
     );
 }
-function mapStateToProps(state) {
-    return {
-        currentSelection: state.selections.currentSelection,
-        savedSelections: state.selections.savedSelections,
-        globalChartState: state.ui.get("globalChartState")
-    };
-}
 
-function mapDispatchToProps(dispatch) {
-    return {
-        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
-        saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
-    };
-}
+export default props => {
+    const win = useWindowManager(props, {
+        width: 500,
+        height: 500,
+        resizeable: true,
+        title: "Contour Graph"
+    });
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(ContourGraph);
+    const [currentSelection, setCurrentSelection] = useCurrentSelection();
+    const [savedSelections, saveCurrentSelection] = useSavedSelections();
+    const [globalChartState, setGlobalChartState] = useGlobalChartState();
+
+    const features = usePinnedFeatures();
+
+    if (features === null) {
+        return <WindowCircularProgress />;
+    }
+
+    if (features.size === 2) {
+        win.setTitle(features.map(f => f.get("feature")).join(" vs "));
+        return (
+            <ContourGraph
+                currentSelection={currentSelection}
+                setCurrentSelection={setCurrentSelection}
+                savedSelections={savedSelections}
+                saveCurrentSelection={saveCurrentSelection}
+                globalChartState={globalChartState}
+                data={features}
+            />
+        );
+    } else {
+        return (
+            <WindowError>
+                Please select exactly two features
+                <br />
+                in the features list to use this graph.
+            </WindowError>
+        );
+    }
+};

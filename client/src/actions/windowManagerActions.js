@@ -21,3 +21,19 @@ export function toggleMinimizeWindow(id) {
 export function setWindowHover(id, hover) {
     return { type: actionTypes.SET_WINDOW_HOVER, id, hover };
 }
+
+export function resizeWindow(id, size) {
+    return { type: actionTypes.WINDOW_RESIZE, id, size };
+}
+
+export function setWindowTitle(id, title) {
+    return { type: actionTypes.WINDOW_SET_TITLE, id, title };
+}
+
+export function setWindowResizable(id, isResizable) {
+    return { type: actionTypes.WINDOW_SET_RESIZABLE, id, isResizable };
+}
+
+export function updateWindowInfo(id, info) {
+    return { type: actionTypes.UPDATE_WINDOW_INFO, id, info };
+}

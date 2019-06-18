@@ -23,6 +23,7 @@ import HelpContent from "components/Help/HelpContent";
 import HelpOutline from "@material-ui/icons/HelpOutline";
 import Close from "@material-ui/icons/Close";
 import IconButton from "@material-ui/core/IconButton";
+import { useWindowManager } from "hooks/WindowHooks";
 
 function RegressionHeaderBar(props) {
     return (
@@ -227,6 +228,17 @@ function getInitialParamState() {
 }
 
 function RegressionsOverview(props) {
+    const win = useWindowManager(props, {
+        width: 850,
+        height: 600,
+        minSize: {
+            width: 750,
+            height: 500
+        },
+        resizeable: true,
+        title: "Regression"
+    });
+
     // Create and store regression states
     const [regressionStates, regressionStateDispatch] = useReducer(
         regressionStateReducer,
