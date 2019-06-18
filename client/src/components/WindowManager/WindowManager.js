@@ -215,6 +215,7 @@ function WindowManager(props) {
                     onResizeEnd={state =>
                         props.resizeWindow(win.id, { width: state.width, height: state.height })
                     }
+                    onMoveEnd={state => props.moveWindow(win.id, { x: state.x, y: state.y })}
                     isActive={activeWindow === win.id}
                     onClick={_ => setActiveWindow(win.id)}
                     {...settings}
@@ -255,7 +256,8 @@ function mapDispatchToProps(dispatch) {
             dispatch
         ),
         setWindowHover: bindActionCreators(windowManagerActions.setWindowHover, dispatch),
-        resizeWindow: bindActionCreators(windowManagerActions.resizeWindow, dispatch)
+        resizeWindow: bindActionCreators(windowManagerActions.resizeWindow, dispatch),
+        moveWindow: bindActionCreators(windowManagerActions.moveWindow, dispatch)
     };
 }
 
