@@ -1,14 +1,26 @@
 import Immutable from "immutable";
+import { defaultInitialSettings } from "constants/windowSettings";
 
 export default class WindowManagerReducer {
     static openNewWindow(state, action) {
         // Add an ID to the window
-        action.info.id =
-            action.info.id ||
-            Math.random()
-                .toString(36)
-                .substring(7);
-        return { ...state, windows: [...state.windows, action.info] };
+        let id =
+            action.info && "id" in action.info
+                ? action.info.id
+                : Math.random()
+                      .toString(36)
+                      .substring(7);
+
+        const info = {
+            ...action.info,
+            id,
+            ...defaultInitialSettings
+        };
+
+        return {
+            ...state,
+            windows: [...state.windows, info]
+        };
     }
 
     static closeWindow(state, action) {
@@ -52,6 +64,32 @@ export default class WindowManagerReducer {
             ...state,
             windows: state.windows.map(win =>
                 win.id === action.id ? Object.assign(win, action.info) : win
+            )
+        };
+    }
+
+    static resizeWindow(state, action) {
+        return {
+            ...state,
+            windows: state.windows.map(win =>
+                win.id === action.id ? Object.assign(win, action.size) : win
+            )
+        };
+    }
+
+    static setWindowTitle(state, action) {
+        return {
+            ...state,
+            windows: state.windows.map(win =>
+                win.id === action.id ? Object.assign(win, { title: action.title }) : win
+            )
+        };
+    }
+    static setWindowResizable(state, action) {
+        return {
+            ...state,
+            windows: state.windows.map(win =>
+                win.id === action.id ? Object.assign(win, { isResizable: action.isResizable }) : win
             )
         };
     }

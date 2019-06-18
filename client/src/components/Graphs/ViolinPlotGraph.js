@@ -11,25 +11,29 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
-import GraphWrapper, {useBoxSelection} from "components/Graphs/GraphWrapper";
+import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
+
+import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import { useCurrentSelection, useSavedSelections, usePinnedFeatures } from "hooks/DataHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+import { useGlobalChartState } from "hooks/UiHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_SELECTION_COLOR = "#FF0000";
 
 function generatePlotData(features) {
-
     let data = [];
 
     for (let i = 0; i < features.length; i++) {
         data[i] = {
-            y: features[i],
-            yaxis: 'y',
+            y: features[i].data,
+            yaxis: "y",
             type: "violin",
             visible: true,
-            name:features[i][0],
+            name: features[i].name,
             box: {
                 visible: true
-            },
+            }
         };
     }
     return data;
@@ -38,17 +42,17 @@ function generatePlotData(features) {
 function generateLayouts(features) {
     let layouts = [];
 
-    for(let index = 0; index < features.length; index++) {
+    for (let index = 0; index < features.length; index++) {
         let layout = {
             autosize: true,
             margin: { l: 15, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space
-            dragmode: 'select',
-            selectdirection: 'v',
+            dragmode: "select",
+            selectdirection: "v",
             hovermode: "compare", // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
             xaxis: {
                 automargin: true,
-                showline:false,
+                showline: false
             },
             yaxis: {
                 automargin: true,
@@ -64,38 +68,39 @@ function generateLayouts(features) {
 }
 
 function ViolinPlotGraph(props) {
-    const features = utils.unzip(props.data.get("data"));
+    //const features = utils.unzip(props.data.get("data"));
 
-    const chartRefs = features.map((feat) => useRef(null));
+    const features = props.data.toJS();
+
+    const chartRefs = features.map(feat => useRef(null));
 
     let data = generatePlotData(features);
 
     let layouts = generateLayouts(features);
-    
+
     return (
         <GraphWrapper
-            resizeHandler = {_ => (chartRefs.forEach((chart) => chart.current.resizeHandler()))}
+            resizeHandler={_ => chartRefs.forEach(chart => chart.current.resizeHandler())}
         >
-            <ul className="box-plot-container"> 
-                {
-                    data.map((dataElement,index) => (
-                        <ViolinPlotSubGraph
-                            data={dataElement}
-                            chart={chartRefs[index]}
-                            layout={layouts[index]}
-                            setCurrentSelection={props.setCurrentSelection}
-                            currentSelection={props.currentSelection}
-                            savedSelections={props.savedSelections}
-                        />
-                    ))
-                }
+            <ul className="box-plot-container">
+                {data.map((dataElement, index) => (
+                    <ViolinPlotSubGraph
+                        key={index}
+                        data={dataElement}
+                        chart={chartRefs[index]}
+                        layout={layouts[index]}
+                        setCurrentSelection={props.setCurrentSelection}
+                        currentSelection={props.currentSelection}
+                        savedSelections={props.savedSelections}
+                    />
+                ))}
             </ul>
         </GraphWrapper>
     );
 }
 
 function ViolinPlotSubGraph(props) {
-     // The plotly react element only changes when the revision is incremented.
+    // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
 
     const [chartState, setChartState] = useState({
@@ -103,7 +108,7 @@ function ViolinPlotSubGraph(props) {
         layout: props.layout,
         config: {
             responsive: true,
-            displaylogo: false,
+            displaylogo: false
         }
     });
 
@@ -115,15 +120,22 @@ function ViolinPlotSubGraph(props) {
         });
         setChartRevision(revision);
     }
-    
-    const [selectionShapes] = useBoxSelection("vertical", props.currentSelection, props.savedSelections, chartState.data[0].y);
 
-    useEffect(_ => {
-        chartState.layout.shapes = selectionShapes;
+    const [selectionShapes] = useBoxSelection(
+        "vertical",
+        props.currentSelection,
+        props.savedSelections,
+        chartState.data[0].y
+    );
 
-        updateChartRevision();
-    }, [selectionShapes]);
-    
+    useEffect(
+        _ => {
+            chartState.layout.shapes = selectionShapes;
+
+            updateChartRevision();
+        },
+        [selectionShapes]
+    );
 
     return (
         <Plot
@@ -141,7 +153,7 @@ function ViolinPlotSubGraph(props) {
                 props.setCurrentSelection([]);
             }}
             onSelected={e => {
-                if (!e) return; 
+                if (!e) return;
                 let points = utils.indicesInRange(chartState.data[0].y, e.range.y[0], e.range.y[1]);
 
                 props.setCurrentSelection(points);
@@ -150,21 +162,41 @@ function ViolinPlotSubGraph(props) {
     );
 }
 
-function mapStateToProps(state) {
-    return {
-        currentSelection: state.selections.currentSelection,
-        savedSelections: state.selections.savedSelections
-    };
-}
+export default props => {
+    const win = useWindowManager(props, {
+        width: 500,
+        height: 500,
+        resizeable: true,
+        title: "Violin Graph"
+    });
 
-function mapDispatchToProps(dispatch) {
-    return {
-        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
-        saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
-    };
-}
+    const [currentSelection, setCurrentSelection] = useCurrentSelection();
+    const [savedSelections, saveCurrentSelection] = useSavedSelections();
+    const [globalChartState, setGlobalChartState] = useGlobalChartState();
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(ViolinPlotGraph);
+    const features = usePinnedFeatures();
+
+    if (features === null) {
+        return <WindowCircularProgress />;
+    }
+    if (features.size === 0) {
+        return <WindowError> Please select at least one feature to use this graph.</WindowError>;
+    }
+
+    win.setTitle(
+        features
+            .map(f => f.get("feature"))
+            .toJS()
+            .join(" vs ")
+    );
+    return (
+        <ViolinPlotGraph
+            currentSelection={currentSelection}
+            setCurrentSelection={setCurrentSelection}
+            savedSelections={savedSelections}
+            saveCurrentSelection={saveCurrentSelection}
+            globalChartState={globalChartState}
+            data={features}
+        />
+    );
+};

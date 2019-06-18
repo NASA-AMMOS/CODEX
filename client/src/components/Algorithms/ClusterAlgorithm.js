@@ -9,6 +9,9 @@ import HelpOutline from "@material-ui/icons/HelpOutline";
 import Close from "@material-ui/icons/Close";
 import IconButton from "@material-ui/core/IconButton";
 
+import { useSelectedFeatureNames, useFilename } from "hooks/DataHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+
 // Creates intial states from the subalgo request presets in algorithmTypes
 function createSubalgoStates(subalgos) {
     return subalgos.map(subalgo => {
@@ -119,6 +122,16 @@ function getSubalgoPreviews(subalgoStates, subalgoStatesDispatch) {
 }
 
 function ClusterAlgorithm(props) {
+    const win = useWindowManager(props, {
+        width: 900,
+        height: 600,
+        resizeable: false,
+        title: "Clustering"
+    });
+
+    const filename = useFilename();
+    const [selectedFeatures, _] = useSelectedFeatureNames();
+
     const algorithm = algorithmTypes.CLUSTER_ALGORITHM;
     const algoVerb = "clustering";
 
@@ -136,8 +149,8 @@ function ClusterAlgorithm(props) {
         subalgoStates.forEach(subalgo => {
             const socket = getSubAlgorithmData(
                 subalgo,
-                props.selectedFeatures,
-                props.filename,
+                selectedFeatures,
+                filename,
                 500,
                 [],
                 inMsg => {
@@ -163,8 +176,8 @@ function ClusterAlgorithm(props) {
                 subalgoStatesDispatch({ type: "refreshPending", name: subalgo.name });
                 const socket = getSubAlgorithmData(
                     subalgo,
-                    props.selectedFeatures,
-                    props.filename,
+                    selectedFeatures,
+                    filename,
                     500,
                     [],
                     inMsg => {
@@ -205,8 +218,8 @@ function ClusterAlgorithm(props) {
                         subalgoState={selectedSubalgo}
                         paramDispatch={action => subalgoStatesDispatch(action)}
                         baseGuidancePath={`${algoVerb}_page`}
-                        selectedFeatures={props.selectedFeatures}
-                        filename={props.filename}
+                        selectedFeatures={selectedFeatures}
+                        filename={filename}
                         winId={props.winId}
                     />
                 )}

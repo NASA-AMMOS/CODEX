@@ -13,13 +13,20 @@ import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 import GraphWrapper from "components/Graphs/GraphWrapper";
 
+import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import { useCurrentSelection, useSavedSelections, usePinnedFeatures } from "hooks/DataHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+import { useGlobalChartState } from "hooks/UiHooks";
+
 const DEFAULT_POINT_COLOR = "#3386E6";
 
 function ScatterGraph(props) {
     const chart = useRef(null);
-    const cols = utils.unzip(props.data.get("data"));
-    const xAxis = cols[0][0];
-    const yAxis = cols[1][0];
+
+    // plug through data props
+    const cols = props.data.map(f => f.get("data")).toJS();
+    const xAxis = props.data.getIn([0, "feature"]);
+    const yAxis = props.data.getIn([1, "feature"]);
 
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
@@ -46,13 +53,12 @@ function ScatterGraph(props) {
             titlefont: { size: 5 },
             xaxis: {
                 automargin: true,
-                title:xAxis
+                title: xAxis
             },
             yaxis: {
                 automargin: true,
-                title:yAxis
-            },
-
+                title: yAxis
+            }
         },
         config: {
             responsive: true,
@@ -96,9 +102,7 @@ function ScatterGraph(props) {
     );
 
     return (
-       <GraphWrapper
-            chart = {chart}
-        >
+        <GraphWrapper chart={chart}>
             <Plot
                 ref={chart}
                 data={chartState.data}
@@ -120,21 +124,49 @@ function ScatterGraph(props) {
     );
 }
 
-function mapStateToProps(state) {
-    return {
-        currentSelection: state.selections.currentSelection,
-        savedSelections: state.selections.savedSelections
-    };
-}
+// wrapped data selector
+export default props => {
+    const win = useWindowManager(props, {
+        width: 500,
+        height: 500,
+        resizeable: true,
+        title: "Scatter Graph"
+    });
 
-function mapDispatchToProps(dispatch) {
-    return {
-        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
-        saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
-    };
-}
+    const [currentSelection, setCurrentSelection] = useCurrentSelection();
+    const [savedSelections, saveCurrentSelection] = useSavedSelections();
+    const [globalChartState, setGlobalChartState] = useGlobalChartState();
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(ScatterGraph);
+    const features = usePinnedFeatures();
+
+    if (features === null) {
+        return <WindowCircularProgress />;
+    }
+
+    if (features.size === 2) {
+        win.setTitle(
+            features
+                .map(f => f.get("feature"))
+                .toJS()
+                .join(" vs ")
+        );
+        return (
+            <ScatterGraph
+                currentSelection={currentSelection}
+                setCurrentSelection={setCurrentSelection}
+                savedSelections={savedSelections}
+                saveCurrentSelection={saveCurrentSelection}
+                globalChartState={globalChartState}
+                data={features}
+            />
+        );
+    } else {
+        return (
+            <WindowError>
+                Please select exactly two features
+                <br />
+                in the features list to use this graph.
+            </WindowError>
+        );
+    }
+};

@@ -23,6 +23,8 @@ import HelpOutline from "@material-ui/icons/HelpOutline";
 import Close from "@material-ui/icons/Close";
 import IconButton from "@material-ui/core/IconButton";
 
+import { useWindowManager } from "hooks/WindowHooks";
+
 function ClassificationHeaderBar(props) {
     return (
         <div className="headerBar">
@@ -229,6 +231,13 @@ function getInitialParamState() {
 }
 
 function ClassificationOverview(props) {
+    const win = useWindowManager(props, {
+        width: 850,
+        height: 600,
+        resizable: false,
+        title: "Classification"
+    });
+
     // Create and store classification states
     const [classificationStates, classificationStateDispatch] = useReducer(
         classificationStateReducer,

@@ -47,19 +47,17 @@ function createSelection(
 
 function createCurrentSelection(props) {
     //checks to see if current selection is null
-    if (props.currentSelection.length == 0)
-        return <li></li>;
+    if (props.currentSelection.length == 0) return <li key={"currentSelection"} />;
 
     return (
         <li
+            key={"currentSelection"}
             className={classnames({ selection: true })}
-            onClick = {
-                () => {
-                    console.log("saving")
-                    props.saveCurrentSelection();
-                    props.setCurrentSelection([]);
-                }
-            }
+            onClick={() => {
+                console.log("saving");
+                props.saveCurrentSelection();
+                props.setCurrentSelection([]);
+            }}
         >
             Current Selection
         </li>
@@ -99,19 +97,17 @@ function SelectionList(props) {
                 </div>
                 <div className="list">
                     <ul>
-                        {props.savedSelections.map(selection =>
-                            createSelection(
-                                props,
-                                selection,
-                                setContextMenuVisible,
-                                setContextMenuPosition,
-                                setContextActiveSelection
+                        {props.savedSelections
+                            .map(selection =>
+                                createSelection(
+                                    props,
+                                    selection,
+                                    setContextMenuVisible,
+                                    setContextMenuPosition,
+                                    setContextActiveSelection
+                                )
                             )
-                        ).concat(
-                            createCurrentSelection(
-                                props
-                            )
-                        )}
+                            .concat(createCurrentSelection(props))}
                     </ul>
                 </div>
             </div>
@@ -176,7 +172,7 @@ function SelectionList(props) {
 function mapStateToProps(state) {
     return {
         savedSelections: state.selections.savedSelections,
-        currentSelection: state.selections.currentSelection,
+        currentSelection: state.selections.currentSelection
     };
 }
 

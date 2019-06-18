@@ -8,13 +8,18 @@ import Plot from "react-plotly.js";
 import * as utils from "utils/utils";
 import GraphWrapper from "components/Graphs/GraphWrapper";
 
+import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import { useCurrentSelection, useSavedSelections, usePinnedFeatures } from "hooks/DataHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+import { useGlobalChartState } from "hooks/UiHooks";
+
 const DEFAULT_POINT_COLOR = "#3386E6";
 
 // Returns a single rgb color interpolation between given rgb color
 // based on the factor given; via https://codepen.io/njmcode/pen/axoyD?editors=0010
 function interpolateColor(color1, color2, factor) {
-    if (arguments.length < 3) { 
-        factor = 0.5; 
+    if (arguments.length < 3) {
+        factor = 0.5;
     }
     let result = color1.slice();
     for (let i = 0; i < 3; i++) {
@@ -25,7 +30,7 @@ function interpolateColor(color1, color2, factor) {
 
 // My function to interpolate between two colors completely, returning an array
 function interpolateColors(color1, color2, steps, scaling) {
-    let stepFactor = 1 / (steps),
+    let stepFactor = 1 / steps,
         interpolatedColorArray = [];
 
     color1 = color1.match(/\d+/g).map(Number);
@@ -33,20 +38,31 @@ function interpolateColors(color1, color2, steps, scaling) {
 
     let percentage = 0.0;
 
-    if(scaling === "log") {
-        percentage = 1.0/(Math.pow(10, steps));
-    } else { //assumed linear
+    if (scaling === "log") {
+        percentage = 1.0 / Math.pow(10, steps);
+    } else {
+        //assumed linear
         percentage = 0.0;
     }
 
-    for(let i = 0; i <= steps; i++) {
+    for (let i = 0; i <= steps; i++) {
         const interpolatedColor = interpolateColor(color1, color2, stepFactor * i);
-        interpolatedColorArray.push([percentage , "rgb("+interpolatedColor[0]+","+interpolatedColor[1]+","+interpolatedColor[2]+")"]);
-        
+        interpolatedColorArray.push([
+            percentage,
+            "rgb(" +
+                interpolatedColor[0] +
+                "," +
+                interpolatedColor[1] +
+                "," +
+                interpolatedColor[2] +
+                ")"
+        ]);
+
         if (scaling === "log") {
-            percentage *= 10; 
-        } else { //assumed linear
-            percentage += (1.0/(steps));
+            percentage *= 10;
+        } else {
+            //assumed linear
+            percentage += 1.0 / steps;
         }
     }
 
@@ -65,34 +81,32 @@ function dataRange(data) {
     return [min, max];
 }
 
-function squashDataIntoBuckets(data, numBuckets){
-
-    const unzippedCols = utils.unzip(data.slice(1));
-    const cols = data.slice(1);
+function squashDataIntoBuckets(data, numBuckets) {
+    const columnLength = data[0].length;
+    const cols = utils.unzip(data);
 
     let ret = new Array(numBuckets).fill(0).map(() => new Array(numBuckets).fill(0));
 
-    const [xMin, xMax] = dataRange(unzippedCols[0]);
-    const [yMin, yMax] = dataRange(unzippedCols[1]);
+    const [xMin, xMax] = dataRange(data[0]);
+    const [yMin, yMax] = dataRange(data[1]);
 
     const xDivisor = (xMax - xMin) / numBuckets;
     const yDivisor = (yMax - yMin) / numBuckets;
 
-    for (let i = 0; i<cols.length; i++) {
-            let xValue = Math.floor((cols[i][0] - xMin) / xDivisor);
-            xValue = xValue > 0 && xValue < numBuckets ? xValue : 0;
-            let yValue = Math.floor((cols[i][1] - yMin) / yDivisor);
-            yValue = yValue > 0 && yValue < numBuckets ? yValue : 0;
+    for (let i = 0; i < cols.length; i++) {
+        let xValue = Math.floor((cols[i][0] - xMin) / xDivisor);
+        xValue = xValue > 0 && xValue < numBuckets ? xValue : 0;
+        let yValue = Math.floor((cols[i][1] - yMin) / yDivisor);
+        yValue = yValue > 0 && yValue < numBuckets ? yValue : 0;
 
-            ret[yValue][xValue]++;
+        ret[yValue][xValue]++;
     }
     return ret;
 }
 
 function generateRange(low, high, increment) {
-
     let range = [];
-    for(let i = low; i < high; i+=increment) {
+    for (let i = low; i < high; i += increment) {
         range.push(i);
     }
 
@@ -105,27 +119,35 @@ function HeatmapGraph(props) {
     let defaultBucketCount = 50;
 
     //the number of interpolation steps that you can take caps at 5?
-    const interpolatedColors = interpolateColors("rgb(255, 255, 255)", "rgb(255, 0, 0)", 5, "linear");
-    
-    const data = props.data.get("data");
+    const interpolatedColors = interpolateColors(
+        "rgb(255, 255, 255)",
+        "rgb(255, 0, 0)",
+        5,
+        "linear"
+    );
+
+    //const data = props.data.get("data");
+    const data = props.data.map(f => f.get("data")).toJS();
 
     //calculate range of data for axis labels
-    const unzippedCols = utils.unzip(data.slice(1));
-    const [xMin, xMax] = dataRange(unzippedCols[0]);
-    const [yMin, yMax] = dataRange(unzippedCols[1]);
+    const xAxis = props.data.getIn([0, "feature"]);
+    const yAxis = props.data.getIn([1, "feature"]);
 
-    const xAxis = data[0][0];
-    const yAxis = data[0][1];
+    const [xMin, xMax] = dataRange(data[0]);
+    const [yMin, yMax] = dataRange(data[1]);
 
-    const cols = squashDataIntoBuckets(props.data.get("data"), defaultBucketCount);
+    //const xAxis = data[0][0];
+    //const yAxis = data[0][1];
+
+    const cols = squashDataIntoBuckets(data, defaultBucketCount);
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
     // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState({
         data: [
             {
-                x: generateRange(xMin, xMax, (xMax - xMin)/defaultBucketCount),
-                y: generateRange(yMin, yMax, (yMax - yMin)/defaultBucketCount),
+                x: generateRange(xMin, xMax, (xMax - xMin) / defaultBucketCount),
+                y: generateRange(yMin, yMax, (yMax - yMin) / defaultBucketCount),
                 z: cols,
                 type: "heatmap",
                 showscale: true,
@@ -133,24 +155,24 @@ function HeatmapGraph(props) {
             }
         ],
         layout: {
-            dragmode:'lasso',
-            xaxis: { 
-                title:xAxis,
-                automargin: true, 
+            dragmode: "lasso",
+            xaxis: {
+                title: xAxis,
+                automargin: true,
                 ticklen: 0,
                 scaleratio: 1.0
             },
             yaxis: {
-                title:yAxis,
+                title: yAxis,
                 automargin: true,
                 ticklen: 0,
-                anchor:"x"
+                anchor: "x"
             },
             autosize: true,
             margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
             hovermode: false, // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
-            annotations: [],
+            annotations: []
         },
         config: {
             displaylogo: false,
@@ -168,9 +190,7 @@ function HeatmapGraph(props) {
     }
 
     return (
-        <GraphWrapper
-            chart = {chart}
-        >
+        <GraphWrapper chart={chart}>
             <Plot
                 ref={chart}
                 data={chartState.data}
@@ -191,4 +211,42 @@ function HeatmapGraph(props) {
         </GraphWrapper>
     );
 }
-export default HeatmapGraph;
+//export default HeatmapGraph;
+
+export default props => {
+    const win = useWindowManager(props, {
+        width: 500,
+        height: 500,
+        resizeable: true,
+        title: "Heat Map"
+    });
+
+    const [currentSelection, setCurrentSelection] = useCurrentSelection();
+    //const [savedSelections, saveCurrentSelection] = useSavedSelections();
+    //const [globalChartState, setGlobalChartState] = useGlobalChartState();
+
+    const features = usePinnedFeatures();
+
+    if (features === null) {
+        return <WindowCircularProgress />;
+    }
+
+    if (features.size === 2) {
+        win.setTitle(features.map(f => f.get("feature")).join(" vs "));
+        return (
+            <HeatmapGraph
+                currentSelection={currentSelection}
+                setCurrentSelection={setCurrentSelection}
+                data={features}
+            />
+        );
+    } else {
+        return (
+            <WindowError>
+                Please select exactly two features
+                <br />
+                in the features list to use this graph.
+            </WindowError>
+        );
+    }
+};

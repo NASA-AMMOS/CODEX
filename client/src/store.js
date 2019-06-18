@@ -5,14 +5,19 @@
 import { createLogger } from "redux-logger";
 import { createStore, applyMiddleware, compose } from "redux";
 import thunkMiddleware from "redux-thunk";
+import { batchDispatchMiddleware } from "redux-batched-actions";
 
 import rootReducer from "reducers";
 
 export default function configureStore(initialState) {
     const logger = createLogger();
-    
+
     const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-    const store = createStore(rootReducer, initialState, composeEnhancers(applyMiddleware(thunkMiddleware)));
+    const store = createStore(
+        rootReducer,
+        initialState,
+        composeEnhancers(applyMiddleware(batchDispatchMiddleware, thunkMiddleware))
+    );
 
     if (module.hot) {
         // Enable Webpack hot module replacement for reducers

@@ -6,6 +6,10 @@ import PropTypes from "prop-types";
 import IPropTypes from "react-immutable-proptypes";
 import { evaluateExpression } from "tevale";
 
+import DataWrapper from "components/DataWrapper/DataWrapper";
+import useWindowManager from "hooks/WindowHooks";
+import Debugger from "components/Debug/Debug";
+
 // connect to redux store
 import { connect } from "react-redux";
 /*
@@ -441,7 +445,23 @@ const mapDispatchToProps = dispatch => ({
 });
 
 export { Filter };
-export default connect(
+
+const WrappedFilter = connect(
     mapStateToProps,
     mapDispatchToProps
 )(Filter);
+
+export default props => {
+    const win = useWindowManager(props, {
+        title: "foo"
+    });
+
+    console.log(win);
+
+    return <Debugger />;
+    /*return (
+        <DataWrapper>
+            <WrappedFilter/>
+        </DataWrapper>
+    );*/
+};
