@@ -52,6 +52,12 @@ function createCurrentSelection(props) {
 
     return (
         <li
+            key={
+                currentSelection.id +
+                Math.random()
+                    .toString(36)
+                    .substring(7)
+            }
             className={classnames({ selection: true })}
             onClick = {
                 () => {
