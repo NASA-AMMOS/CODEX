@@ -4,6 +4,7 @@ import * as utils from "utils/utils";
 import { bindActionCreators } from "redux";
 import * as sessionsActions from "actions/sessionsActions";
 import "components/Sessions/Sessions.scss";
+import { useWindowManager } from "hooks/WindowHooks";
 
 function sessionsStateReducer(sessionsState, action) {
     switch (action.type) {
@@ -16,6 +17,13 @@ function sessionsStateReducer(sessionsState, action) {
 }
 
 function Sessions(props) {
+    const win = useWindowManager(props, {
+        title: "Sessions",
+        width: 500,
+        height: 500,
+        resizeable: true
+    });
+
     const [sessionsState, sessionsStateDispatch] = useReducer(sessionsStateReducer, {
         sessionsList: []
     });

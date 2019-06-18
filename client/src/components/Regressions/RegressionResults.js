@@ -6,6 +6,7 @@ import classnames from "classnames";
 import Button from "@material-ui/core/Button";
 import "components/Regressions/regressions.scss";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import { useWindowManager } from "hooks/WindowHooks";
 
 // Utility to create a Plotly chart for each algorithm data return from the server.
 // We show a loading progress indicator if the data hasn't arrived yet.
@@ -139,6 +140,12 @@ function makeRegressionScore(algo) {
 }
 
 function RegressionResults(props) {
+    const win = useWindowManager(props, {
+        width: 700,
+        height: 700,
+        resizeable: false,
+        title: "Regression Results"
+    });
     // Create state objects for each regression we're running so that we can keep track of them.
     const [algoStates, setAlgoStates] = useState(_ => props.requests.map(req => req.requestObj));
     useEffect(_ => {
