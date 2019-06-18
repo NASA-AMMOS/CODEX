@@ -39,17 +39,17 @@ function FeatureList(props) {
         .filter(f =>
             props.filterString
                 ? f
-                      .get("name")
-                      .toLowerCase()
-                      .startsWith(props.filterString.toLowerCase())
+                    .get("name")
+                    .toLowerCase()
+                    .startsWith(props.filterString.toLowerCase())
                 : true
         )
         .map(f => createFeature(props, f));
 
     return (
-        <div className="feature-lists-container">
-            <div className="Features">
-                <div className="header">
+        <div className={"feature-lists-container " + (statsHidden ? 'stats-hidden' : 'stats-not-hidden')}>
+            <div className="header-container">
+                <div className={"header " + (statsHidden ? 'stats-hidden-header' : 'stats-not-hidden-header')}>
                     <div className="title">Features</div>
                     <span className="stats-toggle"
                           onClick={function(){setStatsHidden(!statsHidden)}}>
@@ -59,17 +59,35 @@ function FeatureList(props) {
                         {activeCount}/{shownCount}/{totalCount}
                     </span>
                 </div>
-                <div className="loading" hidden={!props.featureListLoading}>
-                    <CircularProgress />
-                </div>
-                <div className="list" hidden={props.featureListLoading}>
-                    <ul>{featureItems}</ul>
+                <div className="label-row" hidden={statsHidden}>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>C</td>
+                                <td>R</td>
+                                <td>mean</td>
+                                <td>median</td>
+                                <td>sparkline</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <FeatureData statsHidden={statsHidden} 
-                featureListLoading={props.featureListLoading}
-                featureList={props.featureList.toJS()}
-            />
+            <div className="scroll-container">
+                <div className="Features">
+                    <div className="loading" hidden={!props.featureListLoading}>
+                        <CircularProgress />
+                    </div>
+                    <div className="list" hidden={props.featureListLoading}>
+                        <ul>{featureItems}</ul>
+                    </div>
+                </div>
+                <FeatureData 
+                    statsHidden={statsHidden} 
+                    featureListLoading={props.featureListLoading}
+                    featureList={props.featureList.toJS()}
+                />
+            </div>
         </div>
     );
 }

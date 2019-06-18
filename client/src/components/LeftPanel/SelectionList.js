@@ -45,6 +45,27 @@ function createSelection(
     );
 }
 
+function createCurrentSelection(props) {
+    //checks to see if current selection is null
+    if (props.currentSelection.length == 0)
+        return <li></li>;
+
+    return (
+        <li
+            className={classnames({ selection: true })}
+            onClick = {
+                () => {
+                    console.log("saving")
+                    props.saveCurrentSelection();
+                    props.setCurrentSelection([]);
+                }
+            }
+        >
+            Current Selection
+        </li>
+    );
+}
+
 function SelectionList(props) {
     const activeCount = props.savedSelections.filter(sel => sel.active).length;
     const shownCount = activeCount;
@@ -85,6 +106,10 @@ function SelectionList(props) {
                                 setContextMenuVisible,
                                 setContextMenuPosition,
                                 setContextActiveSelection
+                            )
+                        ).concat(
+                            createCurrentSelection(
+                                props
                             )
                         )}
                     </ul>
@@ -150,7 +175,8 @@ function SelectionList(props) {
 
 function mapStateToProps(state) {
     return {
-        savedSelections: state.selections.savedSelections
+        savedSelections: state.selections.savedSelections,
+        currentSelection: state.selections.currentSelection,
     };
 }
 
@@ -158,7 +184,9 @@ function mapDispatchToProps(dispatch) {
     return {
         toggleSelectionActive: bindActionCreators(selectionActions.toggleSelectionActive, dispatch),
         deleteSelection: bindActionCreators(selectionActions.deleteSelection, dispatch),
-        renameSelection: bindActionCreators(selectionActions.renameSelection, dispatch)
+        renameSelection: bindActionCreators(selectionActions.renameSelection, dispatch),
+        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
+        saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
     };
 }
 
