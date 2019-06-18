@@ -29,6 +29,7 @@ export interface CristalProps {
     onMove?: (state: CristalState) => void;
     onResize?: (state: CristalState) => void;
     onResizeEnd?: (state: CristalState) => void;
+    onMoveEnd?: (state: CristalState) => void;
     className?: string;
     restrictToParentDiv?: boolean;
     onMinimize?: () => void;
@@ -93,10 +94,10 @@ export class Cristal extends Component<CristalProps, CristalState> {
     componentWillReceiveProps(props: CristalProps) {
         // force a rerender when the width/height props change
         if (this.state.width !== props.width) {
-            this.setState( { width: props.width } );
+            this.setState({ width: props.width });
         }
         if (this.state.height !== props.height) {
-            this.setState( { height: props.height } );
+            this.setState({ height: props.height });
         }
     }
 
@@ -239,6 +240,10 @@ export class Cristal extends Component<CristalProps, CristalState> {
         }
     };
 
+    notifyMoveEnd() {
+        if (this.props.onMoveEnd) this.props.onMoveEnd(this.state);
+    }
+
     get isResizing(): boolean {
         const { isResizingX, isResizingY } = this.state;
 
@@ -246,10 +251,13 @@ export class Cristal extends Component<CristalProps, CristalState> {
     }
 
     onMouseUp = () => {
-        const { isResizingX, isResizingY } = this.state;
-        if ( isResizingX || isResizingY ) {
-            this.notifyResizeEnd()
+        const { isResizingX, isResizingY, isDragging } = this.state;
+        if (isResizingX || isResizingY) {
+            this.notifyResizeEnd();
         }
+
+        if (isDragging) this.notifyMoveEnd();
+
         this.setState({
             isDragging: false,
             isResizingX: false,

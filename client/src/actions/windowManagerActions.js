@@ -37,3 +37,7 @@ export function setWindowResizable(id, isResizable) {
 export function updateWindowInfo(id, info) {
     return { type: actionTypes.UPDATE_WINDOW_INFO, id, info };
 }
+
+export function moveWindow(id, position) {
+    return { type: actionTypes.WINDOW_MOVE, id, position };
+}

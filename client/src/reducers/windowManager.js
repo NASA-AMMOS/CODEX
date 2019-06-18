@@ -30,6 +30,8 @@ export default function windowManager(
             return opt_reducer.setWindowResizable(state, action);
         case actionTypes.WINDOW_SET_TITLE:
             return opt_reducer.setWindowTitle(state, action);
+        case actionTypes.WINDOW_MOVE:
+            return opt_reducer.moveWindow(state, action);
         default:
             return state;
     }

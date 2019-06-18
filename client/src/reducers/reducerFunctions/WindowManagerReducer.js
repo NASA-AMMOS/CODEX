@@ -77,6 +77,15 @@ export default class WindowManagerReducer {
         };
     }
 
+    static moveWindow(state, action) {
+        return {
+            ...state,
+            windows: state.windows.map(win =>
+                win.id === action.id ? Object.assign(win, action.position) : win
+            )
+        };
+    }
+
     static setWindowTitle(state, action) {
         return {
             ...state,
