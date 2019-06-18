@@ -5,7 +5,7 @@ import Menu from "@material-ui/icons/menu";
 import IconButton from "@material-ui/core/IconButton";
 
 function RightPanel() {
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
 
     return (
         <React.Fragment>

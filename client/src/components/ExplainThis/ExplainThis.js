@@ -625,7 +625,6 @@ function ExplainThis(props) {
         _ => {
             //handle the loading of the data request promise
             // Get selected feature list from current state if none specified
-            console.log("resetting tree");
             let selectedFeatures = props.featureList
                 .filter(f => f.get("selected"))
                 .map(f => f.get("name"))

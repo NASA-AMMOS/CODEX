@@ -11,6 +11,7 @@ import ScatterGraph from "components/Graphs/ScatterGraph";
 import HeatmapGraph from "components/Graphs/HeatmapGraph";
 import BoxPlotGraph from "components/Graphs/BoxPlotGraph";
 import HistogramGraph from "components/Graphs/HistogramGraph";
+import FindMoreLikeThis from "components/FindMoreLikeThis/FindMoreLikeThis";
 import Sessions from "components/Sessions/Sessions";
 import TimeSeriesGraph from "components/Graphs/TimeSeriesGraph";
 import * as algorithmTypes from "constants/algorithmTypes";
@@ -77,6 +78,8 @@ export function getWindowContent(win) {
             );
         case workflowTypes.EXPLAIN_THIS_WINDOW:
             return <ExplainThis winId={win.id} />;
+        case workflowTypes.FIND_MORE_LIKE_THIS_WINDOW:
+            return <FindMoreLikeThis winId={win.id} />
         case workflowTypes.FILTER_WINDOW:
             return <Filter />;
         case windowTypes.DEBUG_WINDOW:

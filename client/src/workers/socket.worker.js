@@ -12,11 +12,11 @@ function handleGraphDataRequest(msg) {
     socket = new WebSocket(socketString);
 
     socket.onclose = function() {
-        console.log("Closed Graph Socket");
+        //console.log("Closed Graph Socket");
     };
 
     socket.onopen = function() {
-        console.log("Opened Graph Socket");
+        //console.log("Opened Graph Socket");
         const outMsg = JSON.stringify({
             routine: "arrange",
             hashType: "feature",

@@ -15,6 +15,16 @@ export function getExplainThisWindowAction() {
     };
 }
 
+export function getFindMoreLikeThisWindowAction() {
+    return {
+        type: actionTypes.OPEN_NEW_WINDOW,
+        info: {
+            windowType: workflowTypes.FIND_MORE_LIKE_THIS_WINDOW
+        }
+    };
+}
+
+
 export const getFilterWindowAction = request => ({
     type: actionTypes.OPEN_NEW_WINDOW,
     info: {
@@ -33,6 +43,10 @@ export function createWorkflow(workflowType, selectedFeatures) {
             console.log("dispatching filter window action");
             return (dispatch, getState) => {
                 dispatch(getFilterWindowAction());
+            };
+        case workflowTypes.FIND_MORE_LIKE_THIS:
+            return (dispatch, getState) => {
+                dispatch(getFindMoreLikeThisWindowAction());
             };
         default:
             return (dispatch, getState) => {};
