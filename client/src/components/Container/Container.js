@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import "components/Container/Container.css";
 
+import RightPanel from "components/RightPanel/RightPanel";
 import WindowManager from "components/WindowManager/WindowManager";
 
 class Container extends Component {
@@ -8,6 +9,9 @@ class Container extends Component {
         return (
             <div className="Container" id="Container">
                 <WindowManager />
+                <div className="right-side">
+                    <RightPanel/>
+                </div>
             </div>
         );
     }

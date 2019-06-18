@@ -9,7 +9,7 @@ function RightPanel() {
 
     return (
         <React.Fragment>
-            <IconButton className="menu-button-icon" onClick={_ => setOpen(!open)}>
+            <IconButton className="menu-button-icon" hidden={open} onClick={_ => setOpen(!open)}>
                 <Menu className="menu-button"/>
             </IconButton>
             <div className="right-panel" hidden={!open}>

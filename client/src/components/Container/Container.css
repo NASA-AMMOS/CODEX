@@ -11,3 +11,9 @@
     height: calc(100% - 30px);
     box-shadow: inset 5px 5px 11px rgba(6, 6, 6, 0.3);
 }
+
+
+.right-side {
+    float:right;
+    height:100%;
+}
