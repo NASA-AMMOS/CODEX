@@ -5,18 +5,15 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
 import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { Component, useRef } from "react";
 
-import { brushClear } from "actions/data";
 import {
     openAlgorithm,
-    openReport,
     openDevelopment,
     openWorkflow,
-    brushtypeSet,
-    modeSet
 } from "actions/ui";
 import LoadingBar from "components/LoadingBar/LoadingBar";
+import TextField from '@material-ui/core/TextField';
 import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as uiTypes from "constants/uiTypes";
@@ -31,43 +28,81 @@ import * as dimensionalityReductionActions from "actions/dimensionalityReduction
 import * as exportActions from "actions/exportActions";
 import * as dataActions from "actions/data";
 
-class TopBar extends Component {
-    constructor(props) {
-        super(props);
+function SessionBar(props) {
 
-        this.state = {
-            rSelected: 2,
-            brushSelected: "freehand",
-            gridSize: 10
-        };
+    console.log(props);
 
-        this.defaultBackground = "#05101f";
+    return (
+        <div className="session-bar">
+            <ul className="session-bar-list">
+                <li className="session-bar-list-element">
+                    <input
+                        className="session-bar-file-input inputfile"
+                        multiple={false}
+                        name="files[]"
+                        type="file"
+                        onChange={e => {props.fileLoad(e.target.files)}}
+                        accept=".csv,.npy,.h5"
+                    />
+                </li>
+                <li>
+                    <Button 
+                        className="session-bar-button"
+                        onClick = {props.requestServerExport}
+                    >
+                        Export File
+                    </Button>
+                </li>
+                <li>
+                    <Button 
+                        className="session-bar-button"
+                        onClick = {props.openSessionsWindow}
+                    >
+                        Load Session
+                    </Button>
+                </li>
+                <li>
+                    <Button 
+                        className="session-bar-button"
+                        onClick ={
+                        () => {
+                            props.saveSession(
+                                `${props.filename}_${new Date().toISOString()}`
+                            );
+                        }
+                    }
+                    >
+                        Save Session
+                    </Button>
+                </li>
+            </ul>
+        </div>
+    );
+}
 
-        this.ref = null;
-        this.ref_loading = null;
-        this.ref_message = null;
+function NavigationBar(props) {
+    const defaultBackground = "#05101f";
 
-        this.timeout = null;
+    const ref = useRef(null);
+    const ref_loading = useRef(null);
+    const ref_message = useRef(null);
 
-        // handler bindings
-        this.setLoadingPercent = this.setLoadingPercent.bind(this);
-        this.toggleIndeterminateLoading = this.toggleIndeterminateLoading.bind(this);
-        this.setMessageText = this.setMessageText.bind(this);
-    }
+    let timeout = null;
 
-    createMenuItem(window_type, title) {
+    function createMenuItem(window_type, title) {
         return (
-            <MenuItem key={window_type} onSelect={() => this.props.openWindow(window_type)}>
+            <MenuItem key={window_type} onSelect={() => props.openWindow(window_type)}>
                 {title || window_type}
             </MenuItem>
         );
     }
-    getWorkflowMenuItems() {
+
+    function getWorkflowMenuItems() {
         return workflowTypes.WORKFLOW_TYPES.map(workflow => (
             <MenuItem
                 key={workflow}
                 onSelect={() => {
-                    this.props.createWorkflow(workflow);
+                    props.createWorkflow(workflow);
                 }}
             >
                 {workflow}
@@ -75,17 +110,17 @@ class TopBar extends Component {
         ));
     }
 
-    getGraphMenuItems() {
+    function getGraphMenuItems() {
         // WINDOW TYPES
-        return windowTypes.graphs.map(graph => this.createMenuItem(graph));
+        return windowTypes.graphs.map(graph => createMenuItem(graph));
     }
 
-    getAlgorithmsMenuItems() {
+    function getAlgorithmsMenuItems() {
         return algorithmTypes.ALGORITHM_TYPES.map(algo => (
             <MenuItem
                 key={algo}
                 onSelect={() => {
-                    this.props.createAlgorithm(algo);
+                    props.createAlgorithm(algo);
                 }}
             >
                 {algo}
@@ -93,237 +128,106 @@ class TopBar extends Component {
         ));
     }
 
-    getReportsMenuItems() {
-        let menuItems = [];
-        for (let r of this.vars.reports) {
-            menuItems.push(
-                <MenuItem
-                    key={r.name}
-                    onSelect={() => {
-                        this.props.openReport(r.name);
-                    }}
-                >
-                    {r.name}
-                </MenuItem>
-            );
-        }
-        return menuItems;
-    }
-
-    onRadioBtnClick(rSelected) {
-        switch (rSelected) {
-            case 1:
-                this.props.modeSet("zoom");
-                break;
-            case 2:
-                this.props.brushtypeSet(this.state.brushSelected);
-                this.props.modeSet("select");
-                break;
-            case 3:
-                this.props.modeSet("snap");
-                break;
-            default:
-                break;
-        }
-        this.setState({ rSelected });
-    }
-    setBrushSelected(eventKey) {
-        if (eventKey === "clear") {
-            this.props.brushClear();
-        } else {
-            this.props.brushtypeSet(eventKey);
-            this.setState({ brushSelected: eventKey });
-        }
-    }
-    setGridSize(size) {}
-
-    setLoadingPercent(p) {
-        if (this.ref_loading) this.ref_loading.setLoadingPercent(p);
-    }
-    toggleIndeterminateLoading(on, message) {
-        if (this.ref_loading) this.ref_loading.toggleIndeterminateLoading(on, message);
-    }
-    setMessageText(message, status) {
-        if (this.ref && this.ref_message) {
-            this.ref_message.textContent = message;
-            this.ref_message.style.opacity = 1;
-
-            let background = this.defaultBackground;
-            switch (status.toLowerCase()) {
-                case "note":
-                    background = "#49baff";
-                    break;
-                case "warning":
-                    background = "#ffa749";
-                    break;
-                case "error":
-                    background = "#ff4949";
-                    break;
-                default:
-                    break;
-            }
-
-            this.ref.style.background = background;
-
-            clearTimeout(this.timeout);
-            this.timeout = setTimeout(() => {
-                this.ref_message.style.opacity = 0;
-                this.ref.style.background = this.defaultBackground;
-            }, 5000);
-        }
-    }
-
-    render() {
-        let devDisplay = "inline-block";
-        // Don't show the development dropdown in production mode
-        if (process.env.NODE_ENV === "production") devDisplay = "none";
-
-        return (
-            <div
-                className="TopBar"
+    return (
+        <div
+            className="navigation-bar"
+            ref={r => {
+                ref.current = r;
+            }}
+        >
+            <LoadingBar
                 ref={r => {
-                    this.ref = r;
+                    ref_loading.current = r;
                 }}
-            >
-                <LoadingBar
-                    ref={r => {
-                        this.ref_loading = r;
-                    }}
-                />
-                <div id="topBarMenu">
-                    <Dropdown className="dropdownMain" autoOpen={false}>
-                        <Dropdown.Toggle className="dropdownToggle" title="Sessions" />
-                        <Dropdown.Menu>
-                            <MenuItem onSelect={this.props.openSessionsWindow}>
-                                Load Session
-                            </MenuItem>
-                            <MenuItem
-                                onSelect={() => {
-                                    this.props.saveSession(
-                                        `${this.props.filename}_${new Date().toISOString()}`
-                                    );
-                                }}
-                            >
-                                Save Session
-                            </MenuItem>
-                        </Dropdown.Menu>
-                    </Dropdown>
-                    <Dropdown className="dropdownMain" autoOpen={false}>
-                        <Dropdown.Toggle className="dropdownToggle" title="Files" />
-                        <Dropdown.Menu>
-                            <MenuItem style={{ position: "relative" }}>
-                                <input
-                                    className="inputfile"
-                                    multiple={false}
-                                    name="files[]"
-                                    type="file"
-                                    onChange={e => this.props.fileLoad(e.target.files)}
-                                    accept=".csv,.npy,.h5"
-                                />
-                                Import
-                            </MenuItem>
-                            <MenuItem onSelect={this.props.requestServerExport}>Export</MenuItem>
-                        </Dropdown.Menu>
-                    </Dropdown>
+            />
+            <div id="topBarMenu">
+                <Dropdown className="dropdownMain" autoOpen={false}>
+                    <Dropdown.Toggle className="dropdownToggle" title="Graphs" />
+                    <Dropdown.Menu>{getGraphMenuItems()}</Dropdown.Menu>
+                </Dropdown>
 
-                    <Dropdown className="dropdownMain" autoOpen={false}>
-                        <Dropdown.Toggle className="dropdownToggle" title="Graphs" />
-                        <Dropdown.Menu>{this.getGraphMenuItems()}</Dropdown.Menu>
-                    </Dropdown>
+                <Dropdown className="dropdownMain" autoOpen={false}>
+                    <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
+                    <Dropdown.Menu>
+                        {createMenuItem(windowTypes.CLUSTER_ALGORITHM)}
+                        {createMenuItem(
+                            windowTypes.CLASSIFICATION_WINDOW,
+                            "Classification"
+                        )}
+                        {createMenuItem(windowTypes.REGRESSION_WINDOW, "Regression")}
 
-                    <Dropdown className="dropdownMain" autoOpen={false}>
-                        <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
-                        <Dropdown.Menu>
-                            {this.createMenuItem(windowTypes.CLUSTER_ALGORITHM)}
-                            {this.createMenuItem(
-                                windowTypes.CLASSIFICATION_WINDOW,
-                                "Classification"
-                            )}
-                            {this.createMenuItem(windowTypes.REGRESSION_WINDOW, "Regression")}
+                        {createMenuItem(
+                            windowTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW,
+                            "Dimensionality Reduction"
+                        )}
+                        <MenuItem onSelect={props.openDimensionalityReductionWindow}>
+                            Dimensionality Reduction (legacy)
+                        </MenuItem>
+                    </Dropdown.Menu>
+                </Dropdown>
 
-                            {this.createMenuItem(
-                                windowTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW,
-                                "Dimensionality Reduction"
-                            )}
-                            <MenuItem onSelect={this.props.openDimensionalityReductionWindow}>
-                                Dimensionality Reduction (legacy)
-                            </MenuItem>
-                        </Dropdown.Menu>
-                    </Dropdown>
+                <Dropdown
+                    className="dropdownMain"
+                    autoOpen={false}
+                >
+                    <Dropdown.Toggle className="dropdownToggle" title="Development" />
+                    <Dropdown.Menu>
+                        <MenuItem
+                            onSelect={() => props.openWindow(windowTypes.DEBUG_WINDOW)}
+                        >
+                            Open debug window
+                        </MenuItem>
+                    </Dropdown.Menu>
+                </Dropdown>
+                <Dropdown
+                    className="dropdownMain"
+                    autoOpen={false}
+                >
+                    <Dropdown.Toggle className="dropdownToggle" title="Workflows" />
+                    <Dropdown.Menu>{getWorkflowMenuItems()}</Dropdown.Menu>
+                </Dropdown>
 
-                    <Dropdown
-                        style={{ display: devDisplay }}
-                        className="dropdownMain"
-                        autoOpen={false}
-                    >
-                        <Dropdown.Toggle className="dropdownToggle" title="Development" />
-                        <Dropdown.Menu>
-                            <MenuItem
-                                onSelect={eventKey => {
-                                    this.props.openDevelopment("nrandomscatters");
-                                }}
-                            >
-                                8 Random Scatters
-                            </MenuItem>
-                            <MenuItem
-                                onSelect={eventKey => {
-                                    this.props.openDevelopment("sparklinerange");
-                                }}
-                            >
-                                Create range slider window
-                            </MenuItem>
-                            <MenuItem
-                                onSelect={() => this.props.openWindow(windowTypes.DEBUG_WINDOW)}
-                            >
-                                Open debug window
-                            </MenuItem>
-                        </Dropdown.Menu>
-                    </Dropdown>
-                    <Dropdown
-                        style={{ display: devDisplay }}
-                        className="dropdownMain"
-                        autoOpen={false}
-                    >
-                        <Dropdown.Toggle className="dropdownToggle" title="Workflows" />
-                        <Dropdown.Menu>{this.getWorkflowMenuItems()}</Dropdown.Menu>
-                    </Dropdown>
-
-                    <div className="triTopLeft" />
-                </div>
-                <div
-                    id="topBarMessageText"
-                    ref={r => {
-                        this.ref_message = r;
-                    }}
-                />
-                <div id="topBarTools">
-                    <ButtonGroup>
-                        <Dropdown>
-                            <Dropdown.Toggle className="dropdownToggle" title="Windows" />
-                            <Dropdown.Menu>
-                                <MenuItem header>Arrange</MenuItem>
-                                <MenuItem onSelect={() => this.props.setWindowTileAction(true)}>
-                                    Tile
-                                </MenuItem>
-                            </Dropdown.Menu>
-                        </Dropdown>
-                    </ButtonGroup>
-
-                    <div className="triTopRight" />
-                </div>
+                <div className="triTopLeft" />
             </div>
-        );
-    }
+            <div
+                id="topBarMessageText"
+                ref={r => {
+                    ref_message.current = r;
+                }}
+            />
+            <div id="topBarTools">
+                <ButtonGroup>
+                    <Dropdown>
+                        <Dropdown.Toggle className="dropdownToggle" title="Windows" />
+                        <Dropdown.Menu>
+                            <MenuItem header>Arrange</MenuItem>
+                            <MenuItem onSelect={() => props.setWindowTileAction(true)}>
+                                Tile
+                            </MenuItem>
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </ButtonGroup>
+                <div className="triTopRight" />
+            </div>
+        </div>
+    );
+}
+
+function TopBar(props) {   
+
+
+    return (
+        <div className="top-bar">
+            <SessionBar {...props}/>
+            <NavigationBar {...props}/>
+        </div>
+    );
 }
 
 // validation
 TopBar.propTypes = {
-    brushClear: PropTypes.func.isRequired,
     openAlgorithm: PropTypes.func.isRequired,
-    openReport: PropTypes.func.isRequired,
     openWorkflow: PropTypes.func.isRequired,
-    brushtypeSet: PropTypes.func.isRequired,
-    modeSet: PropTypes.func.isRequired,
     setWindowTileAction: PropTypes.func.isRequired
 };
 
@@ -338,13 +242,9 @@ const mapStateToProps = state => {
 
 function mapDispatchToProps(dispatch) {
     return {
-        brushClear: () => dispatch(brushClear()),
         openAlgorithm: (d, n, w, h) => dispatch(openAlgorithm(d, n, w, h)),
-        openReport: (d, n, w, h) => dispatch(openReport(d, n, w, h)),
         openDevelopment: (d, n) => dispatch(openDevelopment(d, n)),
         openWorkflow: (d, n) => dispatch(openWorkflow(d, n)),
-        brushtypeSet: t => dispatch(brushtypeSet(t)),
-        modeSet: m => dispatch(modeSet(m)),
         openWindow: n => dispatch(windowManagerActions.openNewWindow({ windowType: n })),
         createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name)),
         createWorkflow: name => dispatch(workflowActions.createWorkflow(name)),

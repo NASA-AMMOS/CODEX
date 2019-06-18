@@ -1,4 +1,45 @@
-.TopBar {
+.top-bar {
+    color:white;
+}
+
+.session-bar {
+    display: inline-flex;
+    justify-content: space-between;
+    width:100%;
+    z-index: 2147483548;
+    padding:5px;
+}
+
+.session-bar-file-file-input {
+    height:30px;
+    width:200px;
+}
+
+.session-bar-button {
+    color:white;
+    background-color: transparent;
+    margin:0px;
+    margin-left:10px;
+    margin-right: 10px;
+    height:32px;
+    padding: 0px;
+    padding-left:20px;
+    padding-right:20px;
+}
+
+.session-bar-list {
+    list-style: none;
+    width:100%;
+    display: flex;
+    flex-direction: horizontal;
+    margin:0;
+}
+
+.session-bar-list-element {
+    display: inline-block;
+}
+
+.navigation-bar {
     width: 100%;
     height: 30px;
     display: inline-flex;
@@ -10,38 +51,38 @@
     z-index: 2147000000;
 }
 
-.TopBar #topBarMenu {
+.navigation-bar #topBarMenu {
     z-index: 2147483548;
     /*background: linear-gradient( to right, #7d39e0, #05101f );*/
 }
 
-.TopBar #topBarTools {
+.navigation-bar #topBarTools {
     z-index: 2147483548;
     /*background: linear-gradient( to right, #05101f, #7d39e0 );*/
 }
 
-.TopBar .dropdownMain {
+.navigation-bar .dropdownMain {
     margin-left: 0px;
 }
-.TopBar .dropdownMain.right > div {
+.navigation-bar .dropdownMain.right > div {
     right: 0;
     left: unset;
 }
-.TopBar .dropdownToggle {
+.navigation-bar .dropdownToggle {
     color: white;
     border-radius: 0;
     border: none;
     background: transparent;
 }
-.TopBar .dropdownToggle.thin {
+.navigation-bar .dropdownToggle.thin {
     padding-left: 2px;
     padding-right: 2px;
 }
-.TopBar .dropdownToggle > span {
+.navigation-bar .dropdownToggle > span {
     border-top: 4px dashed #fff;
 }
 
-.TopBar .triTopLeft {
+.navigation-bar .triTopLeft {
     display: none;
     position: absolute;
     top: 0px;
@@ -52,7 +93,7 @@
     border-width: 30px 150px 0 0;
     border-color: #05101f transparent transparent transparent;
 }
-.TopBar .triTopRight {
+.navigation-bar .triTopRight {
     display: none;
     position: absolute;
     top: 0px;
@@ -64,32 +105,3 @@
     border-color: transparent transparent #05101f transparent;
 }
 
-.TopBar .topBarRadioSmall {
-    height: 30px;
-    font-size: 13px;
-    line-height: 16px;
-    border-radius: 0px !important;
-    border: none !important;
-    background: transparent !important;
-}
-.TopBar .topBarRadioSmall.active {
-    background: #335ce4 !important;
-}
-
-.TopBar #topBarMessageText {
-    line-height: 30px;
-    font-weight: bold;
-    opacity: 0;
-    transition: opacity 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95);
-}
-
-.inputfile {
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-}
