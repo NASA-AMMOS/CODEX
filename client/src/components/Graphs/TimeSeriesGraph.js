@@ -85,7 +85,7 @@ function TimeSeriesGraph(props) {
 
     return (
         <GraphWrapper
-            resizeHandler={_ => chartRefs.current.forEach((chartRef,idx) => chartRef.current[idx].resizeHandler())}
+            resizeHandler={_ => chartRefs.current.forEach((chartRef) => chartRef.current.resizeHandler())}
         >
             <ul className="time-series-plot-container">
                 {data.map((dataElement, index) => (

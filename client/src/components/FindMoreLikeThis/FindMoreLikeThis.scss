@@ -1,3 +1,36 @@
-.find-more-like-this-header {
-    font-size: 28px;
+.fmlt-header {
+    font-size: 26px;
+    margin: 0;
+}
+
+.io-container {
+    display: flex;
+    flex-direction: row;
+    height:80%;
+}
+
+.fmlt-input-selections {
+    width: 50%;
+}
+
+.fmlt-output-selections {
+    width: 50%;
+}
+
+.fmlt-input-selections-list {
+    list-style: none;
+}
+
+.input-selection.selected{
+    background-color: black;
+    color: white;
+}   
+
+.input-selection.unselected{
+    background-color: white;
+    color:black;
+}
+
+.fmlt-run-button {
+    float:right;
 }

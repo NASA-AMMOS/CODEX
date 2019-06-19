@@ -59,8 +59,9 @@ function generateLayouts(features) {
 
 function HistogramGraph(props) {
     const features = props.data.toJS();
-
-    const chartRefs = features.map(feat => useRef(null));
+    
+    const chartRefs = useRef(null);
+    chartRefs.current = features;
 
     let data = generatePlotData(features);
 
@@ -68,14 +69,14 @@ function HistogramGraph(props) {
 
     return (
         <GraphWrapper
-            resizeHandler={_ => chartRefs.forEach(chart => chart.current.resizeHandler())}
+            resizeHandler={_ => chartRefs.current.forEach((chartRef) => chartRef.current.resizeHandler())}
         >
             <ul className="histogram-graph-container">
                 {data.map((dataElement, index) => (
                     <HistogramSubGraph
                         key={index}
                         data={data[index]}
-                        chart={chartRefs[index]}
+                        chart={chartRefs.current[index]}
                         layout={layouts[index]}
                         setCurrentSelection={props.setCurrentSelection}
                         currentSelection={props.currentSelection}

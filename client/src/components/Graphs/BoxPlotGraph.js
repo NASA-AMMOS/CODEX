@@ -76,7 +76,7 @@ function BoxPlotGraph(props) {
 
     return (
         <GraphWrapper
-            resizeHandler={_ => chartRefs.current.forEach((chartRef,idx) => chartRef.current[idx].resizeHandler())}
+            resizeHandler={_ => chartRefs.current.forEach((chartRef) => chartRef.current.resizeHandler())}
         >
             <ul className="box-plot-container">
                 {data.map((dataElement, index) => (
