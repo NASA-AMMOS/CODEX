@@ -7,6 +7,7 @@ import { fromJS, Set } from "immutable";
 import { batchActions } from "redux-batched-actions";
 import * as selectionActions from "actions/selectionActions";
 import * as dataActions from "actions/data";
+import * as wmActions from "actions/windowManagerActions";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -48,7 +49,7 @@ function usePrevious(value) {
  * @param {array} features list of feature names
  * @return {array} feature state
  */
-export function useFeatures(features) {
+export function useFeatures(features, windowHandle = undefined) {
     features = Set(features);
 
     // know what we had before
@@ -117,6 +118,14 @@ export function useFeatures(features) {
     Promise.all(actionsToDispatch).then(actions => {
         // don't dispatch an empty batched action
         if (actions.length > 0) {
+            if (windowHandle !== undefined) {
+                console.log("window handle defined, adding an action to the action list");
+                let data = { ...windowHandle.data, features: features.toJS() };
+                actions.push(wmActions.setWindowData(windowHandle.id, data));
+            } else {
+                console.log("invalid window handle");
+            }
+
             dispatch(batchActions(actions));
         }
     });
@@ -132,20 +141,20 @@ export function useFeatures(features) {
 /**
  * Get features that are selected, live updating as features are selected or unselected
  */
-export function useLiveFeatures() {
+export function useLiveFeatures(windowHandle = undefined) {
     const domain = useSelector(state => state.data);
     const selectedFeatures = domain
         .get("featureList")
         .filter(f => f.get("selected"))
         .map(f => f.get("name"));
 
-    return useFeatures(selectedFeatures);
+    return useFeatures(selectedFeatures, windowHandle);
 }
 
 /**
  * Get features that are selected, WITHOUT live updating as features are selected or unselected
  */
-export function usePinnedFeatures() {
+export function usePinnedFeatures(windowHandle = undefined) {
     const domain = useSelector(state => state.data);
     const selectedFeatures = domain
         .get("featureList")
@@ -156,10 +165,18 @@ export function usePinnedFeatures() {
     const [pinned, setPinned] = useState(null);
 
     useEffect(() => {
-        setPinned(selectedFeatures);
+        if (
+            windowHandle !== undefined &&
+            windowHandle.data !== undefined &&
+            windowHandle.data.features !== undefined
+        ) {
+            setPinned(windowHandle.data.features);
+        } else {
+            setPinned(selectedFeatures);
+        }
     }, []); // run once
 
-    return useFeatures(pinned);
+    return useFeatures(pinned, windowHandle);
 }
 
 /**

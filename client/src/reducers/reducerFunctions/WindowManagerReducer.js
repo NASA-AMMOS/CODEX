@@ -102,4 +102,12 @@ export default class WindowManagerReducer {
             )
         };
     }
+    static setWindowData(state, action) {
+        return {
+            ...state,
+            windows: state.windows.map(win =>
+                win.id === action.id ? Object.assign(win, { data: action.data }) : win
+            )
+        };
+    }
 }

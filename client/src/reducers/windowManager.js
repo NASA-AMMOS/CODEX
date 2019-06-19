@@ -32,6 +32,8 @@ export default function windowManager(
             return opt_reducer.setWindowTitle(state, action);
         case actionTypes.WINDOW_MOVE:
             return opt_reducer.moveWindow(state, action);
+        case actionTypes.WINDOW_SET_DATA:
+            return opt_reducer.setWindowData(state, action);
         default:
             return state;
     }
