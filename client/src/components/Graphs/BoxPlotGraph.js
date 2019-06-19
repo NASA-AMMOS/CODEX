@@ -67,7 +67,8 @@ function BoxPlotGraph(props) {
     //const features = utils.unzip(props.data.get("data"));
     const features = props.data.toJS();
 
-    const chartRefs = features.map(feat => useRef(null));
+    const chartRefs = useRef(null);
+    chartRefs.current = features;
 
     let data = generatePlotData(features);
 
@@ -75,7 +76,7 @@ function BoxPlotGraph(props) {
 
     return (
         <GraphWrapper
-            resizeHandler={_ => chartRefs.forEach(chart => chart.current.resizeHandler())}
+            resizeHandler={_ => chartRefs.current.forEach((chartRef,idx) => chartRef.current[idx].resizeHandler())}
         >
             <ul className="box-plot-container">
                 {data.map((dataElement, index) => (
@@ -160,27 +161,6 @@ function BoxPlotSubGraph(props) {
     );
 }
 
-/*
-function mapStateToProps(state) {
-    return {
-        currentSelection: state.selections.currentSelection,
-        savedSelections: state.selections.savedSelections
-    };
-}
-
-function mapDispatchToProps(dispatch) {
-    return {
-        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
-        saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
-    };
-}
-
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(BoxPlotGraph); */
-
-// wrapped data selector
 export default props => {
     const win = useWindowManager(props, {
         width: 500,

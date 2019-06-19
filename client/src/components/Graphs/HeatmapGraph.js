@@ -211,7 +211,6 @@ function HeatmapGraph(props) {
         </GraphWrapper>
     );
 }
-//export default HeatmapGraph;
 
 export default props => {
     const win = useWindowManager(props, {

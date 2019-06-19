@@ -72,7 +72,8 @@ function ViolinPlotGraph(props) {
 
     const features = props.data.toJS();
 
-    const chartRefs = features.map(feat => useRef(null));
+    const chartRefs = useRef(null);
+    chartRefs.current = features;
 
     let data = generatePlotData(features);
 
@@ -80,14 +81,14 @@ function ViolinPlotGraph(props) {
 
     return (
         <GraphWrapper
-            resizeHandler={_ => chartRefs.forEach(chart => chart.current.resizeHandler())}
+            resizeHandler={_ => chartRefs.current.forEach((chartRef,idx) => chartRef.current[idx].resizeHandler())}
         >
             <ul className="box-plot-container">
                 {data.map((dataElement, index) => (
                     <ViolinPlotSubGraph
                         key={index}
                         data={dataElement}
-                        chart={chartRefs[index]}
+                        chart={chartRefs.current[index]}
                         layout={layouts[index]}
                         setCurrentSelection={props.setCurrentSelection}
                         currentSelection={props.currentSelection}

@@ -76,7 +76,8 @@ function TimeSeriesGraph(props) {
     //const features = utils.unzip(props.data.get("data"));
     const features = props.data.map(f => f.get("data")).toJS();
 
-    const chartRefs = features.map(feat => useRef(null));
+    const chartRefs = useRef(null);
+    chartRefs.current = features;
 
     let data = generatePlotData(features);
 
@@ -84,7 +85,7 @@ function TimeSeriesGraph(props) {
 
     return (
         <GraphWrapper
-            resizeHandler={_ => chartRefs.forEach(chart => chart.current.resizeHandler())}
+            resizeHandler={_ => chartRefs.current.forEach((chartRef,idx) => chartRef.current[idx].resizeHandler())}
         >
             <ul className="time-series-plot-container">
                 {data.map((dataElement, index) => (
@@ -92,7 +93,7 @@ function TimeSeriesGraph(props) {
                         key={index}
                         axisKey={"x" + (index + 1)}
                         data={data[index]}
-                        chart={chartRefs[index]}
+                        chart={chartRefs.current[index]}
                         layout={layouts[index]}
                         setCurrentSelection={props.setCurrentSelection}
                         currentSelection={props.currentSelection}
