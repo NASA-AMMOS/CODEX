@@ -2,11 +2,16 @@ import React, { useState, useRef, useEffect } from "react";
 import { useSelector, useStore, useDispatch } from "react-redux";
 import WorkerSocket from "worker-loader!workers/socket.worker";
 import * as actionTypes from "constants/actionTypes";
-import { addDataset, featureRetain, featureRelease } from "actions/data";
+import {
+    addDataset,
+    featureRetain,
+    featureRelease,
+    featureSelect,
+    featureUnselect
+} from "actions/data";
 import { fromJS, Set } from "immutable";
 import { batchActions } from "redux-batched-actions";
 import * as selectionActions from "actions/selectionActions";
-import * as dataActions from "actions/data";
 import * as wmActions from "actions/windowManagerActions";
 
 function loadColumnFromServer(feature) {
@@ -119,11 +124,8 @@ export function useFeatures(features, windowHandle = undefined) {
         // don't dispatch an empty batched action
         if (actions.length > 0) {
             if (windowHandle !== undefined) {
-                console.log("window handle defined, adding an action to the action list");
                 let data = { ...windowHandle.data, features: features.toJS() };
                 actions.push(wmActions.setWindowData(windowHandle.id, data));
-            } else {
-                console.log("invalid window handle");
             }
 
             dispatch(batchActions(actions));
@@ -132,8 +134,16 @@ export function useFeatures(features, windowHandle = undefined) {
 
     // if this is the case, then we're probably done resolving
     if (incoming.size === 0 && outgoing.size === 0) {
-        return loadedData.filter(f => features.find(fo => fo == f.get("feature")));
+        const lockedFeatures = loadedData.filter(f => features.find(fo => fo == f.get("feature")));
+
+        // Ensure that we only return the features when they're locked
+        if (features.size !== lockedFeatures.size) {
+            return null;
+        } else {
+            return lockedFeatures;
+        }
     } else {
+        // we haven't finished loading
         return null;
     }
 }
@@ -223,10 +233,10 @@ export function useSelectedFeatureNames() {
         const removalActions = current
             .subtract(sels)
             .toJS()
-            .map(n => dataActions.featureUnselect(n));
+            .map(n => featureUnselect(n));
 
         // now, all that's left is to add all the other actions
-        const additionActions = sels.toJS().map(n => dataActions.featureSelect(n));
+        const additionActions = sels.toJS().map(n => featureSelect(n));
 
         // dispatch all at once to avoid multiple rerenders
         dispatch(batchActions([...removalActions, ...additionActions]));
