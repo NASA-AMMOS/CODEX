@@ -390,6 +390,15 @@ export default class DataReducer {
      * @return {Map} new state
      */
     static addDataset(state, action) {
+        // check that we're not adding the same featureset twice
+        if (
+            state
+                .get("loadedData")
+                .map(f => f.get("feature"))
+                .find(f => f === action.feature) !== undefined
+        ) {
+            return state;
+        }
         const newDataset = Immutable.fromJS({
             feature: action.feature,
             data: action.data,
