@@ -191,7 +191,7 @@ function WindowManager(props) {
                 initialPosition: initialPos,
                 restrictToParentDiv: true,
                 initialSize: { width: win.width, height: win.height },
-                minSize: win.resizable,
+                minSize: win.minSize || { width: 100, height: 100 },
                 width: win.width,
                 height: win.height
             };
