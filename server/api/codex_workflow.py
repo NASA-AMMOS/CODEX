@@ -16,9 +16,10 @@ import time
 import h5py
 import traceback
 import numpy as np
+np.set_printoptions(threshold=sys.maxsize)
 from sklearn.neighbors import kneighbors_graph
 from sklearn import cluster
-from sklearn.model_selection import train_test_split
+
 
 
 # Enviornment variable for setting CODEX root directory.
@@ -34,6 +35,7 @@ import codex_hash
 import codex_system
 import codex_labels
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 def get_proportion_tree_sums(clf, X_test, y_test):
     """
@@ -122,10 +124,10 @@ def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
     >>> result = explain_this(testData['inputHash'], testData['featureNames'], None, testData['classLabelHash'], {})
 
     '''
-    
+
     startTime = time.time()
     result = {"WARNING":None}
-
+    
     # TODO - labels are currently cached under features
     labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
     if labelHash_dict is None:
@@ -161,40 +163,33 @@ def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
     else:
         subsetHash = False
 
-
     if subsetHash is not False:
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
             codex_system.codex_log("ERROR: explain_this - subsetHash returned None.")
             return None
 
-
     if data.ndim < 2:
         codex_system.codex_log("ERROR: explain_this - insufficient data dimmensions")
         return None
 
-    X_train, X_test, y_train, y_test = train_test_split(data, y, random_state=0)
-    X_train = codex_math.codex_impute(X_train)
-    result['data'] = X_train.tolist()
+    X = codex_math.codex_impute(data)
+    result['data'] = X.tolist()
     result['tree_sweep'] = []
 
-    max_depth = 6
-
-    samples_, features_ = X_train.shape
-    if(features_ < 6):
-    	trees_ = features_
-    else:
-    	trees_ = 6
-    for i in range(1, trees_):
+    samples_, features_ = X.shape
+    
+    max_depth = 7
+    for i in range(2, max_depth):
 
         dictionary = {}
-        clf = DecisionTreeClassifier(max_features=i, max_depth = max_depth)
-        clf.fit(X_train,y_train)
+        clf = DecisionTreeClassifier(max_features=features_, max_depth = i)
+        clf.fit(X,y)
 
-        proportion_tree_sums = get_proportion_tree_sums(clf, X_test, y_test)
+        proportion_tree_sums = get_proportion_tree_sums(clf, X, y)
 
         dictionary['json_tree'] = export_json_tree(clf, featureNames, ["Main Data","Isolated Data"], proportion_tree_sums)
-        dictionary["score"] = np.round(clf.score(X_train,y_train) * 100)
+        dictionary["score"] = np.round(clf.score(X,y) * 100)
         dictionary["max_features"] = clf.max_features_
 
         feature_weights, feature_rank = zip(*sorted(zip(clf.feature_importances_, featureNames), reverse=True))
@@ -206,11 +201,51 @@ def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
 
     return result
 
+def find_more_like_this(inputHash, featureList, dataSelections, result):
+    startTime = time.time()
+    result = {"WARNING":None}
 
+    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    if returnHash is None:
+        codex_system.codex_log("ERROR: find_more_like_this: Hash not found. Returning.")
+        return None
+
+    data = returnHash['data']
+    if data is None:
+        return None
+
+    #handle constructing the dataset here from dataSelections
+    #first create a mask from the dataSelections indices
+    like_this_mask = np.zeros(np.shape(data)[0])
+    for index in dataSelections:
+        like_this_mask[index] = 1
+
+    #generate a smaller sample of data
+    indices_list = [i for i in np.arange(np.shape(data)[0]) if like_this_mask[i] == 0]
+    indices_list = np.random.choice(indices_list, size=len(dataSelections), replace=False) 
+    codex_system.codex_log(str(indices_list))
+
+    sample_mask = [1 for i in dataSelections] + [0 for i in indices_list]
+    sample_data = [data[i] for i in dataSelections] + [data[i] for i in indices_list]
+
+    #train on sample
+    clf = RandomForestClassifier(n_estimators=5, max_depth=2,random_state=0)
+    clf.fit(sample_data, sample_mask)
+
+    #make prediction on whole set
+    output_prediction_mask = clf.predict(data)
+
+    codex_system.codex_log(str(output_prediction_mask))
+    #convert mask to selection form so the front
+    output_selection_array = []
+    for i, value in enumerate(output_prediction_mask):
+        if value > 0.5: 
+            output_selection_array.append(i)
+    #end can create a selection corresponding to it
+    result["like_this"] = output_selection_array
+
+    return result
 
 if __name__ == "__main__":
 
     codex_doctest.run_codex_doctest()
-
-
-

@@ -33,38 +33,55 @@ def workflow_call(msg, result):
     Examples:
 
     '''
-
-    featureList = msg["dataFeatures"]
-    featureList = codex_system.get_featureList(featureList)
-
-    labelName = msg["labelName"]
-    labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
-
-
-    subsetHashName = msg["dataSelections"]
-    if (subsetHashName != []):
-        subsetHashName = subsetHashName[0]
-    else:
-        subsetHashName = None
-
-    hashList = codex_hash.feature2hashList(featureList)
-    codex_return_code.logReturnCode(inspect.currentframe())
-
-    data = codex_hash.mergeHashResults(hashList)
-    codex_return_code.logReturnCode(inspect.currentframe())
-    inputHash = codex_hash.hashArray('Merged', data, "feature")
-
-    if (inputHash != None):
-        codex_return_code.logReturnCode(inspect.currentframe())
-        inputHash = inputHash["hash"]
-
-
     if(msg['workflow'] == "explain_this"):
+        featureList = msg["dataFeatures"]
+        featureList = codex_system.get_featureList(featureList)
+
+        labelName = msg["labelName"]
+        labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
+
+        subsetHashName = msg["dataSelections"]
+        if (subsetHashName != []):
+            subsetHashName = subsetHashName[0]
+        else:
+            subsetHashName = None
+
+        hashList = codex_hash.feature2hashList(featureList)
+        codex_return_code.logReturnCode(inspect.currentframe())
+
+        data = codex_hash.mergeHashResults(hashList)
+        codex_return_code.logReturnCode(inspect.currentframe())
+        inputHash = codex_hash.hashArray('Merged', data, "feature")
+
+        if (inputHash != None):
+            codex_return_code.logReturnCode(inspect.currentframe())
+            inputHash = inputHash["hash"]
+
         result = codex_workflow.explain_this(inputHash, featureList, subsetHashName, labelHash, result)
+
+        codex_system.codex_log(str(result))
+    elif (msg['workflow'] == "find_more_like_this"):
+        featureList = msg["featureList"]
+        featureList = codex_system.get_featureList(featureList)
+
+        dataSelections = msg["dataSelections"]
+
+        hashList = codex_hash.feature2hashList(featureList)
+        codex_return_code.logReturnCode(inspect.currentframe())
+
+        data = codex_hash.mergeHashResults(hashList)
+        codex_return_code.logReturnCode(inspect.currentframe())
+        inputHash = codex_hash.hashArray('Merged', data, "feature")
+
+        if (inputHash != None):
+            codex_return_code.logReturnCode(inspect.currentframe())
+            inputHash = inputHash["hash"]
+
+        result = codex_workflow.find_more_like_this(inputHash, featureList, dataSelections, result)
     else:
         result['message'] = "Cannot parse workflow"
 
-
+    result['message'] = 'success'
     return result
 
 

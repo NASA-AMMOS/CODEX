@@ -168,7 +168,6 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
             result = codex_eta_manager.get_time_estimate(msg, result)
         elif (routine == 'arrange'):
             activity = msg["activity"]
-
             if (activity == "add"):
                 result = codex_data_manager.add_data(msg, result)
             elif (activity == "get"):
