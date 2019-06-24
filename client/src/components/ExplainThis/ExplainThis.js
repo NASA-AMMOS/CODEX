@@ -630,8 +630,6 @@ function ExplainThis(props) {
                 .map(f => f.get("name"))
                 .toJS();
 
-            //todo actually setup a form for selecting a feature that gets sent to
-            //the user as a label
             const request = createExplainThisRequest(props.filename, label, selectedFeatures);
 
             const requestMade = utils.makeSimpleRequest(request);

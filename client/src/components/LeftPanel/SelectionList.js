@@ -28,7 +28,11 @@ function createSelection(
                     .toString(36)
                     .substring(7)
             }
-            onClick={_ => props.toggleSelectionActive(selection.id)}
+            onClick={_ => {
+                    props.toggleSelectionActive(selection.id); 
+                    console.log(props.savedSelections)
+                    }
+                }
             onContextMenu={e => {
                 e.preventDefault();
                 setContextMenuVisible(true);
@@ -54,7 +58,6 @@ function createCurrentSelection(props) {
             key={"currentSelection"}
             className={classnames({ selection: true })}
             onClick={() => {
-                console.log("saving");
                 props.saveCurrentSelection();
                 props.setCurrentSelection([]);
             }}

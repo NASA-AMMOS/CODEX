@@ -40,11 +40,11 @@ export default class SelectionsReducer {
             ...state,
             savedSelections: state.savedSelections.concat([
                 {
-                    id: action.name,
+                    id: action.id,
                     rowIndices: action.rowIndices,
                     color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
                     active: true,
-                    displayName: action.name
+                    displayName: action.id
                 }
             ]),
             nextColorIndex:

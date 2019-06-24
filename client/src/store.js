@@ -6,6 +6,7 @@ import { createLogger } from "redux-logger";
 import { createStore, applyMiddleware, compose } from "redux";
 import thunkMiddleware from "redux-thunk";
 import { batchDispatchMiddleware } from "redux-batched-actions";
+import * as middleware from "middlewares/standardMiddleware.js";
 
 import rootReducer from "reducers";
 
@@ -16,7 +17,7 @@ export default function configureStore(initialState) {
     const store = createStore(
         rootReducer,
         initialState,
-        composeEnhancers(applyMiddleware(batchDispatchMiddleware, thunkMiddleware))
+        composeEnhancers(applyMiddleware(batchDispatchMiddleware, thunkMiddleware, middleware.selectionMiddleware))
     );
 
     if (module.hot) {

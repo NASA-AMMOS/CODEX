@@ -188,6 +188,17 @@ export function useCurrentSelection() {
 }
 
 /**
+* Get all feature names.
+*/
+export function useFeatureNames() {
+    const dispatch = useDispatch();
+    const features = useSelector(state => state.data.get("featureList"))
+        .map(f => f.get("name"));
+
+    return features;
+}
+
+/**
  * Get the names of the currently selected features
  * @return {array} currently selected names + setter function
  */

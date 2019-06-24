@@ -1,34 +1,70 @@
 import "components/FindMoreLikeThis/FindMoreLikeThis.scss";
 import React, { useRef, useState, useEffect } from "react";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import { useCurrentSelection, useSavedSelections, usePinnedFeatures, useFilename } from "hooks/DataHooks";
+import { useSavedSelections, useFilename, useFeatureNames, useFeatureLength} from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UiHooks";
+import * as utils from "utils/utils";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Button from "@material-ui/core/Button";
+
+
+/*
+    Funciton that gets all of indices in the given selections
+*/    
+function getSelectionIndices(selectionArray, savedSelections) {
+    const indicesSet = new Set();
+    for (let value of selectionArray) {
+        let selectionIndex = -1;
+        for (const[key, entry] of Object.entries(savedSelections)) {
+            if (entry.id === value)
+                selectionIndex = key;
+        }
+
+        savedSelections[selectionIndex].rowIndices.forEach(
+            (index) => {
+                indicesSet.add(index);
+            }
+        );
+    }
+
+    return Array.from(indicesSet);
+
+}
+
 
 
 /*
     Function that creates the json object for requesting
     the data for the find more like this algorithm. 
 */
-function createFMLTRequest(filename, selections, features) {
-    return {};
+function createFMLTRequest(filename, selections, featureList) {
+    return {
+        routine: "workflow",
+        dataSelections: selections,
+        featureList: featureList,
+        workflow: "find_more_like_this",
+        file: filename,
+        cid: "8ksjk",
+        identification: { id: "dev0" }
+    };
 }
-
 
 /*
-    This function handles all of the behavior required to take
-    the input in the ui to giving the user back the output of 
-    the Find More Like This Algorithm.
-*/
-function getFMLTOutput(filename, selections, features) {
+    Creates a request to upload selections to the backend
 
-    let output = {};
-
-    return output;
+function createSelectionUploadRequest(selectionData) {
+    return {
+        routine: "arrange",
+        activity: "add",
+        hashType: "selection",
+        data: selectionData,
+        name: "fmlt_mask",
+        cid: "8ksjk",
+        identification: { id: "dev0" }
+    };
 }
-
+*/
 
 function InputSelectionListItem(props) {
     //this selected is not to be confused with the concept of 
@@ -105,6 +141,8 @@ function OutputSelections(props) {
         return (
             <div className="fmlt-output-selections">
                 Output Selections
+                <br/>
+                {props.fmltOutput.outputMessage}
             </div>
         );
     } else {
@@ -129,19 +167,34 @@ function FindMoreLikeThis(props) {
     //this is passed to the children to handle figuring out what
     //selections the user has chosen
     const [selectedSelections, setSelectedSelections] = useState([]);
+    const [buttonClicked, setButtonClicked] = useState(false);
 
     //handler for the run button
     //this function handles calling the create request functions
     //it also does input validation
-    function handleRunButtonClick() {
-        
+    useEffect(() => {
+        //assume if this runs that button is clicked because that is the 
+        //only time the flag changes
         if (selectedSelections.length != 0) {
-            //runs the algorithm
+            const convertedSelections = getSelectionIndices(selectedSelections, props.savedSelections);
+
+            const requestObject = createFMLTRequest(props.filename, convertedSelections, props.featureNames);
+
+            const request = utils.makeSimpleRequest(requestObject);
+            request.req.then(data => {
+                //add a saved selections called fmlt_output with the returned data
+                props.saveSelection("output"+(Math.random()*10000), data.like_this)
+            }); 
+
+            //cleanup function
+            return function cleanup() {
+                request.cancel();
+            };
         } else {
             //send error message because no selections 
             //were chosen
         }
-    }
+    }, [buttonClicked]);
 
     return (
         <React.Fragment>
@@ -153,13 +206,15 @@ function FindMoreLikeThis(props) {
                     savedSelections={props.savedSelections}
                     setSelectedSelections={setSelectedSelections}
                  />
-                <OutputSelections fmltOutput={fmltOutput}/>
+                <OutputSelections 
+                    fmltOutput={fmltOutput}
+                />
             </div>
             <Button
                 variant="contained"
                 color="primary"
                 className="fmlt-run-button"
-                onClick={_ => handleRunButtonClick()}
+                onClick={_ => setButtonClicked(true)}
             >
                 Run
             </Button>
@@ -176,11 +231,10 @@ export default props => {
         title: "Find More Like This"
     });
 
-    const [currentSelection, setCurrentSelection] = useCurrentSelection();
-    const [savedSelections, saveCurrentSelection] = useSavedSelections();
+    const [savedSelections, saveSelection] = useSavedSelections();
     const filename = useFilename();
     
-    const features = usePinnedFeatures();
+    const features = useFeatureNames();
 
     if (features === null) {
         return <WindowCircularProgress />;
@@ -192,12 +246,11 @@ export default props => {
 
     return (
         <FindMoreLikeThis
-            currentSelection={currentSelection}
-            setCurrentSelection={setCurrentSelection}
             savedSelections={savedSelections}
-            saveCurrentSelection={saveCurrentSelection}
+            saveSelection={saveSelection}
             filename={filename}
             data={features}
+            featureNames={features}
         />
     );
 };
