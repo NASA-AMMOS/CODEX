@@ -40,6 +40,11 @@ const wrapWindow = (win, dispatch) => {
                 dispatch(wmActions.setWindowResizable(win.id, isResizable));
             }
         },
+        setData: data => {
+            if (data !== win.data) {
+                dispatch(wmActions.setWindowData(win.id, data));
+            }
+        },
         ...win
     };
 };
@@ -52,6 +57,7 @@ const wrapDummy = () => {
         resize: warn,
         setTitle: warn,
         setResizable: warn,
+        setData: warn,
         ...defaultInitialSettings
     };
 };

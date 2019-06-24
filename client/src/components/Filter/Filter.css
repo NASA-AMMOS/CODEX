@@ -45,3 +45,9 @@
 .Filter__nameinput > input {
     flex-grow: 2;
 }
+
+.Filter__heatmap {
+    height: 100%;
+
+    overflow-y: auto;
+}

@@ -130,6 +130,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
         }
 
         this.setState({ width, height });
+        this.notifyResizeEnd();
         this.setInitialPosition({ width, height });
     };
 

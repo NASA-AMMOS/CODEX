@@ -6,21 +6,12 @@ import PropTypes from "prop-types";
 import IPropTypes from "react-immutable-proptypes";
 import { evaluateExpression } from "tevale";
 
-import DataWrapper from "components/DataWrapper/DataWrapper";
-import useWindowManager from "hooks/WindowHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+import { useLiveFeatures, useCurrentSelection } from "hooks/DataHooks";
+import { WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import Debugger from "components/Debug/Debug";
 
-// connect to redux store
-import { connect } from "react-redux";
-/*
-import {
-        getColumn,
-        getSelectedFeatures
-} from '../../../selectors/data'
-import {
-        selectionCreate
-} from '../../../actions/data'
-*/
+import { Sparklines, SparklinesLine } from "react-sparklines";
 
 class Filter extends Component {
     constructor(props) {
@@ -43,8 +34,6 @@ class Filter extends Component {
         // recursion-proofing bindings
         this.createExprString = this.createExprString.bind(this);
         this.createExprTree = this.createExprTree.bind(this);
-
-        console.log(props.features);
     }
 
     /**
@@ -83,8 +72,8 @@ class Filter extends Component {
 
         // if the expression is valid, execute
         if (this.state.expr_valid) {
-            console.log("executing " + this.state.expr_input);
             this.evaluateAllExpressions(this.state.expr_tree);
+            this.exportSelection();
         }
     }
 
@@ -101,7 +90,10 @@ class Filter extends Component {
         try {
             const tree = jsep(input);
             const idents = this.extractIdentifiers(tree);
-            const invalid = this.findInvalidIdentifiers(idents, this.props.selectedFeatures.toJS());
+            const invalid = this.findInvalidIdentifiers(
+                idents,
+                this.props.data.map(f => f.get("feature"))
+            );
             if (invalid.length !== 0) {
                 throw new Error(
                     `Unknown feature${invalid.length > 1 ? "s" : ""}: ${invalid.join(", ")}`
@@ -112,6 +104,7 @@ class Filter extends Component {
                 expr_tree: tree
             });
         } catch (e) {
+            console.warn(e);
             this.setState({
                 expr_error: e.message,
                 expr_valid: false
@@ -268,7 +261,13 @@ class Filter extends Component {
      */
     createExprRows(tree) {
         const exprs = this.extractLogicalExpressions(tree);
-        return exprs.map(this.createExprString);
+        // get unique strings
+        return exprs.map(this.createExprString).reduce((acc, exp, idx, arr) => {
+            if (!acc.includes(exp)) {
+                acc.push(exp);
+            }
+            return acc;
+        }, []);
     }
 
     /**
@@ -291,8 +290,10 @@ class Filter extends Component {
         const cols = {};
         let total_length = 0;
         for (let ident of identifiers) {
-            console.log(ident, this.props.features[ident]);
-            cols[ident] = this.props.features[ident].toJS();
+            cols[ident] = this.props.data
+                .find(f => f.get("feature") === ident)
+                .get("data")
+                .toJS();
             total_length = cols[ident].length; // immutable js size
         }
 
@@ -319,7 +320,6 @@ class Filter extends Component {
         const masks = {};
 
         for (let tree of subtrees) {
-            console.log("evaluating " + tree);
             try {
                 masks[tree.trim()] = this.evaluateExpression(tree);
             } catch (e) {
@@ -338,36 +338,58 @@ class Filter extends Component {
      *
      */
     exportSelection() {
-        console.log(this.state.expr_input);
-        this.props.selectionCreate(
-            this.state.export_name,
-            this.evaluateExpression(this.state.expr_input)
-        );
+        let selection = this.evaluateExpression(this.state.expr_input).reduce((acc, val, idx) => {
+            if (val) {
+                acc.push(idx);
+            }
+            return acc;
+        }, []);
+        this.props.selectionCreate(selection);
     }
 
     /**
      * Render the expression
      */
     render() {
-        const available_features = this.props.selectedFeatures.toJS();
+        const available_features = this.props.data.map(f => f.get("feature")).toJS();
 
-        const create_heat_row = (expr, coverage) => (
-            <tr key={expr}>
-                <td>{expr}</td>
-                <td>
-                    {this.state.expr_masks[expr] === null ||
-                    this.state.expr_masks[expr] === undefined ? (
-                        this.state.expr_masks[expr] === null ? (
-                            <span>evaluation failed</span>
+        const create_heat_row = (expr, coverage) => {
+            // helper to add the points into a heatmap so as not to overwhelm the sparkline chart
+            const bucket_count = 25;
+            const bucketize = expr => {
+                const bucket_size = Math.ceil(this.state.expr_masks[expr].length / bucket_count);
+
+                return this.state.expr_masks[expr].reduce((acc, val, idx) => {
+                    if (0 === idx % bucket_size) {
+                        acc.push(0);
+                    }
+                    acc[acc.length - 1] += val ? 1 : 0;
+
+                    return acc;
+                }, []);
+            };
+
+            return (
+                <tr key={expr}>
+                    <td style={{ width: "50%" }}>{expr /*.replace(/ /g, '\xa0')*/}</td>
+                    <td style={{ width: "50%" }}>
+                        {this.state.expr_masks[expr] === null ||
+                        this.state.expr_masks[expr] === undefined ? (
+                            this.state.expr_masks[expr] === null ? (
+                                <span>evaluation failed</span>
+                            ) : (
+                                <span>did not evaluate</span>
+                            )
                         ) : (
-                            <span>did not evaluate</span>
-                        )
-                    ) : (
-                        this.state.expr_masks[expr].reduce((a, v) => a + (v ? 1 : 0), 0)
-                    )}
-                </td>
-            </tr>
-        );
+                            <Sparklines height={15} data={bucketize(expr)}>
+                                <SparklinesLine color="blue" />
+                            </Sparklines>
+                        )}
+                    </td>
+                </tr>
+            );
+        };
+        //this.state.expr_masks[expr].reduce((a, v) => a + (v ? 1 : 0), 0)
 
         return (
             <div className="Filter">
@@ -394,7 +416,7 @@ class Filter extends Component {
                     <span className="Filter__expr-msg">{this.state.expr_error}</span>
                 </div>
                 <div className="Filter__heatmap">
-                    <table>
+                    <table style={{ width: "100%" }}>
                         <thead>
                             <tr>
                                 <th>Expression</th>
@@ -406,32 +428,10 @@ class Filter extends Component {
                         </tbody>
                     </table>
                 </div>
-                <div className="Filter__nameinput">
-                    <input
-                        type="text"
-                        value={this.state.export_name}
-                        onChange={this.updateExportName}
-                    />
-                    <button
-                        onClick={this.exportSelection}
-                        disabled={!this.state.expr_valid || this.state.expr_input.trim() === ""}
-                    >
-                        export selection
-                    </button>
-                </div>
             </div>
         );
     }
 }
-
-// validation
-Filter.propTypes = {
-    // reference to current data
-    data: IPropTypes.map.isRequired,
-
-    // selector for columns
-    selectionCreate: PropTypes.func.isRequired
-};
 
 // connect to our store
 const mapStateToProps = state => {
@@ -446,17 +446,25 @@ const mapDispatchToProps = dispatch => ({
 
 export { Filter };
 
-const WrappedFilter = connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(Filter);
-
 export default props => {
     const win = useWindowManager(props, {
-        title: "foo"
+        resizable: false,
+        title: "Filter",
+
+        minSize: {
+            width: 500,
+            height: 100
+        }
     });
 
-    console.log(win);
+    const data = useLiveFeatures();
+    const [selection, createSelection] = useCurrentSelection();
+
+    if (data === null) {
+        return <WindowCircularProgress />;
+    }
+
+    return <Filter data={data} selectionCreate={createSelection} />;
 
     return <Debugger />;
     /*return (

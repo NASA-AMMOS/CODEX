@@ -7,13 +7,9 @@ import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
 import PropTypes from "prop-types";
 import React, { Component, useRef } from "react";
 
-import {
-    openAlgorithm,
-    openDevelopment,
-    openWorkflow,
-} from "actions/ui";
+import { openAlgorithm, openDevelopment, openWorkflow } from "actions/ui";
 import LoadingBar from "components/LoadingBar/LoadingBar";
-import TextField from '@material-ui/core/TextField';
+import TextField from "@material-ui/core/TextField";
 import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as uiTypes from "constants/uiTypes";
@@ -29,9 +25,6 @@ import * as exportActions from "actions/exportActions";
 import * as dataActions from "actions/data";
 
 function SessionBar(props) {
-
-    console.log(props);
-
     return (
         <div className="session-bar">
             <ul className="session-bar-list">
@@ -41,36 +34,28 @@ function SessionBar(props) {
                         multiple={false}
                         name="files[]"
                         type="file"
-                        onChange={e => {props.fileLoad(e.target.files)}}
+                        onChange={e => {
+                            props.fileLoad(e.target.files);
+                        }}
                         accept=".csv,.npy,.h5"
                     />
                 </li>
                 <li>
-                    <Button 
-                        className="session-bar-button"
-                        onClick = {props.requestServerExport}
-                    >
+                    <Button className="session-bar-button" onClick={props.requestServerExport}>
                         Export File
                     </Button>
                 </li>
                 <li>
-                    <Button 
-                        className="session-bar-button"
-                        onClick = {props.openSessionsWindow}
-                    >
+                    <Button className="session-bar-button" onClick={props.openSessionsWindow}>
                         Load Session
                     </Button>
                 </li>
                 <li>
-                    <Button 
+                    <Button
                         className="session-bar-button"
-                        onClick ={
-                        () => {
-                            props.saveSession(
-                                `${props.filename}_${new Date().toISOString()}`
-                            );
-                        }
-                    }
+                        onClick={() => {
+                            props.saveSession(`${props.filename}_${new Date().toISOString()}`);
+                        }}
                     >
                         Save Session
                     </Button>
@@ -150,10 +135,7 @@ function NavigationBar(props) {
                     <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
                     <Dropdown.Menu>
                         {createMenuItem(windowTypes.CLUSTER_ALGORITHM)}
-                        {createMenuItem(
-                            windowTypes.CLASSIFICATION_WINDOW,
-                            "Classification"
-                        )}
+                        {createMenuItem(windowTypes.CLASSIFICATION_WINDOW, "Classification")}
                         {createMenuItem(windowTypes.REGRESSION_WINDOW, "Regression")}
 
                         {createMenuItem(
@@ -166,25 +148,24 @@ function NavigationBar(props) {
                     </Dropdown.Menu>
                 </Dropdown>
 
-                <Dropdown
-                    className="dropdownMain"
-                    autoOpen={false}
-                >
+                <Dropdown className="dropdownMain" autoOpen={false}>
                     <Dropdown.Toggle className="dropdownToggle" title="Development" />
                     <Dropdown.Menu>
-                        <MenuItem
-                            onSelect={() => props.openWindow(windowTypes.DEBUG_WINDOW)}
-                        >
+                        <MenuItem onSelect={() => props.openWindow(windowTypes.DEBUG_WINDOW)}>
                             Open debug window
                         </MenuItem>
                     </Dropdown.Menu>
                 </Dropdown>
-                <Dropdown
-                    className="dropdownMain"
-                    autoOpen={false}
-                >
+                <Dropdown className="dropdownMain" autoOpen={false}>
                     <Dropdown.Toggle className="dropdownToggle" title="Workflows" />
-                    <Dropdown.Menu>{getWorkflowMenuItems()}</Dropdown.Menu>
+                    <Dropdown.Menu>
+                        {createMenuItem(windowTypes.EXPLAIN_THIS_WINDOW, "Explain This")}
+                        {createMenuItem(windowTypes.FILTER_WINDOW, "Filter")}
+                        {createMenuItem(
+                            windowTypes.FIND_MORE_LIKE_THIS_WINDOW,
+                            "Find More Like This"
+                        )}
+                    </Dropdown.Menu>
                 </Dropdown>
 
                 <div className="triTopLeft" />
@@ -213,13 +194,11 @@ function NavigationBar(props) {
     );
 }
 
-function TopBar(props) {   
-
-
+function TopBar(props) {
     return (
         <div className="top-bar">
-            <SessionBar {...props}/>
-            <NavigationBar {...props}/>
+            <SessionBar {...props} />
+            <NavigationBar {...props} />
         </div>
     );
 }

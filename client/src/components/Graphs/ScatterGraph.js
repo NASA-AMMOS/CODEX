@@ -137,7 +137,7 @@ export default props => {
     const [savedSelections, saveCurrentSelection] = useSavedSelections();
     const [globalChartState, setGlobalChartState] = useGlobalChartState();
 
-    const features = usePinnedFeatures();
+    const features = usePinnedFeatures(win);
 
     if (features === null) {
         return <WindowCircularProgress />;

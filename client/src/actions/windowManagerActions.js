@@ -38,6 +38,10 @@ export function updateWindowInfo(id, info) {
     return { type: actionTypes.UPDATE_WINDOW_INFO, id, info };
 }
 
+export function setWindowData(id, data) {
+    return { type: actionTypes.WINDOW_SET_DATA, id, data };
+}
+
 export function moveWindow(id, position) {
     return { type: actionTypes.WINDOW_MOVE, id, position };
 }

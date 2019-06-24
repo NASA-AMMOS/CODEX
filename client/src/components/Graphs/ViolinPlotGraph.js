@@ -83,7 +83,9 @@ function ViolinPlotGraph(props) {
 
     return (
         <GraphWrapper
-            resizeHandler={_ => chartRefs.current.forEach((chartRef) => chartRef.current.resizeHandler())}
+            resizeHandler={_ =>
+                chartRefs.current.forEach((chartRef, idx) => chartRef.current[idx].resizeHandler())
+            }
         >
             <ul className="box-plot-container">
                 {data.map((dataElement, index) => (
@@ -177,7 +179,7 @@ export default props => {
     const [savedSelections, saveCurrentSelection] = useSavedSelections();
     const [globalChartState, setGlobalChartState] = useGlobalChartState();
 
-    const features = usePinnedFeatures();
+    const features = usePinnedFeatures(win);
 
     if (features === null) {
         return <WindowCircularProgress />;

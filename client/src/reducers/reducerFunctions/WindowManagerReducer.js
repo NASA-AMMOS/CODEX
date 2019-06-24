@@ -12,9 +12,9 @@ export default class WindowManagerReducer {
                       .substring(7);
 
         const info = {
+            ...defaultInitialSettings,
             ...action.info,
-            id,
-            ...defaultInitialSettings
+            id
         };
 
         return {
@@ -99,6 +99,14 @@ export default class WindowManagerReducer {
             ...state,
             windows: state.windows.map(win =>
                 win.id === action.id ? Object.assign(win, { isResizable: action.isResizable }) : win
+            )
+        };
+    }
+    static setWindowData(state, action) {
+        return {
+            ...state,
+            windows: state.windows.map(win =>
+                win.id === action.id ? Object.assign(win, { data: action.data }) : win
             )
         };
     }
