@@ -4,25 +4,18 @@ import * as uiTypes from "constants/uiTypes";
 import { createGraph } from "actions/graphActions";
 
 function serializeClientState(state) {
-    let windowManager = state.windowManager;
-    let toRet = {
-        windowManager: {
-            windows: windowManager.windows.map(window => {
-                let serializedWindow = {
-                    id: window.id,
-                    windowType: window.windowType
-                };
-
-                if (window.hasOwnProperty("data")) {
-                    serializedWindow.data = {
-                        selected_features: window.data.toJS()["selected_features"]
-                    };
-                }
-                return serializedWindow;
-            })
-        }
+    return {
+        windows: state.windowManager.windows.map(win => {
+            return {
+                data: win.data,
+                height: win.height,
+                width: win.width,
+                x: win.x,
+                y: win.y,
+                windowType: win.windowType
+            };
+        })
     };
-    return toRet;
 }
 
 export function saveSession(sessionName) {
@@ -51,19 +44,12 @@ export function loadSession(sessionName) {
                 data: data.session_data.features,
                 filename: ""
             });
-            data.session_data.state.windowManager.windows.map(windowData => {
-                if (uiTypes.GRAPH_TYPES.includes(windowData.windowType)) {
-                    return dispatch(
-                        createGraph(windowData.windowType, windowData.data.selected_features)
-                    );
-                }
-                // dispatch({
-                //     type: types.OPEN_NEW_WINDOW,
-                //     info: {
-                //         windowType: windowData.windowType,
-                //         data: windowData.data
-                //     }
-                // });
+
+            data.session_data.state.windows.map(windowData => {
+                dispatch({
+                    type: types.OPEN_NEW_WINDOW,
+                    info: windowData
+                });
             });
         });
     };

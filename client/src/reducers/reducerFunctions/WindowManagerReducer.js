@@ -12,9 +12,9 @@ export default class WindowManagerReducer {
                       .substring(7);
 
         const info = {
+            ...defaultInitialSettings,
             ...action.info,
-            id,
-            ...defaultInitialSettings
+            id
         };
 
         return {
