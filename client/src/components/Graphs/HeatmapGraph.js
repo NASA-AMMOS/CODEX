@@ -72,11 +72,10 @@ function interpolateColors(color1, color2, steps, scaling) {
 function dataRange(data) {
     let min = data[0];
     let max = data[0];
-
-    for (let i = 0; i < data.length; i++) {
-        min = data[i] < min ? data[i] : min;
-        max = data[i] > max ? data[i] : max;
-    }
+    data.forEach(row => {
+        min = row < min ? row : min;
+        max = row > max ? row : max;
+    });
 
     return [min, max];
 }

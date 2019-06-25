@@ -1,5 +1,6 @@
 import "components/Graphs/GraphWrapper.css";
 import React, { useRef, useState, useEffect } from "react";
+import * as utils from "utils/utils";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import * as selectionActions from "actions/selectionActions";
@@ -16,7 +17,7 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
     //ignoring type for now.
     const [shapes, setShapes] = useState([]);
 
-    const createRectangle = (range, color, active) => {
+    const createRectangle = (range, color, active, id) => {
         let opaqueColor = color + "80";
         let rect = {
             type: "rect",
@@ -27,6 +28,7 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
                 width: 0
             },
             visible: active,
+            selectionId:id,
         };
 
         if (type === "vertical") {
@@ -50,14 +52,36 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
         return rect;
     };
 
-    const getRangeFromIndices = indices => {
+    const getRangesFromIndices = indices => {
+
         let min = data[indices[0]];
         let max = data[indices[0]];
         indices.forEach(row => {
             min = data[row] < min ? data[row] : min;
             max = data[row] > max ? data[row] : max;
         });
-        return { min: min, max: max };
+
+        const numBuckets = 10;
+        const divisor = (max - min) / numBuckets;
+
+        function squashDataIntoBuckets() {
+            let ret = new Array(numBuckets).fill(0);
+
+            for (let index of indices) {
+                let value = Math.floor((data[index] - min) / divisor);
+                ret[value]+=1;
+            }
+            return ret;
+        }
+        let buckets = squashDataIntoBuckets();
+        
+        let ranges = [];
+        for(let i = 0; i < buckets.length; i++) {
+            if (buckets[i] > 0) {
+                ranges.push({min:min+divisor*i, max:min+divisor*(i+1)});
+            }
+        }
+        return ranges;
     };
 
     //effect hook that manages the creation of selection rectangles
@@ -68,7 +92,6 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
 
             const mappedSavedSelections = savedSelections.map((selection) => {
                 return {indices:selection.rowIndices, color:selection.color, active:selection.active};
-
             });
 
             let allSelections = [...mappedSavedSelections];
@@ -78,13 +101,16 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
             //check to see if there are any selections to render
             if (allSelections.length != 0) {
                 allSelections.forEach(selection => {
-                    const selectionRange = getRangeFromIndices(selection.indices);
-                    const rect = createRectangle(
-                        selectionRange,
-                        selection.color,
-                        selection.active
-                    );
-                    newShapes.push(rect);
+                    const selectionRanges = getRangesFromIndices(selection.indices);
+                    for (let range of selectionRanges) { 
+                        const rect = createRectangle(
+                            range,
+                            selection.color,
+                            selection.active,
+                            selection.id
+                        );
+                        newShapes.push(rect);
+                    }
                 });
             }
 
