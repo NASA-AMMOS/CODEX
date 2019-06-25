@@ -30,7 +30,7 @@ function generatePlotData(features) {
             yaxis: "y",
             type: "violin",
             visible: true,
-            name: features[i].name,
+            name: features[i].feature,
             box: {
                 visible: true
             }
@@ -74,7 +74,7 @@ function ViolinPlotGraph(props) {
     const featureNames = features.map((feature) => {return feature.feature;})
 
     const chartRefs = useRef(featureNames.map(() => createRef()));
-    
+
     let data = generatePlotData(features);
 
     let layouts = generateLayouts(features);

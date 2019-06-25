@@ -45,7 +45,7 @@ function generateLayouts(features) {
             margin: { l: 50, r: 5, t: 20, b: 20 }, // Axis tick labels are drawn in the margin space
             hovermode: "compare", // Turning off hovermode seems to screw up click handling
             yaxis: {
-                title: features[index][0],
+                title: features[index].feature,
                 fixedrange: true
             },
             shapes: []

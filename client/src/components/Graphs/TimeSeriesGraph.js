@@ -23,7 +23,7 @@ const DEFAULT_POINT_COLOR = "#3386E6";
 function generatePlotData(features) {
     //generate time axis list
     let timeAxis = [];
-    for (let i = 0; i < features[0].length; i++) {
+    for (let i = 0; i < features[0].data.length; i++) {
         timeAxis.push(i);
     }
 
@@ -32,7 +32,7 @@ function generatePlotData(features) {
     for (let i = 0; i < features.length; i++) {
         data[i] = {
             x: timeAxis,
-            y: features[i],
+            y: features[i].data,
             xaxis: "x",
             yaxis: "y1",
             mode: "lines",
@@ -52,7 +52,7 @@ function generateLayouts(features) {
             margin: { l: 40, r: 5, t: 5, b: 0 }, // Axis tick labels are drawn in the margin space
             hovermode: "compare", // Turning off hovermode seems to screw up click handling
             yaxis: {
-                title: features[index][0],
+                title: features[index].feature,
                 fixedrange: true
             }
         };
@@ -73,9 +73,7 @@ function generateLayouts(features) {
 }
 
 function TimeSeriesGraph(props) {
-    //const features = utils.unzip(props.data.get("data"));
-    const features = props.data.map(f => f.get("data")).toJS();
-    
+    const features = props.data.toJS();
     const featureNames = features.map((feature) => {return feature.feature;})
 
     const chartRefs = useRef(featureNames.map(() => createRef()));

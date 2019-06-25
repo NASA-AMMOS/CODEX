@@ -70,6 +70,7 @@ function BoxPlotGraph(props) {
     const featureNames = features.map((feature) => {return feature.feature;})
 
     const chartRefs = useRef(featureNames.map(() => createRef()));
+    console.log(chartRefs)
 
     let data = generatePlotData(features);
 
@@ -86,7 +87,7 @@ function BoxPlotGraph(props) {
                     <BoxPlotSubGraph
                         key={index}
                         data={dataElement}
-                        chart={chartRefs[index]}
+                        chart={chartRefs.current[index]}
                         layout={layouts[index]}
                         globalChartState={props.globalChartState}
                         setCurrentSelection={props.setCurrentSelection}
