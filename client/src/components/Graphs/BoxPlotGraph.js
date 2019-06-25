@@ -1,6 +1,6 @@
 import "components/Graphs/BoxPlotGraph.css";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, createRef } from "react";
 import { bindActionCreators } from "redux";
 import * as selectionActions from "actions/selectionActions";
 import { connect } from "react-redux";
@@ -67,8 +67,9 @@ function BoxPlotGraph(props) {
     //const features = utils.unzip(props.data.get("data"));
     const features = props.data.toJS();
 
-    const chartRefs = useRef(null);
-    chartRefs.current = features;
+    const featureNames = features.map((feature) => {return feature.feature;})
+
+    const chartRefs = useRef(featureNames.map(() => createRef()));
 
     let data = generatePlotData(features);
 
@@ -77,7 +78,7 @@ function BoxPlotGraph(props) {
     return (
         <GraphWrapper
             resizeHandler={_ =>
-                chartRefs.current.forEach((chartRef, idx) => chartRef.current[idx].resizeHandler())
+                chartRefs.current.forEach((chartRef) => chartRef.current.resizeHandler())
             }
         >
             <ul className="box-plot-container">

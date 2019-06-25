@@ -1,6 +1,6 @@
 import "components/Graphs/TimeSeriesGraph.css";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, createRef} from "react";
 import { bindActionCreators } from "redux";
 import * as selectionActions from "actions/selectionActions";
 import { connect } from "react-redux";
@@ -75,9 +75,10 @@ function generateLayouts(features) {
 function TimeSeriesGraph(props) {
     //const features = utils.unzip(props.data.get("data"));
     const features = props.data.map(f => f.get("data")).toJS();
+    
+    const featureNames = features.map((feature) => {return feature.feature;})
 
-    const chartRefs = useRef(null);
-    chartRefs.current = features;
+    const chartRefs = useRef(featureNames.map(() => createRef()));
 
     let data = generatePlotData(features);
 
@@ -86,7 +87,7 @@ function TimeSeriesGraph(props) {
     return (
         <GraphWrapper
             resizeHandler={_ =>
-                chartRefs.current.forEach((chartRef, idx) => chartRef.current[idx].resizeHandler())
+                chartRefs.current.forEach((chartRef) => chartRef.current.resizeHandler())
             }
         >
             <ul className="time-series-plot-container">

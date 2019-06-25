@@ -1,6 +1,6 @@
 import "components/Graphs/HistogramGraph.css";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, createRef} from "react";
 import { bindActionCreators } from "redux";
 import * as selectionActions from "actions/selectionActions";
 import { connect } from "react-redux";
@@ -58,10 +58,11 @@ function generateLayouts(features) {
 }
 
 function HistogramGraph(props) {
-    const features = props.data.toJS();
+    const features = props.data.toJS(); 
     
-    const chartRefs = useRef(null);
-    chartRefs.current = features;
+    const featureNames = features.map((feature) => {return feature.feature;})
+
+    const chartRefs = useRef(featureNames.map(() => createRef()));
 
     let data = generatePlotData(features);
 
@@ -69,7 +70,9 @@ function HistogramGraph(props) {
 
     return (
         <GraphWrapper
-            resizeHandler={_ => chartRefs.current.forEach((chartRef) => chartRef.current.resizeHandler())}
+            resizeHandler={_ =>
+                chartRefs.current.forEach((chartRef) => chartRef.current.resizeHandler())
+            }
         >
             <ul className="histogram-graph-container">
                 {data.map((dataElement, index) => (

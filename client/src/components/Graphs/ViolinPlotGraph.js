@@ -1,6 +1,6 @@
 import "components/Graphs/ViolinPlotGraph.css";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, createRef} from "react";
 import { bindActionCreators } from "redux";
 import * as selectionActions from "actions/selectionActions";
 import { connect } from "react-redux";
@@ -71,20 +71,18 @@ function ViolinPlotGraph(props) {
     //const features = utils.unzip(props.data.get("data"));
 
     const features = props.data.toJS();
+    const featureNames = features.map((feature) => {return feature.feature;})
 
-    const chartRefs = useRef(null);
-    chartRefs.current = features;
-
+    const chartRefs = useRef(featureNames.map(() => createRef()));
+    
     let data = generatePlotData(features);
 
     let layouts = generateLayouts(features);
 
-    console.log(chartRefs.current[0])
-
     return (
         <GraphWrapper
             resizeHandler={_ =>
-                chartRefs.current.forEach((chartRef, idx) => chartRef.current[idx].resizeHandler())
+                chartRefs.current.forEach((chartRef) => chartRef.current.resizeHandler())
             }
         >
             <ul className="box-plot-container">
