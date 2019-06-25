@@ -54,14 +54,14 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
 
     const getRangesFromIndices = indices => {
 
-        let min = data[indices[0]];
-        let max = data[indices[0]];
-        indices.forEach(row => {
-            min = data[row] < min ? data[row] : min;
-            max = data[row] > max ? data[row] : max;
+        let min = data[0];
+        let max = data[0];
+        data.forEach(row => {
+            min = row < min ? row : min;
+            max = row > max ? row : max;
         });
 
-        const numBuckets = 10;
+        const numBuckets = 50;
         const divisor = (max - min) / numBuckets;
 
         function squashDataIntoBuckets() {
@@ -81,6 +81,7 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
                 ranges.push({min:min+divisor*i, max:min+divisor*(i+1)});
             }
         }
+        //todo squash adjacent buckets so there is no white line
         return ranges;
     };
 
