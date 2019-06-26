@@ -23,7 +23,6 @@ function getSelectionIndices(selectionArray, savedSelections) {
         }
         indicesList.push(savedSelections[selectionIndex].rowIndices);
     }
-
     return indicesList;
 }
 

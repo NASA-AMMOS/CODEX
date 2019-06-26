@@ -210,16 +210,25 @@ def create_data_from_indices(data_selections, data):
 
     #this is a single dimensional array that contains
     #numbers corrresponding to the data's class
-    codex_system.codex_log(str(np.shape(data)))
-    label_mask = np.zeros(np.shape(data)[0])
+    codex_system.codex_log(str(data_selections))
 
-    #go through the input selections 
-    for class_num in range(len(data_selections)):
-        for index in data_selections[class_num]:
-            label_mask[index] = class_num
+    num_selections = 0
+    for arr in data_selections:
+        num_selections+=len(arr)
+
+    label_mask = np.empty(num_selections)
+    trimmed_data = np.empty((num_selections, np.shape(data)[1]))
+
+    index = 0
+
+    for selection_array_index,class_selection in enumerate(data_selections):
+        for data_index in class_selection:
+            label_mask[index] = selection_array_index #this is the label
+            trimmed_data[index] = data[data_index]
+            index+=1
 
     #return the mask for the data nexto the data
-    return data, label_mask
+    return trimmed_data, label_mask
 
 """
     Convers a label mask [1,2,1,1,3] for data to an array
@@ -227,11 +236,10 @@ def create_data_from_indices(data_selections, data):
 """
 def convert_labels_to_class_indices(label_mask, num_classes):
     indices = []
-    for i in range(num_classes):
+    for i in range(num_classes + 1):
         indices.append([])
 
     for i, class_value in enumerate(label_mask):
-        codex_system.codex_log(str(class_value))
         indices[int(np.round(class_value))].append(i)
 
     return indices
@@ -244,6 +252,7 @@ def convert_labels_to_class_indices(label_mask, num_classes):
 """
 def train_fmlt_model(data):
     #data is of the format (data,labels)
+    codex_system.codex_log(str(data[1]))
 
     #construct the grid search parameter grid
     # Number of trees in random forest
@@ -309,7 +318,6 @@ def find_more_like_this(inputHash, featureList, dataSelections, result):
     
     #first create a mask from the dataSelections indices
     formatted_data = create_data_from_indices(dataSelections, data)
-    
     #run the trian model script
     clf = train_fmlt_model(formatted_data)
     
