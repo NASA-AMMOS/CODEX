@@ -8,31 +8,24 @@ import * as utils from "utils/utils";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Button from "@material-ui/core/Button";
 
-
 /*
     Funciton that gets all of indices in the given selections
 */    
 function getSelectionIndices(selectionArray, savedSelections) {
     const indicesSet = new Set();
-    for (let value of selectionArray) {
+    let indicesList = [];
+
+    for(let selectionName of selectionArray) {
         let selectionIndex = -1;
         for (const[key, entry] of Object.entries(savedSelections)) {
-            if (entry.id === value)
+            if (entry.id === selectionName)
                 selectionIndex = key;
         }
-
-        savedSelections[selectionIndex].rowIndices.forEach(
-            (index) => {
-                indicesSet.add(index);
-            }
-        );
+        indicesList.push(savedSelections[selectionIndex].rowIndices);
     }
 
-    return Array.from(indicesSet);
-
+    return indicesList;
 }
-
-
 
 /*
     Function that creates the json object for requesting
@@ -180,10 +173,14 @@ function FindMoreLikeThis(props) {
 
             const requestObject = createFMLTRequest(props.filename, convertedSelections, props.featureNames);
 
+            //makes a fmlt request
             const request = utils.makeSimpleRequest(requestObject);
+            //resolves the fmlt request
             request.req.then(data => {
                 //add a saved selections called fmlt_output with the returned data
-                props.saveSelection("output"+(Math.random()*10000), data.like_this)
+                data.like_this.forEach((indices) => {
+                    props.saveSelection("output"+(Math.random()*10000), indices)
+                });
             }); 
 
             //cleanup function

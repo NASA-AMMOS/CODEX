@@ -21,7 +21,6 @@ from sklearn.neighbors import kneighbors_graph
 from sklearn import cluster
 
 
-
 # Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, CODEX_ROOT + '/api/sub/')
@@ -36,6 +35,7 @@ import codex_system
 import codex_labels
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import RandomizedSearchCV
 
 def get_proportion_tree_sums(clf, X_test, y_test):
     """
@@ -201,6 +201,95 @@ def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
 
     return result
 
+"""
+    Function that takes the dataSelections and the actual feature data 
+    and turns the selection data into a mask form and packages it with
+    the feature data for training
+"""
+def create_data_from_indices(data_selections, data):
+
+    #this is a single dimensional array that contains
+    #numbers corrresponding to the data's class
+    codex_system.codex_log(str(np.shape(data)))
+    label_mask = np.zeros(np.shape(data)[0])
+
+    #go through the input selections 
+    for class_num in range(len(data_selections)):
+        for index in data_selections[class_num]:
+            label_mask[index] = class_num
+
+    #return the mask for the data nexto the data
+    return data, label_mask
+
+"""
+    Convers a label mask [1,2,1,1,3] for data to an array
+    of class indices arrays [[0,1,2,3,4], [5,6,7,9,11], [8,10,12,13,14]]
+"""
+def convert_labels_to_class_indices(label_mask, num_classes):
+    indices = []
+    for i in range(num_classes):
+        indices.append([])
+
+    for i, class_value in enumerate(label_mask):
+        codex_system.codex_log(str(class_value))
+        indices[int(np.round(class_value))].append(i)
+
+    return indices
+
+"""
+    This function takes in the data for the fmlt model and then
+    trains a random forest on it. 
+    It perfomrms k fold cross validation and hyper parameter tuning 
+    on the data as well to minimize overfitting. 
+"""
+def train_fmlt_model(data):
+    #data is of the format (data,labels)
+
+    #construct the grid search parameter grid
+    # Number of trees in random forest
+    n_estimators = [int(x) for x in np.linspace(start = 5, stop = 50, num = 10)]
+    # Number of features to consider at every split
+    max_features = ['auto', 'sqrt']
+    # Maximum number of levels in tree
+    max_depth = [int(x) for x in np.linspace(2, 20, num = 10)]
+    max_depth.append(None)
+    # Minimum number of samples required to split a node
+    min_samples_split = [2, 5, 10]
+    # Minimum number of samples required at each leaf node
+    min_samples_leaf = [1, 2, 4]
+    # Method of selecting samples for training each tree
+    bootstrap = [True, False]
+    # Create the random grid
+    random_grid = {'n_estimators': n_estimators,
+                   'max_features': max_features,
+                   'max_depth': max_depth,
+                   'min_samples_split': min_samples_split,
+                   'min_samples_leaf': min_samples_leaf,
+                   'bootstrap': bootstrap}
+
+    rf = RandomForestClassifier()
+
+    rf_random = RandomizedSearchCV(estimator = rf,
+                                param_distributions = random_grid,
+                                n_iter = 100, cv = 3,
+                                verbose=2,
+                                random_state=42,
+                                n_jobs = -1)
+
+    train_data, train_labels = data
+
+    rf_random.fit(train_data, train_labels)
+
+    return rf_random
+
+"""
+    This function handles getting the data for, trianing, and evaluating
+    the find more like this model
+
+    dataSelections is assumed to be an all encompassing set from the front end
+    where every data value has a class label. if this is not done explicitly by the user it 
+    should be done automatically somewhere along the line
+"""
 def find_more_like_this(inputHash, featureList, dataSelections, result):
     startTime = time.time()
     result = {"WARNING":None}
@@ -214,37 +303,27 @@ def find_more_like_this(inputHash, featureList, dataSelections, result):
     if data is None:
         return None
 
-    #handle constructing the dataset here from dataSelections
+    #data selections is two dimensional with the rows corresponding to 
+    #independent groups and the columns the number of selections in that given selection
+    # data = [[13,14,16,17], [19,20,21,22]]
+    
     #first create a mask from the dataSelections indices
-    like_this_mask = np.zeros(np.shape(data)[0])
-    for index in dataSelections:
-        like_this_mask[index] = 1
+    formatted_data = create_data_from_indices(dataSelections, data)
+    
+    #run the trian model script
+    clf = train_fmlt_model(formatted_data)
+    
+    #evaluate the trained model on the whole dataset
+    output_predictions_mask = clf.predict(data)
 
-    #generate a smaller sample of data
-    indices_list = [i for i in np.arange(np.shape(data)[0]) if like_this_mask[i] == 0]
-    indices_list = np.random.choice(indices_list, size=len(dataSelections), replace=False) 
-    codex_system.codex_log(str(indices_list))
-
-    sample_mask = [1 for i in dataSelections] + [0 for i in indices_list]
-    sample_data = [data[i] for i in dataSelections] + [data[i] for i in indices_list]
-
-    #train on sample
-    clf = RandomForestClassifier(n_estimators=5, max_depth=2,random_state=0)
-    clf.fit(sample_data, sample_mask)
-
-    #make prediction on whole set
-    output_prediction_mask = clf.predict(data)
-
-    codex_system.codex_log(str(output_prediction_mask))
     #convert mask to selection form so the front
-    output_selection_array = []
-    for i, value in enumerate(output_prediction_mask):
-        if value > 0.5: 
-            output_selection_array.append(i)
+    output_selection_array = convert_labels_to_class_indices(output_predictions_mask, np.shape(dataSelections)[0])
+    
     #end can create a selection corresponding to it
     result["like_this"] = output_selection_array
 
     return result
+
 
 if __name__ == "__main__":
 
