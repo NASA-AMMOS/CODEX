@@ -79,7 +79,7 @@ export function getWindowContent(win) {
         case workflowTypes.EXPLAIN_THIS_WINDOW:
             return <ExplainThis winId={win.id} />;
         case workflowTypes.FIND_MORE_LIKE_THIS_WINDOW:
-            return <FindMoreLikeThis winId={win.id} />
+            return <FindMoreLikeThis winId={win.id} />;
         case workflowTypes.FILTER_WINDOW:
             return <Filter />;
         case windowTypes.DEBUG_WINDOW:

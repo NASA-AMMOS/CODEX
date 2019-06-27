@@ -1,9 +1,9 @@
 import Immutable from "immutable";
 
-export const windowManagerState = {
+export const windowManagerState = Immutable.fromJS({
     windows: [],
     tileActionPending: false
-};
+});
 
 export const windowModel = {
     id: null,

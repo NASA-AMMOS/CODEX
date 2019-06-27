@@ -16,98 +16,106 @@ export default class WindowManagerReducer {
             ...action.info,
             id
         };
-
-        return {
-            ...state,
-            windows: [...state.windows, info]
-        };
+        return state.set("windows", state.get("windows").concat([info]));
     }
 
     static closeWindow(state, action) {
-        return { ...state, windows: state.windows.filter(f => f.id !== action.id) };
+        return state.set("windows", state.get("windows").filter(f => f.id !== action.id));
     }
 
     static closeAllWindows(state, action) {
-        return { ...state, windows: [] };
+        return state.set("windows", []);
     }
 
     static setWindowTileActionPending(state, action) {
-        return { ...state, tileActionPending: action.isPending };
+        return state.set("tileActionPending", action.isPending);
     }
 
     static updateWindows(state, action) {
-        return { ...state, windows: action.windows };
+        return state.set("windows", action.windows);
     }
 
     static toggleMinimizeWindow(state, action) {
-        return {
-            ...state,
-            windows: state.windows.map(win =>
-                win.id === action.id
-                    ? Object.assign(win, { minimized: !win.minimized, hover: false })
-                    : win
-            )
-        };
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.id === action.id
+                        ? Object.assign(win, { minimized: !win.minimized, hover: false })
+                        : win
+                )
+        );
     }
 
     static setWindowHover(state, action) {
-        return {
-            ...state,
-            windows: state.windows.map(win =>
-                win.id === action.id ? Object.assign(win, { hover: action.hover }) : win
-            )
-        };
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.id === action.id ? Object.assign(win, { hover: action.hover }) : win
+                )
+        );
     }
 
     static updateWindowInfo(state, action) {
-        return {
-            ...state,
-            windows: state.windows.map(win =>
-                win.id === action.id ? Object.assign(win, action.info) : win
-            )
-        };
+        return state.set(
+            "windows",
+            state.get("windows").map(win => {
+                return { ...win, ...action.info };
+            })
+        );
     }
 
     static resizeWindow(state, action) {
-        return {
-            ...state,
-            windows: state.windows.map(win =>
-                win.id === action.id ? Object.assign(win, action.size) : win
-            )
-        };
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win => (win.id === action.id ? Object.assign(win, action.size) : win))
+        );
     }
 
     static moveWindow(state, action) {
-        return {
-            ...state,
-            windows: state.windows.map(win =>
-                win.id === action.id ? Object.assign(win, action.position) : win
-            )
-        };
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win => (win.id === action.id ? Object.assign(win, action.position) : win))
+        );
     }
 
     static setWindowTitle(state, action) {
-        return {
-            ...state,
-            windows: state.windows.map(win =>
-                win.id === action.id ? Object.assign(win, { title: action.title }) : win
-            )
-        };
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.id === action.id ? Object.assign(win, { title: action.title }) : win
+                )
+        );
     }
     static setWindowResizable(state, action) {
-        return {
-            ...state,
-            windows: state.windows.map(win =>
-                win.id === action.id ? Object.assign(win, { isResizable: action.isResizable }) : win
-            )
-        };
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.id === action.id
+                        ? Object.assign(win, { isResizable: action.isResizable })
+                        : win
+                )
+        );
     }
     static setWindowData(state, action) {
-        return {
-            ...state,
-            windows: state.windows.map(win =>
-                win.id === action.id ? Object.assign(win, { data: action.data }) : win
-            )
-        };
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.id === action.id ? Object.assign(win, { data: action.data }) : win
+                )
+        );
     }
 }
