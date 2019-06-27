@@ -67,7 +67,6 @@ export default class WindowManagerReducer {
     }
 
     static resizeWindow(state, action) {
-        console.log(action);
         return state.set(
             "windows",
             state

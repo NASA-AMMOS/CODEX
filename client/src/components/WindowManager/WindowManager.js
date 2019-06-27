@@ -178,7 +178,6 @@ function WindowManager(props) {
     const windows = props.windows
         .filter(win => !win.get("minimizedOnly"))
         .map((win, idx) => {
-            console.log(win.toJS());
             const initialPos =
                 win.get("x") && win.get("y")
                     ? { x: win.get("x"), y: win.get("y") }
