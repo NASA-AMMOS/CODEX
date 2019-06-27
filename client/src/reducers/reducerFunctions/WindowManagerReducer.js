@@ -62,9 +62,9 @@ export default class WindowManagerReducer {
     static updateWindowInfo(state, action) {
         return state.set(
             "windows",
-            state.get("windows").map(win => {
-                return { ...win, ...action.info };
-            })
+            state
+                .get("windows")
+                .map(win => (win.id === action.id ? Object.assign(win, action.info) : win))
         );
     }
 
