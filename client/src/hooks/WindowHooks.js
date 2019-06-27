@@ -16,33 +16,33 @@ const wrapWindow = (win, dispatch) => {
     // instead of checking that they haven't already set a value
     return {
         resizeX: width => {
-            if (win.width !== width) {
-                dispatch(wmActions.resizeWindow(win.id, { width }));
+            if (win.get("width") !== width) {
+                dispatch(wmActions.resizeWindow(win.get("id"), { width }));
             }
         },
         resizeY: height => {
-            if (win.height !== height) {
-                dispatch(wmActions.resizeWindow(win.id, { height }));
+            if (win.get("height") !== height) {
+                dispatch(wmActions.resizeWindow(win.get("id"), { height }));
             }
         },
         resize: (width, height) => {
-            if (win.width !== width || win.height !== height) {
-                dispatch(wmActions.resizeWindow(win.id, { width, height }));
+            if (win.get("width") !== width || win.get("height") !== height) {
+                dispatch(wmActions.resizeWindow(win.get("id"), { width, height }));
             }
         },
         setTitle: title => {
-            if (win.title !== title) {
-                dispatch(wmActions.setWindowTitle(win.id, title));
+            if (win.get("title") !== title) {
+                dispatch(wmActions.setWindowTitle(win.get("id"), title));
             }
         },
         setResizable: isResizable => {
-            if (win.isResizable === isResizable) {
-                dispatch(wmActions.setWindowResizable(win.id, isResizable));
+            if (win.get("isResizable") === isResizable) {
+                dispatch(wmActions.setWindowResizable(win.get("id"), isResizable));
             }
         },
         setData: data => {
-            if (data !== win.data) {
-                dispatch(wmActions.setWindowData(win.id, data));
+            if (data !== win.get("data")) {
+                dispatch(wmActions.setWindowData(win.get("id"), data));
             }
         },
         ...win
@@ -68,7 +68,7 @@ export function useWindowManager(props, initialSettings) {
     let window_obj = {};
 
     if (props.__wm_parent_id) {
-        window_obj = domain.get("windows").filter(win => win.id === props.__wm_parent_id)[0];
+        window_obj = domain.get("windows").filter(win => win.get("id") === props.__wm_parent_id)[0];
         window_obj = wrapWindow(window_obj, dispatch);
     } else {
         window_obj = wrapDummy();

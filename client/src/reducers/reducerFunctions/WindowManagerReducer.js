@@ -11,16 +11,16 @@ export default class WindowManagerReducer {
                       .toString(36)
                       .substring(7);
 
-        const info = {
+        const info = Immutable.fromJS({
             ...defaultInitialSettings,
             ...action.info,
             id
-        };
+        });
         return state.set("windows", state.get("windows").concat([info]));
     }
 
     static closeWindow(state, action) {
-        return state.set("windows", state.get("windows").filter(f => f.id !== action.id));
+        return state.set("windows", state.get("windows").filter(f => f.get("id") !== action.id));
     }
 
     static closeAllWindows(state, action) {
@@ -41,8 +41,8 @@ export default class WindowManagerReducer {
             state
                 .get("windows")
                 .map(win =>
-                    win.id === action.id
-                        ? Object.assign(win, { minimized: !win.minimized, hover: false })
+                    win.get("id") === action.id
+                        ? win.set("minimized", !win.get("minimized")).set("hover", false)
                         : win
                 )
         );
@@ -53,9 +53,7 @@ export default class WindowManagerReducer {
             "windows",
             state
                 .get("windows")
-                .map(win =>
-                    win.id === action.id ? Object.assign(win, { hover: action.hover }) : win
-                )
+                .map(win => (win.get("id") === action.id ? win.set("hover", action.hover) : win))
         );
     }
 
@@ -64,16 +62,17 @@ export default class WindowManagerReducer {
             "windows",
             state
                 .get("windows")
-                .map(win => (win.id === action.id ? Object.assign(win, action.info) : win))
+                .map(win => (win.get("id") === action.id ? win.merge(action.info) : win))
         );
     }
 
     static resizeWindow(state, action) {
+        console.log(action);
         return state.set(
             "windows",
             state
                 .get("windows")
-                .map(win => (win.id === action.id ? Object.assign(win, action.size) : win))
+                .map(win => (win.get("id") === action.id ? win.merge(action.size) : win))
         );
     }
 
@@ -82,7 +81,7 @@ export default class WindowManagerReducer {
             "windows",
             state
                 .get("windows")
-                .map(win => (win.id === action.id ? Object.assign(win, action.position) : win))
+                .map(win => (win.get("id") === action.id ? win.merge(action.position) : win))
         );
     }
 
@@ -91,9 +90,7 @@ export default class WindowManagerReducer {
             "windows",
             state
                 .get("windows")
-                .map(win =>
-                    win.id === action.id ? Object.assign(win, { title: action.title }) : win
-                )
+                .map(win => (win.get("id") === action.id ? win.set("title", action.title) : win))
         );
     }
     static setWindowResizable(state, action) {
@@ -102,9 +99,7 @@ export default class WindowManagerReducer {
             state
                 .get("windows")
                 .map(win =>
-                    win.id === action.id
-                        ? Object.assign(win, { isResizable: action.isResizable })
-                        : win
+                    win.get("id") === action.id ? win.set("isResizable", action.isResizable) : win
                 )
         );
     }
@@ -113,9 +108,7 @@ export default class WindowManagerReducer {
             "windows",
             state
                 .get("windows")
-                .map(win =>
-                    win.id === action.id ? Object.assign(win, { data: action.data }) : win
-                )
+                .map(win => (win.get("id") === action.id ? win.set("data", action.data) : win))
         );
     }
 }

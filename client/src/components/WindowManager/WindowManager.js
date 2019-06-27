@@ -176,24 +176,25 @@ function WindowManager(props) {
     );
 
     const windows = props.windows
-        .filter(win => !win.minimizedOnly)
+        .filter(win => !win.get("minimizedOnly"))
         .map((win, idx) => {
+            console.log(win.toJS());
             const initialPos =
-                win.x && win.y
-                    ? { x: win.x, y: win.y }
-                    : getNewWindowPosition(props, refs, win.width, win.height);
+                win.get("x") && win.get("y")
+                    ? { x: win.get("x"), y: win.get("y") }
+                    : getNewWindowPosition(props, refs, win.get("width"), win.get("height"));
 
             const settings = {
-                title: win.title,
+                title: win.get("title"),
                 children: null,
-                isResizable: win.resizeable,
+                isResizable: win.get("resizeable"),
                 isDraggable: true,
                 initialPosition: initialPos,
                 restrictToParentDiv: true,
-                initialSize: { width: win.width, height: win.height },
-                minSize: win.minSize || { width: 100, height: 100 },
-                width: win.width,
-                height: win.height
+                initialSize: { width: win.get("width"), height: win.get("height") },
+                minSize: win.get("minSize") || { width: 100, height: 100 },
+                width: win.get("width"),
+                height: win.get("height")
             };
 
             // This is a bit of an odd return fragment, but we want to avoid re-rendering the window's content.
@@ -205,25 +206,28 @@ function WindowManager(props) {
 
             return (
                 <Cristal
-                    key={win.id}
+                    key={win.get("id")}
                     className="newWindow"
-                    style={win.minimized && !win.hover ? hiddenStyle : null}
-                    onClose={_ => props.closeWindow(win.id)}
-                    ref={r => (refs.current[win.id] = r)}
-                    onMinimize={_ => props.toggleMinimizeWindow(win.id)}
-                    hideHeader={win.minimized}
+                    style={win.minimized && !win.get("hover") ? hiddenStyle : null}
+                    onClose={_ => props.closeWindow(win.get("id"))}
+                    ref={r => (refs.current[win.get("id")] = r)}
+                    onMinimize={_ => props.toggleMinimizeWindow(win.get("id"))}
+                    hideHeader={win.get("minimized")}
                     onResizeEnd={state =>
-                        props.resizeWindow(win.id, { width: state.width, height: state.height })
+                        props.resizeWindow(win.get("id"), {
+                            width: state.width,
+                            height: state.height
+                        })
                     }
-                    onMoveEnd={state => props.moveWindow(win.id, { x: state.x, y: state.y })}
-                    isActive={activeWindow === win.id}
-                    onClick={_ => setActiveWindow(win.id)}
+                    onMoveEnd={state => props.moveWindow(win.get("id"), { x: state.x, y: state.y })}
+                    isActive={activeWindow === win.get("id")}
+                    onClick={_ => setActiveWindow(win.get("id"))}
                     {...settings}
                 >
                     <div className="windowBody">
                         <WindowErrorBoundary verbose={true}>
                             {React.cloneElement(windowContentFunctions.getWindowContent(win), {
-                                __wm_parent_id: win.id
+                                __wm_parent_id: win.get("id")
                             })}
                         </WindowErrorBoundary>
                     </div>
@@ -242,7 +246,7 @@ function WindowManager(props) {
 function mapStateToProps(state) {
     return {
         windows: state.windowManager.get("windows"),
-        tileActionPending: state.windowManager.tileActionPending
+        tileActionPending: state.windowManager.get("tileActionPending")
     };
 }
 

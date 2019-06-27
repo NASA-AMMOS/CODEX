@@ -27,59 +27,72 @@ import * as windowTypes from "constants/windowTypes";
 import Debugger from "components/Debug/Debug";
 
 export function getWindowContent(win) {
-    switch (win.windowType) {
+    switch (win.get("windowType")) {
         case uiTypes.SCATTER_GRAPH:
-            return <ScatterGraph data={win.data} />;
+            return <ScatterGraph data={win.get("data")} />;
         case uiTypes.CONTOUR_GRAPH:
-            return <ContourGraph data={win.data} />;
+            return <ContourGraph data={win.get("data")} />;
         case uiTypes.TIME_SERIES_GRAPH:
-            return <TimeSeriesGraph data={win.data} />;
+            return <TimeSeriesGraph data={win.get("data")} />;
         case uiTypes.HEATMAP_GRAPH:
-            return <HeatmapGraph data={win.data} />;
+            return <HeatmapGraph data={win.get("data")} />;
         case uiTypes.BOX_PLOT_GRAPH:
-            return <BoxPlotGraph data={win.data} />;
+            return <BoxPlotGraph data={win.get("data")} />;
         case uiTypes.VIOLIN_PLOT_GRAPH:
-            return <ViolinPlotGraph data={win.data} />;
+            return <ViolinPlotGraph data={win.get("data")} />;
         case uiTypes.HISTOGRAM_GRAPH:
-            return <HistogramGraph data={win.data} />;
+            return <HistogramGraph data={win.get("data")} />;
         case algorithmTypes.CLUSTER_ALGORITHM:
             return (
                 <ClusterAlgorithm
-                    filename={win.filename}
-                    winId={win.id}
-                    selectedFeatures={win.selectedFeatures}
+                    filename={win.get("filename")}
+                    winId={win.get("id")}
+                    selectedFeatures={win.get("selectedFeatures")}
                 />
             );
         case classificationTypes.CLASSIFICATION_WINDOW:
             return (
                 <ClassificationOverview
-                    selectedFeatures={win.selectedFeatures}
-                    selectedFeatureLength={win.selectedFeatureLength}
-                    winId={win.id}
+                    selectedFeatures={win.get("selectedFeatures")}
+                    selectedFeatureLength={win.get("selectedFeatureLength")}
+                    winId={win.get("id")}
                 />
             );
         case classificationTypes.CLASSIFICATION_RESULTS_WINDOW:
-            return <ClassificationResults requests={win.requests} runParams={win.runParams} />;
+            return (
+                <ClassificationResults
+                    requests={win.get("requests")}
+                    runParams={win.get("runParams")}
+                />
+            );
         case regressionTypes.REGRESSION_WINDOW:
             return (
                 <RegressionsOverview
-                    selectedFeatures={win.selectedFeatures}
-                    selectedFeatureLength={win.selectedFeatureLength}
-                    winId={win.id}
+                    selectedFeatures={win.get("selectedFeatures")}
+                    selectedFeatureLength={win.get("selectedFeatureLength")}
+                    winId={win.get("id")}
                 />
             );
         case regressionTypes.REGRESSION_RESULTS_WINDOW:
-            return <RegressionResults requests={win.requests} runParams={win.runParams} />;
+            return (
+                <RegressionResults
+                    requests={win.get("requests")}
+                    runParams={win.get("runParams")}
+                />
+            );
         case uiTypes.SESSIONS_WINDOW:
             return <Sessions />;
         case dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW:
             return (
-                <DimensionalityReductionResults requests={win.requests} runParams={win.runParams} />
+                <DimensionalityReductionResults
+                    requests={win.get("requests")}
+                    runParams={win.get("runParams")}
+                />
             );
         case workflowTypes.EXPLAIN_THIS_WINDOW:
-            return <ExplainThis winId={win.id} />;
+            return <ExplainThis winId={win.get("id")} />;
         case workflowTypes.FIND_MORE_LIKE_THIS_WINDOW:
-            return <FindMoreLikeThis winId={win.id} />;
+            return <FindMoreLikeThis winId={win.get("id")} />;
         case workflowTypes.FILTER_WINDOW:
             return <Filter />;
         case windowTypes.DEBUG_WINDOW:
@@ -88,7 +101,7 @@ export function getWindowContent(win) {
 }
 
 export function previewAllowed(win) {
-    switch (win.windowType) {
+    switch (win.get("windowType")) {
         case algorithmTypes.CLUSTER_ALGORITHM:
         case algorithmTypes.ALGO_LOADING_WINDOW:
             return false;
