@@ -195,7 +195,7 @@ export function usePinnedFeatures(windowHandle = undefined) {
  */
 export function useNextColorIndex() {
 
-    const nextColorIndex = useSelector(state => state.nextColorIndex);
+    const nextColorIndex = useSelector(state => {return state.selections.nextColorIndex;});
 
     return  nextColorIndex;
 }

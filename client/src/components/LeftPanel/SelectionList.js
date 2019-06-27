@@ -29,8 +29,7 @@ function createSelection(
                     .substring(7)
             }
             onClick={_ => {
-                    props.toggleSelectionActive(selection.id); 
-                    console.log(props.savedSelections)
+                    props.toggleSelectionActive(selection.id);
                     }
                 }
             onContextMenu={e => {

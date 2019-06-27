@@ -236,7 +236,7 @@ def create_data_from_indices(data_selections, data):
 """
 def convert_labels_to_class_indices(label_mask, num_classes):
     indices = []
-    for i in range(num_classes + 1):
+    for i in range(num_classes):
         indices.append([])
 
     for i, class_value in enumerate(label_mask):
@@ -312,12 +312,11 @@ def find_more_like_this(inputHash, featureList, dataSelections, result):
     if data is None:
         return None
 
-    #data selections is two dimensional with the rows corresponding to 
-    #independent groups and the columns the number of selections in that given selection
-    # data = [[13,14,16,17], [19,20,21,22]]
-    
+    #data selections is a dictionary with keys corresponding to class names
+    #and values corresponding to indices
+    dataSelectionsValues = list(dataSelections.values())
     #first create a mask from the dataSelections indices
-    formatted_data = create_data_from_indices(dataSelections, data)
+    formatted_data = create_data_from_indices(dataSelectionsValues, data)
     #run the trian model script
     clf = train_fmlt_model(formatted_data)
     
@@ -325,10 +324,19 @@ def find_more_like_this(inputHash, featureList, dataSelections, result):
     output_predictions_mask = clf.predict(data)
 
     #convert mask to selection form so the front
-    output_selection_array = convert_labels_to_class_indices(output_predictions_mask, np.shape(dataSelections)[0])
+    output_selection_array = convert_labels_to_class_indices(output_predictions_mask, np.shape(dataSelectionsValues)[0])
     
+    class_names = list(dataSelections.keys())    
+
+    #convert the output to a dictionary
+    codex_system.codex_log(str(list(enumerate(output_selection_array))))
+    output_dictionary = {}
+    for i,arr in enumerate(output_selection_array):
+        codex_system.codex_log(str(i))
+        output_dictionary[class_names[i]] = arr
     #end can create a selection corresponding to it
-    result["like_this"] = output_selection_array
+
+    result["like_this"] = output_dictionary
 
     return result
 

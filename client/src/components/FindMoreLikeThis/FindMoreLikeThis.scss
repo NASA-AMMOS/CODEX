@@ -1,36 +1,84 @@
+
 .fmlt-header {
     font-size: 26px;
     margin: 0;
+}
+
+.fmlt-run-button {
+    float:right;
+    width:140px;
 }
 
 .io-container {
     display: flex;
     flex-direction: row;
     height:80%;
-}
+    width: 100%;
 
-.fmlt-input-selections {
-    width: 50%;
-}
+    .fmlt-classes-section{
+        width:50%;
 
-.fmlt-output-selections {
-    width: 50%;
-}
+        .classes-list {
+            margin-left:20px;
+            margin-right:20px;
+            height: 80%;
+            overflow-y: scroll;
 
-.fmlt-input-selections-list {
-    list-style: none;
-}
+            .classes-list-row {
+                display:flex;
+                flex-direction: row;
+                justify-content: space-between;
+                height:50px;
 
-.input-selection.selected{
-    background-color: black;
-    color: white;
-}   
+                .swatch {
+                    width:20px;
+                    height: 20px;
+                    margin-left:auto;
+                    margin-top:auto;
+                    margin-bottom: auto;
+                }
 
-.input-selection.unselected{
-    background-color: white;
-    color:black;
-}
+                .classes-list-row-title {
+                    height:100%;
+                    div {
+                        margin-top: auto;
+                        margin-bottom: auto;
+                    }
+                }
+            }
+        }
+    }
 
-.fmlt-run-button {
-    float:right;
+    .fmlt-selection-labeling{
+        width:50%;
+
+        .selection-labeling-list {
+            margin-left:20px;
+            margin-right:20px;
+            height: 80%;
+            overflow-y: scroll;
+
+            .selection-labeling-row {
+                height:50px;
+                width:100%;
+                display:flex;
+                flex-direction: row;
+
+                .selection-name {
+                    width:50%;
+                    margin:auto;
+                }   
+
+                .selection-dropdown {
+                    min-width:0px !important;
+                    width:50%;
+                    div {
+                        margin-top: auto;
+                        margin-bottom: auto;
+                    }
+                }
+            }
+        }
+
+    }
 }
