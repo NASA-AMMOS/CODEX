@@ -190,6 +190,18 @@ export function usePinnedFeatures(windowHandle = undefined) {
 }
 
 /**
+ * function that gives the next selection color index
+ * @return state.nextColorIndex
+ */
+export function useNextColorIndex() {
+
+    const nextColorIndex = useSelector(state => state.nextColorIndex);
+
+    return  nextColorIndex;
+}
+
+
+/**
  * Get saved selections
  * @return {array} saved selections array + setter function
  */

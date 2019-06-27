@@ -1,29 +1,77 @@
 import "components/FindMoreLikeThis/FindMoreLikeThis.scss";
 import React, { useRef, useState, useEffect } from "react";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import { useSavedSelections, useFilename, useFeatureNames, useFeatureLength} from "hooks/DataHooks";
+import { useSavedSelections, useFilename, useFeatureNames, useFeatureLength, useNextColorIndex} from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UiHooks";
 import * as utils from "utils/utils";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
+import * as uiTypes from "constants/uiTypes";
+import DeleteIcon from '@material-ui/icons/Delete';
+import IconButton from "@material-ui/core/IconButton";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
+
 
 /*
-    Funciton that gets all of indices in the given selections
-*/    
-function getSelectionIndices(selectionArray, savedSelections) {
-    const indicesSet = new Set();
-    let indicesList = [];
+    Function that handles constructing the default selections
+    state array.
+*/
+function constructDefaultSelections(selections) {
 
-    for(let selectionName of selectionArray) {
-        let selectionIndex = -1;
-        for (const[key, entry] of Object.entries(savedSelections)) {
-            if (entry.id === selectionName)
-                selectionIndex = key;
+    return selections.map((selection) => {
+        return {
+            name: selection.id,
+            className: "None"
+        };
+    });
+}
+
+/*
+    Function that handles constructing the default state array
+    for the data classes
+*/
+function constructDefaultClasses(nextColorIndex) {
+
+    return [
+        {
+            name:"Class 1",
+            color:uiTypes.SELECTIONS_COLOR_PALETTE[nextColorIndex]
         }
-        indicesList.push(savedSelections[selectionIndex].rowIndices);
+    ];
+}
+
+/*
+    Function that builds an object of classes and their associated 
+    labels to feed to the backend
+*/
+function buildBackendSelectionObject(selections, savedSelections) {
+    let backendSelectionObject = {};
+
+    function getIndexOfSelectionWithName(name) {
+        for (let [key, value] of Object.entries(savedSelections)) {
+            if (value.id === name)
+                return key
+        }
+        return -1;
     }
-    return indicesList;
+
+    for(let selection of selections) {
+        if (!backendSelectionObject[selection.className]) {
+            backendSelectionObject[selection.className] = 
+                savedSelections[getIndexOfSelectionWithName(selection.name)].rowIndices;
+        } else {
+            backendSelectionObject[selection.className] = 
+                backendSelectionObject[selection.className]
+                    .concat(savedSelections[getIndexOfSelectionWithName(selection.name)].rowIndices);
+        }
+    }
+
+    return backendSelectionObject;
 }
 
 /*
@@ -42,111 +90,132 @@ function createFMLTRequest(filename, selections, featureList) {
     };
 }
 
-/*
-    Creates a request to upload selections to the backend
-
-function createSelectionUploadRequest(selectionData) {
-    return {
-        routine: "arrange",
-        activity: "add",
-        hashType: "selection",
-        data: selectionData,
-        name: "fmlt_mask",
-        cid: "8ksjk",
-        identification: { id: "dev0" }
-    };
-}
-*/
-
-function InputSelectionListItem(props) {
-    //this selected is not to be confused with the concept of 
-    //a selection
-    const [selected, setSelected] = useState(false);
-
-    return (
-        <li 
-            key={props.name}
-            className={"input-selection " + (selected ? "selected" : "unselected")}
-            onClick={
-                _ => {
-                    setSelected(!selected); 
-                    props.toggleSelected(props.name)
-                }
-            }
-        > 
-            {props.name}
-        </li>
-    );
-}
 
 /*
-    List that allows the user to select which selections
-    they want to run the algorithm on 
+    This is a component representing a row of 
+    the SelectionLabeling sectiontion of the page
 */
-function InputSelections(props) {
-    //initializes all object elements as false
-    let tempObj = {};
-    for (let i = 0; i < props.savedSelections.length; i++) {
-        tempObj[props.savedSelections[i].id] = false;
-    }
-    const [selectionsToggleObject, setSelectionsToggleObject] = useState(tempObj);
-
-    function toggleSelected(name) {
-        //searches selectedSelections for the given name and if its
-        //there then it removes it otherwise it adds it
-        let newObj = {
-            ...selectionsToggleObject,
-            [name]: !selectionsToggleObject[name]
-        }
-
-        setSelectionsToggleObject(newObj);
-
-        props.setSelectedSelections(
-            Object.keys(newObj)
-                .filter((name) => newObj[name])
-        );
-    }
+function SelectionLabelingRow(props) {
 
     return (
-        <div className="fmlt-input-selections">
-            Input Selections 
-            <ul className="fmlt-input-selections-list">
-                {
-                    props.savedSelections.map((selection) => {
-                        return (
-                            <InputSelectionListItem 
-                                name={selection.id} 
-                                toggleSelected={toggleSelected}
-                            />
-                        );
-                    })
-                }
-            </ul>
+        <div className="selection-labeling-row">
+            <Typography variant="subtitle1">
+                {props.selectionObject.name}
+            </Typography>
+            <FormControl classes={{ root: "dropdown" }}>
+                <Select
+                    value={props.selectionObject.className}
+                    //todo handle onchange event
+                    //onChange={e => setSearchType(e.target.value)}
+                >
+                    {props.classes.map(class => (
+                        <MenuItem key={class.name} value={class}>
+                            {o.charAt(0).toUpperCase() + o.slice(1)}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
         </div>
     );
 }
 
-function OutputSelections(props) {
+/*
+    This is the component responsible for allowing the 
+    user to label which class(if any) a certain selection
+    belongs to
+*/
+function SelectionLabeling(props) {
 
-    if (props.fmltOutput) {
-        //done loading
-        return (
-            <div className="fmlt-output-selections">
-                Output Selections
-                <br/>
-                {props.fmltOutput.outputMessage}
-            </div>
-        );
-    } else {
-        //loading
-        return (
-            <div className="fmlt-output-selections">
-                Output Selections
-                <CircularProgress />
-            </div>
-        );
+    return (
+        <div className="selection-labeling">
+            <Typography variant="subtitle1">
+                Selection Labeling
+            </Typography>
+        </div>
+    );
+}
+
+/*
+    Function that creates a row for the list of classes.
+    This is a stateless component just used for rendering
+    the row.
+*/
+function ClassRow(props) {
+
+    return (
+        <div className="classes-list-row">
+            <Typography variant="subtitle1">
+                {props.classObject.name}
+            </Typography>
+            <div
+                className="swatch"
+                style={{ background: props.classObject.color }}
+            />
+            <IconButton onClick={props.deleteClass(props.classObject.name)}>
+                <DeleteIcon />
+            </IconButton>
+        </div>
+    );
+}
+
+/*
+    Component representing the list of classes for the 
+    fmlt classification algorithm to train on
+*/
+function ClassesSection(props) {
+    //all the state for the sub list components will be 
+    //maintaned here for simplicity
+    //handles the behavior of adding a default class to the list
+    function createClass() {
+
+    } 
+    //handles the behavior for opening up a color pallete
+    //this might not work in the initial implementation
+    function modifyColor(className) {
+
     }
-    
+
+    //handles deleting a class based on its name
+    function deleteClass(className) {
+
+    }
+
+    //function to modify the name of a class
+    function modifyName(oldName, newName) {
+        //this should also handle dynamically changing the name 
+        //of all of the selections currently associated with that class
+    }
+
+    return (
+        <div className="classes-section">
+            <Typography variant="subtitle1">
+                Classes
+            </Typography>
+            <div className="classes-list">
+                {
+                    props.classes.map(
+                        (classObject) => {
+                            return (
+                                <ClassRow
+                                    classObject={classObject}
+                                    deleteClass={deleteClass}
+                                />
+                            );
+                        }
+                    )
+                }
+            </div>
+            <Button className="add-class-button"
+                    variant="contained"
+                    color="primary"
+                    onClick={_ =>
+                        createClass()
+                    }
+                >
+                    Add class
+            </Button>
+        </div>
+    );
 }
 
 /*
@@ -154,12 +223,33 @@ function OutputSelections(props) {
     the Find More Like This workflow
 */
 function FindMoreLikeThis(props) {
-
-    const [fmltOutput, setFMLTOutput] = useState(null);
-    //this is passed to the children to handle figuring out what
-    //selections the user has chosen
-    const [selectedSelections, setSelectedSelections] = useState([]);
+    //state to detect run button clicks
     const [buttonClicked, setButtonClicked] = useState(false);
+
+    //this piece of state handles holding the metatdata
+    //attatched to selections in the ui
+    //this is not to be confused with props.savedSelections
+    //which is a piece coming from global state
+    const [selections, setSelections] = useState(
+        constructDefaultSelections(props.savedSelections)
+    );
+
+    //interfaces for interacting with selections defined here
+
+    //this piece of state holds the meta data associated with classes
+    const [classes, setClasses] = useState(
+        constructDefaultClasses(props.nextColorIndex)
+    ); 
+
+    //interfaces for interacting with the classes here
+
+    /*
+        Function to validate the user form input
+    */
+    function verifyInputsValid() {
+        //todo implement this logic
+        return true;
+    }
 
     //handler for the run button
     //this function handles calling the create request functions
@@ -167,11 +257,9 @@ function FindMoreLikeThis(props) {
     useEffect(() => {
         //assume if this runs that button is clicked because that is the 
         //only time the flag changes
-        if (selectedSelections.length != 0) {
-            const convertedSelections = getSelectionIndices(selectedSelections, props.savedSelections);
-
-            const requestObject = createFMLTRequest(props.filename, convertedSelections, props.featureNames);
-
+        if (verifyInputsValid()) {
+            const classSelections = buildBackendSelectionObject(selections, props.savedSelections)
+            const requestObject = createFMLTRequest(props.filename, classSelections, props.featureNames);
             //makes a fmlt request
             const request = utils.makeSimpleRequest(requestObject);
             //resolves the fmlt request
@@ -181,7 +269,6 @@ function FindMoreLikeThis(props) {
                     props.saveSelection("output"+(Math.random()*10000), indices)
                 });
             }); 
-
             //cleanup function
             return function cleanup() {
                 request.cancel();
@@ -198,12 +285,10 @@ function FindMoreLikeThis(props) {
                 Find More Like This
             </div>
             <div className="io-container">
-                <InputSelections 
-                    savedSelections={props.savedSelections}
-                    setSelectedSelections={setSelectedSelections}
+                <ClassesSection
+                    classes={classes}
                  />
-                <OutputSelections 
-                    fmltOutput={fmltOutput}
+                <SelectionLabeling
                 />
             </div>
             <Button
@@ -228,6 +313,8 @@ export default props => {
     });
 
     const [savedSelections, saveSelection] = useSavedSelections();
+    const nextColorIndex = useNextColorIndex();
+
     const filename = useFilename();
     
     const features = useFeatureNames();
@@ -247,6 +334,7 @@ export default props => {
             filename={filename}
             data={features}
             featureNames={features}
+            nextColorIndex={nextColorIndex}
         />
     );
 };
