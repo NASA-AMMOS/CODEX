@@ -109,7 +109,7 @@ def export_json_tree(clf, features, labels, proportion_tree_sums, node_index=0):
     """
     return node
 
-def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
+def explain_this(inputHash, featureNames, dataSelections, result):
     '''
     Inputs:
 
@@ -127,23 +127,6 @@ def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
 
     startTime = time.time()
     result = {"WARNING":None}
-    
-    # TODO - labels are currently cached under features
-    labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
-    if labelHash_dict is None:
-        codex_system.codex_log("label hash {hash} not found. Returning!".format(hash=labelHash))
-        return {'algorithm': algorithm,
-                'downsample': downsampled,
-                'cross_val': cross_val,
-                'scoring': scoring,
-                'WARNING': "Label not found in database."}
-    else:
-        y = labelHash_dict['data']
-        result['y'] = y.tolist()
-
-    if(len(np.unique(y)) != 2):
-        result['WARNING'] = "Too many classes.  explain_features currently only works for binary classification"
-        return result
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
@@ -154,32 +137,18 @@ def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
     if data is None:
         return None
 
-    if subsetHashName is not None:
-        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
-        if(subsetHash is None):
-            subsetHash = False
-        else:
-            subsetHash = subsetHash["hash"]
-    else:
-        subsetHash = False
-
-    if subsetHash is not False:
-        data = codex_hash.applySubsetMask(data, subsetHash)
-        if(data is None):
-            codex_system.codex_log("ERROR: explain_this - subsetHash returned None.")
-            return None
-
     if data.ndim < 2:
         codex_system.codex_log("ERROR: explain_this - insufficient data dimmensions")
         return None
 
-    X = codex_math.codex_impute(data)
-    result['data'] = X.tolist()
+    X,y = create_data_from_indices(dataSelections, data)
+    codex_system.codex_log(str(y))
+    
     result['tree_sweep'] = []
 
     samples_, features_ = X.shape
     
-    max_depth = 7
+    max_depth = 6
     for i in range(2, max_depth):
 
         dictionary = {}

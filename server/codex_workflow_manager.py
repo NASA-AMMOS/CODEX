@@ -37,14 +37,7 @@ def workflow_call(msg, result):
         featureList = msg["dataFeatures"]
         featureList = codex_system.get_featureList(featureList)
 
-        labelName = msg["labelName"]
-        labelHash = codex_hash.findHashArray("name", labelName, "feature")['hash']
-
-        subsetHashName = msg["dataSelections"]
-        if (subsetHashName != []):
-            subsetHashName = subsetHashName[0]
-        else:
-            subsetHashName = None
+        dataSelections = msg["dataSelections"]
 
         hashList = codex_hash.feature2hashList(featureList)
         codex_return_code.logReturnCode(inspect.currentframe())
@@ -57,9 +50,7 @@ def workflow_call(msg, result):
             codex_return_code.logReturnCode(inspect.currentframe())
             inputHash = inputHash["hash"]
 
-        result = codex_workflow.explain_this(inputHash, featureList, subsetHashName, labelHash, result)
-
-        codex_system.codex_log(str(result))
+        result = codex_workflow.explain_this(inputHash, featureList, dataSelections, result)
     elif (msg['workflow'] == "find_more_like_this"):
         featureList = msg["featureList"]
         featureList = codex_system.get_featureList(featureList)

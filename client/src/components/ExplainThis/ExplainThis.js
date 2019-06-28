@@ -18,6 +18,11 @@ import FormControl from "@material-ui/core/FormControl";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import Slider from "@material-ui/lab/Slider";
+import { Sparklines, SparklinesLine } from 'react-sparklines';
+import { useSelectedFeatureNames, useFilename, useSavedSelections } from "hooks/DataHooks";
+import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import { useWindowManager } from "hooks/WindowHooks";
+
 
 // Toggle children.
 function toggle(d) {
@@ -133,7 +138,7 @@ function generateTree(treeData, svgRef) {
         root;
 
     //might change this later to be dynamic based on the number of leaf nodes
-    let maxDepth = 6;
+    let maxDepth = 5;
     let numLeafs = calculateNumLeafNodes(treeData);
     let nodeSize = [8, width / maxDepth + 3];
 
@@ -163,7 +168,7 @@ function generateTree(treeData, svgRef) {
     let vis = d3
         .select(svgRef)
         .append("svg:g")
-        .attr("transform", "translate(" + margin.left + "," + (height / 2 - 20) + ")");
+        .attr("transform", "translate(" + margin.left + "," + (height / 2 - 60) + ")");
 
     let gradientContainer = d3
         .select(svgRef)
@@ -246,17 +251,7 @@ function generateTree(treeData, svgRef) {
 
         // Normalize for fixed-depth.
         nodes.forEach(function(d) {
-            let firstDepth = 30;
-            let yscale = 120;
-            d.x += 50;
-            if (hasLeafChildren(d) && d.depth == 1) {
-                firstDepth = 150;
-            }
-            if (d.depth == 0) {
-                d.y = 0;
-            } else {
-                d.y = firstDepth + yscale * (d.depth - 1);
-            }
+            d.y = d.depth * 120;
         });
 
         // Update the nodes…
@@ -427,11 +422,10 @@ function generateTree(treeData, svgRef) {
     load_dataset(treeData);
 }
 
-function createExplainThisRequest(filename, labelName, dataFeatures) {
+function createExplainThisRequest(filename, selections, dataFeatures) {
     return {
         routine: "workflow",
-        dataSelections: [],
-        labelName: labelName,
+        dataSelections: selections,
         workflow: "explain_this",
         dataFeatures: dataFeatures,
         file: filename,
@@ -440,16 +434,30 @@ function createExplainThisRequest(filename, labelName, dataFeatures) {
     };
 }
 
-function ChooseLabel(props) {
+function ChooseSelections(props) {
     return (
-        <div className="label-chooser">
-            <p className="feature-list-header">Choose Label</p>
-            <FormControl className="labelDropdown">
-                <InputLabel>Labels</InputLabel>
-                <Select value={props.label} onChange={e => props.setLabel(e.target.value)}>
-                    {props.selectedFeatures.map(f => (
-                        <MenuItem key={f} value={f}>
-                            {f}
+        <div className="selections-chooser">
+            <p className="selection-chooser-header">Choose Two Selections</p>
+            <FormControl className="selection-dropdown">
+                <Select 
+                    value={props.chosenSelections[0]} 
+                    onChange={e => props.setChosenSelections([e.target.value, props.chosenSelections[1]])}
+                >
+                    {props.selections.map(f => (
+                        <MenuItem key={f.id} value={f.id}>
+                            {f.id}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+            <FormControl className="selection-dropdown">
+                <Select 
+                    value={props.chosenSelections[1]} 
+                    onChange={e => props.setChosenSelections([props.chosenSelections[0], e.target.value])}
+                >
+                    {props.selections.map(f => (
+                        <MenuItem key={f.id} value={f.id}>
+                            {f.id}
                         </MenuItem>
                     ))}
                 </Select>
@@ -488,17 +496,18 @@ function TreeSweepScroller(props) {
             hovermode: "closest", // Turning off hovermode seems to screw up click handling
             showlegend: false,
             xaxis: {
-                automargin: true
+                automargin: true,
+                visible:false
             },
             yaxis: {
                 automargin: true,
-                range: [0, 100]
+                visible:false,
             },
             title: {
                 text: "Score vs Tree Depth",
                 font: {
                     family: "Roboto, Helvetica, Arial, sans-serif",
-                    size: 18
+                    size: 14
                 }
             }
         },
@@ -509,7 +518,7 @@ function TreeSweepScroller(props) {
     };
 
     return (
-        <React.Fragment>
+        <div className="tree-sweep-scroller">
             <Plot
                 className="tree-sweep-plot"
                 data={chartOptions.data}
@@ -530,7 +539,56 @@ function TreeSweepScroller(props) {
                     //scroll tree sweep list
                 }}
             />
-        </React.Fragment>
+        </div>
+    );
+}
+
+function FeatureImportanceGraph(props) {
+    const chartOptions = {
+        data : [{
+            x: props.rankedFeatures,
+            y: props.featureImportances,
+            yaxis:"y",
+            type: "bar"
+        }],
+        config : {
+            displaylogo: false,
+            displayModeBar: false
+        }, 
+        layout: {
+            autosize: true,
+            margin: { l: 20, r: 20, t: 40, b: 70 }, // Axis tick labels are drawn in the margin space
+            marker: {
+                line: {
+                    width: 0.5
+                }
+            },
+            xaxis: {
+                automargin: false,
+                type:"category"
+            },
+            yaxis: {
+                automargin: true,
+
+            },
+            title: {
+                text: "Feature Importances",
+                font: {
+                    family: "Roboto, Helvetica, Arial, sans-serif",
+                    size: 14
+                }
+            }
+        },
+    };
+
+    return (
+        <Plot
+            className="feature-importance-graph"
+            data={chartOptions.data}
+            layout={chartOptions.layout}
+            config={chartOptions.config}
+            useResizeHandler
+        />
     );
 }
 
@@ -538,41 +596,23 @@ function FeatureList(props) {
     if (props.rankedFeatures == undefined) {
         return <div>Loading ...</div>;
     }
-    /*
-    <div className="run-pane">
-        <ChooseLabel
-            selectedFeatures={props.features}
-            label={props.label}
-            setLabel={props.setLabel}
-        />
-    </div>
-    */
 
     return (
         <div className="feature-list">
-            <div className="tree-sweep-scroller">
-                <TreeSweepScroller
-                    setTreeIndex={props.setTreeIndex}
-                    tree_sweep={props.tree_sweep}
-                    treeIndex={props.treeIndex}
-                />
-            </div>
-            <List className="used-features">
-                <ListItem>
-                    <p className="feature-list-header">Used Features</p>
-                </ListItem>
-                {props.rankedFeatures.map((feature, index) => {
-                    return (
-                        <ListItem key={index}>
-                            <span className="feature-list-item">{feature}</span>
-                            <span className="importances-number">
-                                {" "}
-                                / {props.importances[index]}%{" "}
-                            </span>
-                        </ListItem>
-                    );
-                })}
-            </List>
+            <TreeSweepScroller
+                setTreeIndex={props.setTreeIndex}
+                tree_sweep={props.tree_sweep}
+                treeIndex={props.treeIndex}
+            />
+            <FeatureImportanceGraph 
+                rankedFeatures={props.rankedFeatures} 
+                featureImportances={props.importances}
+            />
+            <ChooseSelections
+                selections={props.selections}
+                setChosenSelections={props.setChosenSelections}
+                chosenSelections={props.chosenSelections}
+            />
             <Button
                 className="run-button"
                 variant="contained"
@@ -613,23 +653,28 @@ function ExplainThisTree(props) {
 function ExplainThis(props) {
     //make a data state object to hold the data in the request
     const [dataState, setDataState] = useState(undefined);
-
-    const defaultLabelName = "labels";
-    const [label, setLabel] = useState(defaultLabelName);
+    const [chosenSelections, setChosenSelections] = useState([]);
     const [treeIndex, setTreeIndex] = useState(0);
     const [triggerFlag, setTriggerFlag] = useState(true);
-
     //handles the request object asynchronous loading
     useEffect(
         _ => {
-            //handle the loading of the data request promise
-            // Get selected feature list from current state if none specified
-            let selectedFeatures = props.featureList
-                .filter(f => f.get("selected"))
-                .map(f => f.get("name"))
-                .toJS();
+            if (chosenSelections == undefined || chosenSelections[0] == undefined|| chosenSelections[1] == undefined) {
+                return;
+            }
+            //get indices from selection names
+            let firstSelectionIndices = [];
+            let secondSelectionIndices = [];
+            for (let selection of props.selections) {
+                if (selection.id === chosenSelections[0]){
+                    firstSelectionIndices = selection.rowIndices;
+                } else if (selection.id === chosenSelections[1]) {
+                    secondSelectionIndices = selection.rowIndices;
+                }
+            }
 
-            const request = createExplainThisRequest(props.filename, label, selectedFeatures);
+            //handle the loading of the data request promise
+            const request = createExplainThisRequest(props.filename, [firstSelectionIndices, secondSelectionIndices], props.selectedFeatureNames);
 
             const requestMade = utils.makeSimpleRequest(request);
             requestMade.req.then(data => {
@@ -641,44 +686,38 @@ function ExplainThis(props) {
                 requestMade.cancel();
             };
         },
-        [label, triggerFlag]
+        [triggerFlag]
     );
 
     if (!dataState) {
         return (
-            <div className="chartLoading">
-                <CircularProgress />
-            </div>
-        );
-    } else if (!dataState.tree_sweep) {
-        return (
             <div className="explain-this-container">
                 <FeatureList
-                    features={props.featureList.map(f => f.get("name"))}
                     rankedFeatures={[]}
                     importances={[]}
-                    label={label}
-                    setLabel={setLabel}
                     setTriggerFlag={setTriggerFlag}
                     triggerFlag={triggerFlag}
+                    selections={props.selections}
+                    setChosenSelections={setChosenSelections}
+                    chosenSelections={chosenSelections}
                 />
-                <div className="load-failure">Choose a different feature as your label.</div>
+                <div className="load-failure">Choose selections and hit run.</div>
             </div>
         );
     } else {
         return (
             <div className="explain-this-container">
                 <FeatureList
-                    features={props.featureList.map(f => f.get("name"))}
                     rankedFeatures={dataState.tree_sweep[treeIndex].feature_rank}
                     importances={dataState.tree_sweep[treeIndex].feature_weights}
-                    label={label}
-                    setLabel={setLabel}
                     setTreeIndex={setTreeIndex}
                     tree_sweep={dataState.tree_sweep}
                     setTriggerFlag={setTriggerFlag}
                     triggerFlag={triggerFlag}
                     treeIndex={treeIndex}
+                    selections={props.selections}
+                    setChosenSelections={setChosenSelections}
+                    chosenSelections={chosenSelections}
                 />
                 <ExplainThisTree treeData={dataState.tree_sweep[treeIndex]} />
             </div>
@@ -686,18 +725,35 @@ function ExplainThis(props) {
     }
 }
 
-function mapStateToProps(state) {
-    return {
-        featureList: state.data.get("featureList"),
-        filename: state.data.get("filename")
-    };
-}
+// wrapped data selector
+export default props => {
+    const win = useWindowManager(props, {
+        width: 910,
+        height: 530,
+        resizeable: false,
+        title: "Explain This"
+    });
 
-function mapDispatchToProps(dispatch) {
-    return {};
-}
+    const [selectedFeatureNames, setSelectedFeatures] = useSelectedFeatureNames();
+    const [selections, setSelections] = useSavedSelections();
+    const filename = useFilename();
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(ExplainThis);
+    if (selectedFeatureNames.size >= 1) {
+        return (
+            <ExplainThis
+                selectedFeatureNames={selectedFeatureNames}
+                filename={filename}
+                selections={selections}
+            />
+        );
+    } else {
+        return (
+            <WindowError>
+                Please select exactly two features
+                <br />
+                in the features list to use this graph.
+            </WindowError>
+        );
+    }
+};
+

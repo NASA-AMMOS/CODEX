@@ -1,25 +1,4 @@
-/*
-.explain-this-container {
-    height: 100%;
-    width: 100%;
-    margin: 0px;
-    padding: 0px;
-    display:flex;
-    flex-direction:column;
 
-    .feature-list {
-        height: 100%;
-        width: 220px;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .tree-container {
-        height: 100%;
-    }
-
-}
-*/
 .explain-this-container {
     height: 100%;
     width: 100%;
@@ -44,6 +23,22 @@
         li {
             height: 20px;
         }
+        .selections-chooser {
+            display: flex;
+            flex-direction: column;
+            .selection-dropdown {
+                width: 60%;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+        .feature-importance-graph {
+            width: 100%;
+            height: 37%;
+            margin-top: 20px;
+            margin-bottom:20px;
+        }
 
         .used-features {
             width: 100%;
@@ -55,13 +50,13 @@
 
         .tree-sweep-scroller {
             margin-bottom: 20px;
-            height:30%;
+            height:18%;
             width:100%;
-            .svg-container {
-                height:100%;
-            }
+
             .tree-sweep-slider {
                 padding : 20px;
+                margin-top: 10px;
+                margin-bottom: 10px;
             }
 
             .tree-sweep-plot {
