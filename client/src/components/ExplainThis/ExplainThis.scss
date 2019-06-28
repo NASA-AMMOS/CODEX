@@ -26,18 +26,27 @@
         .selections-chooser {
             display: flex;
             flex-direction: column;
+            .selection-chooser-header {
+                margin: 0px;
+            }
+
             .selection-dropdown {
-                width: 60%;
+                width: 80%;
                 margin-left: auto;
                 margin-right: auto;
             }
         }
 
+        .feature-importance-graph-title {
+            margin: auto;
+            margin-top:20px;
+        }
+
         .feature-importance-graph {
             width: 100%;
-            height: 37%;
-            margin-top: 20px;
-            margin-bottom:20px;
+            margin-top: 5px;
+            overflow-y: scroll;
+            overflow-x: hidden;
         }
 
         .used-features {
@@ -50,24 +59,29 @@
 
         .tree-sweep-scroller {
             margin-bottom: 20px;
-            height:18%;
+            height:25%;
             width:100%;
 
             .tree-sweep-slider {
                 padding : 20px;
-                margin-top: 10px;
+                margin-top: 0px;
                 margin-bottom: 10px;
             }
 
             .tree-sweep-plot {
                 width: 100%;
                 height:100%;
+                .plotly-container {
+                    height:100%;
+                    .svg-container {
+                        height: 100%;
+                    }
+                }
             }
         }
 
         .run-button {
             margin:10px;
-            margin-top: auto;
         }
     }
 

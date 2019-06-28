@@ -18,7 +18,6 @@ import FormControl from "@material-ui/core/FormControl";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import Slider from "@material-ui/lab/Slider";
-import { Sparklines, SparklinesLine } from 'react-sparklines';
 import { useSelectedFeatureNames, useFilename, useSavedSelections } from "hooks/DataHooks";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import { useWindowManager } from "hooks/WindowHooks";
@@ -144,8 +143,8 @@ function generateTree(treeData, svgRef) {
 
     let color_map = d3.scale
         .linear()
-        .domain([0, 0.5, 1])
-        .range(["blue", "lightgray", "red"]);
+        .domain([0, 1])
+        .range(["blue",  "red"]);
 
     /**
      * Mixes colors according to the relative frequency of classes.
@@ -492,16 +491,15 @@ function TreeSweepScroller(props) {
         ],
         layout: {
             autosize: true,
-            margin: { l: 20, r: 0, t: 40, b: 0 }, // Axis tick labels are drawn in the margin space
+            margin: { l: 20, r: 10, t: 20, b: 0 }, // Axis tick labels are drawn in the margin space
             hovermode: "closest", // Turning off hovermode seems to screw up click handling
             showlegend: false,
             xaxis: {
                 automargin: true,
-                visible:false
             },
             yaxis: {
                 automargin: true,
-                visible:false,
+                range: [0, 105]
             },
             title: {
                 text: "Score vs Tree Depth",
@@ -546,49 +544,45 @@ function TreeSweepScroller(props) {
 function FeatureImportanceGraph(props) {
     const chartOptions = {
         data : [{
-            x: props.rankedFeatures,
-            y: props.featureImportances,
+            x: props.featureImportances.reverse(),
+            y: props.rankedFeatures.reverse(),
             yaxis:"y",
-            type: "bar"
+            type: "bar",
+            orientation: "h"
         }],
         config : {
             displaylogo: false,
             displayModeBar: false
         }, 
         layout: {
-            autosize: true,
-            margin: { l: 20, r: 20, t: 40, b: 70 }, // Axis tick labels are drawn in the margin space
-            marker: {
-                line: {
-                    width: 0.5
-                }
-            },
+            autosize:false,
+            height: 100 + (15*props.featureImportances.length),
+            width: 200,
+            margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
             xaxis: {
                 automargin: false,
-                type:"category"
+                type:"category",
             },
             yaxis: {
                 automargin: true,
+                fixedrange:true,
 
             },
-            title: {
-                text: "Feature Importances",
-                font: {
-                    family: "Roboto, Helvetica, Arial, sans-serif",
-                    size: 14
-                }
-            }
         },
     };
 
     return (
-        <Plot
-            className="feature-importance-graph"
-            data={chartOptions.data}
-            layout={chartOptions.layout}
-            config={chartOptions.config}
-            useResizeHandler
-        />
+        <React.Fragment>
+            <div className="feature-importance-graph-title">
+                Feature Importances
+            </div>
+            <Plot
+                className="feature-importance-graph"
+                data={chartOptions.data}
+                layout={chartOptions.layout}
+                config={chartOptions.config}
+            />
+        </React.Fragment>
     );
 }
 
