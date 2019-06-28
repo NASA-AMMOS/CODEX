@@ -538,6 +538,15 @@ function FeatureList(props) {
     if (props.rankedFeatures == undefined) {
         return <div>Loading ...</div>;
     }
+    /*
+    <div className="run-pane">
+        <ChooseLabel
+            selectedFeatures={props.features}
+            label={props.label}
+            setLabel={props.setLabel}
+        />
+    </div>
+    */
 
     return (
         <div className="feature-list">
@@ -564,25 +573,16 @@ function FeatureList(props) {
                     );
                 })}
             </List>
-            <div className="right-pane">
-                <ChooseLabel
-                    selectedFeatures={props.features}
-                    label={props.label}
-                    setLabel={props.setLabel}
-                />
-                <div className="button-container">
-                    <Button
-                        className="run-button"
-                        variant="contained"
-                        color="primary"
-                        onClick={_ => {
-                            props.setTriggerFlag(!props.triggerFlag);
-                        }}
-                    >
-                        Run
-                    </Button>
-                </div>
-            </div>
+            <Button
+                className="run-button"
+                variant="contained"
+                color="primary"
+                onClick={_ => {
+                    props.setTriggerFlag(!props.triggerFlag);
+                }}
+            >
+                Run
+            </Button>
         </div>
     );
 }
@@ -595,7 +595,6 @@ function ExplainThisTree(props) {
         _ => {
             if (!svgRef) return;
             d3.selectAll(".tree-container > *").remove();
-            console.log(props.treeData);
             generateTree(props.treeData.json_tree, svgRef);
         },
         [props.treeData]
