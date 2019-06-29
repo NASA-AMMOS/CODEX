@@ -110,10 +110,11 @@ function classificationStateReducer(classificationState, action) {
     }
 }
 
-function makeNumericInput(param, classificationName, classificationStateDispatch) {
+function makeNumericInput(param, classificationName, classificationStateDispatch, focus) {
     return (
         <React.Fragment key={param.name}>
             <TextField
+                autoFocus={focus}
                 className="parameterInput"
                 fullWidth
                 label={param.label}
@@ -138,11 +139,12 @@ function makeNumericInput(param, classificationName, classificationStateDispatch
     );
 }
 
-function makeStringChoiceInput(param, classificationName, classificationStateDispatch) {
+function makeStringChoiceInput(param, classificationName, classificationStateDispatch, focus) {
     return (
         <FormControl key={param.name}>
             <InputLabel>{param.displayName}</InputLabel>
             <Select
+                autoFocus={focus}
                 value={param.value || param.default}
                 onChange={e =>
                     classificationStateDispatch({
@@ -163,13 +165,18 @@ function makeStringChoiceInput(param, classificationName, classificationStateDis
     );
 }
 
-function makeSubParamInput(param, classificationName, classificationStateDispatch) {
+function makeSubParamInput(param, classificationName, classificationStateDispatch, focus) {
     switch (param.type) {
         case "int":
         case "float":
-            return makeNumericInput(param, classificationName, classificationStateDispatch);
+            return makeNumericInput(param, classificationName, classificationStateDispatch, focus);
         case "string":
-            return makeStringChoiceInput(param, classificationName, classificationStateDispatch);
+            return makeStringChoiceInput(
+                param,
+                classificationName,
+                classificationStateDispatch,
+                focus
+            );
     }
 }
 
@@ -425,14 +432,15 @@ function ClassificationOverview(props) {
                         {classificationStates
                             .find(c => c.name === activeClassificationName)
                             .paramData.map(param => (
-                                <React.Fragment key={param.name}>
+                                <React.Fragment key={activeClassificationName + param.name}>
                                     <hr />
                                     <div>{param.name}</div>
-                                    {param.subParams.map(subParam =>
+                                    {param.subParams.map((subParam, idx) =>
                                         makeSubParamInput(
                                             subParam,
                                             activeClassificationName,
-                                            classificationStateDispatch
+                                            classificationStateDispatch,
+                                            idx === 0
                                         )
                                     )}
                                 </React.Fragment>
