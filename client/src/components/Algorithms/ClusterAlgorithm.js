@@ -126,7 +126,7 @@ function ClusterAlgorithm(props) {
         width: 900,
         height: 600,
         resizeable: false,
-        title: "Clustering"
+        title: "Algorithm: Cluster"
     });
 
     const filename = useFilename();
