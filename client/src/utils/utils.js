@@ -90,3 +90,25 @@ export function indicesInRange(data, min, max) {
 
     return indices;
 }
+
+export function createGradientStops(startColor, endColor, numStops) {
+    const dummyCanvas = document.createElement("canvas");
+    const ctx = dummyCanvas.getContext("2d");
+    const grd = ctx.createLinearGradient(0, 0, numStops, 0);
+    grd.addColorStop(0, startColor);
+    grd.addColorStop(1, endColor);
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, numStops, 1);
+    const imgData = ctx.getImageData(0, 0, numStops, 1);
+
+    return [...Array(numStops).keys()].map(
+        i =>
+            `#${[0, 1, 2]
+                .map(v => {
+                    let hex = imgData.data[i * 4 + v].toString(16);
+                    if (hex.length < 2) hex = "0" + hex;
+                    return hex;
+                })
+                .join("")}`
+    );
+}
