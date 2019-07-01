@@ -18,17 +18,18 @@ function createFeature(props, feature) {
         <li
             className={classnames({ feature: true})}
             key={name}
-            onClick={function(e) {
-                    return selected
-                        ? props.featureUnselect(name, e.shiftKey)
-                        : props.featureSelect(name, e.shiftKey);
-                }}
         >
             <Checkbox
                 checked={selected}
                 value="checkedA"
+                style={{height:"22px",padding:"0px", paddingRight:"10px"}}
                 icon={<CheckboxOutlineBlank style={{fill: "#828282"}} />}
                 checkedIcon={<CheckboxIcon style={{ fill:"#3988E3"}} />}
+                onClick={function(e) {
+                    return selected
+                        ? props.featureUnselect(name, e.shiftKey)
+                        : props.featureSelect(name, e.shiftKey);
+                }}
               />
             <span>{name}</span>
         </li>

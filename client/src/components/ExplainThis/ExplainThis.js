@@ -542,10 +542,11 @@ function TreeSweepScroller(props) {
 }
 
 function FeatureImportanceGraph(props) {
+    console.log(props.featureImportances)
     const chartOptions = {
         data : [{
-            x: props.featureImportances.reverse(),
-            y: props.rankedFeatures.reverse(),
+            x: props.featureImportances.slice().reverse(),
+            y: props.rankedFeatures.slice().reverse(),
             yaxis:"y",
             type: "bar",
             orientation: "h"
@@ -562,6 +563,7 @@ function FeatureImportanceGraph(props) {
             xaxis: {
                 automargin: false,
                 type:"category",
+                domain:[0,100]
             },
             yaxis: {
                 automargin: true,

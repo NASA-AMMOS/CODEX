@@ -161,7 +161,6 @@ def explain_this(inputHash, featureNames, dataSelections, result):
         dictionary['json_tree'] = export_json_tree(clf, featureNames[::-1], ["Main Data","Isolated Data"], proportion_tree_sums)
         dictionary["score"] = np.round(clf.score(X,y) * 100)
         dictionary["max_features"] = clf.max_features_
-
         
         feature_weights = np.asarray(feature_weights).astype(float)
         dictionary["feature_rank"] = feature_rank
