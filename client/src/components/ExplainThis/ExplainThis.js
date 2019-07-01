@@ -49,7 +49,7 @@ function processFloatingPointNumber(number) {
     let roundedNumber = Math.round(number * Math.pow(10, 2)) / Math.pow(10, 2);
     let newNumber = "";
     //see if has decimal
-    if ((roundedNumber + "").length > 4) {
+    if ((roundedNumber + "").length > 6) {
         //convert to scientific notation
         newNumber = roundedNumber.toExponential(1);
     } else {

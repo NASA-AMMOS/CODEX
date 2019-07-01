@@ -17,7 +17,7 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
     //ignoring type for now.
     const [shapes, setShapes] = useState([]);
 
-    const createRectangle = (range, color, active, id) => {
+    const createRectangle = (range, color, hidden, id) => {
         let opaqueColor = color + "80";
         let rect = {
             type: "rect",
@@ -27,7 +27,7 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
             line: {
                 width: 0
             },
-            visible: active,
+            visible: !hidden,
             selectionId:id,
         };
 
@@ -92,12 +92,12 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
             let newShapes = [];
 
             const mappedSavedSelections = savedSelections.map((selection) => {
-                return {indices:selection.rowIndices, color:selection.color, active:selection.active};
+                return {indices:selection.rowIndices, color:selection.color, active:selection.active, hidden:selection.hidden};
             });
 
             let allSelections = [...mappedSavedSelections];
             if (currentSelection.length != 0)
-                allSelections.push({indices: currentSelection, color: DEFAULT_SELECTION_COLOR, active: true});
+                allSelections.push({indices: currentSelection, color: DEFAULT_SELECTION_COLOR, active: true, hidden: false});
             
             //check to see if there are any selections to render
             if (allSelections.length != 0) {
@@ -107,7 +107,7 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
                         const rect = createRectangle(
                             range,
                             selection.color,
-                            selection.active,
+                            selection.hidden,
                             selection.id
                         );
                         newShapes.push(rect);

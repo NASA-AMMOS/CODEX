@@ -94,7 +94,7 @@ function ScatterGraph(props) {
             }
             props.savedSelections.forEach(selection => {
                 selection.rowIndices.forEach(row => {
-                    chartState.data[0].marker.color[row] = selection.active
+                    chartState.data[0].marker.color[row] = !selection.hidden
                         ? selection.color
                         : chartState.data[0].marker.color[row];
                 });

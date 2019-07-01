@@ -29,7 +29,7 @@ function createSelection(
                     .substring(7)
             }
             onClick={_ => {
-                    props.toggleSelectionActive(selection.id);
+                    props.toggleSelectionHidden(selection.id);
                     }
                 }
             onContextMenu={e => {
@@ -42,7 +42,7 @@ function createSelection(
             <div>{selection.displayName}</div>
             <div
                 className="swatch"
-                style={{ background: selection.active ? selection.color : "#bbbbbb" }}
+                style={{ background: !selection.hidden ? selection.color : "#bbbbbb" }}
             />
         </li>
     );
@@ -181,6 +181,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         toggleSelectionActive: bindActionCreators(selectionActions.toggleSelectionActive, dispatch),
+        toggleSelectionHidden: bindActionCreators(selectionActions.toggleSelectionHidden, dispatch),
         deleteSelection: bindActionCreators(selectionActions.deleteSelection, dispatch),
         renameSelection: bindActionCreators(selectionActions.renameSelection, dispatch),
         setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),

@@ -1,4 +1,3 @@
-
 '''
 Author: Jack Lightholder
 Date  : 5/17/19
@@ -73,6 +72,7 @@ def export_json_tree(clf, features, labels, proportion_tree_sums, node_index=0):
 
     Note: From here: https://planspace.org/20151129-see_sklearn_trees_with_d3/
     """
+
     node = {}
     if clf.tree_.children_left[node_index] == -1:  # indicates leaf
         count_labels = zip(clf.tree_.value[node_index, 0], labels)
@@ -142,7 +142,6 @@ def explain_this(inputHash, featureNames, dataSelections, result):
         return None
 
     X,y = create_data_from_indices(dataSelections, data)
-    codex_system.codex_log(str(y))
     
     result['tree_sweep'] = []
 
@@ -157,11 +156,13 @@ def explain_this(inputHash, featureNames, dataSelections, result):
 
         proportion_tree_sums = get_proportion_tree_sums(clf, X, y)
 
-        dictionary['json_tree'] = export_json_tree(clf, featureNames, ["Main Data","Isolated Data"], proportion_tree_sums)
+        feature_weights, feature_rank = zip(*sorted(zip(clf.feature_importances_, featureNames), reverse=True))
+
+        dictionary['json_tree'] = export_json_tree(clf, featureNames[::-1], ["Main Data","Isolated Data"], proportion_tree_sums)
         dictionary["score"] = np.round(clf.score(X,y) * 100)
         dictionary["max_features"] = clf.max_features_
 
-        feature_weights, feature_rank = zip(*sorted(zip(clf.feature_importances_, featureNames), reverse=True))
+        
         feature_weights = np.asarray(feature_weights).astype(float)
         dictionary["feature_rank"] = feature_rank
         dictionary["feature_weights"] = (np.round(feature_weights * 100)).tolist()
@@ -179,8 +180,6 @@ def create_data_from_indices(data_selections, data):
 
     #this is a single dimensional array that contains
     #numbers corrresponding to the data's class
-    codex_system.codex_log(str(data_selections))
-
     num_selections = 0
     for arr in data_selections:
         num_selections+=len(arr)
@@ -221,8 +220,6 @@ def convert_labels_to_class_indices(label_mask, num_classes):
 """
 def train_fmlt_model(data):
     #data is of the format (data,labels)
-    codex_system.codex_log(str(data[1]))
-
     #construct the grid search parameter grid
     # Number of trees in random forest
     n_estimators = [int(x) for x in np.linspace(start = 5, stop = 50, num = 10)]
@@ -298,7 +295,6 @@ def find_more_like_this(inputHash, featureList, dataSelections, result):
     class_names = list(dataSelections.keys())    
 
     #convert the output to a dictionary
-    codex_system.codex_log(str(list(enumerate(output_selection_array))))
     output_dictionary = {}
     for i,arr in enumerate(output_selection_array):
         codex_system.codex_log(str(i))
