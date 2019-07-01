@@ -1,7 +1,8 @@
 export const selectionsState = {
     currentSelection: [],
     savedSelections: [],
-    nextColorIndex: 0
+    nextColorIndex: 0,
+    hoverSelection: null
 };
 
 export const selectionModel = {

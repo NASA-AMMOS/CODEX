@@ -27,3 +27,7 @@ export function deleteSelection(id) {
 export function renameSelection(id, name) {
     return { type: actionTypes.RENAME_SELECTION, id, name };
 }
+
+export function hoverSelection(id) {
+    return { type: actionTypes.HOVER_SELECTION, id };
+}

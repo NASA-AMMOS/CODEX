@@ -14,11 +14,19 @@ import ReactResizeDetector from "react-resize-detector";
 import GraphWrapper from "components/Graphs/GraphWrapper";
 
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import { useCurrentSelection, useSavedSelections, usePinnedFeatures } from "hooks/DataHooks";
+import {
+    useCurrentSelection,
+    useSavedSelections,
+    usePinnedFeatures,
+    useHoveredSelection
+} from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UiHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
+const ANIMATION_RANGE = 15;
+const ANIMATION_SPEED = 50;
+const COLOR_CURRENT_SELECTION = "#FF0000";
 
 function ScatterGraph(props) {
     const chart = useRef(null);
@@ -29,7 +37,7 @@ function ScatterGraph(props) {
     const yAxis = props.data.getIn([1, "feature"]);
 
     // The plotly react element only changes when the revision is incremented.
-    const [chartRevision, setChartRevision] = useState(0);
+    const chartRevision = useRef(0);
 
     // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState({
@@ -40,7 +48,7 @@ function ScatterGraph(props) {
                 type: "scattergl",
                 mode: "markers",
                 marker: { color: cols[0].map((val, idx) => DEFAULT_POINT_COLOR), size: 5 },
-                selected: { marker: { color: "#FF0000", size: 5 } },
+                selected: { marker: { color: COLOR_CURRENT_SELECTION, size: 5 } },
                 visible: true
             }
         ],
@@ -48,7 +56,7 @@ function ScatterGraph(props) {
             autosize: true,
             margin: { l: 0, r: 0, t: 0, b: 0, pad: 10 }, // Axis tick labels are drawn in the margin space
             dragmode: "lasso",
-            datarevision: chartRevision,
+            datarevision: chartRevision.current,
             hovermode: "closest", // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
             xaxis: {
@@ -68,12 +76,21 @@ function ScatterGraph(props) {
     });
 
     function updateChartRevision() {
-        const revision = chartRevision + 1;
+        chartRevision.current++;
         setChartState({
             ...chartState,
-            layout: { ...chartState.layout, datarevision: revision }
+            layout: { ...chartState.layout, datarevision: chartRevision.current }
         });
-        setChartRevision(revision);
+    }
+
+    function setSelectionColors() {
+        props.savedSelections.forEach(selection => {
+            selection.rowIndices.forEach(row => {
+                chartState.data[0].marker.color[row] = selection.active
+                    ? selection.color
+                    : chartState.data[0].marker.color[row];
+            });
+        });
     }
 
     // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
@@ -92,16 +109,61 @@ function ScatterGraph(props) {
             for (let i = 0; i < chartState.data[0].marker.color.length; i++) {
                 chartState.data[0].marker.color[i] = DEFAULT_POINT_COLOR;
             }
-            props.savedSelections.forEach(selection => {
-                selection.rowIndices.forEach(row => {
-                    chartState.data[0].marker.color[row] = !selection.hidden
-                        ? selection.color
-                        : chartState.data[0].marker.color[row];
-                });
-            });
+            setSelectionColors();
             updateChartRevision();
         },
         [props.savedSelections]
+    );
+
+    // Functions to animate selectionst that are being hovered over.
+    const animationState = useRef({ index: 0, ascending: true });
+    useEffect(
+        _ => {
+            if (!props.hoverSelection) return;
+            const activeSelection =
+                props.hoverSelection === "current_selection"
+                    ? { color: COLOR_CURRENT_SELECTION, isCurrentSelection: true }
+                    : props.savedSelections.find(sel => sel.id === props.hoverSelection);
+
+            const colorGradient = utils.createGradientStops(
+                activeSelection.color,
+                DEFAULT_POINT_COLOR,
+                ANIMATION_RANGE
+            );
+
+            const animationInterval = setInterval(_ => {
+                animationState.current.ascending =
+                    animationState.current.index === 0
+                        ? true
+                        : animationState.current.index === ANIMATION_RANGE - 1
+                        ? false
+                        : animationState.current.ascending;
+
+                animationState.current.index = animationState.current.ascending
+                    ? animationState.current.index + 1
+                    : animationState.current.index - 1;
+
+                const nextColor = colorGradient[animationState.current.index];
+
+                if (activeSelection.isCurrentSelection) {
+                    chartState.data[0].selected.marker.color = nextColor;
+                } else {
+                    activeSelection.rowIndices.forEach(row => {
+                        chartState.data[0].marker.color[row] = nextColor;
+                    });
+                }
+                updateChartRevision();
+            }, ANIMATION_SPEED);
+
+            return _ => {
+                clearInterval(animationInterval);
+                animationState.current = { index: 0, ascending: true };
+                chartState.data[0].selected.marker.color = COLOR_CURRENT_SELECTION;
+                setSelectionColors();
+                updateChartRevision();
+            };
+        },
+        [props.hoverSelection]
     );
 
     return (
@@ -139,6 +201,7 @@ export default props => {
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
     const [savedSelections, saveCurrentSelection] = useSavedSelections();
     const [globalChartState, setGlobalChartState] = useGlobalChartState();
+    const [hoverSelection, saveHoverSelection] = useHoveredSelection();
 
     const features = usePinnedFeatures(win);
 
@@ -159,6 +222,7 @@ export default props => {
                 setCurrentSelection={setCurrentSelection}
                 savedSelections={savedSelections}
                 saveCurrentSelection={saveCurrentSelection}
+                hoverSelection={hoverSelection}
                 globalChartState={globalChartState}
                 data={features}
             />

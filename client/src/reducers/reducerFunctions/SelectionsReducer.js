@@ -79,4 +79,8 @@ export default class SelectionsReducer {
             )
         };
     }
+
+    static hoverSelection(state, action) {
+        return { ...state, hoverSelection: action.id };
+    }
 }

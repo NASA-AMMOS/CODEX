@@ -82,6 +82,38 @@
     height: 565px;
 }
 
+.subalgo-edit-output-params {
+    .title {
+        font-weight: bold;
+        font-size: 22px;
+        line-height: 26px;
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        font-weight: bold;
+        font-size: 18px;
+        line-height: 21px;
+        margin-bottom: 10px;
+        margin-top: 20px;
+    }
+
+    .subalgo-param-field {
+        display: flex;
+        font-size: 16px;
+        line-height: 19px;
+        align-items: baseline;
+        input {
+            margin-right: 10px;
+        }
+
+        .param-title {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+    }
+}
+
 .subalgo-edit-header {
     margin-bottom: 10px;
     display: flex;
@@ -152,24 +184,12 @@
         }
     }
 
-    .param-title {
-        font-size: 14px;
-        margin-bottom: 20px;
-    }
-
     .output-section {
         margin-bottom: 5px;
         display: flex;
         justify-content: space-between;
         align-items: baseline;
     }
-}
-
-.subalgo-param-field {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-left: 10px;
 }
 
 .help-container {

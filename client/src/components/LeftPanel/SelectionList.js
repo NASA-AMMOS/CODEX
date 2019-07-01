@@ -32,12 +32,17 @@ function createSelection(
                     .toString(36)
                     .substring(7)
             }
+            onClick={_ => {
+                props.toggleSelectionActive(selection.id);
+            }}
             onContextMenu={e => {
                 e.preventDefault();
                 setContextMenuVisible(true);
                 setContextMenuPosition({ top: e.clientY, left: e.clientX });
                 setContextActiveSelection({ id: selection.id, displayName: selection.displayName });
             }}
+            onMouseEnter={_ => props.hoverSelection(selection.id)}
+            onMouseLeave={_ => props.hoverSelection(null)}
         >
             <Checkbox
                 checked={selection.active}
@@ -82,6 +87,8 @@ function createCurrentSelection(props) {
                 props.saveCurrentSelection();
                 props.setCurrentSelection([]);
             }}
+            onMouseEnter={_ => props.hoverSelection("current_selection")}
+            onMouseLeave={_ => props.hoverSelection(null)}
         >
             Current Selection
         </li>
@@ -207,7 +214,8 @@ function mapDispatchToProps(dispatch) {
         deleteSelection: bindActionCreators(selectionActions.deleteSelection, dispatch),
         renameSelection: bindActionCreators(selectionActions.renameSelection, dispatch),
         setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
-        saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
+        saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch),
+        hoverSelection: bindActionCreators(selectionActions.hoverSelection, dispatch)
     };
 }
 

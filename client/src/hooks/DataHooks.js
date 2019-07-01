@@ -194,12 +194,12 @@ export function usePinnedFeatures(windowHandle = undefined) {
  * @return state.nextColorIndex
  */
 export function useNextColorIndex() {
+    const nextColorIndex = useSelector(state => {
+        return state.selections.nextColorIndex;
+    });
 
-    const nextColorIndex = useSelector(state => {return state.selections.nextColorIndex;});
-
-    return  nextColorIndex;
+    return nextColorIndex;
 }
-
 
 /**
  * Get saved selections
@@ -227,12 +227,11 @@ export function useCurrentSelection() {
 }
 
 /**
-* Get all feature names.
-*/
+ * Get all feature names.
+ */
 export function useFeatureNames() {
     const dispatch = useDispatch();
-    const features = useSelector(state => state.data.get("featureList"))
-        .map(f => f.get("name"));
+    const features = useSelector(state => state.data.get("featureList")).map(f => f.get("name"));
 
     return features;
 }
@@ -274,4 +273,15 @@ export function useSelectedFeatureNames() {
  */
 export function useFilename() {
     return useSelector(state => state.data.get("filename"));
+}
+
+/**
+ * Get id of the selection that's currently being hovered over in the left-hand column.
+ * @return {string} id of active selection
+ */
+export function useHoveredSelection() {
+    const dispatch = useDispatch();
+    const currentHover = useSelector(state => state.selections.hoverSelection);
+
+    return [currentHover, indices => dispatch(selectionActions.setHoverSelection(indices))];
 }
