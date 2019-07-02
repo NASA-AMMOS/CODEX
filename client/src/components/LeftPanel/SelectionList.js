@@ -56,8 +56,8 @@ function createSelection(
             <Checkbox
                 checked={selection.hidden}
                 value="checkedA"
-                icon={<RemoveRedEye style={{fill: "#828282"}} />}
-                checkedIcon={<RemoveRedEye style={{ fill:"#3988E3"}} />}
+                icon={<RemoveRedEye style={{fill: "#DADADA"}} />}
+                checkedIcon={<RemoveRedEye style={{ fill:"#061427"}} />}
                 onClick={_ => {
                     props.toggleSelectionHidden(selection.id);
                     }

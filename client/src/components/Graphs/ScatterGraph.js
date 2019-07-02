@@ -25,7 +25,7 @@ import { useGlobalChartState } from "hooks/UiHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const ANIMATION_RANGE = 15;
-const ANIMATION_SPEED = 50;
+const ANIMATION_SPEED = 2;
 const COLOR_CURRENT_SELECTION = "#FF0000";
 
 function ScatterGraph(props) {
