@@ -86,9 +86,11 @@ function ScatterGraph(props) {
     function setSelectionColors() {
         props.savedSelections.forEach(selection => {
             selection.rowIndices.forEach(row => {
-                chartState.data[0].marker.color[row] = selection.active
-                    ? selection.color
-                    : chartState.data[0].marker.color[row];
+                if (selection.hidden) {
+                    chartState.data[0].marker.color[row] = DEFAULT_POINT_COLOR;
+                } else {
+                    chartState.data[0].marker.color[row] = selection.color;
+                }
             });
         });
     }
@@ -124,6 +126,12 @@ function ScatterGraph(props) {
                 props.hoverSelection === "current_selection"
                     ? { color: COLOR_CURRENT_SELECTION, isCurrentSelection: true }
                     : props.savedSelections.find(sel => sel.id === props.hoverSelection);
+
+            if (activeSelection.hidden) {
+                setSelectionColors();
+                updateChartRevision();
+                return;
+            }
 
             const colorGradient = utils.createGradientStops(
                 activeSelection.color,
@@ -163,7 +171,7 @@ function ScatterGraph(props) {
                 updateChartRevision();
             };
         },
-        [props.hoverSelection]
+        [props.hoverSelection, props.savedSelections]
     );
 
     return (

@@ -32,9 +32,6 @@ function createSelection(
                     .toString(36)
                     .substring(7)
             }
-            onClick={_ => {
-                props.toggleSelectionActive(selection.id);
-            }}
             onContextMenu={e => {
                 e.preventDefault();
                 setContextMenuVisible(true);
@@ -53,7 +50,7 @@ function createSelection(
                     props.toggleSelectionActive(selection.id);
                     }
                 }
-                style={{height:"22px", padding:"0px"}}
+                style={{height:"22px",  padding:"0px"}}
               />
             <div>{selection.displayName}</div>
             <Checkbox
