@@ -142,6 +142,11 @@ def explain_this(inputHash, featureNames, dataSelections, result):
         return None
 
     X,y = create_data_from_indices(dataSelections, data)
+
+    random_search_parameters = {
+
+
+    }
     
     result['tree_sweep'] = []
 
@@ -149,18 +154,39 @@ def explain_this(inputHash, featureNames, dataSelections, result):
     
     max_depth = 6
     for i in range(2, max_depth):
+        #train and fit the model
+        parameters = {
+            'criterion' :['gini', 'entropy'],
+            'splitter' : ['best', 'random'],
+            'min_samples_split': range(2, 10),
+            'min_samples_leaf': range(1, 10),
+            'max_features': range(1, features_)
+        }
 
+        clf = DecisionTreeClassifier(max_depth = i)
+
+        random_search = RandomizedSearchCV(estimator = clf,
+                                param_distributions = parameters,
+                                n_iter = 100, cv = 3,
+                                verbose=2,
+                                random_state=42,
+                                n_jobs = -1)
+
+        
+        random_search.fit(X,y)
+
+        best_tree = random_search.best_estimator_
+
+        #generate the interpretation of the model
         dictionary = {}
-        clf = DecisionTreeClassifier(max_features=features_, max_depth = i)
-        clf.fit(X,y)
 
-        proportion_tree_sums = get_proportion_tree_sums(clf, X, y)
+        proportion_tree_sums = get_proportion_tree_sums(best_tree, X, y)
 
-        feature_weights, feature_rank = zip(*sorted(zip(clf.feature_importances_, featureNames), reverse=True))
+        feature_weights, feature_rank = zip(*sorted(zip(best_tree.feature_importances_, featureNames), reverse=True))
 
-        dictionary['json_tree'] = export_json_tree(clf, featureNames[::-1], ["Main Data","Isolated Data"], proportion_tree_sums)
-        dictionary["score"] = np.round(clf.score(X,y) * 100)
-        dictionary["max_features"] = clf.max_features_
+        dictionary['json_tree'] = export_json_tree(best_tree, featureNames[::-1], ["Main Data","Isolated Data"], proportion_tree_sums)
+        dictionary["score"] = np.round(best_tree.score(X,y) * 100)
+        dictionary["max_features"] = best_tree.max_features_
         
         feature_weights = np.asarray(feature_weights).astype(float)
         dictionary["feature_rank"] = feature_rank

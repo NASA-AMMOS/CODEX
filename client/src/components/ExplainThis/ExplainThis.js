@@ -133,7 +133,7 @@ function generateTree(treeData, svgRef) {
         rect_width = 80,
         rect_height = 20,
         max_link_width = 20,
-        min_link_width = 1,
+        min_link_width = 4,
         root;
 
     //might change this later to be dynamic based on the number of leaf nodes
@@ -442,7 +442,9 @@ function ChooseSelections(props) {
                     value={props.chosenSelections[0]} 
                     onChange={e => props.setChosenSelections([e.target.value, props.chosenSelections[1]])}
                 >
-                    {props.selections.map(f => (
+                    {props.selections
+                        .filter(selection => selection.active)
+                        .map(f => (
                         <MenuItem key={f.id} value={f.id}>
                             {f.id}
                         </MenuItem>
@@ -454,7 +456,9 @@ function ChooseSelections(props) {
                     value={props.chosenSelections[1]} 
                     onChange={e => props.setChosenSelections([props.chosenSelections[0], e.target.value])}
                 >
-                    {props.selections.map(f => (
+                    {props.selections
+                        .filter(selection => selection.active)
+                        .map(f => (
                         <MenuItem key={f.id} value={f.id}>
                             {f.id}
                         </MenuItem>
@@ -466,7 +470,12 @@ function ChooseSelections(props) {
 }
 
 function TreeSweepScroller(props) {
-    if (!props.tree_sweep) return <div className="tree-sweep-scroller"> Loading ... </div>;
+    if (!props.tree_sweep && props.runButtonPressed) {
+        return <div className="tree-sweep-scroller-undefined"> <CircularProgress/></div>;
+    } else if (!props.tree_sweep) {
+        return <div className="tree-sweep-scroller-undefined"> Choose selections and run </div>;
+    }
+
     const [listClass, setListClass] = useState([]);
 
     const currentSelectionRef = useRef(null);
@@ -589,7 +598,7 @@ function FeatureImportanceGraph(props) {
 
 function FeatureList(props) {
     if (props.rankedFeatures == undefined) {
-        return <div>Loading ...</div>;
+        return <CircularProgress/>;
     }
 
     return (
@@ -598,6 +607,7 @@ function FeatureList(props) {
                 setTreeIndex={props.setTreeIndex}
                 tree_sweep={props.tree_sweep}
                 treeIndex={props.treeIndex}
+                runButtonPressed={props.runButtonPressed}
             />
             <FeatureImportanceGraph 
                 rankedFeatures={props.rankedFeatures} 
@@ -613,7 +623,7 @@ function FeatureList(props) {
                 variant="contained"
                 color="primary"
                 onClick={_ => {
-                    props.setTriggerFlag(!props.triggerFlag);
+                    props.setRunButtonPressed(true);
                 }}
             >
                 Run
@@ -649,7 +659,7 @@ function ExplainThis(props) {
     //make a data state object to hold the data in the request
     const [dataState, setDataState] = useState(undefined);
     const [treeIndex, setTreeIndex] = useState(0);
-    const [triggerFlag, setTriggerFlag] = useState(true);
+    const [runButtonPressed, setRunButtonPressed] = useState(false);
 
     //handles initialization of chosenSelections based 
     //on the global active selections
@@ -663,15 +673,16 @@ function ExplainThis(props) {
             numChosen++; 
         }
     }       
-    console.log(newChosenSelections)
     const [chosenSelections, setChosenSelections] = useState(newChosenSelections);
 
 
     useEffect(
         _ => {
-            if (chosenSelections == null || chosenSelections[0] == null || chosenSelections[1] == null) {
+            if (chosenSelections == null || chosenSelections[0] == null || chosenSelections[1] == null || !runButtonPressed) {
                 return;
             }
+            //clear current data
+            setDataState(undefined);
             //get indices from selection names
             let firstSelectionIndices = [];
             let secondSelectionIndices = [];
@@ -688,6 +699,7 @@ function ExplainThis(props) {
 
             const requestMade = utils.makeSimpleRequest(request);
             requestMade.req.then(data => {
+                setRunButtonPressed(false);
                 setDataState(data);
             });
 
@@ -696,22 +708,37 @@ function ExplainThis(props) {
                 requestMade.cancel();
             };
         },
-        [triggerFlag]
+        [runButtonPressed]
     );
 
-    if (!dataState) {
+    if (!dataState && !runButtonPressed) {
         return (
             <div className="explain-this-container">
                 <FeatureList
                     rankedFeatures={[]}
                     importances={[]}
-                    setTriggerFlag={setTriggerFlag}
-                    triggerFlag={triggerFlag}
+                    setRunButtonPressed={setRunButtonPressed}
+                    runButtonPressed={runButtonPressed}
                     selections={props.selections}
                     setChosenSelections={setChosenSelections}
                     chosenSelections={chosenSelections}
                 />
-                <div className="load-failure">Choose selections and hit run.</div>
+                <div className="load-failure">Choose selections and run</div>
+            </div>
+        );
+    } else if (!dataState) {
+        return (
+            <div className="explain-this-container">
+                <FeatureList
+                    rankedFeatures={[]}
+                    importances={[]}
+                    setRunButtonPressed={setRunButtonPressed}
+                    runButtonPressed={runButtonPressed}
+                    selections={props.selections}
+                    setChosenSelections={setChosenSelections}
+                    chosenSelections={chosenSelections}
+                />
+                <div className="load-failure"><CircularProgress/></div>
             </div>
         );
     } else {
@@ -722,8 +749,8 @@ function ExplainThis(props) {
                     importances={dataState.tree_sweep[treeIndex].feature_weights}
                     setTreeIndex={setTreeIndex}
                     tree_sweep={dataState.tree_sweep}
-                    setTriggerFlag={setTriggerFlag}
-                    triggerFlag={triggerFlag}
+                    setRunButtonPressed={setRunButtonPressed}
+                    runButtonPressed={runButtonPressed}
                     treeIndex={treeIndex}
                     selections={props.selections}
                     setChosenSelections={setChosenSelections}
