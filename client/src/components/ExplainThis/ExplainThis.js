@@ -542,7 +542,6 @@ function TreeSweepScroller(props) {
 }
 
 function FeatureImportanceGraph(props) {
-    console.log(props.featureImportances)
     const chartOptions = {
         data : [{
             x: props.featureImportances.slice().reverse(),
@@ -649,13 +648,28 @@ function ExplainThisTree(props) {
 function ExplainThis(props) {
     //make a data state object to hold the data in the request
     const [dataState, setDataState] = useState(undefined);
-    const [chosenSelections, setChosenSelections] = useState([]);
     const [treeIndex, setTreeIndex] = useState(0);
     const [triggerFlag, setTriggerFlag] = useState(true);
-    //handles the request object asynchronous loading
+
+    //handles initialization of chosenSelections based 
+    //on the global active selections
+    let newChosenSelections = [null, null];
+    let numChosen = 0;
+    for (let selection of props.selections) {
+        if (numChosen == 2)
+            break;
+        if (selection.active){
+            newChosenSelections[numChosen] = selection.id;
+            numChosen++; 
+        }
+    }       
+    console.log(newChosenSelections)
+    const [chosenSelections, setChosenSelections] = useState(newChosenSelections);
+
+
     useEffect(
         _ => {
-            if (chosenSelections == undefined || chosenSelections[0] == undefined|| chosenSelections[1] == undefined) {
+            if (chosenSelections == null || chosenSelections[0] == null || chosenSelections[1] == null) {
                 return;
             }
             //get indices from selection names
