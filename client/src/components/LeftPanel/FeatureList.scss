@@ -63,9 +63,12 @@
                 width: 100%;
 
                 ul {
-                    padding-left: 10px;
+                    padding-left: 0px;
+                    padding-right: 0px;
                     li {
                         height: 22px;
+                        padding-left: 10px;
+                        padding-right: 10px;
                     }
                 }
 

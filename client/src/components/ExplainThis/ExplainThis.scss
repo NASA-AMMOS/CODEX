@@ -1,19 +1,24 @@
+
 .explain-this-container {
     height: 100%;
     width: 100%;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    padding-left: 5px;
-    padding-right: 5px;
-    padding: 10px;
-    padding-top: 0px;
+    display: flex;
+    flex-direction: row;
+
+    .load-failure {
+        display:flex;
+        justify-content: center;
+        align-items: center;
+        width:100%;
+        height: 100%;
+    }
 
     .feature-list {
-        height: 220px;
-        border-bottom: 3px solid black;
-        width: 100%;
+        width: 250px;
+        border-right: 3px solid black;
+        height: 100%;
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
 
         .feature-list-header {
             color: rgba(0, 0, 0, 0.87);
@@ -27,47 +32,74 @@
         li {
             height: 20px;
         }
-
-        .used-features {
-            width: 35%;
-            overflow-y: scroll;
-            padding: 16px;
-        }
-
-        .right-pane {
-            width: 25%;
+        .selections-chooser {
             display: flex;
             flex-direction: column;
-
-            .label-chooser {
-                padding-left: 16px;
-                height: 50%;
+            .selection-chooser-header {
+                margin: 0px;
             }
 
-            .button-container {
-                height: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                .run-button {
-                    height: 40%;
-                    width: 60%;
-                }
+            .selection-dropdown {
+                width: 80%;
+                margin-left: auto;
+                margin-right: auto;
             }
+        }
+
+        .feature-importance-graph-title {
+            margin: auto;
+            margin-top:20px;
+        }
+
+        .feature-importance-graph {
+            width: 100%;
+            margin-top: 5px;
+            overflow-y: scroll;
+            overflow-x: hidden;
+        }
+
+        .used-features {
+            width: 100%;
+            overflow-y: scroll;
+            padding: 16px;
+            height: 30%;
+            margin-top:auto;
+        }
+
+        .tree-sweep-scroller-undefined {
+            display: flex; 
+            justify-content: center;
+            align-items:center;
+            margin-bottom: 20px;
+            height:25%;
+            width:100%;
         }
 
         .tree-sweep-scroller {
             margin-bottom: 20px;
-            width: 40%;
+            height:25%;
+            width:100%;
 
             .tree-sweep-slider {
-                margin: 20px;
+                padding : 20px;
+                margin-top: 0px;
+                margin-bottom: 10px;
             }
 
             .tree-sweep-plot {
-                height: 90%;
                 width: 100%;
+                height:100%;
+                .plotly-container {
+                    height:100%;
+                    .svg-container {
+                        height: 100%;
+                    }
+                }
             }
+        }
+
+        .run-button {
+            margin:10px;
         }
     }
 
@@ -75,5 +107,7 @@
         width: 100%;
         height: 600px;
         flex: 1;
+        overflow-y:scroll;
     }
 }
+

@@ -8,5 +8,6 @@ export const selectionsState = {
 export const selectionModel = {
     name: "name",
     rowIndices: [],
-    active: true
+    active: true,
+    hidden: false
 };

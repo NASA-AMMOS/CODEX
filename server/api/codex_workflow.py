@@ -1,4 +1,3 @@
-
 '''
 Author: Jack Lightholder
 Date  : 5/17/19
@@ -73,6 +72,7 @@ def export_json_tree(clf, features, labels, proportion_tree_sums, node_index=0):
 
     Note: From here: https://planspace.org/20151129-see_sklearn_trees_with_d3/
     """
+
     node = {}
     if clf.tree_.children_left[node_index] == -1:  # indicates leaf
         count_labels = zip(clf.tree_.value[node_index, 0], labels)
@@ -109,7 +109,7 @@ def export_json_tree(clf, features, labels, proportion_tree_sums, node_index=0):
     """
     return node
 
-def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
+def explain_this(inputHash, featureNames, dataSelections, result):
     '''
     Inputs:
 
@@ -127,23 +127,6 @@ def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
 
     startTime = time.time()
     result = {"WARNING":None}
-    
-    # TODO - labels are currently cached under features
-    labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
-    if labelHash_dict is None:
-        codex_system.codex_log("label hash {hash} not found. Returning!".format(hash=labelHash))
-        return {'algorithm': algorithm,
-                'downsample': downsampled,
-                'cross_val': cross_val,
-                'scoring': scoring,
-                'WARNING': "Label not found in database."}
-    else:
-        y = labelHash_dict['data']
-        result['y'] = y.tolist()
-
-    if(len(np.unique(y)) != 2):
-        result['WARNING'] = "Too many classes.  explain_features currently only works for binary classification"
-        return result
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
@@ -154,45 +137,57 @@ def explain_this(inputHash, featureNames, subsetHashName, labelHash, result):
     if data is None:
         return None
 
-    if subsetHashName is not None:
-        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
-        if(subsetHash is None):
-            subsetHash = False
-        else:
-            subsetHash = subsetHash["hash"]
-    else:
-        subsetHash = False
-
-    if subsetHash is not False:
-        data = codex_hash.applySubsetMask(data, subsetHash)
-        if(data is None):
-            codex_system.codex_log("ERROR: explain_this - subsetHash returned None.")
-            return None
-
     if data.ndim < 2:
         codex_system.codex_log("ERROR: explain_this - insufficient data dimmensions")
         return None
 
-    X = codex_math.codex_impute(data)
-    result['data'] = X.tolist()
+    X,y = create_data_from_indices(dataSelections, data)
+
+    random_search_parameters = {
+
+
+    }
+    
     result['tree_sweep'] = []
 
     samples_, features_ = X.shape
     
-    max_depth = 7
+    max_depth = 6
     for i in range(2, max_depth):
+        #train and fit the model
+        parameters = {
+            'criterion' :['gini', 'entropy'],
+            'splitter' : ['best', 'random'],
+            'min_samples_split': range(2, 10),
+            'min_samples_leaf': range(1, 10),
+            'max_features': range(1, features_)
+        }
 
+        clf = DecisionTreeClassifier(max_depth = i)
+
+        random_search = RandomizedSearchCV(estimator = clf,
+                                param_distributions = parameters,
+                                n_iter = 100, cv = 3,
+                                verbose=2,
+                                random_state=42,
+                                n_jobs = -1)
+
+        
+        random_search.fit(X,y)
+
+        best_tree = random_search.best_estimator_
+
+        #generate the interpretation of the model
         dictionary = {}
-        clf = DecisionTreeClassifier(max_features=features_, max_depth = i)
-        clf.fit(X,y)
 
-        proportion_tree_sums = get_proportion_tree_sums(clf, X, y)
+        proportion_tree_sums = get_proportion_tree_sums(best_tree, X, y)
 
-        dictionary['json_tree'] = export_json_tree(clf, featureNames, ["Main Data","Isolated Data"], proportion_tree_sums)
-        dictionary["score"] = np.round(clf.score(X,y) * 100)
-        dictionary["max_features"] = clf.max_features_
+        feature_weights, feature_rank = zip(*sorted(zip(best_tree.feature_importances_, featureNames), reverse=True))
 
-        feature_weights, feature_rank = zip(*sorted(zip(clf.feature_importances_, featureNames), reverse=True))
+        dictionary['json_tree'] = export_json_tree(best_tree, featureNames[::-1], ["Main Data","Isolated Data"], proportion_tree_sums)
+        dictionary["score"] = np.round(best_tree.score(X,y) * 100)
+        dictionary["max_features"] = best_tree.max_features_
+        
         feature_weights = np.asarray(feature_weights).astype(float)
         dictionary["feature_rank"] = feature_rank
         dictionary["feature_weights"] = (np.round(feature_weights * 100)).tolist()
@@ -210,8 +205,6 @@ def create_data_from_indices(data_selections, data):
 
     #this is a single dimensional array that contains
     #numbers corrresponding to the data's class
-    codex_system.codex_log(str(data_selections))
-
     num_selections = 0
     for arr in data_selections:
         num_selections+=len(arr)
@@ -252,8 +245,6 @@ def convert_labels_to_class_indices(label_mask, num_classes):
 """
 def train_fmlt_model(data):
     #data is of the format (data,labels)
-    codex_system.codex_log(str(data[1]))
-
     #construct the grid search parameter grid
     # Number of trees in random forest
     n_estimators = [int(x) for x in np.linspace(start = 5, stop = 50, num = 10)]
@@ -329,7 +320,6 @@ def find_more_like_this(inputHash, featureList, dataSelections, result):
     class_names = list(dataSelections.keys())    
 
     #convert the output to a dictionary
-    codex_system.codex_log(str(list(enumerate(output_selection_array))))
     output_dictionary = {}
     for i,arr in enumerate(output_selection_array):
         codex_system.codex_log(str(i))

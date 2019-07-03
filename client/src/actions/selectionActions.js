@@ -12,6 +12,10 @@ export function toggleSelectionActive(id) {
     return { type: actionTypes.TOGGLE_SELECTION_ACTIVE, id };
 }
 
+export function toggleSelectionHidden(id) {
+    return { type: actionTypes.TOGGLE_SELECTION_HIDDEN, id };
+}
+
 export function saveNewSelection(id, rowIndices) {
     return { type: actionTypes.SAVE_NEW_SELECTION, id, rowIndices };
 }

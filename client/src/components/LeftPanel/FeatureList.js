@@ -6,6 +6,9 @@ import { bindActionCreators } from "redux";
 import * as dataActions from "actions/data";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import FeatureData from "components/LeftPanel/FeatureData";
+import Checkbox from '@material-ui/core/Checkbox';
+import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
+import CheckboxIcon from "@material-ui/icons/CheckBox";
 
 function createFeature(props, feature) {
     const name = feature.get("name");
@@ -13,16 +16,21 @@ function createFeature(props, feature) {
 
     return (
         <li
-            className={classnames({ feature: true, selected })}
+            className={classnames({ feature: true})}
             key={name}
-            onClick={e => {
-                if (props.onOffAll !== "all" || props.filterString !== "") e.shiftKey = false;
-                return selected
-                    ? props.featureUnselect(name, e.shiftKey)
-                    : props.featureSelect(name, e.shiftKey);
-            }}
         >
-            <div className="checkbox" />
+            <Checkbox
+                checked={selected}
+                value="checkedA"
+                style={{height:"22px",padding:"0px", paddingRight:"10px"}}
+                icon={<CheckboxOutlineBlank style={{fill: "#828282"}} />}
+                checkedIcon={<CheckboxIcon style={{ fill:"#3988E3"}} />}
+                onClick={function(e) {
+                    return selected
+                        ? props.featureUnselect(name, e.shiftKey)
+                        : props.featureSelect(name, e.shiftKey);
+                }}
+              />
             <span>{name}</span>
         </li>
     );

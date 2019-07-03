@@ -15,11 +15,21 @@ export default class SelectionsReducer {
                     rowIndices: state.currentSelection,
                     color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
                     active: true,
+                    hidden: false,
                     displayName: `Selection_${state.savedSelections.length + 1}`
                 }
             ]),
             currentSelection: [],
             nextColorIndex: (state.nextColorIndex + 1) % uiTypes.SELECTIONS_COLOR_PALETTE.length
+        };
+    }
+
+    static toggleSelectionHidden(state, action) {
+        return {
+            ...state,
+            savedSelections: state.savedSelections.map(selection =>
+                selection.id === action.id ? { ...selection, hidden: !selection.hidden} : selection
+            )
         };
     }
 
@@ -41,6 +51,7 @@ export default class SelectionsReducer {
                     rowIndices: action.rowIndices,
                     color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
                     active: true,
+                    hidden: false,
                     displayName: action.id
                 }
             ]),

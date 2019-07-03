@@ -18,6 +18,10 @@ import FormControl from "@material-ui/core/FormControl";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import Slider from "@material-ui/lab/Slider";
+import { useSelectedFeatureNames, useFilename, useSavedSelections } from "hooks/DataHooks";
+import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import { useWindowManager } from "hooks/WindowHooks";
+
 
 // Toggle children.
 function toggle(d) {
@@ -45,7 +49,7 @@ function processFloatingPointNumber(number) {
     let roundedNumber = Math.round(number * Math.pow(10, 2)) / Math.pow(10, 2);
     let newNumber = "";
     //see if has decimal
-    if ((roundedNumber + "").length > 4) {
+    if ((roundedNumber + "").length > 6) {
         //convert to scientific notation
         newNumber = roundedNumber.toExponential(1);
     } else {
@@ -129,18 +133,18 @@ function generateTree(treeData, svgRef) {
         rect_width = 80,
         rect_height = 20,
         max_link_width = 20,
-        min_link_width = 1,
+        min_link_width = 4,
         root;
 
     //might change this later to be dynamic based on the number of leaf nodes
-    let maxDepth = 6;
+    let maxDepth = 5;
     let numLeafs = calculateNumLeafNodes(treeData);
     let nodeSize = [8, width / maxDepth + 3];
 
     let color_map = d3.scale
         .linear()
-        .domain([0, 0.5, 1])
-        .range(["blue", "lightgray", "red"]);
+        .domain([0, 1])
+        .range(["blue",  "red"]);
 
     /**
      * Mixes colors according to the relative frequency of classes.
@@ -163,7 +167,7 @@ function generateTree(treeData, svgRef) {
     let vis = d3
         .select(svgRef)
         .append("svg:g")
-        .attr("transform", "translate(" + margin.left + "," + (height / 2 - 20) + ")");
+        .attr("transform", "translate(" + margin.left + "," + (height / 2 - 60) + ")");
 
     let gradientContainer = d3
         .select(svgRef)
@@ -246,17 +250,7 @@ function generateTree(treeData, svgRef) {
 
         // Normalize for fixed-depth.
         nodes.forEach(function(d) {
-            let firstDepth = 30;
-            let yscale = 120;
-            d.x += 50;
-            if (hasLeafChildren(d) && d.depth == 1) {
-                firstDepth = 150;
-            }
-            if (d.depth == 0) {
-                d.y = 0;
-            } else {
-                d.y = firstDepth + yscale * (d.depth - 1);
-            }
+            d.y = d.depth * 120;
         });
 
         // Update the nodes…
@@ -427,11 +421,10 @@ function generateTree(treeData, svgRef) {
     load_dataset(treeData);
 }
 
-function createExplainThisRequest(filename, labelName, dataFeatures) {
+function createExplainThisRequest(filename, selections, dataFeatures) {
     return {
         routine: "workflow",
-        dataSelections: [],
-        labelName: labelName,
+        dataSelections: selections,
         workflow: "explain_this",
         dataFeatures: dataFeatures,
         file: filename,
@@ -440,16 +433,34 @@ function createExplainThisRequest(filename, labelName, dataFeatures) {
     };
 }
 
-function ChooseLabel(props) {
+function ChooseSelections(props) {
     return (
-        <div className="label-chooser">
-            <p className="feature-list-header">Choose Label</p>
-            <FormControl className="labelDropdown">
-                <InputLabel>Labels</InputLabel>
-                <Select value={props.label} onChange={e => props.setLabel(e.target.value)}>
-                    {props.selectedFeatures.map(f => (
-                        <MenuItem key={f} value={f}>
-                            {f}
+        <div className="selections-chooser">
+            <p className="selection-chooser-header">Choose Two Selections</p>
+            <FormControl className="selection-dropdown">
+                <Select 
+                    value={props.chosenSelections[0]} 
+                    onChange={e => props.setChosenSelections([e.target.value, props.chosenSelections[1]])}
+                >
+                    {props.selections
+                        .filter(selection => selection.active)
+                        .map(f => (
+                        <MenuItem key={f.id} value={f.id}>
+                            {f.id}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+            <FormControl className="selection-dropdown">
+                <Select 
+                    value={props.chosenSelections[1]} 
+                    onChange={e => props.setChosenSelections([props.chosenSelections[0], e.target.value])}
+                >
+                    {props.selections
+                        .filter(selection => selection.active)
+                        .map(f => (
+                        <MenuItem key={f.id} value={f.id}>
+                            {f.id}
                         </MenuItem>
                     ))}
                 </Select>
@@ -459,7 +470,12 @@ function ChooseLabel(props) {
 }
 
 function TreeSweepScroller(props) {
-    if (!props.tree_sweep) return <div className="tree-sweep-scroller"> Loading ... </div>;
+    if (!props.tree_sweep && props.runButtonPressed) {
+        return <div className="tree-sweep-scroller-undefined"> <CircularProgress/></div>;
+    } else if (!props.tree_sweep) {
+        return <div className="tree-sweep-scroller-undefined"> Choose selections and run </div>;
+    }
+
     const [listClass, setListClass] = useState([]);
 
     const currentSelectionRef = useRef(null);
@@ -484,21 +500,21 @@ function TreeSweepScroller(props) {
         ],
         layout: {
             autosize: true,
-            margin: { l: 20, r: 0, t: 40, b: 0 }, // Axis tick labels are drawn in the margin space
+            margin: { l: 20, r: 10, t: 20, b: 0 }, // Axis tick labels are drawn in the margin space
             hovermode: "closest", // Turning off hovermode seems to screw up click handling
             showlegend: false,
             xaxis: {
-                automargin: true
+                automargin: true,
             },
             yaxis: {
                 automargin: true,
-                range: [0, 100]
+                range: [0, 105]
             },
             title: {
                 text: "Score vs Tree Depth",
                 font: {
                     family: "Roboto, Helvetica, Arial, sans-serif",
-                    size: 18
+                    size: 14
                 }
             }
         },
@@ -509,7 +525,7 @@ function TreeSweepScroller(props) {
     };
 
     return (
-        <React.Fragment>
+        <div className="tree-sweep-scroller">
             <Plot
                 className="tree-sweep-plot"
                 data={chartOptions.data}
@@ -530,59 +546,88 @@ function TreeSweepScroller(props) {
                     //scroll tree sweep list
                 }}
             />
+        </div>
+    );
+}
+
+function FeatureImportanceGraph(props) {
+    const chartOptions = {
+        data : [{
+            x: props.featureImportances.slice().reverse(),
+            y: props.rankedFeatures.slice().reverse(),
+            yaxis:"y",
+            type: "bar",
+            orientation: "h"
+        }],
+        config : {
+            displaylogo: false,
+            displayModeBar: false
+        }, 
+        layout: {
+            autosize:false,
+            height: 100 + (15*props.featureImportances.length),
+            width: 200,
+            margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
+            xaxis: {
+                automargin: false,
+                type:"category",
+                domain:[0,100]
+            },
+            yaxis: {
+                automargin: true,
+                fixedrange:true,
+
+            },
+        },
+    };
+
+    return (
+        <React.Fragment>
+            <div className="feature-importance-graph-title">
+                Feature Importances
+            </div>
+            <Plot
+                className="feature-importance-graph"
+                data={chartOptions.data}
+                layout={chartOptions.layout}
+                config={chartOptions.config}
+            />
         </React.Fragment>
     );
 }
 
 function FeatureList(props) {
     if (props.rankedFeatures == undefined) {
-        return <div>Loading ...</div>;
+        return <CircularProgress/>;
     }
 
     return (
         <div className="feature-list">
-            <div className="tree-sweep-scroller">
-                <TreeSweepScroller
-                    setTreeIndex={props.setTreeIndex}
-                    tree_sweep={props.tree_sweep}
-                    treeIndex={props.treeIndex}
-                />
-            </div>
-            <List className="used-features">
-                <ListItem>
-                    <p className="feature-list-header">Used Features</p>
-                </ListItem>
-                {props.rankedFeatures.map((feature, index) => {
-                    return (
-                        <ListItem key={index}>
-                            <span className="feature-list-item">{feature}</span>
-                            <span className="importances-number">
-                                {" "}
-                                / {props.importances[index]}%{" "}
-                            </span>
-                        </ListItem>
-                    );
-                })}
-            </List>
-            <div className="right-pane">
-                <ChooseLabel
-                    selectedFeatures={props.features}
-                    label={props.label}
-                    setLabel={props.setLabel}
-                />
-                <div className="button-container">
-                    <Button
-                        className="run-button"
-                        variant="contained"
-                        color="primary"
-                        onClick={_ => {
-                            props.setTriggerFlag(!props.triggerFlag);
-                        }}
-                    >
-                        Run
-                    </Button>
-                </div>
-            </div>
+            <TreeSweepScroller
+                setTreeIndex={props.setTreeIndex}
+                tree_sweep={props.tree_sweep}
+                treeIndex={props.treeIndex}
+                runButtonPressed={props.runButtonPressed}
+            />
+            <FeatureImportanceGraph 
+                rankedFeatures={props.rankedFeatures} 
+                featureImportances={props.importances}
+            />
+            <ChooseSelections
+                selections={props.selections}
+                setChosenSelections={props.setChosenSelections}
+                chosenSelections={props.chosenSelections}
+            />
+            <Button
+                className="run-button"
+                variant="contained"
+                color="primary"
+                onClick={_ => {
+                    props.setRunButtonPressed(true);
+                }}
+            >
+                Run
+            </Button>
         </div>
     );
 }
@@ -595,7 +640,6 @@ function ExplainThisTree(props) {
         _ => {
             if (!svgRef) return;
             d3.selectAll(".tree-container > *").remove();
-            console.log(props.treeData);
             generateTree(props.treeData.json_tree, svgRef);
         },
         [props.treeData]
@@ -614,26 +658,48 @@ function ExplainThisTree(props) {
 function ExplainThis(props) {
     //make a data state object to hold the data in the request
     const [dataState, setDataState] = useState(undefined);
-
-    const defaultLabelName = "labels";
-    const [label, setLabel] = useState(defaultLabelName);
     const [treeIndex, setTreeIndex] = useState(0);
-    const [triggerFlag, setTriggerFlag] = useState(true);
+    const [runButtonPressed, setRunButtonPressed] = useState(false);
 
-    //handles the request object asynchronous loading
+    //handles initialization of chosenSelections based 
+    //on the global active selections
+    let newChosenSelections = [null, null];
+    let numChosen = 0;
+    for (let selection of props.selections) {
+        if (numChosen == 2)
+            break;
+        if (selection.active){
+            newChosenSelections[numChosen] = selection.id;
+            numChosen++; 
+        }
+    }       
+    const [chosenSelections, setChosenSelections] = useState(newChosenSelections);
+
+
     useEffect(
         _ => {
-            //handle the loading of the data request promise
-            // Get selected feature list from current state if none specified
-            let selectedFeatures = props.featureList
-                .filter(f => f.get("selected"))
-                .map(f => f.get("name"))
-                .toJS();
+            if (chosenSelections == null || chosenSelections[0] == null || chosenSelections[1] == null || !runButtonPressed) {
+                return;
+            }
+            //clear current data
+            setDataState(undefined);
+            //get indices from selection names
+            let firstSelectionIndices = [];
+            let secondSelectionIndices = [];
+            for (let selection of props.selections) {
+                if (selection.id === chosenSelections[0]){
+                    firstSelectionIndices = selection.rowIndices;
+                } else if (selection.id === chosenSelections[1]) {
+                    secondSelectionIndices = selection.rowIndices;
+                }
+            }
 
-            const request = createExplainThisRequest(props.filename, label, selectedFeatures);
+            //handle the loading of the data request promise
+            const request = createExplainThisRequest(props.filename, [firstSelectionIndices, secondSelectionIndices], props.selectedFeatureNames);
 
             const requestMade = utils.makeSimpleRequest(request);
             requestMade.req.then(data => {
+                setRunButtonPressed(false);
                 setDataState(data);
             });
 
@@ -642,44 +708,53 @@ function ExplainThis(props) {
                 requestMade.cancel();
             };
         },
-        [label, triggerFlag]
+        [runButtonPressed]
     );
 
-    if (!dataState) {
-        return (
-            <div className="chartLoading">
-                <CircularProgress />
-            </div>
-        );
-    } else if (!dataState.tree_sweep) {
+    if (!dataState && !runButtonPressed) {
         return (
             <div className="explain-this-container">
                 <FeatureList
-                    features={props.featureList.map(f => f.get("name"))}
                     rankedFeatures={[]}
                     importances={[]}
-                    label={label}
-                    setLabel={setLabel}
-                    setTriggerFlag={setTriggerFlag}
-                    triggerFlag={triggerFlag}
+                    setRunButtonPressed={setRunButtonPressed}
+                    runButtonPressed={runButtonPressed}
+                    selections={props.selections}
+                    setChosenSelections={setChosenSelections}
+                    chosenSelections={chosenSelections}
                 />
-                <div className="load-failure">Choose a different feature as your label.</div>
+                <div className="load-failure">Choose selections and run</div>
+            </div>
+        );
+    } else if (!dataState) {
+        return (
+            <div className="explain-this-container">
+                <FeatureList
+                    rankedFeatures={[]}
+                    importances={[]}
+                    setRunButtonPressed={setRunButtonPressed}
+                    runButtonPressed={runButtonPressed}
+                    selections={props.selections}
+                    setChosenSelections={setChosenSelections}
+                    chosenSelections={chosenSelections}
+                />
+                <div className="load-failure"><CircularProgress/></div>
             </div>
         );
     } else {
         return (
             <div className="explain-this-container">
                 <FeatureList
-                    features={props.featureList.map(f => f.get("name"))}
                     rankedFeatures={dataState.tree_sweep[treeIndex].feature_rank}
                     importances={dataState.tree_sweep[treeIndex].feature_weights}
-                    label={label}
-                    setLabel={setLabel}
                     setTreeIndex={setTreeIndex}
                     tree_sweep={dataState.tree_sweep}
-                    setTriggerFlag={setTriggerFlag}
-                    triggerFlag={triggerFlag}
+                    setRunButtonPressed={setRunButtonPressed}
+                    runButtonPressed={runButtonPressed}
                     treeIndex={treeIndex}
+                    selections={props.selections}
+                    setChosenSelections={setChosenSelections}
+                    chosenSelections={chosenSelections}
                 />
                 <ExplainThisTree treeData={dataState.tree_sweep[treeIndex]} />
             </div>
@@ -687,18 +762,35 @@ function ExplainThis(props) {
     }
 }
 
-function mapStateToProps(state) {
-    return {
-        featureList: state.data.get("featureList"),
-        filename: state.data.get("filename")
-    };
-}
+// wrapped data selector
+export default props => {
+    const win = useWindowManager(props, {
+        width: 910,
+        height: 530,
+        resizeable: false,
+        title: "Explain This"
+    });
 
-function mapDispatchToProps(dispatch) {
-    return {};
-}
+    const [selectedFeatureNames, setSelectedFeatures] = useSelectedFeatureNames();
+    const [selections, setSelections] = useSavedSelections();
+    const filename = useFilename();
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(ExplainThis);
+    if (selectedFeatureNames.size >= 1) {
+        return (
+            <ExplainThis
+                selectedFeatureNames={selectedFeatureNames}
+                filename={filename}
+                selections={selections}
+            />
+        );
+    } else {
+        return (
+            <WindowError>
+                Please select exactly two features
+                <br />
+                in the features list to use this graph.
+            </WindowError>
+        );
+    }
+};
+

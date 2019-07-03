@@ -11,6 +11,10 @@ import ListItem from "@material-ui/core/ListItem";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
+import Checkbox from '@material-ui/core/Checkbox';
+import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
+import RemoveRedEye from "@material-ui/icons/RemoveRedEye";
+import CheckboxIcon from "@material-ui/icons/CheckBox";
 
 function createSelection(
     props,
@@ -28,9 +32,6 @@ function createSelection(
                     .toString(36)
                     .substring(7)
             }
-            onClick={_ => {
-                props.toggleSelectionActive(selection.id);
-            }}
             onContextMenu={e => {
                 e.preventDefault();
                 setContextMenuVisible(true);
@@ -40,10 +41,32 @@ function createSelection(
             onMouseEnter={_ => props.hoverSelection(selection.id)}
             onMouseLeave={_ => props.hoverSelection(null)}
         >
+            <Checkbox
+                checked={selection.active}
+                value="checkedA"
+                icon={<CheckboxOutlineBlank style={{fill: "#828282"}} />}
+                checkedIcon={<CheckboxIcon style={{ fill:"#3988E3"}} />}
+                onClick={_ => {
+                    props.toggleSelectionActive(selection.id);
+                    }
+                }
+                style={{height:"22px",  padding:"0px"}}
+              />
             <div>{selection.displayName}</div>
-            <div
+            <Checkbox
+                checked={selection.hidden}
+                value="checkedA"
+                icon={<RemoveRedEye style={{fill: "#DADADA"}} />}
+                checkedIcon={<RemoveRedEye style={{ fill:"#061427"}} />}
+                onClick={_ => {
+                    props.toggleSelectionHidden(selection.id);
+                    }
+                }
+                style={{height:"22px", padding:"0px"}}
+              />
+              <div
                 className="swatch"
-                style={{ background: selection.active ? selection.color : "#bbbbbb" }}
+                style={{ background: selection.color}}
             />
         </li>
     );
@@ -184,6 +207,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         toggleSelectionActive: bindActionCreators(selectionActions.toggleSelectionActive, dispatch),
+        toggleSelectionHidden: bindActionCreators(selectionActions.toggleSelectionHidden, dispatch),
         deleteSelection: bindActionCreators(selectionActions.deleteSelection, dispatch),
         renameSelection: bindActionCreators(selectionActions.renameSelection, dispatch),
         setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),

@@ -25,7 +25,7 @@ import { useGlobalChartState } from "hooks/UiHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const ANIMATION_RANGE = 15;
-const ANIMATION_SPEED = 50;
+const ANIMATION_SPEED = 2;
 const COLOR_CURRENT_SELECTION = "#FF0000";
 
 function ScatterGraph(props) {
@@ -86,9 +86,11 @@ function ScatterGraph(props) {
     function setSelectionColors() {
         props.savedSelections.forEach(selection => {
             selection.rowIndices.forEach(row => {
-                chartState.data[0].marker.color[row] = selection.active
-                    ? selection.color
-                    : chartState.data[0].marker.color[row];
+                if (!selection.hidden) {
+                    chartState.data[0].marker.color[row] = selection.color;
+                } else {
+                    chartState.data[0].marker.color[row] = DEFAULT_POINT_COLOR;
+                }
             });
         });
     }
@@ -103,15 +105,12 @@ function ScatterGraph(props) {
         [props.currentSelection]
     );
 
-    // Function to color each chart point according to the current list of saved selections. NOTE: The data is modified in-place.
+
     useEffect(
         _ => {
-            for (let i = 0; i < chartState.data[0].marker.color.length; i++) {
-                chartState.data[0].marker.color[i] = DEFAULT_POINT_COLOR;
-            }
             setSelectionColors();
             updateChartRevision();
-        },
+        }, 
         [props.savedSelections]
     );
 
@@ -119,7 +118,12 @@ function ScatterGraph(props) {
     const animationState = useRef({ index: 0, ascending: true });
     useEffect(
         _ => {
-            if (!props.hoverSelection) return;
+            if (!props.hoverSelection) {
+                setSelectionColors();
+                updateChartRevision();
+                return;
+            }
+
             const activeSelection =
                 props.hoverSelection === "current_selection"
                     ? { color: COLOR_CURRENT_SELECTION, isCurrentSelection: true }

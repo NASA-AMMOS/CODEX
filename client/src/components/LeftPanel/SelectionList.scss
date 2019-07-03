@@ -34,7 +34,13 @@
         overflow-y: scroll;
 
         ul {
-            padding-left: 10px;
+            padding-left: 0px;
+            padding-right: 0px;
+            li {
+                height: 22px;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
         }
 
         .selection {
@@ -42,6 +48,7 @@
             color: #bbb;
             font-size: 14px;
             cursor: pointer;
+            height:22px;
 
             display: flex;
             flex-direction: row;
