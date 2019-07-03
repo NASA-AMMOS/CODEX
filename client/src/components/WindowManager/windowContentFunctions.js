@@ -25,6 +25,7 @@ import ExplainThis from "components/ExplainThis/ExplainThis";
 import Filter from "components/Filter/Filter";
 import * as windowTypes from "constants/windowTypes";
 import Debugger from "components/Debug/Debug";
+import Table from "components/Table/Table";
 
 export function getWindowContent(win) {
     switch (win.get("windowType")) {
@@ -97,6 +98,15 @@ export function getWindowContent(win) {
             return <Filter />;
         case windowTypes.DEBUG_WINDOW:
             return <Debugger />;
+        case windowTypes.TABLE_WINDOW:
+            return <Table />;
+        default:
+            return (
+                <p>
+                    Something has gone wrong, window type <code>{win.get("windowType")}</code> does
+                    not have an registered associated component!
+                </p>
+            );
     }
 }
 

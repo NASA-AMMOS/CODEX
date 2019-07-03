@@ -165,6 +165,7 @@ function NavigationBar(props) {
                             windowTypes.FIND_MORE_LIKE_THIS_WINDOW,
                             "Find More Like This"
                         )}
+                        {createMenuItem(windowTypes.TABLE_WINDOW, "Table")}
                     </Dropdown.Menu>
                 </Dropdown>
 
