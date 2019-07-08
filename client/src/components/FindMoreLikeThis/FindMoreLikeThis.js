@@ -24,23 +24,6 @@ function createClassObject(name, nextColorIndex) {
     }
 }
 
-/*
-    Function that handles constructing the default state array
-    for the data classes
-*/
-function constructDefaultClasses(nextColorIndex) {
-    return [
-        {
-            name:"Class 1",
-            color:uiTypes.SELECTIONS_COLOR_PALETTE[nextColorIndex]
-        },
-
-        {
-            name:"None",
-            color:"None"
-        }
-    ];
-}
 
 /*
     Function that builds an object of classes and their associated 
@@ -290,6 +273,24 @@ function ClassesSection(props) {
 }
 
 /*
+    Function that handles constructing the default state array
+    for the data classes
+*/
+function constructDefaultClasses(nextColorIndex) {
+    return [
+        {
+            name:"Class 1",
+            color:uiTypes.SELECTIONS_COLOR_PALETTE[nextColorIndex]
+        },
+
+        {
+            name:"None",
+            color:"None"
+        }
+    ];
+}
+
+/*
     Parent component of this file that contains all of the ui for 
     the Find More Like This workflow
 */
@@ -307,21 +308,18 @@ function FindMoreLikeThis(props) {
     useEffect(_ => {
         //go through and update the selection names
         setSelections(
-            props.savedSelections.map((selection, index) => {
-                if (index < selections.length) {
+            props.savedSelections
+                .filter((selection) => {return selection.active})
+                .map((selection) => {
                     return {
                         name: selection.id,
-                        className: selections[index].className
-                    }; 
-                } else {
-                    return {
-                        name: selection.id,
-                        className: "None"
-                    }; 
+                        className: selection.className != undefined ? selection.className : "None"
+                    }
                 }
-            })
+            )
         );
     },[props.savedSelections]) ;
+
 
     //this piece of state holds the meta data associated with classes
     const [classes, setClasses] = useState(

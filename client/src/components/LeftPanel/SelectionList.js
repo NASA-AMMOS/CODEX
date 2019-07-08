@@ -52,8 +52,9 @@ function createSelection(
                 }
                 style={{height:"22px",  padding:"0px"}}
               />
-            <div>{selection.displayName}</div>
+            <div className="selection-name-tag">{selection.displayName}</div>
             <Checkbox
+                className="eye-icon-checkbox"
                 checked={selection.hidden}
                 value="checkedA"
                 icon={<RemoveRedEye style={{fill: "#DADADA"}} />}

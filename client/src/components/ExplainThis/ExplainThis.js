@@ -675,7 +675,6 @@ function ExplainThis(props) {
     }       
     const [chosenSelections, setChosenSelections] = useState(newChosenSelections);
 
-
     useEffect(
         _ => {
             if (chosenSelections == null || chosenSelections[0] == null || chosenSelections[1] == null || !runButtonPressed) {
