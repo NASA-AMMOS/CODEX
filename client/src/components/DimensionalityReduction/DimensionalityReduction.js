@@ -11,12 +11,66 @@ import * as utils from "utils/utils";
 import Slider from "@material-ui/lab/Slider";
 import Plotly from "plotly.js";
 import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
 import HelpContent from "components/Help/HelpContent";
 import HelpOutline from "@material-ui/icons/HelpOutline";
 import Close from "@material-ui/icons/Close";
 import IconButton from "@material-ui/core/IconButton";
 import { useWindowManager } from "hooks/WindowHooks";
+import { useStore } from "react-redux";
+import { WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
+import { useSelectedFeatureNames, useFilename } from "hooks/DataHooks";
+
+/**
+ * Create the dimensionality reduction window
+ * @param state current state
+ * @return tuple of (requests, runParams)
+ */
+async function createAllDrRequests(selectedFeatures, filename) {
+    console.log(selectedFeatures);
+    selectedFeatures = selectedFeatures.toJS();
+
+    // create all the requests
+    let requests = dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_TYPES.map(dr => {
+        return {
+            name: dr,
+            paramData: dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_PARAMS[dr].map(param =>
+                Object.assign(param, {
+                    subParams: param.subParams.map(subParam =>
+                        Object.assign(subParam, {
+                            value: selectedFeatures.length
+                        })
+                    )
+                })
+            )
+        };
+    })
+        .map(drstate => createDrRequest(filename, selectedFeatures, drstate))
+        .map(request => {
+            const { req, cancel } = utils.makeSimpleRequest(request);
+            return { req, cancel, requestObj: request };
+        });
+
+    // wait on everything
+    requests = await Promise.all(requests);
+
+    return [requests, { selectedFeatures }];
+}
+
+// Creates a request object for a regression run that can be converted to JSON and sent to the server.
+function createDrRequest(filename, selectedFeatures, drstate) {
+    return {
+        routine: "algorithm",
+        algorithmName: drstate.name,
+        algorithmType: "dimensionality_reduction",
+        dataFeatures: selectedFeatures,
+        filename,
+        identification: { id: "dev0" },
+        parameters: { [drstate.paramData[0].name]: drstate.paramData[0].subParams[0].value }, // UGH! This is really hacky and should be fixed when we refactor all these algo functions.
+        dataSelections: [],
+        downsampled: false
+    };
+}
 
 // Utility to create a Plotly chart for each algorithm data return from the server.
 // We show a loading progress indicator if the data hasn't arrived yet.
@@ -129,12 +183,6 @@ function makeAlgoState(req) {
 }
 
 function DimensionalityReductionResults(props) {
-    const win = useWindowManager(props, {
-        title: "Dimensionality Reduction Results",
-        width: 700,
-        height: 375,
-        resizeable: true
-    });
     // Create state objects for each DR we're running so that we can keep track of them.
     const [algoStates, setAlgoStates] = useState(_ => props.requests.map(makeAlgoState));
 
@@ -235,17 +283,37 @@ function DimensionalityReductionResults(props) {
     );
 }
 
-function mapStateToProps(state) {
-    return {};
-}
+// the overhead of noodling with the dimred internals isn't worth it
+// here be dragons
+const DimensionalityReduction = props => {
+    const win = useWindowManager(props, {
+        title: "Dimensionality Reduction",
+        width: 700,
+        height: 375,
+        resizeable: true
+    });
 
-function mapDispatchToProps(dispatch) {
-    return {
-        featureAdd: bindActionCreators(dataActions.featureAdd, dispatch)
-    };
-}
+    const [isResolved, setIsResolved] = useState(null);
+    const [selectedFeatures, setSelectedFeatures] = useSelectedFeatureNames();
+    const filename = useFilename();
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(DimensionalityReductionResults);
+    // wrap the request creation
+    useEffect(() => {
+        createAllDrRequests(selectedFeatures, filename).then(r => setIsResolved(r));
+    }, []);
+
+    if (isResolved === null) {
+        return <WindowCircularProgress />;
+    } else {
+        const [requests, runParams] = isResolved; // hackish but works A-OK
+        return (
+            <DimensionalityReductionResults
+                requests={requests}
+                runParams={runParams}
+                featureAdd={a => console.log("adding feature ", a)}
+            />
+        );
+    }
+};
+
+export default DimensionalityReduction;

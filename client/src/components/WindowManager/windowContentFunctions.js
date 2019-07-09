@@ -18,7 +18,7 @@ import * as algorithmTypes from "constants/algorithmTypes";
 import * as classificationTypes from "constants/classificationTypes";
 import * as regressionTypes from "constants/regressionTypes";
 import * as uiTypes from "constants/uiTypes";
-import DimensionalityReductionResults from "components/DimensionalityReduction/DimensionalityReductionResults";
+import DimensionalityReduction from "components/DimensionalityReduction/DimensionalityReduction";
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
 import * as workflowTypes from "constants/workflowTypes";
 import ExplainThis from "components/ExplainThis/ExplainThis";
@@ -83,13 +83,8 @@ export function getWindowContent(win) {
             );
         case uiTypes.SESSIONS_WINDOW:
             return <Sessions />;
-        case dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW:
-            return (
-                <DimensionalityReductionResults
-                    requests={win.get("requests")}
-                    runParams={win.get("runParams")}
-                />
-            );
+        case windowTypes.DIMENSIONALITY_REDUCTION_WINDOW:
+            return <DimensionalityReduction />;
         case workflowTypes.EXPLAIN_THIS_WINDOW:
             return <ExplainThis winId={win.get("id")} />;
         case workflowTypes.FIND_MORE_LIKE_THIS_WINDOW:
