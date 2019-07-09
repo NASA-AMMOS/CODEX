@@ -30,6 +30,8 @@
             font-family: "lato_bold", sans-serif;
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
             padding: 0 5px;
+            background-color: #061427;
+            z-index: 999; //this is to ensure it is above the window layout
             td {
                 padding-right: 10px;
             }
@@ -37,11 +39,11 @@
     }
 
     .scroll-container {
+        height:calc(100% - 25px);
         display: flex;
         flex-direction: row;
         overflow-y: scroll;
-        height:calc(100% - 25px);
-
+        z-index: 999; //this is to ensure it is above the window layout
         .Features {
             display: flex;
             flex-flow: column;
@@ -76,14 +78,13 @@
                     font-family: "bitstreamvera", monospace;
                     color: #bbb;
                     font-size: 14px;
-                    cursor: pointer;
-
+                    /*cursor: pointer;*/
                     display: flex;
                     flex-direction: row;
                     align-items: center;
                     justify-content: flex-start;
 
-                    &:hover {
+                    &:hover{
                         background-color: rgba(255, 255, 255, 0.7);
                         color: black;
                     }
@@ -102,6 +103,11 @@
                         background-color: #5d6673;
                     }
                 }
+
+                .feature .hover {
+                    background-color: rgba(255, 255, 255, 0.7);
+                    color: black;
+                }
             }
         }
 
@@ -114,15 +120,19 @@
             padding-left:3px;
             .stats-container {
                 height: calc(40vh - 25px);
+                padding-left:5px;
+                padding-right:5px;
                 .stats-table {
-                    
-                background-color: #061427;
+                    background-color: #061427;
                     tr {
-                        height:16px;
+                        height:22px;
                         line-height: 16px; //necesary to make the height 22
                         td {
                             padding-right: 10px;
                         }
+                    }
+
+                    tr .hover {
                     }
 
                     .dim {

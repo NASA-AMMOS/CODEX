@@ -14,7 +14,7 @@ export default class SelectionsReducer {
                     id: `Selection_${state.savedSelections.length + 1}`,
                     rowIndices: state.currentSelection,
                     color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
-                    active: true,
+                    active: false,
                     hidden: false,
                     displayName: `Selection_${state.savedSelections.length + 1}`
                 }

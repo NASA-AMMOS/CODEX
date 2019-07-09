@@ -84,14 +84,15 @@ function ScatterGraph(props) {
     }
 
     function setSelectionColors() {
+        chartState.data[0].marker.color.forEach((row, idx) => {
+            chartState.data[0].marker.color[idx] = DEFAULT_POINT_COLOR;
+        })
         props.savedSelections.forEach(selection => {
-            selection.rowIndices.forEach(row => {
-                if (!selection.hidden) {
+            if (!selection.hidden) {
+                selection.rowIndices.forEach(row => {
                     chartState.data[0].marker.color[row] = selection.color;
-                } else {
-                    chartState.data[0].marker.color[row] = DEFAULT_POINT_COLOR;
-                }
-            });
+                });
+            }
         });
     }
 

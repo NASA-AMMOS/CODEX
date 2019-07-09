@@ -123,7 +123,7 @@ function textSize(text) {
     return { width: size.width, height: size.height };
 }
 
-function generateTree(treeData, svgRef) {
+function generateTree(treeData, selectionNames, svgRef) {
     let barHeight = 20;
     //setup margins and size for the d3 window
     let margin = { top: 0, right: 20, bottom: 10, left: 65 },
@@ -141,10 +141,16 @@ function generateTree(treeData, svgRef) {
     let numLeafs = calculateNumLeafNodes(treeData);
     let nodeSize = [8, width / maxDepth + 3];
 
-    let color_map = d3.scale
+    /*let color_map = d3.scale
         .linear()
         .domain([0, 1])
         .range(["blue",  "red"]);
+*/
+    let color_map = d3.scale
+        .linear()
+        .domain([0, 1])
+        .interpolate(d3.interpolateHcl)
+        .range(["hsl(41, 60%, 92%)", "hsl(268, 37%, 31%)"]);
 
     /**
      * Mixes colors according to the relative frequency of classes.
@@ -176,14 +182,14 @@ function generateTree(treeData, svgRef) {
 
     gradientContainer
         .append("text")
-        .text("Class 0")
-        .attr("x", -10 - textSize("Class 0").width)
+        .text(selectionNames[0])
+        .attr("x", (width/8 - 10) -10 - textSize(selectionNames[0]).width)
         .attr("y", 5 + barHeight / 2);
-
+    //janky constants needed to center the gradient container
     gradientContainer
         .append("text")
-        .text("Class 1")
-        .attr("x", width / 2 + 10)
+        .text(selectionNames[1])
+        .attr("x", (width/8 - 10) + width / 2 + 10)
         .attr("y", 5 + barHeight / 2);
 
     let linearGradient = gradientContainer
@@ -208,7 +214,7 @@ function generateTree(treeData, svgRef) {
 
     let gradientRect = gradientContainer
         .append("rect")
-        .attr("x", 0)
+        .attr("x", width/8 - 10)
         .attr("y", 0)
         .attr("width", width / 2)
         .attr("height", barHeight)
@@ -640,7 +646,7 @@ function ExplainThisTree(props) {
         _ => {
             if (!svgRef) return;
             d3.selectAll(".tree-container > *").remove();
-            generateTree(props.treeData.json_tree, svgRef);
+            generateTree(props.treeData.json_tree, props.chosenSelections, svgRef);
         },
         [props.treeData]
     );
@@ -674,7 +680,6 @@ function ExplainThis(props) {
         }
     }       
     const [chosenSelections, setChosenSelections] = useState(newChosenSelections);
-
 
     useEffect(
         _ => {
@@ -756,7 +761,7 @@ function ExplainThis(props) {
                     setChosenSelections={setChosenSelections}
                     chosenSelections={chosenSelections}
                 />
-                <ExplainThisTree treeData={dataState.tree_sweep[treeIndex]} />
+                <ExplainThisTree treeData={dataState.tree_sweep[treeIndex]} chosenSelections={chosenSelections}/>
             </div>
         );
     }

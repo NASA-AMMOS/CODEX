@@ -84,29 +84,10 @@ function StatisticsRow(props) {
     );
 }
 
-function loadColumnFromServer(feature) {
-    return new Promise(resolve => {
-        const socketWorker = new WorkerSocket();
-
-        socketWorker.addEventListener("message", e => {
-            const data = JSON.parse(e.data).data.map(ary => ary[0]);
-            resolve(data);
-        });
-
-        socketWorker.postMessage(
-            JSON.stringify({
-                action: actionTypes.GET_GRAPH_DATA,
-                selectedFeatures: [feature]
-            })
-        );
-    });
-}
-
 function FeatureData(props) {
     if (props.featureListLoading) {
         return (
             <div className="chartLoading">
-                <CircularProgress />
             </div>
         );
     }
@@ -118,24 +99,8 @@ function FeatureData(props) {
     let [statsData, setStatsData] = useState({});
     let [featureData, setFeatureData] = useState({});
 
-    //handles making the requests to get the column data for each of the features
-    useEffect(() => {
-        let promises = names.map((featureName) => {
-            return loadColumnFromServer(featureName);
-        });
-
-        Promise.all(promises).then(cols => {
-            let newFeatureData = {};
-            cols.forEach((col, idx) => {
-                newFeatureData[names[idx]] = col;
-            })
-
-            setFeatureData(newFeatureData);
-        });
-
-    },[]);
-
     //handles loading the statistics data in a lifecycle safe way
+    //this will also handle returning the downsampled data
     useEffect(() => {
         let requests = makeStatisticsRequests(names);
         //todo setup useEffect for cleanup
@@ -143,13 +108,23 @@ function FeatureData(props) {
             let { req, cancel } = request;
 
             req.then(data => {
+                setFeatureData(
+                    featureData => {
+                        return {
+                            ...featureData,
+                            [data.name]: data.downsample
+                        }
+                    }
+                )
                 //handle building the list
-                setStatsData(statsData => {
-                    return {
-                        ...statsData,
-                        [data.name[0]]: data
-                    };
-                });
+                setStatsData(
+                    statsData => {
+                        return {
+                            ...statsData,
+                            [data.name]: data
+                        };
+                    }
+                );
             });
         });
 
