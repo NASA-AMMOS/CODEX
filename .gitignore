@@ -3,6 +3,7 @@
 __pycache__/
 src/server/timeLogs/t *
 server/sessions/
+serverreturned_code.py
 
 # misc
 .DS_Store
@@ -23,7 +24,7 @@ yarn-error.log*
 # pre
 .project
 .pydevproject
-.pyc
+*.pyc
 code/API/__pycache__/
 code/API/sub/__pycache__/
 API/__pycache__/
