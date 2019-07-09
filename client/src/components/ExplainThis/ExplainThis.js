@@ -575,9 +575,8 @@ function FeatureImportanceGraph(props) {
             width: 200,
             margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
             xaxis: {
-                automargin: false,
-                type:"category",
-                domain:[0,100]
+                automargin:false,
+                range:[0,100],
             },
             yaxis: {
                 automargin: true,

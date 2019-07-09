@@ -22,6 +22,7 @@ import DimensionalityReductionResults from "components/DimensionalityReduction/D
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
 import * as workflowTypes from "constants/workflowTypes";
 import ExplainThis from "components/ExplainThis/ExplainThis";
+import GeneralClassifier from "components/GeneralClassifier/GeneralClassifier";
 import Filter from "components/Filter/Filter";
 import * as windowTypes from "constants/windowTypes";
 import Debugger from "components/Debug/Debug";
@@ -93,6 +94,8 @@ export function getWindowContent(win) {
             return <ExplainThis winId={win.get("id")} />;
         case workflowTypes.FIND_MORE_LIKE_THIS_WINDOW:
             return <FindMoreLikeThis winId={win.get("id")} />;
+        case workflowTypes.GENERAL_CLASSIFIER_WINDOW:
+            return <GeneralClassifier winId={win.get("id")} />;
         case workflowTypes.FILTER_WINDOW:
             return <Filter />;
         case windowTypes.DEBUG_WINDOW:

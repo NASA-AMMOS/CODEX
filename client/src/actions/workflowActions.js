@@ -15,6 +15,15 @@ export function getExplainThisWindowAction() {
     };
 }
 
+export function getGeneralClassifierWindowAction() {
+    return {
+        type: actionTypes.OPEN_NEW_WINDOW,
+        info: {
+            windowType: workflowTypes.GENERAL_CLASSIFIER_WINDOW
+        }
+    };
+}
+
 export function getFindMoreLikeThisWindowAction() {
     return {
         type: actionTypes.OPEN_NEW_WINDOW,
@@ -47,6 +56,10 @@ export function createWorkflow(workflowType, selectedFeatures) {
         case workflowTypes.FIND_MORE_LIKE_THIS:
             return (dispatch, getState) => {
                 dispatch(getFindMoreLikeThisWindowAction());
+            };
+        case workflowTypes.GENERAL_CLASSIFIER:
+            return (dispatch, getState) => {
+                dispatch(getGeneralClassifierWindowAction());
             };
         default:
             return (dispatch, getState) => {};
