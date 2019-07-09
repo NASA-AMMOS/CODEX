@@ -160,7 +160,7 @@ function ClassRow(props) {
         <div className="classes-list-row">
             <TextField 
                 variant="standard" 
-                defaultValue={props.classObject.name} 
+                value={props.classObject.name} 
                 className="classes-list-row-title"
                 onChange={function(e) { props.modifyName(props.classObject.name, e.target.value)}}
             />
@@ -245,11 +245,11 @@ function ClassesSection(props) {
             <div className="classes-list">
                 {
                     props.classes.map(
-                        (classObject) => {
+                        (classObject, idx) => {
                             if (classObject.name != "None")
                                 return (
                                     <ClassRow
-                                        key={classObject.name}
+                                        key={idx}
                                         classObject={classObject}
                                         deleteClass={deleteClass}
                                         modifyName={modifyName}
