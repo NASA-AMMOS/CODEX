@@ -237,12 +237,12 @@ def convert_labels_to_class_indices(label_mask, num_classes):
     return indices
 
 """
-    This function takes in the data for the fmlt model and then
+    This function takes in the data for the general classifier model and then
     trains a random forest on it. 
     It perfomrms k fold cross validation and hyper parameter tuning 
     on the data as well to minimize overfitting. 
 """
-def train_fmlt_model(data):
+def train_general_classifier_model(data):
     #data is of the format (data,labels)
     #construct the grid search parameter grid
     # Number of trees in random forest
@@ -283,19 +283,19 @@ def train_fmlt_model(data):
 
 """
     This function handles getting the data for, trianing, and evaluating
-    the find more like this model
+    the general_classifier model
 
     dataSelections is assumed to be an all encompassing set from the front end
     where every data value has a class label. if this is not done explicitly by the user it 
     should be done automatically somewhere along the line
 """
-def find_more_like_this(inputHash, featureList, dataSelections, result):
+def general_classifier(inputHash, featureList, dataSelections, result):
     startTime = time.time()
     result = {"WARNING":None}
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
-        codex_system.codex_log("ERROR: find_more_like_this: Hash not found. Returning.")
+        codex_system.codex_log("ERROR: general_classifier: Hash not found. Returning.")
         return None
 
     data = returnHash['data']
@@ -308,7 +308,7 @@ def find_more_like_this(inputHash, featureList, dataSelections, result):
     #first create a mask from the dataSelections indices
     formatted_data = create_data_from_indices(dataSelectionsValues, data)
     #run the trian model script
-    clf = train_fmlt_model(formatted_data)
+    clf = train_general_classifier_model(formatted_data)
     
     #evaluate the trained model on the whole dataset
     output_predictions_mask = clf.predict(data)
@@ -324,11 +324,87 @@ def find_more_like_this(inputHash, featureList, dataSelections, result):
         codex_system.codex_log(str(i))
         output_dictionary[class_names[i]] = arr
     #end can create a selection corresponding to it
-
+    #todo change this name
     result["like_this"] = output_dictionary
 
     return result
 
+def find_more_like_this(inputHash, featureList, dataSelections, result):
+    startTime = time.time()
+    result = {"WARNING":None}
+
+    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    if returnHash is None:
+        codex_system.codex_log("ERROR: general_classifier: Hash not found. Returning.")
+        return None
+
+    data = returnHash['data']
+    if data is None:
+        return None
+
+    #handles the data and training for the positive-unlabeled learning bagging classifier
+    #get the formatted data 
+    dataSelectionsValues = list(dataSelections)
+    #get a full mask of all data [0, 1, 0 ... 0, 0, 1] of length(num data)
+    data_mask = np.zeros(np.shape(data)[0])
+    for index in dataSelectionsValues:
+        data_mask[index] = 1
+    #get the data corresponding to all positive examples
+    positive_data = []
+    for index in dataSelectionsValues:
+        positive_data.append(data[index])
+
+    #train the classifier with the formatted data as the positive examples and 
+    #a random sample from the other data with replacement as the negatives
+    #this is done several times and the models are bagged
+    votes = np.zeros(np.shape(data)[0])
+
+    num_classifiers = 5
+
+    for i in range(num_classifiers):
+        #each iteration train a classifier on the positive data
+        #and a random subsample of the other data as negative examples
+        #choose the same number of negative as positive examples you have
+        negative_data_indices = np.random.choice(
+            [index for index in range(len(data)) if data_mask[index] == 0],
+            replace = True,
+            size = len(positive_data)
+        )
+
+        negative_data = [data[index] for index in negative_data_indices]
+
+        X = positive_data + negative_data
+
+        #create labels now
+        Y = np.zeros(len(X))
+        #make ones for po
+        for i in range(len(positive_data)):
+            Y[i] = 1
+
+        rf = RandomForestClassifier(
+            n_estimators=3,
+            n_jobs = -1,
+            max_depth = 3,
+            max_features = 3
+        )
+
+        rf.fit(X, Y)
+
+        prediction = rf.predict(data)
+
+        #make predictions and add them to votes
+        votes += prediction
+
+    votes = votes / num_classifiers
+
+    #return all points labeled with a positive being when half or more of the bagged
+    #classifiers vote on a given piece of data
+    like_this_indices = [index for index, value in enumerate(votes) if value > 0.5]
+    #also include all of the positive inputs in the like_this_indices array
+
+    result["like_this"] = like_this_indices
+
+    return result
 
 if __name__ == "__main__":
 
