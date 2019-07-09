@@ -121,8 +121,7 @@ def explain_this(inputHash, featureNames, dataSelections, result):
 
     >>> testData = codex_doctest.doctest_get_data()
 
-    >>> result = explain_this(testData['inputHash'], testData['featureNames'], None, testData['classLabelHash'], {})
-
+    
     '''
 
     startTime = time.time()
