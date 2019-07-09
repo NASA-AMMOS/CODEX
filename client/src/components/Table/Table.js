@@ -22,6 +22,8 @@ import {
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import styled from "styled-components";
 
+import "./Table.css";
+
 // data table implementation based on https://material-ui.com/components/tables/#custom-table-pagination-action
 
 const TablePaginationActions = props => {
@@ -129,7 +131,7 @@ const DataTable = props => {
         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) // slice to visible
         .map((row, idx) => {
             let cells = row.map((v, i) => (
-                <TableCell key={i} align="right">
+                <TableCell className="Table--monospace" key={i} align="right">
                     {v}
                 </TableCell>
             ));
