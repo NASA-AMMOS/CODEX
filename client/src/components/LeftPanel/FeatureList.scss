@@ -85,6 +85,25 @@
                     align-items: center;
                     justify-content: flex-start;
 
+                    .feature-name-container {
+                        overflow: hidden;
+                        position: relative;
+                        width:150px;
+                        line-height: 22px;
+                        height:22px;
+                        &:hover span{
+                            transform: translateX(calc(-100% + 150px));
+                        }
+
+                        span {
+                            position: absolute;
+                            white-space: nowrap;
+                            transform: translateX(0);
+                            transition: transform 1000ms linear;
+                            transition-timing-function: linear;
+                        }
+                    }
+
                     &:hover{
                         background-color: rgba(255, 255, 255, 0.7);
                         color: black;

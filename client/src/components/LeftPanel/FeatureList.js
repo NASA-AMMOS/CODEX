@@ -31,7 +31,7 @@ function createFeature(props, feature) {
                         : props.featureSelect(name, e.shiftKey);
                 }}
               />
-            <span>{name}</span>
+            <div className="feature-name-container"><span>{name}</span></div>
         </li>
     );
 }

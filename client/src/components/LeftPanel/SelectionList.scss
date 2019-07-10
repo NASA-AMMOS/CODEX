@@ -56,8 +56,24 @@
             justify-content: flex-start;
 
             .selection-name-tag {
-                margin-left: 10px;
-                margin-right: 10px;
+                overflow: hidden;
+                position: relative;
+                width:100px;
+                line-height: 22px;
+                height:22px;
+                &:hover span{
+                    transform: translateX(calc(-100% + 100px));
+                }
+
+                span {
+                    padding-left: 5px;
+                    padding-right: 5px;
+                    position: absolute;
+                    white-space: nowrap;
+                    transform: translateX(0);
+                    transition: transform 1000ms linear;
+                    transition-timing-function: linear;
+                }
             }
 
             .eye-icon-checkbox {

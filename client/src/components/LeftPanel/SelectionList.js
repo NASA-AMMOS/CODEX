@@ -52,7 +52,7 @@ function createSelection(
                 }
                 style={{height:"22px",  padding:"0px"}}
               />
-            <div className="selection-name-tag">{selection.displayName}</div>
+            <div className="selection-name-tag"><span> {selection.displayName} </span></div>
             <Checkbox
                 className="eye-icon-checkbox"
                 checked={selection.hidden}
