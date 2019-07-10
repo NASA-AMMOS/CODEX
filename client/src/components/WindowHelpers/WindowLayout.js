@@ -5,10 +5,20 @@ import "./WindowLayout.css";
 
 export const WindowLayout = props => {
     const classes = classNames("WindowLayout__LayoutContainer", {
-        "WindowLayout__LayoutContainer--row": props.direction === "row"
+        "WindowLayout__LayoutContainer--row": props.direction === "row",
+        "WindowLayout__LayoutContainer--fullsize": !props.fluid
     });
 
-    return <div className={classes}>{props.children}</div>;
+    const override = {};
+    if (props.align) {
+        override.alignItems = props.align;
+    }
+
+    return (
+        <div className={classes} style={override}>
+            {props.children}
+        </div>
+    );
 };
 
 export const FixedContainer = props => {
