@@ -1,0 +1,25 @@
+.WindowLayout__LayoutContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    width: 100%;
+    height: 100%;
+}
+
+.WindowLayout__LayoutContainer--row {
+    flex-direction: row;
+}
+
+.WindowLayout__Fixed {
+    flex-grow: 0;
+}
+
+.WindowLayout__Expanding {
+    flex-grow: 1;
+}
+
+.WindowLayout--scrollable {
+    overflow: auto;
+    min-height: 0;
+}

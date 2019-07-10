@@ -20,7 +20,6 @@ import * as windowManagerActions from "actions/windowManagerActions";
 import * as classificationActions from "actions/classificationActions";
 import * as regressionActions from "actions/regressionActions";
 import * as sessionsActions from "actions/sessionsActions";
-import * as dimensionalityReductionActions from "actions/dimensionalityReductionActions";
 import * as exportActions from "actions/exportActions";
 import * as dataActions from "actions/data";
 
@@ -139,12 +138,9 @@ function NavigationBar(props) {
                         {createMenuItem(windowTypes.REGRESSION_WINDOW, "Regression")}
 
                         {createMenuItem(
-                            windowTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW,
+                            windowTypes.DIMENSIONALITY_REDUCTION_WINDOW,
                             "Dimensionality Reduction"
                         )}
-                        <MenuItem onSelect={props.openDimensionalityReductionWindow}>
-                            Dimensionality Reduction (legacy)
-                        </MenuItem>
                     </Dropdown.Menu>
                 </Dropdown>
 
@@ -169,6 +165,7 @@ function NavigationBar(props) {
                             windowTypes.GENERAL_CLASSIFIER_WINDOW,
                             "General Classifier"
                         )}
+                        {createMenuItem(windowTypes.TABLE_WINDOW, "Table")}
                     </Dropdown.Menu>
                 </Dropdown>
 
@@ -239,10 +236,6 @@ function mapDispatchToProps(dispatch) {
         openRegressionWindow: bindActionCreators(regressionActions.openRegressionWindow, dispatch),
         openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch),
         saveSession: bindActionCreators(sessionsActions.saveSession, dispatch),
-        openDimensionalityReductionWindow: bindActionCreators(
-            dimensionalityReductionActions.openDimensionalityReductionWindow,
-            dispatch
-        ),
         requestServerExport: bindActionCreators(exportActions.requestServerExport, dispatch),
         fileLoad: bindActionCreators(dataActions.fileLoad, dispatch)
     };

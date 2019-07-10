@@ -18,7 +18,7 @@ import * as algorithmTypes from "constants/algorithmTypes";
 import * as classificationTypes from "constants/classificationTypes";
 import * as regressionTypes from "constants/regressionTypes";
 import * as uiTypes from "constants/uiTypes";
-import DimensionalityReductionResults from "components/DimensionalityReduction/DimensionalityReductionResults";
+import DimensionalityReduction from "components/DimensionalityReduction/DimensionalityReduction";
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
 import * as workflowTypes from "constants/workflowTypes";
 import ExplainThis from "components/ExplainThis/ExplainThis";
@@ -26,6 +26,7 @@ import GeneralClassifier from "components/GeneralClassifier/GeneralClassifier";
 import Filter from "components/Filter/Filter";
 import * as windowTypes from "constants/windowTypes";
 import Debugger from "components/Debug/Debug";
+import Table from "components/Table/Table";
 
 export function getWindowContent(win) {
     switch (win.get("windowType")) {
@@ -83,13 +84,8 @@ export function getWindowContent(win) {
             );
         case uiTypes.SESSIONS_WINDOW:
             return <Sessions />;
-        case dimensionalityReductionTypes.DIMENSIONALITY_REDUCTION_RESULTS_WINDOW:
-            return (
-                <DimensionalityReductionResults
-                    requests={win.get("requests")}
-                    runParams={win.get("runParams")}
-                />
-            );
+        case windowTypes.DIMENSIONALITY_REDUCTION_WINDOW:
+            return <DimensionalityReduction />;
         case workflowTypes.EXPLAIN_THIS_WINDOW:
             return <ExplainThis winId={win.get("id")} />;
         case workflowTypes.FIND_MORE_LIKE_THIS_WINDOW:
@@ -100,6 +96,15 @@ export function getWindowContent(win) {
             return <Filter />;
         case windowTypes.DEBUG_WINDOW:
             return <Debugger />;
+        case windowTypes.TABLE_WINDOW:
+            return <Table />;
+        default:
+            return (
+                <p>
+                    Something has gone wrong, window type <code>{win.get("windowType")}</code> does
+                    not have an registered associated component!
+                </p>
+            );
     }
 }
 
