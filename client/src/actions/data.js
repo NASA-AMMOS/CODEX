@@ -41,7 +41,7 @@ export function fileLoad(fileList) {
  * @return {object} non-dispatched action object
  */
 export const featureAdd = (featureName, featureData) => ({
-    type: types.FEATURE_ADD,
+    type: types.ADD_FEATURE,
     featureName,
     featureData
 });

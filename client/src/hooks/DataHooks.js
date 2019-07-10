@@ -7,12 +7,14 @@ import {
     featureRetain,
     featureRelease,
     featureSelect,
-    featureUnselect
+    featureUnselect,
+    featureAdd
 } from "actions/data";
 import { fromJS, Set } from "immutable";
 import { batchActions } from "redux-batched-actions";
 import * as selectionActions from "actions/selectionActions";
 import * as wmActions from "actions/windowManagerActions";
+import * as utils from "utils/utils";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -284,4 +286,31 @@ export function useHoveredSelection() {
     const currentHover = useSelector(state => state.selections.hoverSelection);
 
     return [currentHover, indices => dispatch(selectionActions.setHoverSelection(indices))];
+}
+
+/**
+ * Create a new feature
+ * @return {function} Setter for a new feature
+ */
+export function useNewFeature() {
+    const dispatch = useDispatch();
+
+    return (name, data) => {
+        // manually form request, see codex_data_manager.py for more
+        let data_encoded = btoa(data);
+        const req = {
+            routine: "arrange",
+            activity: "add",
+            hashType: "feature",
+            name,
+            data: data,
+            length: data.length
+        };
+
+        console.log(req);
+
+        utils.makeSimpleRequest(req).req.then(r => {
+            dispatch(featureAdd(name, data));
+        });
+    };
 }
