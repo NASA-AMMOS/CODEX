@@ -11,15 +11,18 @@ import * as utils from "utils/utils";
 import Slider from "@material-ui/lab/Slider";
 import Plotly from "plotly.js";
 import { bindActionCreators } from "redux";
-import HelpContent from "components/Help/HelpContent";
-import HelpOutline from "@material-ui/icons/HelpOutline";
-import Close from "@material-ui/icons/Close";
-import IconButton from "@material-ui/core/IconButton";
 import { useWindowManager } from "hooks/WindowHooks";
 import { useStore } from "react-redux";
 import { WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
-import { useSelectedFeatureNames, useFilename } from "hooks/DataHooks";
+import { useSelectedFeatureNames, useFilename, useNewFeature } from "hooks/DataHooks";
+import {
+    WindowLayout,
+    ExpandingContainer,
+    FixedContainer
+} from "components/WindowHelpers/WindowLayout";
+import { WindowXScroller } from "components/WindowHelpers/WindowScroller";
+import HelpButton from "components/WindowHelpers/WindowHelp";
 
 /**
  * Create the dimensionality reduction window
@@ -74,7 +77,7 @@ function createDrRequest(filename, selectedFeatures, drstate) {
 
 // Utility to create a Plotly chart for each algorithm data return from the server.
 // We show a loading progress indicator if the data hasn't arrived yet.
-function makeDRPlot(algo, maxYRange, changeSliderVal) {
+function makeDRPlot(algo, maxYRange, changeSliderVal, featureAdd) {
     if (!algo || !algo.data)
         return (
             <div className="chartLoading">
@@ -147,31 +150,10 @@ function makeDRPlot(algo, maxYRange, changeSliderVal) {
                     changeSliderVal(algo.algorithmName, val);
                 }}
             />
+            <Button fullWidth onClick={e => featureAdd(algo)}>
+                Save
+            </Button>
         </React.Fragment>
-    );
-}
-
-function DimensionalityReductionHeader(props) {
-    return (
-        <React.Fragment>
-            <Typography variant="h6">All Reductions</Typography>
-            <IconButton onClick={_ => props.setHelpModeState(state => !state)}>
-                <HelpOutline />
-            </IconButton>
-        </React.Fragment>
-    );
-}
-
-function HelpBarHeader(props) {
-    return (
-        <div className="headerBar">
-            <IconButton
-                className="closeButton"
-                onClick={_ => props.setHelpModeState(state => !state)}
-            >
-                <Close />
-            </IconButton>
-        </div>
     );
 }
 
@@ -208,9 +190,9 @@ function DimensionalityReductionResults(props) {
                 //update the redux feature state with the new data
                 console.log(data);
                 //this is subject to change
-                let featureName = data.algorithm;
-                let featureData = data.data;
-                props.featureAdd(featureName, featureData);
+                //let featureName = data.algorithm;
+                //let featureData = data.data;
+                //props.featureAdd(featureName, featureData);
             });
         });
 
@@ -240,46 +222,42 @@ function DimensionalityReductionResults(props) {
     const [helpModeState, setHelpModeState] = useState(false);
     const algoVerb = "dimensionality_reduction";
 
-    return (
-        <div className="drResults">
-            {!helpModeState ? (
-                <DimensionalityReductionHeader setHelpModeState={setHelpModeState} />
-            ) : (
-                <HelpBarHeader
-                    setHelpModeState={setHelpModeState}
-                    title={"Dimensionality Reduction Page Help"}
-                />
-            )}
-            <HelpContent
-                hidden={!helpModeState}
-                guidancePath={`${algoVerb}_page:general_${algoVerb}`}
-            />
-            <div className="non-help-container" hidden={helpModeState}>
-                <div className="resultRow">
-                    {algoStates.map(algo => (
-                        <div
-                            key={algo.algorithmName}
-                            className={classnames({
-                                regressionResult: true,
-                                selected: selectedAlgos.includes(algo.algorithmName)
-                            })}
-                        >
-                            <div
-                                className="regressionHeader"
-                                onClick={_ => toggleSelected(algo.algorithmName)}
-                            >
-                                {algo.algorithmName.length <= 20
-                                    ? algo.algorithmName
-                                    : algo.algorithmName.slice(0, 17) + "..."}
-                            </div>
-                            <div className="plot">
-                                {makeDRPlot(algo, maxYRange, changeSliderVal)}
-                            </div>
-                        </div>
-                    ))}
-                </div>
+    console.log("algo graphs: ", algoStates);
+    const algoGraphs = algoStates.map(algo => (
+        <FixedContainer key={algo.algorithmName}>
+            <div className="regressionHeader" onClick={() => toggleSelected(algo.algorithmName)}>
+                {algo.algorithmName.length <= 20
+                    ? algo.algorithmName
+                    : algo.algorithmName.slice(0, 17) + "..."}
             </div>
-        </div>
+            <div className="plot">
+                {makeDRPlot(algo, maxYRange, changeSliderVal, props.featureAdd)}
+            </div>
+        </FixedContainer>
+    ));
+
+    return (
+        <WindowLayout>
+            <FixedContainer>
+                <WindowLayout fluid direction="row" align="center">
+                    <Typography variant="h6">All Reductions</Typography>
+                    <ExpandingContainer />
+                    <FixedContainer>
+                        <HelpButton
+                            title={"Dimensionality Reduction Help"}
+                            guidancePath={`${algoVerb}_page:general_${algoVerb}`}
+                        />
+                    </FixedContainer>
+                </WindowLayout>
+            </FixedContainer>
+            <ExpandingContainer>
+                <WindowXScroller>
+                    <WindowLayout fluid direction="row">
+                        {algoGraphs}
+                    </WindowLayout>
+                </WindowXScroller>
+            </ExpandingContainer>
+        </WindowLayout>
     );
 }
 
@@ -288,14 +266,19 @@ function DimensionalityReductionResults(props) {
 const DimensionalityReduction = props => {
     const win = useWindowManager(props, {
         title: "Dimensionality Reduction",
-        width: 700,
+        width: 600,
         height: 375,
-        resizeable: true
+        resizeable: true,
+        minSize: {
+            width: 400,
+            height: 375
+        }
     });
 
     const [isResolved, setIsResolved] = useState(null);
     const [selectedFeatures, setSelectedFeatures] = useSelectedFeatureNames();
     const filename = useFilename();
+    const featureAdd = useNewFeature();
 
     // wrap the request creation
     useEffect(() => {
@@ -310,7 +293,9 @@ const DimensionalityReduction = props => {
             <DimensionalityReductionResults
                 requests={requests}
                 runParams={runParams}
-                featureAdd={a => console.log("adding feature ", a)}
+                featureAdd={a =>
+                    featureAdd(`${a.data.algorithm}_${selectedFeatures.join("_")}`, a.data.data)
+                }
             />
         );
     }
