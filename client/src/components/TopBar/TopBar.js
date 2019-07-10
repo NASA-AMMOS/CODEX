@@ -161,6 +161,10 @@ function NavigationBar(props) {
                             windowTypes.FIND_MORE_LIKE_THIS_WINDOW,
                             "Find More Like This"
                         )}
+                        {createMenuItem(
+                            windowTypes.GENERAL_CLASSIFIER_WINDOW,
+                            "General Classifier"
+                        )}
                         {createMenuItem(windowTypes.TABLE_WINDOW, "Table")}
                     </Dropdown.Menu>
                 </Dropdown>
