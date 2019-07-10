@@ -175,7 +175,8 @@ def run_codex_dim_reduction(
         len(data),
         data.ndim)
 
-    outputHash = codex_hash.hashArray('PCA_', X_transformed, "feature")
+    # print("saving out PCA")
+    # outputHash = codex_hash.hashArray('PCA_', X_transformed, "feature", virtual=True)
 
     output = {
         'eta': eta,
@@ -184,7 +185,7 @@ def run_codex_dim_reduction(
         'explained_variance_ratio': exp_var_ratio.tolist(),
         'inputHash': inputHash,
         'subsetHash': subsetHash,
-        'outputHash': outputHash["hash"],
+        'outputHash': inputHash, #outputHash["hash"],
         'n_components': n_components,
         'downsample': downsampled,
         'message':"success"}
