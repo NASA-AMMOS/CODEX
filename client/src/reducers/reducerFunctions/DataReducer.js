@@ -409,11 +409,16 @@ export default class DataReducer {
     }
 
     static addFeature(state, action) {
+        console.log(action);
         return state.set(
             "featureList",
-            state
-                .get("featureList")
-                .push(Immutable.fromJS({ name: action.feature, selected: false }))
+            state.get("featureList").push(
+                Immutable.fromJS({
+                    name: action.featureName,
+                    selected: false,
+                    virtual: true
+                })
+            )
         );
     }
 

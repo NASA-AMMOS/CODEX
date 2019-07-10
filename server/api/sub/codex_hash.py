@@ -307,12 +307,13 @@ def resetCacheList(hashType):
         codex_system.codex_log("Unknown hash type.  Not resetting")
 
 
-def hashArray(arrayName, inputArray, hashType):
+def hashArray(arrayName, inputArray, hashType, virtual=False):
     '''
     Inputs:
         arrayName (string)    - Name of the data set.  Used in visalization for easy human data recognition
         inputArray (np aray)  - Data to be hashed.  Numpy ND array.  If integers, casted to float for storage
         hashType (string)     - Hash log to store data in {feature, subset, downsample, label}
+        virtual (boolean)     - Whether or not this is a "virtual" feature
 
     Outputs:
         Dictionary -
@@ -386,6 +387,7 @@ def hashArray(arrayName, inputArray, hashType):
         "samples": samples,
         "memory": memoryFootprint,
         "type": hashType,
+        "virtual": virtual,
         "color": None,
         "z-order": None}
 

@@ -78,25 +78,29 @@ def add_data(msg, result):
     '''
     hashType = msg['hashType']
     data = msg["data"]
-    maskLength = msg["length"]
-    encoded = data.encode("ascii")
-    decoded = base64.decodebytes(encoded)
-    resultString = "".join(["{:08b}".format(x) for x in decoded])
-
-    numResults = len(resultString)
-    delta = abs(numResults - maskLength)
-
-    maskTmp = np.zeros(numResults)
-
-    for x in range(0, numResults):
-        maskTmp[x] = int(resultString[x])
-
-    mask = maskTmp[delta:]
 
     if (hashType == "selection"):
+        maskLength = msg["length"]
+
+        encoded = data.encode("ascii")
+        decoded = base64.decodebytes(encoded)
+        resultString = "".join(["{:08b}".format(x) for x in decoded])
+
+        numResults = len(resultString)
+        delta = abs(numResults - maskLength)
+
+        maskTmp = np.zeros(numResults)
+
+        for x in range(0, numResults):
+            maskTmp[x] = int(resultString[x])
+
+        mask = maskTmp[delta:]
+
         hashResult = codex_hash.hashArray(msg["name"], mask, "subset")
+
     elif (hashType == "feature"):
-        hashResult = codex_hash.hashArray(msg["name"], mask, "feature")
+        virtual = msg['virtual'] if 'virtual' in msg else False
+        hashResult = codex_hash.hashArray(msg["name"], np.asarray(data), "feature", virtual=virtual)
     else:
         result["message"] = 'failure'
 
