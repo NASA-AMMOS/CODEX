@@ -170,20 +170,26 @@ const DataTable = props => {
                 <WindowLayout direction="row">
                     <ExpandingContainer />
                     <FixedContainer>
-                        <TablePagination
-                            rowsPerPageOptions={[5, 10, 25, 50, 75, 100, 500, 1000]}
-                            colSpan={3}
-                            count={transposed.size}
-                            rowsPerPage={rowsPerPage}
-                            page={page}
-                            SelectProps={{
-                                inputProps: { "aria-label": "Rows per page" },
-                                native: true
-                            }}
-                            onChangePage={handleChangePage}
-                            onChangeRowsPerPage={handleChangeRowsPerPage}
-                            ActionsComponent={TablePaginationActions}
-                        />
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <TablePagination
+                                        rowsPerPageOptions={[5, 10, 25, 50, 75, 100, 500, 1000]}
+                                        colSpan={3}
+                                        count={transposed.size}
+                                        rowsPerPage={rowsPerPage}
+                                        page={page}
+                                        SelectProps={{
+                                            inputProps: { "aria-label": "Rows per page" },
+                                            native: true
+                                        }}
+                                        onChangePage={handleChangePage}
+                                        onChangeRowsPerPage={handleChangeRowsPerPage}
+                                        ActionsComponent={TablePaginationActions}
+                                    />
+                                </tr>
+                            </tbody>
+                        </table>
                     </FixedContainer>
                 </WindowLayout>
             </FixedContainer>
