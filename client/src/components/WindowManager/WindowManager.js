@@ -118,18 +118,19 @@ function makeMinimizedBar(props) {
     return (
         <div className="minimizedBar">
             {props.windows
-                .filter(win => win.minimized)
+                .filter(win => win.get("minimized"))
                 .map(win => (
                     <div
-                        key={win.id}
+                        key={win.get("id")}
                         onClick={_ => {
-                            if (!win.minimizedOnly) props.toggleMinimizeWindow(win.id);
+                            if (!win.get("minimizedOnly"))
+                                props.toggleMinimizeWindow(win.get("id"));
                         }}
-                        onMouseOver={_ => props.setWindowHover(win.id, true)}
-                        onMouseOut={_ => props.setWindowHover(win.id, false)}
+                        onMouseOver={_ => props.setWindowHover(win.get("id"), true)}
+                        onMouseOut={_ => props.setWindowHover(win.get("id"), false)}
                         className="minimizedWindow"
                     >
-                        <div className="title">{win.title}</div>
+                        <div className="title">{win.get("title")}</div>
                     </div>
                 ))}
         </div>
@@ -207,7 +208,7 @@ function WindowManager(props) {
                 <Cristal
                     key={win.get("id")}
                     className="newWindow"
-                    style={win.minimized && !win.get("hover") ? hiddenStyle : null}
+                    style={win.get("minimized") && !win.get("hover") ? hiddenStyle : null}
                     onClose={_ => props.closeWindow(win.get("id"))}
                     ref={r => (refs.current[win.get("id")] = r)}
                     onMinimize={_ => props.toggleMinimizeWindow(win.get("id"))}
