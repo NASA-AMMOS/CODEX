@@ -286,13 +286,18 @@ const DimensionalityReduction = props => {
         return <WindowCircularProgress />;
     } else {
         const [requests, runParams] = isResolved; // hackish but works A-OK
+        const getVectorFromSlider = a => a.data.data.map(r => r[a.sliderVal - 1]);
+
         return (
             <DimensionalityReductionResults
                 requests={requests}
                 runParams={runParams}
-                featureAdd={a =>
-                    featureAdd(`${a.data.algorithm}_${selectedFeatures.join("_")}`, a.data.data)
-                }
+                featureAdd={a => {
+                    featureAdd(
+                        `${a.data.algorithm}_${selectedFeatures.join("_")}/${a.sliderVal}`,
+                        getVectorFromSlider(a)
+                    );
+                }}
             />
         );
     }
