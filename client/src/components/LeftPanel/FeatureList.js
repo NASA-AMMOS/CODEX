@@ -1,4 +1,4 @@
-import React, { Component , useState} from "react";
+import React, { Component, useState } from "react";
 import "components/LeftPanel/FeatureList.scss";
 import { connect } from "react-redux";
 import classnames from "classnames";
@@ -6,7 +6,7 @@ import { bindActionCreators } from "redux";
 import * as dataActions from "actions/data";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import FeatureData from "components/LeftPanel/FeatureData";
-import Checkbox from '@material-ui/core/Checkbox';
+import Checkbox from "@material-ui/core/Checkbox";
 import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckboxIcon from "@material-ui/icons/CheckBox";
 
@@ -14,24 +14,27 @@ function createFeature(props, feature) {
     const name = feature.get("name");
     const selected = feature.get("selected");
 
+    // virtual feature handling
+    const virtual = feature.get("virtual");
+    const virtualStyle = { fontStyle: virtual ? "italic" : "normal" };
+
     return (
-        <li
-            className={classnames({ feature: true})}
-            key={name}
-        >
+        <li className={classnames({ feature: true })} key={name}>
             <Checkbox
                 checked={selected}
                 value="checkedA"
-                style={{height:"22px",padding:"0px", paddingRight:"10px"}}
-                icon={<CheckboxOutlineBlank style={{fill: "#828282"}} />}
-                checkedIcon={<CheckboxIcon style={{ fill:"#3988E3"}} />}
+                style={{ height: "22px", padding: "0px", paddingRight: "10px" }}
+                icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
+                checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
                 onClick={function(e) {
                     return selected
                         ? props.featureUnselect(name, e.shiftKey)
                         : props.featureSelect(name, e.shiftKey);
                 }}
-              />
-            <div className="feature-name-container"><span>{name}</span></div>
+            />
+            <div className="feature-name-container">
+                <span style={virtualStyle}>{name}</span>
+            </div>
         </li>
     );
 }
@@ -47,21 +50,34 @@ function FeatureList(props) {
         .filter(f =>
             props.filterString
                 ? f
-                    .get("name")
-                    .toLowerCase()
-                    .startsWith(props.filterString.toLowerCase())
+                      .get("name")
+                      .toLowerCase()
+                      .startsWith(props.filterString.toLowerCase())
                 : true
         )
         .map(f => createFeature(props, f));
 
     return (
-        <div className={"feature-lists-container " + (statsHidden ? 'stats-hidden' : 'stats-not-hidden')}>
+        <div
+            className={
+                "feature-lists-container " + (statsHidden ? "stats-hidden" : "stats-not-hidden")
+            }
+        >
             <div className="header-container">
-                <div className={"header " + (statsHidden ? 'stats-hidden-header' : 'stats-not-hidden-header')}>
+                <div
+                    className={
+                        "header " +
+                        (statsHidden ? "stats-hidden-header" : "stats-not-hidden-header")
+                    }
+                >
                     <div className="title">Features</div>
-                    <span className="stats-toggle"
-                          onClick={function(){setStatsHidden(!statsHidden)}}>
-                             {statsHidden ? "stats off" : "stats on"} 
+                    <span
+                        className="stats-toggle"
+                        onClick={function() {
+                            setStatsHidden(!statsHidden);
+                        }}
+                    >
+                        {statsHidden ? "stats off" : "stats on"}
                     </span>
                     <span className="counts">
                         {activeCount}/{shownCount}/{totalCount}
@@ -90,8 +106,8 @@ function FeatureList(props) {
                         <ul>{featureItems}</ul>
                     </div>
                 </div>
-                <FeatureData 
-                    statsHidden={statsHidden} 
+                <FeatureData
+                    statsHidden={statsHidden}
                     featureListLoading={props.featureListLoading}
                     featureList={props.featureList.toJS()}
                 />
