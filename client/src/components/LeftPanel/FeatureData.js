@@ -130,10 +130,15 @@ function FeatureData(props) {
                 if (index + 1 >= names.length) 
                     return;
 
+                request.cancel();
+
                 //start next request
                 const nextRequestObject =  {...requestTemplate, name: [names[index + 1]]};
-                const nextRequest = utils.makeSimpleRequest(nextRequestObject);
-                lazyRecursizeHandler(nextRequest, index + 1);
+
+                setTimeout(function() {
+                    const nextRequest = utils.makeSimpleRequest(nextRequestObject);
+                    lazyRecursizeHandler(nextRequest, index + 1);
+                }, 200)
             })
         }
         
