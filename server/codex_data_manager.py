@@ -44,23 +44,30 @@ def get_data_metrics(msg, result):
     data = codex_hash.findHashArray("name",  msg['name'][0], "feature")['data']
     codex_system.codex_log("getting data hash : "+ str(data))
     result = {}
+    try:
+        result['min'] = np.min(data)
+        result['max'] = np.max(data)
+        result['median'] = np.median(data)
+        result['mean'] = np.mean(data)
+        #result['mode'] = scipy.stats.mode(data)[0][0]
+        result['std'] = np.std(data)
+        result['var'] = np.var(data)
+        result['name'] = msg['name'][0]
 
-    result['min'] = np.min(data)
-    result['max'] = np.max(data)
-    result['median'] = np.median(data)
-    result['mean'] = np.mean(data)
-    #result['mode'] = scipy.stats.mode(data)[0][0]
-    result['std'] = np.std(data)
-    result['var'] = np.var(data)
-    result['name'] = msg['name'][0]
+        #returns the downsample of the given row
+        #fake stuff right now
+        result['downsample'] = scipy.signal.resample(data,100).tolist()
 
-    #returns the downsample of the given row
-    #fake stuff right now
-    result['downsample'] = scipy.signal.resample(data,100).tolist()
-
-    hist, bin_edges = np.histogram(data)
-    result['hist_data'] = hist.tolist()
-    result['hist_edges'] = bin_edges.tolist()
+        hist, bin_edges = np.histogram(data)
+        result['hist_data'] = hist.tolist()
+        result['hist_edges'] = bin_edges.tolist()
+        result["status"] = "success"
+    except:
+        codex_system.codex_log("Error occured while computing feature data metrics")
+        failureResult = {}
+        failureResult["status"] = "failed"
+        failureResult['name'] = msg['name'][0]
+        return failureResult
 
     return result
 

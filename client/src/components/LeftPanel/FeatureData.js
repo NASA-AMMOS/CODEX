@@ -3,9 +3,9 @@ import * as utils from "utils/utils";
 import WorkerSocket from "worker-loader!workers/socket.worker";
 import * as actionFunctions from "actions/actionFunctions";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { Sparklines, SparklinesLine } from 'react-sparklines';
-import { bindActionCreators} from "redux";
-import { connect} from "react-redux";
+import { Sparklines, SparklinesLine } from "react-sparklines";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
 import * as actionTypes from "constants/actionTypes";
 
 function processFloatingPointNumber(number) {
@@ -22,30 +22,26 @@ function processFloatingPointNumber(number) {
     return newNumber;
 }
 
-//makes a request for the statistics of all of the features
-//features is an array of strings of the feature names
-function makeStatisticsRequests(features) {
-    const request = {
-        routine: "arrange",
-        hashType: "feature",
-        activity: "metrics",
-        //'name': features,
-        cid: "8vrjn"
-    };
-
-    let requests = features.map(feature => {
-        request.name = [feature];
-        return utils.makeSimpleRequest(request);
-    });
-
-    return requests;
-}
-
 function StatisticsRow(props) {
     if (props.stats === undefined) {
         return (
             <tr>
-                <td> Loading ... </td>
+                <td className="loading-td" />
+                <td className="loading-td" />
+                <td className="loading-td" />
+                <td className="loading-td" />
+                <td className="loading-td">Loading... </td>
+            </tr>
+        );
+    }
+    if (props.stats.status === "failed") {
+        return (
+            <tr>
+                <td className="loading-td" />
+                <td className="loading-td" />
+                <td className="loading-td" />
+                <td className="loading-td" />
+                <td className="loading-td">Failure ...</td>
             </tr>
         );
     }
@@ -76,7 +72,11 @@ function StatisticsRow(props) {
             <td> {mean} </td>
             <td> {median} </td>
             <td>
-                <Sparklines data={props.data} limit={100} style={{ fill: "none" , height:"20px", width:"100%"}}>
+                <Sparklines
+                    data={props.data}
+                    limit={100}
+                    style={{ fill: "none", height: "20px", width: "100%" }}
+                >
                     <SparklinesLine color="white" />
                 </Sparklines>
             </td>
@@ -86,10 +86,7 @@ function StatisticsRow(props) {
 
 function FeatureData(props) {
     if (props.featureListLoading) {
-        return (
-            <div className="chartLoading">
-            </div>
-        );
+        return <div className="chartLoading" />;
     }
 
     let names = props.featureList.map(feature => {
@@ -102,37 +99,52 @@ function FeatureData(props) {
     //handles loading the statistics data in a lifecycle safe way
     //this will also handle returning the downsampled data
     useEffect(() => {
-        let requests = makeStatisticsRequests(names);
-        //todo setup useEffect for cleanup
-        requests.forEach(request => {
-            let { req, cancel } = request;
-
-            req.then(data => {
-                setFeatureData(
-                    featureData => {
-                        return {
-                            ...featureData,
-                            [data.name]: data.downsample
-                        }
-                    }
-                )
-                //handle building the list
-                setStatsData(
-                    statsData => {
-                        return {
-                            ...statsData,
-                            [data.name]: data
-                        };
-                    }
-                );
-            });
-        });
-
-        return function cleanup() {
-            requests.forEach(request => request.cancel());
+        const requestTemplate = {
+            routine: "arrange",
+            hashType: "feature",
+            activity: "metrics",
+            cid: "8vrjn"
         };
-    }, []);
 
+        function lazyRecursizeHandler(request, index) {
+            request.req.then(data => {
+                setFeatureData(featureData => {
+                    return {
+                        ...featureData,
+                        [data.name]: data.downsample
+                    };
+                });
+                //handle building the list
+                setStatsData(statsData => {
+                    return {
+                        ...statsData,
+                        [data.name]: data
+                    };
+                });
+
+                if (index + 1 >= names.length) return;
+
+                request.cancel();
+
+                //start next request
+                const nextRequestObject = { ...requestTemplate, name: [names[index + 1]] };
+
+                setTimeout(function() {
+                    const nextRequest = utils.makeSimpleRequest(nextRequestObject);
+                    lazyRecursizeHandler(nextRequest, index + 1);
+                }, 200);
+            });
+        }
+
+        if (names.length > 0) {
+            const requestCopy = { ...requestTemplate, name: [names[0]] };
+
+            const firstRequest = utils.makeSimpleRequest(requestCopy);
+
+            lazyRecursizeHandler(firstRequest, 0);
+        }
+        //todo handle cleanup
+    }, []);
     return (
         <React.Fragment>
             <div className="feature-statistics-panel" hidden={props.statsHidden}>
@@ -140,7 +152,14 @@ function FeatureData(props) {
                     <table className="stats-table">
                         <tbody>
                             {names.map(name => {
-                                return <StatisticsRow data={featureData[name]} key={name} stats={statsData[name]}/>;
+                                return (
+                                    <StatisticsRow
+                                        data={featureData[name]}
+                                        key={name}
+                                        name={name}
+                                        stats={statsData[name]}
+                                    />
+                                );
                             })}
                         </tbody>
                     </table>

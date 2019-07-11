@@ -22,7 +22,6 @@ import { useSelectedFeatureNames, useFilename, useSavedSelections } from "hooks/
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import { useWindowManager } from "hooks/WindowHooks";
 
-
 // Toggle children.
 function toggle(d) {
     //decide base
@@ -146,11 +145,12 @@ function generateTree(treeData, selectionNames, svgRef) {
         .domain([0, 1])
         .range(["blue",  "red"]);
 */
+
     let color_map = d3.scale
         .linear()
         .domain([0, 1])
         .interpolate(d3.interpolateHcl)
-        .range(["hsl(41, 60%, 92%)", "hsl(268, 37%, 31%)"]);
+        .range(["hsl(0, 90%, 92%)", "hsl(240, 27%, 21%)"]);
 
     /**
      * Mixes colors according to the relative frequency of classes.
@@ -183,13 +183,13 @@ function generateTree(treeData, selectionNames, svgRef) {
     gradientContainer
         .append("text")
         .text(selectionNames[0])
-        .attr("x", (width/8 - 10) -10 - textSize(selectionNames[0]).width)
+        .attr("x", width / 8 - 10 - 10 - textSize(selectionNames[0]).width)
         .attr("y", 5 + barHeight / 2);
     //janky constants needed to center the gradient container
     gradientContainer
         .append("text")
         .text(selectionNames[1])
-        .attr("x", (width/8 - 10) + width / 2 + 10)
+        .attr("x", width / 8 - 10 + width / 2 + 10)
         .attr("y", 5 + barHeight / 2);
 
     let linearGradient = gradientContainer
@@ -214,7 +214,7 @@ function generateTree(treeData, selectionNames, svgRef) {
 
     let gradientRect = gradientContainer
         .append("rect")
-        .attr("x", width/8 - 10)
+        .attr("x", width / 8 - 10)
         .attr("y", 0)
         .attr("width", width / 2)
         .attr("height", barHeight)
@@ -444,31 +444,35 @@ function ChooseSelections(props) {
         <div className="selections-chooser">
             <p className="selection-chooser-header">Choose Two Selections</p>
             <FormControl className="selection-dropdown">
-                <Select 
-                    value={props.chosenSelections[0]} 
-                    onChange={e => props.setChosenSelections([e.target.value, props.chosenSelections[1]])}
+                <Select
+                    value={props.chosenSelections[0]}
+                    onChange={e =>
+                        props.setChosenSelections([e.target.value, props.chosenSelections[1]])
+                    }
                 >
                     {props.selections
                         .filter(selection => selection.active)
                         .map(f => (
-                        <MenuItem key={f.id} value={f.id}>
-                            {f.id}
-                        </MenuItem>
-                    ))}
+                            <MenuItem key={f.id} value={f.id}>
+                                {f.id}
+                            </MenuItem>
+                        ))}
                 </Select>
             </FormControl>
             <FormControl className="selection-dropdown">
-                <Select 
-                    value={props.chosenSelections[1]} 
-                    onChange={e => props.setChosenSelections([props.chosenSelections[0], e.target.value])}
+                <Select
+                    value={props.chosenSelections[1]}
+                    onChange={e =>
+                        props.setChosenSelections([props.chosenSelections[0], e.target.value])
+                    }
                 >
                     {props.selections
                         .filter(selection => selection.active)
                         .map(f => (
-                        <MenuItem key={f.id} value={f.id}>
-                            {f.id}
-                        </MenuItem>
-                    ))}
+                            <MenuItem key={f.id} value={f.id}>
+                                {f.id}
+                            </MenuItem>
+                        ))}
                 </Select>
             </FormControl>
         </div>
@@ -477,7 +481,12 @@ function ChooseSelections(props) {
 
 function TreeSweepScroller(props) {
     if (!props.tree_sweep && props.runButtonPressed) {
-        return <div className="tree-sweep-scroller-undefined"> <CircularProgress/></div>;
+        return (
+            <div className="tree-sweep-scroller-undefined">
+                {" "}
+                <CircularProgress />
+            </div>
+        );
     } else if (!props.tree_sweep) {
         return <div className="tree-sweep-scroller-undefined"> Choose selections and run </div>;
     }
@@ -507,10 +516,9 @@ function TreeSweepScroller(props) {
         layout: {
             autosize: true,
             margin: { l: 20, r: 10, t: 20, b: 0 }, // Axis tick labels are drawn in the margin space
-            hovermode: "closest", // Turning off hovermode seems to screw up click handling
             showlegend: false,
             xaxis: {
-                automargin: true,
+                automargin: true
             },
             yaxis: {
                 automargin: true,
@@ -558,39 +566,39 @@ function TreeSweepScroller(props) {
 
 function FeatureImportanceGraph(props) {
     const chartOptions = {
-        data : [{
-            x: props.featureImportances.slice().reverse(),
-            y: props.rankedFeatures.slice().reverse(),
-            yaxis:"y",
-            type: "bar",
-            orientation: "h"
-        }],
-        config : {
+        data: [
+            {
+                x: props.featureImportances.slice().reverse(),
+                y: props.rankedFeatures.slice().reverse(),
+                yaxis: "y",
+                type: "bar",
+                orientation: "h",
+                hoverinfo: "x"
+            }
+        ],
+        config: {
             displaylogo: false,
             displayModeBar: false
-        }, 
+        },
         layout: {
-            autosize:false,
-            height: 100 + (15*props.featureImportances.length),
+            autosize: false,
+            height: 100 + 15 * props.featureImportances.length,
             width: 200,
             margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
             xaxis: {
-                automargin:false,
-                range:[0,100],
+                automargin: false,
+                range: [0, 100]
             },
             yaxis: {
                 automargin: true,
-                fixedrange:true,
-
-            },
-        },
+                fixedrange: true
+            }
+        }
     };
 
     return (
         <React.Fragment>
-            <div className="feature-importance-graph-title">
-                Feature Importances
-            </div>
+            <div className="feature-importance-graph-title">Feature Importances</div>
             <Plot
                 className="feature-importance-graph"
                 data={chartOptions.data}
@@ -603,7 +611,7 @@ function FeatureImportanceGraph(props) {
 
 function FeatureList(props) {
     if (props.rankedFeatures == undefined) {
-        return <CircularProgress/>;
+        return <CircularProgress />;
     }
 
     return (
@@ -614,8 +622,8 @@ function FeatureList(props) {
                 treeIndex={props.treeIndex}
                 runButtonPressed={props.runButtonPressed}
             />
-            <FeatureImportanceGraph 
-                rankedFeatures={props.rankedFeatures} 
+            <FeatureImportanceGraph
+                rankedFeatures={props.rankedFeatures}
                 featureImportances={props.importances}
             />
             <ChooseSelections
@@ -666,23 +674,56 @@ function ExplainThis(props) {
     const [treeIndex, setTreeIndex] = useState(0);
     const [runButtonPressed, setRunButtonPressed] = useState(false);
 
-    //handles initialization of chosenSelections based 
+    //handles initialization of chosenSelections based
     //on the global active selections
     let newChosenSelections = [null, null];
     let numChosen = 0;
     for (let selection of props.selections) {
-        if (numChosen == 2)
-            break;
-        if (selection.active){
+        if (numChosen == 2) break;
+        if (selection.active) {
             newChosenSelections[numChosen] = selection.id;
-            numChosen++; 
+            numChosen++;
         }
-    }       
+    }
     const [chosenSelections, setChosenSelections] = useState(newChosenSelections);
 
     useEffect(
         _ => {
-            if (chosenSelections == null || chosenSelections[0] == null || chosenSelections[1] == null || !runButtonPressed) {
+            //make chosen selections always be the first two selections if any are null
+            if (chosenSelections[0] == null && chosenSelections[1] == null) {
+                let num = 0;
+                for (let selection of props.selections) {
+                    if (num == 2) break;
+                    if (selection.active) {
+                        chosenSelections[num] = selection.id;
+                        num++;
+                    }
+                }
+            } else if (chosenSelections[0] == null) {
+                for (let selection of props.selections) {
+                    if (selection.active && selection.id != chosenSelections[1]) {
+                        chosenSelections[0] = selection.id;
+                    }
+                }
+            } else if (chosenSelections[1] == null) {
+                for (let selection of props.selections) {
+                    if (selection.active && selection.id != chosenSelections[0]) {
+                        chosenSelections[1] = selection.id;
+                    }
+                }
+            }
+        },
+        [props.selections]
+    );
+
+    useEffect(
+        _ => {
+            if (
+                chosenSelections == null ||
+                chosenSelections[0] == null ||
+                chosenSelections[1] == null ||
+                !runButtonPressed
+            ) {
                 return;
             }
             //clear current data
@@ -691,7 +732,7 @@ function ExplainThis(props) {
             let firstSelectionIndices = [];
             let secondSelectionIndices = [];
             for (let selection of props.selections) {
-                if (selection.id === chosenSelections[0]){
+                if (selection.id === chosenSelections[0]) {
                     firstSelectionIndices = selection.rowIndices;
                 } else if (selection.id === chosenSelections[1]) {
                     secondSelectionIndices = selection.rowIndices;
@@ -699,7 +740,11 @@ function ExplainThis(props) {
             }
 
             //handle the loading of the data request promise
-            const request = createExplainThisRequest(props.filename, [firstSelectionIndices, secondSelectionIndices], props.selectedFeatureNames);
+            const request = createExplainThisRequest(
+                props.filename,
+                [firstSelectionIndices, secondSelectionIndices],
+                props.selectedFeatureNames
+            );
 
             const requestMade = utils.makeSimpleRequest(request);
             requestMade.req.then(data => {
@@ -742,7 +787,9 @@ function ExplainThis(props) {
                     setChosenSelections={setChosenSelections}
                     chosenSelections={chosenSelections}
                 />
-                <div className="load-failure"><CircularProgress/></div>
+                <div className="load-failure">
+                    <CircularProgress />
+                </div>
             </div>
         );
     } else {
@@ -760,7 +807,10 @@ function ExplainThis(props) {
                     setChosenSelections={setChosenSelections}
                     chosenSelections={chosenSelections}
                 />
-                <ExplainThisTree treeData={dataState.tree_sweep[treeIndex]} chosenSelections={chosenSelections}/>
+                <ExplainThisTree
+                    treeData={dataState.tree_sweep[treeIndex]}
+                    chosenSelections={chosenSelections}
+                />
             </div>
         );
     }
@@ -797,4 +847,3 @@ export default props => {
         );
     }
 };
-

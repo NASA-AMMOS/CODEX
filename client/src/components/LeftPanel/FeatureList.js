@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { Component, useState, useEffect } from "react";
 import "components/LeftPanel/FeatureList.scss";
 import { connect } from "react-redux";
 import classnames from "classnames";
@@ -9,17 +9,19 @@ import FeatureData from "components/LeftPanel/FeatureData";
 import Checkbox from "@material-ui/core/Checkbox";
 import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckboxIcon from "@material-ui/icons/CheckBox";
+import Popover from "@material-ui/core/Popover";
+import Typography from "@material-ui/core/Typography";
 
-function createFeature(props, feature) {
-    const name = feature.get("name");
-    const selected = feature.get("selected");
+function FeatureListItem(props) {
+    const name = props.feature.get("name");
+    const selected = props.feature.get("selected");
 
     // virtual feature handling
-    const virtual = feature.get("virtual");
+    const virtual = props.feature.get("virtual");
     const virtualStyle = { fontStyle: virtual ? "italic" : "normal" };
 
     return (
-        <li className={classnames({ feature: true })} key={name}>
+        <li className={classnames({ feature: true })} key={name} title={name}>
             <Checkbox
                 checked={selected}
                 value="checkedA"
@@ -32,7 +34,7 @@ function createFeature(props, feature) {
                         : props.featureSelect(name, e.shiftKey);
                 }}
             />
-            <div className="feature-name-container">
+            <div className="feature-name">
                 <span style={virtualStyle}>{name}</span>
             </div>
         </li>
@@ -55,7 +57,14 @@ function FeatureList(props) {
                       .startsWith(props.filterString.toLowerCase())
                 : true
         )
-        .map(f => createFeature(props, f));
+        .map(f => (
+            <FeatureListItem
+                key={f.get("name")}
+                feature={f}
+                featureUnselect={props.featureUnselect}
+                featureSelect={props.featureSelect}
+            />
+        ));
 
     return (
         <div
