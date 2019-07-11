@@ -130,6 +130,12 @@
                 .stats-table {
                     background-color: #061427;
 
+                    .loading-tr {
+                        height: 22px;
+                        line-height: 16px;
+                        padding:0px;
+                    }
+
                     .feature-statistics-row {
                         height:22px;
                         line-height: 16px; //necesary to make the height 22
