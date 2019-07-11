@@ -108,7 +108,6 @@ function FeatureData(props) {
         function lazyRecursizeHandler(request, index) {
 
             request.req.then((data) => {
-                console.log(data);
                 setFeatureData(
                     featureData => {
                         return {
