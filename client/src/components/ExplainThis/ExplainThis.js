@@ -146,11 +146,13 @@ function generateTree(treeData, selectionNames, svgRef) {
         .domain([0, 1])
         .range(["blue",  "red"]);
 */
+    
     let color_map = d3.scale
         .linear()
         .domain([0, 1])
         .interpolate(d3.interpolateHcl)
-        .range(["hsl(41, 60%, 92%)", "hsl(268, 37%, 31%)"]);
+        .range(["hsl(0, 90%, 92%)", "hsl(240, 27%, 21%)"]);
+    
 
     /**
      * Mixes colors according to the relative frequency of classes.
@@ -507,7 +509,6 @@ function TreeSweepScroller(props) {
         layout: {
             autosize: true,
             margin: { l: 20, r: 10, t: 20, b: 0 }, // Axis tick labels are drawn in the margin space
-            hovermode: "closest", // Turning off hovermode seems to screw up click handling
             showlegend: false,
             xaxis: {
                 automargin: true,
@@ -563,7 +564,8 @@ function FeatureImportanceGraph(props) {
             y: props.rankedFeatures.slice().reverse(),
             yaxis:"y",
             type: "bar",
-            orientation: "h"
+            orientation: "h",
+            hoverinfo: "x"
         }],
         config : {
             displaylogo: false,
@@ -679,6 +681,34 @@ function ExplainThis(props) {
         }
     }       
     const [chosenSelections, setChosenSelections] = useState(newChosenSelections);
+
+    useEffect(
+        _ => {
+            //make chosen selections always be the first two selections if any are null
+            if (chosenSelections[0] == null && chosenSelections[1] == null) {
+                let num = 0;
+                for(let selection of props.selections) {
+                    if (num == 2) break;
+                    if (selection.active) {
+                        chosenSelections[num] = selection.id;
+                        num++;
+                    }
+                }
+            } else if (chosenSelections[0] == null) {
+                for(let selection of props.selections) {
+                    if (selection.active && selection.id != chosenSelections[1]) {
+                        chosenSelections[0] = selection.id;
+                    }
+                }
+            } else if (chosenSelections[1] == null) {
+                for(let selection of props.selections) {
+                    if (selection.active && selection.id != chosenSelections[0]) {
+                        chosenSelections[1] = selection.id;
+                    }
+                }
+            }
+        }
+    , [props.selections]);
 
     useEffect(
         _ => {

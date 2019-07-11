@@ -246,16 +246,16 @@ def train_general_classifier_model(data):
     #data is of the format (data,labels)
     #construct the grid search parameter grid
     # Number of trees in random forest
-    n_estimators = [int(x) for x in np.linspace(start = 5, stop = 50, num = 10)]
+    #parameter search
+    n_estimators = np.arange(3, 30)
     # Number of features to consider at every split
     max_features = ['auto', 'sqrt']
     # Maximum number of levels in tree
-    max_depth = [int(x) for x in np.linspace(2, 20, num = 10)]
-    max_depth.append(None)
+    max_depth = np.arange(2, 20)
     # Minimum number of samples required to split a node
-    min_samples_split = [2, 5, 10]
+    min_samples_split = np.arange(2, 10)
     # Minimum number of samples required at each leaf node
-    min_samples_leaf = [1, 2, 4]
+    min_samples_leaf = np.arange(1, 10)
     # Method of selecting samples for training each tree
     bootstrap = [True, False]
     # Create the random grid
@@ -359,8 +359,27 @@ def find_more_like_this(inputHash, featureList, dataSelections, result):
     #this is done several times and the models are bagged
     votes = np.zeros(np.shape(data)[0])
 
-    num_classifiers = 5
+    #parameter search
+    n_estimators = np.arange(3, 15)
+    # Number of features to consider at every split
+    max_features = ['auto', 'sqrt']
+    # Maximum number of levels in tree
+    max_depth = np.arange(2, 5)
+    # Minimum number of samples required to split a node
+    min_samples_split = np.arange(2, 10)
+    # Minimum number of samples required at each leaf node
+    min_samples_leaf = np.arange(1, 10)
+    # Method of selecting samples for training each tree
+    bootstrap = [True, False]
+    # Create the random grid
+    random_grid = {'n_estimators': n_estimators,
+                   'max_features': max_features,
+                   'max_depth': max_depth,
+                   'min_samples_split': min_samples_split,
+                   'min_samples_leaf': min_samples_leaf,
+                   'bootstrap': bootstrap}
 
+    num_classifiers = 5
     for i in range(num_classifiers):
         #each iteration train a classifier on the positive data
         #and a random subsample of the other data as negative examples
@@ -381,16 +400,18 @@ def find_more_like_this(inputHash, featureList, dataSelections, result):
         for i in range(len(positive_data)):
             Y[i] = 1
 
-        rf = RandomForestClassifier(
-            n_estimators=3,
-            n_jobs = -1,
-            max_depth = 3,
-            max_features = 3
-        )
+        rf = RandomForestClassifier()
 
-        rf.fit(X, Y)
+        rf_random = RandomizedSearchCV(estimator = rf,
+                                param_distributions = random_grid,
+                                n_iter = 30, cv = 3,
+                                verbose=2,
+                                random_state=42,
+                                n_jobs = -1)
 
-        prediction = rf.predict(data)
+        rf_random.fit(X, Y)
+
+        prediction = rf_random.predict(data)
 
         #make predictions and add them to votes
         votes += prediction
