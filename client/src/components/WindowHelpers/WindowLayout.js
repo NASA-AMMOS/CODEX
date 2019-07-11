@@ -39,9 +39,11 @@ export const ExpandingContainer = props => {
     return <div className={classes}>{props.children}</div>;
 };
 
-export const WindowCover = props =>
+export const WindowCover = props => <div className="WindowLayout__cover">{props.children}</div>;
+
+export const WindowTogglableCover = props =>
     props.open ? (
-        <div className="WindowLayout__cover">
+        <WindowCover>
             <WindowLayout>
                 <WindowLayout fluid direction="row" align="center">
                     <Typography variant="h6">{props.title}</Typography>
@@ -54,5 +56,5 @@ export const WindowCover = props =>
                 </WindowLayout>
                 <ExpandingContainer>{props.children}</ExpandingContainer>
             </WindowLayout>
-        </div>
+        </WindowCover>
     ) : null;
