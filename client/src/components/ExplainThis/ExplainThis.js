@@ -7,6 +7,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 import * as d3 from "d3";
+import * as d3SC from "d3-scale-chromatic";
 import Plot from "react-plotly.js";
 import Button from "@material-ui/core/Button";
 import "components/ExplainThis/ExplainThis.scss";
@@ -21,6 +22,7 @@ import Slider from "@material-ui/lab/Slider";
 import { useSelectedFeatureNames, useFilename, useSavedSelections } from "hooks/DataHooks";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import { useWindowManager } from "hooks/WindowHooks";
+
 
 
 // Toggle children.
@@ -146,13 +148,15 @@ function generateTree(treeData, selectionNames, svgRef) {
         .domain([0, 1])
         .range(["blue",  "red"]);
 */
-    
+    /*
     let color_map = d3.scale
         .linear()
         .domain([0, 1])
         .interpolate(d3.interpolateHcl)
         .range(["hsl(0, 90%, 92%)", "hsl(240, 27%, 21%)"]);
-    
+    */
+
+    let color_map = d3SC.interpolatePlasma;
 
     /**
      * Mixes colors according to the relative frequency of classes.
@@ -447,7 +451,7 @@ function ChooseSelections(props) {
             <p className="selection-chooser-header">Choose Two Selections</p>
             <FormControl className="selection-dropdown">
                 <Select 
-                    value={props.chosenSelections[0]} 
+                    value={props.chosenSelections[0] != null ? props.chosenSelections[0] : ""} 
                     onChange={e => props.setChosenSelections([e.target.value, props.chosenSelections[1]])}
                 >
                     {
@@ -463,6 +467,7 @@ function ChooseSelections(props) {
                                     );
                                 }
                             }
+                            
                             return arr;
                         })()
                     }
@@ -470,7 +475,7 @@ function ChooseSelections(props) {
             </FormControl>
             <FormControl className="selection-dropdown">
                 <Select 
-                    value={props.chosenSelections[1]} 
+                    value={props.chosenSelections[1] != null ? props.chosenSelections[1] : ""} 
                     onChange={e => props.setChosenSelections([props.chosenSelections[0], e.target.value])}
                 >
                     {
@@ -486,6 +491,7 @@ function ChooseSelections(props) {
                                     );
                                 }
                             }
+
                             return arr;
                         })()
                     }
@@ -748,6 +754,7 @@ function ExplainThis(props) {
         [runButtonPressed]
     );
 
+    
     if (!dataState && !runButtonPressed) {
         return (
             <div className="explain-this-container">
@@ -779,6 +786,7 @@ function ExplainThis(props) {
             </div>
         );
     } else {
+        const selectionNames = [props.selections[chosenSelections[0]].id, props.selections[chosenSelections[1]].id];
         return (
             <div className="explain-this-container">
                 <FeatureList
@@ -793,7 +801,7 @@ function ExplainThis(props) {
                     setChosenSelections={setChosenSelections}
                     chosenSelections={chosenSelections}
                 />
-                <ExplainThisTree treeData={dataState.tree_sweep[treeIndex]} chosenSelections={chosenSelections}/>
+                <ExplainThisTree treeData={dataState.tree_sweep[treeIndex]} chosenSelections={selectionNames}/>
             </div>
         );
     }
