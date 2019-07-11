@@ -3,6 +3,10 @@ import classNames from "classnames";
 import React from "react";
 import "./WindowLayout.css";
 
+import Typography from "@material-ui/core/Typography";
+import Close from "@material-ui/icons/Close";
+import IconButton from "@material-ui/core/IconButton";
+
 export const WindowLayout = props => {
     const classes = classNames("WindowLayout__LayoutContainer", {
         "WindowLayout__LayoutContainer--row": props.direction === "row",
@@ -34,3 +38,21 @@ export const ExpandingContainer = props => {
     });
     return <div className={classes}>{props.children}</div>;
 };
+
+export const WindowCover = props =>
+    props.open ? (
+        <div className="WindowLayout__cover">
+            <WindowLayout>
+                <WindowLayout fluid direction="row" align="center">
+                    <Typography variant="h6">{props.title}</Typography>
+                    <ExpandingContainer />
+                    <FixedContainer>
+                        <IconButton onClick={props.onClose}>
+                            <Close />
+                        </IconButton>
+                    </FixedContainer>
+                </WindowLayout>
+                <ExpandingContainer>{props.children}</ExpandingContainer>
+            </WindowLayout>
+        </div>
+    ) : null;
