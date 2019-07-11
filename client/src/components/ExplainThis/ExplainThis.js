@@ -450,13 +450,22 @@ function ChooseSelections(props) {
                     value={props.chosenSelections[0]} 
                     onChange={e => props.setChosenSelections([e.target.value, props.chosenSelections[1]])}
                 >
-                    {props.selections
-                        .filter(selection => selection.active)
-                        .map(f => (
-                        <MenuItem key={f.id} value={f.id}>
-                            {f.id}
-                        </MenuItem>
-                    ))}
+                    {
+                        (function() {
+                            let arr = [];
+
+                            for(let i = 0; i < props.selections.length; i++) {
+                                if (props.selections[i].active && props.chosenSelections[1]!=i) {
+                                    arr.push(
+                                        <MenuItem key={props.selections[i].id} value={i}>
+                                            {props.selections[i].id}
+                                        </MenuItem>
+                                    );
+                                }
+                            }
+                            return arr;
+                        })()
+                    }
                 </Select>
             </FormControl>
             <FormControl className="selection-dropdown">
@@ -464,13 +473,22 @@ function ChooseSelections(props) {
                     value={props.chosenSelections[1]} 
                     onChange={e => props.setChosenSelections([props.chosenSelections[0], e.target.value])}
                 >
-                    {props.selections
-                        .filter(selection => selection.active)
-                        .map(f => (
-                        <MenuItem key={f.id} value={f.id}>
-                            {f.id}
-                        </MenuItem>
-                    ))}
+                    {
+                        (function() {
+                            let arr = [];
+
+                            for(let i = 0; i < props.selections.length; i++) {
+                                if (props.selections[i].active && props.chosenSelections[0]!=i) {
+                                    arr.push(
+                                        <MenuItem key={props.selections[i].id} value={i}>
+                                            {props.selections[i].id}
+                                        </MenuItem>
+                                    );
+                                }
+                            }
+                            return arr;
+                        })()
+                    }
                 </Select>
             </FormControl>
         </div>
@@ -667,69 +685,42 @@ function ExplainThis(props) {
     const [dataState, setDataState] = useState(undefined);
     const [treeIndex, setTreeIndex] = useState(0);
     const [runButtonPressed, setRunButtonPressed] = useState(false);
-
-    //handles initialization of chosenSelections based 
-    //on the global active selections
-    let newChosenSelections = [null, null];
-    let numChosen = 0;
-    for (let selection of props.selections) {
-        if (numChosen == 2)
-            break;
-        if (selection.active){
-            newChosenSelections[numChosen] = selection.id;
-            numChosen++; 
-        }
-    }       
-    const [chosenSelections, setChosenSelections] = useState(newChosenSelections);
+    const [chosenSelections, setChosenSelections] = useState([null, null]);
 
     useEffect(
         _ => {
-            //make chosen selections always be the first two selections if any are null
-            if (chosenSelections[0] == null && chosenSelections[1] == null) {
-                let num = 0;
-                for(let selection of props.selections) {
-                    if (num == 2) break;
-                    if (selection.active) {
-                        chosenSelections[num] = selection.id;
-                        num++;
-                    }
-                }
-            } else if (chosenSelections[0] == null) {
-                for(let selection of props.selections) {
-                    if (selection.active && selection.id != chosenSelections[1]) {
-                        chosenSelections[0] = selection.id;
-                    }
-                }
-            } else if (chosenSelections[1] == null) {
-                for(let selection of props.selections) {
-                    if (selection.active && selection.id != chosenSelections[0]) {
-                        chosenSelections[1] = selection.id;
-                    }
-                }
-            }
+            let newChosenSelections = [...chosenSelections];
+            if (newChosenSelections[0] != null && !props.selections[newChosenSelections[0]].active) 
+                newChosenSelections[0] = null;
+            if (newChosenSelections[1] != null && !props.selections[newChosenSelections[1]].active)
+                newChosenSelections[1] = null;
+
+            if (newChosenSelections[0] === null) {
+                props.selections.forEach((selection, idx) => {
+                    if (selection.active && idx != newChosenSelections[1])
+                        newChosenSelections[0] = idx;
+                });
+            } 
+
+            if (newChosenSelections[1] === null) {
+                props.selections.forEach((selection, idx) => {
+                    if (selection.active && idx != newChosenSelections[0])
+                        newChosenSelections[1] = idx;
+                });
+            } 
+            setChosenSelections(newChosenSelections);
         }
     , [props.selections]);
 
     useEffect(
         _ => {
-            if (chosenSelections == null || chosenSelections[0] == null || chosenSelections[1] == null || !runButtonPressed) {
+            if (chosenSelections[0] == null || chosenSelections[1] == null || !runButtonPressed) {
                 return;
             }
             //clear current data
             setDataState(undefined);
-            //get indices from selection names
-            let firstSelectionIndices = [];
-            let secondSelectionIndices = [];
-            for (let selection of props.selections) {
-                if (selection.id === chosenSelections[0]){
-                    firstSelectionIndices = selection.rowIndices;
-                } else if (selection.id === chosenSelections[1]) {
-                    secondSelectionIndices = selection.rowIndices;
-                }
-            }
-
             //handle the loading of the data request promise
-            const request = createExplainThisRequest(props.filename, [firstSelectionIndices, secondSelectionIndices], props.selectedFeatureNames);
+            const request = createExplainThisRequest(props.filename, chosenSelections, props.selectedFeatureNames);
 
             const requestMade = utils.makeSimpleRequest(request);
             requestMade.req.then(data => {
