@@ -717,10 +717,22 @@ function ExplainThis(props) {
             if (chosenSelections[0] == null || chosenSelections[1] == null || !runButtonPressed) {
                 return;
             }
+
+            //get indices from selection names
+            let firstSelectionIndices = [];
+            let secondSelectionIndices = [];
+            for (let i = 0; i<props.selections.length; i++) {
+                if (i === chosenSelections[0]){
+                    firstSelectionIndices = props.selections[i].rowIndices;
+                } else if (i === chosenSelections[1]) {
+                    secondSelectionIndices = props.selections[i].rowIndices;
+                }
+            }
+
             //clear current data
             setDataState(undefined);
             //handle the loading of the data request promise
-            const request = createExplainThisRequest(props.filename, chosenSelections, props.selectedFeatureNames);
+            const request = createExplainThisRequest(props.filename, [firstSelectionIndices, secondSelectionIndices], props.selectedFeatureNames);
 
             const requestMade = utils.makeSimpleRequest(request);
             requestMade.req.then(data => {
