@@ -507,7 +507,13 @@ function ChooseSelections(props) {
             <FormControl className="selection-dropdown">
                 <Select 
                     value={props.chosenSelections[0] != null ? props.chosenSelections[0] : ""} 
-                    onChange={e => props.setChosenSelections([e.target.value, props.chosenSelections[1]])}
+                    onChange={
+                        e => {
+                            props.setChosenSelections([e.target.value, props.chosenSelections[1]]);
+                            props.setRunButtonPressed(false);
+                            props.setDataState(undefined);
+                        }
+                    }
                 >
                     {
                         (function() {
@@ -531,7 +537,13 @@ function ChooseSelections(props) {
             <FormControl className="selection-dropdown">
                 <Select 
                     value={props.chosenSelections[1] != null ? props.chosenSelections[1] : ""} 
-                    onChange={e => props.setChosenSelections([props.chosenSelections[0], e.target.value])}
+                    onChange={
+                        e => {
+                            props.setChosenSelections([props.chosenSelections[0], e.target.value]);
+                            props.setRunButtonPressed(false);
+                            props.setDataState(undefined);
+                        }
+                    }
                 >
                     {
                         (function() {
@@ -558,9 +570,9 @@ function ChooseSelections(props) {
 
 function TreeSweepScroller(props) {
     if (!props.tree_sweep && props.runButtonPressed) {
-        return <div className="tree-sweep-scroller-undefined"> <CircularProgress/></div>;
+        return <div className="tree-sweep-scroller"> <CircularProgress/></div>;
     } else if (!props.tree_sweep) {
-        return <div className="tree-sweep-scroller-undefined"> Choose selections and run </div>;
+        return <div className="tree-sweep-scroller"> Choose selections and run </div>;
     }
 
     const [listClass, setListClass] = useState([]);
@@ -703,6 +715,8 @@ function FeatureList(props) {
                 selections={props.selections}
                 setChosenSelections={props.setChosenSelections}
                 chosenSelections={props.chosenSelections}
+                setRunButtonPressed={props.setRunButtonPressed}
+                setDataState={props.setDataState}
             />
             <Button
                 className="run-button"
@@ -860,6 +874,7 @@ function ExplainThis(props) {
                     selections={props.selections}
                     setChosenSelections={setChosenSelections}
                     chosenSelections={chosenSelections}
+                    setDataState={setDataState}
                 />
                 <ExplainThisTree treeData={dataState.tree_sweep[treeIndex]} chosenSelections={chosenSelections} selectionNames={dataState.selectionNames}/>
             </div>
