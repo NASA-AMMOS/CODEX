@@ -7,6 +7,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 import * as d3 from "d3";
+import * as d3SC from "d3-scale-chromatic";
 import Plot from "react-plotly.js";
 import Button from "@material-ui/core/Button";
 import "components/ExplainThis/ExplainThis.scss";
@@ -64,6 +65,7 @@ function node_label(d) {
     //shorten the name
     //shorten the number
     //add them back together
+    if (d.hidden || d.leaf) return "";
     let split = d.name.split(" ");
     let float = processFloatingPointNumber(parseFloat(split[2])); //truncate to two decimal places
     let featureName = split[0];
@@ -145,12 +147,15 @@ function generateTree(treeData, selectionNames, svgRef) {
         .domain([0, 1])
         .range(["blue",  "red"]);
 */
-
+    /*
     let color_map = d3.scale
         .linear()
         .domain([0, 1])
         .interpolate(d3.interpolateHcl)
         .range(["hsl(0, 90%, 92%)", "hsl(240, 27%, 21%)"]);
+    */
+
+    let color_map = d3SC.interpolatePlasma;
 
     /**
      * Mixes colors according to the relative frequency of classes.
@@ -175,6 +180,7 @@ function generateTree(treeData, selectionNames, svgRef) {
         .append("svg:g")
         .attr("transform", "translate(" + margin.left + "," + (height / 2 - 60) + ")");
 
+    //defines the gradient
     let gradientContainer = d3
         .select(svgRef)
         .append("svg:g")
@@ -221,6 +227,61 @@ function generateTree(treeData, selectionNames, svgRef) {
         .style("stroke", "black")
         .style("stroke-width", 2)
         .style("fill", "url(#linear-gradient)");
+
+    //make the arrow on the right side of the screen
+    d3.select(svgRef)
+        .append("svg:g")
+        .append("svg:defs")
+        .append("svg:marker")
+        .attr("id", "triangle")
+        .attr("refX", 6)
+        .attr("refY", 6)
+        .attr("markerWidth", 30)
+        .attr("markerHeight", 30)
+        .attr("markerUnits", "userSpaceOnUse")
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M 0 0 12 6 0 12 3 6")
+        .style("fill", "black");
+
+    d3.select(svgRef)
+        .append("svg:g")
+        .append("svg:defs")
+        .append("svg:marker")
+        .attr("id", "triangle2")
+        .attr("refX", 6)
+        .attr("refY", 6)
+        .attr("markerWidth", 30)
+        .attr("markerHeight", 30)
+        .attr("markerUnits", "userSpaceOnUse")
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M 12 12 0 6 12 0 9 6")
+        .style("fill", "black");
+
+    //line
+    d3.select(svgRef)
+        .append("line")
+        .attr("x1", width + 55)
+        .attr("y1", 100)
+        .attr("x2", width + 55)
+        .attr("y2", height - 200)
+        .attr("stroke-width", 1)
+        .attr("stroke", "black")
+        .attr("marker-end", "url(#triangle)")
+        .attr("marker-start", "url(#triangle2)");
+
+    d3.select(svgRef)
+        .append("text")
+        .text("Greater")
+        .attr("x", width + 25)
+        .attr("y", 80);
+
+    d3.select(svgRef)
+        .append("text")
+        .text("Lesser")
+        .attr("x", width + 34)
+        .attr("y", height - 175);
 
     // global scale for link width
     let link_stoke_scale = d3.scale.linear();
@@ -305,10 +366,10 @@ function generateTree(treeData, selectionNames, svgRef) {
         nodeEnter
             .insert("rect", "text")
             .attr("width", function(d) {
-                return d.bbox.width + rectPadding;
+                return d.leaf ? 0 : d.bbox.width + rectPadding;
             })
             .attr("height", function(d) {
-                return d.bbox.height;
+                return d.leaf ? 0 : d.bbox.height;
             })
             .attr("x", function(d) {
                 return -d.bbox.width / 2 - rectPadding / 2;
@@ -445,34 +506,50 @@ function ChooseSelections(props) {
             <p className="selection-chooser-header">Choose Two Selections</p>
             <FormControl className="selection-dropdown">
                 <Select
-                    value={props.chosenSelections[0]}
+                    value={props.chosenSelections[0] != null ? props.chosenSelections[0] : ""}
                     onChange={e =>
                         props.setChosenSelections([e.target.value, props.chosenSelections[1]])
                     }
                 >
-                    {props.selections
-                        .filter(selection => selection.active)
-                        .map(f => (
-                            <MenuItem key={f.id} value={f.id}>
-                                {f.id}
-                            </MenuItem>
-                        ))}
+                    {(function() {
+                        let arr = [];
+
+                        for (let i = 0; i < props.selections.length; i++) {
+                            if (props.selections[i].active && props.chosenSelections[1] != i) {
+                                arr.push(
+                                    <MenuItem key={props.selections[i].id} value={i}>
+                                        {props.selections[i].id}
+                                    </MenuItem>
+                                );
+                            }
+                        }
+
+                        return arr;
+                    })()}
                 </Select>
             </FormControl>
             <FormControl className="selection-dropdown">
                 <Select
-                    value={props.chosenSelections[1]}
+                    value={props.chosenSelections[1] != null ? props.chosenSelections[1] : ""}
                     onChange={e =>
                         props.setChosenSelections([props.chosenSelections[0], e.target.value])
                     }
                 >
-                    {props.selections
-                        .filter(selection => selection.active)
-                        .map(f => (
-                            <MenuItem key={f.id} value={f.id}>
-                                {f.id}
-                            </MenuItem>
-                        ))}
+                    {(function() {
+                        let arr = [];
+
+                        for (let i = 0; i < props.selections.length; i++) {
+                            if (props.selections[i].active && props.chosenSelections[0] != i) {
+                                arr.push(
+                                    <MenuItem key={props.selections[i].id} value={i}>
+                                        {props.selections[i].id}
+                                    </MenuItem>
+                                );
+                            }
+                        }
+
+                        return arr;
+                    })()}
                 </Select>
             </FormControl>
         </div>
@@ -515,7 +592,7 @@ function TreeSweepScroller(props) {
         ],
         layout: {
             autosize: true,
-            margin: { l: 20, r: 10, t: 20, b: 0 }, // Axis tick labels are drawn in the margin space
+            margin: { l: 20, r: 10, t: 30, b: 0 }, // Axis tick labels are drawn in the margin space
             showlegend: false,
             xaxis: {
                 automargin: true
@@ -528,7 +605,7 @@ function TreeSweepScroller(props) {
                 text: "Score vs Tree Depth",
                 font: {
                     family: "Roboto, Helvetica, Arial, sans-serif",
-                    size: 14
+                    size: 16
                 }
             }
         },
@@ -653,7 +730,10 @@ function ExplainThisTree(props) {
         _ => {
             if (!svgRef) return;
             d3.selectAll(".tree-container > *").remove();
-            generateTree(props.treeData.json_tree, props.chosenSelections, svgRef);
+            //process the json tree
+            //the tree needs to be flipped
+
+            generateTree(props.treeData.json_tree, props.selectionNames, svgRef);
         },
         [props.treeData]
     );
@@ -673,72 +753,53 @@ function ExplainThis(props) {
     const [dataState, setDataState] = useState(undefined);
     const [treeIndex, setTreeIndex] = useState(0);
     const [runButtonPressed, setRunButtonPressed] = useState(false);
-
-    //handles initialization of chosenSelections based
-    //on the global active selections
-    let newChosenSelections = [null, null];
-    let numChosen = 0;
-    for (let selection of props.selections) {
-        if (numChosen == 2) break;
-        if (selection.active) {
-            newChosenSelections[numChosen] = selection.id;
-            numChosen++;
-        }
-    }
-    const [chosenSelections, setChosenSelections] = useState(newChosenSelections);
+    const [chosenSelections, setChosenSelections] = useState([null, null]);
 
     useEffect(
         _ => {
-            //make chosen selections always be the first two selections if any are null
-            if (chosenSelections[0] == null && chosenSelections[1] == null) {
-                let num = 0;
-                for (let selection of props.selections) {
-                    if (num == 2) break;
-                    if (selection.active) {
-                        chosenSelections[num] = selection.id;
-                        num++;
-                    }
-                }
-            } else if (chosenSelections[0] == null) {
-                for (let selection of props.selections) {
-                    if (selection.active && selection.id != chosenSelections[1]) {
-                        chosenSelections[0] = selection.id;
-                    }
-                }
-            } else if (chosenSelections[1] == null) {
-                for (let selection of props.selections) {
-                    if (selection.active && selection.id != chosenSelections[0]) {
-                        chosenSelections[1] = selection.id;
-                    }
-                }
+            let newChosenSelections = [...chosenSelections];
+            if (newChosenSelections[0] != null && !props.selections[newChosenSelections[0]].active)
+                newChosenSelections[0] = null;
+            if (newChosenSelections[1] != null && !props.selections[newChosenSelections[1]].active)
+                newChosenSelections[1] = null;
+
+            if (newChosenSelections[0] === null) {
+                props.selections.forEach((selection, idx) => {
+                    if (selection.active && idx != newChosenSelections[1])
+                        newChosenSelections[0] = idx;
+                });
             }
+
+            if (newChosenSelections[1] === null) {
+                props.selections.forEach((selection, idx) => {
+                    if (selection.active && idx != newChosenSelections[0])
+                        newChosenSelections[1] = idx;
+                });
+            }
+            setChosenSelections(newChosenSelections);
         },
         [props.selections]
     );
 
     useEffect(
         _ => {
-            if (
-                chosenSelections == null ||
-                chosenSelections[0] == null ||
-                chosenSelections[1] == null ||
-                !runButtonPressed
-            ) {
+            if (chosenSelections[0] == null || chosenSelections[1] == null || !runButtonPressed) {
                 return;
             }
-            //clear current data
-            setDataState(undefined);
+
             //get indices from selection names
             let firstSelectionIndices = [];
             let secondSelectionIndices = [];
-            for (let selection of props.selections) {
-                if (selection.id === chosenSelections[0]) {
-                    firstSelectionIndices = selection.rowIndices;
-                } else if (selection.id === chosenSelections[1]) {
-                    secondSelectionIndices = selection.rowIndices;
+            for (let i = 0; i < props.selections.length; i++) {
+                if (i === chosenSelections[0]) {
+                    firstSelectionIndices = props.selections[i].rowIndices;
+                } else if (i === chosenSelections[1]) {
+                    secondSelectionIndices = props.selections[i].rowIndices;
                 }
             }
 
+            //clear current data
+            setDataState(undefined);
             //handle the loading of the data request promise
             const request = createExplainThisRequest(
                 props.filename,
@@ -749,7 +810,13 @@ function ExplainThis(props) {
             const requestMade = utils.makeSimpleRequest(request);
             requestMade.req.then(data => {
                 setRunButtonPressed(false);
-                setDataState(data);
+
+                const selectionNames = [
+                    props.selections[chosenSelections[0]].id,
+                    props.selections[chosenSelections[1]].id
+                ];
+
+                setDataState({ ...data, selectionNames: selectionNames });
             });
 
             //cancels the request if the window is closed
@@ -810,6 +877,7 @@ function ExplainThis(props) {
                 <ExplainThisTree
                     treeData={dataState.tree_sweep[treeIndex]}
                     chosenSelections={chosenSelections}
+                    selectionNames={dataState.selectionNames}
                 />
             </div>
         );

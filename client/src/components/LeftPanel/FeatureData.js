@@ -25,23 +25,23 @@ function processFloatingPointNumber(number) {
 function StatisticsRow(props) {
     if (props.stats === undefined) {
         return (
-            <tr>
-                <td className="loading-td" />
-                <td className="loading-td" />
-                <td className="loading-td" />
-                <td className="loading-td" />
-                <td className="loading-td">Loading... </td>
+            <tr className="loading-tr">
+                <td />
+                <td />
+                <td />
+                <td />
+                <td>Loading... </td>
             </tr>
         );
     }
     if (props.stats.status === "failed") {
         return (
-            <tr>
-                <td className="loading-td" />
-                <td className="loading-td" />
-                <td className="loading-td" />
-                <td className="loading-td" />
-                <td className="loading-td">Failure ...</td>
+            <tr className="loading-tr">
+                <td />
+                <td />
+                <td />
+                <td />
+                <td>Failure... </td>
             </tr>
         );
     }
@@ -122,9 +122,8 @@ function FeatureData(props) {
                     };
                 });
 
-                if (index + 1 >= names.length) return;
-
                 request.cancel();
+                if (index + 1 >= names.length) return;
 
                 //start next request
                 const nextRequestObject = { ...requestTemplate, name: [names[index + 1]] };
@@ -132,7 +131,7 @@ function FeatureData(props) {
                 setTimeout(function() {
                     const nextRequest = utils.makeSimpleRequest(nextRequestObject);
                     lazyRecursizeHandler(nextRequest, index + 1);
-                }, 200);
+                }, 120);
             });
         }
 
