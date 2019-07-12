@@ -109,6 +109,23 @@ def export_json_tree(clf, features, labels, proportion_tree_sums, node_index=0):
     """
     return node
 
+"""
+    Rotate the json tree recursively
+"""
+def rotate_tree(json_tree):
+
+    if (not json_tree["leaf"]):
+        #recurse on children 
+        rotate_tree(json_tree["children"][0])
+        rotate_tree(json_tree["children"][1])
+
+        temp = json_tree["children"][0]
+        json_tree["children"][0] = json_tree["children"][1]
+        json_tree["children"][1] = temp
+
+    return json_tree
+
+
 def explain_this(inputHash, featureNames, dataSelections, result):
     '''
     Inputs:
@@ -141,18 +158,13 @@ def explain_this(inputHash, featureNames, dataSelections, result):
         return None
 
     X,y = create_data_from_indices(dataSelections, data)
-
-    random_search_parameters = {
-
-
-    }
     
     result['tree_sweep'] = []
 
     samples_, features_ = X.shape
     
     max_depth = 6
-    for i in range(2, max_depth):
+    for i in range(1, max_depth):
         #train and fit the model
         parameters = {
             'criterion' :['gini', 'entropy'],
@@ -183,7 +195,12 @@ def explain_this(inputHash, featureNames, dataSelections, result):
 
         feature_weights, feature_rank = zip(*sorted(zip(best_tree.feature_importances_, featureNames), reverse=True))
 
-        dictionary['json_tree'] = export_json_tree(best_tree, featureNames[::-1], ["Main Data","Isolated Data"], proportion_tree_sums)
+        json_tree = export_json_tree(best_tree, featureNames[::-1], ["Main Data","Isolated Data"], proportion_tree_sums)
+        #rotate the tree here
+        rotated_tree = rotate_tree(json_tree)
+
+        dictionary['json_tree'] = rotated_tree
+
         dictionary["score"] = np.round(best_tree.score(X,y) * 100)
         dictionary["max_features"] = best_tree.max_features_
         
