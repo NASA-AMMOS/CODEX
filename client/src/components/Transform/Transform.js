@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 
 import { useWindowManager } from "hooks/WindowHooks";
 import { usePinnedFeatures, useNewFeature } from "hooks/DataHooks";
@@ -24,6 +24,7 @@ import AceEditor from "react-ace";
 import "brace/mode/javascript";
 import "brace/theme/github";
 import "brace/keybinding/vim";
+import "brace/keybinding/emacs";
 
 import workerize from "workerize";
 
@@ -61,8 +62,20 @@ const EditorLine = props => {
             <WindowLayout direction="row" align="baseline">
                 <span>
                     {errorsCount} errors, {warningsCount} warnings, {infoCount} info -{" "}
-                    {props.prog.length} chars
+                    {props.prog.length} chars -&nbsp;
                 </span>
+                {props.keyHandler === "" ? (
+                    <span onClick={props.nextKeyHandler} className="Transform--selectable">
+                        default
+                    </span>
+                ) : (
+                    <span
+                        onClick={props.nextKeyHandler}
+                        className="Transform__editorLine--highlight Transform--selectable"
+                    >
+                        {props.keyHandler}
+                    </span>
+                )}
                 <ExpandingContainer />
                 {!props.executing ? (
                     <span
@@ -82,6 +95,10 @@ const EditorLine = props => {
     );
 };
 
+const getLocalStorageKey = features => {
+    return "transformer:" + features.map(f => f.get("feature")).join("/");
+};
+
 /**
  * Ace editor component
  */
@@ -89,22 +106,42 @@ const CodeEditor = props => {
     const [editorID, setEditorID] = useState(createNewId());
 
     // compute default value of form field
-    let getDisplayName = name =>
-        name === sanitizeName(name) ? name : `${sanitizeName(name)} (${name})`;
-    let defaultValue = "/**\n * Available features:\n";
-    defaultValue += props.features.map(f => ` *  - ${getDisplayName(f.get("feature"))}`).join("\n");
-    defaultValue += "\n */\n\nreturn 0;";
+
+    const localStorageKey = useMemo(() => getLocalStorageKey(props.features), [props.features]);
 
     // use the ace component as a controlled form
-    const [content, setContent] = useState(defaultValue);
-    useEffect(() => props.onChange(defaultValue), []); // propagate the default value
+    const [content, setContent] = useState("");
+
+    // ensure the component loads in/out of localstorage
+    useEffect(() => {
+        if (window.localStorage.getItem(localStorageKey) === null) {
+            // compute the default value of the editor
+            let getDisplayName = name =>
+                name === sanitizeName(name) ? name : `${sanitizeName(name)} (${name})`;
+            let defaultValue = "/**\n * Available features:\n";
+            defaultValue += props.features
+                .map(f => ` *  - ${getDisplayName(f.get("feature"))}`)
+                .join("\n");
+            defaultValue += "\n */\n\nreturn 0;";
+
+            window.localStorage.setItem(localStorageKey, defaultValue);
+        }
+        props.onChange(window.localStorage.getItem(localStorageKey));
+        setContent(window.localStorage.getItem(localStorageKey));
+    }, []);
     const contentUpdate = e => {
+        window.localStorage.setItem(localStorageKey, e);
         setContent(e);
         props.onChange(e);
     }; // wrapping avoids react error
 
     // keep track of the annotations from the ace layer
     const [annotations, setAnnotations] = useState([]);
+
+    const editorKeyHandlers = ["", "vim", "emacs"];
+    const [editorKeyHandler, setEditorKeyHandler] = useState(0);
+    const nextHandler = () =>
+        setEditorKeyHandler((editorKeyHandler + 1) % editorKeyHandlers.length);
 
     // we know everything's okay if there are no errors
     const isValid = annotations.filter(a => a.type !== "info").length === 0;
@@ -119,10 +156,10 @@ const CodeEditor = props => {
                 name={editorID}
                 width=""
                 height="100%"
-                defaultValue={defaultValue}
                 editorProps={{ $blockScrolling: true }}
                 onChange={contentUpdate}
                 onValidate={setAnnotations}
+                keyboardHandler={editorKeyHandlers[editorKeyHandler]}
                 enableLiveAutocomplete={true}
                 value={content}
             />
@@ -133,6 +170,8 @@ const CodeEditor = props => {
                 onExecute={execute}
                 onStopExecute={props.onStopExecute}
                 executing={props.executing}
+                keyHandler={editorKeyHandlers[editorKeyHandler]}
+                nextKeyHandler={nextHandler}
             />
         </React.Fragment>
     );
@@ -149,6 +188,24 @@ const Executor = props => {
     const [transformFn, setTransformFn] = useState(null);
     const [results, setResults] = useState(null);
     const [outputName, setOutputName] = useState("transformed vector");
+
+    // worker lifecycle management
+    const [worker, _setWorker] = useState(null);
+    const setWorker = wrkr => {
+        if (worker !== null) {
+            worker.shutdown();
+        }
+        _setWorker(wrkr);
+    };
+    useEffect(() => {
+        return () => {
+            // clean up a worker when this component is unmounted
+            if (worker !== null) {
+                worker.shutdown();
+            }
+        };
+    });
+
     const iref = useRef();
 
     const addMessage = (message, color, indent = 0, save = true) => {
@@ -191,7 +248,7 @@ const Executor = props => {
             }
         } else if (stage === "execute") {
             // Create our function which will perform the transpose and the mapping
-            const worker = workerize(`
+            const vectorWorker = workerize(`
                 export function createVector(features) {
                     let transform = null;
 
@@ -235,9 +292,16 @@ const Executor = props => {
                         output
                     };
                 }
+
+                export function shutdown() {
+                    // workaround as .terminate(); does not seem to work
+                    close();
+                }
             `);
 
-            worker
+            setWorker(vectorWorker);
+
+            vectorWorker
                 .createVector(props.features.toJS())
                 .then(r => {
                     if (r.error) {
@@ -317,7 +381,13 @@ const executeTransform = (lambda, features) => {};
 
 const Transform = props => {
     const win = useWindowManager(props, {
-        title: "Data Transformer"
+        title: "Data Transformer",
+        minSize: {
+            width: 475,
+            height: 150
+        },
+        width: 500,
+        height: 400
     });
 
     const features = usePinnedFeatures(win);

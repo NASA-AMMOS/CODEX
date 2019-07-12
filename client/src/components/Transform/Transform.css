@@ -21,7 +21,6 @@
     padding: 10px;
     height: 100%;
     white-space: pre;
-    margin-bottom: -10px;
     font-size: 12px;
 }
 
@@ -40,4 +39,12 @@
 .Transform__ExecutorFeatureName > input:disabled {
     color: var(--gray);
     border: 0;
+}
+
+.Transform--selectable {
+    cursor: pointer;
+}
+
+.Transform__editorLine--highlight {
+    color: var(--blue);
 }
