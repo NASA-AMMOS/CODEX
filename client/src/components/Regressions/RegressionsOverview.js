@@ -138,7 +138,7 @@ function makeNumericInput(param, regressionName, regressionStateDispatch) {
 function makeStringChoiceInput(param, regressionName, regressionStateDispatch) {
     return (
         <FormControl key={param.name}>
-            <InputLabel>{param.displayName}</InputLabel>
+            <InputLabel>{param.name}</InputLabel>
             <Select
                 value={param.value || param.default}
                 onChange={e =>

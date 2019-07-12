@@ -74,6 +74,20 @@
             margin-top:auto;
         }
 
+        .tree-sweep-scroller-circular{ 
+            margin-bottom: 20px;
+            height:30%;
+            width:100%;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            div {
+                margin: auto;
+            }   
+
+        }
+
         .tree-sweep-scroller {
             margin-bottom: 20px;
             height:30%;

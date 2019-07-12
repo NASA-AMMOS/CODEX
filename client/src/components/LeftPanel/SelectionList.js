@@ -36,7 +36,7 @@ function createSelection(
                 e.preventDefault();
                 setContextMenuVisible(true);
                 setContextMenuPosition({ top: e.clientY, left: e.clientX });
-                setContextActiveSelection({ id: selection.id, displayName: selection.displayName });
+                setContextActiveSelection({ id: selection.id, name: selection.name });
             }}
             onMouseEnter={_ => props.hoverSelection(selection.id)}
             onMouseLeave={_ => props.hoverSelection(null)}
@@ -52,7 +52,7 @@ function createSelection(
                 }
                 style={{height:"22px",  padding:"0px"}}
               />
-            <div className="selection-name-tag"><span> {selection.displayName} </span></div>
+            <div className="selection-name-tag"><span> {selection.name} </span></div>
             <Checkbox
                 className="eye-icon-checkbox"
                 checked={selection.hidden}

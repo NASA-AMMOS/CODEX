@@ -522,8 +522,8 @@ function ChooseSelections(props) {
                             for(let i = 0; i < props.selections.length; i++) {
                                 if (props.selections[i].active && props.chosenSelections[1]!=i) {
                                     arr.push(
-                                        <MenuItem key={props.selections[i].id} value={i}>
-                                            {props.selections[i].id}
+                                        <MenuItem key={props.selections[i].name} value={i}>
+                                            {props.selections[i].name}
                                         </MenuItem>
                                     );
                                 }
@@ -552,8 +552,8 @@ function ChooseSelections(props) {
                             for(let i = 0; i < props.selections.length; i++) {
                                 if (props.selections[i].active && props.chosenSelections[0]!=i) {
                                     arr.push(
-                                        <MenuItem key={props.selections[i].id} value={i}>
-                                            {props.selections[i].id}
+                                        <MenuItem key={props.selections[i].name} value={i}>
+                                            {props.selections[i].name}
                                         </MenuItem>
                                     );
                                 }
@@ -570,7 +570,7 @@ function ChooseSelections(props) {
 
 function TreeSweepScroller(props) {
     if (!props.tree_sweep && props.runButtonPressed) {
-        return <div className="tree-sweep-scroller"> <CircularProgress/></div>;
+        return <div className="tree-sweep-scroller-circular"> <CircularProgress/></div>;
     } else if (!props.tree_sweep) {
         return <div className="tree-sweep-scroller"> Choose selections and run </div>;
     }
@@ -811,12 +811,12 @@ function ExplainThis(props) {
             setDataState(undefined);
             //handle the loading of the data request promise
             const request = createExplainThisRequest(props.filename, [firstSelectionIndices, secondSelectionIndices], props.selectedFeatureNames);
-
+            console.log(request);
             const requestMade = utils.makeSimpleRequest(request);
             requestMade.req.then(data => {
                 setRunButtonPressed(false);
                 
-                const selectionNames = [props.selections[chosenSelections[0]].id, props.selections[chosenSelections[1]].id];
+                const selectionNames = [props.selections[chosenSelections[0]].name, props.selections[chosenSelections[1]].name];
         
                 setDataState({...data,selectionNames:selectionNames});
             });

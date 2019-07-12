@@ -9,5 +9,7 @@ export const selectionModel = {
     name: "name",
     rowIndices: [],
     active: true,
-    hidden: false
+    hidden: false,
+    id: 0,
+    groupID: null
 };

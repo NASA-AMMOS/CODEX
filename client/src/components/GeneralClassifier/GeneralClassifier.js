@@ -33,7 +33,7 @@ function buildBackendSelectionObject(selections, savedSelections) {
 
     function getIndexOfSelectionWithName(name) {
         for (let [key, value] of Object.entries(savedSelections)) {
-            if (value.id === name)
+            if (value.name === name)
                 return key
         }
         return -1;
@@ -311,7 +311,7 @@ function GeneralClassifier(props) {
                 .filter((selection) => {return selection.active})
                 .map((selection) => {
                     return {
-                        name: selection.id,
+                        name: selection.name,
                         className: selection.className != undefined ? selection.className : "None"
                     }
                 }
