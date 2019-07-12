@@ -1,0 +1,43 @@
+.Transform__editorLine {
+    background-color: #e8e8e8;
+    color: #666;
+    font-size: 12px;
+    padding: 2px 1em 2px 1em;
+}
+
+.Transform__editorLineExecute {
+    color: var(--green);
+    cursor: pointer;
+}
+
+.Transform__editorLineExecute[data-valid="false"] {
+    color: var(--red);
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+.Transform__Executor {
+    background-color: #e8e8e8;
+    padding: 10px;
+    height: 100%;
+    white-space: pre;
+    margin-bottom: -10px;
+    font-size: 12px;
+}
+
+.Transform__ExecutorFeatureName {
+    margin-left: 2em;
+    padding: 0;
+}
+
+.Transform__ExecutorFeatureName > input {
+    background: none;
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid var(--gray);
+}
+
+.Transform__ExecutorFeatureName > input:disabled {
+    color: var(--gray);
+    border: 0;
+}

@@ -39,6 +39,8 @@ export const ExpandingContainer = props => {
     return <div className={classes}>{props.children}</div>;
 };
 
+export const WindowNoPad = props => <div className="WindowLayout__nopad">{props.children}</div>;
+
 export const WindowCover = props => <div className="WindowLayout__cover">{props.children}</div>;
 
 export const WindowTogglableCover = props =>

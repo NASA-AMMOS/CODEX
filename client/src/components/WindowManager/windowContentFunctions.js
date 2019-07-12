@@ -27,6 +27,7 @@ import Filter from "components/Filter/Filter";
 import * as windowTypes from "constants/windowTypes";
 import Debugger from "components/Debug/Debug";
 import Table from "components/Table/Table";
+import Transform from "components/Transform/Transform";
 
 export function getWindowContent(win) {
     switch (win.get("windowType")) {
@@ -98,6 +99,8 @@ export function getWindowContent(win) {
             return <Debugger />;
         case windowTypes.TABLE_WINDOW:
             return <Table />;
+        case windowTypes.TRANSFORM_WINDOW:
+            return <Transform />;
         default:
             return (
                 <p>

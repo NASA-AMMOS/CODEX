@@ -166,6 +166,7 @@ function NavigationBar(props) {
                             "General Classifier"
                         )}
                         {createMenuItem(windowTypes.TABLE_WINDOW, "Table")}
+                        {createMenuItem(windowTypes.TRANSFORM_WINDOW, "Transform")}
                     </Dropdown.Menu>
                 </Dropdown>
 

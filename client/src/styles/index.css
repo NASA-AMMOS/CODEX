@@ -89,3 +89,8 @@ button:focus {
         opacity: 1;
     }
 }
+
+.monospace {
+    /* system font stack */
+    font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
+}

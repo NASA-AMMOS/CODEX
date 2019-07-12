@@ -31,6 +31,7 @@
         "prop-types": "^15.6.2",
         "raf": "3.4.0",
         "react": "^16.3.2",
+        "react-ace": "^7.0.2",
         "react-color": "^2.14.1",
         "react-contextmenu": "^2.9.2",
         "react-d3-library": "^1.1.8",
@@ -55,7 +56,8 @@
         "ts-react-toolbox": "^0.2.2",
         "webpack-hot-middleware": "^2.25.0",
         "whatwg-fetch": "2.0.3",
-        "worker-loader": "^2.0.0"
+        "worker-loader": "^2.0.0",
+        "workerize": "^0.1.7"
     },
     "scripts": {
         "start": "npm run open:src",
