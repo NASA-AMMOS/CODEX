@@ -47,7 +47,8 @@ body {
 }
 
 textarea:focus,
-input:focus {
+input:focus,
+button:focus {
     outline: none;
 }
 
@@ -87,4 +88,9 @@ input:focus {
         display: inherit;
         opacity: 1;
     }
+}
+
+.monospace {
+    /* system font stack */
+    font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
 }

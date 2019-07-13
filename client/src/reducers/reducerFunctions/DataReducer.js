@@ -409,7 +409,13 @@ export default class DataReducer {
     }
 
     static addFeature(state, action) {
-        console.log(action);
+        if (
+            state.get("featureList").find(a => a.get("name") === action.featureName) !== undefined
+        ) {
+            console.warn(`feature ${action.featureName} already exists, skipping add!`);
+            return state;
+        }
+
         return state.set(
             "featureList",
             state.get("featureList").push(

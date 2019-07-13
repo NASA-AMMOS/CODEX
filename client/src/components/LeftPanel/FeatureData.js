@@ -3,9 +3,9 @@ import * as utils from "utils/utils";
 import WorkerSocket from "worker-loader!workers/socket.worker";
 import * as actionFunctions from "actions/actionFunctions";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { Sparklines, SparklinesLine } from 'react-sparklines';
-import { bindActionCreators} from "redux";
-import { connect} from "react-redux";
+import { Sparklines, SparklinesLine } from "react-sparklines";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
 import * as actionTypes from "constants/actionTypes";
 
 function processFloatingPointNumber(number) {
@@ -26,10 +26,10 @@ function StatisticsRow(props) {
     if (props.stats === undefined) {
         return (
             <tr className="loading-tr">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td />
+                <td />
+                <td />
+                <td />
                 <td>Loading... </td>
             </tr>
         );
@@ -37,10 +37,10 @@ function StatisticsRow(props) {
     if (props.stats.status === "failed") {
         return (
             <tr className="loading-tr">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td />
+                <td />
+                <td />
+                <td />
                 <td>Failure... </td>
             </tr>
         );
@@ -72,7 +72,11 @@ function StatisticsRow(props) {
             <td> {mean} </td>
             <td> {median} </td>
             <td>
-                <Sparklines data={props.data} limit={100} style={{ fill: "none" , height:"20px", width:"100%"}}>
+                <Sparklines
+                    data={props.data}
+                    limit={100}
+                    style={{ fill: "none", height: "20px", width: "100%" }}
+                >
                     <SparklinesLine color="white" />
                 </Sparklines>
             </td>
@@ -82,10 +86,7 @@ function StatisticsRow(props) {
 
 function FeatureData(props) {
     if (props.featureListLoading) {
-        return (
-            <div className="chartLoading">
-            </div>
-        );
+        return <div className="chartLoading" />;
     }
 
     let names = props.featureList.map(feature => {
@@ -106,42 +107,36 @@ function FeatureData(props) {
         };
 
         function lazyRecursizeHandler(request, index) {
-
-            request.req.then((data) => {
-                setFeatureData(
-                    featureData => {
-                        return {
-                            ...featureData,
-                            [data.name]: data.downsample
-                        };
-                    }
-                );
+            request.req.then(data => {
+                setFeatureData(featureData => {
+                    return {
+                        ...featureData,
+                        [data.name]: data.downsample
+                    };
+                });
                 //handle building the list
-                setStatsData(
-                    statsData => {
-                        return {
-                            ...statsData,
-                            [data.name]: data
-                        };
-                    }
-                );
+                setStatsData(statsData => {
+                    return {
+                        ...statsData,
+                        [data.name]: data
+                    };
+                });
 
                 request.cancel();
-                if (index + 1 >= names.length) 
-                    return;
+                if (index + 1 >= names.length) return;
 
                 //start next request
-                const nextRequestObject =  {...requestTemplate, name: [names[index + 1]]};
+                const nextRequestObject = { ...requestTemplate, name: [names[index + 1]] };
 
                 setTimeout(function() {
                     const nextRequest = utils.makeSimpleRequest(nextRequestObject);
                     lazyRecursizeHandler(nextRequest, index + 1);
-                }, 120)
-            })
+                }, 120);
+            });
         }
-        
+
         if (names.length > 0) {
-            const requestCopy = {...requestTemplate, name: [names[0]]};
+            const requestCopy = { ...requestTemplate, name: [names[0]] };
 
             const firstRequest = utils.makeSimpleRequest(requestCopy);
 
@@ -156,12 +151,14 @@ function FeatureData(props) {
                     <table className="stats-table">
                         <tbody>
                             {names.map(name => {
-                                return <StatisticsRow 
-                                    data={featureData[name]} 
-                                    key={name} 
-                                    name={name}
-                                    stats={statsData[name]}
-                                />;
+                                return (
+                                    <StatisticsRow
+                                        data={featureData[name]}
+                                        key={name}
+                                        name={name}
+                                        stats={statsData[name]}
+                                    />
+                                );
                             })}
                         </tbody>
                     </table>

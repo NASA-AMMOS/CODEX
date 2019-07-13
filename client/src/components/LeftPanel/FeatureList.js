@@ -1,4 +1,4 @@
-import React, { Component , useState, useEffect} from "react";
+import React, { Component, useState, useEffect } from "react";
 import "components/LeftPanel/FeatureList.scss";
 import { connect } from "react-redux";
 import classnames from "classnames";
@@ -6,37 +6,37 @@ import { bindActionCreators } from "redux";
 import * as dataActions from "actions/data";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import FeatureData from "components/LeftPanel/FeatureData";
-import Checkbox from '@material-ui/core/Checkbox';
+import Checkbox from "@material-ui/core/Checkbox";
 import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckboxIcon from "@material-ui/icons/CheckBox";
-import Popover from '@material-ui/core/Popover';
-import Typography from '@material-ui/core/Typography';
+import Popover from "@material-ui/core/Popover";
+import Typography from "@material-ui/core/Typography";
 
 function FeatureListItem(props) {
     const name = props.feature.get("name");
     const selected = props.feature.get("selected");
 
+    // virtual feature handling
+    const virtual = props.feature.get("virtual");
+    const virtualStyle = { fontStyle: virtual ? "italic" : "normal" };
+
     return (
-        <li
-            className={classnames({ feature: true})}
-            key={name}
-            title={name}
-         >
+        <li className={classnames({ feature: true })} key={name} title={name}>
             <Checkbox
                 checked={selected}
                 value="checkedA"
-                style={{height:"22px",padding:"0px", paddingRight:"10px"}}
-                icon={<CheckboxOutlineBlank style={{fill: "#828282"}} />}
-                checkedIcon={<CheckboxIcon style={{ fill:"#3988E3"}} />}
+                style={{ height: "22px", padding: "0px", paddingRight: "10px" }}
+                icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
+                checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
                 onClick={function(e) {
                     return selected
                         ? props.featureUnselect(name, e.shiftKey)
                         : props.featureSelect(name, e.shiftKey);
                 }}
-              />
-            <span className="feature-name">
-                {name}
-            </span>
+            />
+            <div className="feature-name">
+                <span style={virtualStyle}>{name}</span>
+            </div>
         </li>
     );
 }
@@ -52,26 +52,41 @@ function FeatureList(props) {
         .filter(f =>
             props.filterString
                 ? f
-                    .get("name")
-                    .toLowerCase()
-                    .startsWith(props.filterString.toLowerCase())
+                      .get("name")
+                      .toLowerCase()
+                      .startsWith(props.filterString.toLowerCase())
                 : true
         )
-        .map(f => <FeatureListItem 
-                    key={f.get("name")} 
-                    feature={f} 
-                    featureUnselect={props.featureUnselect}
-                    featureSelect={props.featureSelect}
-                    />);
+        .map(f => (
+            <FeatureListItem
+                key={f.get("name")}
+                feature={f}
+                featureUnselect={props.featureUnselect}
+                featureSelect={props.featureSelect}
+            />
+        ));
 
     return (
-        <div className={"feature-lists-container " + (statsHidden ? 'stats-hidden' : 'stats-not-hidden')}>
+        <div
+            className={
+                "feature-lists-container " + (statsHidden ? "stats-hidden" : "stats-not-hidden")
+            }
+        >
             <div className="header-container">
-                <div className={"header " + (statsHidden ? 'stats-hidden-header' : 'stats-not-hidden-header')}>
+                <div
+                    className={
+                        "header " +
+                        (statsHidden ? "stats-hidden-header" : "stats-not-hidden-header")
+                    }
+                >
                     <div className="title">Features</div>
-                    <span className="stats-toggle"
-                          onClick={function(){setStatsHidden(!statsHidden);}}>
-                             {statsHidden ? "stats off" : "stats on"} 
+                    <span
+                        className="stats-toggle"
+                        onClick={function() {
+                            setStatsHidden(!statsHidden);
+                        }}
+                    >
+                        {statsHidden ? "stats off" : "stats on"}
                     </span>
                     <span className="counts">
                         {activeCount}/{shownCount}/{totalCount}
@@ -100,8 +115,8 @@ function FeatureList(props) {
                         <ul>{featureItems}</ul>
                     </div>
                 </div>
-                <FeatureData 
-                    statsHidden={statsHidden} 
+                <FeatureData
+                    statsHidden={statsHidden}
                     featureListLoading={props.featureListLoading}
                     featureList={props.featureList.toJS()}
                 />

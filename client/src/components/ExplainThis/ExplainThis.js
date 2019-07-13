@@ -23,7 +23,6 @@ import { useSelectedFeatureNames, useFilename, useSavedSelections } from "hooks/
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import { useWindowManager } from "hooks/WindowHooks";
 
-
 // Toggle children.
 function toggle(d) {
     //decide base
@@ -66,8 +65,7 @@ function node_label(d) {
     //shorten the name
     //shorten the number
     //add them back together
-    if (d.hidden || d.leaf) 
-        return "";
+    if (d.hidden || d.leaf) return "";
     let split = d.name.split(" ");
     let float = processFloatingPointNumber(parseFloat(split[2])); //truncate to two decimal places
     let featureName = split[0];
@@ -191,13 +189,13 @@ function generateTree(treeData, selectionNames, svgRef) {
     gradientContainer
         .append("text")
         .text(selectionNames[0])
-        .attr("x", (width/8 - 10) -10 - textSize(selectionNames[0]).width)
+        .attr("x", width / 8 - 10 - 10 - textSize(selectionNames[0]).width)
         .attr("y", 5 + barHeight / 2);
     //janky constants needed to center the gradient container
     gradientContainer
         .append("text")
         .text(selectionNames[1])
-        .attr("x", (width/8 - 10) + width / 2 + 10)
+        .attr("x", width / 8 - 10 + width / 2 + 10)
         .attr("y", 5 + barHeight / 2);
 
     let linearGradient = gradientContainer
@@ -222,7 +220,7 @@ function generateTree(treeData, selectionNames, svgRef) {
 
     let gradientRect = gradientContainer
         .append("rect")
-        .attr("x", width/8 - 10)
+        .attr("x", width / 8 - 10)
         .attr("y", 0)
         .attr("width", width / 2)
         .attr("height", barHeight)
@@ -232,35 +230,39 @@ function generateTree(treeData, selectionNames, svgRef) {
 
     //make the arrow on the right side of the screen
     d3.select(svgRef)
-        .append("svg:g").append("svg:defs").append("svg:marker")
+        .append("svg:g")
+        .append("svg:defs")
+        .append("svg:marker")
         .attr("id", "triangle")
         .attr("refX", 6)
         .attr("refY", 6)
         .attr("markerWidth", 30)
         .attr("markerHeight", 30)
-        .attr("markerUnits","userSpaceOnUse")
+        .attr("markerUnits", "userSpaceOnUse")
         .attr("orient", "auto")
         .append("path")
         .attr("d", "M 0 0 12 6 0 12 3 6")
         .style("fill", "black");
 
     d3.select(svgRef)
-        .append("svg:g").append("svg:defs").append("svg:marker")
+        .append("svg:g")
+        .append("svg:defs")
+        .append("svg:marker")
         .attr("id", "triangle2")
         .attr("refX", 6)
         .attr("refY", 6)
         .attr("markerWidth", 30)
         .attr("markerHeight", 30)
-        .attr("markerUnits","userSpaceOnUse")
+        .attr("markerUnits", "userSpaceOnUse")
         .attr("orient", "auto")
         .append("path")
         .attr("d", "M 12 12 0 6 12 0 9 6")
         .style("fill", "black");
 
-    
-    //line              
-    d3.select(svgRef).append("line")
-        .attr("x1",  width + 55)
+    //line
+    d3.select(svgRef)
+        .append("line")
+        .attr("x1", width + 55)
         .attr("y1", 100)
         .attr("x2", width + 55)
         .attr("y2", height - 200)
@@ -268,7 +270,7 @@ function generateTree(treeData, selectionNames, svgRef) {
         .attr("stroke", "black")
         .attr("marker-end", "url(#triangle)")
         .attr("marker-start", "url(#triangle2)");
-    
+
     d3.select(svgRef)
         .append("text")
         .text("Greater")
@@ -344,8 +346,6 @@ function generateTree(treeData, selectionNames, svgRef) {
             });
         }
 
-
-
         nodeEnter
             .append("svg:text")
             .attr("dy", "6px")
@@ -366,7 +366,7 @@ function generateTree(treeData, selectionNames, svgRef) {
         nodeEnter
             .insert("rect", "text")
             .attr("width", function(d) {
-                return d.leaf ? 0 : (d.bbox.width + rectPadding);
+                return d.leaf ? 0 : d.bbox.width + rectPadding;
             })
             .attr("height", function(d) {
                 return d.leaf ? 0 : d.bbox.height;
@@ -528,7 +528,6 @@ function ChooseSelections(props) {
                                     );
                                 }
                             }
-                            
                             return arr;
                         })()
                     }
@@ -560,8 +559,7 @@ function ChooseSelections(props) {
                             }
 
                             return arr;
-                        })()
-                    }
+                    })()}
                 </Select>
             </FormControl>
         </div>
@@ -602,7 +600,7 @@ function TreeSweepScroller(props) {
             margin: { l: 20, r: 10, t: 30, b: 0 }, // Axis tick labels are drawn in the margin space
             showlegend: false,
             xaxis: {
-                automargin: true,
+                automargin: true
             },
             yaxis: {
                 automargin: true,
@@ -650,40 +648,39 @@ function TreeSweepScroller(props) {
 
 function FeatureImportanceGraph(props) {
     const chartOptions = {
-        data : [{
-            x: props.featureImportances.slice().reverse(),
-            y: props.rankedFeatures.slice().reverse(),
-            yaxis:"y",
-            type: "bar",
-            orientation: "h",
-            hoverinfo: "x"
-        }],
-        config : {
+        data: [
+            {
+                x: props.featureImportances.slice().reverse(),
+                y: props.rankedFeatures.slice().reverse(),
+                yaxis: "y",
+                type: "bar",
+                orientation: "h",
+                hoverinfo: "x"
+            }
+        ],
+        config: {
             displaylogo: false,
             displayModeBar: false
-        }, 
+        },
         layout: {
-            autosize:false,
-            height: 100 + (15*props.featureImportances.length),
+            autosize: false,
+            height: 100 + 15 * props.featureImportances.length,
             width: 200,
             margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
             xaxis: {
-                automargin:false,
-                range:[0,100],
+                automargin: false,
+                range: [0, 100]
             },
             yaxis: {
                 automargin: true,
-                fixedrange:true,
-
-            },
-        },
+                fixedrange: true
+            }
+        }
     };
 
     return (
         <React.Fragment>
-            <div className="feature-importance-graph-title">
-                Feature Importances
-            </div>
+            <div className="feature-importance-graph-title">Feature Importances</div>
             <Plot
                 className="feature-importance-graph"
                 data={chartOptions.data}
@@ -696,7 +693,7 @@ function FeatureImportanceGraph(props) {
 
 function FeatureList(props) {
     if (props.rankedFeatures == undefined) {
-        return <CircularProgress/>;
+        return <CircularProgress />;
     }
 
     return (
@@ -707,8 +704,8 @@ function FeatureList(props) {
                 treeIndex={props.treeIndex}
                 runButtonPressed={props.runButtonPressed}
             />
-            <FeatureImportanceGraph 
-                rankedFeatures={props.rankedFeatures} 
+            <FeatureImportanceGraph
+                rankedFeatures={props.rankedFeatures}
                 featureImportances={props.importances}
             />
             <ChooseSelections
@@ -768,7 +765,7 @@ function ExplainThis(props) {
     useEffect(
         _ => {
             let newChosenSelections = [...chosenSelections];
-            if (newChosenSelections[0] != null && !props.selections[newChosenSelections[0]].active) 
+            if (newChosenSelections[0] != null && !props.selections[newChosenSelections[0]].active)
                 newChosenSelections[0] = null;
             if (newChosenSelections[1] != null && !props.selections[newChosenSelections[1]].active)
                 newChosenSelections[1] = null;
@@ -778,17 +775,18 @@ function ExplainThis(props) {
                     if (selection.active && idx != newChosenSelections[1])
                         newChosenSelections[0] = idx;
                 });
-            } 
+            }
 
             if (newChosenSelections[1] === null) {
                 props.selections.forEach((selection, idx) => {
                     if (selection.active && idx != newChosenSelections[0])
                         newChosenSelections[1] = idx;
                 });
-            } 
+            }
             setChosenSelections(newChosenSelections);
-        }
-    , [props.selections]);
+        },
+        [props.selections]
+    );
 
     useEffect(
         _ => {
@@ -799,8 +797,8 @@ function ExplainThis(props) {
             //get indices from selection names
             let firstSelectionIndices = [];
             let secondSelectionIndices = [];
-            for (let i = 0; i<props.selections.length; i++) {
-                if (i === chosenSelections[0]){
+            for (let i = 0; i < props.selections.length; i++) {
+                if (i === chosenSelections[0]) {
                     firstSelectionIndices = props.selections[i].rowIndices;
                 } else if (i === chosenSelections[1]) {
                     secondSelectionIndices = props.selections[i].rowIndices;
@@ -829,7 +827,6 @@ function ExplainThis(props) {
         [runButtonPressed]
     );
 
-    
     if (!dataState && !runButtonPressed) {
         return (
             <div className="explain-this-container">
@@ -857,7 +854,9 @@ function ExplainThis(props) {
                     setChosenSelections={setChosenSelections}
                     chosenSelections={chosenSelections}
                 />
-                <div className="load-failure"><CircularProgress/></div>
+                <div className="load-failure">
+                    <CircularProgress />
+                </div>
             </div>
         );
     } else {
@@ -876,7 +875,11 @@ function ExplainThis(props) {
                     chosenSelections={chosenSelections}
                     setDataState={setDataState}
                 />
-                <ExplainThisTree treeData={dataState.tree_sweep[treeIndex]} chosenSelections={chosenSelections} selectionNames={dataState.selectionNames}/>
+                <ExplainThisTree
+                    treeData={dataState.tree_sweep[treeIndex]}
+                    chosenSelections={chosenSelections}
+                    selectionNames={dataState.selectionNames}
+                />
             </div>
         );
     }
@@ -913,4 +916,3 @@ export default props => {
         );
     }
 };
-

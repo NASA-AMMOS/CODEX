@@ -75,12 +75,17 @@ def get_data_metrics(msg, result):
 def add_data(msg, result):
     '''
     Inputs:
-
+        msg (dict)     - request to add data from the frontend
     Outputs:
-
+        results (dict) - response
     Notes:
-
+        Data must be a 1D array!
     Examples:
+    >>> testData = codex_doctest.doctest_get_data()
+
+    >>> message = {'routine': 'arrange', 'hashType': 'feature', 'activity': 'add', 'name': 'TiO2', 'data': [1, 2, 3, 4]}
+    >>> results = add_data
+
 
     '''
     hashType = msg['hashType']
@@ -106,8 +111,12 @@ def add_data(msg, result):
         hashResult = codex_hash.hashArray(msg["name"], mask, "subset")
 
     elif (hashType == "feature"):
+        # assert the data is 1D
+        np_data = np.asarray(data);
+        assert np_data.ndim == 1;
+
         virtual = msg['virtual'] if 'virtual' in msg else False
-        hashResult = codex_hash.hashArray(msg["name"], np.asarray(data), "feature", virtual=virtual)
+        hashResult = codex_hash.hashArray(msg["name"], np_data, "feature", virtual=virtual)
     else:
         result["message"] = 'failure'
 

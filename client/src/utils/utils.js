@@ -19,6 +19,19 @@ export const getId = idName => {
     return getIdIds[idName];
 };
 
+/**
+ * Get a new ID
+ * @param {number} length (optional, default 5)
+ */
+export function createNewId(length = 5) {
+    const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let out = "";
+    for (let i = 0; i < length; i++) {
+        out += alphabet[Math.floor(Math.random() * alphabet.length)];
+    }
+    return out;
+}
+
 export function unzip(ary) {
     return ary.reduce((acc, item) => {
         item.forEach((val, idx) => {

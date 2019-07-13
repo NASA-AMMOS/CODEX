@@ -30,7 +30,6 @@ import HelpButton from "components/WindowHelpers/WindowHelp";
  * @return tuple of (requests, runParams)
  */
 async function createAllDrRequests(selectedFeatures, filename) {
-    console.log(selectedFeatures);
     selectedFeatures = selectedFeatures.toJS();
 
     // create all the requests
@@ -188,7 +187,6 @@ function DimensionalityReductionResults(props) {
                     )
                 );
                 //update the redux feature state with the new data
-                console.log(data);
                 //this is subject to change
                 //let featureName = data.algorithm;
                 //let featureData = data.data;
@@ -222,7 +220,6 @@ function DimensionalityReductionResults(props) {
     const [helpModeState, setHelpModeState] = useState(false);
     const algoVerb = "dimensionality_reduction";
 
-    console.log("algo graphs: ", algoStates);
     const algoGraphs = algoStates.map(algo => (
         <FixedContainer key={algo.algorithmName}>
             <div className="regressionHeader" onClick={() => toggleSelected(algo.algorithmName)}>
@@ -289,13 +286,18 @@ const DimensionalityReduction = props => {
         return <WindowCircularProgress />;
     } else {
         const [requests, runParams] = isResolved; // hackish but works A-OK
+        const getVectorFromSlider = a => a.data.data.map(r => r[a.sliderVal - 1]);
+
         return (
             <DimensionalityReductionResults
                 requests={requests}
                 runParams={runParams}
-                featureAdd={a =>
-                    featureAdd(`${a.data.algorithm}_${selectedFeatures.join("_")}`, a.data.data)
-                }
+                featureAdd={a => {
+                    featureAdd(
+                        `${a.data.algorithm}_${selectedFeatures.join("_")}/${a.sliderVal}`,
+                        getVectorFromSlider(a)
+                    );
+                }}
             />
         );
     }
