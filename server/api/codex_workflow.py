@@ -249,7 +249,8 @@ def convert_labels_to_class_indices(label_mask, num_classes):
         indices.append([])
 
     for i, class_value in enumerate(label_mask):
-        indices[int(np.round(class_value))].append(i)
+        #if (class_value!=-1):
+        indices[class_value].append(i)
 
     return indices
 
@@ -306,7 +307,7 @@ def train_general_classifier_model(data):
     where every data value has a class label. if this is not done explicitly by the user it 
     should be done automatically somewhere along the line
 """
-def general_classifier(inputHash, featureList, dataSelections, result):
+def general_classifier(inputHash, featureList, dataSelections, similarityThreshold, result):
     startTime = time.time()
     result = {"WARNING":None}
 
@@ -319,30 +320,37 @@ def general_classifier(inputHash, featureList, dataSelections, result):
     if data is None:
         return None
 
-    #data selections is a dictionary with keys corresponding to class names
-    #and values corresponding to indices
-    dataSelectionsValues = list(dataSelections.values())
     #first create a mask from the dataSelections indices
-    formatted_data = create_data_from_indices(dataSelectionsValues, data)
+    formatted_data = create_data_from_indices(dataSelections, data)
+
+    codex_system.codex_log(str(formatted_data))
     #run the trian model script
     clf = train_general_classifier_model(formatted_data)
     
     #evaluate the trained model on the whole dataset
-    output_predictions_mask = clf.predict(data)
+    output_predictions_probabilities = clf.predict_proba(data)
 
+    codex_system.codex_log(str(output_predictions_probabilities))
+    codex_system.codex_log(str(clf.predict_proba(data)))
+    #convert probability array to mask
+    output_predictions_mask = []
+    for probs in output_predictions_probabilities:
+        argmax = np.argmax(probs)
+        output_predictions_mask.append(argmax)
+
+    """for probs in output_predictions_probabilities:
+        argmax = np.argmax(probs)
+        if (argmax > similarityThreshold):
+            output_predictions_mask.append(argmax)
+        else:
+            output_predictions_mask.append(-1)
+    """
     #convert mask to selection form so the front
-    output_selection_array = convert_labels_to_class_indices(output_predictions_mask, np.shape(dataSelectionsValues)[0])
+    output_selection_array = convert_labels_to_class_indices(output_predictions_mask, np.shape(dataSelections)[0])
     
-    class_names = list(dataSelections.keys())    
-
-    #convert the output to a dictionary
-    output_dictionary = {}
-    for i,arr in enumerate(output_selection_array):
-        codex_system.codex_log(str(i))
-        output_dictionary[class_names[i]] = arr
     #end can create a selection corresponding to it
     #todo change this name
-    result["like_this"] = output_dictionary
+    result["like_this"] = output_selection_array
 
     return result
 

@@ -1,7 +1,7 @@
 import "components/GeneralClassifier/GeneralClassifier.scss";
 import React, { useRef, useState, useEffect } from "react";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import { useSavedSelections, useFilename, useFeatureNames, useFeatureLength, useNextColorIndex} from "hooks/DataHooks";
+import { useSavedSelections, useFilename, useSelectedFeatureNames} from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UiHooks";
 import * as utils from "utils/utils";
@@ -17,276 +17,113 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import TextField from '@material-ui/core/TextField';
 
-function createClassObject(name, nextColorIndex) {
-    return {
-        name: name,
-        color:uiTypes.SELECTIONS_COLOR_PALETTE[nextColorIndex]
-    }
-}
-
 /*
-    Function that builds an object of classes and their associated 
-    labels to feed to the backend
+    Function that returns an array of arrays containing 
+    the indices in a given selection
 */
-function buildBackendSelectionObject(selections, savedSelections) {
-    let backendSelectionObject = {};
-
-    function getIndexOfSelectionWithName(name) {
-        for (let [key, value] of Object.entries(savedSelections)) {
-            if (value.name === name)
-                return key
-        }
-        return -1;
-    }
-
-    for(let selection of selections) {
-        if (!backendSelectionObject[selection.className]) {
-            backendSelectionObject[selection.className] = 
-                savedSelections[getIndexOfSelectionWithName(selection.name)].rowIndices;
-        } else {
-            backendSelectionObject[selection.className] = 
-                backendSelectionObject[selection.className]
-                    .concat(savedSelections[getIndexOfSelectionWithName(selection.name)].rowIndices);
-        }
-    }
-
-    return backendSelectionObject;
+function activeSelectionIndices(savedSelections) {
+    return savedSelections
+                .filter((selection) => {return selection.active;})
+                .map((selection) => {return selection.rowIndices;});
 }
 
 /*
     Function that creates the json object for requesting
     the data for the general classifier algorithm. 
 */
-function createGCRequest(filename, selections, featureList) {
+function createGCRequest(filename, selections, featureList, similarityThreshold) {
     return {
         routine: "workflow",
         dataSelections: selections,
         featureList: featureList,
         workflow: "general_classifier",
         file: filename,
+        similarityThreshold: similarityThreshold,
         cid: "8ksjk",
         identification: { id: "dev0" }
     };
 }
 
-
 /*
-    This is a component representing a row of 
-    the SelectionLabeling sectiontion of the page
+    Section of the code that handles taking in parameters from the user
 */
-function SelectionLabelingRow(props) {
+function ParameterSection(props) {
 
-    return (
-        <div className="selection-labeling-row">
-            <Typography variant="subtitle1" className="selection-name">
-                {props.selectionObject.name}
-            </Typography>
-            <FormControl classes={{ root: "dropdown" }} className="selection-dropdown">
-                <Select
-                    value={props.selectionObject.className}
-                    //todo handle onchange event
-                    onChange={e => props.changeClass(props.selectionObject.name, e.target.value)}
-                >
-                    {
-                        props.classes.map(classObject => (
-                            <MenuItem key={classObject.name} value={classObject.name}>
-                                {classObject.name}
-                            </MenuItem>
-                        ))
-                    }
-                </Select>
-            </FormControl>
-        </div>
-    );
-}
-
-/*
-    This is the component responsible for allowing the 
-    user to label which class(if any) a certain selection
-    belongs to
-*/
-function SelectionLabeling(props) {
-
-    //these functions help to manage the state of selectionlabeling
-    //returns the index
-    function findSelectionByName(name) {
-        let index = -1;
-        for(let i = 0; i < props.selections.length; i++) {
-            if (props.selections[i].name === name)
-                index = i;
-        }
-        return index;
-    }
-
-    //function that allows for the changing of a class for a selection
-    function changeClass(selection, newClassName) {
-        const index = findSelectionByName(selection);
-
-        let newSelections = [...props.selections];
-        newSelections[index].className = newClassName;
-        props.setSelections(newSelections);
+    function findSelectionById(id) {
+        return props.activeSelections.filter((selection) => {
+            return selection.id === id;
+        })[0];
     }
 
     return (
-        <div className="gc-selection-labeling">
+        <div className="parameter-section">
             <Typography variant="h6">
-                Selection Labeling
+                Parameter Section
             </Typography>
-            <div className="selection-labeling-list">
-                {
-                    props.selections.map((selection) => {
-                        return (
-                            <SelectionLabelingRow
-                                classes={props.classes}
-                                selectionObject={selection}
-                                changeClass={changeClass}
-                            /> 
-                        );
-                    })
-                }
+            <div className="similarity-threshold-container">
+                <InputLabel className="similarity-threshold-label">Similarity Threshold</InputLabel>
+                <TextField
+                    variant="standard" 
+                    type="number"
+                    value={props.similarityThreshold} 
+                    className="similarity-threshold-input"
+                    inputProps={{ min: 0, max: 1 , step:0.1}}
+                    onChange={function(e) { props.setSimilarityThreshold(e.target.value);}}
+                />
             </div>
         </div>
-    );
+    )
 }
 
-/*
-    Function that creates a row for the list of classes.
-    This is a stateless component just used for rendering
-    the row.
-*/
-function ClassRow(props) {
-    return (
-        <div className="classes-list-row">
-            <TextField 
-                variant="standard" 
-                value={props.classObject.name} 
-                className="classes-list-row-title"
-                onChange={function(e) { props.modifyName(props.classObject.name, e.target.value)}}
-            />
-            <div
-                className="swatch"
-                style={{ background: props.classObject.color }}
-            />
-            <IconButton onClick={function() {props.deleteClass(props.classObject.name)}}>
-                <DeleteIcon />
-            </IconButton>
-        </div>
-    );
-}
+function OutputSection(props) {
 
-/*
-    Component representing the list of classes for the 
-    gc classification algorithm to train on
-*/
-function ClassesSection(props) {
-    //all the state for the sub list components will be 
-    //maintaned here for simplicity
-
-    //helper function for finding a class by name
-    //returns the index
-    function findClassByName(name) {
-        let index = -1;
-        for(let i = 0; i < props.classes.length; i++) {
-            if (props.classes[i].name === name)
-                index = i;
-        }
-        return index;
-    }
-
-    //handles the behavior of adding a default class to the list
-    function createClass() {   
-        //creates a new class based on the length of the classes array
-        let newClassArray = [...props.classes];
-
-        newClassArray.push(
-            createClassObject(
-                "Class "+props.classes.length,
-                props.nextColorIndex + props.classes.length - 1
-            )
+    if (!props.loading && props.outputMessage != null) {
+        return (
+            <div className="output-section">
+                <Typography variant="h6" className="output-section-header">
+                    Output
+                </Typography>
+                <div className="output-section-text">
+                    {props.outputMessage}
+                </div>
+            </div>
         );
+    } else if (props.loading) {
+        return (
+            <div className="loading-section">
+                <CircularProgress/>
+            </div>
+        );
+    } else if (props.outputMessage == null) {
+        return (
+            <div className="loading-section">
+            </div>
+        );
+    }   
+}
 
-        props.setClasses(newClassArray);
-    } 
-    //handles the behavior for opening up a color pallete
-    //this might not work in the initial implementation
-    function modifyColor(className) {
-
-    }
-
-    //handles deleting a class based on its name
-    function deleteClass(className) {
-        const index = findClassByName(className);
-        let arrToSplice = [...props.classes];
-
-        if (index >= 0){
-            arrToSplice.splice(index, 1)
-            props.setClasses(arrToSplice);
-        }
-    }
-
-    //function to modify the name of a class
-    function modifyName(oldName, newName) {
-        //this should also handle dynamically changing the name 
-        //of all of the selections currently associated with that class
-        const index = findClassByName(oldName);
-
-        let newClasses = [...props.classes];
-        newClasses[index].name = newName;
-
-        props.setClasses(newClasses);
-    }
+function InputSelections(props) {
 
     return (
-        <div className="gc-classes-section">
+        <div className="input-selections">
             <Typography variant="h6">
-                Classes
+                Input Selections
             </Typography>
-            <div className="classes-list">
+            <div className="input-selections-list">
                 {
-                    props.classes.map(
-                        (classObject, idx) => {
-                            if (classObject.name != "None")
-                                return (
-                                    <ClassRow
-                                        key={idx}
-                                        classObject={classObject}
-                                        deleteClass={deleteClass}
-                                        modifyName={modifyName}
-                                    />
-                                );
+                    props.activeSelections.map(
+                        (selection) => {
+                            return (
+                                <div key={selection.name} className="input-selection">
+                                    {selection.name}
+                                </div>
+                            );
                         }
                     )
                 }
             </div>
-            <Button className="add-class-button"
-                    variant="contained"
-                    color="primary"
-                    onClick={_ =>
-                        createClass()
-                    }
-                >
-                    Add class
-            </Button>
         </div>
     );
-}
-
-/*
-    Function that handles constructing the default state array
-    for the data classes
-*/
-function constructDefaultClasses(nextColorIndex) {
-    return [
-        {
-            name:"Class 1",
-            color:uiTypes.SELECTIONS_COLOR_PALETTE[nextColorIndex]
-        },
-
-        {
-            name:"None",
-            color:"None"
-        }
-    ];
 }
 
 /*
@@ -294,43 +131,19 @@ function constructDefaultClasses(nextColorIndex) {
     the General Classifier workflow
 */
 function GeneralClassifier(props) {
-    //state to detect run button clicks
+
     const [buttonClicked, setButtonClicked] = useState(false);
+    const [similarityThreshold, setSimilarityThreshold] = useState(0.5);
+    const [outputMessage, setOutputMessage] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-    //this piece of state handles holding the metatdata
-    //attatched to selections in the ui
-    //this is not to be confused with props.savedSelections
-    //which is a piece coming from global state
-    const [selections, setSelections] = useState([]);
+    const activeSelections = props.savedSelections
+                                    .filter((selection) => {return selection.active});
 
-    //this handles live updating the selections on update of savedSelections
-    useEffect(_ => {
-        //go through and update the selection names
-        setSelections(
-            props.savedSelections
-                .filter((selection) => {return selection.active})
-                .map((selection) => {
-                    return {
-                        name: selection.name,
-                        className: selection.className != undefined ? selection.className : "None"
-                    }
-                }
-            )
-        );
-    },[props.savedSelections]) ;
+    function makeOutputMessage(names) {
+        return "General Classifications have been made and outputed as selections under the names: \n"
+                + names.map((name) => {return name+"\n"});
 
-
-    //this piece of state holds the meta data associated with classes
-    const [classes, setClasses] = useState(
-        constructDefaultClasses(props.nextColorIndex)
-    ); 
-
-    /*
-        Function to validate the user form input
-    */
-    function verifyInputsValid() {
-        //todo implement this logic
-        return true;
     }
 
     //handler for the run button
@@ -339,18 +152,29 @@ function GeneralClassifier(props) {
     useEffect(() => {
         //assume if this runs that button is clicked because that is the 
         //only time the flag changes
-        if (verifyInputsValid()) {
-            const classSelections = buildBackendSelectionObject(selections, props.savedSelections);
-            const requestObject = createGCRequest(props.filename, classSelections, props.featureNames);
+        if (buttonClicked) {
+            const selectionsIndices = activeSelectionIndices(props.savedSelections);
+
+            const requestObject = createGCRequest(props.filename, selectionsIndices, props.selectedFeatureNames, similarityThreshold);
+            
             //makes a gc request
             const request = utils.makeSimpleRequest(requestObject);
+            setLoading(true);
+            setOutputMessage(null);
             //resolves the gc request
             request.req.then(data => {
-                //add a saved selections called gc_output with the returned data
-                for (let [key, value] of Object.entries(data.like_this)) {
-                    //todo make naming robust to existing selections
-                    props.saveSelection(key, value);
+                const randomString = (Math.floor(Math.random()*(999-100+1)+100))+"";
+                let selectionNames = [];
+                for (let i = 0; i < activeSelections.length; i++) {
+                    selectionNames.push("GC-"+randomString+" "+activeSelections[i].name);
                 }
+                //add a saved selections called gc_output with the returned data
+                for (var i = 0; i < data.like_this.length; i++) {
+                    props.saveSelection(selectionNames[i], data.like_this[i]);
+                }
+                setOutputMessage(makeOutputMessage(selectionNames))
+                setLoading(false);
+                setButtonClicked(false);
             }); 
             //cleanup function
             return function cleanup() {
@@ -363,55 +187,60 @@ function GeneralClassifier(props) {
     }, [buttonClicked]);
 
     return (
-        <React.Fragment>
-            <div className="gc-header">
+        <div className="gc-container">
+            <Typography variant="h5" className="gc-header">
                 General Classifier
+            </Typography>
+            <div className="non-header-container">
+                <div className="gc-left-side">
+                    <InputSelections
+                        activeSelections={activeSelections}
+                    />
+                </div>
+                <div className="gc-right-side">
+                    <ParameterSection
+                        setSimilarityThreshold={setSimilarityThreshold}
+                        similarityThreshold={similarityThreshold}
+                        activeSelections={activeSelections}
+                    />
+                    <OutputSection
+                        loading={loading}
+                        outputMessage={outputMessage}
+                    />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        className="gc-run-button"
+                        onClick={_ => setButtonClicked(true)}
+                    >
+                        Run
+                    </Button>
+                </div>
             </div>
-            <div className="io-container">
-                <ClassesSection
-                    classes={classes}
-                    setClasses={setClasses}
-                    nextColorIndex={props.nextColorIndex}
-                 />
-                <SelectionLabeling
-                    classes={classes}
-                    selections={selections}
-                    setSelections={setSelections}
-                />
-            </div>
-            <Button
-                variant="contained"
-                color="primary"
-                className="gc-run-button"
-                onClick={_ => setButtonClicked(true)}
-            >
-                Run
-            </Button>
-        </React.Fragment>
+        </div>
     );
 }
 
 // wrapped data selector
 export default props => {
     const win = useWindowManager(props, {
-        width: 750,
-        height: 500,
-        resizeable: true,
+        width: 650,
+        height: 350,
+        resizeable: false,
         title: "General Classifier"
     });
 
     const [savedSelections, saveSelection] = useSavedSelections();
-    const nextColorIndex = useNextColorIndex();
 
     const filename = useFilename();
     
-    const features = useFeatureNames();
+    const [selectedFeatureNames, setSelectedFeatureNames] = useSelectedFeatureNames();
 
-    if (features === null) {
+    if (selectedFeatureNames === null) {
         return <WindowCircularProgress />;
     }
 
-    if (features.size === 0) {
+    if (selectedFeatureNames.size === 0) {
         return <WindowError> Please select at least one feature to use this graph.</WindowError>;
     }
 
@@ -420,9 +249,7 @@ export default props => {
             savedSelections={savedSelections}
             saveSelection={saveSelection}
             filename={filename}
-            data={features}
-            featureNames={features}
-            nextColorIndex={nextColorIndex}
+            selectedFeatureNames={selectedFeatureNames}
         />
     );
 };
