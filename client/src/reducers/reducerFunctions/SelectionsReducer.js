@@ -43,6 +43,28 @@ export default class SelectionsReducer {
     }
 
     static saveNewSelection(state, action) {
+        //look to see if the selection is a duplicate
+        //if so then update the selection with the same name
+        for (let i = 0; i < state.savedSelections.length; i++) {
+            const selection = state.savedSelections[i];
+            if (selection.name === action.name) {
+                let newSavedSelections = [...state.savedSelections];
+                newSavedSelections[i] = {
+                    id: i,
+                    rowIndices: action.rowIndices,
+                    color: selection.color,
+                    active: true,
+                    hidden: false,
+                    name: action.name
+                };
+
+                return {
+                    ...state,
+                    savedSelections: newSavedSelections
+                };
+            }
+        }
+
         return {
             ...state,
             savedSelections: state.savedSelections.concat([
