@@ -1,4 +1,4 @@
-import { useSavedSelections, useFilename, useFeatureNames} from "hooks/DataHooks";
+import { useSavedSelections, useFilename, useSelectedFeatureNames} from "hooks/DataHooks";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import { useWindowManager } from "hooks/WindowHooks";
 import * as utils from "utils/utils";
@@ -17,13 +17,14 @@ import "components/FindMoreLikeThis/FindMoreLikeThis.scss";
     Function that creates the json object for requesting
     the data for the fmlt algorithm. 
 */
-function createFMLTRequest(filename, selections, featureList) {
+function createFMLTRequest(filename, selections, featureList, similarityThreshold) {
     return {
         routine: "workflow",
         dataSelections: selections,
         featureList: featureList,
         workflow: "find_more_like_this",
         file: filename,
+        similarityThreshold: similarityThreshold,
         cid: "8ksjk",
         identification: { id: "dev0" }
     };
@@ -103,8 +104,7 @@ function OutputSection(props) {
             <div className="loading-section">
             </div>
         );
-    }
-    
+    }   
 }
 
 /*
@@ -152,7 +152,7 @@ function FindMoreLikeThis(props) {
                 return; 
             }
 
-            const requestObject = createFMLTRequest(props.filename, inputSelection.rowIndices, props.featureNames);
+            const requestObject = createFMLTRequest(props.filename, inputSelection.rowIndices, props.featureNames, similarityThreshold);
             //actually handle the request for running the 
             //find more like this algorithm
             setOutputMessage("");
@@ -212,14 +212,14 @@ export default props => {
 
     const [savedSelections, saveSelection] = useSavedSelections();
     const filename = useFilename();
-    const featureNames = useFeatureNames();
+    const [selectedFeatureNames, setSelectedFeatureNames] = useSelectedFeatureNames();
 
     return (
         <FindMoreLikeThis
             savedSelections={savedSelections}
             saveSelection={saveSelection}
             filename={filename}
-            featureNames={featureNames}
+            featureNames={Array.from(selectedFeatureNames)}
         />
     );
 };

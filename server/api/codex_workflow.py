@@ -346,7 +346,7 @@ def general_classifier(inputHash, featureList, dataSelections, result):
 
     return result
 
-def find_more_like_this(inputHash, featureList, dataSelections, result):
+def find_more_like_this(inputHash, featureList, dataSelections, similarityThreshold, result):
     startTime = time.time()
     result = {"WARNING":None}
 
@@ -370,6 +370,8 @@ def find_more_like_this(inputHash, featureList, dataSelections, result):
     positive_data = []
     for index in dataSelectionsValues:
         positive_data.append(data[index])
+
+
 
     #train the classifier with the formatted data as the positive examples and 
     #a random sample from the other data with replacement as the negatives
@@ -396,7 +398,7 @@ def find_more_like_this(inputHash, featureList, dataSelections, result):
                    'min_samples_leaf': min_samples_leaf,
                    'bootstrap': bootstrap}
 
-    num_classifiers = 5
+    num_classifiers = 15
     for i in range(num_classifiers):
         #each iteration train a classifier on the positive data
         #and a random subsample of the other data as negative examples
@@ -437,7 +439,7 @@ def find_more_like_this(inputHash, featureList, dataSelections, result):
 
     #return all points labeled with a positive being when half or more of the bagged
     #classifiers vote on a given piece of data
-    like_this_indices = [index for index, value in enumerate(votes) if value > 0.5]
+    like_this_indices = [index for index, value in enumerate(votes) if value > similarityThreshold]
     #also include all of the positive inputs in the like_this_indices array
 
     result["like_this"] = like_this_indices

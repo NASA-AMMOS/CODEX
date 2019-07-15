@@ -56,6 +56,7 @@ def workflow_call(msg, result):
         featureList = codex_system.get_featureList(featureList)
 
         dataSelections = msg["dataSelections"]
+        similarityThreshold = float(msg["similarityThreshold"])
 
         hashList = codex_hash.feature2hashList(featureList)
         codex_return_code.logReturnCode(inspect.currentframe())
@@ -68,12 +69,13 @@ def workflow_call(msg, result):
             codex_return_code.logReturnCode(inspect.currentframe())
             inputHash = inputHash["hash"]
 
-        result = codex_workflow.find_more_like_this(inputHash, featureList, dataSelections, result)
+        result = codex_workflow.find_more_like_this(inputHash, featureList, dataSelections, similarityThreshold, result)
     elif (msg['workflow'] == "general_classifier"):
         featureList = msg["featureList"]
         featureList = codex_system.get_featureList(featureList)
 
         dataSelections = msg["dataSelections"]
+        similarityThreshold = msg["similarityThreshold"]
 
         hashList = codex_hash.feature2hashList(featureList)
         codex_return_code.logReturnCode(inspect.currentframe())
@@ -86,7 +88,7 @@ def workflow_call(msg, result):
             codex_return_code.logReturnCode(inspect.currentframe())
             inputHash = inputHash["hash"]
 
-        result = codex_workflow.general_classifier(inputHash, featureList, dataSelections, result)
+        result = codex_workflow.general_classifier(inputHash, featureList, dataSelections, similarityThreshold, result)
     else:
         result['message'] = "Cannot parse workflow"
 

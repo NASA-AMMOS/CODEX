@@ -809,7 +809,6 @@ function ExplainThis(props) {
             setDataState(undefined);
             //handle the loading of the data request promise
             const request = createExplainThisRequest(props.filename, [firstSelectionIndices, secondSelectionIndices], props.selectedFeatureNames);
-            console.log(request);
             const requestMade = utils.makeSimpleRequest(request);
             requestMade.req.then(data => {
                 setRunButtonPressed(false);
