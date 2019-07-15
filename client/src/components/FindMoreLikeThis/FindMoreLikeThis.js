@@ -155,17 +155,16 @@ function FindMoreLikeThis(props) {
             const requestObject = createFMLTRequest(props.filename, inputSelection.rowIndices, props.featureNames);
             //actually handle the request for running the 
             //find more like this algorithm
-            console.log(JSON.stringify(requestObject));
             setOutputMessage("");
             setLoading(true);
-            setButtonClicked(false);
             const request = utils.makeSimpleRequest(requestObject);
             //resolves the fmlt request
             request.req.then(data => {
                 setLoading(false);
                 setOutputMessage(makeOutputMessage( "Like " + inputSelection.name));
                 //add a saved selections called fmlt_output with the returned data
-                props.saveSelection( "Like " + inputSelection.name, data.like_this)
+                props.saveSelection( "Like " + inputSelection.name, data.like_this);
+                setButtonClicked(false);
             }); 
             //cleanup function
             return function cleanup() {
