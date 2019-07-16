@@ -1,4 +1,4 @@
-import { useSavedSelections, useFilename, useFeatureNames} from "hooks/DataHooks";
+import { useSavedSelections, useFilename, useFeatureNames } from "hooks/DataHooks";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import { useWindowManager } from "hooks/WindowHooks";
 import * as utils from "utils/utils";
@@ -14,6 +14,7 @@ function createFMLTRequest(filename, selections, featureList) {
         routine: "workflow",
         dataSelections: selections,
         featureList: featureList,
+        sessionkey: utils.getGlobalSessionKey(),
         workflow: "find_more_like_this",
         file: filename,
         cid: "8ksjk",
@@ -26,43 +27,48 @@ function createFMLTRequest(filename, selections, featureList) {
     the Find More Like This workflow
 */
 function FindMoreLikeThis(props) {
-
     const [buttonClicked, setButtonClicked] = useState(false);
 
-    const activeSelections = props.savedSelections
-                                .filter((selection) => {return selection.active});
+    const activeSelections = props.savedSelections.filter(selection => {
+        return selection.active;
+    });
 
     let activeSelectionsIndices = [];
     for (let selection of activeSelections) {
         activeSelectionsIndices = activeSelectionsIndices.concat(selection.rowIndices);
     }
 
-    useEffect( _ => {
-        if (buttonClicked) {
-            const requestObject = createFMLTRequest(props.filename, activeSelectionsIndices, props.featureNames);
-            //actually handle the request for running the 
-            //find more like this algorithm
-            const request = utils.makeSimpleRequest(requestObject);
-            //resolves the fmlt request
-            request.req.then(data => {
-                //add a saved selections called fmlt_output with the returned data
-                props.saveSelection( "Like " + activeSelections[0].id, data.like_this)
-            }); 
-            //cleanup function
-            return function cleanup() {
-                request.cancel();
-            };
-        }
-    },[buttonClicked]);
+    useEffect(
+        _ => {
+            if (buttonClicked) {
+                const requestObject = createFMLTRequest(
+                    props.filename,
+                    activeSelectionsIndices,
+                    props.featureNames
+                );
+                //actually handle the request for running the
+                //find more like this algorithm
+                const request = utils.makeSimpleRequest(requestObject);
+                //resolves the fmlt request
+                request.req.then(data => {
+                    //add a saved selections called fmlt_output with the returned data
+                    props.saveSelection("Like " + activeSelections[0].id, data.like_this);
+                });
+                //cleanup function
+                return function cleanup() {
+                    request.cancel();
+                };
+            }
+        },
+        [buttonClicked]
+    );
 
     return (
         <div className="fmlt-container">
             <div className="fmlt-active-selections">
-                {
-                    activeSelections.map((selection) => {
-                        return <div className="fmlt-active-selections-item"> {selection.id} </div>;
-                    })
-                }
+                {activeSelections.map(selection => {
+                    return <div className="fmlt-active-selections-item"> {selection.id} </div>;
+                })}
             </div>
             <Button
                 variant="contained"

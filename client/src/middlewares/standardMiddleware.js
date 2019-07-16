@@ -1,4 +1,5 @@
 import * as actionTypes from "constants/actionTypes";
+import { getGlobalSessionKey } from "utils";
 
 export const selectionMiddleware = store => next => action => {
     //todo get this middleware to upload the selections to the backend
@@ -7,6 +8,7 @@ export const selectionMiddleware = store => next => action => {
         const request = {
             routine: "arrange",
             hashType: "selection",
+            sessionkey: getGlobalSessionKey(),
             //activity: "metrics",
             //'name': features,
             cid: "8vrjn"
@@ -14,6 +16,6 @@ export const selectionMiddleware = store => next => action => {
     } else if (action.type == actionTypes.SAVE_NEW_SELECTION) {
         //upload the saved selection to the backend
     }
-    
+
     next(action);
-}
+};

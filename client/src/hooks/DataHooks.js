@@ -30,6 +30,7 @@ function loadColumnFromServer(feature) {
         socketWorker.postMessage(
             JSON.stringify({
                 action: actionTypes.GET_GRAPH_DATA,
+                sessionkey: utils.getGlobalSessionKey(),
                 selectedFeatures: [feature]
             })
         );

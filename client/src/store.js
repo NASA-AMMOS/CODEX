@@ -17,7 +17,13 @@ export default function configureStore(initialState) {
     const store = createStore(
         rootReducer,
         initialState,
-        composeEnhancers(applyMiddleware(batchDispatchMiddleware, thunkMiddleware, middleware.selectionMiddleware))
+        composeEnhancers(
+            applyMiddleware(
+                batchDispatchMiddleware,
+                thunkMiddleware,
+                middleware.selectionMiddleware
+            )
+        )
     );
 
     if (module.hot) {

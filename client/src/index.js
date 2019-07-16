@@ -12,7 +12,7 @@ import View from "components/View/View";
 import configureStore from "store";
 import registerServiceWorker from "registerServiceWorker";
 
-const store = configureStore();
+export const store = configureStore();
 
 ReactDOM.render(
     <Provider store={store}>

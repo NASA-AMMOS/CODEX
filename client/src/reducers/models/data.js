@@ -5,6 +5,7 @@
  */
 
 import Immutable from "immutable";
+import { createMemorableId } from "utils/utils";
 
 export const dataState = Immutable.fromJS({
     data: [],
@@ -19,7 +20,8 @@ export const dataState = Immutable.fromJS({
         last_shiftless_selected_feature: null
     },
     featureList: [],
-    featureListLoading: false
+    featureListLoading: false,
+    serverSessionKey: createMemorableId()
 });
 
 export const loadedDataModel = {

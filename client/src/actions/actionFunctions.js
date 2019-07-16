@@ -1,6 +1,7 @@
 import * as actionTypes from "constants/actionTypes";
 /* eslint import/no-webpack-loader-syntax: off */
 import WorkerSocket from "worker-loader!workers/socket.worker";
+import { getGlobalSessionKey } from "utils/utils";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -14,6 +15,7 @@ function loadColumnFromServer(feature) {
         socketWorker.postMessage(
             JSON.stringify({
                 action: actionTypes.GET_GRAPH_DATA,
+                sessionkey: getGlobalSessionKey(),
                 selectedFeatures: [feature]
             })
         );

@@ -5,6 +5,7 @@
 
 import * as types from "constants/actionTypes";
 import WorkerUpload from "worker-loader!workers/upload.worker";
+import { getGlobalSessionKey } from "utils/utils";
 
 export function fileLoad(fileList) {
     return dispatch => {
@@ -28,6 +29,7 @@ export function fileLoad(fileList) {
 
         workerUpload.postMessage({
             files: fileList,
+            sessionkey: getGlobalSessionKey(),
             NODE_ENV: process.env.NODE_ENV
         });
     };

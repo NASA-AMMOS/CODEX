@@ -120,7 +120,7 @@ export function runAlgorithm(subalgoState, selectedFeatures, winId) {
                 dispatch({
                     type: actionTypes.UPDATE_WINDOW_INFO,
                     id: loadingWindowId,
-                    info: { loadingSecRemaining: secRemaining | 0 }
+                    info: { loadingSecRemaining: secRemaining || 0 }
                 });
                 return;
             }

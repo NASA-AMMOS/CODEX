@@ -3,6 +3,9 @@ import * as actionTypes from "constants/actionTypes";
 /* eslint import/no-webpack-loader-syntax: off */
 import WorkerSocket from "worker-loader!workers/socket.worker";
 
+import { generateCombination } from "gfycat-style-urls";
+import { store } from "index";
+
 /**
  * Get a unique id number per idName
  * @param {string} idName
@@ -32,6 +35,13 @@ export function createNewId(length = 5) {
     return out;
 }
 
+/**
+ * Create a memorable ID
+ */
+export function createMemorableId() {
+    return generateCombination(3, "", true);
+}
+
 export function unzip(ary) {
     return ary.reduce((acc, item) => {
         item.forEach((val, idx) => {
@@ -53,11 +63,18 @@ export function zip(ary) {
     }, []);
 }
 
+/**
+ * Get the current session key on the application
+ */
+export function getGlobalSessionKey() {
+    return store.data.get("serverSessionKey");
+}
+
 export function makeSimpleRequest(request) {
     let cancel;
     const req = new Promise((resolve, reject) => {
-        const requestObject = {};
         const socketWorker = new WorkerSocket();
+        request.sessionkey = getGlobalSessionKey();
 
         socketWorker.addEventListener("message", e => {
             const inMsg = JSON.parse(e.data);

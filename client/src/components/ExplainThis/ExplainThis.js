@@ -494,6 +494,7 @@ function createExplainThisRequest(filename, selections, dataFeatures) {
         dataSelections: selections,
         workflow: "explain_this",
         dataFeatures: dataFeatures,
+        sessionkey: utils.getGlobalSessionKey(),
         file: filename,
         cid: "8ksjk",
         identification: { id: "dev0" }
