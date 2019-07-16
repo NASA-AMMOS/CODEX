@@ -508,9 +508,11 @@ function ChooseSelections(props) {
             <FormControl className="selection-dropdown">
                 <Select
                     value={props.chosenSelections[0] != null ? props.chosenSelections[0] : ""}
-                    onChange={e =>
-                        props.setChosenSelections([e.target.value, props.chosenSelections[1]])
-                    }
+                    onChange={e => {
+                        props.setChosenSelections([e.target.value, props.chosenSelections[1]]);
+                        props.setRunButtonPressed(false);
+                        props.setDataState(undefined);
+                    }}
                 >
                     {(function() {
                         let arr = [];
@@ -518,13 +520,12 @@ function ChooseSelections(props) {
                         for (let i = 0; i < props.selections.length; i++) {
                             if (props.selections[i].active && props.chosenSelections[1] != i) {
                                 arr.push(
-                                    <MenuItem key={props.selections[i].id} value={i}>
-                                        {props.selections[i].id}
+                                    <MenuItem key={props.selections[i].name} value={i}>
+                                        {props.selections[i].name}
                                     </MenuItem>
                                 );
                             }
                         }
-
                         return arr;
                     })()}
                 </Select>
@@ -532,9 +533,11 @@ function ChooseSelections(props) {
             <FormControl className="selection-dropdown">
                 <Select
                     value={props.chosenSelections[1] != null ? props.chosenSelections[1] : ""}
-                    onChange={e =>
-                        props.setChosenSelections([props.chosenSelections[0], e.target.value])
-                    }
+                    onChange={e => {
+                        props.setChosenSelections([props.chosenSelections[0], e.target.value]);
+                        props.setRunButtonPressed(false);
+                        props.setDataState(undefined);
+                    }}
                 >
                     {(function() {
                         let arr = [];
@@ -542,8 +545,8 @@ function ChooseSelections(props) {
                         for (let i = 0; i < props.selections.length; i++) {
                             if (props.selections[i].active && props.chosenSelections[0] != i) {
                                 arr.push(
-                                    <MenuItem key={props.selections[i].id} value={i}>
-                                        {props.selections[i].id}
+                                    <MenuItem key={props.selections[i].name} value={i}>
+                                        {props.selections[i].name}
                                     </MenuItem>
                                 );
                             }
@@ -560,13 +563,13 @@ function ChooseSelections(props) {
 function TreeSweepScroller(props) {
     if (!props.tree_sweep && props.runButtonPressed) {
         return (
-            <div className="tree-sweep-scroller-undefined">
+            <div className="tree-sweep-scroller-circular">
                 {" "}
                 <CircularProgress />
             </div>
         );
     } else if (!props.tree_sweep) {
-        return <div className="tree-sweep-scroller-undefined"> Choose selections and run </div>;
+        return <div className="tree-sweep-scroller"> Choose selections and run </div>;
     }
 
     const [listClass, setListClass] = useState([]);
@@ -708,6 +711,8 @@ function FeatureList(props) {
                 selections={props.selections}
                 setChosenSelections={props.setChosenSelections}
                 chosenSelections={props.chosenSelections}
+                setRunButtonPressed={props.setRunButtonPressed}
+                setDataState={props.setDataState}
             />
             <Button
                 className="run-button"
@@ -807,14 +812,13 @@ function ExplainThis(props) {
                 [firstSelectionIndices, secondSelectionIndices],
                 props.selectedFeatureNames
             );
-
             const requestMade = utils.makeSimpleRequest(request);
             requestMade.req.then(data => {
                 setRunButtonPressed(false);
 
                 const selectionNames = [
-                    props.selections[chosenSelections[0]].id,
-                    props.selections[chosenSelections[1]].id
+                    props.selections[chosenSelections[0]].name,
+                    props.selections[chosenSelections[1]].name
                 ];
 
                 setDataState({ ...data, selectionNames: selectionNames });
@@ -874,6 +878,7 @@ function ExplainThis(props) {
                     selections={props.selections}
                     setChosenSelections={setChosenSelections}
                     chosenSelections={chosenSelections}
+                    setDataState={setDataState}
                 />
                 <ExplainThisTree
                     treeData={dataState.tree_sweep[treeIndex]}

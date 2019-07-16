@@ -16,8 +16,8 @@ export function toggleSelectionHidden(id) {
     return { type: actionTypes.TOGGLE_SELECTION_HIDDEN, id };
 }
 
-export function saveNewSelection(id, rowIndices) {
-    return { type: actionTypes.SAVE_NEW_SELECTION, id, rowIndices };
+export function saveNewSelection(name, rowIndices) {
+    return { type: actionTypes.SAVE_NEW_SELECTION, name, rowIndices };
 }
 
 export function deleteSelection(id) {
@@ -30,4 +30,8 @@ export function renameSelection(id, name) {
 
 export function hoverSelection(id) {
     return { type: actionTypes.HOVER_SELECTION, id };
+}
+
+export function setSelectionGroup(id, groupID) {
+    return { type: actionTypes.SET_SELECTION_GROUP, id, groupID };
 }

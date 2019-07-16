@@ -11,7 +11,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
-import Checkbox from '@material-ui/core/Checkbox';
+import Checkbox from "@material-ui/core/Checkbox";
 import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
 import RemoveRedEye from "@material-ui/icons/RemoveRedEye";
 import CheckboxIcon from "@material-ui/icons/CheckBox";
@@ -36,7 +36,7 @@ function createSelection(
                 e.preventDefault();
                 setContextMenuVisible(true);
                 setContextMenuPosition({ top: e.clientY, left: e.clientX });
-                setContextActiveSelection({ id: selection.id, displayName: selection.displayName });
+                setContextActiveSelection({ id: selection.id, name: selection.name });
             }}
             onMouseEnter={_ => props.hoverSelection(selection.id)}
             onMouseLeave={_ => props.hoverSelection(null)}
@@ -44,31 +44,28 @@ function createSelection(
             <Checkbox
                 checked={selection.active}
                 value="checkedA"
-                icon={<CheckboxOutlineBlank style={{fill: "#828282"}} />}
-                checkedIcon={<CheckboxIcon style={{ fill:"#3988E3"}} />}
+                icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
+                checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
                 onClick={_ => {
                     props.toggleSelectionActive(selection.id);
-                    }
-                }
-                style={{height:"22px",  padding:"0px"}}
-              />
-            <div className="selection-name-tag"><span> {selection.displayName} </span></div>
+                }}
+                style={{ height: "22px", padding: "0px" }}
+            />
+            <div className="selection-name-tag">
+                <span> {selection.name} </span>
+            </div>
             <Checkbox
                 className="eye-icon-checkbox"
                 checked={selection.hidden}
                 value="checkedA"
-                icon={<RemoveRedEye style={{fill: "#DADADA"}} />}
-                checkedIcon={<RemoveRedEye style={{ fill:"#061427"}} />}
+                icon={<RemoveRedEye style={{ fill: "#DADADA" }} />}
+                checkedIcon={<RemoveRedEye style={{ fill: "#061427" }} />}
                 onClick={_ => {
                     props.toggleSelectionHidden(selection.id);
-                    }
-                }
-                style={{height:"22px", padding:"0px"}}
-              />
-              <div
-                className="swatch"
-                style={{ background: selection.color}}
+                }}
+                style={{ height: "22px", padding: "0px" }}
             />
+            <div className="swatch" style={{ background: selection.color }} />
         </li>
     );
 }

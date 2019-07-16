@@ -40,6 +40,7 @@
         "react-handsontable": "^0.3.1",
         "react-immutable-proptypes": "^2.1.0",
         "react-markdown": "^3.3.0",
+        "react-nestable": "^1.1.0",
         "react-plotly.js": "^2.3.0",
         "react-redux": "^7.1.0",
         "react-resize-detector": "^4.1.4",

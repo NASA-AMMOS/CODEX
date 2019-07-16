@@ -142,7 +142,7 @@ function makeNumericInput(param, classificationName, classificationStateDispatch
 function makeStringChoiceInput(param, classificationName, classificationStateDispatch, focus) {
     return (
         <FormControl key={param.name}>
-            <InputLabel>{param.displayName}</InputLabel>
+            <InputLabel>{param.name}</InputLabel>
             <Select
                 autoFocus={focus}
                 value={param.value || param.default}

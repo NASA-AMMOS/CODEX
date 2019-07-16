@@ -1,0 +1,61 @@
+.fmlt-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .parameter-section {
+        .selection-dropdown-container {
+            display: flex;
+            flex-direction: row;
+            .selection-dropdown {
+                width: 50%;
+                margin-left: 5px;
+                margin-right: 15px;
+            }
+
+            .selection-dropdown-label {
+                width: 50%;
+                margin-bottom: auto;
+                margin-top: auto;
+                margin-left: 10px;
+            }
+        }
+
+        .similarity-threshold-container {
+            display: flex;
+            flex-direction: row;
+            .similarity-threshold-label {
+                width: 50%;
+                margin-bottom: auto;
+                margin-top: auto;
+                margin-left: 10px;
+            }
+
+            .similarity-threshold-input {
+                width: 50%;
+                margin-left: 5px;
+                margin-right: 15px;
+            }
+        }
+    }
+
+    .output-section {
+        flex-grow: 1;
+        margin: 20px;
+        margin-bottom: 10px;
+        border: 2px solid black;
+        padding: 5px;
+    }
+
+    .loading-section {
+        flex-grow: 1;
+        margin: auto;
+        align-items: center;
+        display: flex;
+    }
+
+    .fmlt-run-button {
+        margin-top: auto;
+        margin-bottom: 10px;
+    }
+}

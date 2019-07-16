@@ -11,12 +11,12 @@ export default class SelectionsReducer {
             ...state,
             savedSelections: state.savedSelections.concat([
                 {
-                    id: `Selection_${state.savedSelections.length + 1}`,
+                    id: state.savedSelections.length,
                     rowIndices: state.currentSelection,
                     color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
                     active: false,
                     hidden: false,
-                    displayName: `Selection_${state.savedSelections.length + 1}`
+                    name: `Selection ${state.savedSelections.length + 1}`
                 }
             ]),
             currentSelection: [],
@@ -28,7 +28,7 @@ export default class SelectionsReducer {
         return {
             ...state,
             savedSelections: state.savedSelections.map(selection =>
-                selection.id === action.id ? { ...selection, hidden: !selection.hidden} : selection
+                selection.id === action.id ? { ...selection, hidden: !selection.hidden } : selection
             )
         };
     }
@@ -43,16 +43,38 @@ export default class SelectionsReducer {
     }
 
     static saveNewSelection(state, action) {
+        //look to see if the selection is a duplicate
+        //if so then update the selection with the same name
+        for (let i = 0; i < state.savedSelections.length; i++) {
+            const selection = state.savedSelections[i];
+            if (selection.name === action.name) {
+                let newSavedSelections = [...state.savedSelections];
+                newSavedSelections[i] = {
+                    id: i,
+                    rowIndices: action.rowIndices,
+                    color: selection.color,
+                    active: true,
+                    hidden: false,
+                    name: action.name
+                };
+
+                return {
+                    ...state,
+                    savedSelections: newSavedSelections
+                };
+            }
+        }
+
         return {
             ...state,
             savedSelections: state.savedSelections.concat([
                 {
-                    id: action.id,
+                    id: state.savedSelections.length,
                     rowIndices: action.rowIndices,
                     color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
                     active: true,
                     hidden: false,
-                    displayName: action.id
+                    name: action.name
                 }
             ]),
             nextColorIndex:
@@ -74,7 +96,7 @@ export default class SelectionsReducer {
             ...state,
             savedSelections: state.savedSelections.map(selection =>
                 selection.id === action.id
-                    ? Object.assign(selection, { displayName: action.name })
+                    ? Object.assign(selection, { name: action.name })
                     : selection
             )
         };
@@ -82,5 +104,16 @@ export default class SelectionsReducer {
 
     static hoverSelection(state, action) {
         return { ...state, hoverSelection: action.id };
+    }
+
+    static setSelectionGroup(state, action) {
+        return {
+            ...state,
+            savedSelections: state.savedSelections.map(selection =>
+                selection.id === action.id
+                    ? Object.assign(selection, { groupID: action.groupID })
+                    : selection
+            )
+        };
     }
 }

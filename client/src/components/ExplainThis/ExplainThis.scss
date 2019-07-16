@@ -8,7 +8,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 100%;
+        width: 640px;
         height: 100%;
     }
 
@@ -57,6 +57,11 @@
             margin-top: 5px;
             overflow-y: scroll;
             overflow-x: hidden;
+            height: 130px;
+
+            .js-plotly-plot {
+                height: 100%;
+            }
         }
 
         .used-features {
@@ -67,13 +72,17 @@
             margin-top: auto;
         }
 
-        .tree-sweep-scroller-undefined {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .tree-sweep-scroller-circular {
             margin-bottom: 20px;
             height: 30%;
             width: 100%;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            div {
+                margin: auto;
+            }
         }
 
         .tree-sweep-scroller {
@@ -106,7 +115,7 @@
     }
 
     .tree-container {
-        width: 100%;
+        width: 640px;
         height: 600px;
         flex: 1;
         overflow-y: scroll;

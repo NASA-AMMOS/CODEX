@@ -214,7 +214,7 @@ export function useSavedSelections() {
 
     return [
         savedSelections,
-        (id, indices) => dispatch(selectionActions.saveNewSelection(id, indices))
+        (name, indices) => dispatch(selectionActions.saveNewSelection(name, indices))
     ];
 }
 
