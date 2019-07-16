@@ -32,13 +32,22 @@ import os
 import pickle
 import psutil
 import time
+import warnings
+import functools
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
 import codex_system
 import codex_doctest
 
+DEFAULT_CODEX_HASH_BIND    = 'tcp://*:64209'
+DEFAULT_CODEX_HASH_CONNECT = 'tcp://localhost:64209'
+DOCTEST_SESSION            = '__doctest__'
+
 class NoSessionSpecifiedError(Exception):
+    pass
+
+class PotentialAPIAbuseWarning(RuntimeWarning):
     pass
 
 class CodexHash:
@@ -52,7 +61,9 @@ class CodexHash:
         if sessionKey is None:
             raise NoSessionSpecifiedError()
         if not self.__has_session(sessionKey):
-            codex_system.codex_log('Creating a new session for key {}'.format(sessionKey));
+            # not using codex_log bc it breaks tests unnecessarily
+            # sys.stderr.write('Creating a new session for key {}'.format(sessionKey));
+            # sys.stderr.flush()
             self.sessions[sessionKey] = {
                 "featureList": [],
                 "subsetList": [],
@@ -1026,16 +1037,70 @@ def assert_session(sessionKey):
     if sessionKey is None:
         raise NoSessionSpecifiedError()
 
+
 class WrappedCache:
+    '''
+    Create a cache, and ensure that it connects to the proper bind address.
+    Alternatively, create a local cache if the DOCTEST_SESSION is passed in.
+    '''
     sessionKey = None
     cache = None
-    def __init__(self, cache, sessionKey):
+
+    def __init__(self, sessionKey):
+        '''
+        Inputs:
+            sessionKey (string)  - session key for the data set you wish to access
+
+        Notes:
+            Use the special test string DOCTEST_SESSION to force a local instantiation of the hash set
+
+
+        >>> WrappedCache(None)
+        Traceback (most recent call last):
+            ...
+        NoSessionSpecifiedError
+        >>> WrappedCache(DOCTEST_SESSION)
+        <__main__.WrappedCache object at 0x...>
+        >>> WrappedCache('SomeSessionKey')
+        Traceback (most recent call last):
+            ...
+        NotImplementedError: Connecting to remotes is not yet implemented!
+        '''
         assert_session(sessionKey)
         self.sessionKey = sessionKey
-        self.cache = cache
+
+        if self.sessionKey == DOCTEST_SESSION:
+            # if we're in a doctest session, instantiate the cache directly
+            self.cache = CodexHash()
+        else:
+            # TODO: connect to a remote session (spec to DEFAULT_CODEX_HASH_BIND)
+            raise NotImplementedError('Connecting to remotes is not yet implemented!')
 
     def __getattr__(self, name):
         return functools.partial(getattr(self.cache, name), session=self.sessionKey)
+
+def get_cache(session):
+    '''
+    Inputs:
+        session {string/WrappedCache} - session key to connect to OR a wrapped cache (for local testing only)
+
+    Note:
+        If you pass in a session with a key that is not the DOCTEST_SESSION key, a warning will be generated.
+
+    >>> get_cache('SomeSessionKey')
+    Traceback (most recent call last):
+        ...
+    NotImplementedError: Connecting to remotes is not yet implemented!
+    >>> cache = get_cache(DOCTEST_SESSION)
+    >>> get_cache(cache)
+    '''
+    if isinstance(session, WrappedCache):
+        if session.sessionKey != DOCTEST_SESSION:
+            warnings.warn('Passing in a cache to get_cache outside of a doctest (session = {})! Do\'t do this.'.format(session.sessionKey), PotentialAPIAbuseWarning)
+        return session
+
+    # otherwise, return a new cache connection
+    return WrappedCache(session)
 
 if __name__ == "__main__":
     codex_doctest.run_codex_doctest()
