@@ -67,7 +67,7 @@ export function zip(ary) {
  * Get the current session key on the application
  */
 export function getGlobalSessionKey() {
-    return store.data.get("serverSessionKey");
+    return store.getState().data.get("serverSessionKey");
 }
 
 export function makeSimpleRequest(request) {
