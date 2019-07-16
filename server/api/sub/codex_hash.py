@@ -38,86 +38,107 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 import codex_system
 import codex_doctest
 
+class NoSessionSpecifiedError(Exception):
+    pass
+
 class CodexHash:
     # current hashes stored here
-    featureList = []
-    subsetList = []
-    downsampleList = []
-    labelList = []
-    classifierList = []
-    regressorList = []
+    sessions={}
 
-    def printCacheCount(self):
+    def __has_session(self, sessionKey):
+        return sessionKey in self.sessions
+
+    def __set_session(self, sessionKey):
+        if sessionKey is None:
+            raise NoSessionSpecifiedError()
+        if not self.__has_session(sessionKey):
+            codex_system.codex_log('Creating a new session for key {}'.format(sessionKey));
+            self.sessions[sessionKey] = {
+                "featureList": [],
+                "subsetList": [],
+                "downsampleList": [],
+                "labelList": [],
+                "classifierList": [],
+                "regressorList": []
+            }
+        return sessionKey
+
+    def printCacheCount(self, session=None):
         '''
         Inputs:
 
         Outputs:
 
         Examples:
+        >>> session = 'foo'
         >>> ch = CodexHash()
-        >>> ch.resetCacheList("feature")
-        >>> ch.resetCacheList("subset")
-        >>> ch.resetCacheList("downsample")
-        >>> ch.resetCacheList("label")
+        >>> ch.resetCacheList("feature", session=session)
+        >>> ch.resetCacheList("subset", session=session)
+        >>> ch.resetCacheList("downsample", session=session)
+        >>> ch.resetCacheList("label", session=session)
 
         >>> x1 = np.array([2,3,1,0])
-        >>> hashResult = ch.hashArray("x1", x1, "feature")
-        >>> hashResult = ch.hashArray("x2", x1, "feature")
-        >>> hashResult = ch.hashArray("s1", x1, "subset")
-        >>> ch.printCacheCount()
+        >>> hashResult = ch.hashArray("x1", x1, "feature", session=session)
+        >>> hashResult = ch.hashArray("x2", x1, "feature", session=session)
+        >>> hashResult = ch.hashArray("s1", x1, "subset", session=session)
+        >>> ch.printCacheCount(session=session)
         Feature Cache Size           : 1
         Subset Cache Size            : 1
         Downsample Cache Size        : 0
         Number of classifier models  : 0
         Number of regressor models   : 1
         '''
-        codex_system.codex_log("Feature Cache Size           : " + str(len(self.featureList)))
-        codex_system.codex_log("Subset Cache Size            : " + str(len(self.subsetList)))
-        codex_system.codex_log("Downsample Cache Size        : " + str(len(self.downsampleList)))
-        codex_system.codex_log("Number of classifier models  : " + str(len(self.regressorList)))
-        codex_system.codex_log("Number of regressor models   : " + str(len(self.classifierList)))
+        session = self.__set_session(session)
+
+        codex_system.codex_log("Feature Cache Size           : " + str(len(self.sessions[session]["featureList"])))
+        codex_system.codex_log("Subset Cache Size            : " + str(len(self.sessions[session]["subsetList"])))
+        codex_system.codex_log("Downsample Cache Size        : " + str(len(self.sessions[session]["downsampleList"])))
+        codex_system.codex_log("Number of classifier models  : " + str(len(self.sessions[session]["regressorList"])))
+        codex_system.codex_log("Number of regressor models   : " + str(len(self.sessions[session]["classifierList"])))
 
 
-    def remove_stale_data(self, verbose=False):
+    def remove_stale_data(self, verbose=False, session=None):
         '''
         Inputs:
 
         Outputs:
 
         Examples:
+        >>> session = 'foo'
         >>> ch = CodexHash()
         >>> x1 = np.array([2,3,1,0])
-        >>> hashResult = ch.hashArray("x1", x1, "feature")
-        >>> hashResult = ch.hashArray("x2", x1, "feature")
-        >>> hashResult = ch.hashArray("s1", x1, "subset")
-        >>> ch.remove_stale_data()
+        >>> hashResult = ch.hashArray("x1", x1, "feature", session=session)
+        >>> hashResult = ch.hashArray("x2", x1, "feature", session=session)
+        >>> hashResult = ch.hashArray("s1", x1, "subset", session=session)
+        >>> ch.remove_stale_data(session=session)
 
-        >>> ch.resetCacheList("feature")
-        >>> ch.resetCacheList("subset")
-        >>> ch.resetCacheList("downsample")
-        >>> ch.resetCacheList("label")
-
-        >>> x1 = np.array([2,3,1,0])
-        >>> hashResult = ch.hashArray("s1", x1, "subset")
-        >>> hashResult = ch.hashArray("x1", x1, "feature")
-        >>> hashResult = ch.hashArray("x2", x1, "feature")
-        >>> ch.remove_stale_data()
-
-        >>> ch.resetCacheList("feature")
-        >>> ch.resetCacheList("subset")
-        >>> ch.resetCacheList("downsample")
-        >>> ch.resetCacheList("label")
+        >>> ch.resetCacheList("feature", session=session)
+        >>> ch.resetCacheList("subset", session=session)
+        >>> ch.resetCacheList("downsample", session=session)
+        >>> ch.resetCacheList("label", session=session)
 
         >>> x1 = np.array([2,3,1,0])
-        >>> hashResult = ch.hashArray("s1", x1, "downsample")
-        >>> hashResult = ch.hashArray("x1", x1, "feature")
-        >>> hashResult = ch.hashArray("x2", x1, "feature")
-        >>> ch.remove_stale_data()
+        >>> hashResult = ch.hashArray("s1", x1, "subset", session=session)
+        >>> hashResult = ch.hashArray("x1", x1, "feature", session=session)
+        >>> hashResult = ch.hashArray("x2", x1, "feature", session=session)
+        >>> ch.remove_stale_data(session=session)
+
+        >>> ch.resetCacheList("feature", session=session)
+        >>> ch.resetCacheList("subset", session=session)
+        >>> ch.resetCacheList("downsample", session=session)
+        >>> ch.resetCacheList("label", session=session)
+
+        >>> x1 = np.array([2,3,1,0])
+        >>> hashResult = ch.hashArray("s1", x1, "downsample", session=session)
+        >>> hashResult = ch.hashArray("x1", x1, "feature", session=session)
+        >>> hashResult = ch.hashArray("x2", x1, "feature", session=session)
+        >>> ch.remove_stale_data(session=session)
         '''
+        session = self.__set_session(session)
 
         if(verbose):
             codex_system.codex_log("Before clearing cache:")
-            self.printCacheCount()
+            self.printCacheCount(session=session)
             process = psutil.Process(os.getpid())
             current_ram = process.memory_info().rss
             codex_system.codex_log(current_ram)
@@ -126,89 +147,90 @@ class CodexHash:
         oldestType = "downsample"
         oldestName = ""
 
-        for point in self.featureList:
+        for point in self.sessions[session]["featureList"]:
             if(point["time"] < oldestTime):
                 oldestTime = point["time"]
                 oldestType = "feature"
                 oldestName = point["name"]
 
-        for point in self.subsetList:
+        for point in self.sessions[session]["subsetList"]:
             if(point["time"] < oldestTime):
                 oldestTime = point["time"]
                 oldestType = "subset"
                 oldestName = point["name"]
 
-        for point in self.downsampleList:
+        for point in self.sessions[session]["downsampleList"]:
             if(point["time"] < oldestTime):
                 oldestTime = point["time"]
                 oldestType = "downsample"
                 oldestName = point["name"]
 
-        status = self.deleteHashName(oldestName, oldestType)
+        status = self.deleteHashName(oldestName, oldestType, session=session)
         if(status != True):
             codex_system.codex_log("Deleting hash failed")
             return None
 
         if(verbose):
             codex_system.codex_log("After clearing cache:")
-            self.printCacheCount()
+            self.printCacheCount(session=session)
             process = psutil.Process(os.getpid())
             current_ram = process.memory_info().rss
             print(current_ram)
 
 
-    def deleteHashName(self, name, hashType):
+    def deleteHashName(self, name, hashType, session=None):
+        session = self.__set_session(session)
 
         delIndex = None
 
         if(hashType == "subset"):
 
-            length = len(self.subsetList)
+            length = len(self.sessions[session]["subsetList"])
             for x in range(0, length):
-                if(name == self.subsetList[x]["name"]):
+                if(name == self.sessions[session]["subsetList"][x]["name"]):
                     delIndex = x
 
             if(delIndex is not None):
-                del self.subsetList[delIndex]
+                del self.sessions[session]["subsetList"][delIndex]
                 return True
             else:
                 return False
 
         elif(hashType == "feature"):
 
-            length = len(self.featureList)
+            length = len(self.sessions[session]["featureList"])
             for x in range(0, length):
-                if(name == self.featureList[x]["name"]):
+                if(name == self.sessions[session]["featureList"][x]["name"]):
                     delIndex = x
 
             if(delIndex is not None):
-                del self.featureList[delIndex]
+                del self.sessions[session]["featureList"][delIndex]
                 return True
             else:
                 return False
 
         elif(hashType == "downsample"):
 
-            length = len(self.downsampleList)
+            length = len(self.sessions[session]["downsampleList"])
             for x in range(0, length):
-                if(name == self.downsampleList[x]["name"]):
+                if(name == self.sessions[session]["downsampleList"][x]["name"]):
                     delIndex = x
 
             if(delIndex is not None):
-                del self.downsampleList[delIndex]
+                del self.sessions[session]["downsampleList"][delIndex]
                 return True
             else:
                 return False
 
         elif(hashType == "label"):
 
-            length = len(self.labelList)
+            length = len(self.sessions[session]["labelList"])
             for x in range(0, length):
-                if(name == self.labelList[x]["name"]):
+                if(name == self.sessions[session]["labelList"][x]["name"]):
                     delIndex = x
 
             if(delIndex is not None):
-                del self.labelList[delIndex]
+                del self.sessions[session]["labelList"][delIndex]
                 return True
             else:
                 return False
@@ -218,32 +240,33 @@ class CodexHash:
             return False
 
 
-    def hashUpdate(self, field, old, new, hashType):
+    def hashUpdate(self, field, old, new, hashType, session=None):
         '''
         Inputs:
 
         Outputs:
 
         Examples:
+        >>> session = 'foo'
         >>> ch = CodexHash()
-        >>> ch.resetCacheList("subset")
-        >>> ch.resetCacheList("feature")
-        >>> ch.resetCacheList("downsample")
-        >>> ch.resetCacheList("label")
+        >>> ch.resetCacheList("subset", session=session)
+        >>> ch.resetCacheList("feature", session=session)
+        >>> ch.resetCacheList("downsample", session=session)
+        >>> ch.resetCacheList("label", session=session)
 
         >>> x1 = np.array([2,3,1,0])
-        >>> hashResult = ch.hashArray("x1", x1, "subset")
+        >>> hashResult = ch.hashArray("x1", x1, "subset", session=session)
 
-        >>> ch.printHashList("subset")
+        >>> ch.printHashList("subset", session=session)
         Name: x1
         Hash: bb99f457e6632e9944b801e6c53ad7353e08ce00
         Data Shape: (4,)
         Color: None
         Z-Order: None
 
-        >>> result = ch.hashUpdate("name","x1","x2","subset")
+        >>> result = ch.hashUpdate("name","x1","x2","subset", session=session)
 
-        >>> ch.printHashList("subset")
+        >>> ch.printHashList("subset", session=session)
         Name: x2
         Hash: bb99f457e6632e9944b801e6c53ad7353e08ce00
         Data Shape: (4,)
@@ -251,59 +274,62 @@ class CodexHash:
         Z-Order: None
 
         '''
+        session = self.__set_session(session)
 
-        result = self.findHashArray(field, old, hashType)
-        status = self.deleteHashName(old, hashType)
+        result = self.findHashArray(field, old, hashType, session=session)
+        status = self.deleteHashName(old, hashType, session=session)
         result[field] = new
 
         if(hashType == "subset"):
-            self.subsetList.append(result)
+            self.sessions[session]["subsetList"].append(result)
         elif(hashType == "downsample"):
-            self.downsampleList.append(result)
+            self.sessions[session]["downsampleList"].append(result)
         elif(hashType == "label"):
-            self.labelList.append(result)
+            self.sessions[session]["labelList"].append(result)
         elif(hashType == "feature"):
-            self.featureList.append(result)
+            self.sessions[session]["featureList"].append(result)
         else:
             return False
 
         return True
 
 
-    def resetCacheList(self, hashType):
+    def resetCacheList(self, hashType, session=None):
         '''
         Inputs:
 
         Outputs:
 
         Examples:
+        >>> session = 'foo'
         >>> ch = CodexHash()
-        >>> ch.resetCacheList("downsample")
-        >>> ch.resetCacheList("feature")
-        >>> ch.resetCacheList("subset")
-        >>> ch.resetCacheList("label")
-        >>> ch.resetCacheList("unknown")
+        >>> ch.resetCacheList("downsample", session=session)
+        >>> ch.resetCacheList("feature", session=session)
+        >>> ch.resetCacheList("subset", session=session)
+        >>> ch.resetCacheList("label", session=session)
+        >>> ch.resetCacheList("unknown", session=session)
         Unknown hash type.  Not resetting
 
         '''
+        session = self.__set_session(session)
 
         if(hashType == "feature"):
-            self.featureList = []
+            self.sessions[session]["featureList"] = []
         elif(hashType == "downsample"):
-            self.downsampleList = []
+            self.sessions[session]["downsampleList"] = []
         elif(hashType == "subset"):
-            self.subsetList = []
+            self.sessions[session]["subsetList"] = []
         elif(hashType == "label"):
-            self.labelList = []
+            self.sessions[session]["labelList"] = []
         elif(hashType == "classifier"):
-            self.classifierList = []
+            self.sessions[session]["classifierList"] = []
         elif(hashType == "regressor"):
-            self.regressorList = []
+            self.sessions[session]["regressorList"] = []
         else:
             codex_system.codex_log("Unknown hash type.  Not resetting")
 
 
-    def hashArray(self, arrayName, inputArray, hashType, virtual=False):
+    def hashArray(self, arrayName, inputArray, hashType, virtual=False, session=None):
         '''
         Inputs:
             arrayName (string)    - Name of the data set.  Used in visalization for easy human data recognition
@@ -323,34 +349,36 @@ class CodexHash:
 
         Examples:
         # Standard completion check
+        >>> session = 'foo'
         >>> ch = CodexHash()
         >>> x1 = np.array([2,3,1,0])
-        >>> hashResult = ch.hashArray("x1", x1, "feature")
+        >>> hashResult = ch.hashArray("x1", x1, "feature", session=session)
         >>> print(hashResult['hash'])
         bb99f457e6632e9944b801e6c53ad7353e08ce00
 
-        >>> hashResult = ch.hashArray("x1", x1, "subset")
+        >>> hashResult = ch.hashArray("x1", x1, "subset", session=session)
         >>> print(hashResult['hash'])
         bb99f457e6632e9944b801e6c53ad7353e08ce00
 
         # Incorrect hashType input
-        >>> ch.hashArray("x1",x1,"log")
+        >>> ch.hashArray("x1",x1,"log", session=session)
         ERROR: Hash type not recognized! Not logged for future use.
 
-        >>> ch.resetCacheList("feature")
+        >>> ch.resetCacheList("feature", session=session)
         >>> x1 = np.array([2,3,1,0])
-        >>> hashResult = ch.hashArray("x1", x1, "feature")
+        >>> hashResult = ch.hashArray("x1", x1, "feature", session=session)
 
         >>> x1 = np.array([2,3,1,0])
-        >>> hashResult = ch.hashArray("x1", x1, "feature")
+        >>> hashResult = ch.hashArray("x1", x1, "feature", session=session)
 
-        >>> ch.printHashList("feature")
+        >>> ch.printHashList("feature", session=session)
         Name: x1
         Hash: bb99f457e6632e9944b801e6c53ad7353e08ce00
         Data Shape: (4,)
         Color: None
         Z-Order: None
         '''
+        session = self.__set_session(session)
 
         if(isinstance(inputArray, type(None))):
             return None
@@ -389,17 +417,17 @@ class CodexHash:
             "z-order": None}
 
         if(hashType == "feature"):
-            if not any(d['hash'] == newHash["hash"] for d in self.featureList):
-                self.featureList.append(newHash)
+            if not any(d['hash'] == newHash["hash"] for d in self.sessions[session]["featureList"]):
+                self.sessions[session]["featureList"].append(newHash)
         elif(hashType == "subset"):
-            if not any(d['hash'] == newHash["hash"] for d in self.subsetList):
-                self.subsetList.append(newHash)
+            if not any(d['hash'] == newHash["hash"] for d in self.sessions[session]["subsetList"]):
+                self.sessions[session]["subsetList"].append(newHash)
         elif(hashType == "downsample"):
-            if not any(d['hash'] == newHash["hash"] for d in self.downsampleList):
-                self.downsampleList.append(newHash)
+            if not any(d['hash'] == newHash["hash"] for d in self.sessions[session]["downsampleList"]):
+                self.sessions[session]["downsampleList"].append(newHash)
         elif(hashType == "label"):
-            if not any(d['name'] == newHash["name"] for d in self.labelList):
-                self.labelList.append(newHash)
+            if not any(d['name'] == newHash["name"] for d in self.sessions[session]["labelList"]):
+                self.sessions[session]["labelList"].append(newHash)
         elif(hashType == "NOSAVE"):
             pass
         else:
@@ -409,7 +437,7 @@ class CodexHash:
         return newHash
 
 
-    def printHashList(self, hashType):
+    def printHashList(self, hashType, session=None):
         '''
         Inputs:
             hashType (string) - {feature, subset} print the requested hash list. Used in debugging
@@ -418,51 +446,53 @@ class CodexHash:
             NONE
 
         Examples:
+        >>> session = 'foo'
         >>> ch = CodexHash()
-        >>> ch.resetCacheList("subset")
-        >>> ch.resetCacheList("feature")
+        >>> ch.resetCacheList("subset", session=session)
+        >>> ch.resetCacheList("feature", session=session)
 
         >>> x1 = np.array([2,3,1,0])
-        >>> hashResult = ch.hashArray("x1_feature", x1, "feature")
-        >>> hashResult = ch.hashArray("x1_subset", x1, "subset")
-        >>> hashResult = ch.hashArray("x1_downsample", x1, "downsample")
-        >>> hashResult = ch.hashArray("x1_label", x1, "label")
+        >>> hashResult = ch.hashArray("x1_feature", x1, "feature", session=session)
+        >>> hashResult = ch.hashArray("x1_subset", x1, "subset", session=session)
+        >>> hashResult = ch.hashArray("x1_downsample", x1, "downsample", session=session)
+        >>> hashResult = ch.hashArray("x1_label", x1, "label", session=session)
 
-        >>> ch.printHashList("feature")
+        >>> ch.printHashList("feature", session=session)
         Name: x1_feature
         Hash: bb99f457e6632e9944b801e6c53ad7353e08ce00
         Data Shape: (4,)
         Color: None
         Z-Order: None
 
-        >>> ch.printHashList("subset")
+        >>> ch.printHashList("subset", session=session)
         Name: x1_subset
         Hash: bb99f457e6632e9944b801e6c53ad7353e08ce00
         Data Shape: (4,)
         Color: None
         Z-Order: None
 
-        >>> ch.printHashList("downsample")
+        >>> ch.printHashList("downsample", session=session)
         Name: x1_downsample
         Hash: bb99f457e6632e9944b801e6c53ad7353e08ce00
         Data Shape: (4,)
         Color: None
         Z-Order: None
 
-        >>> ch.printHashList("label")
+        >>> ch.printHashList("label", session=session)
         Name: x1_label
         Hash: bb99f457e6632e9944b801e6c53ad7353e08ce00
         Data Shape: (4,)
         Color: None
         Z-Order: None
 
-        >>> ch.printHashList("unknown")
+        >>> ch.printHashList("unknown", session=session)
         ERROR: printHashList - unknown hashType
         '''
+        session = self.__set_session(session)
 
         if(hashType == "feature"):
 
-            for point in self.featureList:
+            for point in self.sessions[session]["featureList"]:
                 codex_system.codex_log("Name: " + point['name'])
                 codex_system.codex_log("Hash: " + point['hash'])
                 codex_system.codex_log("Data Shape: " + str(point['data'].shape))
@@ -471,7 +501,7 @@ class CodexHash:
 
         elif(hashType == "subset"):
 
-            for point in self.subsetList:
+            for point in self.sessions[session]["subsetList"]:
                 codex_system.codex_log("Name: " + point['name'])
                 codex_system.codex_log("Hash: " + point['hash'])
                 codex_system.codex_log("Data Shape: " + str(point['data'].shape))
@@ -480,7 +510,7 @@ class CodexHash:
 
         elif(hashType == "downsample"):
 
-            for point in self.downsampleList:
+            for point in self.sessions[session]["downsampleList"]:
                 codex_system.codex_log("Name: " + point['name'])
                 codex_system.codex_log("Hash: " + point['hash'])
                 codex_system.codex_log("Data Shape: " + str(point['data'].shape))
@@ -489,7 +519,7 @@ class CodexHash:
 
         elif(hashType == "label"):
 
-            for point in self.labelList:
+            for point in self.sessions[session]["labelList"]:
                 codex_system.codex_log("Name: " + point['name'])
                 codex_system.codex_log("Hash: " + point['hash'])
                 codex_system.codex_log("Data Shape: " + str(point['data'].shape))
@@ -500,7 +530,7 @@ class CodexHash:
             codex_system.codex_log("ERROR: printHashList - unknown hashType")
 
 
-    def findHashArray(self, field, name, hashType):
+    def findHashArray(self, field, name, hashType, session=None):
         '''
         Inputs:
             name     (string)  - hash string for the data set you wish to access
@@ -510,80 +540,83 @@ class CodexHash:
             hashArray function defined dictionary of information about data set
 
         Examples:
+        >>> session = 'foo'
         >>> ch = CodexHash()
-        >>> ch.resetCacheList("feature")
-        >>> ch.resetCacheList("subset")
-        >>> ch.resetCacheList("downsample")
-        >>> ch.resetCacheList("label")
+        >>> ch.resetCacheList("feature", session=session)
+        Creating a new session for key foo
+        >>> ch.resetCacheList("subset", session=session)
+        >>> ch.resetCacheList("downsample", session=session)
+        >>> ch.resetCacheList("label", session=session)
 
         >>> x1 = np.array([2,3,1,0])
-        >>> hashResult_feature = ch.hashArray("x1_feature", x1, "feature")
-        >>> hashResult_subset = ch.hashArray("x1_subset", x1, "subset")
-        >>> hashResult_feature = ch.hashArray("x1_downsample", x1, "downsample")
-        >>> hashResult_subset = ch.hashArray("x1_label", x1, "label")
+        >>> hashResult_feature = ch.hashArray("x1_feature", x1, "feature", session=session)
+        >>> hashResult_subset = ch.hashArray("x1_subset", x1, "subset", session=session)
+        >>> hashResult_feature = ch.hashArray("x1_downsample", x1, "downsample", session=session)
+        >>> hashResult_subset = ch.hashArray("x1_label", x1, "label", session=session)
 
-        >>> result = ch.findHashArray('hash',hashResult_feature["hash"],"feature")
+        >>> result = ch.findHashArray('hash',hashResult_feature["hash"],"feature", session=session)
         >>> print(result["hash"])
         bb99f457e6632e9944b801e6c53ad7353e08ce00
 
-        >>> result = ch.findHashArray('hash',hashResult_subset["hash"],"subset")
+        >>> result = ch.findHashArray('hash',hashResult_subset["hash"],"subset", session=session)
         >>> print(result["hash"])
         bb99f457e6632e9944b801e6c53ad7353e08ce00
 
-        >>> result = ch.findHashArray('hash',hashResult_subset["hash"],"downsample")
+        >>> result = ch.findHashArray('hash',hashResult_subset["hash"],"downsample", session=session)
         >>> print(result["hash"])
         bb99f457e6632e9944b801e6c53ad7353e08ce00
 
-        >>> result = ch.findHashArray('hash',hashResult_subset["hash"],"label")
+        >>> result = ch.findHashArray('hash',hashResult_subset["hash"],"label", session=session)
         >>> print(result["hash"])
         bb99f457e6632e9944b801e6c53ad7353e08ce00
 
-        >>> result = ch.findHashArray('hash',"4f584718a8fa7b54716b48075b3332","label")
+        >>> result = ch.findHashArray('hash',"4f584718a8fa7b54716b48075b3332","label", session=session)
         >>> print(result)
         None
 
-        >>> result = ch.findHashArray('hash',hashResult_subset["hash"],"unknown_type")
+        >>> result = ch.findHashArray('hash',hashResult_subset["hash"],"unknown_type", session=session)
         ERROR: findHashArray - hash not found
         '''
+        session = self.__set_session(session)
 
         if(hashType == "feature"):
             
-            for point in self.featureList:
+            for point in self.sessions[session]["featureList"]:
                 if(point[field] == name):
                     return point
             return None
 
         elif(hashType == "subset"):
 
-            for point in self.subsetList:
+            for point in self.sessions[session]["subsetList"]:
                 if(point[field] == name):
                     return point
             return None
 
         elif(hashType == "downsample"):
 
-            for point in self.downsampleList:
+            for point in self.sessions[session]["downsampleList"]:
                 if(point[field] == name):
                     return point
             return None
 
         elif(hashType == "label"):
 
-            for point in self.labelList:
+            for point in self.sessions[session]["labelList"]:
                 if(point[field] == name):
                     return point
             return None
 
         elif(hashType == "regressor"):
 
-            for point in self.regressorList:
+            for point in self.sessions[session]["regressorList"]:
                 if(point[field] == name):
                     return point
             return None
 
         elif(hashType == "classifier"):
 
-            for point in self.classifierList:
+            for point in self.sessions[session]["classifierList"]:
                 if(point[field] == name):
                     return point
             return None
@@ -593,7 +626,7 @@ class CodexHash:
             return None
 
 
-    def mergeHashResults(self, hashList, verbose=False):
+    def mergeHashResults(self, hashList, verbose=False, session=None):
         '''
         Inputs:
             hashList (list)      - list of hash strings to be merged into a new accessible data set
@@ -602,11 +635,14 @@ class CodexHash:
             hashArray (np array) - merged numpy nd-array of individual from hashList input
 
         Examples:
+        >>> session = 'foo'
         >>> ch = CodexHash()
-        >>> ch.mergeHashResults(None)
+        >>> ch.mergeHashResults(None, session=session)
         ERROR: mergeHashResults hashList is None
 
         '''
+        session = self.__set_session(session)
+
         if(hashList is None):
             codex_system.codex_log("ERROR: mergeHashResults hashList is None")
             return None
@@ -621,7 +657,7 @@ class CodexHash:
             codex_system.codex_log("Number of features: " + str(totalFeatures))
 
         currentHash = hashList[0]
-        result = self.findHashArray("hash", currentHash, "feature")
+        result = self.findHashArray("hash", currentHash, "feature", session=session)
         if(result is None):
             codex_system.codex_log("Warning, hash not found in mergeHashResults")
             return None
@@ -634,7 +670,7 @@ class CodexHash:
 
         for featureNum in range(1, totalFeatures):
             currentHash = hashList[featureNum]
-            result = self.findHashArray("hash", currentHash, "feature")
+            result = self.findHashArray("hash", currentHash, "feature", session=session)
             if(result is None):
                 codex_system.codex_log(
                     "Warning, hash not found in mergeHashResults")
@@ -669,7 +705,8 @@ class CodexHash:
         return returnArray
 
 
-    def feature2hashList(self, featureList):
+    def feature2hashList(self, featureList, session=None):
+        session = self.__set_session(session)
 
         hashList = []
         for feature in featureList:
@@ -684,7 +721,7 @@ class CodexHash:
         return hashList
 
 
-    def applySubsetMask(self, featureArray, subsetHash):
+    def applySubsetMask(self, featureArray, subsetHash, session=None):
         '''
         Inputs:
             featureArray (np array) - feature to which subset mask will be applied
@@ -697,6 +734,8 @@ class CodexHash:
         Examples:
 
         '''
+        session = self.__set_session(session)
+
         subsetHashName = None
 
         returnDict = findHashArray("hash", subsetHash, "subset")
@@ -748,7 +787,7 @@ class CodexHash:
             return outData, returnDict['name']
 
 
-    def pickle_data(self, session_name, front_end_state):
+    def pickle_data(self, session_name, front_end_state, session=None):
         '''
         Inputs:
 
@@ -758,6 +797,7 @@ class CodexHash:
 
         Examples:
 
+        >>> session = 'foo'
         >>> ch = CodexHash()
         >>> from sklearn import datasets, linear_model
         >>> diabetes = datasets.load_diabetes()
@@ -766,58 +806,60 @@ class CodexHash:
         LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
                  normalize=False)
 
-        >>> model = ch.saveModel("test", regr, "classifier")
+        >>> model = ch.saveModel("test", regr, "classifier", session=session)
         >>> model is not None
         True
 
-        >>> ch.resetCacheList("feature")
-        >>> ch.resetCacheList("subset")
-        >>> ch.resetCacheList("downsample")
-        >>> ch.resetCacheList("label")
+        >>> ch.resetCacheList("feature", session=session)
+        >>> ch.resetCacheList("subset", session=session)
+        >>> ch.resetCacheList("downsample", session=session)
+        >>> ch.resetCacheList("label", session=session)
 
         >>> x1 = np.array([2,3,1,0])
 
-        >>> hashResult = ch.hashArray("x1", x1, "feature")
-        >>> hashResult = ch.hashArray("x1", x1, "subset")
-        >>> hashResult = ch.hashArray("x1", x1, "downsample")
-        >>> hashResult = ch.hashArray("x1", x1, "label")
+        >>> hashResult = ch.hashArray("x1", x1, "feature", session=session)
+        >>> hashResult = ch.hashArray("x1", x1, "subset", session=session)
+        >>> hashResult = ch.hashArray("x1", x1, "downsample", session=session)
+        >>> hashResult = ch.hashArray("x1", x1, "label", session=session)
         
-        >>> ch.pickle_data("test_session", {"front_end_payload":"payload_value"})
+        >>> ch.pickle_data("test_session", {"front_end_payload":"payload_value"}, session=session)
 
         '''
+        session = self.__set_session(session)
+
         session_path = os.path.join(CODEX_ROOT, 'sessions', session_name)
         if not os.path.exists(os.path.join(session_path)):
             os.makedirs(session_path)
 
         ## Save classifier models
         pickle_path = os.path.join(session_path, 'classifier_models')
-        pickle.dump(self.classifierList, open(pickle_path, 'wb'))
+        pickle.dump(self.sessions[session]["classifierList"], open(pickle_path, 'wb'))
 
         # Save regression models
         pickle_path = os.path.join(session_path, 'regressor_models')
-        pickle.dump(self.regressorList, open(pickle_path, 'wb'))
+        pickle.dump(self.sessions[session]["regressorList"], open(pickle_path, 'wb'))
 
         # Save labels
         pickle_path = os.path.join(session_path, "label_data")
-        pickle.dump(self.labelList, open(pickle_path, 'wb'))
+        pickle.dump(self.sessions[session]["labelList"], open(pickle_path, 'wb'))
 
         # Save features
         pickle_path = os.path.join(session_path, "feature_data")
-        pickle.dump(self.featureList, open(pickle_path, 'wb'))
+        pickle.dump(self.sessions[session]["featureList"], open(pickle_path, 'wb'))
 
         # Save subsets
         pickle_path = os.path.join(session_path, "subset_data")
-        pickle.dump(self.subsetList, open(pickle_path, 'wb'))
+        pickle.dump(self.sessions[session]["subsetList"], open(pickle_path, 'wb'))
 
         # Save downsampled features
         pickle_path = os.path.join(session_path, "downsampled_data")
-        pickle.dump(self.downsampleList, open(pickle_path, 'wb'))
+        pickle.dump(self.sessions[session]["downsampleList"], open(pickle_path, 'wb'))
 
         # Save front end state
         pickle_path = os.path.join(session_path, "client_state")
         pickle.dump(front_end_state, open(pickle_path, 'wb'))
 
-    def unpickle_data(self, session_name):
+    def unpickle_data(self, session_name, session=None):
         '''
         Inputs:
 
@@ -829,17 +871,19 @@ class CodexHash:
 
         Examples:
 
+        >>> session = 'foo'
         >>> ch = CodexHash()
-        >>> ch.unpickle_data("test_session")
+        >>> ch.unpickle_data("test_session", session=session)
         {'features': ['x1'], 'labels': ['x1'], 'subsets': ['x1'], 'downsample': ['x1'], 'state': {'front_end_payload': 'payload_value'}}
         
-        >>> ch.printCacheCount()
+        >>> ch.printCacheCount(session=session)
         Feature Cache Size           : 1
         Subset Cache Size            : 1
         Downsample Cache Size        : 1
         Number of classifier models  : 0
         Number of regressor models   : 1
         '''
+        session = self.__set_session(session)
 
         session_path = os.path.join(CODEX_ROOT, 'sessions', session_name)
         if not os.path.exists(os.path.join(session_path)):
@@ -847,46 +891,46 @@ class CodexHash:
 
         ## Load classifier models
         pickle_path = os.path.join(session_path, 'classifier_models')
-        self.classifierList = pickle.load(open(pickle_path, "rb"))
+        self.sessions[session]["classifierList"] = pickle.load(open(pickle_path, "rb"))
 
         # Load regression models
         pickle_path = os.path.join(session_path, 'regressor_models')
-        self.regressorList = pickle.load(open(pickle_path, "rb"))
+        self.sessions[session]["regressorList"] = pickle.load(open(pickle_path, "rb"))
 
         # Load labels
         pickle_path = os.path.join(session_path, "label_data")
-        self.labelList = pickle.load(open(pickle_path, "rb"))
+        self.sessions[session]["labelList"] = pickle.load(open(pickle_path, "rb"))
 
         labels = []
-        for label in self.labelList:
-            x = self.findHashArray('hash', label["hash"], "label")
+        for label in self.sessions[session]["labelList"]:
+            x = self.findHashArray('hash', label["hash"], "label", session=session)
             labels.append(x['name'])
 
         # Load features
         pickle_path = os.path.join(session_path, "feature_data")
-        self.featureList = pickle.load(open(pickle_path, "rb"))
+        self.sessions[session]["featureList"] = pickle.load(open(pickle_path, "rb"))
 
         features = []
-        for feature in self.featureList:
-            x = self.findHashArray('hash', feature['hash'], 'feature')
+        for feature in self.sessions[session]["featureList"]:
+            x = self.findHashArray('hash', feature['hash'], 'feature', session=session)
             features.append(x['name'])
 
         # Load subsets
         pickle_path = os.path.join(session_path, "subset_data")
-        self.subsetList = pickle.load(open(pickle_path, "rb"))
+        self.sessions[session]["subsetList"] = pickle.load(open(pickle_path, "rb"))
 
         subsets = []
-        for subset in self.subsetList:
-            x = self.findHashArray('hash', subset['hash'], "subset")
+        for subset in self.sessions[session]["subsetList"]:
+            x = self.findHashArray('hash', subset['hash'], "subset", session=session)
             subsets.append(x['name'])
 
         # Load downsampled features
         pickle_path = os.path.join(session_path, "downsampled_data")
-        self.downsampleList = pickle.load(open(pickle_path, "rb"))
+        self.sessions[session]["downsampleList"] = pickle.load(open(pickle_path, "rb"))
 
         downsamples = []
-        for downsample in self.downsampleList:
-            x = self.findHashArray('hash', downsample['hash'], "downsample")
+        for downsample in self.sessions[session]["downsampleList"]:
+            x = self.findHashArray('hash', downsample['hash'], "downsample", session=session)
             downsamples.append(x['name'])
 
         # Load client state
@@ -896,7 +940,7 @@ class CodexHash:
         return {'features':features, 'labels':labels, 'subsets':subsets, 'downsample':downsamples, 'state':state}
 
 
-    def saveModel(self, modelName, inputModel, modelType):
+    def saveModel(self, modelName, inputModel, modelType, session=None):
         '''
         Inputs:
             modelName (string)    - Name of the model.  Used in visalization for easy human model recognition
@@ -915,6 +959,7 @@ class CodexHash:
 
         Examples:
 
+        >>> session = 'foo'
         >>> ch = CodexHash()
         >>> from sklearn import datasets, linear_model
         >>> diabetes = datasets.load_diabetes()
@@ -923,11 +968,12 @@ class CodexHash:
         LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
                  normalize=False)
 
-        >>> model = ch.saveModel("test", regr, "classifier")
+        >>> model = ch.saveModel("test", regr, "classifier", session=session)
         >>> model is not None
         True
 
         '''
+        session = self.__set_session(session)
 
         pickled_model = pickle.dumps(inputModel)
         hashValue = hashlib.sha1(pickled_model).hexdigest()
@@ -947,11 +993,11 @@ class CodexHash:
             "type": modelType}
 
         if(modelType == "regressor"):
-            if not any(d['hash'] == newHash["hash"] for d in self.regressorList):
-                self.regressorList.append(newHash)
+            if not any(d['hash'] == newHash["hash"] for d in self.sessions[session]["regressorList"]):
+                self.sessions[session]["regressorList"].append(newHash)
         elif(modelType == "classifier"):
-            if not any(d['hash'] == newHash["hash"] for d in self.classifierList):
-                self.classifierList.append(newHash)
+            if not any(d['hash'] == newHash["hash"] for d in self.sessions[session]["classifierList"]):
+                self.sessions[session]["classifierList"].append(newHash)
         else:
             codex_system.codex_log(
                 "ERROR: Model hash type not recognized! Not logged for future use.")
@@ -959,9 +1005,15 @@ class CodexHash:
 
         return newHash
 
+class WrappedCache:
+    sessionKey = None
+    cache = None
+    def __init__(self, cache, sessionKey):
+        self.sessionKey = sessionKey
+        self.cache = cache
 
+    def __getattr__(self, name):
+        return functools.partial(getattr(self.cache, name), session=self.sessionKey)
 
 if __name__ == "__main__":
-
-
     codex_doctest.run_codex_doctest()
