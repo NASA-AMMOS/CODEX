@@ -345,7 +345,7 @@ class CodexHash:
                 samples (int)     - number of samples in the data set
                 memory (int)      - size, in bytes, of memory being cached
 
-        Notes: 
+        Notes:
 
         Examples:
         # Standard completion check
@@ -580,7 +580,7 @@ class CodexHash:
         session = self.__set_session(session)
 
         if(hashType == "feature"):
-            
+
             for point in self.sessions[session]["featureList"]:
                 if(point[field] == name):
                     return point
@@ -793,7 +793,7 @@ class CodexHash:
 
         Outputs:
 
-        Notes: 
+        Notes:
 
         Examples:
 
@@ -821,7 +821,7 @@ class CodexHash:
         >>> hashResult = ch.hashArray("x1", x1, "subset", session=session)
         >>> hashResult = ch.hashArray("x1", x1, "downsample", session=session)
         >>> hashResult = ch.hashArray("x1", x1, "label", session=session)
-        
+
         >>> ch.pickle_data("test_session", {"front_end_payload":"payload_value"}, session=session)
 
         '''
@@ -875,7 +875,7 @@ class CodexHash:
         >>> ch = CodexHash()
         >>> ch.unpickle_data("test_session", session=session)
         {'features': ['x1'], 'labels': ['x1'], 'subsets': ['x1'], 'downsample': ['x1'], 'state': {'front_end_payload': 'payload_value'}}
-        
+
         >>> ch.printCacheCount(session=session)
         Feature Cache Size           : 1
         Subset Cache Size            : 1
@@ -955,7 +955,7 @@ class CodexHash:
                 samples (int)     - number of samples in the data set
                 memory (int)      - size, in bytes, of memory being cached
 
-        Notes: 
+        Notes:
 
         Examples:
 
@@ -1005,10 +1005,32 @@ class CodexHash:
 
         return newHash
 
+def assert_session(sessionKey):
+    '''
+    Inputs:
+        sessionKey (string)  - session key for the data set you wish to access
+
+    Outputs:
+        None
+
+    Notes:
+        Ensures a session is active
+
+    >>> assert_session('SomeSessionKey')
+    >>> assert_session(None)
+    Traceback (most recent call last):
+        ...
+    NoSessionSpecifiedError
+    '''
+
+    if sessionKey is None:
+        raise NoSessionSpecifiedError()
+
 class WrappedCache:
     sessionKey = None
     cache = None
     def __init__(self, cache, sessionKey):
+        assert_session(sessionKey)
         self.sessionKey = sessionKey
         self.cache = cache
 
