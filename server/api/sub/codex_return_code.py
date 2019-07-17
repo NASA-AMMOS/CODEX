@@ -12,6 +12,7 @@ import h5py
 import hashlib
 import sys
 import json
+from types import ModuleType
 import inspect
 import numpy as np
 import os.path
@@ -85,6 +86,8 @@ def logReturnCode(frame):
             arg_string = arg_string.replace("\n","")
             arg_string = arg_string.replace(" ",",")
         elif isinstance(value, codex_hash.WrappedCache):
+            arg_string = ""
+        elif isinstance(value, ModuleType):
             arg_string = ""
         else:
             arg_string = ""

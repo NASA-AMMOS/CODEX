@@ -17,8 +17,6 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
 import codex_yaml
-import codex_return_code
-import codex_doctest
 
 import inspect
 
@@ -38,6 +36,7 @@ def get_featureList(featureList):
         Success
 
     '''
+    import codex_return_code
 
     # TODO - do I need featureString?
     #featureString = "featureList =['"
@@ -213,5 +212,6 @@ def codex_server_memory_check(verbose=False, session=None):
 
 if __name__ == "__main__":
 
+    import codex_doctest
     codex_doctest.run_codex_doctest()
 
