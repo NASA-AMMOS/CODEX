@@ -20,6 +20,8 @@ dependencies:
   - pandas
   - pillow
   - psutil
+  - msgpack-python
+  - pyzmq
   - pip
   - pip:
     - pysptools
