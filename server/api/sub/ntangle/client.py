@@ -81,6 +81,9 @@ class Client:
     def __ping(self):
         return self.__call('#ping')
 
+    def _shutdown(self):
+        return self.__call('#shutdown')
+
     # make this more easily debuggable
     def __repr__(self):
         return '<ntangle client object @ {}>'.format(self.remote)

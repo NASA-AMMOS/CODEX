@@ -97,6 +97,10 @@ class Server:
         self.__socket = self.__context.socket(zmq.REP)
         self.__log('created socket')
 
+    def __del__(self):
+        # clean up the socket so we don't hang the program
+        self.__socket.close()
+
     def __log(self, text, level="info"):
         if not self.__logging:
             return
@@ -132,8 +136,10 @@ class Server:
         self.__socket.bind(bind_addr)
         self.__log('serving on {}'.format(bind_addr))
 
+        shouldStop = False
+
         # listen for requests
-        while True:
+        while not shouldStop:
             # wait for message
             message = self.__socket.recv_pyobj()
 
@@ -145,6 +151,10 @@ class Server:
                 if message['func'] == '#listing':
                     self.__log('serving listing')
                     reply['return'] = self.get_listing()
+                elif message['func'] == '#shutdown':
+                    self.__log('shutting down the server', level='warn')
+                    shouldStop = True
+                    reply['return'] = True
                 else:
                     self.__log('serving {}({}, {})'.format(
                         message['func'],
