@@ -116,4 +116,11 @@ export default class SelectionsReducer {
             )
         };
     }
+
+    static setSavedSelections(state, action) {
+        return {
+            ...state,
+            savedSelections: action.newSavedSelections
+        };
+    }
 }
