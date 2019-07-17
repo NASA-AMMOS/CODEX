@@ -21,10 +21,11 @@ sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 from os import listdir
 from os.path import isfile, join, isdir
 
-import codex_hash
 import codex_doctest
+from codex_hash import get_cache
 
 def save_session(msg, result):
+    codex_hash = get_cache(msg['sessionkey'])
 
 
     session_name = msg['session_name']
@@ -39,6 +40,7 @@ def save_session(msg, result):
 
 
 def load_session(msg, result):
+    codex_hash = get_cache(msg['sessionkey'])
 
     session_name = msg['session_name']
     session_path = os.path.join(CODEX_ROOT, 'sessions', session_name)

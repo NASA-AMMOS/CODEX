@@ -33,7 +33,7 @@ import codex_classification_api
 import codex_system
 import codex_doctest
 import codex_return_code
-import codex_hash
+from codex_hash import get_cache
 
 def algorithm_call(msg, result):
     '''
@@ -44,6 +44,8 @@ def algorithm_call(msg, result):
     Examples:
 
     '''
+    codex_hash = get_cache(msg['sessionkey'])
+
 
     parms = msg['parameters']
     downsampled = msg["downsampled"]
@@ -75,38 +77,38 @@ def algorithm_call(msg, result):
 
     if (algorithmType == "binning"):
         result = codex_1d_binning.ml_binning(inputHash, hashList,
-                                             subsetHashName, algorithmName,
-                                             downsampled, parms, result)
+                subsetHashName, algorithmName,
+                downsampled, parms, result, session=codex_hash)
 
     elif (algorithmType == "clustering"):
         result = codex_clustering_api.ml_cluster(inputHash, hashList,
-                                                 subsetHashName, algorithmName,
-                                                 downsampled, parms, result)
+                subsetHashName, algorithmName,
+                downsampled, parms, result, session=codex_hash)
 
     elif (algorithmType == "data_quality_scan"):
         result = codex_data_quality_scan_api.ml_quality_scan(inputHash, hashList, 
-        										subsetHashName, algorithmName, downsampled,
-            									parms, result)
+                subsetHashName, algorithmName, downsampled,
+                parms, result, session=codex_hash)
 
     elif (algorithmType == "dimensionality_reduction"):
         result = codex_dimmension_reduction_api.ml_dimensionality_reduction(inputHash, hashList, 
-        										subsetHashName, algorithmName, downsampled,
-            									parms, result)
+                subsetHashName, algorithmName, downsampled,
+                parms, result, session=codex_hash)
 
     elif (algorithmType == "endmember"):
         result = codex_endmembers.ml_endmember(inputHash, hashList,
-                                               subsetHashName, algorithmName,
-                                               downsampled, parms, result)
+                subsetHashName, algorithmName,
+                downsampled, parms, result, session=codex_hash)
 
     elif (algorithmType == "normalize"):
         result = codex_normalize.ml_normalize(inputHash, hashList,
-                                              subsetHashName, algorithmName,
-                                              downsampled, parms, result)
+                subsetHashName, algorithmName,
+                downsampled, parms, result, session=codex_hash)
 
     elif (algorithmType == "peak_detect"):
         result = codex_peak_detection_api.ml_peak_detect(
             inputHash, hashList, subsetHashName, algorithmName, downsampled,
-            parms, result)
+            parms, result, session=codex_hash)
 
     elif (algorithmType == "regression"):
 
@@ -118,8 +120,8 @@ def algorithm_call(msg, result):
         scoring = msg["scoring"]
 
         result = codex_regression_api.ml_regression(
-            inputHash, hashList, subsetHashName, labelHash, algorithmName,
-            downsampled, parms, scoring, search_type, cross_val, result)
+                inputHash, hashList, subsetHashName, labelHash, algorithmName,
+                downsampled, parms, scoring, search_type, cross_val, result, session=codex_hash)
 
     elif (algorithmType == "classification"):
 
@@ -131,17 +133,17 @@ def algorithm_call(msg, result):
         scoring = msg["scoring"]
 
         result = codex_classification_api.ml_classification(
-            inputHash, hashList, subsetHashName, labelHash, algorithmName,
-            downsampled, parms, scoring, search_type, cross_val, result)
+                inputHash, hashList, subsetHashName, labelHash, algorithmName,
+                downsampled, parms, scoring, search_type, cross_val, result, session=codex_hash)
 
     elif (algorithmType == "segment"):
         result = codex_segmentation_api.ml_segmentation(
             inputHash, hashList, subsetHashName, algorithmName, downsampled,
-            parms, result)
+            parms, result, session=codex_hash)
 
     elif (algorithmType == "template_scan"):
         result = codex_template_scan_api.ml_template_scan(
-            inputHash, hashList, subsetHashName, None, algorithmName, downsampled, parms, result)
+                inputHash, hashList, subsetHashName, None, algorithmName, downsampled, parms, result, session=codex_hash)
 
     else:
         result['message'] = "Cannot parse algorithmType"

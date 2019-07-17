@@ -36,7 +36,7 @@ def download_code(msg, result):
 
 
 if __name__ == "__main__":
-
+    import codex_doctest
     codex_doctest.run_codex_doctest()
 
 

@@ -20,9 +20,10 @@ sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 import base64
 import numpy as np
 import scipy
+import scipy.signal
 
-import codex_hash
 import codex_doctest
+from codex_hash import get_cache
 import codex_system
 
 def get_data_metrics(msg, result):
@@ -35,11 +36,16 @@ def get_data_metrics(msg, result):
 
     Examples:
 
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
-    >>> message = {'routine': 'arrange', 'hashType': 'feature', 'activity': 'metrics', 'name': ['TiO2'], 'cid': '8vrjn'}
+    >>> message = {'routine': 'arrange', 'hashType': 'feature', 'activity': 'metrics', 'name': ['TiO2'], 'cid': '8vrjn', 'sessionkey': DOCTEST_SESSION}
     >>> result = get_data_metrics(message, {})
+    getting data hash : ...
     '''
+    codex_hash = get_cache(msg['sessionkey'])
+
 
     data = codex_hash.findHashArray("name",  msg['name'][0], "feature")['data']
     codex_system.codex_log("getting data hash : "+ str(data))
@@ -81,13 +87,17 @@ def add_data(msg, result):
     Notes:
         Data must be a 1D array!
     Examples:
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
-    >>> message = {'routine': 'arrange', 'hashType': 'feature', 'activity': 'add', 'name': 'TiO2', 'data': [1, 2, 3, 4]}
+    >>> message = {'routine': 'arrange', 'hashType': 'feature', 'activity': 'add', 'name': 'TiO2', 'data': [1, 2, 3, 4], 'sessionkey': DOCTEST_SESSION}
     >>> results = add_data
 
 
     '''
+    codex_hash = get_cache(msg['sessionkey'])
+
     hashType = msg['hashType']
     data = msg["data"]
 
@@ -116,7 +126,11 @@ def add_data(msg, result):
         assert np_data.ndim == 1;
 
         virtual = msg['virtual'] if 'virtual' in msg else False
+        print('adding feature... feature len {}'.format(len(codex_hash.featureList)));
         hashResult = codex_hash.hashArray(msg["name"], np_data, "feature", virtual=virtual)
+        print('added feature.    feature len {}'.format(len(codex_hash.featureList)));
+
+
     else:
         result["message"] = 'failure'
 
@@ -134,11 +148,15 @@ def get_data(msg, result):
 
     Examples:
 
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
-    >>> message = {'routine': 'arrange', 'hashType': 'feature', 'activity': 'get', 'name': ['TiO2'], 'cid': '8vrjn'}
+    >>> message = {'routine': 'arrange', 'hashType': 'feature', 'activity': 'get', 'name': ['TiO2'], 'cid': '8vrjn', 'sessionkey': DOCTEST_SESSION}
     >>> result = get_data(message, {})
     '''
+    codex_hash = get_cache(msg['sessionkey'])
+
 
     hashType = msg['hashType']
     names = msg["name"]
@@ -182,6 +200,8 @@ def delete_data(msg, result):
     Examples:
 
     '''
+    codex_hash = get_cache(msg['sessionkey'])
+
     hashType = msg['hashType']
     name = msg["name"]
 
@@ -216,6 +236,8 @@ def update_data(msg, result):
     Examples:
 
     '''
+    codex_hash = get_cache(msg['sessionkey'])
+
     hashType = msg['hashType']
     field = msg["field"]
     old = msg["old"]
