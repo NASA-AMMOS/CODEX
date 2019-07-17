@@ -20,8 +20,6 @@ from random import shuffle
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
-from codex_hash import get_cache
-import codex_doctest
 
 def label_swap(labels, dataHash, verbose=False, session=None):
     '''
@@ -32,6 +30,7 @@ def label_swap(labels, dataHash, verbose=False, session=None):
     Examples:
 
     '''
+    from codex_hash import get_cache
     codex_hash = get_cache(session)
 
     test_uniq_labels = np.unique(labels)
@@ -146,5 +145,5 @@ def label_swap(labels, dataHash, verbose=False, session=None):
 
 if __name__ == "__main__":
 
-
-    codex_doctest.run_codex_doctest()
+    from codex_doctest import run_codex_doctest
+    run_codex_doctest()

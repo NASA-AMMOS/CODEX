@@ -38,7 +38,6 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
 import codex_system
-import codex_doctest
 
 DEFAULT_CODEX_HASH_BIND    = 'tcp://*:64209'
 DEFAULT_CODEX_HASH_CONNECT = 'tcp://localhost:64209'
@@ -554,7 +553,6 @@ class CodexHash:
         >>> session = 'foo'
         >>> ch = CodexHash()
         >>> ch.resetCacheList("feature", session=session)
-        Creating a new session for key foo
         >>> ch.resetCacheList("subset", session=session)
         >>> ch.resetCacheList("downsample", session=session)
         >>> ch.resetCacheList("label", session=session)
@@ -1093,6 +1091,7 @@ def get_cache(session):
     NotImplementedError: Connecting to remotes is not yet implemented!
     >>> cache = get_cache(DOCTEST_SESSION)
     >>> get_cache(cache)
+    <__main__.WrappedCache object at 0x...>
     '''
     if isinstance(session, WrappedCache):
         if session.sessionKey != DOCTEST_SESSION:
@@ -1103,4 +1102,5 @@ def get_cache(session):
     return WrappedCache(session)
 
 if __name__ == "__main__":
+    import codex_doctest
     codex_doctest.run_codex_doctest()
