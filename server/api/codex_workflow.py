@@ -29,7 +29,7 @@ import codex_return_code
 import codex_math
 import codex_time_log
 import codex_doctest
-import codex_hash
+from codex_hash import get_cache
 import codex_system
 import codex_labels
 from sklearn.tree import DecisionTreeClassifier
@@ -136,7 +136,9 @@ def explain_this(inputHash, featureNames, dataSelections, result):
 
     Examples:
 
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
     
     '''
@@ -346,7 +348,9 @@ def general_classifier(inputHash, featureList, dataSelections, result):
 
     return result
 
-def find_more_like_this(inputHash, featureList, dataSelections, similarityThreshold, result):
+def find_more_like_this(inputHash, featureList, dataSelections, similarityThreshold, result, session=None):
+    codex_hash = get_cache(session)
+
     startTime = time.time()
     result = {"WARNING":None}
 

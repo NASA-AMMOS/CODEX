@@ -24,7 +24,7 @@ from scipy import stats
 # CODEX Support
 import codex_doctest
 import codex_time_log
-import codex_hash
+from codex_hash import get_cache
 import codex_read_data_api
 import codex_return_code
 import inspect
@@ -39,7 +39,8 @@ def ml_binning(
         algorithmName,
         downsampled,
         parms,
-        result):
+        result,
+        session=None):
     '''
     Inputs:
 
@@ -47,12 +48,15 @@ def ml_binning(
 
     Examples:
     >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
 
-    >>> result = ml_binning(testData['inputHash'], testData['hashList'], None, "stats", False, {}, {})
+    >>> result = ml_binning(testData['inputHash'], testData['hashList'], None, "stats", False, {}, {}, session=codex_hash)
 
-    >>> result = ml_binning(testData['inputHash'], testData['hashList'], None, "stat", False, {}, {})
+    >>> result = ml_binning(testData['inputHash'], testData['hashList'], None, "stat", False, {}, {}, session=codex_hash)
 
     '''
+    codex_hash = get_cache(session)
 
     data = codex_hash.mergeHashResults(hashList)
     inputHash = codex_hash.hashArray('Merged', data, "feature")
@@ -75,7 +79,7 @@ def ml_binning(
     if(algorithmName == '1d'):
 
         try:
-            result = codex_binned_stat(inputHash, subsetHash)
+            result = codex_binned_stat(inputHash, subsetHash, session=session)
         except BaseException:
             codex_system.codex_log("Failed to run 1-d binned statistics")
             result['message'] = "Failed to run 1-d binned statistics"
@@ -123,7 +127,8 @@ def codex_binned_stat(
         y=None,
         limits=None,
         func=None,
-        ignore_outliers=False):
+        ignore_outliers=False,
+        session=None):
     '''
     Detail:     Binning statistics including histogram (counting) and functions of data bins.
                     Major customization is bins are specified by CENTER, not by edges. #bins = specified bin values.
@@ -146,14 +151,18 @@ def codex_binned_stat(
     Examples:
 
         # First try without valid inputHash
-        >>> codex_binned_stat(None, bins = range(10))
+
+        >>> from codex_hash import DOCTEST_SESSION
+        >>> codex_hash = get_cache(DOCTEST_SESSION)
+
+        >>> codex_binned_stat(None, bins = range(10), session=codex_hash)
         Hash not found. Returning!
 
         >>> featureList = ['L2/RetrievalResults/xco2']
-        >>> hashList = codex_read_data_api.codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature")
+        >>> hashList = codex_read_data_api.codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature", session=codex_hash)
 
         >>> inputHash = hashList[0][0]
-        >>> results = codex_binned_stat(inputHash)
+        >>> results = codex_binned_stat(inputHash, session=codex_hash)
 
         #print(results)
 
@@ -161,12 +170,12 @@ def codex_binned_stat(
         >>> inputArray = range(0,10)
         >>> inputHashDictionary = codex_hash.hashArray("example 1", inputArray, "feature")
         >>> inputHash = inputHashDictionary['hash']
-        >>> results = codex_binned_stat(inputHash, bins = range(10))
+        >>> results = codex_binned_stat(inputHash, bins = range(10), session=codex_hash)
 
         #print(results)
 
         #Note that providing bins = 10 causes a slight shift in the array, as the bin centers treat max/min(limits) as edges of right(left) most bins
-        >>> results = codex_binned_stat(inputHash, bins = 10)
+        >>> results = codex_binned_stat(inputHash, bins = 10, session=codex_hash)
 
         #print(results)
 
@@ -174,36 +183,36 @@ def codex_binned_stat(
         >>> inputArray = range(10)
         >>> inputHashDictionary = codex_hash.hashArray("example 1", inputArray, "feature")
         >>> inputHash = inputHashDictionary['hash']
-        >>> results = codex_binned_stat(inputHash, bins = 4, y = range(10,20))
+        >>> results = codex_binned_stat(inputHash, bins = 4, y = range(10,20), session=codex_hash)
 
         #print(results)
 
-        >>> results = codex_binned_stat(inputHash, bins = 4, y = range(10,20), func = 'mean')
+        >>> results = codex_binned_stat(inputHash, bins = 4, y = range(10,20), func = 'mean', session=codex_hash)
 
         #print(results)
 
         #Instead specify "sum" to treat the y's as weights to a histogram
-        >>> results = codex_binned_stat(inputHash, bins = 4, y = range(10,20), func = 'sum')
+        >>> results = codex_binned_stat(inputHash, bins = 4, y = range(10,20), func = 'sum', session=codex_hash)
 
         #print(results)
 
         #Or "median" by text ref, which uses an unknown median function that is neither scipy nor Numpy
-        >>> results = codex_binned_stat(inputHash, bins = 4, y = range(10,20), func = 'median')
+        >>> results = codex_binned_stat(inputHash, bins = 4, y = range(10,20), func = 'median', session=codex_hash)
 
         #print(results)
 
         #or by function ref, which produces different results because now you know which median function is being used
-        >>> results = codex_binned_stat(inputHash, bins = 4, y = range(10,20), func = N.median)
+        >>> results = codex_binned_stat(inputHash, bins = 4, y = range(10,20), func = N.median, session=codex_hash)
 
         #print(results)
 
         #Limits narrow the range, and since we're performing a plain histogram, the outliers are stacked on the wings
-        >>> results = codex_binned_stat(inputHash, bins = 4, limits = [4,6])
+        >>> results = codex_binned_stat(inputHash, bins = 4, limits = [4,6], session=codex_hash)
 
         #print(results)
 
         #Unless we tell it not to
-        >>> results = codex_binned_stat(inputHash, bins = 4, limits = [4,6], ignore_outliers = True)
+        >>> results = codex_binned_stat(inputHash, bins = 4, limits = [4,6], ignore_outliers = True, session=codex_hash)
 
         #print(results)
 
@@ -211,25 +220,27 @@ def codex_binned_stat(
         >>> inputArray = range(10,20)
         >>> inputHashDictionary = codex_hash.hashArray("example 1", inputArray, "feature")
         >>> inputHash = inputHashDictionary['hash']
-        >>> results = codex_binned_stat(inputHash, bins = range(0,30,3))
+        >>> results = codex_binned_stat(inputHash, bins = range(0,30,3), session=codex_hash)
 
         #print(results)
 
         #But in function case, can't know what function value exists in empty bins
-        >>> results = codex_binned_stat(inputHash, y = range(10,20), bins = range(0,30,3), func = 'mean')
+        >>> results = codex_binned_stat(inputHash, y = range(10,20), bins = range(0,30,3), func = 'mean', session=codex_hash)
 
         #print(results)
 
         #Limits ignored if bins specified
-        >>> results = codex_binned_stat(inputHash, y = range(10,20), bins = range(0,30,3), limits = [0,15], func = 'mean')
+        >>> results = codex_binned_stat(inputHash, y = range(10,20), bins = range(0,30,3), limits = [0,15], func = 'mean', session=codex_hash)
 
         #print(results)
 
-        >>> results = codex_binned_stat(inputHash, bins = [0,1,2,3,4,5])
+        >>> results = codex_binned_stat(inputHash, bins = [0,1,2,3,4,5], session=codex_hash)
 
         #print(results)
 
     '''
+    codex_hash = get_cache(session)
+
     startTime = time.time()
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
@@ -327,4 +338,3 @@ if __name__ == "__main__":
 
 
 
-    

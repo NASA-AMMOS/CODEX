@@ -31,7 +31,7 @@ import inspect
 import codex_doctest
 import codex_math
 import codex_time_log
-import codex_hash
+from codex_hash import get_cache
 import codex_read_data_api
 import codex_return_code
 import codex_system
@@ -43,20 +43,25 @@ def ml_quality_scan(
         algorithmName,
         downsampled,
         parms,
-        result):
+        result,
+        session=None):
     '''
     Inputs:
 
     Outputs:
 
     Examples:
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
-    >>> result = ml_quality_scan(testData['inputHash'], testData['hashList'], None, "oddities", False, {'sigma': 3, 'inside': True}, {})
+    >>> result = ml_quality_scan(testData['inputHash'], testData['hashList'], None, "oddities", False, {'sigma': 3, 'inside': True}, {}, session=codex_hash)
 
-    >>> result = ml_quality_scan(testData['inputHash'], testData['hashList'], None, "sigma_data", False, {'sigma': 3, 'inside': True}, {})
+    >>> result = ml_quality_scan(testData['inputHash'], testData['hashList'], None, "sigma_data", False, {'sigma': 3, 'inside': True}, {}, session=codex_hash)
 
     '''
+
+    codex_hash = get_cache(session)
 
     if(subsetHashName is not None):
         subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
@@ -70,7 +75,7 @@ def ml_quality_scan(
     if(algorithmName == 'oddities'):
 
         try:
-            result = codex_count_oddities(inputHash, subsetHash)
+            result = codex_count_oddities(inputHash, subsetHash, session=codex_hash)
         except BaseException:
             codex_system.codex_log("Failed to run count_oddities")
             result['message'] = "Failed to run count_oddities"
@@ -96,7 +101,7 @@ def ml_quality_scan(
             return None
 
         try:
-            result = codex_get_sigma_data(inputHash, subsetHash, sigma, inside)
+            result = codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=codex_hash)
         except BaseException:
             codex_system.codex_log("Failed to run codex_get_sigma_data")
             result['message'] = "Failed to run codex_get_sigma_data"
@@ -109,7 +114,7 @@ def ml_quality_scan(
     return result
 
 
-def codex_count_oddities(inputHash, subsetHash):
+def codex_count_oddities(inputHash, subsetHash, session=None):
     '''
     Inuputs:
         inputHash (string)   - hash value corresponding to the data to cluster
@@ -130,14 +135,18 @@ def codex_count_oddities(inputHash, subsetHash):
     Examples:
 
     # integer example
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
     #>>> dictionary = codex_count_oddities(testData['inputHash'], False)
 
-    >>> dictionary = codex_count_oddities(None,False)
+    >>> dictionary = codex_count_oddities(None,False, session=codex_hash)
     Error: codex_count_oddities: Hash not found
 
     '''
+
+    codex_hash = get_cache(session)
     codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
 
@@ -212,7 +221,7 @@ def codex_count_oddities(inputHash, subsetHash):
     return dictionary
 
 
-def codex_get_sigma_data(inputHash, subsetHash, sigma, inside):
+def codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=None):
     '''
     Inuputs:
         inputHash (string)   - hash value corresponding to the data to cluster
@@ -236,9 +245,13 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside):
     Examples:
 
     # collect data inside sigma range
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
     '''
+    codex_hash = get_cache(session)
+
     codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
 
@@ -304,7 +317,7 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside):
     return dictionary
 
 
-def codex_column_correlation(inputHash, subsetHash):
+def codex_column_correlation(inputHash, subsetHash, session=None):
     '''
     Inuputs:
         inputHash (string)            - hash value corresponding to the data to cluster
@@ -317,11 +330,15 @@ def codex_column_correlation(inputHash, subsetHash):
 
     Examples:
 
-        >>> testData = codex_doctest.doctest_get_data()
+        >>> from codex_hash import DOCTEST_SESSION
+        >>> codex_hash = get_cache(DOCTEST_SESSION)
+        >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
-        >>> results = codex_column_correlation(testData['inputHash'], False)
+        >>> results = codex_column_correlation(testData['inputHash'], False, session=codex_hash)
 
         '''
+
+    codex_hash = get_cache(session)
     codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
 
@@ -372,7 +389,8 @@ def codex_column_threshold(
         inputHash,
         subsetHash,
         threshold_min,
-        threshold_max):
+        threshold_max,
+        session=None):
     '''
     Inuputs:
         inputHash (string)            - hash value corresponding to the data to cluster
@@ -389,13 +407,17 @@ def codex_column_threshold(
 
     Examples:
 
-        >>> testData = codex_doctest.doctest_get_data()
+        >>> from codex_hash import DOCTEST_SESSION
+        >>> codex_hash = get_cache(DOCTEST_SESSION)
+        >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
-        >>> dictionary = codex_column_threshold(testData['inputHash'], False, 0, 0.000394)
+        >>> dictionary = codex_column_threshold(testData['inputHash'], False, 0, 0.000394, session=codex_hash)
         >>> print(dictionary["threshold_max"])
         0.000394
 
     '''
+    codex_hash = get_cache(session)
+
     codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     returnList = []

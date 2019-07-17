@@ -30,7 +30,7 @@ import codex_system
 import codex_math
 import codex_downsample
 import codex_doctest
-import codex_hash
+from codex_hash import get_cache
 import codex_read_data_api
 import codex_return_code
 import codex_time_log
@@ -43,7 +43,8 @@ def ml_dimensionality_reduction(
         algorithmName,
         downsampled,
         parms,
-        result):
+        result,
+        session=None):
     '''
     Inputs:
 
@@ -52,6 +53,8 @@ def ml_dimensionality_reduction(
     Examples:
 
     '''
+
+    codex_hash = get_cache(session)
 
     if(subsetHashName is not None):
         subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
@@ -63,7 +66,7 @@ def ml_dimensionality_reduction(
         subsetHash = False
 
     try:
-        result = run_codex_dim_reduction(inputHash, subsetHash, parms, downsampled, False, algorithmName)
+        result = run_codex_dim_reduction(inputHash, subsetHash, parms, downsampled, False, algorithmName, session=codex_hash)
     except BaseException:
         codex_system.codex_log("Failed to run dimensionality reduction analysis")
         result['message'] = "Failed to run dimensionality reduction analysis"
@@ -79,7 +82,8 @@ def run_codex_dim_reduction(
         parms,
         downsampled,
         showPlot,
-        algorithm):
+        algorithm,
+        session=None):
     '''
     Inputs:
         inputHash (string)  - hash value corresponding to the data to cluster
@@ -91,14 +95,19 @@ def run_codex_dim_reduction(
 
     Examples:
 
-        >>> testData = codex_doctest.doctest_get_data()
+        >>> from codex_hash import DOCTEST_SESSION
+        >>> codex_hash = get_cache(DOCTEST_SESSION)
+        >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
-        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, False, False, "PCA")
+        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, False, False, "PCA", session=codex_hash)
 
-        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, 500, False, "ICA")
+        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, 500, False, "ICA", session=codex_hash)
         Downsampling to 500 samples.
 
     '''
+
+    codex_hash = get_cache(session)
+    
     codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
@@ -121,7 +130,7 @@ def run_codex_dim_reduction(
     full_samples = len(data)
     if(downsampled is not False):
         codex_system.codex_log("Downsampling to {ds} samples.".format(ds=downsampled))
-        data = codex_downsample.downsample(data, samples=downsampled)
+        data = codex_downsample.downsample(data, samples=downsampled, session=codex_hash)
 
     eta = codex_time_log.getComputeTimeEstimate("dimension_reduction", algorithm, full_samples)
 

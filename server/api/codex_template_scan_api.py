@@ -29,7 +29,7 @@ import codex_system
 import codex_doctest
 import codex_time_log
 import codex_return_code
-import codex_hash
+from codex_hash import get_cache
 import codex_math
 import codex_read_data_api
 
@@ -44,31 +44,35 @@ def ml_template_scan(
         algorithmName,
         downsampled,
         parms,
-        result):
+        result,
+        session=None):
     '''
     Inputs:
 
     Outputs:
 
     Examples:
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
     # Missing algorithmType
-    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "temp", False, {'num_templates': 1, 'scan_jump': 50}, {})
+    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "temp", False, {'num_templates': 1, 'scan_jump': 50}, {}, session=codex_hash)
     Template hash name not given
 
     # Standard usage
-    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': 50}, {})
+    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': 50}, {}, session=codex_hash)
     Template hash name not given
 
     # Incorrect num_templates
-    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': "String", 'scan_jump': 50}, {})
+    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': "String", 'scan_jump': 50}, {}, session=codex_hash)
     Template hash name not given
 
     # Incorrect scan_jump
-    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': "String"}, {})
+    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': "String"}, {}, session=codex_hash)
     Template hash name not given
     '''
+    codex_hash = get_cache(session)
 
     data = codex_hash.mergeHashResults(hashList)
     inputHash = codex_hash.hashArray('Merged', data, "feature")
@@ -124,7 +128,8 @@ def ml_template_scan(
                 downsampled,
                 templateHash,
                 num_templates,
-                scan_jump)
+                scan_jump,
+                session=codex_hash)
         except BaseException:
             codex_system.codex_log("Failed to run template scan algorithm")
             result['message'] = "Failed to run template scan algorithm"
@@ -143,7 +148,8 @@ def codex_template_scan(
         downsampled,
         templateHash,
         num_templates,
-        scan_jump):
+        scan_jump,
+        session=None):
     '''
     Inputs:
         inputHash (string)         - hash representing single feature
@@ -160,6 +166,8 @@ def codex_template_scan(
     Examples:
 
     '''
+    codex_hash = get_cache(session)
+
     codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
 
@@ -174,7 +182,7 @@ def codex_template_scan(
         X = codex_hash.applySubsetMask(X, subsetHash)
 
     if(downsampled is not False):
-        X = codex_downsample.downsample(X, percentage=downsampled)
+        X = codex_downsample.downsample(X, percentage=downsampled, session=codex_hash)
 
     returnTemplateHash = codex_hash.findHashArray(
         "hash", templateHash, "feature")

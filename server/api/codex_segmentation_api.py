@@ -31,7 +31,7 @@ import codex_math
 import codex_system
 import codex_time_log
 import codex_doctest
-import codex_hash
+from codex_hash import get_cache
 import codex_downsample
 import codex_read_data_api
 import codex_return_code
@@ -46,20 +46,23 @@ def ml_segmentation(
         algorithmName,
         downsampled,
         parms,
-        result):
+        result,
+        session=None):
     '''
     Inputs:
 
     Outputs:
 
     Examples:
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
     # Standard use
-    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {})
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {}, session=codex_hash)
 
     # Scale cannot be cast
-    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': "string", 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {})
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': "string", 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {}, session=codex_hash)
     scale parameter not set
     Traceback (most recent call last):
     ...
@@ -67,7 +70,7 @@ def ml_segmentation(
     <BLANKLINE>
 
     # Sigma cannot be cast
-    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': "String", 'min_size': 10, 'downsampled': 500}, {})
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': "String", 'min_size': 10, 'downsampled': 500}, {}, session=codex_hash)
     sigma parameter not set
     Traceback (most recent call last):
     ...
@@ -75,7 +78,7 @@ def ml_segmentation(
     <BLANKLINE>
 
     # min_size incorrectly called min_scale
-    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': 7, 'min_scale': 10, 'downsampled': 500}, {})
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': 7, 'min_scale': 10, 'downsampled': 500}, {}, session=codex_hash)
     min_size parameter not set
     Traceback (most recent call last):
     ...
@@ -83,9 +86,11 @@ def ml_segmentation(
     <BLANKLINE>
 
     # incorrect algorithmType
-    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwa", False, {'scale': 3, 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {})
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwa", False, {'scale': 3, 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {}, session=codex_hash)
     Cannot find requested segmentation algorithm
     '''
+    codex_hash = get_cache(session)
+
     data = codex_hash.mergeHashResults(hashList)
     inputHash = codex_hash.hashArray('Merged', data, "feature")
     if(inputHash is not None):
@@ -132,7 +137,7 @@ def ml_segmentation(
 
         try:
             result = codex_segmentation_felzenszwalb(
-                inputHash, subsetHash, downsampled, scale, sigma, min_size)
+                inputHash, subsetHash, downsampled, scale, sigma, min_size, session=codex_hash)
         except BaseException:
             codex_system.codex_log(
                 "Failed to run felzenszwalb segmentation algorithm")
@@ -168,7 +173,7 @@ def ml_segmentation(
 
         try:
             result = codex_segmentation_quickshift(
-                inputHash, subsetHash, downsampled, kernel_size, max_dist, sigma)
+                inputHash, subsetHash, downsampled, kernel_size, max_dist, sigma, session=codex_hash)
         except BaseException:
             codex_system.codex_log(
                 "Failed to run quickshift segmentation algorithm")
@@ -189,7 +194,8 @@ def codex_segmentation_quickshift(
         downsampled,
         kernel_size,
         max_dist,
-        sigma):
+        sigma,
+        session=None):
     '''
     Inputs:
         inputHash (string)   - hash value corresponding to the data to cluster
@@ -210,11 +216,15 @@ def codex_segmentation_quickshift(
         Algorithm: http://scikit-image.org/docs/dev/api/skimage.segmentation.html#quickshift
 
     Examples:
-        >>> testData = codex_doctest.doctest_get_data()
+        >>> from codex_hash import DOCTEST_SESSION
+        >>> codex_hash = get_cache(DOCTEST_SESSION)
+        >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
-        >>> segments = codex_segmentation_quickshift(testData['inputHash'], False, 50, 20.0, 5.0, 2.0)
+        >>> segments = codex_segmentation_quickshift(testData['inputHash'], False, 50, 20.0, 5.0, 2.0, session=codex_hash)
         Downsampling to 50 percent
     '''
+    codex_hash = get_cache(session)
+
     codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
@@ -238,7 +248,7 @@ def codex_segmentation_quickshift(
             "Downsampling to " +
             str(downsampled) +
             " percent")
-        data = codex_downsample.downsample(data, percentage=downsampled)
+        data = codex_downsample.downsample(data, percentage=downsampled, session=codex_hash)
 
     data = np.dstack((data, data, data))
     segments = quickshift(
@@ -276,7 +286,8 @@ def codex_segmentation_felzenszwalb(
         downsampled,
         scale,
         sigma,
-        min_size):
+        min_size,
+        session=None):
     '''
     Inputs:
         inputHash (string)   - hash value corresponding to the data to cluster
@@ -298,11 +309,15 @@ def codex_segmentation_felzenszwalb(
 
     Examples:
 
-        >>> testData = codex_doctest.doctest_get_data()
+        >>> from codex_hash import DOCTEST_SESSION
+        >>> codex_hash = get_cache(DOCTEST_SESSION)
+        >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
-        >>> segments = codex_segmentation_felzenszwalb(testData['inputHash'], False, 50, 3.0, 0.95, 3)
+        >>> segments = codex_segmentation_felzenszwalb(testData['inputHash'], False, 50, 3.0, 0.95, 3, session=codex_hash)
         Downsampling to 50 percent
     '''
+    codex_hash = get_cache(session)
+
     codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
@@ -326,7 +341,7 @@ def codex_segmentation_felzenszwalb(
             "Downsampling to " +
             str(downsampled) +
             " percent")
-        data = codex_downsample.downsample(data, percentage=downsampled)
+        data = codex_downsample.downsample(data, percentage=downsampled, session=codex_hash)
 
     data = codex_math.codex_impute(data)
     segments = felzenszwalb(data, scale=scale, sigma=sigma, min_size=min_size)
