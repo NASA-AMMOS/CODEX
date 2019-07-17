@@ -24,7 +24,7 @@ def doctest_get_image_path():
     return (CODEX_ROOT + '/uploads/test_image.JPG')
 
 
-def doctest_get_data():
+def doctest_get_data(session=None):
     '''
     Inputs:
         None
@@ -47,11 +47,11 @@ def doctest_get_data():
     '''
     from codex_hash import get_cache, DOCTEST_SESSION
 
-    codex_hash = get_cache(DOCTEST_SESSION)
+    codex_hash = get_cache(DOCTEST_SESSION if session is None else session)
 
     featureList = ['TiO2', 'FeOT', 'SiO2', 'Total']
     hashList, featureList = codex_read_data_api.codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv', featureList, "feature", session=codex_hash)
-    
+
     # merge 1d arrays to nd-array
     data = codex_hash.mergeHashResults(hashList)
     samples, features = data.shape
