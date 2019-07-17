@@ -24,6 +24,8 @@ export default function selections(
             return opt_reducer.renameSelection(state, action);
         case actionTypes.HOVER_SELECTION:
             return opt_reducer.hoverSelection(state, action);
+        case actionTypes.SET_SAVED_SELECTIONS:
+            return opt_reducer.setSavedSelections(state, action);
         default:
             return state;
     }

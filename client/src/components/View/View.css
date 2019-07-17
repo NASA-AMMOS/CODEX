@@ -3,6 +3,7 @@
     height: 100%;
     padding-top: 10px;
     display: flex;
+    overflow: hidden;
     background: linear-gradient(to top, #061427, #061427);
 }
 
