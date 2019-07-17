@@ -36,6 +36,10 @@ import warnings
 import functools
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
+# IPC support
+from ntangle.client import Client
+from ntangle.server import Server, expose
+
 # CODEX Support
 import codex_system
 
@@ -44,9 +48,6 @@ DEFAULT_CODEX_HASH_CONNECT = 'tcp://localhost:64209'
 DOCTEST_SESSION            = '__doctest__'
 
 class NoSessionSpecifiedError(Exception):
-    pass
-
-class PotentialAPIAbuseWarning(RuntimeWarning):
     pass
 
 class CodexHash:
@@ -73,6 +74,7 @@ class CodexHash:
             }
         return sessionKey
 
+    @expose('printCacheCount')
     def printCacheCount(self, session=None):
         '''
         Inputs:
@@ -106,7 +108,7 @@ class CodexHash:
         codex_system.codex_log("Number of classifier models  : " + str(len(self.sessions[session]["regressorList"])))
         codex_system.codex_log("Number of regressor models   : " + str(len(self.sessions[session]["classifierList"])))
 
-
+    @expose('remove_stale_data')
     def remove_stale_data(self, verbose=False, session=None):
         '''
         Inputs:
@@ -188,6 +190,7 @@ class CodexHash:
             print(current_ram)
 
 
+    @expose('deleteHashName')
     def deleteHashName(self, name, hashType, session=None):
         session = self.__set_session(session)
 
@@ -250,6 +253,7 @@ class CodexHash:
             return False
 
 
+    @expose('hashUpdate')
     def hashUpdate(self, field, old, new, hashType, session=None):
         '''
         Inputs:
@@ -304,6 +308,7 @@ class CodexHash:
         return True
 
 
+    @expose('resetCacheList')
     def resetCacheList(self, hashType, session=None):
         '''
         Inputs:
@@ -339,6 +344,7 @@ class CodexHash:
             codex_system.codex_log("Unknown hash type.  Not resetting")
 
 
+    @expose('hashArray')
     def hashArray(self, arrayName, inputArray, hashType, virtual=False, session=None):
         '''
         Inputs:
@@ -540,6 +546,7 @@ class CodexHash:
             codex_system.codex_log("ERROR: printHashList - unknown hashType")
 
 
+    @expose('findHashArray')
     def findHashArray(self, field, name, hashType, session=None):
         '''
         Inputs:
@@ -635,6 +642,7 @@ class CodexHash:
             return None
 
 
+    @expose('mergeHashResults')
     def mergeHashResults(self, hashList, verbose=False, session=None):
         '''
         Inputs:
@@ -714,6 +722,7 @@ class CodexHash:
         return returnArray
 
 
+    @expose('feature2hashList')
     def feature2hashList(self, featureList, session=None):
         session = self.__set_session(session)
 
@@ -730,6 +739,7 @@ class CodexHash:
         return hashList
 
 
+    @expose('applySubsetMask')
     def applySubsetMask(self, featureArray, subsetHash, session=None):
         '''
         Inputs:
@@ -796,6 +806,7 @@ class CodexHash:
             return outData, returnDict['name']
 
 
+    @expose('pickle_data')
     def pickle_data(self, session_name, front_end_state, session=None):
         '''
         Inputs:
@@ -868,6 +879,7 @@ class CodexHash:
         pickle_path = os.path.join(session_path, "client_state")
         pickle.dump(front_end_state, open(pickle_path, 'wb'))
 
+    @expose('unpickle_data')
     def unpickle_data(self, session_name, session=None):
         '''
         Inputs:
@@ -949,6 +961,7 @@ class CodexHash:
         return {'features':features, 'labels':labels, 'subsets':subsets, 'downsample':downsamples, 'state':state}
 
 
+    @expose('saveModel')
     def saveModel(self, modelName, inputModel, modelType, session=None):
         '''
         Inputs:
@@ -1044,7 +1057,7 @@ class WrappedCache:
     sessionKey = None
     cache = None
 
-    def __init__(self, sessionKey):
+    def __init__(self, sessionKey, timeout=5_000):
         '''
         Inputs:
             sessionKey (string)  - session key for the data set you wish to access
@@ -1059,25 +1072,25 @@ class WrappedCache:
         NoSessionSpecifiedError
         >>> WrappedCache(DOCTEST_SESSION)
         <__main__.WrappedCache object at 0x...>
-        >>> WrappedCache('SomeSessionKey')
+        >>> cache = WrappedCache('SomeSessionKey')
         Traceback (most recent call last):
             ...
-        NotImplementedError: Connecting to remotes is not yet implemented!
+        OSError: Connection to codex_hash dropped
         '''
         assert_session(sessionKey)
         self.sessionKey = sessionKey
 
-        if self.sessionKey == DOCTEST_SESSION:
+        if self.sessionKey == DOCTEST_SESSION and not ('CODEX_LIVE_TEST' in os.environ):
             # if we're in a doctest session, instantiate the cache directly
             self.cache = CodexHash()
         else:
             # TODO: connect to a remote session (spec to DEFAULT_CODEX_HASH_BIND)
-            raise NotImplementedError('Connecting to remotes is not yet implemented!')
+            self.cache = Client(DEFAULT_CODEX_HASH_CONNECT, timeout=timeout)
 
     def __getattr__(self, name):
         return functools.partial(getattr(self.cache, name), session=self.sessionKey)
 
-def get_cache(session):
+def get_cache(session, timeout=5_000):
     '''
     Inputs:
         session {string/WrappedCache} - session key to connect to OR a wrapped cache (for local testing only)
@@ -1088,19 +1101,28 @@ def get_cache(session):
     >>> get_cache('SomeSessionKey')
     Traceback (most recent call last):
         ...
-    NotImplementedError: Connecting to remotes is not yet implemented!
+    OSError: Connection to codex_hash dropped
+
     >>> cache = get_cache(DOCTEST_SESSION)
     >>> get_cache(cache)
     <__main__.WrappedCache object at 0x...>
     '''
     if isinstance(session, WrappedCache):
-        if session.sessionKey != DOCTEST_SESSION:
-            warnings.warn('Passing in a cache to get_cache outside of a doctest (session = {})! Do\'t do this.'.format(session.sessionKey), PotentialAPIAbuseWarning)
         return session
 
     # otherwise, return a new cache connection
-    return WrappedCache(session)
+    return WrappedCache(session, timeout=timeout)
+
+def create_server(launch=True):
+    if launch:
+        return Server(CodexHash()).listen(DEFAULT_CODEX_HASH_BIND)
+    else:
+        return Server(CodexHash())
 
 if __name__ == "__main__":
-    import codex_doctest
-    codex_doctest.run_codex_doctest()
+    if 'server' in sys.argv:
+        create_server()
+
+    else:
+        import codex_doctest
+        codex_doctest.run_codex_doctest()
