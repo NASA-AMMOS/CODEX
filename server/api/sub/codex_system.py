@@ -16,7 +16,6 @@ import numpy as np
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
-import codex_hash
 import codex_yaml
 import codex_return_code
 import codex_doctest
@@ -174,7 +173,7 @@ def get_codex_memory_usage():
     return current_ram
 
 
-def codex_server_memory_check(verbose=False):
+def codex_server_memory_check(verbose=False, session=None):
     '''
     Inputs:
 
@@ -184,9 +183,13 @@ def codex_server_memory_check(verbose=False):
         Value returned in MB
 
     Examples:
-    >>> codex_server_memory_check()
+    >>> from codex_hash import DOCTEST_SESSION, get_cache
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> codex_server_memory_check(session=codex_hash)
 
     '''
+    from codex_hash import get_cache # defer import to try to circumvent circular import
+    codex_hash = get_cache(session)
     allowed_ram = get_setting("working_ram")
     current_ram = get_codex_memory_usage()
 

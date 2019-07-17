@@ -28,26 +28,29 @@ sys.path.insert(1, CODEX_ROOT + '/api/sub/')
 # CODEX Support
 import codex_doctest
 import codex_return_code
-import codex_hash
+from codex_hash import get_cache
 import codex_system
 
 
-def codex_read_csv(file, featureList, hashType):
+def codex_read_csv(file, featureList, hashType, session=None):
     '''
     Inuputs:
 
     Outputs:
 
     Examples:
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
     >>> featureList = ['TiO2','FeOT','SiO2','Total']
-    >>> hashList = codex_read_csv(CODEX_ROOT + '/uploads/missing.csv',featureList, "feature")
+    >>> hashList = codex_read_csv(CODEX_ROOT + '/uploads/missing.csv',featureList, "feature", session=codex_hash)
     ERROR: codex_read_csv - cannot open file
 
     >>> featureList = ['fake_feature','FeOT','SiO2','Total']
-    >>> hashList = codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv',featureList, "feature")
+    >>> hashList = codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv',featureList, "feature", session=codex_hash)
 
 
     '''
+    codex_hash = get_cache(session)
     hashList = []
     columns = defaultdict(list)
 
@@ -88,7 +91,7 @@ def codex_read_csv(file, featureList, hashType):
     return hashList, list(featureList)
 
 
-def codex_read_image(file, show=False):
+def codex_read_image(file, show=False, session=None):
     '''
     Inuputs:
 
@@ -100,6 +103,7 @@ def codex_read_image(file, show=False):
     Examples:
 
     '''
+    session = get_cache(session)
 
     image = Image.open(file)
     if(image.format == "PNG"):
@@ -144,7 +148,7 @@ def traverse_datasets(hdf_file):
             yield path
 
 
-def codex_read_hd5(file, featureList, hashType):
+def codex_read_hd5(file, featureList, hashType, session=None):
     '''
     Inuputs:
 
@@ -153,18 +157,22 @@ def codex_read_hd5(file, featureList, hashType):
     Notes:
 
     Examples:
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
     >>> featureList = ['L2/RetrievalGeometry/retrieval_latitude/','L2/RetrievalResults/xco2']
-    >>> result = codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature")
+    >>> result = codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature", session=codex_hash)
     >>> print(result)
     (['314f2860593b8d3a5c8612693aed9232874210a3', '5d3d72c3ad2afcccb86d1693fd1a4b3bb39f407a'], ['L2/RetrievalGeometry/retrieval_latitude/', 'L2/RetrievalResults/xco2'])
 
     >>> featureList = ['L2/RetrievalGeometry/retrieval_latitude/','L2/RetrievalResults/xco2','missing_feature']
-    >>> result = codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature")
+    >>> result = codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature", session=codex_hash)
     Error: codex_read_hd5: Feature not found.
 
-    >>> result = codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_1000.h5', featureList, "feature")
+    >>> result = codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_1000.h5', featureList, "feature", session=codex_hash)
     ERROR: codex_read_hd5 - cannot open file
     '''
+    codex_hash = get_cache(session)
+
     hashList = []
 
     try:
@@ -198,7 +206,7 @@ def codex_read_hd5(file, featureList, hashType):
     return hashList, list(featureList)
 
 
-def codex_read_npy(file, featureList, hashType):
+def codex_read_npy(file, featureList, hashType, session=None):
     '''
     Inuputs:
 
@@ -209,6 +217,8 @@ def codex_read_npy(file, featureList, hashType):
     Examples:
 
     '''
+    codex_hash = get_cache(session)
+
     hashList = []
 
     try:
@@ -237,47 +247,50 @@ def codex_read_npy(file, featureList, hashType):
     return hashList, featureList
 
 
-def codex_save_subset(inputHash, subsetHash, saveFilePath):
+def codex_save_subset(inputHash, subsetHash, saveFilePath, session=None):
     '''
     Inuputs:
 
     Outputs:
 
     Examples:
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
     >>> inputArray = np.array([10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200])
     >>> randomSubset = np.array([0,1,0,1,0,1,1,0,0,0,0,0,1,1,1,0,0,1,0,1])
     >>> inputHash = codex_hash.hashArray('input_array', inputArray, 'feature')
     >>> subsetHash = codex_hash.hashArray('subset_hash', randomSubset, 'subset')
-    >>> outputHash,resultingName = codex_save_subset(inputHash['hash'], False, CODEX_ROOT + '/uploads/save_subset_output_test.h5')
-    >>> readingHash = codex_read_hd5(CODEX_ROOT + '/uploads/save_subset_output_test.h5', [resultingName], "feature")
+    >>> outputHash,resultingName = codex_save_subset(inputHash['hash'], False, CODEX_ROOT + '/uploads/save_subset_output_test.h5', session=codex_hash)
+    >>> readingHash = codex_read_hd5(CODEX_ROOT + '/uploads/save_subset_output_test.h5', [resultingName], "feature", session=codex_hash)
 
-    >>> codex_save_subset(None, None, CODEX_ROOT + '/uploads/')
+    >>> codex_save_subset(None, None, CODEX_ROOT + '/uploads/', session=codex_hash)
     Hash not found. Returning!
 
     >>> inputArray = np.array([10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200])
     >>> randomSubset = np.array([0,1,0,1,0,1,1,0,0,0,0,0,1,1,1,0,0,1,0,1])
 
-    >>> inputHash = codex_hash.hashArray('input_array', inputArray, 'feature')
-    >>> subsetHash = codex_hash.hashArray('subset_hash', randomSubset, 'subset')
+    >>> inputHash = codex_hash.hashArray('input_array', inputArray, 'feature', session=codex_hash)
+    >>> subsetHash = codex_hash.hashArray('subset_hash', randomSubset, 'subset', session=codex_hash)
 
 
     # Test scenario of not applying a subset mask
-    >>> outputHash,resultingName = codex_save_subset(inputHash['hash'], False, CODEX_ROOT + '/uploads/save_subset_output_test.h5')
-    >>> readingHash = codex_read_hd5(CODEX_ROOT + '/uploads/save_subset_output_test.h5', [resultingName], "feature")
+    >>> outputHash,resultingName = codex_save_subset(inputHash['hash'], False, CODEX_ROOT + '/uploads/save_subset_output_test.h5', session=codex_hash)
+    >>> readingHash = codex_read_hd5(CODEX_ROOT + '/uploads/save_subset_output_test.h5', [resultingName], "feature", session=codex_hash)
 
     >>> if(outputHash == readingHash[0][0]):
     ... 	print("Subset Applied Test:   Successful")
     Subset Applied Test:   Successful
 
     # Test scenario of applying subset mask.  Save full feature.
-    >>> outputHash,resultingName = codex_save_subset(inputHash['hash'], subsetHash['hash'], CODEX_ROOT + '/uploads/save_subset_output_test.h5')
-    >>> readingHash = codex_read_hd5(CODEX_ROOT + '/uploads/save_subset_output_test.h5', [resultingName], "feature")
+    >>> outputHash,resultingName = codex_save_subset(inputHash['hash'], subsetHash['hash'], CODEX_ROOT + '/uploads/save_subset_output_test.h5', session=codex_hash)
+    >>> readingHash = codex_read_hd5(CODEX_ROOT + '/uploads/save_subset_output_test.h5', [resultingName], "feature", session=codex_hash)
 
     >>> if(outputHash == readingHash[0][0]):
     ... 	print("No Subset Mask Test:   Successful")
     No Subset Mask Test:   Successful
 
     '''
+    codex_hash = get_cache(session)
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         codex_system.codex_log("Hash not found. Returning!")
