@@ -749,7 +749,7 @@ class CodexHash:
 
         subsetHashName = None
 
-        returnDict = findHashArray("hash", subsetHash, "subset")
+        returnDict = self.findHashArray("hash", subsetHash, "subset", session=session)
         if(returnDict is None):
             codex_system.codex_log("Hash not found. Returning!")
             return None
