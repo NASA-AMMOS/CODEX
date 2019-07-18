@@ -126,9 +126,7 @@ def add_data(msg, result):
         assert np_data.ndim == 1;
 
         virtual = msg['virtual'] if 'virtual' in msg else False
-        print('adding feature... feature len {}'.format(len(codex_hash.featureList)));
         hashResult = codex_hash.hashArray(msg["name"], np_data, "feature", virtual=virtual)
-        print('added feature.    feature len {}'.format(len(codex_hash.featureList)));
 
 
     else:
