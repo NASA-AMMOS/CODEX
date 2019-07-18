@@ -3,7 +3,7 @@ import WorkerSocket from "worker-loader!workers/socket.worker";
 import * as actionTypes from "constants/actionTypes";
 import ReactMarkdown from "react-markdown";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { getGlobalSessionKey } from "utils";
+import { getGlobalSessionKey } from "utils/utils";
 
 function HelpContent(props) {
     const [textContent, setTextContent] = useState(null);

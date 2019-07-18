@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import WorkerSocket from "worker-loader!workers/socket.worker";
 import * as actionTypes from "constants/actionTypes";
 import { addDataset, featureRetain, featureRelease } from "actions/data";
-import { getGlobalSessionKey } from "utils";
+import { getGlobalSessionKey } from "utils/utils";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
