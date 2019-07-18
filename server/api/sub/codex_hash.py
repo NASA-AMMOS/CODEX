@@ -728,7 +728,7 @@ class CodexHash:
 
         hashList = []
         for feature in featureList:
-            r = findHashArray("name", feature, "feature")
+            r = self.findHashArray("name", feature, "feature", session=session)
             if(r is not None):
                 hashList.append(r['hash'])
             else:
@@ -1049,6 +1049,22 @@ def assert_session(sessionKey):
         raise NoSessionSpecifiedError()
 
 
+def memoize(func):
+    cache = dict()
+
+    def make_key(args, kwargs):
+        return (args, kwargs)
+        #return ','.join([repr(a) for a in args]) + ','.join([k + '=' + repr(kwargs[k]) for k in kwargs])
+
+    def memoized_func(*args, **kwargs):
+        if make_key(args, kwargs) in cache:
+            return cache[args]
+        result = func(*args, **kwargs)
+        cache[make_key(args, kwargs)] = result
+        return result
+
+    return memoized_func
+
 class WrappedCache:
     '''
     Create a cache, and ensure that it connects to the proper bind address.
@@ -1087,6 +1103,8 @@ class WrappedCache:
             # TODO: connect to a remote session (spec to DEFAULT_CODEX_HASH_BIND)
             self.cache = Client(DEFAULT_CODEX_HASH_CONNECT, timeout=timeout)
 
+
+
     def __getattr__(self, name):
         return functools.partial(getattr(self.cache, name), session=self.sessionKey)
 
@@ -1113,15 +1131,18 @@ def get_cache(session, timeout=5_000):
     # otherwise, return a new cache connection
     return WrappedCache(session, timeout=timeout)
 
-def create_server(launch=True):
+def create_cache_server(launch=True):
     if launch:
         return Server(CodexHash()).listen(DEFAULT_CODEX_HASH_BIND)
     else:
         return Server(CodexHash())
 
+def stop_cache_server():
+    return Client(DEFAULT_CODEX_HASH_CONNECT)._shutdown()
+
 if __name__ == "__main__":
     if 'server' in sys.argv:
-        create_server()
+        create_cache_server()
 
     else:
         import codex_doctest
