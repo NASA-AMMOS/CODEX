@@ -22,7 +22,7 @@ import codex_workflow
 import codex_doctest
 import codex_return_code
 import codex_system
-import codex_hash
+from codex_hash import get_cache
 
 def workflow_call(msg, result):
     '''
@@ -33,6 +33,8 @@ def workflow_call(msg, result):
     Examples:
 
     '''
+    codex_hash = get_cache(msg['sessionkey'])
+
     if(msg['workflow'] == "explain_this"):
         featureList = msg["dataFeatures"]
         featureList = codex_system.get_featureList(featureList)
@@ -50,7 +52,7 @@ def workflow_call(msg, result):
             codex_return_code.logReturnCode(inspect.currentframe())
             inputHash = inputHash["hash"]
 
-        result = codex_workflow.explain_this(inputHash, featureList, dataSelections, result)
+        result = codex_workflow.explain_this(inputHash, featureList, dataSelections, result, session=codex_hash)
     elif (msg['workflow'] == "find_more_like_this"):
         featureList = msg["featureList"]
         featureList = codex_system.get_featureList(featureList)
@@ -69,7 +71,7 @@ def workflow_call(msg, result):
             codex_return_code.logReturnCode(inspect.currentframe())
             inputHash = inputHash["hash"]
 
-        result = codex_workflow.find_more_like_this(inputHash, featureList, dataSelections, similarityThreshold, result)
+        result = codex_workflow.find_more_like_this(inputHash, featureList, dataSelections, similarityThreshold, result, session=codex_hash)
     elif (msg['workflow'] == "general_classifier"):
         featureList = msg["featureList"]
         featureList = codex_system.get_featureList(featureList)
@@ -88,7 +90,7 @@ def workflow_call(msg, result):
             codex_return_code.logReturnCode(inspect.currentframe())
             inputHash = inputHash["hash"]
 
-        result = codex_workflow.general_classifier(inputHash, featureList, dataSelections, similarityThreshold, result)
+        result = codex_workflow.general_classifier(inputHash, featureList, dataSelections, similarityThreshold, result, session=codex_hash)
     else:
         result['message'] = "Cannot parse workflow"
 

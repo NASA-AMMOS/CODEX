@@ -2,7 +2,7 @@
     display: flex;
     /*border-right: 6px solid #7d39e0;*/
     /*z-index: 2000000000;*/
-    position:relative;
+    position: relative;
 }
 
 .Panel #border {
@@ -98,4 +98,3 @@
 .Panel .PanelOptions #onOffAll.off {
     border-bottom: 2px solid #e53434;
 }
-

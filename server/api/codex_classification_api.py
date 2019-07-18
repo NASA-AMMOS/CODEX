@@ -61,7 +61,7 @@ import codex_doctest
 import codex_plot
 import codex_read_data_api
 import codex_downsample
-import codex_hash
+from codex_hash import get_cache
 import codex_dimmension_reduction_api
 import codex_system
 import codex_labels
@@ -77,7 +77,8 @@ def ml_classification(
         scoring,
         search_type,
         cross_val,
-        result):
+        result,
+        session=None):
     '''
     Inputs:
 
@@ -86,6 +87,7 @@ def ml_classification(
     Examples:
 
     '''
+    codex_hash = get_cache(session)
 
     if len(hashList) < 2:
         codex_system.codex_log("Classification requires >= 2 features.")
@@ -101,7 +103,7 @@ def ml_classification(
         subsetHash = False
 
     try:
-        result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring)
+        result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=session)
         codex_system.codex_log("Completed classification run with warnings: {r}".format(r=result["WARNING"]))
     except BaseException:
         codex_system.codex_log(
@@ -112,7 +114,7 @@ def ml_classification(
 
     return result
 
-def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algorithm,  parms, search_type, cross_val, scoring):
+def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algorithm,  parms, search_type, cross_val, scoring, session=None):
     '''
     Inputs:
         inputHash (string)  - hash value corresponding to the data to cluster
@@ -139,16 +141,19 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
     Examples:
 
-        >>> testData = codex_doctest.doctest_get_data()
+        >>> from codex_hash import DOCTEST_SESSION
+        >>> codex_hash = get_cache(DOCTEST_SESSION)
+        >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
-        >>> result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'fake_scoring_metric')
+        >>> result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'fake_scoring_metric', session=codex_hash)
         >>> print(result["WARNING"])
         fake_scoring_metric not a valid scoring metric for classification.
 
-        >>> result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'precision')
+        >>> result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'precision', session=codex_hash)
         >>> print(result["WARNING"])
         None
     '''
+    codex_hash = get_cache(session)
     codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     result = {'algorithm': algorithm,
@@ -176,7 +181,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     if downsampled is not False:
         codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
         samples = len(data)
-        data = codex_downsample.downsample(data, percentage=downsampled)
+        data = codex_downsample.downsample(data, percentage=downsampled, session=session)
 
     if data.ndim < 2:
         codex_system.codex_log("ERROR: run_codex_classification - insufficient data dimmensions")
@@ -454,8 +459,8 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
 if __name__ == "__main__":
 
-    #codex_doctest.run_codex_doctest()
-    testData = codex_doctest.doctest_get_data()
+    codex_doctest.run_codex_doctest()
+    #testData = codex_doctest.doctest_get_data()
 
-    result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'precision')
+    #result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'precision', session='__doctest__')
     

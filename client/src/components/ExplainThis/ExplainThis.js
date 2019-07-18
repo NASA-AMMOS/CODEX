@@ -494,6 +494,7 @@ function createExplainThisRequest(filename, selections, dataFeatures) {
         dataSelections: selections,
         workflow: "explain_this",
         dataFeatures: dataFeatures,
+        sessionkey: utils.getGlobalSessionKey(),
         file: filename,
         cid: "8ksjk",
         identification: { id: "dev0" }
@@ -505,60 +506,53 @@ function ChooseSelections(props) {
         <div className="selections-chooser">
             <p className="selection-chooser-header">Choose Two Selections</p>
             <FormControl className="selection-dropdown">
-                <Select 
-                    value={props.chosenSelections[0] != null ? props.chosenSelections[0] : ""} 
-                    onChange={
-                        e => {
-                            props.setChosenSelections([e.target.value, props.chosenSelections[1]]);
-                            props.setRunButtonPressed(false);
-                            props.setDataState(undefined);
-                        }
-                    }
+                <Select
+                    value={props.chosenSelections[0] != null ? props.chosenSelections[0] : ""}
+                    onChange={e => {
+                        props.setChosenSelections([e.target.value, props.chosenSelections[1]]);
+                        props.setRunButtonPressed(false);
+                        props.setDataState(undefined);
+                    }}
                 >
-                    {
-                        (function() {
-                            let arr = [];
+                    {(function() {
+                        let arr = [];
 
-                            for(let i = 0; i < props.selections.length; i++) {
-                                if (props.selections[i].active && props.chosenSelections[1]!=i) {
-                                    arr.push(
-                                        <MenuItem key={props.selections[i].name} value={i}>
-                                            {props.selections[i].name}
-                                        </MenuItem>
-                                    );
-                                }
+                        for (let i = 0; i < props.selections.length; i++) {
+                            if (props.selections[i].active && props.chosenSelections[1] != i) {
+                                arr.push(
+                                    <MenuItem key={props.selections[i].name} value={i}>
+                                        {props.selections[i].name}
+                                    </MenuItem>
+                                );
                             }
-                            return arr;
-                        })()
-                    }
+                        }
+                        return arr;
+                    })()}
                 </Select>
             </FormControl>
             <FormControl className="selection-dropdown">
-                <Select 
-                    value={props.chosenSelections[1] != null ? props.chosenSelections[1] : ""} 
-                    onChange={
-                        e => {
-                            props.setChosenSelections([props.chosenSelections[0], e.target.value]);
-                            props.setRunButtonPressed(false);
-                            props.setDataState(undefined);
-                        }
-                    }
+                <Select
+                    value={props.chosenSelections[1] != null ? props.chosenSelections[1] : ""}
+                    onChange={e => {
+                        props.setChosenSelections([props.chosenSelections[0], e.target.value]);
+                        props.setRunButtonPressed(false);
+                        props.setDataState(undefined);
+                    }}
                 >
-                    {
-                        (function() {
-                            let arr = [];
+                    {(function() {
+                        let arr = [];
 
-                            for(let i = 0; i < props.selections.length; i++) {
-                                if (props.selections[i].active && props.chosenSelections[0]!=i) {
-                                    arr.push(
-                                        <MenuItem key={props.selections[i].name} value={i}>
-                                            {props.selections[i].name}
-                                        </MenuItem>
-                                    );
-                                }
+                        for (let i = 0; i < props.selections.length; i++) {
+                            if (props.selections[i].active && props.chosenSelections[0] != i) {
+                                arr.push(
+                                    <MenuItem key={props.selections[i].name} value={i}>
+                                        {props.selections[i].name}
+                                    </MenuItem>
+                                );
                             }
+                        }
 
-                            return arr;
+                        return arr;
                     })()}
                 </Select>
             </FormControl>
@@ -568,7 +562,12 @@ function ChooseSelections(props) {
 
 function TreeSweepScroller(props) {
     if (!props.tree_sweep && props.runButtonPressed) {
-        return <div className="tree-sweep-scroller-circular"> <CircularProgress/></div>;
+        return (
+            <div className="tree-sweep-scroller-circular">
+                {" "}
+                <CircularProgress />
+            </div>
+        );
     } else if (!props.tree_sweep) {
         return <div className="tree-sweep-scroller"> Choose selections and run </div>;
     }
@@ -808,14 +807,21 @@ function ExplainThis(props) {
             //clear current data
             setDataState(undefined);
             //handle the loading of the data request promise
-            const request = createExplainThisRequest(props.filename, [firstSelectionIndices, secondSelectionIndices], props.selectedFeatureNames);
+            const request = createExplainThisRequest(
+                props.filename,
+                [firstSelectionIndices, secondSelectionIndices],
+                props.selectedFeatureNames
+            );
             const requestMade = utils.makeSimpleRequest(request);
             requestMade.req.then(data => {
                 setRunButtonPressed(false);
-                
-                const selectionNames = [props.selections[chosenSelections[0]].name, props.selections[chosenSelections[1]].name];
-        
-                setDataState({...data,selectionNames:selectionNames});
+
+                const selectionNames = [
+                    props.selections[chosenSelections[0]].name,
+                    props.selections[chosenSelections[1]].name
+                ];
+
+                setDataState({ ...data, selectionNames: selectionNames });
             });
 
             //cancels the request if the window is closed

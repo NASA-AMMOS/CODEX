@@ -11,7 +11,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
-import Checkbox from '@material-ui/core/Checkbox';
+import Checkbox from "@material-ui/core/Checkbox";
 import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
 import RemoveRedEye from "@material-ui/icons/RemoveRedEye";
 import CheckboxIcon from "@material-ui/icons/CheckBox";
@@ -72,7 +72,7 @@ function SelectionContextMenu(props) {
     );
 }
 
-function SelectionDisplayItem(props){
+function SelectionDisplayItem(props) {
     return (
         <div
             className={classnames({ selection: true })}
@@ -86,7 +86,10 @@ function SelectionDisplayItem(props){
                 e.preventDefault();
                 props.setContextMenuVisible(true);
                 props.setContextMenuPosition({ top: e.clientY, left: e.clientX });
-                props.setContextActiveSelection({ id: props.selection.id, name: props.selection.name });
+                props.setContextActiveSelection({
+                    id: props.selection.id,
+                    name: props.selection.name
+                });
             }}
             onMouseEnter={_ => props.hoverSelection(props.selection.id)}
             onMouseLeave={_ => props.hoverSelection(null)}
@@ -94,39 +97,35 @@ function SelectionDisplayItem(props){
             <Checkbox
                 checked={props.selection.active}
                 value="checkedA"
-                icon={<CheckboxOutlineBlank style={{fill: "#828282"}} />}
-                checkedIcon={<CheckboxIcon style={{ fill:"#3988E3"}} />}
-                onClick={
-                    _ => {
-                        props.toggleSelectionActive(props.selection.id);
-                    }
-                }
-                style={{height:"22px",  padding:"0px"}}
-              />
-            <div className="selection-name-tag"><span> {props.selection.name} </span></div>
+                icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
+                checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
+                onClick={_ => {
+                    props.toggleSelectionActive(props.selection.id);
+                }}
+                style={{ height: "22px", padding: "0px" }}
+            />
+            <div className="selection-name-tag">
+                <span> {props.selection.name} </span>
+            </div>
             <Checkbox
                 className="eye-icon-checkbox"
                 checked={props.selection.hidden}
                 value="checkedA"
-                icon={<RemoveRedEye style={{fill: "#DADADA"}} />}
-                checkedIcon={<RemoveRedEye style={{ fill:"#061427"}} />}
+                icon={<RemoveRedEye style={{ fill: "#DADADA" }} />}
+                checkedIcon={<RemoveRedEye style={{ fill: "#061427" }} />}
                 onClick={_ => {
                     props.toggleSelectionHidden(props.selection.id);
-                    }
-                }
-                style={{height:"22px", padding:"0px"}}
-              />
-              <div
-                className="swatch"
-                style={{ background: props.selection.color}}
+                }}
+                style={{ height: "22px", padding: "0px" }}
             />
+            <div className="swatch" style={{ background: props.selection.color }} />
         </div>
     );
 }
 
 function CurrentSelection(props) {
     //checks to see if current selection is null
-    const disabled = (props.currentSelection.length == 0);
+    const disabled = props.currentSelection.length == 0;
 
     return (
         <Button
@@ -158,8 +157,7 @@ const reorder = (list, startIndex, endIndex) => {
 const grid = 8;
 
 function DragList(props) {
-
-    function onDragEnd(result){
+    function onDragEnd(result) {
         // dropped outside the list
         if (!result.destination) {
             return;
@@ -185,21 +183,29 @@ function DragList(props) {
                             //style={getListStyle(snapshot.isDraggingOver)}
                         >
                             {props.savedSelections.map((selection, index) => (
-                                <Draggable key={selection.id} draggableId={selection.id+""} index={index}>
+                                <Draggable
+                                    key={selection.id}
+                                    draggableId={selection.id + ""}
+                                    index={index}
+                                >
                                     {(provided, snapshot) => (
-                                        <div 
+                                        <div
                                             ref={provided.innerRef}
                                             {...provided.draggableProps}
                                             {...provided.dragHandleProps}
                                         >
                                             <SelectionDisplayItem
-                                                hoverSelection={props.hoverSelection}     
+                                                hoverSelection={props.hoverSelection}
                                                 selection={selection}
                                                 toggleSelectionActive={props.toggleSelectionActive}
                                                 toggleSelectionHidden={props.toggleSelectionHidden}
                                                 setContextMenuVisible={props.setContextMenuVisible}
-                                                setContextMenuPosition={props.setContextMenuPosition}
-                                                setContextActiveSelection={props.setContextActiveSelection}
+                                                setContextMenuPosition={
+                                                    props.setContextMenuPosition
+                                                }
+                                                setContextActiveSelection={
+                                                    props.setContextActiveSelection
+                                                }
                                             />
                                         </div>
                                     )}
@@ -298,7 +304,7 @@ function mapDispatchToProps(dispatch) {
         setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
         saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch),
         hoverSelection: bindActionCreators(selectionActions.hoverSelection, dispatch),
-        setSavedSelections: bindActionCreators(selectionActions.setSavedSelections, dispatch),
+        setSavedSelections: bindActionCreators(selectionActions.setSavedSelections, dispatch)
     };
 }
 

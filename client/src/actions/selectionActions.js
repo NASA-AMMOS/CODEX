@@ -29,7 +29,7 @@ export function renameSelection(id, name) {
 }
 
 export function setSavedSelections(newSavedSelections) {
-    return {type: actionTypes.SET_SAVED_SELECTIONS, newSavedSelections:newSavedSelections};
+    return { type: actionTypes.SET_SAVED_SELECTIONS, newSavedSelections: newSavedSelections };
 }
 
 export function hoverSelection(id) {
@@ -37,5 +37,5 @@ export function hoverSelection(id) {
 }
 
 export function setSelectionGroup(id, groupID) {
-    return {type: actionTypes.SET_SELECTION_GROUP, id, groupID};
+    return { type: actionTypes.SET_SELECTION_GROUP, id, groupID };
 }

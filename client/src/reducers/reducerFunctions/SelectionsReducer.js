@@ -28,7 +28,7 @@ export default class SelectionsReducer {
         return {
             ...state,
             savedSelections: state.savedSelections.map(selection =>
-                selection.id === action.id ? { ...selection, hidden: !selection.hidden} : selection
+                selection.id === action.id ? { ...selection, hidden: !selection.hidden } : selection
             )
         };
     }

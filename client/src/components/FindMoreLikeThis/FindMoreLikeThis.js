@@ -1,4 +1,4 @@
-import { useSavedSelections, useFilename, useSelectedFeatureNames} from "hooks/DataHooks";
+import { useSavedSelections, useFilename, useSelectedFeatureNames } from "hooks/DataHooks";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import { useWindowManager } from "hooks/WindowHooks";
 import * as utils from "utils/utils";
@@ -8,7 +8,7 @@ import Typography from "@material-ui/core/Typography";
 import FormControl from "@material-ui/core/FormControl";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
-import TextField from '@material-ui/core/TextField';
+import TextField from "@material-ui/core/TextField";
 import InputLabel from "@material-ui/core/InputLabel";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import "components/FindMoreLikeThis/FindMoreLikeThis.scss";
@@ -22,6 +22,7 @@ function createFMLTRequest(filename, selections, featureList, similarityThreshol
         routine: "workflow",
         dataSelections: selections,
         featureList: featureList,
+        sessionkey: utils.getGlobalSessionKey(),
         workflow: "find_more_like_this",
         file: filename,
         similarityThreshold: similarityThreshold,
@@ -31,9 +32,8 @@ function createFMLTRequest(filename, selections, featureList, similarityThreshol
 }
 
 function ParameterSection(props) {
-
     function findSelectionById(id) {
-        return props.activeSelections.filter((selection) => {
+        return props.activeSelections.filter(selection => {
             return selection.id === id;
         })[0];
     }
@@ -43,68 +43,58 @@ function ParameterSection(props) {
             <div className="selection-dropdown-container">
                 <InputLabel className="selection-dropdown-label">Input Selection</InputLabel>
                 <FormControl className="selection-dropdown">
-                    <Select 
-                        value={props.inputSelection != undefined ? props.inputSelection.id : ""} 
-                        onChange={
-                            e => {
-                                props.setInputSelection(findSelectionById(e.target.value));
-                            }
-                        }
+                    <Select
+                        value={props.inputSelection != undefined ? props.inputSelection.id : ""}
+                        onChange={e => {
+                            props.setInputSelection(findSelectionById(e.target.value));
+                        }}
                     >
-                        {
-                            props.activeSelections.map(
-                                (selection) => {
-                                    return (
-                                        <MenuItem key={selection.id} value={selection.id}>
-                                            {selection.name}
-                                        </MenuItem>
-                                    );
-                                }
-                            )
-                        }
+                        {props.activeSelections.map(selection => {
+                            return (
+                                <MenuItem key={selection.id} value={selection.id}>
+                                    {selection.name}
+                                </MenuItem>
+                            );
+                        })}
                     </Select>
                 </FormControl>
             </div>
             <div className="similarity-threshold-container">
                 <InputLabel className="similarity-threshold-label">Similarity Threshold</InputLabel>
                 <TextField
-                    variant="standard" 
+                    variant="standard"
                     type="number"
-                    value={props.similarityThreshold} 
+                    value={props.similarityThreshold}
                     className="similarity-threshold-input"
-                    inputProps={{ min: 0, max: 1 , step:0.1}}
-                    onChange={function(e) { props.setSimilarityThreshold(e.target.value);}}
+                    inputProps={{ min: 0, max: 1, step: 0.1 }}
+                    onChange={function(e) {
+                        props.setSimilarityThreshold(e.target.value);
+                    }}
                 />
             </div>
         </div>
-    )
+    );
 }
 
 function OutputSection(props) {
-
     if (!props.loading && props.outputMessage != null) {
         return (
             <div className="output-section">
                 <Typography variant="h5" className="output-section-header">
                     Output
                 </Typography>
-                <div className="output-section-text">
-                    {props.outputMessage}
-                </div>
+                <div className="output-section-text">{props.outputMessage}</div>
             </div>
         );
     } else if (props.loading) {
         return (
             <div className="loading-section">
-                <CircularProgress/>
+                <CircularProgress />
             </div>
         );
     } else if (props.outputMessage == null) {
-        return (
-            <div className="loading-section">
-            </div>
-        );
-    }   
+        return <div className="loading-section" />;
+    }
 }
 
 /*
@@ -112,66 +102,80 @@ function OutputSection(props) {
     the Find More Like This workflow
 */
 function FindMoreLikeThis(props) {
-
     const [buttonClicked, setButtonClicked] = useState(false);
     const [similarityThreshold, setSimilarityThreshold] = useState(0.5);
     const [outputMessage, setOutputMessage] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const activeSelections = props.savedSelections
-                                    .filter((selection) => {return selection.active});
-    
+    const activeSelections = props.savedSelections.filter(selection => {
+        return selection.active;
+    });
+
     const [inputSelection, setInputSelection] = useState(activeSelections[0]);
 
     function makeOutputMessage(name) {
-        return "Like This selection has been computed and outputted to the selection called '"+ name+"'";
+        return (
+            "Like This selection has been computed and outputted to the selection called '" +
+            name +
+            "'"
+        );
     }
 
-    useEffect( _ => {
-        //checks to see if the input selection is still active
-        if (inputSelection == undefined) {
-            if (activeSelections.length > 0) {
-                setInputSelection(activeSelections[0])
+    useEffect(
+        _ => {
+            //checks to see if the input selection is still active
+            if (inputSelection == undefined) {
+                if (activeSelections.length > 0) {
+                    setInputSelection(activeSelections[0]);
+                }
+            } else {
+                const selectionsWithId = activeSelections.filter(selection => {
+                    return selection.id === inputSelection.id;
+                });
+
+                if (selectionsWithId.length === 0) {
+                    setInputSelection(activeSelections[0]);
+                }
             }
-        } else {
-            const selectionsWithId = activeSelections
-                                        .filter((selection) => {
-                                            return selection.id === inputSelection.id;
-                                        })
+        },
+        [props.savedSelections]
+    );
 
-            if (selectionsWithId.length === 0) {
-                setInputSelection(activeSelections[0]);
-            } 
-        }
-    }, [props.savedSelections]);
+    useEffect(
+        _ => {
+            if (buttonClicked) {
+                if (inputSelection === undefined) {
+                    //send error message
+                    return;
+                }
 
-    useEffect( _ => {
-        if (buttonClicked) {
-            if (inputSelection === undefined) {
-                //send error message 
-                return; 
+                const requestObject = createFMLTRequest(
+                    props.filename,
+                    inputSelection.rowIndices,
+                    props.featureNames,
+                    similarityThreshold
+                );
+                //actually handle the request for running the
+                //find more like this algorithm
+                setOutputMessage("");
+                setLoading(true);
+                const request = utils.makeSimpleRequest(requestObject);
+                //resolves the fmlt request
+                request.req.then(data => {
+                    setLoading(false);
+                    setOutputMessage(makeOutputMessage("Like " + inputSelection.name));
+                    //add a saved selections called fmlt_output with the returned data
+                    props.saveSelection("Like " + inputSelection.name, data.like_this);
+                    setButtonClicked(false);
+                });
+                //cleanup function
+                return function cleanup() {
+                    request.cancel();
+                };
             }
-
-            const requestObject = createFMLTRequest(props.filename, inputSelection.rowIndices, props.featureNames, similarityThreshold);
-            //actually handle the request for running the 
-            //find more like this algorithm
-            setOutputMessage("");
-            setLoading(true);
-            const request = utils.makeSimpleRequest(requestObject);
-            //resolves the fmlt request
-            request.req.then(data => {
-                setLoading(false);
-                setOutputMessage(makeOutputMessage( "Like " + inputSelection.name));
-                //add a saved selections called fmlt_output with the returned data
-                props.saveSelection( "Like " + inputSelection.name, data.like_this);
-                setButtonClicked(false);
-            }); 
-            //cleanup function
-            return function cleanup() {
-                request.cancel();
-            };
-        }
-    },[buttonClicked]);
+        },
+        [buttonClicked]
+    );
 
     return (
         <div className="fmlt-container">
@@ -185,10 +189,7 @@ function FindMoreLikeThis(props) {
                 similarityThreshold={similarityThreshold}
                 activeSelections={activeSelections}
             />
-            <OutputSection
-                loading={loading}
-                outputMessage={outputMessage}
-            />
+            <OutputSection loading={loading} outputMessage={outputMessage} />
             <Button
                 variant="contained"
                 color="primary"

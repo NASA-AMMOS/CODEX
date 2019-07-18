@@ -4,12 +4,12 @@
     height: 100%;
 
     .parameter-section {
-         .selection-dropdown-container{
+        .selection-dropdown-container {
             display: flex;
             flex-direction: row;
             .selection-dropdown {
                 width: 50%;
-                margin-left:  5px;
+                margin-left: 5px;
                 margin-right: 15px;
             }
 
@@ -33,7 +33,7 @@
 
             .similarity-threshold-input {
                 width: 50%;
-                margin-left:  5px;
+                margin-left: 5px;
                 margin-right: 15px;
             }
         }
@@ -53,7 +53,6 @@
         align-items: center;
         display: flex;
     }
-   
 
     .fmlt-run-button {
         margin-top: auto;

@@ -39,7 +39,7 @@ import codex_doctest
 import codex_time_log
 import codex_plot
 import codex_return_code
-import codex_hash
+from codex_hash import get_cache
 
 DEBUG = False
 
@@ -51,39 +51,43 @@ def ml_endmember(
         algorithmName,
         downsampled,
         parms,
-        result):
+        result,
+        session=None):
     '''
     Inputs:
 
     Outputs:
 
     Examples:
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
     # Missing algorithmType
-    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "kmean", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {})
+    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "kmean", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=codex_hash)
     Cannot find requested endmember algorithm
 
-    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "ATGP", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {})
+    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "ATGP", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=codex_hash)
 
-    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "PPI", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {})
+    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "PPI", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=codex_hash)
 
-    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {})
+    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=codex_hash)
     WARNING: q must be <= to number of features
 
-    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'q':4, 'numSkewers':5}, {})
+    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'q':4, 'numSkewers':5}, {}, session=codex_hash)
 
     # inputHash == None
-    >>> result = ml_endmember(testData['inputHash'], None, None, "FIPPI", False, {'downsampled': 500, 'q':4, 'numSkewers':5}, {})
+    >>> result = ml_endmember(testData['inputHash'], None, None, "FIPPI", False, {'downsampled': 500, 'q':4, 'numSkewers':5}, {}, session=codex_hash)
 
     # q not set
-    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'numSkewers':5}, {})
+    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'numSkewers':5}, {}, session=codex_hash)
     q parameter not set
     Traceback (most recent call last):
     ...
     KeyError: 'q'
     <BLANKLINE>
     '''
+    codex_hash = get_cache(session)
 
     if(subsetHashName is not None):
         subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
@@ -104,7 +108,7 @@ def ml_endmember(
 
     if(algorithmName == "ATGP"):
         try:
-            result = codex_ATGP(inputHash, subsetHash, q, downsampled)
+            result = codex_ATGP(inputHash, subsetHash, q, downsampled, session=codex_hash)
         except BaseException:
             codex_system.codex_log("Failed to run ATGP endmember algorithm")
             result['message'] = "Failed to run ATGP endmember algorithm"
@@ -113,7 +117,7 @@ def ml_endmember(
 
     elif(algorithmName == "FIPPI"):
         try:
-            result = codex_FIPPI(inputHash, subsetHash, q, downsampled)
+            result = codex_FIPPI(inputHash, subsetHash, q, downsampled, session=codex_hash)
         except BaseException:
             codex_system.codex_log("Failed to run FIPPI endmember algorithm")
             result['message'] = "Failed to run FIPPI endmember algorithm"
@@ -136,7 +140,8 @@ def ml_endmember(
                 subsetHash,
                 q,
                 numSkewers,
-                downsampled)
+                downsampled,
+                session=codex_hash)
         except BaseException:
             codex_system.codex_log("Failed to run PPI endmember algorithm")
             result['message'] = "Failed to run PPI endmember algorithm"
@@ -151,7 +156,7 @@ def ml_endmember(
     return result
 
 
-def codex_ATGP(inputHash, subsetHash, q, downsampled):
+def codex_ATGP(inputHash, subsetHash, q, downsampled, session=None):
     '''
     Inputs:
         inputHash (string)   - hash value corresponding to the data to cluster
@@ -164,10 +169,14 @@ def codex_ATGP(inputHash, subsetHash, q, downsampled):
             endmember_vector - Array of indices into the array data corresponding to the induced endmembers
 
     Examples:
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
-    >>> result = codex_ATGP(testData['inputHash'], False, 3, False)
+    >>> result = codex_ATGP(testData['inputHash'], False, 3, False, session=codex_hash)
     '''
+    codex_hash = get_cache(session)
+
     codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
@@ -192,7 +201,7 @@ def codex_ATGP(inputHash, subsetHash, q, downsampled):
             str(downsampled) +
             " samples")
         samples = len(data)
-        data = codex_downsample.downsample(data, percentage=downsampled)
+        data = codex_downsample.downsample(data, percentage=downsampled, session=codex_hash)
         eta = codex_time_log.getComputeTimeEstimate(
             "endmember", "ATGP", samples)
 
@@ -217,7 +226,7 @@ def codex_ATGP(inputHash, subsetHash, q, downsampled):
     return dictionary
 
 
-def codex_FIPPI(inputHash, subsetHash, q, downsampled):
+def codex_FIPPI(inputHash, subsetHash, q, downsampled, session=None):
     '''
     Inputs:
         inputHash (string)   - hash value corresponding to the data to cluster
@@ -230,10 +239,14 @@ def codex_FIPPI(inputHash, subsetHash, q, downsampled):
             endmember_vector - Array of indices into the array data corresponding to the induced endmembers
 
     Examples:
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
-    >>> result = codex_FIPPI(testData['inputHash'], False, 1, False)
+    >>> result = codex_FIPPI(testData['inputHash'], False, 1, False, session=codex_hash)
     '''
+
+    codex_hash = get_cache(session)
     codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
@@ -263,7 +276,7 @@ def codex_FIPPI(inputHash, subsetHash, q, downsampled):
             str(downsampled) +
             " samples")
         samples = len(data)
-        data = codex_downsample.downsample(data, percentage=downsampled)
+        data = codex_downsample.downsample(data, percentage=downsampled, session=codex_hash)
         eta = codex_time_log.getComputeTimeEstimate(
             "endmember", "FIPPI", samples)
 
@@ -288,7 +301,7 @@ def codex_FIPPI(inputHash, subsetHash, q, downsampled):
     return dictionary
 
 
-def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled):
+def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled, session=None):
     '''
     Inputs:
         inputHash (string)   - hash value corresponding to the data to cluster
@@ -302,10 +315,14 @@ def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled):
             endmember_vector - Array of indices into the array data corresponding to the induced endmembers
 
     Examples:
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
-    >>> result = codex_PPI(testData['inputHash'], False, 3, 1, False)
+    >>> result = codex_PPI(testData['inputHash'], False, 3, 1, False, session=codex_hash)
     '''
+
+    codex_hash = get_cache(session)
     codex_return_code.logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
@@ -330,7 +347,7 @@ def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled):
             str(downsampled) +
             " samples")
         samples = len(data)
-        data = codex_downsample.downsample(data, percentage=downsampled)
+        data = codex_downsample.downsample(data, percentage=downsampled, session=codex_hash)
         eta = codex_time_log.getComputeTimeEstimate(
             "endmember", "PPI", samples)
 

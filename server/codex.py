@@ -2,7 +2,7 @@
 Author: Jack Lightholder
 Date  : 7/19/17
 
-Brief : 
+Brief :
 
 Notes :
 
@@ -23,6 +23,7 @@ from tornado import ioloop
 from tornado import websocket
 from tornado import gen
 from concurrent.futures import ProcessPoolExecutor
+from multiprocessing import Process
 from tornado.ioloop import IOLoop
 import ssl
 import concurrent.futures
@@ -34,13 +35,12 @@ import tornado
 import json
 import inspect
 
-# CODEX 
+# CODEX
 import codex_workflow_manager
 import codex_algorithm_manager
 import codex_guidance_manager
 import codex_read_data_api
 import codex_system
-import codex_hash
 import codex_return_code
 import codex_time_log
 import codex_doctest
@@ -48,6 +48,8 @@ import codex_session_manager
 import codex_data_manager
 import codex_analysis_manager
 import codex_eta_manager
+from codex_hash import get_cache, create_cache_server, stop_cache_server, NoSessionSpecifiedError
+from zmq.error import ZMQError
 
 # create a `ThreadPoolExecutor` instance
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
@@ -71,6 +73,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
         filepath = CODEX_ROOT + "/uploads/" + filename
 
         if (msg["done"] == True):
+            codex_hash = get_cache(msg['sessionkey'])
 
             f = open(filepath, 'wb')
             for chunk in fileChunks:
@@ -81,16 +84,16 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
             fileExtension = filename.split(".")[-1]
             if (fileExtension == "csv"):
                 hashList, featureList = codex_read_data_api.codex_read_csv(
-                    filepath, None, "feature")
+                    filepath, None, "feature", session=codex_hash)
                 codex_return_code.logReturnCode(inspect.currentframe())
 
             elif (fileExtension == "h5"):
                 hashList, featureList = codex_read_data_api.codex_read_hd5(
-                    filepath, None, "feature")
+                    filepath, None, "feature", session=codex_hash)
                 codex_return_code.logReturnCode(inspect.currentframe())
 
             elif (fileExtension == "npy"):
-                hashList, featureList = codex_read_data_api.codex_read_npy(filepath, None, "feature")
+                hashList, featureList = codex_read_data_api.codex_read_npy(filepath, None, "feature", session=codex_hash)
                 codex_return_code.logReturnCode(inspect.currentframe())
 
             else:
@@ -133,7 +136,10 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         result = executor.submit(self.handle_request, message)
         result.add_done_callback(self._on_response_ready)
-        codex_system.codex_server_memory_check()
+        try:
+            codex_system.codex_server_memory_check(session=json.loads(message)['sessionkey'])
+        except:
+            raise
 
     def handle_request(self, message):
         '''
@@ -148,9 +154,15 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 
         '''
         msg = json.loads(message)
+
+
         result = msg
         codex_system.codex_log("{time} : Message from front end: {json}".format(time=now.isoformat(), json=msg))
-        
+
+        if 'sessionkey' not in msg:
+            print('session_key not in message!!!')
+            raise NoSessionSpecifiedError()
+
         routine = msg['routine']
         if(routine == 'algorithm'):
             result = codex_algorithm_manager.algorithm_call(msg, result)
@@ -209,6 +221,19 @@ def make_app():
         (r"/upload", uploadSocket),
     ], **settings)
 
+def make_cache_process():
+    def run_cache():
+        try:
+            create_cache_server()
+        except ZMQError as e:
+            if e.strerror == 'Address already in use':
+                print('Cache server already running!')
+            else:
+                raise
+        except Exception as e:
+            print('Cache server launch failure!')
+            raise
+    return Process(target=run_cache)
 
 if __name__ == '__main__':
 
@@ -229,5 +254,15 @@ if __name__ == '__main__':
     else:
         app = tornado.httpserver.HTTPServer(app)
 
+    # create the cache server process and start it
+    codex_hash_server = make_cache_process()
+    codex_hash_server.start()
+
+    # start server
     app.listen(8888)
     ioloop.IOLoop.instance().start()
+
+    # gracefully shut down cache server
+    stop_cache_server() 
+    codex_hash_server.join() # wait for process shutdown
+    

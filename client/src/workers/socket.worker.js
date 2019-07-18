@@ -20,6 +20,7 @@ function handleGraphDataRequest(msg) {
         const outMsg = JSON.stringify({
             routine: "arrange",
             hashType: "feature",
+            sessionkey: msg.sessionkey,
             activity: "get",
             name: msg.selectedFeatures,
             cid
@@ -122,7 +123,7 @@ self.addEventListener("message", function(e) {
         case types.GET_GRAPH_DATA:
             handleGraphDataRequest(msg);
             break;
-        case types.GET_ALGORITHM_DATA: 
+        case types.GET_ALGORITHM_DATA:
             handleAlgorithmRequest(msg);
             break;
         case types.GET_HELP_TEXT:

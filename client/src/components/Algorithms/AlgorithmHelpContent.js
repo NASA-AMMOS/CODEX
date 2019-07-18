@@ -4,6 +4,7 @@ import WorkerSocket from "worker-loader!workers/socket.worker";
 import * as actionTypes from "constants/actionTypes";
 import ReactMarkdown from "react-markdown";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import { getGlobalSessionKey } from "utils/utils";
 
 function AlgorithmHelpContent(props) {
     const [textContent, setTextContent] = useState(null);
@@ -21,6 +22,7 @@ function AlgorithmHelpContent(props) {
             socketWorker.postMessage(
                 JSON.stringify({
                     action: actionTypes.GET_HELP_TEXT,
+                    sessionkey: getGlobalSessionKey(),
                     path: props.guidancePath
                 })
             );

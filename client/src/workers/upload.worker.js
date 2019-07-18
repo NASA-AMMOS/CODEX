@@ -10,7 +10,7 @@ function blobToBase64(blob, callback) {
 }
 
 //Send pieces of each files over the socket synchronously
-function process(files) {
+function process(files, sessionkey) {
     //for( let j = 0; j < files.length; j++ ) {
 
     let blob = files[0];
@@ -61,6 +61,7 @@ function process(files) {
                     sock.send(
                         JSON.stringify({
                             filename: blob.name,
+                            sessionkey,
                             done: true
                         })
                     );
@@ -96,7 +97,7 @@ self.addEventListener("message", function(e) {
         };
         sock.onopen = function() {
             console.log("Opened Upload Socket");
-            process(files);
+            process(files, e.data.sessionkey);
         };
     }
 });

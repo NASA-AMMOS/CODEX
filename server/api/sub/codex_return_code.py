@@ -12,6 +12,7 @@ import h5py
 import hashlib
 import sys
 import json
+from types import ModuleType
 import inspect
 import numpy as np
 import os.path
@@ -21,7 +22,7 @@ returnedCodePath = CODEX_ROOT + "returned_code.py"
 contents = []
 
 import codex_doctest
-
+import codex_hash
 
 def logReturnCode(frame):
     '''
@@ -84,6 +85,10 @@ def logReturnCode(frame):
             arg_string = "{arg}=np.array(({value}))".format(arg=arg, value=value)
             arg_string = arg_string.replace("\n","")
             arg_string = arg_string.replace(" ",",")
+        elif isinstance(value, codex_hash.WrappedCache):
+            arg_string = ""
+        elif isinstance(value, ModuleType):
+            arg_string = ""
         else:
             arg_string = ""
             print("Unsupported input type: {type} for {function_string} in {arg}".format(type=type(value), function_string=function_string, arg=arg))

@@ -1,5 +1,6 @@
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as actionTypes from "constants/actionTypes";
+import { getGlobalSessionKey } from "utils/utils";
 
 /* eslint import/no-webpack-loader-syntax: off */
 import WorkerSocket from "worker-loader!workers/socket.worker";
@@ -19,6 +20,7 @@ function buildSubalgoServerRequest(
         algorithmName: subalgo.simplename,
         dataFeatures: selectedFeatures,
         file: filename,
+        sessionkey: getGlobalSessionKey(),
         guidance: null,
         identification: {
             id: "dev0"

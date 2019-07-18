@@ -12,7 +12,6 @@ import sys
 import yaml
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
-import codex_doctest
 
 def codex_read_yaml(filepath):
     '''
@@ -31,5 +30,6 @@ def codex_read_yaml(filepath):
 
 
 if __name__ == "__main__":
+    import codex_doctest
 
     codex_doctest.run_codex_doctest()

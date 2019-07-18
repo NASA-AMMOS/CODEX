@@ -23,7 +23,7 @@ import math
 DEBUG = False
 
 import codex_system
-import codex_hash
+from codex_hash import get_cache
 import codex_doctest
 
 def ml_normalize(
@@ -32,16 +32,20 @@ def ml_normalize(
         algorithmName,
         downsampled,
         parms,
-        result):
+        result,
+        session=None):
     '''
     Inputs:
 
     Outputs:
 
     Examples:
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
     '''
+    codex_hash = get_cache(session)
 
     data = codex_hash.mergeHashResults(hashList)
     inputHash = codex_hash.hashArray('Merged', data, "feature")

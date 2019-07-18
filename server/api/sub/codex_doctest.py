@@ -17,7 +17,6 @@ import numpy as np
 import random
 
 # CODEX Support
-import codex_hash
 import codex_read_data_api
 
 def doctest_get_image_path():
@@ -25,7 +24,7 @@ def doctest_get_image_path():
     return (CODEX_ROOT + '/uploads/test_image.JPG')
 
 
-def doctest_get_data():
+def doctest_get_data(session=None):
     '''
     Inputs:
         None
@@ -46,10 +45,13 @@ def doctest_get_data():
         >>> print(testData['inputHash'])
         34a8c666b260c3968ad2a2010eef03fe4f80e21e
     '''
+    from codex_hash import get_cache, DOCTEST_SESSION
+
+    codex_hash = get_cache(DOCTEST_SESSION if session is None else session)
 
     featureList = ['TiO2', 'FeOT', 'SiO2', 'Total']
-    hashList, featureList = codex_read_data_api.codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv', featureList, "feature")
-    
+    hashList, featureList = codex_read_data_api.codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv', featureList, "feature", session=codex_hash)
+
     # merge 1d arrays to nd-array
     data = codex_hash.mergeHashResults(hashList)
     samples, features = data.shape
@@ -60,10 +62,10 @@ def doctest_get_data():
     templateHashDictionary = codex_hash.hashArray("template", template, "feature")
     templateHash = templateHashDictionary['hash']
 
-    labelHash = codex_read_data_api.codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv', ["labels"], "feature")
+    labelHash = codex_read_data_api.codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv', ["labels"], "feature", session=codex_hash)
     labelHash = labelHash[0][0]
 
-    regrLabelData = [] 
+    regrLabelData = []
     random.seed(50)
 
     for j in range(samples): 

@@ -8,7 +8,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        width:640px;
+        width: 640px;
         height: 100%;
     }
 
@@ -57,12 +57,11 @@
             margin-top: 5px;
             overflow-y: scroll;
             overflow-x: hidden;
-            height:130px;
+            height: 130px;
 
             .js-plotly-plot {
                 height: 100%;
             }
-
         }
 
         .used-features {
@@ -73,17 +72,17 @@
             margin-top: auto;
         }
 
-        .tree-sweep-scroller-circular{ 
+        .tree-sweep-scroller-circular {
             margin-bottom: 20px;
-            height:30%;
-            width:100%;
+            height: 30%;
+            width: 100%;
             display: flex;
             justify-content: center;
             flex-direction: column;
             text-align: center;
             div {
                 margin: auto;
-            }   
+            }
         }
 
         .tree-sweep-scroller {

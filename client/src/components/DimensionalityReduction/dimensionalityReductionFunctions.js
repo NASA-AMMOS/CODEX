@@ -12,6 +12,7 @@ export function getEta(regression, selectedFeatures, numFeatures) {
         routine: "time",
         algorithmType: "regression",
         algorithmName: regression,
+        sessionkey: utils.getGlobalSessionKey(),
         numSamples: selectedFeatures.length,
         numFeatures: numFeatures
     };

@@ -20,6 +20,9 @@ dependencies:
   - pandas
   - pillow
   - psutil
+  - msgpack-python
+  - pyzmq
+  - termcolor
   - pip
   - pip:
     - pysptools

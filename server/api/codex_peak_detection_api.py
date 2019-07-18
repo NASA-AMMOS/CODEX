@@ -32,7 +32,7 @@ import codex_return_code
 import codex_downsample
 import codex_plot
 import codex_time_log
-import codex_hash
+from codex_hash import get_cache
 
 DEBUG = False
 
@@ -49,18 +49,23 @@ def ml_peak_detect(
         algorithmName,
         downsampled,
         parms,
-        result):
+        result,
+        session=None):
     '''
     Inputs:
 
     Outputs:
 
     Examples:
-    >>> testData = codex_doctest.doctest_get_data()
+    >>> from codex_hash import DOCTEST_SESSION
+    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
     #>>> result = ml_peak_detect(testData['hashList'], None, "peak_cwt", False, {'peak_width': 3, 'gap_threshold': 5, 'min_snr': 3, 'noise_perc': 10}, {})
 
     '''
+    codex_hash = get_cache(session)
+
     data = codex_hash.mergeHashResults(hashList)
     inputHash = codex_hash.hashArray('Merged', data, "feature")
     if(inputHash is not None):
@@ -121,7 +126,8 @@ def ml_peak_detect(
                 peak_width,
                 gap_threshold,
                 min_snr,
-                noise_perc)
+                noise_perc,
+                session=codex_hash)
         except BaseException:
             codex_system.codex_log(
                 "Failed to run codex_scipy_signal_peak_cwt peak detection algorithm")
@@ -190,7 +196,8 @@ def ml_peak_detect(
                 edge,
                 kpsh,
                 valley,
-                False)
+                False,
+                session=codex_hash)
         except BaseException:
             codex_system.codex_log(
                 "Failed to run matlab-findpeaks peak detection algorithm")
@@ -213,7 +220,8 @@ def codex_scipy_signal_peak_cwt(
         peak_width,
         gap_threshold,
         min_snr,
-        noise_perc):
+        noise_perc,
+        session=None):
     '''
     Inputs:
         inputHash (string)        - Hash value corresponding to the data to cluster
@@ -237,6 +245,8 @@ def codex_scipy_signal_peak_cwt(
     Examples:
 
     '''
+    codex_hash = get_cache(session)
+
     downsampledHash = None
     startTime = time.time()
     eta = None
@@ -261,7 +271,7 @@ def codex_scipy_signal_peak_cwt(
             str(downsampled) +
             " samples")
         samples = len(data)
-        data = codex_downsample.downsample(data, percentage=downsampled)
+        data = codex_downsample.downsample(data, percentage=downsampled, session=codex_hash)
         eta = codex_time_log.getComputeTimeEstimate("peak", "cwt", samples)
 
     data = codex_math.codex_impute(data)
@@ -304,7 +314,8 @@ def codex_matlab_findpeaks(
         edge,
         kpsh,
         valley,
-        showPlot):
+        showPlot,
+        session=None):
     '''
     Inputs:
         inputHash (string)        - Hash value corresponding to the data to cluster
@@ -329,6 +340,8 @@ def codex_matlab_findpeaks(
     Examples:
 
     '''
+    codex_hash = get_cache(session)
+
     codex_return_code.logReturnCode(inspect.currentframe())
     downsampledHash = None
     startTime = time.time()
@@ -354,7 +367,7 @@ def codex_matlab_findpeaks(
             str(downsampled) +
             " samples")
         samples = len(data)
-        data = codex_downsample.downsample(data, percentage=downsampled)
+        data = codex_downsample.downsample(data, percentage=downsampled, session=codex_hash)
         eta = codex_time_log.getComputeTimeEstimate(
             "peak", "matlab_findpeaks", samples)
 

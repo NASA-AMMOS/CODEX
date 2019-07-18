@@ -103,6 +103,7 @@ function FeatureData(props) {
             routine: "arrange",
             hashType: "feature",
             activity: "metrics",
+            sessionkey: utils.getGlobalSessionKey(),
             cid: "8vrjn"
         };
 

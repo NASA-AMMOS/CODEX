@@ -22,8 +22,8 @@
                     overflow-y: scroll;
                     .input-selection {
                         height: 30px;
-                        margin-left:10px;
-                        margin-right:10px;
+                        margin-left: 10px;
+                        margin-right: 10px;
                         line-height: 30px;
                         padding-left: 10px;
                     }
@@ -32,23 +32,22 @@
                         background-color: #ebebeb;
                     }
                 }
-                
             }
         }
 
         .gc-right-side {
             width: 50%;
             display: flex;
-            flex-direction:column;
+            flex-direction: column;
             .parameter-section {
-                height:100%;
-                .selection-dropdown-container{
-                    margin-top:10px;
+                height: 100%;
+                .selection-dropdown-container {
+                    margin-top: 10px;
                     display: flex;
                     flex-direction: row;
                     .selection-dropdown {
                         width: 50%;
-                        margin-left:  5px;
+                        margin-left: 5px;
                         margin-right: 15px;
                     }
 
@@ -72,7 +71,7 @@
 
                     .similarity-threshold-input {
                         width: 50%;
-                        margin-left:  5px;
+                        margin-left: 5px;
                         margin-right: 15px;
                     }
                 }
@@ -90,7 +89,7 @@
                 margin-bottom: 10px;
                 border: 2px solid black;
                 padding: 5px;
-                overflow-y:scroll;
+                overflow-y: scroll;
             }
 
             .loading-section {
@@ -101,5 +100,4 @@
             }
         }
     }
-   
 }
