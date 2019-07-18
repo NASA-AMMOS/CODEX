@@ -7,11 +7,12 @@
     justify-content: space-between;
     width:100%;
     z-index: 2147483548;
-    padding:5px;
+    padding-top: 5px;
+    height: 40px;
 }
 
 .session-bar-file-file-input {
-    height:30px;
+    height:25px;
     width:200px;
 }
 
@@ -21,7 +22,7 @@
     margin:0px;
     margin-left:10px;
     margin-right: 10px;
-    height:32px;
+    height:28px;
     padding: 0px;
     padding-left:20px;
     padding-right:20px;

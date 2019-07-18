@@ -163,7 +163,7 @@ function FindMoreLikeThis(props) {
                 setLoading(false);
                 setOutputMessage(makeOutputMessage( "Like " + inputSelection.name));
                 //add a saved selections called fmlt_output with the returned data
-                props.saveSelection( "Like " + inputSelection.name, data.like_this);
+                props.saveSelection( "Like " + inputSelection.name, data.like_this, "FMLT");
                 setButtonClicked(false);
             }); 
             //cleanup function

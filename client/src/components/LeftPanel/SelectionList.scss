@@ -32,6 +32,7 @@
         position: relative;
         display: flex;
         flex-direction:column;
+        padding-bottom: 10px;
 
         .current-selection-button {
             margin: 10px;
@@ -46,6 +47,9 @@
                     color: #9f9f9f;
                 }
             }
+        }
+
+        .group-dnd-div {
         }
 
         .drag-drop-div {
