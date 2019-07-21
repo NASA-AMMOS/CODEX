@@ -264,6 +264,7 @@ function SelectionGroup(props) {
                                 />
                                 <div
                                     className="selection-group-sub-selections"
+                                    hidden={!groupExpanded}
                                 >
                                     {
                                         props.group.map((selection, index) => {
@@ -385,8 +386,6 @@ function DragList(props) {
         const newSelectionsGroupList = keepOldIndices(selectionsGroupList, newGenerated);
         setSelectionsGroupList(newSelectionsGroupList);
     }, [props.savedSelections, props.selectionGroups]);
-
-    //console.log(selectionsGroupList);
 
     function onDragEnd(result){
         // dropped outside the list

@@ -137,7 +137,7 @@ export function getUniqueGroupID(groups, id) {
     } else {
         let numStarting = 0;
         for(let group of groups) {
-            if(groups.id.substring(id.length) === id) 
+            if(group.id.substring(id.length) === id) 
                 numStarting++;
         }
         if (numStarting === 0)
