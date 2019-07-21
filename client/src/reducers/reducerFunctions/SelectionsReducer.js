@@ -16,7 +16,8 @@ export default class SelectionsReducer {
                     color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
                     active: false,
                     hidden: false,
-                    name: `Selection ${state.savedSelections.length + 1}`
+                    name: `Selection ${state.savedSelections.length + 1}`,
+                    groupID: null
                 }
             ]),
             currentSelection: [],
@@ -43,27 +44,6 @@ export default class SelectionsReducer {
     }
 
     static saveNewSelection(state, action) {
-        //look to see if the selection is a duplicate
-        //if so then update the selection with the same name
-        for (let i = 0; i < state.savedSelections.length; i++) {
-            const selection = state.savedSelections[i];
-            if (selection.name === action.name) {
-                let newSavedSelections = [...state.savedSelections];
-                newSavedSelections[i] = {
-                    id: i,
-                    rowIndices: action.rowIndices,
-                    color: selection.color,
-                    active: true,
-                    hidden: false,
-                    name: action.name
-                };
-
-                return {
-                    ...state,
-                    savedSelections: newSavedSelections
-                };
-            }
-        }
 
         return {
             ...state,
@@ -74,7 +54,8 @@ export default class SelectionsReducer {
                     color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
                     active: true,
                     hidden: false,
-                    name: action.name
+                    name: action.name,
+                    groupID: action.groupID
                 }
             ]),
             nextColorIndex:
@@ -117,10 +98,47 @@ export default class SelectionsReducer {
         };
     }
 
-    static setSavedSelections(state, action) {
+    static createSelectionGroup(state, action) {
+        const uniqueID = (
+            function(){
+                for(let group of state.groups){
+                    if (action.id === group.id)
+                        return false;
+                }
+                return true;
+            }
+        )();
+        if (!uniqueID)
+            return state;
+
         return {
             ...state,
-            savedSelections: action.newSavedSelections
-        };
+            groups: [...state.groups, 
+                {
+                    id: action.id,
+                    active: true,
+                    hidden: false,
+                    info: null
+                }
+            ]
+        }
+    }
+
+    static toggleGroupHidden(state, action) {
+        return {
+            ...state,
+            groups: state.groups.map(group =>
+                group.id === action.id ? { ...group, hidden: !group.hidden} : group
+            )
+        }
+    }
+
+    static toggleGroupActive(state, action) {
+        return {
+            ...state,
+            groups: state.groups.map(group =>
+                group.id === action.id ? { ...group, active: !group.active} : group
+            )
+        }
     }
 }

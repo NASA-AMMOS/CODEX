@@ -214,9 +214,25 @@ export function useSavedSelections() {
 
     return [
         savedSelections,
-        (name, indices) => dispatch(selectionActions.saveNewSelection(name, indices))
+        (name, indices, groupID) => dispatch(selectionActions.saveNewSelection(name, indices, groupID))
     ];
 }
+
+/**
+ * Get the list of existing groups
+ * @return {array} current list of groups from the selections state
+ */
+export function useSelectionGroups(){
+    const dispatch = useDispatch();
+    const groups = useSelector(state => {
+        return state.selections.groups;
+    });
+
+    return [
+        groups,
+        (groupID) => dispatch(selectionActions.createSelectionGroup(groupID))
+    ];
+ }
 
 /**
  * Get current selection
@@ -307,8 +323,6 @@ export function useNewFeature() {
             data: data,
             length: data.length
         };
-
-        console.log(req);
 
         utils.makeSimpleRequest(req).req.then(r => {
             dispatch(featureAdd(name, data));

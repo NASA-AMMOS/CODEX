@@ -1,4 +1,4 @@
-import { useSavedSelections, useFilename, useSelectedFeatureNames } from "hooks/DataHooks";
+import { useSavedSelections, useFilename, useSelectedFeatureNames, useSelectionGroups} from "hooks/DataHooks";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import { useWindowManager } from "hooks/WindowHooks";
 import * as utils from "utils/utils";
@@ -149,13 +149,8 @@ function FindMoreLikeThis(props) {
                     return;
                 }
 
-                const requestObject = createFMLTRequest(
-                    props.filename,
-                    inputSelection.rowIndices,
-                    props.featureNames,
-                    similarityThreshold
-                );
-                //actually handle the request for running the
+                const requestObject = createFMLTRequest(props.filename, inputSelection.rowIndices, props.featureNames, similarityThreshold);
+                //actually handle the request for running the 
                 //find more like this algorithm
                 setOutputMessage("");
                 setLoading(true);
@@ -163,19 +158,20 @@ function FindMoreLikeThis(props) {
                 //resolves the fmlt request
                 request.req.then(data => {
                     setLoading(false);
-                    setOutputMessage(makeOutputMessage("Like " + inputSelection.name));
+                    setOutputMessage(makeOutputMessage( "Like " + inputSelection.name));
                     //add a saved selections called fmlt_output with the returned data
-                    props.saveSelection("Like " + inputSelection.name, data.like_this);
+
+                    const groupID = utils.getUniqueGroupID(props.selectionGroups, "FMLT");
+                    props.createSelectionGroup(groupID);
+                    props.saveSelection( "Like " + inputSelection.name, data.like_this, groupID);
                     setButtonClicked(false);
-                });
+                }); 
                 //cleanup function
                 return function cleanup() {
                     request.cancel();
                 };
-            }
-        },
-        [buttonClicked]
-    );
+        }
+    },[buttonClicked]);
 
     return (
         <div className="fmlt-container">
@@ -214,6 +210,7 @@ export default props => {
     const [savedSelections, saveSelection] = useSavedSelections();
     const filename = useFilename();
     const [selectedFeatureNames, setSelectedFeatureNames] = useSelectedFeatureNames();
+    const [selectionGroups, createSelectionGroup] = useSelectionGroups();
 
     return (
         <FindMoreLikeThis
@@ -221,6 +218,8 @@ export default props => {
             saveSelection={saveSelection}
             filename={filename}
             featureNames={Array.from(selectedFeatureNames)}
+            selectionGroups={selectionGroups}
+            createSelectionGroup={createSelectionGroup}
         />
     );
 };

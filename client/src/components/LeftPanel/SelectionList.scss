@@ -31,7 +31,8 @@
         height: 100%;
         position: relative;
         display: flex;
-        flex-direction: column;
+        flex-direction:column;
+        padding-bottom: 10px;
 
         .current-selection-button {
             margin: 10px;
@@ -48,11 +49,52 @@
             }
         }
 
+        .group-dnd-div {
+        }
+
         .drag-drop-div {
             flex: 1;
             width: 100%;
             overflow-y: scroll;
 
+            .group-container {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+
+                .group-display-item{
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: flex-start;
+
+                    .group-display-name-tag {
+                        overflow: hidden;
+                        position: relative;
+                        width: 150px;
+                        height: 22px;
+                        line-height: 22px;
+                        padding-left: 5px;
+                        padding-right: 5px;
+                    }
+
+                    .eye-icon-checkbox {
+                        margin-left: auto;
+                        margin-right: 5px;
+                    }
+
+                    .keyboard-arrow {
+                        width: 24px;
+                        height: 24px;
+                        color: #bbb;
+                    }
+
+                }
+
+            }
+
+            .selection-group-sub-selections {
+                margin-left: 20px;
+            }
             .selection {
                 font-family: "bitstreamvera", monospace;
                 color: #bbb;
@@ -84,7 +126,7 @@
 
                 .eye-icon-checkbox {
                     margin-left: auto;
-                    margin-right: 10px;
+                    margin-right:5px;
                 }
 
                 &:hover {
@@ -107,8 +149,9 @@
                 }
 
                 .swatch {
-                    width: 10px;
-                    height: 10px;
+                    width: 14px;
+                    height: 14px;
+                    margin:5px;
                 }
             }
         }

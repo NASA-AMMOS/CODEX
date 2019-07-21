@@ -142,3 +142,24 @@ export function createGradientStops(startColor, endColor, numStops) {
                 .join("")}`
     );
 }
+
+ /**
+  * Appends a unique id to a given name
+  * @return {string} an augmented version of a name if it is not unique 
+  */
+export function getUniqueGroupID(groups, id) {
+
+    if (id === null || id === undefined) {
+        return "Group "+groups.length;
+    } else {
+        let numStarting = 0;
+        for(let group of groups) {
+            if(group.id.substring(id.length) === id) 
+                numStarting++;
+        }
+        if (numStarting === 0)
+            return id;
+        else 
+            return getUniqueGroupID(id+" "+numStarting);
+    }
+}
