@@ -24,6 +24,12 @@ export default function selections(
             return opt_reducer.renameSelection(state, action);
         case actionTypes.HOVER_SELECTION:
             return opt_reducer.hoverSelection(state, action);
+        case actionTypes.CREATE_SELECTION_GROUP:
+            return opt_reducer.createSelectionGroup(state, action);
+        case actionTypes.TOGGLE_GROUP_HIDDEN:
+            return opt_reducer.toggleGroupHidden(state, action);
+        case actionTypes.TOGGLE_GROUP_ACTIVE:
+            return opt_reducer.toggleGroupActive(state, action);
         default:
             return state;
     }

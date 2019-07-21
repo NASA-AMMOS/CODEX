@@ -35,3 +35,15 @@ export function hoverSelection(id) {
 export function setSelectionGroup(id, groupID) {
     return {type: actionTypes.SET_SELECTION_GROUP, id, groupID};
 }
+
+export function createSelectionGroup(id) {
+    return {type: actionTypes.CREATE_SELECTION_GROUP, id};
+}
+
+export function toggleGroupActive(id) {
+    return {type: actionTypes.TOGGLE_GROUP_ACTIVE, id};
+}
+
+export function toggleGroupHidden(id) {
+    return {type: actionTypes.TOGGLE_GROUP_HIDDEN, id};
+}

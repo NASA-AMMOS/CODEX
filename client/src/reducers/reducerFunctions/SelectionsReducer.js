@@ -97,4 +97,48 @@ export default class SelectionsReducer {
             )
         };
     }
+
+    static createSelectionGroup(state, action) {
+        const uniqueID = (
+            function(){
+                for(let group of state.groups){
+                    if (action.id === group.id)
+                        return false;
+                }
+                return true;
+            }
+        )();
+        if (!uniqueID)
+            return state;
+
+        return {
+            ...state,
+            groups: [...state.groups, 
+                {
+                    id: action.id,
+                    active: true,
+                    hidden: false,
+                    info: null
+                }
+            ]
+        }
+    }
+
+    static toggleGroupHidden(state, action) {
+        return {
+            ...state,
+            groups: state.groups.map(group =>
+                group.id === action.id ? { ...group, hidden: !group.hidden} : group
+            )
+        }
+    }
+
+    static toggleGroupActive(state, action) {
+        return {
+            ...state,
+            groups: state.groups.map(group =>
+                group.id === action.id ? { ...group, active: !group.active} : group
+            )
+        }
+    }
 }
