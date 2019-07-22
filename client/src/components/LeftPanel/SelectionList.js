@@ -107,10 +107,10 @@ function GroupDisplayItem(props) {
             />
             <Checkbox
                 className="keyboard-toggle"
-                checked={!props.expanded}
+                checked={!props.groupExpanded}
                 value="checkedA"
                 icon={<KeyboardArrowDown className="keyboard-arrow"/>}
-                checkedIcon={<KeyboardArrowUp className="keyboard-arrow"/> }
+                checkedIcon={<KeyboardArrowUp className="keyboard-arrow"/>}
                 onClick={_ => {
                         props.setGroupExpanded(!props.groupExpanded)
                     }
@@ -430,7 +430,7 @@ function DragList(props) {
 
             let newSelectionsGroupList = selectionsGroupList;
             newSelectionsGroupList[newArrIndex].value = outputArr;
-            
+
             setSelectionsGroupList(newSelectionsGroupList);
         }
 
@@ -445,7 +445,9 @@ function DragList(props) {
 
     return (
         <div className="list">
-            <DragDropContext onDragEnd={onDragEnd}>
+            <DragDropContext 
+                onDragEnd={onDragEnd}
+            >
                 <Droppable droppableId="droppable" type="OUTER">
                   {(provided, snapshot) => (
                     <div
