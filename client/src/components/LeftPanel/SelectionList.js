@@ -266,29 +266,38 @@ function SelectionGroup(props) {
                                     hidden={!groupExpanded}
                                 >
                                     {
-                                        props.group.map((selection, index) => {
-                                            return (
-                                                <Draggable key={selection.id} draggableId={selection.id+""} index={index}>  
-                                                    {(provided, snapshot) => (
-                                                        <div 
-                                                            ref={provided.innerRef}
-                                                            {...provided.draggableProps}
-                                                            {...provided.dragHandleProps}
-                                                        >  
-                                                            <SelectionDisplayItem
-                                                                hoverSelection={props.hoverSelection}     
-                                                                selection={selection.value}
-                                                                toggleSelectionActive={props.toggleSelectionActive}
-                                                                toggleSelectionHidden={props.toggleSelectionHidden}
-                                                                setContextMenuVisible={props.setContextMenuVisible}
-                                                                setContextMenuPosition={props.setContextMenuPosition}
-                                                                setContextActiveSelection={props.setContextActiveSelection}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </Draggable>
-                                            );
-                                        })
+                                        props.group
+                                            .concat()//this is so it does not mutate the original list
+                                            .sort((a,b) => { 
+                                                if ( a.index < b.index)
+                                                    return -1;
+                                                else if (a.index > b.index)
+                                                    return 1;
+                                                else 
+                                                    return 0;
+                                            }).map((selection, index) => {
+                                                return (
+                                                    <Draggable key={selection.id} draggableId={selection.id+""} index={index}>  
+                                                        {(provided, snapshot) => (
+                                                            <div 
+                                                                ref={provided.innerRef}
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                            >  
+                                                                <SelectionDisplayItem
+                                                                    hoverSelection={props.hoverSelection}     
+                                                                    selection={selection.value}
+                                                                    toggleSelectionActive={props.toggleSelectionActive}
+                                                                    toggleSelectionHidden={props.toggleSelectionHidden}
+                                                                    setContextMenuVisible={props.setContextMenuVisible}
+                                                                    setContextMenuPosition={props.setContextMenuPosition}
+                                                                    setContextActiveSelection={props.setContextActiveSelection}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </Draggable>
+                                                );
+                                            })
                                     }
                                 </div>
                                 {provided.placeholder}
@@ -392,7 +401,40 @@ function DragList(props) {
             return;
         }
 
-        const outputList =  reorder(
+        function findElementIndexByType(type) {
+
+            for (let i = 0; i < selectionsGroupList.length; i++) {
+                if (selectionsGroupList[i].type === "group") {
+                    const group = selectionsGroupList[i];
+                    if (group.id === type)
+                        return i;
+                }
+            }
+
+            return -1;
+        }
+
+
+        if (result.source.droppableId != "droppable" 
+            || result.destination.droppableId != "droppable") {
+            //a nested list is being dropped and should then be passed into reorder
+            const newArrIndex = findElementIndexByType(result.type);
+            if (newArrIndex == -1)
+                return;
+
+            const outputArr = reorder(
+                selectionsGroupList[newArrIndex].value,
+                result.source.index,
+                result.destination.index
+            );
+
+            let newSelectionsGroupList = selectionsGroupList;
+            newSelectionsGroupList[newArrIndex].value = outputArr;
+            
+            setSelectionsGroupList(newSelectionsGroupList);
+        }
+
+        const outputList = reorder(
             selectionsGroupList,
             result.source.index,
             result.destination.index
