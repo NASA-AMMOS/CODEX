@@ -42,6 +42,10 @@ export function setWindowData(id, data) {
     return { type: actionTypes.WINDOW_SET_DATA, id, data };
 }
 
+export function setActiveWindow(id) {
+    return { type: actionTypes.WINDOW_SET_ACTIVE, id };
+}
+
 export function moveWindow(id, position) {
     return { type: actionTypes.WINDOW_MOVE, id, position };
 }

@@ -4,6 +4,7 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import React, { useState, useLayoutEffect, useEffect, useRef } from "react";
 import ShelfPack from "@mapbox/shelf-pack";
+import { useActiveWindow } from "hooks/WindowHooks";
 
 import Cristal from "react-cristal/src";
 import * as windowContentFunctions from "components/WindowManager/windowContentFunctions";
@@ -148,7 +149,7 @@ function usePrevious(value) {
 function WindowManager(props) {
     const refs = useRef({}); // Store refs to all the open windows so we can do global window operations
     // Each time the windows list gets updated, delete old refs.
-    const [activeWindow, setActiveWindow] = useState(null);
+    const [activeWindow, setActiveWindow] = useActiveWindow();
 
     const oldWindows = usePrevious(props.windows);
     useEffect(
@@ -156,11 +157,6 @@ function WindowManager(props) {
             Object.keys(refs.current).forEach(key => {
                 if (!refs.current[key]) delete refs.current[key];
             });
-
-            // If there's a new window since the previous render, set it to be the active window.
-            const newWindow =
-                oldWindows && props.windows.find(win => !oldWindows.find(w => w.id === win.id));
-            if (newWindow) setActiveWindow(newWindow.id);
         },
         [props.windows]
     );
