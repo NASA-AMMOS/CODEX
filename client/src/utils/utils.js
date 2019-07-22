@@ -154,12 +154,12 @@ export function getUniqueGroupID(groups, id) {
     } else {
         let numStarting = 0;
         for(let group of groups) {
-            if(group.id.substring(id.length) === id) 
+            if(group.id.substring(0, id.length) === id) 
                 numStarting++;
         }
         if (numStarting === 0)
             return id;
         else 
-            return getUniqueGroupID(id+" "+numStarting);
+            return getUniqueGroupID(groups, id+" "+numStarting);
     }
 }
