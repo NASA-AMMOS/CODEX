@@ -226,8 +226,7 @@ function FeatureListDNDRow(props) {
     and their corresponding statistics
 */
 function FeatureListDND(props) {
-
-    if (props.featureIndices === {})
+    if (Object.keys(props.featureIndices).length == 0)
         return <div> Loading ... </div>
 
     function onDragEnd(result){
