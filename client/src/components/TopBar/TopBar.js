@@ -23,7 +23,42 @@ import * as sessionsActions from "actions/sessionsActions";
 import * as exportActions from "actions/exportActions";
 import * as dataActions from "actions/data";
 
+import { useFilename } from "hooks/DataHooks";
+import MaterialButton from "@material-ui/core/Button";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload";
+import CodeIcon from "@material-ui/icons/Code";
+import SaveIcon from "@material-ui/icons/Save";
+import OpenIcon from "@material-ui/icons/FolderOpen";
+import DescriptionIcon from "@material-ui/icons/Description";
+import CircularProgress from "@material-ui/core/CircularProgress";
+
 function SessionBar(props) {
+    const filename = useFilename();
+
+    let uploadButtonContents = null;
+    if (filename === null) {
+        uploadButtonContents = (
+            <React.Fragment>
+                <CloudUploadIcon fontSize="small" />
+                &nbsp; Upload
+            </React.Fragment>
+        );
+    } else if (filename === "") {
+        uploadButtonContents = (
+            <React.Fragment>
+                <CircularProgress size="16px" color="inherit" />
+                &nbsp; Loading...
+            </React.Fragment>
+        );
+    } else {
+        uploadButtonContents = (
+            <React.Fragment>
+                <DescriptionIcon fontSize="small" />
+                &nbsp;
+                {filename}
+            </React.Fragment>
+        );
+    }
     return (
         <div className="session-bar">
             <ul className="session-bar-list">
@@ -31,33 +66,58 @@ function SessionBar(props) {
                     <input
                         className="session-bar-file-input inputfile"
                         multiple={false}
+                        id="codex-file-upload-button"
                         name="files[]"
                         type="file"
+                        hidden
+                        accept=".csv,.npy,.h5"
                         onChange={e => {
                             props.fileLoad(e.target.files);
                         }}
-                        accept=".csv,.npy,.h5"
                     />
                 </li>
                 <li>
-                    <Button className="session-bar-button" onClick={props.requestServerExport}>
-                        Export File
-                    </Button>
+                    <label htmlFor="codex-file-upload-button">
+                        <MaterialButton component="span" size="small" color="inherit">
+                            {uploadButtonContents}
+                        </MaterialButton>
+                    </label>
                 </li>
+                <li className="session-bar__spacer" />
                 <li>
-                    <Button className="session-bar-button" onClick={props.openSessionsWindow}>
-                        Load Session
-                    </Button>
-                </li>
-                <li>
-                    <Button
+                    <MaterialButton
                         className="session-bar-button"
+                        size="small"
+                        color="inherit"
+                        onClick={props.requestServerExport}
+                    >
+                        Export File &nbsp;
+                        <CodeIcon fontSize="small" />
+                    </MaterialButton>
+                </li>
+                <li>
+                    <MaterialButton
+                        className="session-bar-button"
+                        size="small"
+                        color="inherit"
+                        onClick={props.openSessionsWindow}
+                    >
+                        Load Session &nbsp;
+                        <OpenIcon fontSize="small" />
+                    </MaterialButton>
+                </li>
+                <li>
+                    <MaterialButton
+                        className="session-bar-button"
+                        size="small"
+                        color="inherit"
                         onClick={() => {
                             props.saveSession(`${props.filename}_${new Date().toISOString()}`);
                         }}
                     >
-                        Save Session
-                    </Button>
+                        Save Session &nbsp;
+                        <SaveIcon fontSize="small" />
+                    </MaterialButton>
                 </li>
             </ul>
         </div>
