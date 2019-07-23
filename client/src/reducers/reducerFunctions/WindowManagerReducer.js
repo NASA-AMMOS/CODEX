@@ -16,6 +16,7 @@ export default class WindowManagerReducer {
             ...action.info,
             id
         });
+        state = state.set("activeWindow", id);
         return state.set("windows", state.get("windows").concat([info]));
     }
 
@@ -109,5 +110,8 @@ export default class WindowManagerReducer {
                 .get("windows")
                 .map(win => (win.get("id") === action.id ? win.set("data", action.data) : win))
         );
+    }
+    static setWindowActive(state, action) {
+        return state.set("activeWindow", action.id);
     }
 }

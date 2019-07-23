@@ -62,6 +62,12 @@ const wrapDummy = () => {
     };
 };
 
+/**
+ * Window manager configuration hook
+ * @param {object} props parent props
+ * @param {object} initialSettings initial settings for WM
+ * @return a reference to the window
+ */
 export function useWindowManager(props, initialSettings) {
     const dispatch = useDispatch();
     const domain = useSelector(state => state.windowManager);
@@ -83,6 +89,19 @@ export function useWindowManager(props, initialSettings) {
     }, []); // <- only run on first render
 
     return window_obj;
+}
+
+/**
+ * Getter/setter for the active window
+ * @return {tuple} value/setter function
+ */
+export function useActiveWindow() {
+    const dispatch = useDispatch();
+    const activeWindow = useSelector(state => state.windowManager.get("activeWindow"));
+
+    const setActiveWindow = id => dispatch(wmActions.setActiveWindow(id));
+
+    return [activeWindow, setActiveWindow];
 }
 
 export default useWindowManager;
