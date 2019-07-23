@@ -1,12 +1,32 @@
-.feature-lists-container {
+.feature-list-container {
     height: 40vh;
-    position: relative;
+    position:relative;
+    color:white;
+
+    &.stats-hidden {
+        width: 100%;
+        .feature-name-row {
+            width: 100%;
+        }
+    }
+
+    &.stats-not-hidden {
+        width: 250%;
+
+        .feature-name-row{ 
+            width: 40%;
+        }
+    }
+
     .header-container {
         display: flex;
         flex-direction: row;
         color: white;
         height: 25px;
+        width: 100%;
+
         .header {
+            width: 250px;
             display: flex;
             justify-content: space-between;
             align-items: baseline;
@@ -31,142 +51,72 @@
             padding: 0 5px;
             background-color: #061427;
             z-index: 999; //this is to ensure it is above the window layout
-            td {
-                padding-right: 10px;
+            height: 25px;
+            line-height: 25px;
+
+            display: flex;
+            flex-direction: row;
+
+            .classification, .regression {
+                width: 25px;
+            }
+
+            .mean, .median {
+                width: 75px;
+            }
+
+            .sparkline {
+                width: 200px;
             }
         }
     }
 
-    .scroll-container {
+    .features {
         height: calc(100% - 25px);
-        display: flex;
-        flex-direction: row;
-        position: relative;
-        z-index: 999;
         overflow-y: scroll;
+        z-index: 999;
+        position: relative;
         background-color: #061427;
-        .Features {
-            display: flex;
-            flex-flow: column;
-            width: 40%;
-            height: calc(100% - 25px);
-            flex: 1;
-            color: white;
-            font-family: "bitstreamvera", monospace;
 
-            .loading {
+        .list {
+
+            .featureRow {
+                height: 22px;
+                line-height: 22px;
                 display: flex;
-                justify-content: center;
-                align-items: center;
-                width: 200px;
-                height: 100%;
-            }
+                flex-direction: row;
 
-            .list {
-                direction: "ltr";
-                width: 100%;
-
-                ul {
-                    padding-left: 0px;
-                    padding-right: 0px;
-                    margin-bottom: 0px;
-                    li {
-                        height: 22px;
-                        padding-left: 10px;
-                        padding-right: 10px;
-                    }
-                }
-
-                .feature {
-                    font-family: "bitstreamvera", monospace;
-                    color: #bbb;
-                    font-size: 14px;
-                    /*cursor: pointer;*/
+                .feature-name-row {
                     display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    justify-content: flex-start;
-
-                    .mouse-over-popover {
-                        margin-left: 25px;
-                    }
-
+                    flex-direction:row;
                     .feature-name {
-                        overflow: hidden;
-                        width: 100%;
+                        padding-left: 5px;
+                        padding-right: 5px;
                         text-overflow: ellipsis;
                     }
-
-                    &.selected {
-                        color: black;
-                        background-color: white !important;
-                    }
-
-                    .checkbox {
-                        height: 13px;
-                        width: 13px;
-                        border-radius: 2px;
-                        margin-right: 7px;
-                        margin-left: 5px;
-                        background-color: #5d6673;
-                    }
                 }
-            }
-        }
 
-        .feature-statistics-panel {
-            width: 60%;
-            height: 40vh;
-            color: #bbb;
-            background-color: #061427;
-            z-index: 999; //this is to ensure it is above the window layout
-            padding-left: 3px;
-            .stats-container {
-                height: calc(40vh - 25px);
-                padding-left: 5px;
-                padding-right: 5px;
-                .stats-table {
-                    background-color: #061427;
+                .feature-statistics-row {
+                    width: 60%;
+                    display: flex;
+                    flex-direction: row;
+                    padding-left: 5px;
+                    z-index: 999;
 
-                    .loading-tr {
-                        height: 22px;
-                        line-height: 16px;
-                        padding: 0px;
+                    .class-regression-span {
+                        width: 22px;
+
                     }
 
-                    .feature-statistics-row {
-                        height: 22px;
-                        line-height: 16px; //necesary to make the height 22
-                        td {
-                            padding-right: 10px;
-                        }
+                    .mean-span, .median-span {
+                        width: 75px;
                     }
 
-                    .dim {
-                        color: #666666;
-                    }
-
-                    .lit {
-                        color: #eeeeee;
+                    .sparkline-span {
+                        width: 200px;
                     }
                 }
             }
         }
     }
-}
-
-.stats-hidden {
-    width: 100%;
-}
-
-.stats-not-hidden {
-    width: 250%;
-}
-
-.stats-hidden-header {
-    width: 100%;
-}
-
-.stats-not-hidden-header {
-    width: 40%;
 }
