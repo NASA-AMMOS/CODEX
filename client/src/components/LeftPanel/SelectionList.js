@@ -414,7 +414,6 @@ function DragList(props) {
             return -1;
         }
 
-
         if (result.source.droppableId != "droppable" 
             || result.destination.droppableId != "droppable") {
             //a nested list is being dropped and should then be passed into reorder
