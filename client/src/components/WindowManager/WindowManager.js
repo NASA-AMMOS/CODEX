@@ -5,6 +5,7 @@ import { connect } from "react-redux";
 import React, { useState, useLayoutEffect, useEffect, useRef } from "react";
 import ShelfPack from "@mapbox/shelf-pack";
 import { useActiveWindow } from "hooks/WindowHooks";
+import { batchActions } from "redux-batched-actions";
 
 import Cristal from "react-cristal/src";
 import * as windowContentFunctions from "components/WindowManager/windowContentFunctions";
@@ -67,52 +68,107 @@ function tileWindows(props, refs) {
     console.log("Can't tile windows! Not enough space!");
 }
 
-// Adapted from: https://www.youtube.com/watch?v=g8bSdXCG-lA
-function getNewWindowPosition(props, refs, width, height) {
-    const windowContainer = document.getElementById("Container");
-    const bounds = windowContainer.getBoundingClientRect();
-    bounds.width = Math.floor(bounds.width);
-    bounds.height = Math.floor(bounds.height);
-
-    // Build a matrix of occupied and unoccupied space
-    const matrix = Array(bounds.height)
-        .fill()
-        .map((_, y) =>
-            Array(bounds.width)
-                .fill(0)
-                .map((_, x) => true)
+/**
+ * Binary space partition
+ */
+function BSPTile(windows) {
+    // helper to divide into integer components
+    const divide = num => [Math.floor(num / 2), Math.ceil(num / 2)];
+    // helper to make partitions
+    const makePart = (x, y, width, height, depth = -1) => ({ x, y, width, height, depth });
+    // add margins to a partition
+    const addMargin = margin => part =>
+        makePart(
+            part.x + margin,
+            part.y + margin,
+            part.width - 2 * margin,
+            part.height - 2 * margin,
+            part.depth
         );
 
-    const windows = createPackingObject(Object.entries(refs.current));
-    windows.forEach(win => {
-        if (win.width && win.height) {
-            for (let y = win.y; y < win.height + win.y + 10; y++) {
-                for (let x = win.x; x < win.width + win.x + 10; x++) {
-                    matrix[y][x] = false;
-                }
-            }
+    /**
+     * Make a list of partitions the length of the space
+     */
+    function makePartitions(bounding, remaining, depth = 0) {
+        // base case: zero remaining
+        if (remaining === 0) {
+            return [];
+        } else if (remaining === 1) {
+            // base case: one remaining
+            return [bounding];
         }
-    });
 
-    let cache = Array(bounds.width).fill(0);
-    const stack = [];
+        // here we have 2+ remaining partitions
+        let part1 = {};
+        let part2 = {};
+        if (bounding.width > bounding.height) {
+            // split horizontally
+            let [left, right] = divide(bounding.width);
 
-    for (let row = 0; row < bounds.height; row++) {
-        cache = cache.map((col, idx) => (matrix[row][idx] ? col + 1 : 0));
-
-        let currentWidth = 0;
-        for (let col = 0; col < bounds.width; col++) {
-            if (cache[col] >= height) {
-                // We've found the start of a box that's tall enough
-                currentWidth = cache[col] >= height ? currentWidth + 1 : 0;
-            }
-
-            if (currentWidth === width) {
-                // And now we have one that's wide enough
-                return { y: row - height + 1, x: col - width + 1 };
-            }
+            part1 = makePart(bounding.x, bounding.y, left, bounding.height, depth);
+            part2 = makePart(bounding.x + left, bounding.y, right, bounding.height, depth);
+        } else {
+            // split vertically
+            let [top, bottom] = divide(bounding.height);
+            part1 = makePart(bounding.x, bounding.y, bounding.width, top, depth);
+            part2 = makePart(bounding.x, bounding.y + top, bounding.width, bottom, depth);
         }
+
+        // recursive step: calculate child partitions
+        let [part1_remaining, part2_remaining] = divide(remaining);
+        return [
+            ...makePartitions(part1, part1_remaining, depth + 1),
+            ...makePartitions(part2, part2_remaining, depth + 1)
+        ];
     }
+
+    // determine the bounds of the window
+    const windowContainer = document.getElementById("Container");
+    const containerBoundingRect = windowContainer.getBoundingClientRect();
+    // make partitions, taking care to respect the window container area's padding
+    const bounds = makePart(
+        10,
+        10,
+        containerBoundingRect.width - 20,
+        containerBoundingRect.height - 50
+    );
+
+    // next, create N partitions (to match the # of windows)
+    const partitions = makePartitions(bounds, windows.length).map(addMargin(1));
+
+    // in-place sort the partitions by size. it's important that the partitions
+    // are sorted so that the windows do not shuffle around when you try
+    // to re+tile multiple times.
+    partitions.sort(part => part.width * part.height);
+
+    console.log(partitions);
+
+    // sort the windows by size as well
+    const windows_sorted = windows
+        .sort(win => win.get("width") * win.get("height"))
+        .map(win => win.get("id"));
+
+    // reduce the windows together with the partitions to create action objects (undispatched)
+    return partitions.reduce(
+        (acc, val, idx) => [
+            ...acc,
+            windowManagerActions.resizeWindow(windows_sorted[idx], {
+                width: val.width,
+                height: val.height
+            }),
+            windowManagerActions.moveWindow(windows_sorted[idx], { x: val.x, y: val.y })
+        ],
+        []
+    );
+}
+
+// Simple heuristic for window position
+function getNewWindowPosition(props, refs, width, height) {
+    const activeWindows = Object.keys(refs.current).length;
+    return {
+        x: activeWindows * 30,
+        y: activeWindows * 30
+    };
 }
 
 function makeMinimizedBar(props) {
@@ -166,7 +222,17 @@ function WindowManager(props) {
     useLayoutEffect(
         _ => {
             if (!props.tileActionPending) return;
-            tileWindows(props, refs);
+            //tileWindows(props, refs);
+            const actions = BSPTile([...props.windows]);
+
+            // hacky, but the windows need to be directly notified of their new positions
+            for (let action of actions) {
+                if ("position" in action) {
+                    refs.current[action.id].snapToPosition(action.position);
+                }
+            }
+
+            props.executeTilingAction(actions);
             props.setWindowTileAction(false);
         },
         [props.tileActionPending]
@@ -190,7 +256,9 @@ function WindowManager(props) {
                 initialSize: { width: win.get("width"), height: win.get("height") },
                 minSize: win.get("minSize").toJS() || { width: 100, height: 100 },
                 width: win.get("width"),
-                height: win.get("height")
+                height: win.get("height"),
+                x: win.get("x", 0),
+                y: win.get("y", 0)
             };
 
             // This is a bit of an odd return fragment, but we want to avoid re-rendering the window's content.
@@ -257,7 +325,8 @@ function mapDispatchToProps(dispatch) {
         ),
         setWindowHover: bindActionCreators(windowManagerActions.setWindowHover, dispatch),
         resizeWindow: bindActionCreators(windowManagerActions.resizeWindow, dispatch),
-        moveWindow: bindActionCreators(windowManagerActions.moveWindow, dispatch)
+        moveWindow: bindActionCreators(windowManagerActions.moveWindow, dispatch),
+        executeTilingAction: actions => dispatch(batchActions(actions))
     };
 }
 
