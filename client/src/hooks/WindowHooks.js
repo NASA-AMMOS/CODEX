@@ -99,7 +99,7 @@ export function useActiveWindow() {
     const dispatch = useDispatch();
     const activeWindow = useSelector(state => state.windowManager.get("activeWindow"));
 
-    const setActiveWindow = id => dispatch(wmActions.setActiveWindow(id));
+    const setActiveWindow = id => id !== activeWindow && dispatch(wmActions.setActiveWindow(id));
 
     return [activeWindow, setActiveWindow];
 }
