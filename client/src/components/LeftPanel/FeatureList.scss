@@ -45,7 +45,7 @@
         z-index: 999;
         overflow-y: scroll;
         background-color: #061427;
-        .Features {
+        .features {
             display: flex;
             flex-flow: column;
             width: 40%;
@@ -66,15 +66,9 @@
                 direction: "ltr";
                 width: 100%;
 
-                ul {
-                    padding-left: 0px;
-                    padding-right: 0px;
-                    margin-bottom: 0px;
-                    li {
-                        height: 22px;
-                        padding-left: 10px;
-                        padding-right: 10px;
-                    }
+                .featureRow {
+                    display: flex;
+                    flex-direction: row;
                 }
 
                 .feature {
@@ -95,6 +89,8 @@
                         overflow: hidden;
                         width: 100%;
                         text-overflow: ellipsis;
+                        padding-left: 5px;
+                        padding-right: 5px;
                     }
 
                     &.selected {
@@ -106,8 +102,6 @@
                         height: 13px;
                         width: 13px;
                         border-radius: 2px;
-                        margin-right: 7px;
-                        margin-left: 5px;
                         background-color: #5d6673;
                     }
                 }
