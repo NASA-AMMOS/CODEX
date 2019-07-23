@@ -91,7 +91,10 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
             //add range to the selection state and optimize this
             let newShapes = [];
 
-            const mappedSavedSelections = savedSelections.map((selection) => {
+            const mappedSavedSelections = savedSelections
+                                            .concat()
+                                            .reverse()
+                                            .map((selection) => {
                 return {indices:selection.rowIndices, color:selection.color, active:selection.active, hidden:selection.hidden};
             });
 
