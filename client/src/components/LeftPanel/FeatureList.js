@@ -17,6 +17,9 @@ import * as actionFunctions from "actions/actionFunctions";
 import { Sparklines, SparklinesLine } from "react-sparklines";
 import * as actionTypes from "constants/actionTypes";
 
+/*
+    A function used to process a floating point number
+*/
 function processFloatingPointNumber(number) {
     let roundedNumber = Math.round(number * Math.pow(10, 2)) / Math.pow(10, 2);
     let newNumber = "";
@@ -31,6 +34,10 @@ function processFloatingPointNumber(number) {
     return newNumber;
 }
 
+/*
+    Function to help reorder an object used to persist the 
+    order of features
+*/
 const reorder = (object, startIndex, endIndex) => {
     //shift everything with an index after up one
     function findNameOfIndex(index) {
@@ -67,25 +74,25 @@ const reorder = (object, startIndex, endIndex) => {
     return newObject;
 };
 
+/*
+    The section of the header that shows the labels for the 
+    feature statistics
+*/
 function StatsLabelRow(props) {
     return (
         <div className="label-row" hidden={props.statsHidden}>
-            <table>
-                <tbody>
-                    <tr>
-                        <td>C</td>
-                        <td>R</td>
-                        <td>mean</td>
-                        <td>median</td>
-                        <td>sparkline</td>
-                    </tr>
-                </tbody>
-            </table>
+            <span className="classification"> C </span>
+            <span className="regression"> R </span>
+            <span className="mean"> mean </span>
+            <span className="median"> median </span>
+            <span className="sparkline"> sparkline </span>
         </div>
     );
 }
 
-
+/*
+    The header for the feature list left panel
+*/
 function FeaturePanelHeader(props) {
 
     return (
@@ -116,18 +123,22 @@ function FeaturePanelHeader(props) {
     );
 }
 
+/*
+    The section of a feature row that displays the feature statistics
+    data like mean, median, and sparkline
+*/
 function StatisticsRow(props) {
     //handles the failure cases of when stats are not yet loaded
     //or there was an actual failure in the backend
-    if (props.stats === undefined) {
+    if (props.stats === undefined ) {
         return (
-            <div className="loading">
+            <div className="loading" hidden={props.statsHidden}>
                 Loading...
             </div>
         );
     } else if (props.stats.status === "failed") {
         return (
-            <div className="failed">
+            <div className="failed" hidden={props.statsHidden}>
                 Failure ...
             </div>
         );
@@ -139,9 +150,9 @@ function StatisticsRow(props) {
     let [featureTypeData, setFeatureTypeData] = useState({ c: false, r: false });
 
     return (
-        <div className="feature-statistics-row">
+        <div className="feature-statistics-row" hidden={props.statsHidden}>
             <span
-                className={featureTypeData.c ? "lit" : "dim"}
+                className={(featureTypeData.c ? "lit" : "dim")+ " class-regression-span"}
                 onClick={function() {
                     setFeatureTypeData({ r: featureTypeData.r, c: !featureTypeData.c });
                 }}
@@ -149,16 +160,16 @@ function StatisticsRow(props) {
                 C
             </span>
             <span
-                className={featureTypeData.r ? "lit" : "dim"}
+                className={(featureTypeData.r ? "lit" : "dim")+ " class-regression-span"}
                 onClick={function() {
                     setFeatureTypeData({ r: !featureTypeData.r, c: featureTypeData.c });
                 }}
             >
                 R
             </span>
-            <span> {mean} </span>
-            <span> {median} </span>
-            <span>
+            <span className="mean-span"> {mean} </span>
+            <span className="median-span"> {median} </span>
+            <span className="sparkline-span">
                 <Sparklines
                     data={props.data}
                     limit={100}
@@ -171,6 +182,10 @@ function StatisticsRow(props) {
     );
 }
 
+/*
+    A single row displaying a feature and its corresponding data
+    for the drag and drop menu
+*/
 function FeatureListDNDRow(props) {
     const virtual = props.featureInfo.virtual;
     const selected = props.featureInfo.selected;
@@ -178,20 +193,22 @@ function FeatureListDNDRow(props) {
 
     return (
         <React.Fragment>
-            <Checkbox
-                checked={selected}
-                value="checkedA"
-                style={{ height: "22px", padding: "0px"}}
-                icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
-                checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
-                onClick={function(e) {
-                    return selected
-                        ? props.featureUnselect(props.featureName, e.shiftKey)
-                        : props.featureSelect(props.featureName, e.shiftKey);
-                }}
-            />
-            <div className="feature-name">
-                <span style={virtualStyle}>{props.featureName}</span>
+            <div className="feature-name-row">
+                <Checkbox
+                    checked={selected}
+                    value="checkedA"
+                    style={{ height: "22px", padding: "0px"}}
+                    icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
+                    checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
+                    onClick={function(e) {
+                        return selected
+                            ? props.featureUnselect(props.featureName, e.shiftKey)
+                            : props.featureSelect(props.featureName, e.shiftKey);
+                    }}
+                />
+                <div className="feature-name">
+                    <span style={virtualStyle}>{props.featureName}</span>
+                </div>
             </div>
             <StatisticsRow
                 stats={props.stats}
@@ -389,7 +406,7 @@ function FeatureList(props) {
     return (
         <div
             className={
-                "feature-lists-container " + (statsHidden ? "stats-hidden" : "stats-not-hidden")
+                "feature-list-container " + (statsHidden ? "stats-hidden" : "stats-not-hidden")
             }
         >
             <FeaturePanelHeader
@@ -399,23 +416,22 @@ function FeatureList(props) {
                 activeCount={activeCount}
                 shownCount={shownCount}
             />
-            <div className="scroll-container">
-                <div className="features">
-                    <div className="loading" hidden={!props.featureListLoading}>
-                        <CircularProgress />
-                    </div>
-                    <div className="list" hidden={props.featureListLoading}>
-                        <FeatureListDND
-                            featureIndices={featureIndices}
-                            setFeatureIndices={setFeatureIndices}
-                            data={featureData}
-                            stats={featureStats}
-                            featureNames={featureNames}
-                            featureSelect={props.featureSelect}
-                            featureUnselect={props.featureUnselect}
-                            featureMapping={featureMapping}
-                        />
-                    </div>
+            <div className="features">
+                <div className="loading" hidden={!props.featureListLoading}>
+                    <CircularProgress />
+                </div>
+                <div className="list" hidden={props.featureListLoading}>
+                    <FeatureListDND
+                        featureIndices={featureIndices}
+                        setFeatureIndices={setFeatureIndices}
+                        data={featureData}
+                        stats={featureStats}
+                        statsHidden={statsHidden}
+                        featureNames={sortedFeatureNames}
+                        featureSelect={props.featureSelect}
+                        featureUnselect={props.featureUnselect}
+                        featureMapping={featureMapping}
+                    />
                 </div>
             </div>
         </div>
