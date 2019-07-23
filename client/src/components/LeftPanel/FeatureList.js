@@ -42,12 +42,11 @@ const reorder = (object, startIndex, endIndex) => {
     //shift everything with an index after up one
     function findNameOfIndex(index) {
         for (let name of Object.keys(object)) {
-            if (object[name] === index)
-                return name;
+            if (object[name] === index) return name;
         }
     }
 
-    let newObject = {...object};
+    let newObject = { ...object };
     //set the element at startIndex's index to endIndex
     //add one to everything inbetween startIndex and endIndex including startIndex
 
@@ -94,7 +93,6 @@ function StatsLabelRow(props) {
     The header for the feature list left panel
 */
 function FeaturePanelHeader(props) {
-
     return (
         <div className="header-container">
             <div
@@ -116,9 +114,7 @@ function FeaturePanelHeader(props) {
                     {props.activeCount}/{props.shownCount}/{props.totalCount}
                 </span>
             </div>
-            <StatsLabelRow
-                statsHidden={props.statsHidden}
-            />
+            <StatsLabelRow statsHidden={props.statsHidden} />
         </div>
     );
 }
@@ -130,7 +126,7 @@ function FeaturePanelHeader(props) {
 function StatisticsRow(props) {
     //handles the failure cases of when stats are not yet loaded
     //or there was an actual failure in the backend
-    if (props.stats === undefined ) {
+    if (props.stats === undefined) {
         return (
             <div className="feature-statistics-row loading" hidden={props.statsHidden}>
                 Loading...
@@ -152,7 +148,7 @@ function StatisticsRow(props) {
     return (
         <div className="feature-statistics-row" hidden={props.statsHidden}>
             <span
-                className={(featureTypeData.c ? "lit" : "dim")+ " class-regression-span"}
+                className={(featureTypeData.c ? "lit" : "dim") + " class-regression-span"}
                 onClick={function() {
                     setFeatureTypeData({ r: featureTypeData.r, c: !featureTypeData.c });
                 }}
@@ -160,7 +156,7 @@ function StatisticsRow(props) {
                 C
             </span>
             <span
-                className={(featureTypeData.r ? "lit" : "dim")+ " class-regression-span"}
+                className={(featureTypeData.r ? "lit" : "dim") + " class-regression-span"}
                 onClick={function() {
                     setFeatureTypeData({ r: !featureTypeData.r, c: featureTypeData.c });
                 }}
@@ -198,7 +194,7 @@ function FeatureListDNDRow(props) {
                     checked={selected}
                     className="selected-checkbox"
                     value="checkedA"
-                    style={{ height: "22px", padding: "0px"}}
+                    style={{ height: "22px", padding: "0px" }}
                     icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
                     checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
                     onClick={function(e) {
@@ -207,7 +203,9 @@ function FeatureListDNDRow(props) {
                             : props.featureSelect(props.featureName, e.shiftKey);
                     }}
                 />
-                <span className="feature-name">{props.featureName}</span>
+                <span className="feature-name" style={virtualStyle}>
+                    {props.featureName}
+                </span>
             </div>
             <StatisticsRow
                 stats={props.stats}
@@ -225,10 +223,9 @@ function FeatureListDNDRow(props) {
     and their corresponding statistics
 */
 function FeatureListDND(props) {
-    if (Object.keys(props.featureIndices).length == 0)
-        return <div></div>
+    if (Object.keys(props.featureIndices).length == 0) return <div></div>;
 
-    function onDragEnd(result){
+    function onDragEnd(result) {
         if (!result.destination) {
             return;
         }
@@ -243,9 +240,7 @@ function FeatureListDND(props) {
     }
 
     return (
-        <DragDropContext 
-            onDragEnd={onDragEnd}
-        >
+        <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="droppable" type="OUTER">
                 {(provided, snapshot) => (
                     <div
@@ -253,11 +248,15 @@ function FeatureListDND(props) {
                         {...provided.droppableProps}
                         className="drag-drop-div"
                     >
-                        {   
-                            props.featureNames.map((featureName) => {
-                                return <Draggable key={featureName} draggableId={featureName+""} index={props.featureIndices[featureName]}>
+                        {props.featureNames.map(featureName => {
+                            return (
+                                <Draggable
+                                    key={featureName}
+                                    draggableId={featureName + ""}
+                                    index={props.featureIndices[featureName]}
+                                >
                                     {(provided, snapshot) => (
-                                        <div 
+                                        <div
                                             ref={provided.innerRef}
                                             {...provided.draggableProps}
                                             {...provided.dragHandleProps}
@@ -274,12 +273,12 @@ function FeatureListDND(props) {
                                                 featureSelect={props.featureSelect}
                                             />
                                         </div>
-                                    )}        
+                                    )}
                                 </Draggable>
-                            })
-                        }
+                            );
+                        })}
                         {provided.placeholder}
-                    </div>  
+                    </div>
                 )}
             </Droppable>
         </DragDropContext>
@@ -296,20 +295,20 @@ function FeatureList(props) {
     const totalCount = props.featureList.size;
 
     //translate featureList into interpretable js list of names
-    const featureNames = props.featureList.toJS()
-                                .map((feature) => {return feature.name});
+    const featureNames = props.featureList.toJS().map(feature => {
+        return feature.name;
+    });
 
-    //holds other data about features 
+    //holds other data about features
     let featureMapping = {};
 
-    props.featureList.toJS()
-        .forEach((feature) => {
-            featureMapping[feature.name] = {
-                selected: feature.selected, 
-                virtual: feature.virtual
-            };
-        }); 
-    
+    props.featureList.toJS().forEach(feature => {
+        featureMapping[feature.name] = {
+            selected: feature.selected,
+            virtual: feature.virtual
+        };
+    });
+
     //manages the hidden state of the statistics panel
     const [statsHidden, setStatsHidden] = useState(true);
     //a map from feature names to their current list indices
@@ -332,7 +331,6 @@ function FeatureList(props) {
 
         function lazyRecursizeHandler(request, index) {
             request.req.then(data => {
-
                 setFeatureData(featureData => {
                     return {
                         ...featureData,
@@ -368,40 +366,36 @@ function FeatureList(props) {
         }
         //todo handle cleanup
     });
-    
+
     //handles the initialization and updating of featureIndices
-    useEffect(_ => {
-        let newFeatureIndices = {};
-        featureNames
-            .forEach((name, index) => {
+    useEffect(
+        _ => {
+            let newFeatureIndices = {};
+            featureNames.forEach((name, index) => {
                 newFeatureIndices[name] = index;
             });
-        setFeatureIndices(newFeatureIndices);
-        setFeatureStats({});
-        setFeatureData({});
+            setFeatureIndices(newFeatureIndices);
+            setFeatureStats({});
+            setFeatureData({});
+        },
+        [props.featureList, props.filename]
+    );
 
-    }, [props.featureList, props.filename]);
-
-    //filters out the feautres based on the filter bar and 
+    //filters out the feautres based on the filter bar and
     //sorts them by their indices stored in featureIndices
     const sortedFeatureNames = featureNames
         .filter(featureName =>
             props.filterString
-                ? featureName
-                      .toLowerCase()
-                      .startsWith(props.filterString.toLowerCase())
+                ? featureName.toLowerCase().startsWith(props.filterString.toLowerCase())
                 : true
         )
-        .concat()//this is so it operates on a copy of stuff
+        .concat() //this is so it operates on a copy of stuff
         .sort((a, b) => {
             const aIndex = featureIndices[a];
             const bIndex = featureIndices[b];
-            if (aIndex < bIndex)
-                return -1;
-            else if (aIndex > bIndex)
-                return 1;
-            else
-                return 0;
+            if (aIndex < bIndex) return -1;
+            else if (aIndex > bIndex) return 1;
+            else return 0;
         });
 
     return (
