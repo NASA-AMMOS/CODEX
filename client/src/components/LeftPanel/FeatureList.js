@@ -132,13 +132,13 @@ function StatisticsRow(props) {
     //or there was an actual failure in the backend
     if (props.stats === undefined ) {
         return (
-            <div className="loading" hidden={props.statsHidden}>
+            <div className="feature-statistics-row loading" hidden={props.statsHidden}>
                 Loading...
             </div>
         );
     } else if (props.stats.status === "failed") {
         return (
-            <div className="failed" hidden={props.statsHidden}>
+            <div className="feature-statistics-row failed" hidden={props.statsHidden}>
                 Failure ...
             </div>
         );
@@ -196,6 +196,7 @@ function FeatureListDNDRow(props) {
             <div className="feature-name-row">
                 <Checkbox
                     checked={selected}
+                    className="selected-checkbox"
                     value="checkedA"
                     style={{ height: "22px", padding: "0px"}}
                     icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
@@ -206,9 +207,7 @@ function FeatureListDNDRow(props) {
                             : props.featureSelect(props.featureName, e.shiftKey);
                     }}
                 />
-                <div className="feature-name">
-                    <span style={virtualStyle}>{props.featureName}</span>
-                </div>
+                <span className="feature-name">{props.featureName}</span>
             </div>
             <StatisticsRow
                 stats={props.stats}
@@ -227,7 +226,7 @@ function FeatureListDNDRow(props) {
 */
 function FeatureListDND(props) {
     if (Object.keys(props.featureIndices).length == 0)
-        return <div> Loading ... </div>
+        return <div></div>
 
     function onDragEnd(result){
         let reorderedObject = reorder(
@@ -275,6 +274,7 @@ function FeatureListDND(props) {
                                 </Draggable>
                             })
                         }
+                        {provided.placeholder}
                     </div>  
                 )}
             </Droppable>
@@ -313,8 +313,7 @@ function FeatureList(props) {
     //the holder of feature data for sparklines
     const [featureData, setFeatureData] = useState({});
     //the holder of the stats data
-    const [featureStats, setFeatureStats] = useState({})
-
+    const [featureStats, setFeatureStats] = useState({});
     //handles the loading of feature data
     //handles loading the statistics data in a lifecycle safe way
     //this will also handle returning the downsampled data
@@ -329,6 +328,7 @@ function FeatureList(props) {
 
         function lazyRecursizeHandler(request, index) {
             request.req.then(data => {
+
                 setFeatureData(featureData => {
                     return {
                         ...featureData,
@@ -355,8 +355,7 @@ function FeatureList(props) {
                 }, 120);
             });
         }
-
-        if (featureNames.length > 0) {
+        if (featureNames.length > 0 && Object.keys(featureData).length == 0) {
             const requestCopy = { ...requestTemplate, name: [featureNames[0]] };
 
             const firstRequest = utils.makeSimpleRequest(requestCopy);
@@ -364,21 +363,20 @@ function FeatureList(props) {
             lazyRecursizeHandler(firstRequest, 0);
         }
         //todo handle cleanup
-    }, []);
+    });
     
     //handles the initialization and updating of featureIndices
     useEffect(_ => {
-        let newFeatureIndices = {...featureIndices};
-        let num = Object.keys(featureIndices).length;
+        let newFeatureIndices = {};
         featureNames
-            .forEach((name) => {
-                if (newFeatureIndices[name] == undefined) {
-                    newFeatureIndices[name] = num;
-                    num++;
-                }
+            .forEach((name, index) => {
+                newFeatureIndices[name] = index;
             });
         setFeatureIndices(newFeatureIndices);
-    }, [props.featureList]);
+        setFeatureStats({});
+        setFeatureData({});
+
+    }, [props.featureList, props.filename]);
 
     //filters out the feautres based on the filter bar and 
     //sorts them by their indices stored in featureIndices
@@ -416,7 +414,7 @@ function FeatureList(props) {
                 shownCount={shownCount}
             />
             <div className="features">
-                <div className="loading" hidden={!props.featureListLoading}>
+                <div className="loading-list" hidden={!props.featureListLoading}>
                     <CircularProgress />
                 </div>
                 <div className="list" hidden={props.featureListLoading}>
@@ -440,7 +438,8 @@ function FeatureList(props) {
 function mapStateToProps(state) {
     return {
         featureList: state.data.get("featureList"),
-        featureListLoading: state.data.get("featureListLoading")
+        featureListLoading: state.data.get("featureListLoading"),
+        filename: state.data.get("filename")
     };
 }
 
