@@ -157,7 +157,8 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 
 
         result = msg
-        codex_system.codex_log("{time} : Message from front end: {json}".format(time=now.isoformat(), json=msg))
+        # log the response but without the data
+        codex_system.codex_log("{time} : Message from front end: {json}".format(time=now.isoformat(), json={k:(msg[k] if k != 'data' else '[data removed]') for k in msg}))
 
         if 'sessionkey' not in msg:
             print('session_key not in message!!!')
@@ -198,7 +199,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 
         result['message'] = "success"
         stringMsg = json.dumps(result)
-        codex_system.codex_log("{time} : Response to front end: {json}".format(time=now.isoformat(), json=stringMsg))
+        codex_system.codex_log("{time} : Response to front end: {json}".format(time=now.isoformat(), json={k:(result[k] if k != 'data' else '[data removed]') for k in result}))
         return stringMsg
 
 

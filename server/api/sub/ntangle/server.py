@@ -101,6 +101,12 @@ class Server:
         # clean up the socket so we don't hang the program
         self.__socket.close()
 
+    def __shorten_repr(self, obj, limit=10):
+        text = repr(obj)
+        if len(text) < limit:
+            return text
+        return text[:10] + '...'
+
     def __log(self, text, level="info"):
         if not self.__logging:
             return
@@ -158,8 +164,8 @@ class Server:
                 else:
                     self.__log('serving {}({}, {})'.format(
                         message['func'],
-                        ', '.join([repr(a) for a in message['args']]),
-                        ', '.join('{}={}'.format(k, repr(message['kwargs'][k])) for k in message['kwargs'])
+                        ', '.join([self.__shorten_repr(a) for a in message['args']]),
+                        ', '.join('{}={}'.format(k, self.__shorten_repr(message['kwargs'][k])) for k in message['kwargs'])
                     ))
 
                     reply['return'], reply['stdout'] = self.call(message['func'], message['args'], message['kwargs'])

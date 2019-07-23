@@ -68,7 +68,8 @@ class Client:
         if msg['success']:
             if 'stdout' in msg:
                 sys.stdout.write(msg['stdout'])
-                sys.stdout.flush()
+                # skip flush for speed
+                #sys.stdout.flush()
             return msg['return']
         else:
             raise RemoteError(msg['error'])

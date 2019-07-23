@@ -42,13 +42,11 @@ def get_data_metrics(msg, result):
 
     >>> message = {'routine': 'arrange', 'hashType': 'feature', 'activity': 'metrics', 'name': ['TiO2'], 'cid': '8vrjn', 'sessionkey': DOCTEST_SESSION}
     >>> result = get_data_metrics(message, {})
-    getting data hash : ...
     '''
     codex_hash = get_cache(msg['sessionkey'])
 
 
     data = codex_hash.findHashArray("name",  msg['name'][0], "feature")['data']
-    codex_system.codex_log("getting data hash : "+ str(data))
     result = {}
     try:
         result['min'] = np.min(data)
