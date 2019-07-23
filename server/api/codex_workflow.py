@@ -126,7 +126,7 @@ def rotate_tree(json_tree):
     return json_tree
 
 
-def explain_this(inputHash, featureNames, dataSelections, result):
+def explain_this(inputHash, featureNames, dataSelections, result, session=None):
     '''
     Inputs:
 
@@ -142,6 +142,7 @@ def explain_this(inputHash, featureNames, dataSelections, result):
 
     
     '''
+    codex_hash = get_cache(session)
 
     startTime = time.time()
     result = {"WARNING":None}
