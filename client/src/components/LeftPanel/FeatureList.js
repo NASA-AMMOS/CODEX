@@ -229,6 +229,10 @@ function FeatureListDND(props) {
         return <div></div>
 
     function onDragEnd(result){
+        if (!result.destination) {
+            return;
+        }
+
         let reorderedObject = reorder(
             props.featureIndices,
             result.source.index,

@@ -197,7 +197,6 @@ function CurrentSelection(props) {
 
 const reorder = (list, startIndex, endIndex) => {
     //shift everything with an index after up one
-
     function findElementWithIndex(index) {
         for (let i = 0; i < list.length; i++) {
             if (list[i].index === index)
@@ -312,8 +311,7 @@ function SelectionGroup(props) {
 }
 
 const generateSelectionsGroupList = (savedSelections, selectionGroups, group) => {
-
-    let list = []
+    let list = [];
 
     function getValuesOfGroup(groupID) {
         let values = [];
