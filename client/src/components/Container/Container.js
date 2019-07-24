@@ -9,9 +9,6 @@ class Container extends Component {
         return (
             <div className="Container" id="Container">
                 <WindowManager />
-                <div className="right-side">
-                    <RightPanel/>
-                </div>
             </div>
         );
     }
