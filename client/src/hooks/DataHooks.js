@@ -214,7 +214,8 @@ export function useSavedSelections() {
 
     return [
         savedSelections,
-        (name, indices, groupID) => dispatch(selectionActions.saveNewSelection(name, indices, groupID))
+        (name, indices, groupID) =>
+            dispatch(selectionActions.saveNewSelection(name, indices, groupID))
     ];
 }
 
@@ -222,17 +223,14 @@ export function useSavedSelections() {
  * Get the list of existing groups
  * @return {array} current list of groups from the selections state
  */
-export function useSelectionGroups(){
+export function useSelectionGroups() {
     const dispatch = useDispatch();
     const groups = useSelector(state => {
         return state.selections.groups;
     });
 
-    return [
-        groups,
-        (groupID) => dispatch(selectionActions.createSelectionGroup(groupID))
-    ];
- }
+    return [groups, groupID => dispatch(selectionActions.createSelectionGroup(groupID))];
+}
 
 /**
  * Get current selection
@@ -309,8 +307,8 @@ export function useHoveredSelection() {
  * Create a new feature
  * @return {function} Setter for a new feature
  */
-export function useNewFeature() {
-    const dispatch = useDispatch();
+export function useNewFeature(dispatch) {
+    dispatch = dispatch || useDispatch(); // May be called by another action.
 
     return (name, data) => {
         // manually form request, see codex_data_manager.py for more
