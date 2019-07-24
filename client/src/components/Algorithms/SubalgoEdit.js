@@ -196,6 +196,8 @@ function SubalgoEdit(props) {
                         humanName={props.subalgoState.humanName}
                         serverData={props.subalgoState.serverData}
                         loaded={props.subalgoState.loaded}
+                        xAxisLabel="Principal Component 1 (PC1)"
+                        yAxisLabel="Principal Component 2 (PC2)"
                         previewMode
                     />
                     <div className="action-buttons">{getActionButtons(props)}</div>
