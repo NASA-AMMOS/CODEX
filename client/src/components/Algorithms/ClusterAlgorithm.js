@@ -198,7 +198,7 @@ function ClusterAlgorithm(props) {
 
     return (
         <React.Fragment>
-            <div className="preview-title">
+            <div className="preview-title" hidden={selectedSubalgo}>
                 <div className="title">
                     {helpModeState ? `Help: ${algoVerb}` : "Choose a Clustering Method"}
                 </div>
