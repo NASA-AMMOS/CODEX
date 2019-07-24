@@ -6,6 +6,8 @@ import msgpack
 import functools
 import sys
 
+codex_zmq_context = zmq.Context() 
+
 # something happened on the remote
 class RemoteError(Exception):
     pass
@@ -25,7 +27,8 @@ class Client:
 
         # if we don't have a zmq context, create a new one
         if context is None:
-            self.__context = zmq.Context()
+            global codex_zmq_context
+            self.__context = codex_zmq_context
         else:
             self.__context = context
 
