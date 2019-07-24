@@ -4,6 +4,7 @@ import * as algorithmTypes from "constants/algorithmTypes";
 import * as graphActions from "actions/graphActions";
 import * as uiTypes from "constants/uiTypes";
 import * as utils from "utils/utils";
+import { usePinnedFeatures, useNewFeature } from "hooks/DataHooks";
 
 export function createAlgorithm(algoMode) {
     return (dispatch, getState) => {
@@ -27,18 +28,15 @@ function findOutputParam(subalgoState, paramName) {
 
 // Saves the returned algorithm data to the state and spawns a new graph window if requested.
 function handleAlgorithmReturn(inMsg, subalgoState, dispatch) {
+    console.log(subalgoState);
     // Update data store with new feature columns
     const basename = findOutputParam(subalgoState, "name");
-    const featureList = [];
+
+    const newFeature = useNewFeature(dispatch);
     for (let i = 0; i < inMsg.data[0].length; i++) {
-        const feature = `${basename}_PCA${i + 1}`;
-        featureList.push(feature);
-        dispatch({ type: actionTypes.ADD_FEATURE, feature });
-        dispatch({
-            type: actionTypes.ADD_DATASET,
-            feature,
-            data: inMsg.data.map(row => row[i])
-        });
+        const featureName = `${basename}_PCA${i + 1}`;
+        const data = inMsg.data.map(row => row[i]);
+        newFeature(featureName, data);
     }
 
     // Create a new selection for each cluster if requested
@@ -47,9 +45,9 @@ function handleAlgorithmReturn(inMsg, subalgoState, dispatch) {
         const uniqueName = utils.getUniqueGroupID("Clustering");
         //create a group with a unique name
         dispatch({
-            type:actionTypes.CREATE_SELECTION_GROUP,
+            type: actionTypes.CREATE_SELECTION_GROUP,
             id: uniqueName
-        })
+        });
 
         for (let i = 0; i <= inMsg.numClusters - 1; i++) {
             const rowIndices = inMsg.clusters.reduce((acc, val, idx) => {
@@ -79,27 +77,24 @@ function handleAlgorithmReturn(inMsg, subalgoState, dispatch) {
         );
 
         features.forEach((f, idx) => {
-            const feature = `${basename}_${idx}`;
-            dispatch({ type: actionTypes.ADD_FEATURE, feature });
-            dispatch({
-                type: actionTypes.ADD_DATASET,
-                feature,
-                data: f
-            });
+            const featureName = `${basename}_${idx}`;
+            newFeature(featureName, f);
         });
     }
 
     // Spawn graph window if requested
     if (findOutputParam(subalgoState, "graph")) {
-        const axes = ["xAxis", "yAxis"].map(axis => {
+        const features = ["xAxis", "yAxis"].map(axis => {
             const axisName = findOutputParam(subalgoState, axis);
             if (axisName.match(/pca\d/i)) {
                 return `${findOutputParam(subalgoState, "name")}_${axisName}`;
             }
             return axisName;
         });
-
-        dispatch(graphActions.createGraph(uiTypes.SCATTER_GRAPH, axes));
+        dispatch({
+            type: actionTypes.OPEN_NEW_WINDOW,
+            info: { windowType: uiTypes.SCATTER_GRAPH, data: { features } }
+        });
     }
 }
 

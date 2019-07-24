@@ -26,6 +26,7 @@ function createPlotSeries(serverData) {
 }
 
 function makeChart(props) {
+    console.log(props.serverData);
     const cols = utils.unzip(props.serverData.data);
     const chartState = {
         data: [
@@ -39,7 +40,7 @@ function makeChart(props) {
                         const cluster = props.serverData.clusters[idx];
                         return cluster === -1 ? "#eee" : uiTypes.SELECTIONS_COLOR_PALETTE[cluster];
                     }),
-                    size: 2
+                    size: 5
                 },
                 selected: { marker: { color: "#FF0000", size: 2 } },
                 visible: true
