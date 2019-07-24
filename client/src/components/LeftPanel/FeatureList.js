@@ -223,7 +223,8 @@ function FeatureListDNDRow(props) {
     and their corresponding statistics
 */
 function FeatureListDND(props) {
-    if (Object.keys(props.featureIndices).length == 0) return <div></div>;
+    if (Object.keys(props.featureIndices).length == 0 || props.featureIndices == undefined)
+        return <div />;
 
     function onDragEnd(result) {
         if (!result.destination) {
@@ -249,6 +250,8 @@ function FeatureListDND(props) {
                         className="drag-drop-div"
                     >
                         {props.featureNames.map(featureName => {
+                            if (featureName === undefined || !props.featureIndices[featureName])
+                                return <div> </div>;
                             return (
                                 <Draggable
                                     key={featureName}
@@ -374,11 +377,12 @@ function FeatureList(props) {
             featureNames.forEach((name, index) => {
                 newFeatureIndices[name] = index;
             });
+
             setFeatureIndices(newFeatureIndices);
             setFeatureStats({});
             setFeatureData({});
         },
-        [props.featureList, props.filename]
+        [props.filename, props.featureList]
     );
 
     //filters out the feautres based on the filter bar and

@@ -86,17 +86,17 @@ function ScatterGraph(props) {
     function setSelectionColors() {
         chartState.data[0].marker.color.forEach((row, idx) => {
             chartState.data[0].marker.color[idx] = DEFAULT_POINT_COLOR;
-        })
+        });
         props.savedSelections
             .concat()
             .reverse()
             .forEach(selection => {
-            if (!selection.hidden) {
-                selection.rowIndices.forEach(row => {
-                    chartState.data[0].marker.color[row] = selection.color;
-                });
-            }
-        });
+                if (!selection.hidden) {
+                    selection.rowIndices.forEach(row => {
+                        chartState.data[0].marker.color[row] = selection.color;
+                    });
+                }
+            });
     }
 
     // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
@@ -109,12 +109,11 @@ function ScatterGraph(props) {
         [props.currentSelection]
     );
 
-
     useEffect(
         _ => {
             setSelectionColors();
             updateChartRevision();
-        }, 
+        },
         [props.savedSelections]
     );
 

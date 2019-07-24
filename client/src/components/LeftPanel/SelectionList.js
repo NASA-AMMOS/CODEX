@@ -275,6 +275,8 @@ function SelectionGroup(props) {
                                                 else 
                                                     return 0;
                                             }).map((selection, index) => {
+
+                                                if (selection == undefined) return <div> </div>;
                                                 return (
                                                     <Draggable key={selection.id} draggableId={selection.id+""} index={index}>  
                                                         {(provided, snapshot) => (

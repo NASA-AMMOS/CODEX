@@ -18,7 +18,7 @@ function buildSubalgoServerRequest(
         routine: "algorithm",
         algorithmType: "clustering",
         algorithmName: subalgo.simplename,
-        dataFeatures: selectedFeatures,
+        dataFeatures: selectedFeatures.toJS(),
         file: filename,
         sessionkey: getGlobalSessionKey(),
         guidance: null,
@@ -55,6 +55,7 @@ export function getSubAlgorithmData(
         dataSelections
     );
 
+    console.log(request);
     const requestObject = {};
     const socketWorker = new WorkerSocket();
 

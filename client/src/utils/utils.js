@@ -147,7 +147,8 @@ export function createGradientStops(startColor, endColor, numStops) {
   * Appends a unique id to a given name
   * @return {string} an augmented version of a name if it is not unique 
   */
-export function getUniqueGroupID(groups, id) {
+export function getUniqueGroupID(id) {
+    const groups = store.getState().selections.groups;
 
     if (id === null || id === undefined) {
         return "Group "+groups.length;
