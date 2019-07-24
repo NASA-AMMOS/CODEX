@@ -56,7 +56,7 @@ function SubalgoOutputParams(props) {
     return (
         <div hidden={props.hidden} className="subalgo-edit-output-params">
             <div className="title">{props.subalgoState.humanName} Output Options</div>
-            <div className="subtitle">Principal component outputs</div>
+            <div className="subtitle">Principal Component Outputs</div>
             <div className="subalgo-param-field">
                 <input
                     type="checkbox"
@@ -78,7 +78,7 @@ function SubalgoOutputParams(props) {
                 />
                 <div className="param-title">Create a scatterplot with PC1 vs PC2</div>
             </div>
-            <div className="subtitle">Cluster outputs</div>
+            <div className="subtitle">Cluster Outputs</div>
             <div className="subalgo-param-field">
                 <input
                     type="checkbox"
