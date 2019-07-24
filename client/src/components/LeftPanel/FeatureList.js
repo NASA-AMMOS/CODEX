@@ -225,7 +225,7 @@ function FeatureListDNDRow(props) {
     and their corresponding statistics
 */
 function FeatureListDND(props) {
-    if (Object.keys(props.featureIndices).length == 0)
+    if (Object.keys(props.featureIndices).length == 0 || props.featureIndices == undefined)
         return <div></div>
 
     function onDragEnd(result){
@@ -242,6 +242,8 @@ function FeatureListDND(props) {
         props.setFeatureIndices(reorderedObject);
     }
 
+    console.log(props.featureIndices);
+
     return (
         <DragDropContext 
             onDragEnd={onDragEnd}
@@ -255,6 +257,7 @@ function FeatureListDND(props) {
                     >
                         {   
                             props.featureNames.map((featureName) => {
+                                if (featureName == undefined) return <div> </div>;
                                 return <Draggable key={featureName} draggableId={featureName+""} index={props.featureIndices[featureName]}>
                                     {(provided, snapshot) => (
                                         <div 
@@ -380,7 +383,7 @@ function FeatureList(props) {
         setFeatureStats({});
         setFeatureData({});
 
-    }, [props.featureList, props.filename]);
+    }, [props.filename]);
 
     //filters out the feautres based on the filter bar and 
     //sorts them by their indices stored in featureIndices

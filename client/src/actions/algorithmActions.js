@@ -3,6 +3,7 @@ import { getSubAlgorithmData } from "components/Algorithms/algorithmFunctions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as graphActions from "actions/graphActions";
 import * as uiTypes from "constants/uiTypes";
+import * as utils from "utils/utils";
 
 export function createAlgorithm(algoMode) {
     return (dispatch, getState) => {
@@ -42,15 +43,25 @@ function handleAlgorithmReturn(inMsg, subalgoState, dispatch) {
 
     // Create a new selection for each cluster if requested
     if (findOutputParam(subalgoState, "clusters")) {
+        //get unique name
+        const uniqueName = utils.getUniqueGroupID("Clustering");
+        //create a group with a unique name
+        dispatch({
+            type:actionTypes.CREATE_SELECTION_GROUP,
+            id: uniqueName
+        })
+
         for (let i = 0; i <= inMsg.numClusters - 1; i++) {
             const rowIndices = inMsg.clusters.reduce((acc, val, idx) => {
                 if (val === i) acc.push(idx);
                 return acc;
             }, []);
+            //create new selection with unique name as id
             dispatch({
                 type: actionTypes.SAVE_NEW_SELECTION,
                 name: `${basename}_${i + 1}`,
-                rowIndices
+                rowIndices: rowIndices,
+                groupID: uniqueName
             });
         }
     }

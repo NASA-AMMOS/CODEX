@@ -78,7 +78,6 @@ function SubalgoOutputParams(props) {
                 />
                 <div className="param-title">Create a scatterplot with PC1 vs PC2</div>
             </div>
-
             <div className="subtitle">Cluster outputs</div>
             <div className="subalgo-param-field">
                 <input

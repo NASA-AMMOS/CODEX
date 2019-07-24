@@ -13,7 +13,7 @@ import rootReducer from "reducers";
 export default function configureStore(initialState) {
     const logger = createLogger();
 
-    const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+    const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({trace:true}) || compose;
     const store = createStore(
         rootReducer,
         initialState,

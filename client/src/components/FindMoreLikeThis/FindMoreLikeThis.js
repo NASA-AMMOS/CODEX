@@ -160,8 +160,8 @@ function FindMoreLikeThis(props) {
                     setLoading(false);
                     setOutputMessage(makeOutputMessage( "Like " + inputSelection.name));
                     //add a saved selections called fmlt_output with the returned data
-
-                    const groupID = utils.getUniqueGroupID(props.selectionGroups, "FMLT");
+                    const groupID = utils.getUniqueGroupID("FMLT");
+                    
                     props.createSelectionGroup(groupID);
                     props.saveSelection( "Like " + inputSelection.name, data.like_this, groupID);
                     setButtonClicked(false);
