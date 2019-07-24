@@ -382,7 +382,7 @@ function FeatureList(props) {
             setFeatureStats({});
             setFeatureData({});
         },
-        [props.filename, props.featureList]
+        [props.filename]
     );
 
     //filters out the feautres based on the filter bar and
