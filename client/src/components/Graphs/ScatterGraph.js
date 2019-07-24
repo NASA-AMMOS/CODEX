@@ -121,7 +121,7 @@ function ScatterGraph(props) {
     const animationState = useRef({ index: 0, ascending: true });
     useEffect(
         _ => {
-            if (!props.hoverSelection) {
+            if (props.hoverSelection === null) {
                 setSelectionColors();
                 updateChartRevision();
                 return;
