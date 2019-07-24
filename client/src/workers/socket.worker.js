@@ -79,6 +79,7 @@ function handleHelpTextRequest(msg) {
         const outMsg = JSON.stringify({
             routine: "guidance",
             guidance: msg.path,
+            sessionkey: msg.sessionkey,
             identification: cid,
             cid
         });

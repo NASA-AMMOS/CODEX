@@ -72,23 +72,16 @@
             margin-top: auto;
         }
 
-        .tree-sweep-scroller-circular {
-            margin-bottom: 20px;
-            height: 30%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            text-align: center;
-            div {
-                margin: auto;
-            }
-        }
-
         .tree-sweep-scroller {
             margin-bottom: 20px;
             height: 30%;
             width: 100%;
+
+            .tree-sweep-scroller-title {
+                text-align: center;
+                height: 20%;
+                width: 100%;
+            }
 
             .tree-sweep-slider {
                 padding: 20px;
@@ -98,7 +91,7 @@
 
             .tree-sweep-plot {
                 width: 100%;
-                height: 100%;
+                height: 80%;
                 .plotly-container {
                     height: 100%;
                     .svg-container {

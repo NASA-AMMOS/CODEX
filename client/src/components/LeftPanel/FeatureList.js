@@ -251,7 +251,7 @@ function FeatureListDND(props) {
                     >
                         {props.featureNames.map(featureName => {
                             if (featureName === undefined || !props.featureIndices[featureName])
-                                return <div> </div>;
+                                return <div key={featureName}> </div>;
                             return (
                                 <Draggable
                                     key={featureName}
@@ -382,7 +382,7 @@ function FeatureList(props) {
             setFeatureStats({});
             setFeatureData({});
         },
-        [props.filename, props.featureList]
+        [props.filename]
     );
 
     //filters out the feautres based on the filter bar and

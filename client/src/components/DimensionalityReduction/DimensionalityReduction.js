@@ -13,7 +13,7 @@ import Plotly from "plotly.js";
 import { bindActionCreators } from "redux";
 import { useWindowManager } from "hooks/WindowHooks";
 import { useStore } from "react-redux";
-import { WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import { WindowCircularProgress, WindowError } from "components/WindowHelpers/WindowCenter";
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
 import { useSelectedFeatureNames, useFilename, useNewFeature } from "hooks/DataHooks";
 import {
@@ -273,16 +273,23 @@ const DimensionalityReduction = props => {
     });
 
     const [isResolved, setIsResolved] = useState(null);
+    const [currentError, setCurrentError] = useState(null);
     const [selectedFeatures, setSelectedFeatures] = useSelectedFeatureNames();
     const filename = useFilename();
     const featureAdd = useNewFeature();
 
     // wrap the request creation
     useEffect(() => {
+        if (selectedFeatures.size < 2) {
+            setCurrentError("Dimensionality reduction requires at least two selected features!");
+            return;
+        }
         createAllDrRequests(selectedFeatures, filename).then(r => setIsResolved(r));
     }, []);
 
-    if (isResolved === null) {
+    if (currentError !== null) {
+        return <WindowError>{currentError}</WindowError>;
+    } else if (isResolved === null) {
         return <WindowCircularProgress />;
     } else {
         const [requests, runParams] = isResolved; // hackish but works A-OK
