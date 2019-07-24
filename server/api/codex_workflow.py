@@ -84,7 +84,7 @@ def export_json_tree(clf, features, labels, proportion_tree_sums, node_index=0):
             "class_1":proportion_tree_sums[node_index,1].item()
         } 
         node['leaf'] = True;
-        node['hidden'] = True;
+        node['hidden'] = False;
     else:
         feature = features[clf.tree_.feature[node_index]]
         threshold = clf.tree_.threshold[node_index]

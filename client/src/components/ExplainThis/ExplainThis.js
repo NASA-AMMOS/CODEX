@@ -7,6 +7,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 import * as d3 from "d3";
+import * as d3Hierarchy from "d3-hierarchy";
 import * as d3SC from "d3-scale-chromatic";
 import Plot from "react-plotly.js";
 import Button from "@material-ui/core/Button";
@@ -23,28 +24,24 @@ import { useSelectedFeatureNames, useFilename, useSavedSelections } from "hooks/
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import { useWindowManager } from "hooks/WindowHooks";
 
-// Toggle children.
-function toggle(d) {
-    //decide base
-    if (d.children && childrenHidden(d)) {
-        toggleRecursive(d, false);
-    } else if (d.children && !childrenHidden(d)) {
-        toggleRecursive(d, true);
-    }
+//general helper functions go here
+function createExplainThisRequest(filename, selections, dataFeatures) {
+    return {
+        routine: "workflow",
+        dataSelections: selections,
+        workflow: "explain_this",
+        dataFeatures: dataFeatures,
+        sessionkey: utils.getGlobalSessionKey(),
+        file: filename,
+        cid: "8ksjk",
+        identification: { id: "dev0" }
+    };
 }
 
-//recursively turns everything off
-function toggleRecursive(d, signal) {
-    if (d.children) {
-        d.children.forEach(d => {
-            if (!d.leaf) {
-                d.hidden = signal;
-                toggleRecursive(d, signal);
-            }
-        });
-    }
-}
-
+/*
+    Function that handles truncatng longer numbers so they fit
+    into the node boxes
+*/
 function processFloatingPointNumber(number) {
     let roundedNumber = Math.round(number * Math.pow(10, 2)) / Math.pow(10, 2);
     let newNumber = "";
@@ -59,13 +56,35 @@ function processFloatingPointNumber(number) {
     return newNumber;
 }
 
+//this section of the code handles the manipulation of the tree
+
+// Toggle children.
+function toggle(d) {
+    //decide base
+    if (d.children && childrenHidden(d)) {
+        toggleRecursive(d, false);
+    } else if (d.children && !childrenHidden(d)) {
+        toggleRecursive(d, true);
+    }
+}
+
+//recursively turns everything off
+function toggleRecursive(d, signal) {
+    if (d.children) {
+        d.children.forEach(d => {
+            d.hidden = signal;
+            toggleRecursive(d, signal);
+        });
+    }
+}
+
 // Node labels
 function node_label(d) {
     //split on spaces
     //shorten the name
     //shorten the number
     //add them back together
-    if (d.hidden || d.leaf) return "";
+    if (d.hidden) return "";
     let split = d.name.split(" ");
     let float = processFloatingPointNumber(parseFloat(split[2])); //truncate to two decimal places
     let featureName = split[0];
@@ -124,110 +143,33 @@ function textSize(text) {
     return { width: size.width, height: size.height };
 }
 
-function generateTree(treeData, selectionNames, svgRef) {
-    let barHeight = 20;
-    //setup margins and size for the d3 window
-    let margin = { top: 0, right: 20, bottom: 10, left: 65 },
-        i = 0,
-        width = svgRef.clientWidth - margin.right - margin.left,
-        height = svgRef.clientHeight - margin.top - margin.bottom,
-        rect_width = 80,
-        rect_height = 20,
-        max_link_width = 20,
-        min_link_width = 4,
-        root;
+//this section of code is for svg helper functions
 
-    //might change this later to be dynamic based on the number of leaf nodes
-    let maxDepth = 5;
-    let numLeafs = calculateNumLeafNodes(treeData);
-    let nodeSize = [8, width / maxDepth + 3];
-
-    /*let color_map = d3.scale
-        .linear()
-        .domain([0, 1])
-        .range(["blue",  "red"]);
+/*
+    This is where the color gradient is defined
 */
-    /*
-    let color_map = d3.scale
-        .linear()
-        .domain([0, 1])
-        .interpolate(d3.interpolateHcl)
-        .range(["hsl(0, 90%, 92%)", "hsl(240, 27%, 21%)"]);
-    */
 
-    let color_map = d3SC.interpolatePlasma;
+/*let color_map = d3.scale
+    .linear()
+    .domain([0, 1])
+    .range(["blue",  "red"]);
+*/
+/*
+let color_map = d3.scale
+    .linear()
+    .domain([0, 1])
+    .interpolate(d3.interpolateHcl)
+    .range(["hsl(0, 90%, 92%)", "hsl(240, 27%, 21%)"]);
+*/
 
-    /**
-     * Mixes colors according to the relative frequency of classes.
-     */
-    function mix_colors(d) {
-        let values = Object.values(d.target.proportions);
-        let sum = d.target.proportions.class_0 + d.target.proportions.class_1;
+let color_map = d3SC.interpolatePlasma;
 
-        let col = d3.rgb(color_map(values[0] / sum));
 
-        return col;
-    }
-
-    let tree = d3.layout.tree().nodeSize(nodeSize);
-
-    let diagonal = d3.svg.diagonal().projection(function(d) {
-        return [d.y, d.x];
-    });
-
-    let vis = d3
-        .select(svgRef)
-        .append("svg:g")
-        .attr("transform", "translate(" + margin.left + "," + (height / 2 - 60) + ")");
-
-    //defines the gradient
-    let gradientContainer = d3
-        .select(svgRef)
-        .append("svg:g")
-        .attr("transform", "translate(" + width / 4 + "," + 10 + ")");
-
-    gradientContainer
-        .append("text")
-        .text(selectionNames[0])
-        .attr("x", width / 8 - 10 - 10 - textSize(selectionNames[0]).width)
-        .attr("y", 5 + barHeight / 2);
-    //janky constants needed to center the gradient container
-    gradientContainer
-        .append("text")
-        .text(selectionNames[1])
-        .attr("x", width / 8 - 10 + width / 2 + 10)
-        .attr("y", 5 + barHeight / 2);
-
-    let linearGradient = gradientContainer
-        .append("defs")
-        .append("linearGradient")
-        .attr("id", "linear-gradient");
-
-    linearGradient
-        .append("stop")
-        .attr("offset", "0%")
-        .attr("stop-color", color_map(0));
-
-    linearGradient
-        .append("stop")
-        .attr("offset", "50%")
-        .attr("stop-color", color_map(0.5));
-
-    linearGradient
-        .append("stop")
-        .attr("offset", "100%")
-        .attr("stop-color", color_map(1));
-
-    let gradientRect = gradientContainer
-        .append("rect")
-        .attr("x", width / 8 - 10)
-        .attr("y", 0)
-        .attr("width", width / 2)
-        .attr("height", barHeight)
-        .style("stroke", "black")
-        .style("stroke-width", 2)
-        .style("fill", "url(#linear-gradient)");
-
+/*
+    This function handles drawing the arrow on the right side of the
+    screen
+*/
+function drawScaleArrow(svgRef, width, height) {
     //make the arrow on the right side of the screen
     d3.select(svgRef)
         .append("svg:g")
@@ -282,6 +224,110 @@ function generateTree(treeData, selectionNames, svgRef) {
         .text("Lesser")
         .attr("x", width + 34)
         .attr("y", height - 175);
+}
+
+function drawColorGradient(svgRef, width, height, selectionNames) {
+    const barHeight = 20;
+     //defines the gradient
+    let gradientContainer = d3
+        .select(svgRef)
+        .append("svg:g")
+        .attr("transform", "translate(" + width / 4 + "," + 10 + ")");
+
+    gradientContainer
+        .append("text")
+        .text(selectionNames[0])
+        .attr("x", width / 8 - 10 - 10 - textSize(selectionNames[0]).width)
+        .attr("y", 5 + barHeight / 2);
+    //janky constants needed to center the gradient container
+    gradientContainer
+        .append("text")
+        .text(selectionNames[1])
+        .attr("x", width / 8 - 10 + width / 2 + 10)
+        .attr("y", 5 + barHeight / 2);
+
+    let linearGradient = gradientContainer
+        .append("defs")
+        .append("linearGradient")
+        .attr("id", "linear-gradient");
+
+    linearGradient
+        .append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", color_map(0));
+
+    linearGradient
+        .append("stop")
+        .attr("offset", "50%")
+        .attr("stop-color", color_map(0.5));
+
+    linearGradient
+        .append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", color_map(1));
+
+    let gradientRect = gradientContainer
+        .append("rect")
+        .attr("x", width / 8 - 10)
+        .attr("y", 0)
+        .attr("width", width / 2)
+        .attr("height", barHeight)
+        .style("stroke", "black")
+        .style("stroke-width", 2)
+        .style("fill", "url(#linear-gradient)");
+}
+
+function generateTree(treeData, selectionNames, svgRef) {
+    //setup margins and size for the d3 window
+    let margin = { top: 0, right: 20, bottom: 10, left: 65 },
+        i = 0,
+        width = svgRef.clientWidth - margin.right - margin.left,
+        height = svgRef.clientHeight - margin.top - margin.bottom,
+        rect_width = 80,
+        rect_height = 20,
+        max_link_width = 20,
+        min_link_width = 4,
+        root;
+
+    //test d3Hierarchy
+    const testRoot = d3Hierarchy.hierarchy(treeData);
+    const testLinks = testRoot.links();
+    const testNodes = testRoot.descendants();
+
+    console.log(testLinks);
+    console.log(testNodes);
+
+    //might change this later to be dynamic based on the number of leaf nodes
+    let maxDepth = 4;
+    let numLeafs = calculateNumLeafNodes(treeData);
+    let nodeSize = [8, width / maxDepth + 3];
+
+    /**
+     * Mixes colors according to the relative frequency of classes.
+     */
+    function mix_colors(d) {
+        let values = Object.values(d.target.proportions);
+        let sum = d.target.proportions.class_0 + d.target.proportions.class_1;
+
+        let col = d3.rgb(color_map(values[0] / sum));
+
+        return col;
+    }
+
+    let tree = d3.layout.tree().nodeSize(nodeSize);
+
+    let diagonal = d3.svg.diagonal().projection(function(d) {
+        return [d.y, d.x];
+    });
+
+    let vis = d3
+        .select(svgRef)
+        .append("svg:g")
+        .attr("transform", "translate(" + margin.left + "," + (height / 2 - 60) + ")");
+   
+    drawColorGradient(svgRef, width, height, selectionNames);
+
+    drawScaleArrow(svgRef, width, height);
 
     // global scale for link width
     let link_stoke_scale = d3.scale.linear();
@@ -315,9 +361,12 @@ function generateTree(treeData, selectionNames, svgRef) {
         // Compute the new tree layout.
         let nodes = tree.nodes(root).reverse();
 
+        //This section of code is used to determine the 
+        //height and width of the links
         // Normalize for fixed-depth.
         nodes.forEach(function(d) {
             d.y = d.depth * 120;
+            d.x *= 2;
         });
 
         // Update the nodes…
@@ -366,10 +415,10 @@ function generateTree(treeData, selectionNames, svgRef) {
         nodeEnter
             .insert("rect", "text")
             .attr("width", function(d) {
-                return d.leaf ? 0 : d.bbox.width + rectPadding;
+                return d.bbox.width + rectPadding;
             })
             .attr("height", function(d) {
-                return d.leaf ? 0 : d.bbox.height;
+                return d.bbox.height;
             })
             .attr("x", function(d) {
                 return -d.bbox.width / 2 - rectPadding / 2;
@@ -391,7 +440,7 @@ function generateTree(treeData, selectionNames, svgRef) {
                 return !hasLeafChildren(d) && childrenHidden(d) ? "lightsteelblue" : "#fff";
             })
             .style("opacity", function(d) {
-                return d.leaf || !d.hidden ? 0 : 1;
+                return !d.hidden ? 0 : 1;
             });
 
         // Transition nodes to their new position.
@@ -488,19 +537,10 @@ function generateTree(treeData, selectionNames, svgRef) {
     load_dataset(treeData);
 }
 
-function createExplainThisRequest(filename, selections, dataFeatures) {
-    return {
-        routine: "workflow",
-        dataSelections: selections,
-        workflow: "explain_this",
-        dataFeatures: dataFeatures,
-        sessionkey: utils.getGlobalSessionKey(),
-        file: filename,
-        cid: "8ksjk",
-        identification: { id: "dev0" }
-    };
-}
-
+/*
+    The component that allows the user to select two selections
+    to explain
+*/
 function ChooseSelections(props) {
     return (
         <div className="selections-chooser">
@@ -560,16 +600,17 @@ function ChooseSelections(props) {
     );
 }
 
+/*
+    The graph that displays the scores of the trees at various
+    depths and allows a user to scroll between them.
+*/
 function TreeSweepScroller(props) {
-    if (!props.tree_sweep && props.runButtonPressed) {
+    if (!props.tree_sweep) {
         return (
-            <div className="tree-sweep-scroller-circular">
-                {" "}
-                <CircularProgress />
+            <div className="tree-sweep-scroller">
+                <div className="tree-sweep-scroller-title"> Score vs Tree Depth </div>
             </div>
-        );
-    } else if (!props.tree_sweep) {
-        return <div className="tree-sweep-scroller"> Choose selections and run </div>;
+         );
     }
 
     const [listClass, setListClass] = useState([]);
@@ -596,7 +637,7 @@ function TreeSweepScroller(props) {
         ],
         layout: {
             autosize: true,
-            margin: { l: 20, r: 10, t: 30, b: 0 }, // Axis tick labels are drawn in the margin space
+            margin: { l: 20, r: 10, t: 0, b: 20 }, // Axis tick labels are drawn in the margin space
             showlegend: false,
             xaxis: {
                 automargin: true
@@ -604,13 +645,6 @@ function TreeSweepScroller(props) {
             yaxis: {
                 automargin: true,
                 range: [0, 105]
-            },
-            title: {
-                text: "Score vs Tree Depth",
-                font: {
-                    family: "Roboto, Helvetica, Arial, sans-serif",
-                    size: 16
-                }
             }
         },
         config: {
@@ -621,6 +655,7 @@ function TreeSweepScroller(props) {
 
     return (
         <div className="tree-sweep-scroller">
+            <div className="tree-sweep-scroller-title"> Score vs Tree Depth </div>
             <Plot
                 className="tree-sweep-plot"
                 data={chartOptions.data}
@@ -645,7 +680,21 @@ function TreeSweepScroller(props) {
     );
 }
 
+/*
+    Comnponent that handles drawing the histogram that displays
+    feature importances.
+*/
 function FeatureImportanceGraph(props) {
+    if (props.featureImportances === undefined || props.rankedFeatures === undefined) {
+        return (
+            <React.Fragment>
+                <div className="feature-importance-graph-title">Feature Importances</div>
+                <div className="feature-importance-graph">
+
+                </div>
+            </React.Fragment>
+        );
+    }
     const chartOptions = {
         data: [
             {
@@ -690,10 +739,11 @@ function FeatureImportanceGraph(props) {
     );
 }
 
-function FeatureList(props) {
-    if (props.rankedFeatures == undefined) {
-        return <CircularProgress />;
-    }
+/*
+    This is the component that holds all of the forms and 
+    graphs on the left side of the component.
+*/
+function LeftSidePanel(props) {
 
     return (
         <div className="feature-list">
@@ -728,7 +778,25 @@ function FeatureList(props) {
     );
 }
 
-function ExplainThisTree(props) {
+/*
+    This component holds the actual tree diagram for explain this.
+*/
+function ExplainThisTreeDiagram(props) {
+    //handle the null cases
+    if (!props.treeData && !props.runButtonPressed) {
+        return (
+            <div className="load-failure">
+                Choose selections and run
+            </div>
+        );
+    } else if (!props.treeData) {
+        return (
+            <div className="load-failure">
+                <CircularProgress />
+            </div>
+        );
+    }
+    
     //declaring svgRef so that the callback in the jsx below can reach it
     let svgRef = null;
     //wraps the entire functionality in lifecycle methods
@@ -754,13 +822,20 @@ function ExplainThisTree(props) {
     );
 }
 
+/*
+    This is the parent component of this file. 
+    It handles the rendering of the explain this tree
+    and visualizing all of the data associated with it.
+*/
 function ExplainThis(props) {
     //make a data state object to hold the data in the request
     const [dataState, setDataState] = useState(undefined);
+    //holds the index of the current tree as determined by the tree scroller
     const [treeIndex, setTreeIndex] = useState(0);
     const [runButtonPressed, setRunButtonPressed] = useState(false);
     const [chosenSelections, setChosenSelections] = useState([null, null]);
 
+    //handles the dynamic loading of selections 
     useEffect(
         _ => {
             let newChosenSelections = [...chosenSelections];
@@ -820,7 +895,7 @@ function ExplainThis(props) {
                     props.selections[chosenSelections[0]].name,
                     props.selections[chosenSelections[1]].name
                 ];
-
+                console.log(data);
                 setDataState({ ...data, selectionNames: selectionNames });
             });
 
@@ -832,62 +907,29 @@ function ExplainThis(props) {
         [runButtonPressed]
     );
 
-    if (!dataState && !runButtonPressed) {
-        return (
-            <div className="explain-this-container">
-                <FeatureList
-                    rankedFeatures={[]}
-                    importances={[]}
-                    setRunButtonPressed={setRunButtonPressed}
-                    runButtonPressed={runButtonPressed}
-                    selections={props.selections}
-                    setChosenSelections={setChosenSelections}
-                    chosenSelections={chosenSelections}
-                />
-                <div className="load-failure">Choose selections and run</div>
-            </div>
-        );
-    } else if (!dataState) {
-        return (
-            <div className="explain-this-container">
-                <FeatureList
-                    rankedFeatures={[]}
-                    importances={[]}
-                    setRunButtonPressed={setRunButtonPressed}
-                    runButtonPressed={runButtonPressed}
-                    selections={props.selections}
-                    setChosenSelections={setChosenSelections}
-                    chosenSelections={chosenSelections}
-                />
-                <div className="load-failure">
-                    <CircularProgress />
-                </div>
-            </div>
-        );
-    } else {
-        return (
-            <div className="explain-this-container">
-                <FeatureList
-                    rankedFeatures={dataState.tree_sweep[treeIndex].feature_rank}
-                    importances={dataState.tree_sweep[treeIndex].feature_weights}
-                    setTreeIndex={setTreeIndex}
-                    tree_sweep={dataState.tree_sweep}
-                    setRunButtonPressed={setRunButtonPressed}
-                    runButtonPressed={runButtonPressed}
-                    treeIndex={treeIndex}
-                    selections={props.selections}
-                    setChosenSelections={setChosenSelections}
-                    chosenSelections={chosenSelections}
-                    setDataState={setDataState}
-                />
-                <ExplainThisTree
-                    treeData={dataState.tree_sweep[treeIndex]}
-                    chosenSelections={chosenSelections}
-                    selectionNames={dataState.selectionNames}
-                />
-            </div>
-        );
-    }
+    return (
+        <div className="explain-this-container">
+            <LeftSidePanel
+                rankedFeatures={dataState != undefined ? dataState.tree_sweep[treeIndex].feature_rank : undefined}
+                importances={dataState != undefined ? dataState.tree_sweep[treeIndex].feature_weights : undefined}
+                setTreeIndex={setTreeIndex}
+                tree_sweep={dataState != undefined ? dataState.tree_sweep : undefined}
+                setRunButtonPressed={setRunButtonPressed}
+                runButtonPressed={runButtonPressed}
+                treeIndex={treeIndex}
+                selections={props.selections}
+                setChosenSelections={setChosenSelections}
+                chosenSelections={chosenSelections}
+                setDataState={setDataState}
+            />
+            <ExplainThisTreeDiagram
+                runButtonPressed={runButtonPressed}
+                treeData={dataState != undefined ? dataState.tree_sweep[treeIndex] : undefined}
+                chosenSelections={chosenSelections}
+                selectionNames={dataState != undefined ? dataState.selectionNames : undefined}
+            />
+        </div>
+    );
 }
 
 // wrapped data selector
