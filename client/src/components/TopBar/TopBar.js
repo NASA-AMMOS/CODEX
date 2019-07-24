@@ -72,7 +72,7 @@ function SessionBar(props) {
                         hidden
                         accept=".csv,.npy,.h5"
                         onChange={e => {
-                            props.fileLoad(e.target.files);
+                            if (e.target.files.length) props.fileLoad(e.target.files);
                         }}
                     />
                 </li>
