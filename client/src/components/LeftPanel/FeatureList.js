@@ -224,7 +224,7 @@ function FeatureListDNDRow(props) {
 */
 function FeatureListDND(props) {
     if (Object.keys(props.featureIndices).length == 0 || props.featureIndices == undefined)
-        return <div></div>
+        return <div />;
 
     function onDragEnd(result) {
         if (!result.destination) {
@@ -249,36 +249,37 @@ function FeatureListDND(props) {
                         {...provided.droppableProps}
                         className="drag-drop-div"
                     >
-                        {   
-                            props.featureNames.map((featureName) => {
-                                if (featureName == undefined) return <div> </div>;
-                                return (<Draggable 
-                                            key={featureName} 
-                                            draggableId={featureName+""} 
-                                            index={props.featureIndices[featureName]}>
-
-                                            {(provided, snapshot) => (
-                                                <div
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    {...provided.dragHandleProps}
-                                                    className="featureRow"
-                                                >
-                                                    <FeatureListDNDRow
-                                                        featureName={featureName}
-                                                        featureInfo={props.featureMapping[featureName]}
-                                                        stats={props.stats[featureName]}
-                                                        data={props.data[featureName]}
-                                                        statsHidden={props.statsHidden}
-                                                        featureListLoading={props.featureListLoading}
-                                                        featureUnselect={props.featureUnselect}
-                                                        featureSelect={props.featureSelect}
-                                                    />
-                                                </div>
-                                            )}
-                                        </Draggable>)
-                            })
-                        }
+                        {props.featureNames.map(featureName => {
+                            if (featureName === undefined || !props.featureIndices[featureName])
+                                return <div> </div>;
+                            return (
+                                <Draggable
+                                    key={featureName}
+                                    draggableId={featureName + ""}
+                                    index={props.featureIndices[featureName]}
+                                >
+                                    {(provided, snapshot) => (
+                                        <div
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}
+                                            className="featureRow"
+                                        >
+                                            <FeatureListDNDRow
+                                                featureName={featureName}
+                                                featureInfo={props.featureMapping[featureName]}
+                                                stats={props.stats[featureName]}
+                                                data={props.data[featureName]}
+                                                statsHidden={props.statsHidden}
+                                                featureListLoading={props.featureListLoading}
+                                                featureUnselect={props.featureUnselect}
+                                                featureSelect={props.featureSelect}
+                                            />
+                                        </div>
+                                    )}
+                                </Draggable>
+                            );
+                        })}
                         {provided.placeholder}
                     </div>
                 )}
@@ -376,12 +377,13 @@ function FeatureList(props) {
             featureNames.forEach((name, index) => {
                 newFeatureIndices[name] = index;
             });
-            
-        setFeatureIndices(newFeatureIndices);
-        setFeatureStats({});
-        setFeatureData({});
 
-    }, [props.filename]);
+            setFeatureIndices(newFeatureIndices);
+            setFeatureStats({});
+            setFeatureData({});
+        },
+        [props.filename, props.featureList]
+    );
 
     //filters out the feautres based on the filter bar and
     //sorts them by their indices stored in featureIndices
