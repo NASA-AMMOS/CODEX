@@ -55,6 +55,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    &.subalgo-chart-loading {
+        min-height: 420px;
+    }
 }
 
 .subalgo-plot {
