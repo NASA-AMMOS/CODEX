@@ -28,7 +28,6 @@ function findOutputParam(subalgoState, paramName) {
 
 // Saves the returned algorithm data to the state and spawns a new graph window if requested.
 function handleAlgorithmReturn(inMsg, subalgoState, dispatch) {
-    console.log(subalgoState);
     // Update data store with new feature columns
     const basename = findOutputParam(subalgoState, "name");
 

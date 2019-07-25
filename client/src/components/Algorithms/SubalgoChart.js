@@ -48,14 +48,16 @@ function makeChart(props) {
         ],
         layout: {
             autosize: true,
-            margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
+            margin: props.xAxisLabel ? undefined : { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
             hovermode: false, // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
             xaxis: {
-                automargin: true
+                automargin: true,
+                title: { text: props.xAxisLabel }
             },
             yaxis: {
-                automargin: true
+                automargin: true,
+                title: { text: props.yAxisLabel }
             }
         },
         config: {

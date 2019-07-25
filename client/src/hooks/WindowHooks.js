@@ -2,6 +2,7 @@ import React, { useLayoutEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import * as wmActions from "actions/windowManagerActions";
 import { defaultInitialSettings } from "constants/windowSettings";
+import { fromJS } from "immutable";
 
 /*
  * Basically, this hook:
@@ -14,6 +15,7 @@ const wrapWindow = (win, dispatch) => {
     // dispatchers are wrapped to avoid unnecessary rerenders by triggering actions
     // this greatly simplifies components using this, as they can simply "set and forget"
     // instead of checking that they haven't already set a value
+    console.log(win.toJS());
     return {
         resizeX: width => {
             if (win.get("width") !== width) {
@@ -41,11 +43,11 @@ const wrapWindow = (win, dispatch) => {
             }
         },
         setData: data => {
-            if (data !== win.get("data")) {
+            if (fromJS(data) !== win.get("data")) {
                 dispatch(wmActions.setWindowData(win.get("id"), data));
             }
         },
-        ...win
+        ...win.toJS()
     };
 };
 

@@ -251,7 +251,7 @@ function FeatureListDND(props) {
                     >
                         {props.featureNames.map(featureName => {
                             if (featureName === undefined || !props.featureIndices[featureName])
-                                return <div> </div>;
+                                return <div key={featureName}> </div>;
                             return (
                                 <Draggable
                                     key={featureName}
