@@ -523,7 +523,9 @@ explain_this_page:
 
     general_explain_this: |
 
-        Sample Data
+        # Explain This
+        
+        Explain This is a workflow that allows you to describe the difference between two selections of data.
 
 
 classification_page:

@@ -250,7 +250,7 @@ function FeatureListDND(props) {
                         className="drag-drop-div"
                     >
                         {props.featureNames.map(featureName => {
-                            if (featureName === undefined || props.featureIndices[featureName] == undefined){
+                            if (featureName === undefined || props.featureIndices[featureName] === undefined){
                                 return <div key={featureName}> </div>;
                             }
                             return (
