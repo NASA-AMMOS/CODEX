@@ -121,9 +121,11 @@ const DataTable = props => {
     const handleChangePage = (event, newPage) => setPage(newPage);
     const handleChangeRowsPerPage = event => setRowsPerPage(parseInt(event.target.value, 25));
 
+    const fixedHeadStyle = { backgroundColor: "#fff", position: "sticky", top: 0 };
+
     // compute the table headers + visible rows
     const headers = indices.map(n => (
-        <TableCell key={n} align="right">
+        <TableCell key={n} align="right" style={fixedHeadStyle}>
             {n}
         </TableCell>
     ));
@@ -151,7 +153,7 @@ const DataTable = props => {
                 <Table size={"small"}>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Index</TableCell>
+                            <TableCell style={fixedHeadStyle}>Index</TableCell>
                             {headers}
                         </TableRow>
                     </TableHead>
