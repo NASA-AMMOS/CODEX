@@ -15,19 +15,20 @@ import { useWindowManager } from "hooks/WindowHooks";
 // Utility to create a Plotly chart for each algorithm data return from the server.
 // We show a loading progress indicator if the data hasn't arrived yet.
 function makeClassificationPlot(algo) {
-    if (!algo || !algo.data)
+    if (!algo || !algo.get("serverResponse") || !algo.get("serverResponse").classes)
         return (
             <div className="chartLoading">
                 <CircularProgress />
             </div>
         );
 
+    const data = algo.get("serverResponse");
     const chartOptions = {
         data: [
             {
-                x: [...algo.data.classes].sort((a, b) => a - b),
-                y: [...algo.data.classes].sort((a, b) => b - a).map(idx => `Label ${idx}`),
-                z: algo.data.cm_data,
+                x: [...data.classes].sort((a, b) => a - b),
+                y: [...data.classes].sort((a, b) => b - a).map(idx => `Label ${idx}`),
+                z: data.cm_data,
                 type: "heatmap",
                 colorscale: "Reds",
                 showscale: false,
@@ -54,17 +55,17 @@ function makeClassificationPlot(algo) {
     };
 
     //add annotations
-    for (let i = 0; i < algo.data.cm_data.length; i++) {
-        for (let j = 0; j < algo.data.cm_data[i].length; j++) {
-            let value = algo.data.cm_data[i][j];
+    for (let i = 0; i < data.cm_data.length; i++) {
+        for (let j = 0; j < data.cm_data[i].length; j++) {
+            let value = data.cm_data[i][j];
 
             let colorValue = value < 0.5 ? "black" : "white";
 
             let annotation = {
                 xref: "x1",
                 yref: "y1",
-                x: algo.data.classes[j],
-                y: algo.data.classes[i],
+                x: data.classes[j],
+                y: data.classes[i],
                 text: value + "%",
                 font: {
                     family: "Arial",
@@ -93,12 +94,14 @@ function makeClassificationPlot(algo) {
 // (Doesn't display until all classification returns come back from server.)
 function makeBestClassification(algoStates) {
     const bestClassification =
-        algoStates.every(algo => algo.data) &&
+        algoStates.every(algo => algo.get("serverResponse")) &&
         algoStates.reduce((acc, algo) => {
-            if (!acc) return { name: algo.data.algorithmName, score: algo.data.best_score };
-            return algo.data.best_score > acc.score
-                ? { name: algo.data.algorithmName, score: algo.data.best_score }
-                : acc;
+            const retVal = {
+                name: algo.get("serverResponse").algorithmName,
+                score: algo.get("serverResponse").best_score
+            };
+
+            return !acc ? retVal : algo.get("serverResponse").best_score > acc.score ? retVal : acc;
         }, null);
 
     return (
@@ -113,7 +116,9 @@ function makeBestClassification(algoStates) {
                 </div>
                 <div className="plot">
                     {makeClassificationPlot(
-                        algoStates.find(algo => algo.algorithmName === bestClassification.name)
+                        algoStates.find(
+                            algo => algo.get("algorithmName") === bestClassification.name
+                        )
                     )}
                 </div>
             </div>
@@ -130,24 +135,26 @@ function ClassificationResults(props) {
     });
 
     // Create state objects for each classification we're running so that we can keep track of them.
-    const [algoStates, setAlgoStates] = useState(_ => props.requests.map(req => req.requestObj));
+    const [algoStates, setAlgoStates] = useState(_ =>
+        props.requests.map(req => req.get("requestObj"))
+    );
     useEffect(_ => {
         // As each request promise resolves with server data, update the state.
         props.requests.forEach(request => {
-            request.req.then(data =>
-                setAlgoStates(
-                    algoStates.map(algo =>
-                        algo.algorithmName === data.algorithmName
-                            ? Object.assign(algo, { data })
+            request.get("req").then(data => {
+                setAlgoStates(algos =>
+                    algos.map(algo =>
+                        algo.get("algorithmName") === data.algorithmName
+                            ? algo.set("serverResponse", data)
                             : algo
                     )
-                )
-            );
+                );
+            });
         });
 
         // If the window is closed before the requests have all resolved, cancel all of them.
         return function cleanup() {
-            props.requests.map(({ cancel }) => cancel());
+            props.requests.map(req => req.get("cancel")());
         };
     }, []);
 
@@ -168,16 +175,17 @@ function ClassificationResults(props) {
                 <div className="runParams">
                     <Typography variant="h6">Global Run Parameters</Typography>
                     <ul className="bestParms">
-                        <li>Label: {props.runParams.labelName}</li>
+                        <li>Label: {props.runParams.get("labelName")}</li>
                         <li>
                             Features:{" "}
-                            {props.runParams.selectedFeatures
-                                .filter(l => l !== props.runParams.labelName)
+                            {props.runParams
+                                .get("selectedFeatures")
+                                .filter(l => l !== props.runParams.get("labelName"))
                                 .join(", ")}
                         </li>
-                        <li>Cross-vals: {props.runParams.crossVal}</li>
-                        <li>Scoring: {props.runParams.scoring}</li>
-                        <li>Search Type: {props.runParams.searchType}</li>
+                        <li>Cross-vals: {props.runParams.get("crossVal")}</li>
+                        <li>Scoring: {props.runParams.get("scoring")}</li>
+                        <li>Search Type: {props.runParams.get("searchType")}</li>
                     </ul>
                 </div>
             </div>
@@ -185,31 +193,35 @@ function ClassificationResults(props) {
             <div className="resultRow">
                 {algoStates.map(algo => (
                     <div
-                        key={algo.algorithmName}
+                        key={algo.get("algorithmName")}
                         className={classnames({
                             classificationResult: true,
-                            selected: selectedAlgos.includes(algo.algorithmName)
+                            selected: selectedAlgos.includes(algo.get("algorithmName"))
                         })}
                     >
                         <div
                             className="classificationHeader"
-                            onClick={_ => toggleSelected(algo.algorithmName)}
+                            onClick={_ => toggleSelected(algo.get("algorithmName"))}
                         >
-                            {algo.algorithmName.length <= 20
-                                ? algo.algorithmName
-                                : algo.algorithmName.slice(0, 17) + "..."}
-                            <span className="percentage" hidden={!algo.loaded}>
-                                {algo.loaded && Math.ceil(algo.data.best_score * 100)}%
+                            {algo.get("algorithmName").length <= 20
+                                ? algo.get("algorithmName")
+                                : algo.get("algorithmName").slice(0, 17) + "..."}
+                            <span className="percentage" hidden={!algo.get("loaded")}>
+                                {algo.get("loaded") &&
+                                    Math.ceil(algo.getIn(["serverResponse", "best_score"]) * 100)}
+                                %
                             </span>
                         </div>
                         <div className="plot">{makeClassificationPlot(algo)}</div>
-                        <ul className="bestParms" hidden={!algo.data}>
-                            {algo.data &&
-                                Object.entries(algo.data.best_parms).map(([name, val]) => (
-                                    <li key={name}>
-                                        {name}: {val}
-                                    </li>
-                                ))}
+                        <ul className="bestParms" hidden={!algo.get("data")}>
+                            {algo.getIn(["serverResponse", "best_parms"]) &&
+                                Object.entries(algo.getIn(["serverResponse", "best_parms"])).map(
+                                    ([name, val]) => (
+                                        <li key={name}>
+                                            {name}: {val}
+                                        </li>
+                                    )
+                                )}
                         </ul>
                     </div>
                 ))}

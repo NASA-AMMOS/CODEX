@@ -86,14 +86,11 @@ function classificationStateReducer(classificationState, action) {
                 classification.name === action.classificationName
                     ? {
                           ...classification,
-                          paramData: {
-                              ...classification.paramData,
-                              params: classification.paramData.params.map(param =>
-                                  param.name === action.paramName
-                                      ? { ...param, value: action.value }
-                                      : param
-                              )
-                          }
+                          paramData: classification.paramData.map(param =>
+                              param.name === action.paramName
+                                  ? { ...param, value: action.value }
+                                  : param
+                          )
                       }
                     : classification
             );

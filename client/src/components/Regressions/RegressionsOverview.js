@@ -83,14 +83,11 @@ function regressionStateReducer(regressionState, action) {
                 regression.name === action.regressionName
                     ? {
                           ...regression,
-                          paramData: {
-                              ...regression.paramData,
-                              params: regression.paramData.params.map(param =>
-                                  param.name === action.paramName
-                                      ? { ...param, value: action.value }
-                                      : param
-                              )
-                          }
+                          paramData: regression.paramData.map(param =>
+                              param.name === action.paramName
+                                  ? { ...param, value: action.value }
+                                  : param
+                          )
                       }
                     : regression
             );
