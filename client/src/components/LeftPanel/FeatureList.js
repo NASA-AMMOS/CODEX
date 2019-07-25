@@ -250,7 +250,7 @@ function FeatureListDND(props) {
                         className="drag-drop-div"
                     >
                         {props.featureNames.map(featureName => {
-                            if (featureName === undefined || !props.featureIndices[featureName])
+                            if (featureName === undefined /*|| !props.featureIndices[featureName]*/)
                                 return <div key={featureName}> </div>;
                             return (
                                 <Draggable
@@ -365,7 +365,6 @@ function FeatureList(props) {
     //handles loading the statistics data in a lifecycle safe way
     //this will also handle returning the downsampled data
     useEffect(() => {
-        
         if (featureNames.length > 0 && Object.keys(featureData).length == 0) {
             const requestCopy = { ...requestTemplate, name: [featureNames[0]] };
 
@@ -393,20 +392,23 @@ function FeatureList(props) {
         [props.filename]
     );
 
-    useEffect(_ => {
-        if (featureNames.length != memoizedFeatureLength) {
-            setMemoizedFeatureLength(featureNames.length);
+    useEffect(
+        _ => {
+            if (featureNames.length != memoizedFeatureLength) {
+                setMemoizedFeatureLength(featureNames.length);
 
-            let newFeatureIndices = {};
-            featureNames.forEach((name, index) => {
-                newFeatureIndices[name] = index;
-            });
+                let newFeatureIndices = {};
+                featureNames.forEach((name, index) => {
+                    newFeatureIndices[name] = index;
+                });
 
-            setFeatureIndices(newFeatureIndices);
-            setFeatureStats({});
-            setFeatureData({});
-        }
-    },[props.featureList]);
+                setFeatureIndices(newFeatureIndices);
+                setFeatureStats({});
+                setFeatureData({});
+            }
+        },
+        [props.featureList]
+    );
 
     //handles when the featureList changes
     /*
