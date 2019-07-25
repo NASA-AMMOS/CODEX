@@ -7,6 +7,7 @@ Brief : System monitors for CODEX
 Notes :
 
 '''
+import inspect
 import os
 import sys
 import math
@@ -18,7 +19,7 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 # CODEX Support
 import codex_yaml
 
-import inspect
+
 
 def get_featureList(featureList):
     '''

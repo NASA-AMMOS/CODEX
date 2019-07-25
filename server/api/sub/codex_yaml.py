@@ -30,6 +30,6 @@ def codex_read_yaml(filepath):
 
 
 if __name__ == "__main__":
-    import codex_doctest
 
+    import codex_doctest
     codex_doctest.run_codex_doctest()

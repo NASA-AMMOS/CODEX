@@ -18,7 +18,7 @@ import numpy as np
 import os.path
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
-returnedCodePath = CODEX_ROOT + "returned_code.py"
+returnedCodePath = os.path.join(CODEX_ROOT,"returned_code.py")
 contents = []
 
 import codex_doctest

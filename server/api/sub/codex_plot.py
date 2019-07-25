@@ -1,3 +1,12 @@
+'''
+Author: Jack Lightholder
+Date  : 7/15/18
+
+Brief : CODEX plotting functionality
+
+Notes :
+
+'''
 import sys
 import h5py
 import time

@@ -10,7 +10,7 @@ import os
 import sys
 # Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, CODEX_ROOT + '/api/sub/')
+sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
 
 # Python Libraries
 import numpy as np
@@ -21,7 +21,7 @@ import codex_read_data_api
 
 def doctest_get_image_path():
 
-    return (CODEX_ROOT + '/uploads/test_image.JPG')
+    return (os.path.join(CODEX_ROOT, 'uploads', 'test_image.JPG'))
 
 
 def doctest_get_data(session=None):

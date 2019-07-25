@@ -20,11 +20,8 @@ from heapq import nsmallest
 from os import listdir
 from os.path import isfile, join, isdir
 
-logPath = CODEX_ROOT + "timeLogs/"
+logPath = os.path.join(CODEX_ROOT, "timeLogs")
 timeLogs = {}
-
-import codex_doctest
-
 
 def logTime(domain, algorithm, time, samples, features):
     '''
@@ -53,7 +50,7 @@ def logTime(domain, algorithm, time, samples, features):
         except BaseException:
             pass
 
-    algorithmFile = algorithmPath + "/timeLog.npy"
+    algorithmFile = os.path.join(algorithmPath, "timeLog.npy")
 
     try:
         data = timeLogs[domain][algorithm]["log"]
@@ -81,22 +78,11 @@ def getTimeLogDict():
     for algorithmType in algorithmTypes:
         timeLogs[algorithmType] = {}
         algorithms = [
-            f for f in listdir(
-                logPath +
-                algorithmType) if isdir(
-                join(
-                    logPath +
-                    algorithmType,
-                    f))]
+            f for f in listdir(join(logPath, algorithmType)) if isdir(join(join(logPath, algorithmType), f))]
         for algorithm in algorithms:
             timeLogs[algorithmType][algorithm] = {}
             try:
-                data = np.load(
-                    logPath +
-                    algorithmType +
-                    "/" +
-                    algorithm +
-                    "/timeLog.npy")
+                data = np.load(join(logPath, algorithmType, algorithm, "timeLog.npy"))
                 timeLogs[algorithmType][algorithm]["log"] = data
             except BaseException:
                 pass
@@ -158,5 +144,6 @@ def getComputeTimeEstimate(domain, algorithm, inputSamples):
 
 if __name__ == "__main__":
 
+    import codex_doctest
     codex_doctest.run_codex_doctest()
 

@@ -90,7 +90,8 @@ function subalgoParamReducer(subalgoStates, action) {
                 if (subalgo.socket) subalgo.socket.closeSocket(); // Want to cancel previous refresh if we're starting a new one
                 return Object.assign(subalgo, {
                     needsRefresh: false,
-                    loaded: false
+                    loaded: false,
+                    serverData: null
                 });
             });
     }

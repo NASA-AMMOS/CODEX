@@ -13,7 +13,7 @@ import sys
 import os
 # Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, CODEX_ROOT + '/api/sub/')
+sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
 
 import traceback
 import time

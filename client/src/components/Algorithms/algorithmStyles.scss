@@ -55,6 +55,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    &.large-mode {
+        min-height: 420px;
+    }
 }
 
 .subalgo-plot {
