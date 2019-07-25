@@ -108,7 +108,11 @@ export default class WindowManagerReducer {
             "windows",
             state
                 .get("windows")
-                .map(win => (win.get("id") === action.id ? win.set("data", action.data) : win))
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.set("data", Immutable.fromJS(action.data))
+                        : win
+                )
         );
     }
     static setWindowActive(state, action) {
