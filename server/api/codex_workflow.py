@@ -17,6 +17,7 @@ import traceback
 import numpy as np
 np.set_printoptions(threshold=sys.maxsize)
 from sklearn.neighbors import kneighbors_graph
+from sklearn.model_selection import train_test_split
 from sklearn import cluster
 
 
@@ -79,6 +80,7 @@ def export_json_tree(clf, features, labels, proportion_tree_sums, node_index=0):
         node['name'] = ', '.join(('{} of {}'.format(int(count), label)
                                   for count, label in count_labels))
         node['samples'] = proportion_tree_sums[node_index,0].item() + proportion_tree_sums[node_index,1].item()
+        node['class'] = clf.classes_[np.argmax(clf.tree_.value[node_index])]
         node['proportions'] = {
             "class_0":proportion_tree_sums[node_index,0].item(),
             "class_1":proportion_tree_sums[node_index,1].item()
@@ -161,6 +163,8 @@ def explain_this(inputHash, featureNames, dataSelections, result, session=None):
         return None
 
     X,y = create_data_from_indices(dataSelections, data)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
     
     result['tree_sweep'] = []
 
@@ -187,14 +191,14 @@ def explain_this(inputHash, featureNames, dataSelections, result, session=None):
                                 n_jobs = -1)
 
         
-        random_search.fit(X,y)
+        random_search.fit(X_train,y_train)
 
         best_tree = random_search.best_estimator_
 
         #generate the interpretation of the model
         dictionary = {}
 
-        proportion_tree_sums = get_proportion_tree_sums(best_tree, X, y)
+        proportion_tree_sums = get_proportion_tree_sums(best_tree, X_test, y_test)
 
         feature_weights, feature_rank = zip(*sorted(zip(best_tree.feature_importances_, featureNames), reverse=True))
 
@@ -204,7 +208,7 @@ def explain_this(inputHash, featureNames, dataSelections, result, session=None):
 
         dictionary['json_tree'] = rotated_tree
 
-        dictionary["score"] = np.round(best_tree.score(X,y) * 100)
+        dictionary["score"] = np.round(best_tree.score(X_test,y_test) * 100)
         dictionary["max_features"] = best_tree.max_features_
         
         feature_weights = np.asarray(feature_weights).astype(float)

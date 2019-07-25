@@ -297,18 +297,8 @@ function generateTree(treeData, selectionNames, svgRef) {
         min_link_width = 4,
         root;
 
-    //test d3Hierarchy
-    const testRoot = d3Hierarchy.hierarchy(treeData);
-    const testLinks = testRoot.links();
-    const testNodes = testRoot.descendants();
-
-    console.log(testLinks);
-    console.log(testNodes);
-
     //might change this later to be dynamic based on the number of leaf nodes
     let maxDepth = 4;
-    let numLeafs = calculateNumLeafNodes(treeData);
-    let nodeSize = [8, width / maxDepth + 3];
 
     /**
      * Mixes colors according to the relative frequency of classes.
@@ -322,7 +312,9 @@ function generateTree(treeData, selectionNames, svgRef) {
         return col;
     }
 
-    let tree = d3.layout.tree().nodeSize(nodeSize);
+    let tree = d3.layout.tree()
+        .size([height - 140, width])
+        //.nodeSize(nodeSize);
 
     let diagonal = d3.svg.diagonal().projection(function(d) {
         return [d.y, d.x];
@@ -331,7 +323,7 @@ function generateTree(treeData, selectionNames, svgRef) {
     let vis = d3
         .select(svgRef)
         .append("svg:g")
-        .attr("transform", "translate(" + margin.left + "," + (height / 2 - 60) + ")");
+        .attr("transform", "translate(" + margin.left + "," + 40 + ")");
    
     drawColorGradient(svgRef, width, height, selectionNames);
 
@@ -364,7 +356,7 @@ function generateTree(treeData, selectionNames, svgRef) {
     }
 
     function update(source) {
-        let duration = d3.event && d3.event.altKey ? 5000 : 500;
+        let duration = 600;
 
         // Compute the new tree layout.
         let nodes = tree.nodes(root).reverse();
@@ -373,7 +365,7 @@ function generateTree(treeData, selectionNames, svgRef) {
         //height and width of the links
         // Normalize for fixed-depth.
         nodes.forEach(function(d) {
-            d.y = d.depth * 120;
+            d.y = d.depth * 110;
         });
 
         // Update the nodes…
@@ -434,17 +426,17 @@ function generateTree(treeData, selectionNames, svgRef) {
                 return -d.bbox.height / 2;
             })
             .attr("rx", function(d) {
-                return d.type === "split" ? 2 : 0;
+                return 2;
             })
             .attr("ry", function(d) {
-                return d.type === "split" ? 2 : 0;
+                return 2;
             })
             .style("margin", 20)
+            .style("fill", function(d){
+                return !d.leaf && childrenHidden(d) ? "steelblue" : "#fff";
+            })
             .style("stroke", function(d) {
                 return d.type === "split" ? "steelblue" : "#bbbbbb";
-            })
-            .style("fill", function(d) {
-                return !hasLeafChildren(d) && childrenHidden(d) ? "lightsteelblue" : "#fff";
             })
             .style("opacity", function(d) {
                 return !d.hidden ? 0 : 1;
@@ -460,8 +452,21 @@ function generateTree(treeData, selectionNames, svgRef) {
 
         nodeUpdate
             .select("rect")
-            .style("fill", function(d) {
-                return !hasLeafChildren(d) && childrenHidden(d) ? "lightsteelblue" : "#fff";
+            .style("stroke", function(d) {
+                if (d.leaf) {
+                    //is a leaf
+                    //color based on which label is chosen for this leaf
+                    if (d.class == 1) {
+                        return color_map(0);
+                    } else {
+                        return color_map(1);
+                    }   
+                } else {
+                    return "#bbbbbb";
+                }
+            })
+            .style("stroke-width", function(d) {
+                return d.leaf ? 4 : 1;
             })
             .style("opacity", function(d) {
                 return d.hidden ? 0 : 1;

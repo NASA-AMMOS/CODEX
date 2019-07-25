@@ -360,7 +360,7 @@ function FeatureList(props) {
             setTimeout(function() {
                 const nextRequest = utils.makeSimpleRequest(nextRequestObject);
                 lazyRecursizeHandler(nextRequest, index + 1);
-            }, 120);
+            }, 1000);
         });
     }
 
