@@ -255,7 +255,7 @@ function WindowManager(props) {
             const settings = {
                 title: win.get("title"),
                 children: null,
-                isResizable: win.get("resizeable"),
+                isResizable: win.get("isResizable"),
                 isDraggable: true,
                 initialPosition: initialPos,
                 restrictToParentDiv: true,

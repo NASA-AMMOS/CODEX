@@ -8,7 +8,7 @@ import * as workflowTypes from "constants/workflowTypes";
 export const defaultInitialSettings = {
     width: 650,
     height: 500,
-    resizeable: true,
+    isResizable: true,
     title: "",
     minSize: {
         width: 100,
