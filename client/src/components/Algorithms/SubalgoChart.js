@@ -26,7 +26,6 @@ function createPlotSeries(serverData) {
 }
 
 function makeChart(props) {
-    console.log(props.serverData);
     const cols = utils.unzip(props.serverData.data);
     const chartState = {
         data: [
