@@ -250,8 +250,11 @@ function FeatureListDND(props) {
                         className="drag-drop-div"
                     >
                         {props.featureNames.map(featureName => {
-                            if (featureName === undefined || !props.featureIndices[featureName])
+                            console.log(props.featureIndices[featureName])
+                            if (featureName === undefined || props.featureIndices[featureName] == undefined){
+                                console.log("empty row");
                                 return <div key={featureName}> </div>;
+                            }
                             return (
                                 <Draggable
                                     key={featureName}
