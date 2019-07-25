@@ -126,7 +126,7 @@ function ClusterAlgorithm(props) {
     const win = useWindowManager(props, {
         width: 900,
         height: 600,
-        resizeable: false,
+        isResizable: false,
         title: "Algorithm: Cluster"
     });
 
