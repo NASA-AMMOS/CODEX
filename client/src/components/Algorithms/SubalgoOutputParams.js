@@ -58,6 +58,7 @@ function SubalgoOutputParams(props) {
             <div className="title">{props.subalgoState.humanName} Output Options</div>
             <div className="subtitle">Principal Component Outputs</div>
             <div className="subalgo-param-field">
+                <label className="param-title">
                 <input
                     type="checkbox"
                     checked={getParamValue(props, "pca")}
@@ -67,33 +68,36 @@ function SubalgoOutputParams(props) {
                             dispatchOutputParamChange(props, "graph", e.target.checked);
                     }}
                 />
-                <div className="param-title">Create Features for PC1 and PC2</div>
+                Create Features for PC1 and PC2</label>
             </div>
             <div className="subalgo-param-field">
+                <label className="param-title">
                 <input
                     type="checkbox"
                     checked={getParamValue(props, "graph")}
                     onChange={e => dispatchOutputParamChange(props, "graph", e.target.checked)}
                     disabled={!getParamValue(props, "pca")}
                 />
-                <div className="param-title">Create a scatterplot with PC1 vs PC2</div>
+                Create a scatterplot with PC1 vs PC2</label>
             </div>
             <div className="subtitle">Cluster Outputs</div>
             <div className="subalgo-param-field">
+                <label className="param-title">
                 <input
                     type="checkbox"
                     checked={getParamValue(props, "clusterId")}
                     onChange={e => dispatchOutputParamChange(props, "clusterId", e.target.checked)}
                 />
-                <div className="param-title">Create Features for each Cluster ID</div>
+                Create Features for each Cluster ID</label>
             </div>
             <div className="subalgo-param-field">
+                <label className="param-title">
                 <input
                     type="checkbox"
                     checked={getParamValue(props, "clusters")}
                     onChange={e => dispatchOutputParamChange(props, "clusters", e.target.checked)}
                 />
-                <div className="param-title">Create Selections for each Cluster</div>
+                Create Selections for each Cluster</label>
             </div>
             <TextField
                 label="Cluster Name"

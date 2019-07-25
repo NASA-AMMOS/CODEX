@@ -105,7 +105,7 @@ def ml_cluster(
     try:
         
         pca = codex_dimmension_reduction_api.run_codex_dim_reduction(inputHash, subsetHash, {"n_components":2}, downsampled, False, "PCA", session=codex_hash)
-        result = run_codex_clustering(pca['outputHash'], subsetHash, False, algorithmName, parms, session=codex_hash)
+        result = run_codex_clustering(pca['outputHash'], subsetHash, downsampled, algorithmName, parms, session=codex_hash)
         result['data'] = pca['data']
 
     except BaseException:
