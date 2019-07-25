@@ -95,7 +95,7 @@ function SubalgoChart(props) {
 
     const loadingClasses = classnames({
         "subalgo-chart-loading": true,
-        "preview-mode": props.previewMode
+        "large-mode": props.previewMode
     });
 
     const timeToGenerate =
