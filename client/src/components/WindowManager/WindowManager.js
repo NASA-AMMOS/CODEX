@@ -10,6 +10,7 @@ import { batchActions } from "redux-batched-actions";
 import Cristal from "react-cristal/src";
 import * as windowContentFunctions from "components/WindowManager/windowContentFunctions";
 import * as windowManagerActions from "actions/windowManagerActions";
+import * as selectionActions from "actions/selectionActions";
 import * as windowSettings from "constants/windowSettings";
 import WindowErrorBoundary from "components/WindowHelpers/WindowErrorBoundary";
 
@@ -207,6 +208,11 @@ function WindowManager(props) {
     // Each time the windows list gets updated, delete old refs.
     const [activeWindow, setActiveWindow] = useActiveWindow();
 
+    //clear out current selection when all windows are closed
+    if (props.windows.length == 0) {
+        props.setCurrentSelection([]);
+    }
+
     const oldWindows = usePrevious(props.windows);
     useEffect(
         _ => {
@@ -326,6 +332,7 @@ function mapDispatchToProps(dispatch) {
         setWindowHover: bindActionCreators(windowManagerActions.setWindowHover, dispatch),
         resizeWindow: bindActionCreators(windowManagerActions.resizeWindow, dispatch),
         moveWindow: bindActionCreators(windowManagerActions.moveWindow, dispatch),
+        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
         executeTilingAction: actions => dispatch(batchActions(actions))
     };
 }
