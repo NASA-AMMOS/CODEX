@@ -11,7 +11,7 @@ import { useWindowManager } from "hooks/WindowHooks";
 // Utility to create a Plotly chart for each algorithm data return from the server.
 // We show a loading progress indicator if the data hasn't arrived yet.
 function makeRegressionPlot(algo) {
-    if (!algo || !algo.data)
+    if (!algo || !algo.get("serverResponse"))
         return (
             <div className="chartLoading">
                 <CircularProgress />
@@ -34,9 +34,11 @@ function makeRegressionPlot(algo) {
 
     // Initial chart settings. These need to be kept in state and updated as necessary
 
+    const data = algo.get("serverResponse");
+
     const dataMax = (function() {
-        let max = algo.data.y[0];
-        const concatData = algo.data.y.concat(algo.data.y_pred);
+        let max = data.y[0];
+        const concatData = data.y.concat(data.y_pred);
         for (let i = 0; i < concatData.length; i++) {
             max = concatData[i] > max ? concatData[i] : max;
         }
@@ -47,11 +49,11 @@ function makeRegressionPlot(algo) {
     const chartOptions = {
         data: [
             {
-                x: [...algo.data.y_pred],
-                y: [...algo.data.y],
+                x: [...data.y_pred],
+                y: [...data.y],
                 type: "scattergl",
                 mode: "markers",
-                marker: { color: algo.data.y_pred.map((val, idx) => "#3386E6"), size: 2 },
+                marker: { color: data.y_pred.map((val, idx) => "#3386E6"), size: 2 },
                 selected: { marker: { color: "#FF0000", size: 2 } },
                 visible: true
             },
@@ -98,21 +100,25 @@ function makeRegressionPlot(algo) {
 // (Doesn't display until all regression returns come back from server.)
 function makeBestRegression(algoStates) {
     const bestRegression =
-        algoStates.every(algo => algo.data) &&
+        algoStates.every(algo => algo.get("serverResponse")) &&
         algoStates.reduce((acc, algo) => {
             if (!acc)
                 return {
-                    name: algo.algorithmName,
-                    score: algo.data.best_score,
+                    name: algo.get("algorithmName"),
+                    score: algo.get("serverResponse").best_score,
                     scoring: algo.scoring
                 };
             //accesses a comparison funciton from regressionTypes because higher is not always better
-            let comparison = regressionTypes.REGRESSION_SCORING_FUNCTIONS[algo.scoring](
-                algo.data.best_score,
+            let comparison = regressionTypes.REGRESSION_SCORING_FUNCTIONS[algo.get("scoring")](
+                algo.get("serverResponse").best_score,
                 acc.score
             );
             return comparison > 0
-                ? { name: algo.algorithmName, score: algo.data.best_score, scoring: algo.scoring }
+                ? {
+                      name: algo.get("algorithmName"),
+                      score: algo.get("serverResponse").best_score,
+                      scoring: algo.get("scoring")
+                  }
                 : acc;
         }, null);
     return (
@@ -125,7 +131,7 @@ function makeBestRegression(algoStates) {
                 </div>
                 <div className="plot">
                     {makeRegressionPlot(
-                        algoStates.find(algo => algo.algorithmName === bestRegression.name)
+                        algoStates.find(algo => algo.get("algorithmName") === bestRegression.name)
                     )}
                 </div>
             </div>
@@ -147,24 +153,27 @@ function RegressionResults(props) {
         title: "Regression Results"
     });
     // Create state objects for each regression we're running so that we can keep track of them.
-    const [algoStates, setAlgoStates] = useState(_ => props.requests.map(req => req.requestObj));
+    const [algoStates, setAlgoStates] = useState(_ =>
+        props.requests.map(req => req.get("requestObj"))
+    );
+
     useEffect(_ => {
         // As each request promise resolves with server data, update the state.
         props.requests.forEach(request => {
-            request.req.then(data =>
-                setAlgoStates(
-                    algoStates.map(algo =>
-                        algo.algorithmName === data.algorithmName
-                            ? Object.assign(algo, { data })
+            request.get("req").then(data => {
+                setAlgoStates(algos =>
+                    algos.map(algo =>
+                        algo.get("algorithmName") === data.algorithmName
+                            ? algo.set("serverResponse", data)
                             : algo
                     )
-                )
-            );
+                );
+            });
         });
 
         // If the window is closed before the requests have all resolved, cancel all of them.
         return function cleanup() {
-            props.requests.map(({ cancel }) => cancel());
+            props.requests.forEach(req => req.get("cancel")());
         };
     }, []);
 
@@ -185,16 +194,17 @@ function RegressionResults(props) {
                 <div className="runParams">
                     <Typography variant="h6">Global Run Parameters</Typography>
                     <ul className="bestParms">
-                        <li>Label: {props.runParams.labelName}</li>
+                        <li>Label: {props.runParams.get("labelName")}</li>
                         <li>
                             Features:{" "}
-                            {props.runParams.selectedFeatures
-                                .filter(l => l !== props.runParams.labelName)
+                            {props.runParams
+                                .get("selectedFeatures")
+                                .filter(l => l !== props.runParams.get("labelName"))
                                 .join(", ")}
                         </li>
-                        <li>Cross-vals: {props.runParams.crossVal}</li>
-                        <li>Scoring: {props.runParams.scoring}</li>
-                        <li>Search Type: {props.runParams.searchType}</li>
+                        <li>Cross-vals: {props.runParams.get("crossVal")}</li>
+                        <li>Scoring: {props.runParams.get("scoring")}</li>
+                        <li>Search Type: {props.runParams.get("searchType")}</li>
                     </ul>
                 </div>
             </div>
@@ -202,33 +212,38 @@ function RegressionResults(props) {
             <div className="resultRow">
                 {algoStates.map(algo => (
                     <div
-                        key={algo.algorithmName}
+                        key={algo.get("algorithmName")}
                         className={classnames({
                             regressionResult: true,
-                            selected: selectedAlgos.includes(algo.algorithmName)
+                            selected: selectedAlgos.includes(algo.get("algorithmName"))
                         })}
                     >
                         <div
                             className="regressionHeader"
-                            onClick={_ => toggleSelected(algo.algorithmName)}
+                            onClick={_ => toggleSelected(algo.get("algorithmName"))}
                         >
-                            {algo.algorithmName.length <= 20
-                                ? algo.algorithmName
-                                : algo.algorithmName.slice(0, 17) + "..."}
+                            {algo.get("algorithmName").length <= 20
+                                ? algo.get("algorithmName")
+                                : algo.get("algorithmName").slice(0, 17) + "..."}
                             {makeRegressionScore({
-                                name: algo.algorithmName,
-                                score: algo.data != undefined ? algo.data.best_score : 0.0,
-                                scoring: algo.scoring
+                                name: algo.get("algorithmName"),
+                                score:
+                                    algo.get("data") != undefined
+                                        ? algo.getIn(["data", "best_score"])
+                                        : 0.0,
+                                scoring: algo.get("scoring")
                             })}
                         </div>
                         <div className="plot">{makeRegressionPlot(algo)}</div>
-                        <ul className="bestParms" hidden={!algo.data}>
-                            {algo.data &&
-                                Object.entries(algo.data.best_parms).map(([name, val]) => (
-                                    <li key={name}>
-                                        {name}: {val}
-                                    </li>
-                                ))}
+                        <ul className="bestParms" hidden={!algo.get("data")}>
+                            {algo.getIn(["serverResponse", "best_parms"]) &&
+                                Object.entries(algo.getIn(["serverResponse", "best_parms"])).map(
+                                    ([name, val]) => (
+                                        <li key={name}>
+                                            {name}: {val}
+                                        </li>
+                                    )
+                                )}
                         </ul>
                     </div>
                 ))}
