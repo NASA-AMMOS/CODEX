@@ -14,7 +14,7 @@ U.S. Government Sponsorship acknowledged.
 import os
 import sys
 CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, CODEX_ROOT + '/api/sub/')
+sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
 
 import time
 import inspect

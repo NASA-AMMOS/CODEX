@@ -15,8 +15,8 @@ import os
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 import sys
-sys.path.insert(1, CODEX_ROOT + '/api/')
-sys.path.insert(1, CODEX_ROOT + '/api/sub/')
+sys.path.insert(1, os.path.join(CODEX_ROOT, 'api'))
+sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
 
 from os import listdir
 from os.path import isfile, join, isdir
