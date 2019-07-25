@@ -374,7 +374,6 @@ function generateTree(treeData, selectionNames, svgRef) {
         // Normalize for fixed-depth.
         nodes.forEach(function(d) {
             d.y = d.depth * 120;
-            d.x *= 2;
         });
 
         // Update the nodes…
@@ -442,7 +441,7 @@ function generateTree(treeData, selectionNames, svgRef) {
             })
             .style("margin", 20)
             .style("stroke", function(d) {
-                return d.type === "split" ? "steelblue" : "olivedrab";
+                return d.type === "split" ? "steelblue" : "#bbbbbb";
             })
             .style("fill", function(d) {
                 return !hasLeafChildren(d) && childrenHidden(d) ? "lightsteelblue" : "#fff";
@@ -648,11 +647,13 @@ function TreeSweepScroller(props) {
             margin: { l: 20, r: 10, t: 0, b: 20 }, // Axis tick labels are drawn in the margin space
             showlegend: false,
             xaxis: {
-                automargin: true
+                automargin: true,
+                fixedrange: true,
             },
             yaxis: {
                 automargin: true,
-                range: [0, 105]
+                range: [0, 105],
+                fixedrange: true
             }
         },
         config: {
@@ -670,8 +671,6 @@ function TreeSweepScroller(props) {
                 layout={chartOptions.layout}
                 config={chartOptions.config}
                 useResizeHandler
-                //divId={id}
-                //onBeforeHover={e => console.log(e)}
             />
             <Slider
                 className="tree-sweep-slider"
@@ -681,7 +680,6 @@ function TreeSweepScroller(props) {
                 step={1}
                 onChange={(_, val) => {
                     props.setTreeIndex(val);
-                    //scroll tree sweep list
                 }}
             />
         </div>
@@ -725,6 +723,7 @@ function FeatureImportanceGraph(props) {
             margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
             xaxis: {
                 automargin: false,
+                fixedrange: true,
                 range: [0, 100]
             },
             yaxis: {

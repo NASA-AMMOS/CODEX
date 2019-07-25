@@ -166,7 +166,7 @@ def explain_this(inputHash, featureNames, dataSelections, result, session=None):
 
     samples_, features_ = X.shape
     
-    max_depth = 6
+    max_depth = 5
     for i in range(1, max_depth):
         #train and fit the model
         parameters = {

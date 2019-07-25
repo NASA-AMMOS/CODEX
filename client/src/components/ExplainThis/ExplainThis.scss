@@ -3,6 +3,7 @@
     width: 100%;
     display: flex;
     flex-direction: row;
+    color:black;
 
     .help-button {
         position: absolute;
@@ -43,7 +44,7 @@
             display: flex;
             flex-direction: column;
             .selection-chooser-header {
-                margin: 0px;
+                margin: 0 auto;
             }
 
             .selection-dropdown {
