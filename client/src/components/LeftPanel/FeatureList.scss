@@ -94,6 +94,11 @@
                 display: flex;
                 flex-direction: row;
 
+                &:hover{
+                    background-color:#bbbbbb;
+                    color: #051426;
+                }
+
                 .feature-name-row {
                     display: flex;
                     flex-direction:row;
