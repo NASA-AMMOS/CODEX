@@ -204,7 +204,7 @@ function NavigationBar(props) {
                     </Dropdown.Menu>
                 </Dropdown>
 
-                <Dropdown className="dropdownMain" autoOpen={false}>
+                {/** <Dropdown className="dropdownMain" autoOpen={false}>
                     <Dropdown.Toggle className="dropdownToggle" title="Development" />
                     <Dropdown.Menu>
                         <MenuItem onSelect={() => props.openWindow(windowTypes.DEBUG_WINDOW)}>
@@ -212,6 +212,7 @@ function NavigationBar(props) {
                         </MenuItem>
                     </Dropdown.Menu>
                 </Dropdown>
+            **/}
                 <Dropdown className="dropdownMain" autoOpen={false}>
                     <Dropdown.Toggle className="dropdownToggle" title="Workflows" />
                     <Dropdown.Menu>
