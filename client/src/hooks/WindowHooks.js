@@ -15,7 +15,6 @@ const wrapWindow = (win, dispatch) => {
     // dispatchers are wrapped to avoid unnecessary rerenders by triggering actions
     // this greatly simplifies components using this, as they can simply "set and forget"
     // instead of checking that they haven't already set a value
-    console.log(win.toJS());
     return {
         resizeX: width => {
             if (win.get("width") !== width) {
