@@ -73,7 +73,8 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
         filepath = os.path.join(CODEX_ROOT, "uploads", filename)
 
         if (msg["done"] == True):
-            codex_hash = get_cache(msg['sessionkey'])
+            codex_system.codex_log('Finished file transfer, initiating save...')
+            codex_hash = get_cache(msg['sessionkey'], timeout=None)
 
             f = open(filepath, 'wb')
             for chunk in fileChunks:
@@ -104,6 +105,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
             fileChunks.append(contents)
 
         if msg['done']:
+            codex_system.codex_log('Finished file save.')
             result['status'] = 'complete'
             result['feature_names'] = featureList
         else:

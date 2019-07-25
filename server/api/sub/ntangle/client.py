@@ -34,7 +34,8 @@ class Client:
 
         # create a socket
         self.__socket = self.__context.socket(zmq.REQ)
-        self.__socket.setsockopt(zmq.LINGER, timeout)
+        if timeout is not None:
+            self.__socket.setsockopt(zmq.LINGER, timeout)
         self.__socket.connect(remote)
 
         # connect to the remote
@@ -59,7 +60,7 @@ class Client:
         msg = {}
         if self.timeout is None:
             # wait back from the server
-            msg = self.__socket.recv_obj()
+            msg = self.__socket.recv_pyobj()
         else:
             poller = zmq.Poller()
             poller.register(self.__socket, zmq.POLLIN)
