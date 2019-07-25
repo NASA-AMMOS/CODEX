@@ -46,7 +46,7 @@ const wrapWindow = (win, dispatch) => {
                 dispatch(wmActions.setWindowData(win.get("id"), data));
             }
         },
-        ...win.toJS()
+        ...(win ? win.toJS() : {})
     };
 };
 
