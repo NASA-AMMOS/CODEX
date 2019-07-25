@@ -40,7 +40,7 @@ function ControlBar(props) {
                 props.changeGlobalChartState(previousChartMode.current);
             }
 
-            if (props.windows.some(win => uiTypes.GRAPH_TYPES.includes(win.windowType))) {
+            if (props.windows.some(win => uiTypes.GRAPH_TYPES.includes(win.get("windowType")))) {
                 document.addEventListener("keydown", handleKeyDown);
                 document.addEventListener("keyup", handleKeyUp);
             }
@@ -60,7 +60,9 @@ function ControlBar(props) {
     return (
         <div
             className="controlBar"
-            hidden={props.windows.every(win => !uiTypes.GRAPH_TYPES.includes(win.windowType))}
+            hidden={props.windows.every(
+                win => !uiTypes.GRAPH_TYPES.includes(win.get("windowType"))
+            )}
         >
             <Lasso className={lassoClass} onClick={_ => props.changeGlobalChartState("lasso")} />
             <Zoom className={zoomClass} onClick={_ => props.changeGlobalChartState("zoom")} />

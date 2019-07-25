@@ -15,8 +15,8 @@ import os
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 import sys
-sys.path.insert(1, CODEX_ROOT + '/api/')
-sys.path.insert(1, CODEX_ROOT + '/api/sub/')
+sys.path.insert(1, os.path.join(CODEX_ROOT, 'api'))
+sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
 
 from tornado import web
 from tornado import ioloop
@@ -70,7 +70,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
         result = {}
 
         filename = msg["filename"]
-        filepath = CODEX_ROOT + "/uploads/" + filename
+        filepath = os.path.join(CODEX_ROOT, "uploads", filename)
 
         if (msg["done"] == True):
             codex_system.codex_log('Finished file transfer, initiating save...')

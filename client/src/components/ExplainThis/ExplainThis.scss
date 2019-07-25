@@ -4,6 +4,13 @@
     display: flex;
     flex-direction: row;
 
+    .help-button {
+        position: absolute;
+        right: 0px;
+        margin: 10px;
+        margin-top: 0px;
+    }
+
     .load-failure {
         display: flex;
         justify-content: center;

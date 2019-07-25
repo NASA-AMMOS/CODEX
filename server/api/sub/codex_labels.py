@@ -19,7 +19,6 @@ import operator
 from random import shuffle
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
-# CODEX Support
 
 def label_swap(labels, dataHash, verbose=False, session=None):
     '''

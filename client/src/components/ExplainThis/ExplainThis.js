@@ -23,6 +23,15 @@ import Slider from "@material-ui/lab/Slider";
 import { useSelectedFeatureNames, useFilename, useSavedSelections } from "hooks/DataHooks";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import { useWindowManager } from "hooks/WindowHooks";
+import HelpOutline from "@material-ui/icons/HelpOutline";
+import HelpContent from "components/Help/HelpContent";
+import IconButton from "@material-ui/core/IconButton";
+import {
+    WindowLayout,
+    FixedContainer,
+    ExpandingContainer,
+    WindowTogglableCover
+} from "components/WindowHelpers/WindowLayout";
 
 //general helper functions go here
 function createExplainThisRequest(filename, selections, dataFeatures) {
@@ -57,8 +66,7 @@ function processFloatingPointNumber(number) {
 }
 
 //this section of the code handles the manipulation of the tree
-
-// Toggle children.
+//Toggle children.
 function toggle(d) {
     //decide base
     if (d.children && childrenHidden(d)) {
@@ -834,6 +842,7 @@ function ExplainThis(props) {
     const [treeIndex, setTreeIndex] = useState(0);
     const [runButtonPressed, setRunButtonPressed] = useState(false);
     const [chosenSelections, setChosenSelections] = useState([null, null]);
+    const [helpActive, setHelpActive] = useState(false);
 
     //handles the dynamic loading of selections 
     useEffect(
@@ -928,6 +937,20 @@ function ExplainThis(props) {
                 chosenSelections={chosenSelections}
                 selectionNames={dataState != undefined ? dataState.selectionNames : undefined}
             />
+            <div className="help-button">
+                <IconButton hidden={helpActive} onClick={() => setHelpActive(true)}>
+                    <HelpOutline />
+                </IconButton>
+            </div>
+            {!helpActive || (
+                <WindowTogglableCover
+                    open={helpActive}
+                    onClose={() => setHelpActive(false)}
+                    title={"Explain This"}
+                >
+                    <HelpContent guidancePath={"explain_this_page:general_explain_this"} />
+                </WindowTogglableCover>
+            )}
         </div>
     );
 }

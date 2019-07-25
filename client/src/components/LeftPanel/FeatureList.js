@@ -171,7 +171,7 @@ function StatisticsRow(props) {
                     limit={100}
                     style={{ fill: "none", height: "20px", width: "100%" }}
                 >
-                    <SparklinesLine color="white" />
+                    <SparklinesLine color={props.rowHover ? "#051426" : "white"} />
                 </Sparklines>
             </span>
         </div>
@@ -187,8 +187,25 @@ function FeatureListDNDRow(props) {
     const selected = props.featureInfo.selected;
     const virtualStyle = { fontStyle: virtual ? "italic" : "normal" };
 
+    const [rowHover, setRowHover] = useState(false);
+
     return (
-        <React.Fragment>
+        <div
+            ref={props.provided.innerRef}
+            {...props.provided.draggableProps}
+            {...props.provided.dragHandleProps}
+            className="featureRow"
+            onMouseEnter={
+                function(){
+                    setRowHover(true);
+                }
+            }
+            onMouseLeave={
+                function(){
+                    setRowHover(false);
+                }
+            }
+        >
             <div className="feature-name-row">
                 <Checkbox
                     checked={selected}
@@ -213,8 +230,9 @@ function FeatureListDNDRow(props) {
                 statsHidden={props.statsHidden}
                 featureListLoading={props.featureListLoading}
                 featureList={props.featureNames}
+                rowHover={rowHover}
             />
-        </React.Fragment>
+        </div>
     );
 }
 
@@ -250,8 +268,9 @@ function FeatureListDND(props) {
                         className="drag-drop-div"
                     >
                         {props.featureNames.map(featureName => {
-                            if (featureName === undefined /*|| !props.featureIndices[featureName]*/)
+                            if (featureName === undefined || props.featureIndices[featureName] === undefined){
                                 return <div key={featureName}> </div>;
+                            }
                             return (
                                 <Draggable
                                     key={featureName}
@@ -259,12 +278,6 @@ function FeatureListDND(props) {
                                     index={props.featureIndices[featureName]}
                                 >
                                     {(provided, snapshot) => (
-                                        <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            className="featureRow"
-                                        >
                                             <FeatureListDNDRow
                                                 featureName={featureName}
                                                 featureInfo={props.featureMapping[featureName]}
@@ -274,8 +287,8 @@ function FeatureListDND(props) {
                                                 featureListLoading={props.featureListLoading}
                                                 featureUnselect={props.featureUnselect}
                                                 featureSelect={props.featureSelect}
+                                                provided={provided}
                                             />
-                                        </div>
                                     )}
                                 </Draggable>
                             );

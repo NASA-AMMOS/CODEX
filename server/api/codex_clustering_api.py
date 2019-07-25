@@ -24,7 +24,7 @@ DEBUG = False
 
 # Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, CODEX_ROOT + '/api/sub/')
+sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
 
 # CODEX Support
 import codex_return_code
@@ -242,6 +242,12 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
 
     cluster_alg.fit(X)
     y_pred = cluster_alg.labels_.astype(np.int)
+
+    # temporary to not change API right now
+    merged_hash = codex_hash.hashArray("temporary", X, "feature")
+    y_pred = codex_labels.label_swap(y_pred, merged_hash["hash"], session=codex_hash)
+    label_hash = codex_hash.hashArray(merged_hash["hash"], y_pred, "label")
+
     result['numClusters'] = np.unique(y_pred).size
     result['clusters'] = y_pred.tolist()
 
@@ -252,7 +258,6 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
         centers = None
         result['centers'] = None
 
-
     endTime = time.time()
     computeTime = endTime - startTime
     codex_time_log.logTime(
@@ -261,13 +266,6 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
         computeTime,
         len(data),
         data.ndim)
-
-    # temporary to not change API right now
-    merged_hash = codex_hash.hashArray("temporary", X, "feature")
-    label_hash = codex_hash.hashArray(merged_hash["hash"], y_pred, "label")
-
-    # TODO - turn back on label swap
-    #y_pred = codex_labels.label_swap(y_pred, merged_hash["hash"])
 
     result['message'] = "success"
     return result

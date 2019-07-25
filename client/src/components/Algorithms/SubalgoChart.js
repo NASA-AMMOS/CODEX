@@ -93,6 +93,11 @@ function SubalgoChart(props) {
         "preview-mode": props.previewMode
     });
 
+    const loadingClasses = classnames({
+        "subalgo-chart-loading": true,
+        "large-mode": props.previewMode
+    });
+
     const timeToGenerate =
         props.serverData && props.serverData.eta ? `~${props.serverData.eta.toFixed(2)}s` : "";
 
@@ -106,7 +111,7 @@ function SubalgoChart(props) {
             onClick={props.onClick}
         >
             <div className={titleClasses}>{props.titleText}</div>
-            <div className="subalgo-chart-loading" hidden={props.serverData}>
+            <div className={loadingClasses} hidden={props.serverData}>
                 <CircularProgress />
             </div>
             <div className="subalgo-plot" hidden={!props.serverData}>
