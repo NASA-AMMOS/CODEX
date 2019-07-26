@@ -8,7 +8,8 @@ import {
     featureRelease,
     featureSelect,
     featureUnselect,
-    featureAdd
+    featureAdd,
+    fileLoad
 } from "actions/data";
 import { fromJS, Set } from "immutable";
 import { batchActions } from "redux-batched-actions";
@@ -326,4 +327,13 @@ export function useNewFeature(dispatch) {
             dispatch(featureAdd(name, data));
         });
     };
+}
+
+/**
+ * File upload hook
+ * @return {function} file load helper
+ */
+export function useFileUpload() {
+    const dispatch = useDispatch();
+    return files => fileLoad(files)(dispatch);
 }

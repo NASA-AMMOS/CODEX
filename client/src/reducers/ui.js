@@ -24,6 +24,12 @@ export default function ui(state = uiState, action, opt_reducer = UiReducer) {
             return opt_reducer.addToHistory(state, action);
         case actionTypes.CHANGE_GLOBAL_CHART_STATE:
             return opt_reducer.changeGlobalChartState(state, action);
+        case actionTypes.SET_UPLOAD_STATE_UPLOADING:
+            return opt_reducer.setUploadStatusUploading(state, action);
+        case actionTypes.SET_UPLOAD_STATE_PROCESSING:
+            return opt_reducer.setUploadStatusProcessing(state, action);
+        case actionTypes.SET_UPLOAD_STATE_DONE:
+            return opt_reducer.setUploadStatusDone(state, action);
         default:
             return state;
     }

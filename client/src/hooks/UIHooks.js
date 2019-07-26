@@ -11,3 +11,13 @@ export function useGlobalChartState() {
 
     return [gcs, state => dispatch(uiActions.changeGlobalChartState(state))];
 }
+
+/**
+ * Returns the current upload status
+ * @return {null/string/number} of upload status
+ */
+export function useUploadStatus() {
+    const status = useSelector(state => state.ui.get("uploadStatus"));
+
+    return status;
+}

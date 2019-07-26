@@ -2,26 +2,6 @@
     color: white;
 }
 
-.session-bar {
-    padding-top: 5px;
-}
-
-.session-bar label[for="codex-file-upload-button"] {
-    margin-bottom: 0;
-}
-
-.session-bar-list {
-    list-style: none;
-    display: flex;
-    flex-direction: row;
-    margin: 0;
-    padding-left: 5px;
-}
-
-.session-bar__spacer {
-    flex-grow: 1;
-}
-
 /*
 .session-bar-list-element {
     display: inline-block;

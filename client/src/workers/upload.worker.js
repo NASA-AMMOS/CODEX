@@ -1,5 +1,7 @@
 let sock;
 
+let UPLOAD_PERCENTAGE_USEFUL_UPDATE = 0.1;
+
 function blobToBase64(blob, callback) {
     let reader = new self.FileReader();
     reader.readAsDataURL(blob);
@@ -51,9 +53,16 @@ function process(files, sessionkey) {
                     );
 
                     const outMsg = {
-                        status: "uploading " + start / SIZE
+                        status: "uploading " + start / SIZE,
+                        percent: start / SIZE
                     };
-                    self.postMessage(JSON.stringify(outMsg));
+                    if (
+                        start / SIZE - self.lastPercentageStatus >
+                        UPLOAD_PERCENTAGE_USEFUL_UPDATE
+                    ) {
+                        self.lastPercentageStatus = start / SIZE;
+                        self.postMessage(JSON.stringify(outMsg));
+                    }
 
                     start = end;
                     end = start + BYTES_PER_CHUNK;
@@ -81,6 +90,10 @@ function process(files, sessionkey) {
 }
 
 self.addEventListener("message", function(e) {
+    // to try to only send useful updates, we'll only send updates when the the percentage
+    // is more than 5% different from the previous value. hence, starting at -5 means that we'll
+    // be starting on the leading edge (rather than the trailing edge)
+    self.lastPercentageStatus = -1 * UPLOAD_PERCENTAGE_USEFUL_UPDATE;
     let files = [];
     for (let j = 0; j < e.data.files.length; j++) {
         files.push(e.data.files[j]);
