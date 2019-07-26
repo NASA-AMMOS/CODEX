@@ -142,7 +142,6 @@ function StatisticsRow(props) {
 
     let mean = processFloatingPointNumber(props.stats.mean);
     let median = processFloatingPointNumber(props.stats.median);
-
     let [featureTypeData, setFeatureTypeData] = useState({ c: false, r: false });
 
     return (
@@ -337,7 +336,6 @@ function FeatureList(props) {
 
     function loadData(featureName, callback) {
         const requestCopy = { ...requestTemplate, name: [featureName] };
-        console.log(featureName);
         setTimeout(
             function(){
                 const request = utils.makeSimpleRequest(requestCopy);
@@ -419,6 +417,25 @@ function FeatureList(props) {
             setFeatureData({});
         },
         [props.filename]
+    );
+
+    useEffect( 
+        _ => {
+            let beforeLength = Object.keys(featureIndices).length;
+            let newFeatureIndices = {...featureIndices};
+
+            featureNames
+                .filter((name) => {
+                    return featureIndices[name] == undefined;
+                })
+                .forEach((name) => {
+                    newFeatureIndices[name] = beforeLength;
+                    beforeLength++;
+                }); 
+
+            setFeatureIndices(newFeatureIndices);
+        },
+        [featureNames]
     );
 
     //callback that handles the asynchronous loading of feature data
