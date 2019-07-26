@@ -1,4 +1,9 @@
-import { useSavedSelections, useFilename, useSelectedFeatureNames, useSelectionGroups} from "hooks/DataHooks";
+import {
+    useSavedSelections,
+    useFilename,
+    useSelectedFeatureNames,
+    useSelectionGroups
+} from "hooks/DataHooks";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import { useWindowManager } from "hooks/WindowHooks";
 import * as utils from "utils/utils";
@@ -149,8 +154,13 @@ function FindMoreLikeThis(props) {
                     return;
                 }
 
-                const requestObject = createFMLTRequest(props.filename, inputSelection.rowIndices, props.featureNames, similarityThreshold);
-                //actually handle the request for running the 
+                const requestObject = createFMLTRequest(
+                    props.filename,
+                    inputSelection.rowIndices,
+                    props.featureNames,
+                    similarityThreshold
+                );
+                //actually handle the request for running the
                 //find more like this algorithm
                 setOutputMessage("");
                 setLoading(true);
@@ -158,20 +168,22 @@ function FindMoreLikeThis(props) {
                 //resolves the fmlt request
                 request.req.then(data => {
                     setLoading(false);
-                    setOutputMessage(makeOutputMessage( "Like " + inputSelection.name));
+                    setOutputMessage(makeOutputMessage("Like " + inputSelection.name));
                     //add a saved selections called fmlt_output with the returned data
                     const groupID = utils.getUniqueGroupID("FMLT");
-                    
+
                     props.createSelectionGroup(groupID);
-                    props.saveSelection( "Like " + inputSelection.name, data.like_this, groupID);
+                    props.saveSelection("Like " + inputSelection.name, data.like_this, groupID);
                     setButtonClicked(false);
-                }); 
+                });
                 //cleanup function
                 return function cleanup() {
                     request.cancel();
                 };
-        }
-    },[buttonClicked]);
+            }
+        },
+        [buttonClicked]
+    );
 
     return (
         <div className="fmlt-container">
@@ -203,7 +215,7 @@ export default props => {
     const win = useWindowManager(props, {
         width: 350,
         height: 400,
-        resizeable: false,
+        isResizable: false,
         title: "Find More Like This"
     });
 

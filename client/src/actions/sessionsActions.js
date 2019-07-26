@@ -5,14 +5,14 @@ import { createGraph } from "actions/graphActions";
 
 function serializeClientState(state) {
     return {
-        windows: state.windowManager.windows.map(win => {
+        windows: state.windowManager.get("windows").map(win => {
             return {
-                data: win.data,
-                height: win.height,
-                width: win.width,
-                x: win.x,
-                y: win.y,
-                windowType: win.windowType
+                data: win.get("data"),
+                height: win.get("height"),
+                width: win.get("width"),
+                x: win.get("x"),
+                y: win.get("y"),
+                windowType: win.get("windowType")
             };
         })
     };
@@ -23,6 +23,7 @@ export function saveSession(sessionName) {
         const { req } = utils.makeSimpleRequest({
             routine: "save_session",
             session_name: sessionName,
+            filename: getState().data.get("filename"),
             state: serializeClientState(getState())
         });
         req.then(data => {
@@ -42,7 +43,7 @@ export function loadSession(sessionName) {
             dispatch({
                 type: types.FILE_LOAD,
                 data: data.session_data.features,
-                filename: ""
+                filename: data.filename
             });
 
             data.session_data.state.windows.map(windowData => {

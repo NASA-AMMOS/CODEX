@@ -219,7 +219,7 @@ export default props => {
     const win = useWindowManager(props, {
         width: 650,
         height: 350,
-        resizeable: false,
+        isResizable: false,
         title: "General Classifier"
     });
 

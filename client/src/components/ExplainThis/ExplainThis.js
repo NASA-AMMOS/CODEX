@@ -172,7 +172,6 @@ let color_map = d3.scale
 
 let color_map = d3SC.interpolatePlasma;
 
-
 /*
     This function handles drawing the arrow on the right side of the
     screen
@@ -236,7 +235,7 @@ function drawScaleArrow(svgRef, width, height) {
 
 function drawColorGradient(svgRef, width, height, selectionNames) {
     const barHeight = 20;
-     //defines the gradient
+    //defines the gradient
     let gradientContainer = d3
         .select(svgRef)
         .append("svg:g")
@@ -312,9 +311,8 @@ function generateTree(treeData, selectionNames, svgRef) {
         return col;
     }
 
-    let tree = d3.layout.tree()
-        .size([height - 140, width])
-        //.nodeSize(nodeSize);
+    let tree = d3.layout.tree().size([height - 140, width]);
+    //.nodeSize(nodeSize);
 
     let diagonal = d3.svg.diagonal().projection(function(d) {
         return [d.y, d.x];
@@ -324,7 +322,7 @@ function generateTree(treeData, selectionNames, svgRef) {
         .select(svgRef)
         .append("svg:g")
         .attr("transform", "translate(" + margin.left + "," + 40 + ")");
-   
+
     drawColorGradient(svgRef, width, height, selectionNames);
 
     drawScaleArrow(svgRef, width, height);
@@ -361,7 +359,7 @@ function generateTree(treeData, selectionNames, svgRef) {
         // Compute the new tree layout.
         let nodes = tree.nodes(root).reverse();
 
-        //This section of code is used to determine the 
+        //This section of code is used to determine the
         //height and width of the links
         // Normalize for fixed-depth.
         nodes.forEach(function(d) {
@@ -432,7 +430,7 @@ function generateTree(treeData, selectionNames, svgRef) {
                 return 2;
             })
             .style("margin", 20)
-            .style("fill", function(d){
+            .style("fill", function(d) {
                 return !d.leaf && childrenHidden(d) ? "steelblue" : "#fff";
             })
             .style("stroke", function(d) {
@@ -460,7 +458,7 @@ function generateTree(treeData, selectionNames, svgRef) {
                         return color_map(0);
                     } else {
                         return color_map(1);
-                    }   
+                    }
                 } else {
                     return "#bbbbbb";
                 }
@@ -622,7 +620,7 @@ function TreeSweepScroller(props) {
             <div className="tree-sweep-scroller">
                 <div className="tree-sweep-scroller-title"> Score vs Tree Depth </div>
             </div>
-         );
+        );
     }
 
     const [listClass, setListClass] = useState([]);
@@ -653,7 +651,7 @@ function TreeSweepScroller(props) {
             showlegend: false,
             xaxis: {
                 automargin: true,
-                fixedrange: true,
+                fixedrange: true
             },
             yaxis: {
                 automargin: true,
@@ -700,9 +698,7 @@ function FeatureImportanceGraph(props) {
         return (
             <React.Fragment>
                 <div className="feature-importance-graph-title">Feature Importances</div>
-                <div className="feature-importance-graph">
-
-                </div>
+                <div className="feature-importance-graph"></div>
             </React.Fragment>
         );
     }
@@ -756,7 +752,6 @@ function FeatureImportanceGraph(props) {
     graphs on the left side of the component.
 */
 function LeftSidePanel(props) {
-
     return (
         <div className="feature-list">
             <TreeSweepScroller
@@ -796,11 +791,7 @@ function LeftSidePanel(props) {
 function ExplainThisTreeDiagram(props) {
     //handle the null cases
     if (!props.treeData && !props.runButtonPressed) {
-        return (
-            <div className="load-failure">
-                Choose selections and run
-            </div>
-        );
+        return <div className="load-failure">Choose selections and run</div>;
     } else if (!props.treeData) {
         return (
             <div className="load-failure">
@@ -808,7 +799,7 @@ function ExplainThisTreeDiagram(props) {
             </div>
         );
     }
-    
+
     //declaring svgRef so that the callback in the jsx below can reach it
     let svgRef = null;
     //wraps the entire functionality in lifecycle methods
@@ -848,7 +839,7 @@ function ExplainThis(props) {
     const [chosenSelections, setChosenSelections] = useState([null, null]);
     const [helpActive, setHelpActive] = useState(false);
 
-    //handles the dynamic loading of selections 
+    //handles the dynamic loading of selections
     useEffect(
         _ => {
             let newChosenSelections = [...chosenSelections];
@@ -923,8 +914,16 @@ function ExplainThis(props) {
     return (
         <div className="explain-this-container">
             <LeftSidePanel
-                rankedFeatures={dataState != undefined ? dataState.tree_sweep[treeIndex].feature_rank : undefined}
-                importances={dataState != undefined ? dataState.tree_sweep[treeIndex].feature_weights : undefined}
+                rankedFeatures={
+                    dataState != undefined
+                        ? dataState.tree_sweep[treeIndex].feature_rank
+                        : undefined
+                }
+                importances={
+                    dataState != undefined
+                        ? dataState.tree_sweep[treeIndex].feature_weights
+                        : undefined
+                }
                 setTreeIndex={setTreeIndex}
                 tree_sweep={dataState != undefined ? dataState.tree_sweep : undefined}
                 setRunButtonPressed={setRunButtonPressed}
@@ -964,7 +963,7 @@ export default props => {
     const win = useWindowManager(props, {
         width: 910,
         height: 530,
-        resizeable: false,
+        isResizable: false,
         title: "Explain This"
     });
 
@@ -981,10 +980,6 @@ export default props => {
             />
         );
     } else {
-        return (
-            <WindowError>
-                Please select at least one feature. 
-            </WindowError>
-        );
+        return <WindowError>Please select at least one feature.</WindowError>;
     }
 };
