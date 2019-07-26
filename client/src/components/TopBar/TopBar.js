@@ -79,11 +79,6 @@ function NavigationBar(props) {
                 ref.current = r;
             }}
         >
-            <LoadingBar
-                ref={r => {
-                    ref_loading.current = r;
-                }}
-            />
             <div id="topBarMenu">
                 <Dropdown className="dropdownMain" autoOpen={false}>
                     <Dropdown.Toggle className="dropdownToggle" title="Graphs" />
