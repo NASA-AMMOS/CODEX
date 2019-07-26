@@ -8,7 +8,8 @@ import {
     featureRelease,
     featureSelect,
     featureUnselect,
-    featureAdd
+    featureAdd,
+    fileLoad
 } from "actions/data";
 import { fromJS, Set } from "immutable";
 import { batchActions } from "redux-batched-actions";
