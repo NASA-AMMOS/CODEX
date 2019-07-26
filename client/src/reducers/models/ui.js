@@ -1,5 +1,6 @@
 import Immutable from "immutable";
 
 export const uiState = Immutable.fromJS({
-    globalChartState: "lasso"
+    globalChartState: "lasso",
+    uploadStatus: null
 });

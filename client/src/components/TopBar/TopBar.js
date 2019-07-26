@@ -8,7 +8,6 @@ import PropTypes from "prop-types";
 import React, { Component, useRef } from "react";
 
 import { openAlgorithm, openDevelopment, openWorkflow } from "actions/ui";
-import LoadingBar from "components/LoadingBar/LoadingBar";
 import TextField from "@material-ui/core/TextField";
 import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
@@ -23,106 +22,7 @@ import * as sessionsActions from "actions/sessionsActions";
 import * as exportActions from "actions/exportActions";
 import * as dataActions from "actions/data";
 
-import { useFilename } from "hooks/DataHooks";
-import MaterialButton from "@material-ui/core/Button";
-import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import CodeIcon from "@material-ui/icons/Code";
-import SaveIcon from "@material-ui/icons/Save";
-import OpenIcon from "@material-ui/icons/FolderOpen";
-import DescriptionIcon from "@material-ui/icons/Description";
-import CircularProgress from "@material-ui/core/CircularProgress";
-
-function SessionBar(props) {
-    const filename = useFilename();
-
-    let uploadButtonContents = null;
-    if (filename === null) {
-        uploadButtonContents = (
-            <React.Fragment>
-                <CloudUploadIcon fontSize="small" />
-                &nbsp; Upload
-            </React.Fragment>
-        );
-    } else if (filename === "") {
-        uploadButtonContents = (
-            <React.Fragment>
-                <CircularProgress size="16px" color="inherit" />
-                &nbsp; Loading...
-            </React.Fragment>
-        );
-    } else {
-        uploadButtonContents = (
-            <React.Fragment>
-                <DescriptionIcon fontSize="small" />
-                &nbsp;
-                {filename}
-            </React.Fragment>
-        );
-    }
-    return (
-        <div className="session-bar">
-            <ul className="session-bar-list">
-                <li className="session-bar-list-element">
-                    <input
-                        className="session-bar-file-input inputfile"
-                        multiple={false}
-                        id="codex-file-upload-button"
-                        name="files[]"
-                        type="file"
-                        hidden
-                        accept=".csv,.npy,.h5"
-                        onChange={e => {
-                            if (e.target.files.length) props.fileLoad(e.target.files);
-                        }}
-                    />
-                </li>
-                <li>
-                    <label htmlFor="codex-file-upload-button">
-                        <MaterialButton component="span" size="small" color="inherit">
-                            {uploadButtonContents}
-                        </MaterialButton>
-                    </label>
-                </li>
-                <li className="session-bar__spacer" />
-                <li>
-                    <MaterialButton
-                        className="session-bar-button"
-                        size="small"
-                        color="inherit"
-                        onClick={props.requestServerExport}
-                    >
-                        Export File &nbsp;
-                        <CodeIcon fontSize="small" />
-                    </MaterialButton>
-                </li>
-                <li>
-                    <MaterialButton
-                        className="session-bar-button"
-                        size="small"
-                        color="inherit"
-                        onClick={props.openSessionsWindow}
-                    >
-                        Load Session &nbsp;
-                        <OpenIcon fontSize="small" />
-                    </MaterialButton>
-                </li>
-                <li>
-                    <MaterialButton
-                        className="session-bar-button"
-                        size="small"
-                        color="inherit"
-                        onClick={() => {
-                            props.saveSession(`${props.filename}_${new Date().toISOString()}`);
-                        }}
-                    >
-                        Save Session &nbsp;
-                        <SaveIcon fontSize="small" />
-                    </MaterialButton>
-                </li>
-            </ul>
-        </div>
-    );
-}
+import SessionBar from "components/TopBar/SessionBar";
 
 function NavigationBar(props) {
     const defaultBackground = "#05101f";
@@ -260,7 +160,7 @@ function NavigationBar(props) {
 function TopBar(props) {
     return (
         <div className="top-bar">
-            <SessionBar {...props} />
+            <SessionBar />
             <NavigationBar {...props} />
         </div>
     );
@@ -298,8 +198,7 @@ function mapDispatchToProps(dispatch) {
         openRegressionWindow: bindActionCreators(regressionActions.openRegressionWindow, dispatch),
         openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch),
         saveSession: bindActionCreators(sessionsActions.saveSession, dispatch),
-        requestServerExport: bindActionCreators(exportActions.requestServerExport, dispatch),
-        fileLoad: bindActionCreators(dataActions.fileLoad, dispatch)
+        requestServerExport: bindActionCreators(exportActions.requestServerExport, dispatch)
     };
 }
 

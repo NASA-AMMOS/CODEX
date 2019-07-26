@@ -6,6 +6,7 @@
 import * as types from "constants/actionTypes";
 import WorkerUpload from "worker-loader!workers/upload.worker";
 import { getGlobalSessionKey } from "utils/utils";
+import * as uiActions from "actions/ui";
 
 export function fileLoad(fileList) {
     return dispatch => {
@@ -17,7 +18,15 @@ export function fileLoad(fileList) {
         let workerUpload = new WorkerUpload();
         workerUpload.addEventListener("message", msg => {
             const res = JSON.parse(msg.data);
-            if (res.status !== "complete") return;
+            if (res.status !== "complete") {
+                if (res.percent + 0.05 > 1) {
+                    dispatch(uiActions.setUploadStateProcessing());
+                } else {
+                    dispatch(uiActions.setUploadStateUploading(res.percent));
+                }
+                return;
+            }
+            dispatch(uiActions.setUploadStateDone());
             dispatch({
                 type: types.FILE_LOAD,
                 data: res.feature_names,

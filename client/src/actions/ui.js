@@ -113,3 +113,13 @@ export const addToHistory = (status, kind, description) => ({
 export function changeGlobalChartState(chartState) {
     return { type: types.CHANGE_GLOBAL_CHART_STATE, chartState };
 }
+
+export function setUploadStateUploading(percentage = 0) {
+    return { type: types.SET_UPLOAD_STATE_UPLOADING, percentage };
+}
+export function setUploadStateProcessing() {
+    return { type: types.SET_UPLOAD_STATE_PROCESSING };
+}
+export function setUploadStateDone() {
+    return { type: types.SET_UPLOAD_STATE_DONE };
+}

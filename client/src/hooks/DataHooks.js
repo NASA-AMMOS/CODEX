@@ -327,3 +327,12 @@ export function useNewFeature(dispatch) {
         });
     };
 }
+
+/**
+ * File upload hook
+ * @return {function} file load helper
+ */
+export function useFileUpload() {
+    const dispatch = useDispatch();
+    return files => fileLoad(files)(dispatch);
+}
