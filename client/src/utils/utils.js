@@ -149,7 +149,7 @@ export function createGradientStops(startColor, endColor, numStops) {
   */
 export function getUniqueGroupID(id) {
     const groups = store.getState().selections.groups;
-
+    
     if (id === null || id === undefined) {
         return "Group "+groups.length;
     } else {
@@ -161,6 +161,6 @@ export function getUniqueGroupID(id) {
         if (numStarting === 0)
             return id;
         else 
-            return getUniqueGroupID(groups, id+" "+numStarting);
+            return getUniqueGroupID(id+" "+numStarting);
     }
 }
