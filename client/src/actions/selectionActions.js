@@ -20,6 +20,10 @@ export function saveNewSelection(name, rowIndices, groupID) {
     return { type: actionTypes.SAVE_NEW_SELECTION, name, rowIndices, groupID};
 }
 
+export function removeAllSelections() {
+    return {type: actionTypes.REMOVE_ALL_SELECTIONS};
+}
+
 export function deleteSelection(id) {
     return { type: actionTypes.DELETE_SELECTION, id };
 }

@@ -30,6 +30,8 @@ export default function selections(
             return opt_reducer.toggleGroupHidden(state, action);
         case actionTypes.TOGGLE_GROUP_ACTIVE:
             return opt_reducer.toggleGroupActive(state, action);
+        case actionTypes.REMOVE_ALL_SELECTIONS:
+            return opt_reducer.removeAllSelections(state, action);
         default:
             return state;
     }

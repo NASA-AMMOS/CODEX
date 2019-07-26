@@ -5,7 +5,7 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
 import PropTypes from "prop-types";
-import React, { Component, useRef } from "react";
+import React, { Component, useRef , useEffect} from "react";
 
 import { openAlgorithm, openDevelopment, openWorkflow } from "actions/ui";
 import LoadingBar from "components/LoadingBar/LoadingBar";
@@ -22,6 +22,7 @@ import * as regressionActions from "actions/regressionActions";
 import * as sessionsActions from "actions/sessionsActions";
 import * as exportActions from "actions/exportActions";
 import * as dataActions from "actions/data";
+import * as selectionActions from "actions/selectionActions";
 
 import { useFilename } from "hooks/DataHooks";
 import MaterialButton from "@material-ui/core/Button";
@@ -34,6 +35,10 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 
 function SessionBar(props) {
     const filename = useFilename();
+
+    useEffect(_ => {
+        props.removeAllSelections();
+    }, [filename])
 
     let uploadButtonContents = null;
     if (filename === null) {
@@ -299,7 +304,8 @@ function mapDispatchToProps(dispatch) {
         openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch),
         saveSession: bindActionCreators(sessionsActions.saveSession, dispatch),
         requestServerExport: bindActionCreators(exportActions.requestServerExport, dispatch),
-        fileLoad: bindActionCreators(dataActions.fileLoad, dispatch)
+        fileLoad: bindActionCreators(dataActions.fileLoad, dispatch),
+        removeAllSelections: bindActionCreators(selectionActions.removeAllSelections, dispatch),
     };
 }
 

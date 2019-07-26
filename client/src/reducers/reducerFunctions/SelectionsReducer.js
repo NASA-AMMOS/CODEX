@@ -141,4 +141,11 @@ export default class SelectionsReducer {
             )
         }
     }
+
+    static removeAllSelections(state, action) {
+        return {
+            ...state,
+            savedSelections: []
+        }
+    }
 }
