@@ -415,7 +415,7 @@ def find_more_like_this(inputHash, featureList, dataSelections, similarityThresh
                    'min_samples_leaf': min_samples_leaf,
                    'bootstrap': bootstrap}
 
-    num_classifiers = 15
+    num_classifiers = 1
     for i in range(num_classifiers):
         #each iteration train a classifier on the positive data
         #and a random subsample of the other data as negative examples
