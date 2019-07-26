@@ -19,7 +19,7 @@ export function fileLoad(fileList) {
         workerUpload.addEventListener("message", msg => {
             const res = JSON.parse(msg.data);
             if (res.status !== "complete") {
-                if (res.percent + 0.05 > 1) {
+                if (res.percent + 0.1 > 1) {
                     dispatch(uiActions.setUploadStateProcessing());
                 } else {
                     dispatch(uiActions.setUploadStateUploading(res.percent));
