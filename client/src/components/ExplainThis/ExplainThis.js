@@ -86,24 +86,6 @@ function toggleRecursive(d, signal) {
     }
 }
 
-// Node labels
-function node_label(d) {
-    //split on spaces
-    //shorten the name
-    //shorten the number
-    //add them back together
-    if (d.hidden) return "";
-    let split = d.name.split(" ");
-    let float = processFloatingPointNumber(parseFloat(split[2])); //truncate to two decimal places
-    let featureName = split[0];
-    let name =
-        featureName.length > 8
-            ? featureName.substring(0, 2) + "..." + featureName.substring(featureName.length - 2)
-            : featureName;
-
-    return name + split[1] + float;
-}
-
 function hasLeafChildren(d) {
     if (d.children != undefined && d.children != null) {
         let has = true;
@@ -243,13 +225,13 @@ function drawColorGradient(svgRef, width, height, selectionNames) {
 
     gradientContainer
         .append("text")
-        .text(selectionNames[0])
-        .attr("x", width / 8 - 10 - 10 - textSize(selectionNames[0]).width)
+        .text(selectionNames[1])
+        .attr("x", width / 8 - 10 - 10 - textSize(selectionNames[1]).width)
         .attr("y", 5 + barHeight / 2);
     //janky constants needed to center the gradient container
     gradientContainer
         .append("text")
-        .text(selectionNames[1])
+        .text(selectionNames[0])
         .attr("x", width / 8 - 10 + width / 2 + 10)
         .attr("y", 5 + barHeight / 2);
 
@@ -310,6 +292,26 @@ function generateTree(treeData, selectionNames, svgRef) {
 
         return col;
     }
+
+
+    // Node labels
+    function node_label(d) {
+        if (d.hidden) return "";
+
+        if (d.leaf) {
+            return selectionNames[d.class];
+        }
+        let split = d.name.split(" ");
+        let float = processFloatingPointNumber(parseFloat(split[2])); //truncate to two decimal places
+        let featureName = split[0];
+        let name =
+            featureName.length > 10
+                ? featureName.substring(0, 2) + "..." + featureName.substring(featureName.length - 2)
+                : featureName;
+
+        return name + split[1] + float;
+    }
+
 
     let tree = d3.layout.tree().size([height - 140, width]);
     //.nodeSize(nodeSize);
@@ -429,7 +431,6 @@ function generateTree(treeData, selectionNames, svgRef) {
             .attr("ry", function(d) {
                 return 2;
             })
-            .style("margin", 20)
             .style("fill", function(d) {
                 return !d.leaf && childrenHidden(d) ? "steelblue" : "#fff";
             })

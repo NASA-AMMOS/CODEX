@@ -310,9 +310,6 @@ function FeatureList(props) {
     const shownCount = activeCount;
     const totalCount = props.featureList.size;
 
-    //number of features as a peice of state
-    //const [memoizedFeatureNames, setMemoizedFeatureNames] = useState([]);
-    const [memoizedFeatureLength, setMemoizedFeatureLength] = useState(0);
     //manages the hidden state of the statistics panel
     const [statsHidden, setStatsHidden] = useState(true);
     //a map from feature names to their current list indices
@@ -321,6 +318,9 @@ function FeatureList(props) {
     const [featureData, setFeatureData] = useState({});
     //the holder of the stats data
     const [featureStats, setFeatureStats] = useState({});
+    //limit to the number of feature stats to load on page start
+    const lazyLimit = 12;
+    const [statsLoading, setStatsLoading] = useState(false);
 
     //translate featureList into interpretable js list of names
     const featureNames = props.featureList.toJS().map(feature => {
@@ -335,33 +335,63 @@ function FeatureList(props) {
         cid: "8vrjn"
     };
 
-    function lazyRecursizeHandler(request, index) {
-        request.req.then(data => {
-            setFeatureData(featureData => {
-                return {
-                    ...featureData,
-                    [data.name]: data.downsample
-                };
+    function loadData(featureName, callback) {
+        const requestCopy = { ...requestTemplate, name: [featureName] };
+        console.log(featureName);
+        setTimeout(
+            function(){
+                const request = utils.makeSimpleRequest(requestCopy);
+
+                request.req.then(data => {
+                    setFeatureData(featureData => {
+                        return {
+                            ...featureData,
+                            [data.name]: data.downsample
+                        };
+                    });
+                    //handle building the list
+                    setFeatureStats(statsData => {
+                        return {
+                            ...statsData,
+                            [data.name]: data
+                        };
+                    });
+                    request.cancel();
+                    callback();
+                });
+            },
+            300
+        );
+    }
+
+    function statsLoadingWrapper(list) {
+
+        if (list.length > 0) {
+            setStatsLoading(true);
+            loadData(list[0], function() {
+                let continueList = list.slice(1,list.length);
+                 
+                if (list.length > 1){
+                    statsLoadingWrapper(continueList);
+                } else {
+                    setStatsLoading(false);
+                } 
             });
-            //handle building the list
-            setFeatureStats(statsData => {
-                return {
-                    ...statsData,
-                    [data.name]: data
-                };
-            });
-
-            request.cancel();
-            if (index + 1 >= featureNames.length) return;
-
-            //start next request
-            const nextRequestObject = { ...requestTemplate, name: [featureNames[index + 1]] };
-
-            setTimeout(function() {
-                const nextRequest = utils.makeSimpleRequest(nextRequestObject);
-                lazyRecursizeHandler(nextRequest, index + 1);
-            }, 1000);
-        });
+        } else if (!statsHidden){
+            let index = 0; 
+            let continueList = [];
+            while (index < featureNames.length) {
+                if (featureStats[featureNames[index]] === undefined){
+                    continueList.push(featureNames[index]);
+                    break;
+                }
+                index++;
+            }
+            if (continueList.length > 0 ){
+                setStatsLoading(true);
+                statsLoadingWrapper(continueList);
+            }
+        }
     }
 
     //holds other data about features
@@ -374,25 +404,11 @@ function FeatureList(props) {
         };
     });
 
-    //handles the loading of feature data
-    //handles loading the statistics data in a lifecycle safe way
-    //this will also handle returning the downsampled data
-    useEffect(() => {
-        if (featureNames.length > 0 && Object.keys(featureData).length == 0) {
-            const requestCopy = { ...requestTemplate, name: [featureNames[0]] };
-
-            const firstRequest = utils.makeSimpleRequest(requestCopy);
-
-            lazyRecursizeHandler(firstRequest, 0);
-        }
-        //todo handle cleanup
-    });
-
-    //handles the initialization and updating of featureIndices
+    //runs on file change
+    //it handles clearing the current data
+    //and also starting the loading of the new data up to the lazy limit
     useEffect(
         _ => {
-            //setMemoizedFeatureNames([...featureNames]);
-            setMemoizedFeatureLength(featureNames.length);
             let newFeatureIndices = {};
             featureNames.forEach((name, index) => {
                 newFeatureIndices[name] = index;
@@ -405,78 +421,24 @@ function FeatureList(props) {
         [props.filename]
     );
 
+    //callback that handles the asynchronous loading of feature data
     useEffect(
         _ => {
-            if (featureNames.length != memoizedFeatureLength) {
-                setMemoizedFeatureLength(featureNames.length);
+            if (!statsLoading) {
+                let unloadedList = [];
+                let index = 0; 
 
-                let newFeatureIndices = {};
-                featureNames.forEach((name, index) => {
-                    newFeatureIndices[name] = index;
-                });
-
-                setFeatureIndices(newFeatureIndices);
-                setFeatureStats({});
-                setFeatureData({});
-            }
-        },
-        [props.featureList]
-    );
-
-    //handles when the featureList changes
-    /*
-    //this is code to handle smart reloading of the feature statistics
-    //for when the featureList changes
-    useEffect(_ => {
-            function isDifferent(list1, list2) {
-                if (list1.length != list2.length) {
-                    return true;
-                } else {
-                    let index = 0; 
-                    while (index < list1.length) {
-                        if (list1[index] != list2[index])
-                            return true;
-                        index++;
+                while (index <= lazyLimit && index < featureNames.length) {
+                    if (featureStats[featureNames[index]] === undefined){
+                        unloadedList.push(featureNames[index]);
                     }
+                    index++;
                 }
-                return false;
+
+                statsLoadingWrapper(unloadedList);
             }
-
-            //see if feature list is different form old version
-            if (isDifferent(featureNames, memoizedFeatureNames)) {
-                let newFeatureIndices = {};
-                let newFeatureData = {};
-                let newFeatureStats = {};
-
-                let notLoaded = [];
-
-                for (let name of featureNames) {
-                    if (memoizedFeatureNames.indexOf(name) != -1) {
-                        //the name exists previously so save its data and stats
-                        newFeatureData[name] = featureData[name];
-                        newFeatureStats[name] = featureStats[name];
-                        newFeatureIndices[name] = featureIndices[name];
-                    } else {
-                        notLoaded.push(name);
-                    }
-                }
-
-                for (let name of notLoaded) {
-                    //add index for not loaded data
-                    newFeatureIndices[name] = Object.keys(newFeatureIndices).length;
-
-                }
-
-                setFeatureStats(newFeatureStats);
-                setFeatureData(newFeatureData);
-                setFeatureIndices(newFeatureIndices);
-
-                setMemoizedFeatureNames([...featureNames]);
-            }
-        },
-        [props.featureList]
-    );
-    */
+        }
+    , [statsHidden, featureNames]);
 
     //filters out the feautres based on the filter bar and
     //sorts them by their indices stored in featureIndices
