@@ -32,9 +32,9 @@ from codex_hash import get_cache
 import codex_system
 
 
-def codex_read_csv(file, featureList, hashType, session=None):
+def codex_read_csv(file, featureList, hashType, session=None, hashRef=None):
     '''
-    Inuputs:
+    Inputs:
 
     Outputs:
 
@@ -50,7 +50,11 @@ def codex_read_csv(file, featureList, hashType, session=None):
 
 
     '''
-    codex_hash = get_cache(session)
+    codex_hash = None
+    if hashRef is not None:
+        codex_hash = hashRef # call directly
+    else:
+        codex_hash = get_cache(session)
     hashList = []
     columns = defaultdict(list)
 
@@ -85,7 +89,7 @@ def codex_read_csv(file, featureList, hashType, session=None):
             feature_data = codex_system.string2token(feature_data)
 
         feature_hash = codex_hash.hashArray(
-            feature_name, feature_data, hashType)
+            feature_name, feature_data, hashType, session=session)
         hashList.append(feature_hash['hash'])
 
     return hashList, list(featureList)
@@ -148,7 +152,7 @@ def traverse_datasets(hdf_file):
             yield path
 
 
-def codex_read_hd5(file, featureList, hashType, session=None):
+def codex_read_hd5(file, featureList, hashType, session=None, hashRef=None):
     '''
     Inuputs:
 
@@ -171,7 +175,11 @@ def codex_read_hd5(file, featureList, hashType, session=None):
     >>> result = codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_1000.h5', featureList, "feature", session=codex_hash)
     ERROR: codex_read_hd5 - cannot open file
     '''
-    codex_hash = get_cache(session)
+    codex_hash = None
+    if hashRef is not None:
+        codex_hash = hashRef # call directly
+    else:
+        codex_hash = get_cache(session)
 
     hashList = []
 
@@ -199,14 +207,14 @@ def codex_read_hd5(file, featureList, hashType, session=None):
                 "Log: codex_read_hd5: Tokenized " + feature_name)
 
         feature_hash = codex_hash.hashArray(
-            feature_name, feature_data, hashType)
+            feature_name, feature_data, hashType, session=session)
         hashList.append(feature_hash['hash'])
 
     f.close()
     return hashList, list(featureList)
 
 
-def codex_read_npy(file, featureList, hashType, session=None):
+def codex_read_npy(file, featureList, hashType, session=None, hashRef=None):
     '''
     Inuputs:
 
@@ -217,7 +225,11 @@ def codex_read_npy(file, featureList, hashType, session=None):
     Examples:
 
     '''
-    codex_hash = get_cache(session)
+    codex_hash = None
+    if hashRef is not None:
+        codex_hash = hashRef # call directly
+    else:
+        codex_hash = get_cache(session)
 
     hashList = []
 
@@ -241,7 +253,7 @@ def codex_read_npy(file, featureList, hashType, session=None):
         feature_name = "feature_" + str(x)
         featureList.append(feature_name)
         feature_hash = codex_hash.hashArray(
-            feature_name, feature_data, hashType)
+            feature_name, feature_data, hashType, session=session)
         hashList.append(feature_hash['hash'])
 
     return hashList, featureList

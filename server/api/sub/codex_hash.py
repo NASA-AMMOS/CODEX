@@ -1027,6 +1027,32 @@ class CodexHash:
 
         return newHash
 
+    @expose('import_hd5')
+    def import_hd5(self, filepath, session=None):
+        import codex_read_data_api
+        hashList, featureList = codex_read_data_api.codex_read_hd5(
+            filepath, None, "feature", hashRef=self, session=session)
+    
+        return hashList, featureList
+
+    @expose('import_csv')
+    def import_csv(self, filepath, session=None):
+        import codex_read_data_api
+
+        hashList, featureList = codex_read_data_api.codex_read_csv(
+            filepath, None, "feature", hashRef=self, session=session)
+
+        return hashList, featureList
+
+    @expose('import_npy')
+    def import_npy(self, filepath, session=None):
+        import codex_read_data_api
+
+        hashList, featureList = codex_read_data_api.codex_read_npy(
+            filepath, None, "feature", hashRef=self, session=session)
+
+        return hashList, featureList
+
 def assert_session(sessionKey):
     '''
     Inputs:

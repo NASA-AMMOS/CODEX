@@ -84,17 +84,15 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
 
             fileExtension = filename.split(".")[-1]
             if (fileExtension == "csv"):
-                hashList, featureList = codex_read_data_api.codex_read_csv(
-                    filepath, None, "feature", session=codex_hash)
+                hashList, featureList = codex_hash.import_csv(filepath)
                 codex_return_code.logReturnCode(inspect.currentframe())
 
             elif (fileExtension == "h5"):
-                hashList, featureList = codex_read_data_api.codex_read_hd5(
-                    filepath, None, "feature", session=codex_hash)
+                hashList, featureList = codex_hash.import_hd5(filepath)
                 codex_return_code.logReturnCode(inspect.currentframe())
 
             elif (fileExtension == "npy"):
-                hashList, featureList = codex_read_data_api.codex_read_npy(filepath, None, "feature", session=codex_hash)
+                hashList, featureList = codex_hash.import_npy(filepath)
                 codex_return_code.logReturnCode(inspect.currentframe())
 
             else:
