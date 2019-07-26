@@ -4,6 +4,8 @@ __pycache__/
 src/server/timeLogs/t *
 server/sessions/
 serverreturned_code.py
+serverTimeLogs/
+server/timeLogs*
 
 # misc
 .DS_Store
