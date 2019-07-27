@@ -1031,7 +1031,7 @@ class CodexHash:
     def import_hd5(self, filepath, session=None):
         import codex_read_data_api
         hashList, featureList = codex_read_data_api.codex_read_hd5(
-            filepath, None, "feature", hashRef=self, session=session)
+            filepath, None, "feature", session=WrappedCache(session, cache=self))
     
         return hashList, featureList
 
@@ -1040,7 +1040,7 @@ class CodexHash:
         import codex_read_data_api
 
         hashList, featureList = codex_read_data_api.codex_read_csv(
-            filepath, None, "feature", hashRef=self, session=session)
+            filepath, None, "feature", session=WrappedCache(session, cache=self))
 
         return hashList, featureList
 
@@ -1049,7 +1049,7 @@ class CodexHash:
         import codex_read_data_api
 
         hashList, featureList = codex_read_data_api.codex_read_npy(
-            filepath, None, "feature", hashRef=self, session=session)
+            filepath, None, "feature", session=WrappedCache(session, cache=self))
 
         return hashList, featureList
 
@@ -1099,7 +1099,7 @@ class WrappedCache:
     sessionKey = None
     cache = None
 
-    def __init__(self, sessionKey, timeout=5_000):
+    def __init__(self, sessionKey, timeout=5_000, cache=None):
         '''
         Inputs:
             sessionKey (string)  - session key for the data set you wish to access
@@ -1122,7 +1122,10 @@ class WrappedCache:
         assert_session(sessionKey)
         self.sessionKey = sessionKey
 
-        if self.sessionKey == DOCTEST_SESSION and not ('CODEX_LIVE_TEST' in os.environ):
+        if cache is not None:
+            # allow for passthrough
+            self.cache = cache
+        elif self.sessionKey == DOCTEST_SESSION and not ('CODEX_LIVE_TEST' in os.environ):
             # if we're in a doctest session, instantiate the cache directly
             self.cache = CodexHash()
         else:
