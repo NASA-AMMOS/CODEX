@@ -2,6 +2,7 @@ import * as actionTypes from "constants/actionTypes";
 
 /* eslint import/no-webpack-loader-syntax: off */
 import WorkerSocket from "worker-loader!workers/socket.worker";
+import StreamSocket from "worker-loader!workers/stream.worker";
 
 import { generateCombination } from "gfycat-style-urls";
 import { store } from "index";
@@ -143,24 +144,54 @@ export function createGradientStops(startColor, endColor, numStops) {
     );
 }
 
- /**
-  * Appends a unique id to a given name
-  * @return {string} an augmented version of a name if it is not unique 
-  */
+/**
+ * Appends a unique id to a given name
+ * @return {string} an augmented version of a name if it is not unique
+ */
 export function getUniqueGroupID(id) {
     const groups = store.getState().selections.groups;
-    
+
     if (id === null || id === undefined) {
-        return "Group "+groups.length;
+        return "Group " + groups.length;
     } else {
         let numStarting = 0;
-        for(let group of groups) {
-            if(group.id.substring(0, id.length) === id) 
-                numStarting++;
+        for (let group of groups) {
+            if (group.id.substring(0, id.length) === id) numStarting++;
         }
-        if (numStarting === 0)
-            return id;
-        else 
-            return getUniqueGroupID(id+" "+numStarting);
+        if (numStarting === 0) return id;
+        else return getUniqueGroupID(id + " " + numStarting);
     }
+}
+
+/**
+ * Make a streaming request to the backend. Calls a callback for every new message
+ * @param {object} request request to send
+ * @param {function} cb callback function
+ * @returns {function} cancel function
+ */
+export function makeStreamRequest(request, cb) {
+    const streamWorker = new StreamSocket();
+    request.sessionkey = getGlobalSessionKey();
+
+    let cancel = () => {
+        streamWorker.postMessage(
+            JSON.stringify({
+                action: actionTypes.CLOSE_SOCKET
+            })
+        );
+    };
+
+    streamWorker.addEventListener("message", e => {
+        const inMsg = JSON.parse(e.data);
+        cb(inMsg);
+    });
+
+    streamWorker.postMessage(
+        JSON.stringify({
+            action: actionTypes.SIMPLE_REQUEST,
+            request
+        })
+    );
+
+    return cancel;
 }

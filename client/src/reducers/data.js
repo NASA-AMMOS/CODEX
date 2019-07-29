@@ -48,6 +48,12 @@ export default function data(state = dataState, action, opt_reducer = DataReduce
             return opt_reducer.featureRetain(state, action);
         case actionTypes.FEATURE_LIFETIME_RELEASE:
             return opt_reducer.featureRelease(state, action);
+        case actionTypes.STAT_SET_FEATURE_LOADING:
+            return opt_reducer.statSetFeatureLoading(state, action);
+        case actionTypes.STAT_SET_FEATURE_FAILED:
+            return opt_reducer.statSetFeatureFailed(state, action);
+        case actionTypes.STAT_SET_FEATURE_RESOLVED:
+            return opt_reducer.statSetFeatureResolved(state, action);
         default:
             return state;
     }
