@@ -22,11 +22,10 @@ from tornado import web
 from tornado import ioloop
 from tornado import websocket
 from tornado import gen
-from pebble import ProcessPool
-from multiprocessing import Process, Queue, Manager
+from pebble import ProcessPool, concurrent
+from multiprocessing import Manager
 from tornado.ioloop import IOLoop
 import ssl
-import concurrent.futures
 import base64
 import threading
 import datetime
@@ -279,19 +278,18 @@ def make_app():
         (r"/upload", uploadSocket),
     ], **settings)
 
-def make_cache_process():
-    def run_cache():
-        try:
-            create_cache_server()
-        except ZMQError as e:
-            if e.strerror == 'Address already in use':
-                print('Cache server already running!')
-            else:
-                raise
-        except Exception as e:
-            print('Cache server launch failure!')
+@concurrent.process
+def run_cache():
+    try:
+        create_cache_server()
+    except ZMQError as e:
+        if e.strerror == 'Address already in use':
+            print('Cache server already running!')
+        else:
             raise
-    return Process(target=run_cache)
+    except Exception as e:
+        print('Cache server launch failure!')
+        raise
 
 if __name__ == '__main__':
 
@@ -312,9 +310,8 @@ if __name__ == '__main__':
     else:
         app = tornado.httpserver.HTTPServer(app)
 
-    # create the cache server process and start it
-    codex_hash_server = make_cache_process()
-    codex_hash_server.start()
+    # create the cache server process
+    codex_hash_server = run_cache()
 
     # start server
     app.listen(8888)
