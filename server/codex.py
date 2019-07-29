@@ -23,7 +23,7 @@ from tornado import ioloop
 from tornado import websocket
 from tornado import gen
 from pebble import ProcessPool
-from multiprocessing import Manager, Process
+from multiprocessing import Manager, Process, cpu_count
 from tornado.ioloop import IOLoop
 import ssl
 import base64
@@ -51,8 +51,8 @@ from codex_hash import get_cache, create_cache_server, stop_cache_server, NoSess
 from zmq.error import ZMQError
 
 # create our process pools
-executor = ProcessPool(max_workers=5, max_tasks=10)
-readpool = ProcessPool(max_workers=5, max_tasks=10)
+executor = ProcessPool(max_workers=cpu_count(), max_tasks=cpu_count() * 2)
+readpool = ProcessPool(max_workers=cpu_count(), max_tasks=cpu_count() * 2)
 queuemgr = Manager()
 
 fileChunks = []
