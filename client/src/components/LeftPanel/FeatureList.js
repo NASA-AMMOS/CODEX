@@ -140,10 +140,16 @@ function StatisticsRow(props) {
         return <div className="feature-statistics-row loading">Loading...</div>;
     } else if (failed) {
         return <div className="feature-statistics-row failed">Failure ...</div>;
+    } else if (stats === null) {
+        return <div className="feature-statistics-row">Working...</div>;
     }
 
     let mean = processFloatingPointNumber(stats.get("mean"));
     let median = processFloatingPointNumber(stats.get("median"));
+    let downsample = stats.get("downsample");
+    if (downsample) {
+        downsample = downsample.toJS();
+    }
 
     return (
         <div className="feature-statistics-row">
@@ -167,7 +173,7 @@ function StatisticsRow(props) {
             <span className="median-span"> {median} </span>
             <span className="sparkline-span">
                 <Sparklines
-                    data={stats.get("downsample").toJS()}
+                    data={downsample}
                     limit={100}
                     style={{ fill: "none", height: "20px", width: "100%" }}
                 >
