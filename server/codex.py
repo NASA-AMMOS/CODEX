@@ -49,10 +49,13 @@ import codex_analysis_manager
 import codex_eta_manager
 from codex_hash import get_cache, create_cache_server, stop_cache_server, NoSessionSpecifiedError
 from zmq.error import ZMQError
+import math
 
+def throttled_cpu_count():
+    return max( 1, math.floor(cpu_count() * 0.40))
 # create our process pools
-executor = ProcessPool(max_workers=cpu_count(), max_tasks=cpu_count() * 2)
-readpool = ProcessPool(max_workers=cpu_count(), max_tasks=cpu_count() * 2)
+executor = ProcessPool(max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
+readpool = ProcessPool(max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
 queuemgr = Manager()
 
 fileChunks = []
@@ -216,7 +219,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         ioloop.IOLoop.current().add_callback(
             functools.partial(self.on_response, response))
 
-    def on_close():
+    def on_close(self):
         # close the executor
         if self.future is not None and (not self.future.done()):
             self.future.cancel()
