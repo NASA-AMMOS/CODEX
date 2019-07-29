@@ -17,6 +17,12 @@ import * as actionFunctions from "actions/actionFunctions";
 import { Sparklines, SparklinesLine } from "react-sparklines";
 import * as actionTypes from "constants/actionTypes";
 
+import {
+    useFeatureStatistics,
+    useFeatureStatisticsLoader,
+    useFeatureMetadata
+} from "hooks/DataHooks";
+
 /*
     A function used to process a floating point number
 */
@@ -35,7 +41,7 @@ function processFloatingPointNumber(number) {
 }
 
 /*
-    Function to help reorder an object used to persist the 
+    Function to help reorder an object used to persist the
     order of features
 */
 const reorder = (object, startIndex, endIndex) => {
@@ -74,7 +80,7 @@ const reorder = (object, startIndex, endIndex) => {
 };
 
 /*
-    The section of the header that shows the labels for the 
+    The section of the header that shows the labels for the
     feature statistics
 */
 function StatsLabelRow(props) {
@@ -126,26 +132,21 @@ function FeaturePanelHeader(props) {
 function StatisticsRow(props) {
     //handles the failure cases of when stats are not yet loaded
     //or there was an actual failure in the backend
-    if (props.stats === undefined) {
-        return (
-            <div className="feature-statistics-row loading" hidden={props.statsHidden}>
-                Loading...
-            </div>
-        );
-    } else if (props.stats.status === "failed") {
-        return (
-            <div className="feature-statistics-row failed" hidden={props.statsHidden}>
-                Failure ...
-            </div>
-        );
-    }
 
-    let mean = processFloatingPointNumber(props.stats.mean);
-    let median = processFloatingPointNumber(props.stats.median);
+    const [loading, failed, stats] = useFeatureStatistics(props.featureName);
     let [featureTypeData, setFeatureTypeData] = useState({ c: false, r: false });
 
+    if (loading) {
+        return <div className="feature-statistics-row loading">Loading...</div>;
+    } else if (failed) {
+        return <div className="feature-statistics-row failed">Failure ...</div>;
+    }
+
+    let mean = processFloatingPointNumber(stats.get("mean"));
+    let median = processFloatingPointNumber(stats.get("median"));
+
     return (
-        <div className="feature-statistics-row" hidden={props.statsHidden}>
+        <div className="feature-statistics-row">
             <span
                 className={(featureTypeData.c ? "lit" : "dim") + " class-regression-span"}
                 onClick={function() {
@@ -166,7 +167,7 @@ function StatisticsRow(props) {
             <span className="median-span"> {median} </span>
             <span className="sparkline-span">
                 <Sparklines
-                    data={props.data}
+                    data={stats.get("downsample").toJS()}
                     limit={100}
                     style={{ fill: "none", height: "20px", width: "100%" }}
                 >
@@ -194,16 +195,12 @@ function FeatureListDNDRow(props) {
             {...props.provided.draggableProps}
             {...props.provided.dragHandleProps}
             className="featureRow"
-            onMouseEnter={
-                function(){
-                    setRowHover(true);
-                }
-            }
-            onMouseLeave={
-                function(){
-                    setRowHover(false);
-                }
-            }
+            onMouseEnter={function() {
+                setRowHover(true);
+            }}
+            onMouseLeave={function() {
+                setRowHover(false);
+            }}
         >
             <div className="feature-name-row">
                 <Checkbox
@@ -223,14 +220,13 @@ function FeatureListDNDRow(props) {
                     {props.featureName}
                 </span>
             </div>
-            <StatisticsRow
-                stats={props.stats}
-                data={props.data}
-                statsHidden={props.statsHidden}
-                featureListLoading={props.featureListLoading}
-                featureList={props.featureNames}
-                rowHover={rowHover}
-            />
+            {props.statsHidden || (
+                <StatisticsRow
+                    featureName={props.featureName}
+                    featureListLoading={props.featureListLoading}
+                    rowHover={rowHover}
+                />
+            )}
         </div>
     );
 }
@@ -267,7 +263,10 @@ function FeatureListDND(props) {
                         className="drag-drop-div"
                     >
                         {props.featureNames.map(featureName => {
-                            if (featureName === undefined || props.featureIndices[featureName] === undefined){
+                            if (
+                                featureName === undefined ||
+                                props.featureIndices[featureName] === undefined
+                            ) {
                                 return <div key={featureName}> </div>;
                             }
                             return (
@@ -277,17 +276,17 @@ function FeatureListDND(props) {
                                     index={props.featureIndices[featureName]}
                                 >
                                     {(provided, snapshot) => (
-                                            <FeatureListDNDRow
-                                                featureName={featureName}
-                                                featureInfo={props.featureMapping[featureName]}
-                                                stats={props.stats[featureName]}
-                                                data={props.data[featureName]}
-                                                statsHidden={props.statsHidden}
-                                                featureListLoading={props.featureListLoading}
-                                                featureUnselect={props.featureUnselect}
-                                                featureSelect={props.featureSelect}
-                                                provided={provided}
-                                            />
+                                        <FeatureListDNDRow
+                                            featureName={featureName}
+                                            featureInfo={props.featureMapping[featureName]}
+                                            stats={props.stats[featureName]}
+                                            data={props.data[featureName]}
+                                            statsHidden={props.statsHidden}
+                                            featureListLoading={props.featureListLoading}
+                                            featureUnselect={props.featureUnselect}
+                                            featureSelect={props.featureSelect}
+                                            provided={provided}
+                                        />
                                     )}
                                 </Draggable>
                             );
@@ -301,13 +300,16 @@ function FeatureListDND(props) {
 }
 
 /*
-    Parent component that holds all of the other components and manages the 
+    Parent component that holds all of the other components and manages the
     data for the features section on the left side panel of the page
 */
 function FeatureList(props) {
     const activeCount = props.featureList.filter(f => f.get("selected")).size;
     const shownCount = activeCount;
     const totalCount = props.featureList.size;
+
+    const stats = useFeatureStatisticsLoader();
+    const features = useFeatureMetadata();
 
     //manages the hidden state of the statistics panel
     const [statsHidden, setStatsHidden] = useState(true);
@@ -317,6 +319,7 @@ function FeatureList(props) {
     const [featureData, setFeatureData] = useState({});
     //the holder of the stats data
     const [featureStats, setFeatureStats] = useState({});
+
     //limit to the number of feature stats to load on page start
     const lazyLimit = 12;
     const [statsLoading, setStatsLoading] = useState(false);
@@ -326,71 +329,7 @@ function FeatureList(props) {
         return feature.name;
     });
 
-    const requestTemplate = {
-        routine: "arrange",
-        hashType: "feature",
-        activity: "metrics",
-        sessionkey: utils.getGlobalSessionKey(),
-        cid: "8vrjn"
-    };
-
-    function loadData(featureName, callback) {
-        const requestCopy = { ...requestTemplate, name: [featureName] };
-        setTimeout(
-            function(){
-                const request = utils.makeSimpleRequest(requestCopy);
-
-                request.req.then(data => {
-                    setFeatureData(featureData => {
-                        return {
-                            ...featureData,
-                            [data.name]: data.downsample
-                        };
-                    });
-                    //handle building the list
-                    setFeatureStats(statsData => {
-                        return {
-                            ...statsData,
-                            [data.name]: data
-                        };
-                    });
-                    request.cancel();
-                    callback();
-                });
-            },
-            300
-        );
-    }
-
-    function statsLoadingWrapper(list) {
-
-        if (list.length > 0) {
-            setStatsLoading(true);
-            loadData(list[0], function() {
-                let continueList = list.slice(1,list.length);
-                 
-                if (list.length > 1){
-                    statsLoadingWrapper(continueList);
-                } else {
-                    setStatsLoading(false);
-                } 
-            });
-        } else if (!statsHidden){
-            let index = 0; 
-            let continueList = [];
-            while (index < featureNames.length) {
-                if (featureStats[featureNames[index]] === undefined){
-                    continueList.push(featureNames[index]);
-                    break;
-                }
-                index++;
-            }
-            if (continueList.length > 0 ){
-                setStatsLoading(true);
-                statsLoadingWrapper(continueList);
-            }
-        }
-    }
+    const loadData = (a, b) => {};
 
     //holds other data about features
     let featureMapping = {};
@@ -419,43 +358,24 @@ function FeatureList(props) {
         [props.filename]
     );
 
-    useEffect( 
+    useEffect(
         _ => {
             let beforeLength = Object.keys(featureIndices).length;
-            let newFeatureIndices = {...featureIndices};
+            let newFeatureIndices = { ...featureIndices };
 
             featureNames
-                .filter((name) => {
+                .filter(name => {
                     return featureIndices[name] == undefined;
                 })
-                .forEach((name) => {
+                .forEach(name => {
                     newFeatureIndices[name] = beforeLength;
                     beforeLength++;
-                }); 
+                });
 
             setFeatureIndices(newFeatureIndices);
         },
-        [featureNames]
+        [features]
     );
-
-    //callback that handles the asynchronous loading of feature data
-    useEffect(
-        _ => {
-            if (!statsLoading) {
-                let unloadedList = [];
-                let index = 0; 
-
-                while (index <= lazyLimit && index < featureNames.length) {
-                    if (featureStats[featureNames[index]] === undefined){
-                        unloadedList.push(featureNames[index]);
-                    }
-                    index++;
-                }
-
-                statsLoadingWrapper(unloadedList);
-            }
-        }
-    , [statsHidden, featureNames]);
 
     //filters out the feautres based on the filter bar and
     //sorts them by their indices stored in featureIndices
@@ -488,9 +408,11 @@ function FeatureList(props) {
                 shownCount={shownCount}
             />
             <div className="features">
-                <div className="loading-list" hidden={!props.featureListLoading}>
-                    <CircularProgress />
-                </div>
+                {props.featureListLoading && (
+                    <div className="loading-list">
+                        <CircularProgress />
+                    </div>
+                )}
                 <div className="list" hidden={props.featureListLoading}>
                     <FeatureListDND
                         featureIndices={featureIndices}
