@@ -1,6 +1,6 @@
 let sock;
 
-let UPLOAD_PERCENTAGE_USEFUL_UPDATE = 0.1;
+let UPLOAD_PERCENTAGE_USEFUL_UPDATE = 0.05;
 
 function blobToBase64(blob, callback) {
     let reader = new self.FileReader();

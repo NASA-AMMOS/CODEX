@@ -37,6 +37,8 @@
 }
 
 .session-bar-loading-bar--indeterminate {
+    width: 100%;
+    transition: width 0s;
     animation: IndeterminateLoad 2s ease infinite;
 }
 

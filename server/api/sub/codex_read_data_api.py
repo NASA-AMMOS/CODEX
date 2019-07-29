@@ -34,7 +34,7 @@ import codex_system
 
 def codex_read_csv(file, featureList, hashType, session=None):
     '''
-    Inuputs:
+    Inputs:
 
     Outputs:
 
