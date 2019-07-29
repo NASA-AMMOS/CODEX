@@ -251,9 +251,17 @@ export function useCurrentSelection() {
  * Get all feature names.
  */
 export function useFeatureNames() {
-    const dispatch = useDispatch();
     const features = useSelector(state => state.data.get("featureList")).map(f => f.get("name"));
 
+    return features;
+}
+
+/**
+ * Get all feature metadata
+ * @returns {Map} a reference to the store's featurelist metadata
+ */
+export function useFeatureMetadata() {
+    const features = useSelector(state => state.data.get("featureList"));
     return features;
 }
 
