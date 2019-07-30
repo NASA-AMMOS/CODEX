@@ -260,6 +260,9 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         except:
             raise
 
+        # make sure the socket gets closed
+        self.on_close()
+        self.close()
 
 
 class MainHandler(tornado.web.RequestHandler):
