@@ -226,13 +226,13 @@ function drawColorGradient(svgRef, width, height, selectionNames) {
     gradientContainer
         .append("text")
         .text(selectionNames[1])
-        .attr("x", width / 8 - 10 - 10 - textSize(selectionNames[1]).width)
+        .attr("x", width / 8 - 10 - textSize(selectionNames[1]).width)
         .attr("y", 5 + barHeight / 2);
     //janky constants needed to center the gradient container
     gradientContainer
         .append("text")
         .text(selectionNames[0])
-        .attr("x", width / 8 - 10 + width / 2 + 10)
+        .attr("x", width / 8 + width / 2 + 10)
         .attr("y", 5 + barHeight / 2);
 
     let linearGradient = gradientContainer
@@ -257,7 +257,7 @@ function drawColorGradient(svgRef, width, height, selectionNames) {
 
     let gradientRect = gradientContainer
         .append("rect")
-        .attr("x", width / 8 - 10)
+        .attr("x", width / 8)
         .attr("y", 0)
         .attr("width", width / 2)
         .attr("height", barHeight)
@@ -703,6 +703,8 @@ function FeatureImportanceGraph(props) {
             </React.Fragment>
         );
     }
+
+    console.log(props.rankedFeatures);
     const chartOptions = {
         data: [
             {
@@ -711,7 +713,8 @@ function FeatureImportanceGraph(props) {
                 yaxis: "y",
                 type: "bar",
                 orientation: "h",
-                hoverinfo: "x"
+                hoverinfo: "x",
+                textposition:"auto"
             }
         ],
         config: {
@@ -720,7 +723,7 @@ function FeatureImportanceGraph(props) {
         },
         layout: {
             autosize: false,
-            height: 100 + 15 * props.featureImportances.length,
+            height: 100 + 30 * props.featureImportances.length,
             width: 200,
             margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
             xaxis: {
@@ -786,6 +789,45 @@ function LeftSidePanel(props) {
     );
 }
 
+function TreeSummary(props) {
+    if (props.treeData == undefined) {
+        return (
+            <div className="tree-summary">
+                No tree is defined
+            </div>
+        );
+    }
+
+    function generateSummaryFromData(data, depth) {
+        //recursively construct a python esque description of the tree
+
+        let description = "";
+        if (data.children != undefined) {    
+
+            const left = data.children[0] != undefined ? generateSummaryFromData(data.children[0], depth+1) : "";
+            const right = data.children[1] != undefined ? generateSummaryFromData(data.children[1], depth+1) : "";
+
+            return (
+                <React.Fragment>
+                    <div style={{marginLeft: 10*depth}}> {"if " + data.name + " :"} </div>
+                    <div style={{marginLeft: 10*depth}}> {left} </div>
+                    <div style={{marginLeft: 10*depth}}> {"else:"} </div> 
+                    <div style={{marginLeft: 10*depth}}> {right} </div>
+                </React.Fragment>
+            )
+        } else {
+            //leaf node
+            return <div style={{marginLeft: 10*depth}}> {props.selectionNames[data.class]} </div>;
+        }
+    }
+
+    return (
+        <div className="tree-summary">
+            {generateSummaryFromData(props.treeData.json_tree, 0)}
+        </div>
+    );
+}
+
 /*
     This component holds the actual tree diagram for explain this.
 */
@@ -839,6 +881,7 @@ function ExplainThis(props) {
     const [runButtonPressed, setRunButtonPressed] = useState(false);
     const [chosenSelections, setChosenSelections] = useState([null, null]);
     const [helpActive, setHelpActive] = useState(false);
+    const [summaryActive, setSummaryActive] = useState(false);
 
     //handles the dynamic loading of selections
     useEffect(
@@ -946,15 +989,44 @@ function ExplainThis(props) {
                     <HelpOutline />
                 </IconButton>
             </div>
-            {!helpActive || (
-                <WindowTogglableCover
-                    open={helpActive}
-                    onClose={() => setHelpActive(false)}
-                    title={"Explain This"}
-                >
-                    <HelpContent guidancePath={"explain_this_page:general_explain_this"} />
-                </WindowTogglableCover>
-            )}
+            <Button
+                className="summary-button"
+                variant="contained"
+                color="primary"
+                onClick={_ => {
+                    setSummaryActive(true);
+                }}
+            >
+                Summary
+            </Button>
+            {
+                (function(){
+                    if (helpActive) {
+                        return (
+                            <WindowTogglableCover
+                                open={helpActive}
+                                onClose={() => setHelpActive(false)}
+                                title={"Explain This"}
+                            >
+                                <HelpContent guidancePath={"explain_this_page:general_explain_this"} />
+                            </WindowTogglableCover>
+                        );
+                    } else if (summaryActive) {
+                        return (
+                            <WindowTogglableCover
+                                open={summaryActive}
+                                onClose={() => setSummaryActive(false)}
+                                title={"Explain This Summary"}
+                            >
+                                <TreeSummary
+                                    treeData={dataState != undefined ? dataState.tree_sweep[treeIndex] : undefined}
+                                    selectionNames={dataState != undefined ? dataState.selectionNames : undefined}
+                                />
+                            </WindowTogglableCover>
+                        );
+                    }
+                })()
+            }
         </div>
     );
 }

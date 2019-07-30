@@ -5,6 +5,13 @@
     flex-direction: row;
     color:black;
 
+    .summary-button {
+        position: absolute;
+        left: 250px;
+        margin: 10px;
+        margin-top: 0px;
+    }
+
     .help-button {
         position: absolute;
         right: 0px;
