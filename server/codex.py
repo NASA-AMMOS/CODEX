@@ -22,7 +22,7 @@ from tornado import web
 from tornado import ioloop
 from tornado import websocket
 from tornado import gen
-from pebble import ProcessPool
+from pebble import ProcessPool, ThreadPool
 from multiprocessing import Manager, Process, cpu_count
 from tornado.ioloop import IOLoop
 import ssl
@@ -55,7 +55,7 @@ def throttled_cpu_count():
     return max( 1, math.floor(cpu_count() * 0.40))
 # create our process pools
 executor = ProcessPool(max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
-readpool = ProcessPool(max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
+readpool = ThreadPool( max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
 queuemgr = Manager()
 
 fileChunks = []
