@@ -702,6 +702,8 @@ function FeatureImportanceGraph(props) {
             </React.Fragment>
         );
     }
+
+    console.log(props.rankedFeatures);
     const chartOptions = {
         data: [
             {
@@ -710,7 +712,8 @@ function FeatureImportanceGraph(props) {
                 yaxis: "y",
                 type: "bar",
                 orientation: "h",
-                hoverinfo: "x"
+                hoverinfo: "x",
+                textposition:"auto"
             }
         ],
         config: {
@@ -719,7 +722,7 @@ function FeatureImportanceGraph(props) {
         },
         layout: {
             autosize: false,
-            height: 100 + 15 * props.featureImportances.length,
+            height: 100 + 30 * props.featureImportances.length,
             width: 200,
             margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
             xaxis: {
