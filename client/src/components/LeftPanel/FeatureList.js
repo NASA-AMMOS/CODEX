@@ -16,8 +16,9 @@ import WorkerSocket from "worker-loader!workers/socket.worker";
 import * as actionFunctions from "actions/actionFunctions";
 import { Sparklines, SparklinesLine } from "react-sparklines";
 import * as actionTypes from "constants/actionTypes";
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from "@material-ui/core/FormControl";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
 import Button from '@material-ui/core/Button';
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 
@@ -114,10 +115,11 @@ function FeaturePanelHeader(props) {
             <div className="title">Features</div>
             <span
                 className="stats-toggle"
-                onClick={function() {
-                    props.setStatsHidden(!props.statsHidden);
-                    console.log("click registered");
-                }}
+                onClick={
+                    function() {
+                        props.setStatsHidden(!props.statsHidden);
+                    }
+                }
             >
                 {props.statsHidden ? "Stats >" : "< done"}
             </span>
@@ -135,43 +137,52 @@ function SelectedDropdown(props) {
     const inactive = totalCount - activeCount;
 
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const [lastSelected, setLastSelected] = useState(0);
 
-    function handleClick(event) {
-        setAnchorEl(event.currentTarget);
-    }
-
-    function handleClose() {
-        setAnchorEl(null);
-    }
+    const featureFilterFunctions = [
+        function(feature) {
+            return true;
+        },
+        function (feature) {
+            return feature.selected;
+        },
+        function (feature) {
+            return !feature.selected;
+        }
+    ]
 
     return (
-         <div className="selected-dropdown">
-            <Button 
-                className="selected-dropdown-button"
-                aria-controls="simple-menu"
-                aria-haspopup="true"
-                onClick={handleClick}
+        <FormControl className="selected-dropdown">
+            <Select
+                value={lastSelected}
+                onChange={e => {
+                    setLastSelected(e.target.value);
+                    props.setFeatureFilter({func:featureFilterFunctions[e.target.value]});
+                }}
             >
-                {"All Columns ("+totalCount+"/"+totalCount+")"}<ArrowDropDownIcon/>
-            </Button>
-            <Menu 
-                className="dropdownMain"
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-            >
-                <MenuItem key="total">
+                <MenuItem 
+                    key="total"
+                    value={0}
+                >
                     {"All Columns ("+totalCount+"/"+totalCount+")"}
                 </MenuItem>
-                <MenuItem key="selected">
+                <MenuItem 
+                    key="selected" 
+                    value={1}
+                >
                     {"Selected ("+activeCount+"/"+totalCount+")"}
                 </MenuItem>
-                <MenuItem key="not_selected">
+                <MenuItem 
+                    key="not_selected" 
+                    value={2}
+                >
                     {"Not Selected ("+inactive+"/"+totalCount+")"}
                 </MenuItem>
-            </Menu>
-        </div>
+            </Select>
+            <ArrowDropDownIcon
+                color="white"
+            />
+        </FormControl>
     );
 }
 
@@ -379,11 +390,16 @@ function FeatureList(props) {
     //limit to the number of feature stats to load on page start
     const lazyLimit = 12;
     const [statsLoading, setStatsLoading] = useState(false);
+    const [featureFilter, setFeatureFilter] = useState({
+        func:function(feature) {return true;}
+    });
 
     //translate featureList into interpretable js list of names
-    const featureNames = props.featureList.toJS().map(feature => {
-        return feature.name;
-    });
+    const featureNames = props.featureList.toJS()
+        .filter((feature) => {return featureFilter.func(feature)})
+        .map(feature => {
+            return feature.name;
+        });
 
     const loadData = (a, b) => {};
 
@@ -466,6 +482,7 @@ function FeatureList(props) {
             <div className="stats-bar-top">
                 <SelectedDropdown
                     featureList={props.featureList}
+                    setFeatureFilter={setFeatureFilter}
                 />
                 <StatsLabelRow statsHidden={statsHidden} />
             </div>

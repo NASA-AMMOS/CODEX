@@ -55,20 +55,20 @@
 
         .selected-dropdown {
             width: 250px;
-            color:white;
-
-            .selected-dropdown-button {
-                border: solid white 2px;
+            & > div {
                 color:white;
+                border: solid white 2px;
                 width: 95%;
                 margin:4px;
                 height:28px;
                 line-height: 28px;
                 padding: 0px;
+                padding-left: 10px;
+            }
 
-                span {
-                    line-height: 26px;
-                }
+            svg {
+                float:right;
+                fill:white;
             }
         }
     }
