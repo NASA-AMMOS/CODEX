@@ -4,7 +4,17 @@
     display: flex;
     overflow: hidden;
     background: linear-gradient(to top, #061427, #061427);
+    flex-direction: column;
 }
+
+.bottom-section {
+    display: flex;
+    flex-direction: row;
+    width:100%;
+    align-self:flex-end;
+    flex:1;
+}
+
 
 .rightPanel {
     width: 100%;

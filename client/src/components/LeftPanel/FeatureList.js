@@ -90,31 +90,41 @@ function StatsLabelRow(props) {
 }
 
 /*
+    Bar that handles the form for the feature filtering
+*/
+function FilterBar(props) {
+    return (
+        <div className="filter-bar">
+            <input
+                type="text"
+                placeholder="Filter"
+                onInput={e => props.setFilterString(e.target.value)}
+            />
+        </div>
+    );
+}
+
+/*
     The header for the feature list left panel
 */
 function FeaturePanelHeader(props) {
     return (
-        <div className="header-container">
-            <div
-                className={
-                    "header " +
-                    (props.statsHidden ? "stats-hidden-header" : "stats-not-hidden-header")
-                }
+        <div
+            className={
+                "header " +
+                (props.statsHidden ? "stats-hidden-header" : "stats-not-hidden-header")
+            }
+        >
+            <div className="title">Features</div>
+            <span
+                className="stats-toggle"
+                onClick={function() {
+                    props.setStatsHidden(!props.statsHidden);
+                    console.log("click registered");
+                }}
             >
-                <div className="title">Features</div>
-                <span
-                    className="stats-toggle"
-                    onClick={function() {
-                        props.setStatsHidden(!props.statsHidden);
-                    }}
-                >
-                    {props.statsHidden ? "stats off" : "stats on"}
-                </span>
-                <span className="counts">
-                    {props.activeCount}/{props.shownCount}/{props.totalCount}
-                </span>
-            </div>
-            <StatsLabelRow statsHidden={props.statsHidden} />
+                {props.statsHidden ? "Stats >" : "< done"}
+            </span>
         </div>
     );
 }
@@ -317,6 +327,8 @@ function FeatureList(props) {
     const [featureData, setFeatureData] = useState({});
     //the holder of the stats data
     const [featureStats, setFeatureStats] = useState({});
+    //fitler string
+    const [filterString, setFilterString] = useState("");
     //limit to the number of feature stats to load on page start
     const lazyLimit = 12;
     const [statsLoading, setStatsLoading] = useState(false);
@@ -461,8 +473,8 @@ function FeatureList(props) {
     //sorts them by their indices stored in featureIndices
     const sortedFeatureNames = featureNames
         .filter(featureName =>
-            props.filterString
-                ? featureName.toLowerCase().startsWith(props.filterString.toLowerCase())
+            filterString
+                ? featureName.toLowerCase().startsWith(filterString.toLowerCase())
                 : true
         )
         .concat() //this is so it operates on a copy of stuff
@@ -479,7 +491,7 @@ function FeatureList(props) {
             className={
                 "feature-list-container " + (statsHidden ? "stats-hidden" : "stats-not-hidden")
             }
-        >
+        >   
             <FeaturePanelHeader
                 statsHidden={statsHidden}
                 setStatsHidden={setStatsHidden}
@@ -487,6 +499,12 @@ function FeatureList(props) {
                 activeCount={activeCount}
                 shownCount={shownCount}
             />
+            <div className="stats-bar-top">
+                <FilterBar
+                    setFilterString={setFilterString}
+                />
+                <StatsLabelRow statsHidden={statsHidden} />
+            </div>
             <div className="features">
                 <div className="loading-list" hidden={!props.featureListLoading}>
                     <CircularProgress />

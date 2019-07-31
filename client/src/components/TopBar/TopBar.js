@@ -21,6 +21,7 @@ import * as regressionActions from "actions/regressionActions";
 import * as sessionsActions from "actions/sessionsActions";
 import * as exportActions from "actions/exportActions";
 import * as dataActions from "actions/data";
+import ControlBar from "components/ControlBar/ControlBar";
 import SessionBar from "components/TopBar/SessionBar";
 
 function NavigationBar(props) {
@@ -127,12 +128,15 @@ function NavigationBar(props) {
 
                 <div className="triTopLeft" />
             </div>
-            <div
-                id="topBarMessageText"
-                ref={r => {
-                    ref_message.current = r;
-                }}
-            />
+            {/*
+                <div
+                    id="topBarMessageText"
+                    ref={r => {
+                        ref_message.current = r;
+                    }}
+                />
+            */}
+            <ControlBar/>
             <div id="topBarTools">
                 <ButtonGroup>
                     <Dropdown>
