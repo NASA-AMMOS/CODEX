@@ -10,6 +10,7 @@ import SaveIcon from "@material-ui/icons/Save";
 import OpenIcon from "@material-ui/icons/FolderOpen";
 import DescriptionIcon from "@material-ui/icons/Description";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Title from "components/Title/Title";
 import classNames from "classnames";
 import * as selectionActions from "actions/selectionActions";
 
@@ -68,6 +69,9 @@ const SessionBar = props => {
         <div className="session-bar">
             <div className={loadingClasses} style={loadingStyle} />
             <ul className="session-bar-list">
+                <li className="session-bar-title">
+                    <Title />
+                </li>
                 <li className="session-bar-list-element">
                     <input
                         className="session-bar-file-input inputfile"

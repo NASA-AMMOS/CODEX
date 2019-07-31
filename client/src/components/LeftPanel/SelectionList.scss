@@ -12,15 +12,15 @@
         justify-content: space-between;
         align-items: baseline;
         font-family: "lato_bold", sans-serif;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
         padding: 0 5px;
+        background-color: #79AAB5;
 
         .title {
             font-weight: bold;
         }
 
         .counts {
-            color: #bbb;
+            color: white;
             font-size: 14px;
         }
     }

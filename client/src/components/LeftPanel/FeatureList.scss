@@ -2,7 +2,9 @@
     height: 40vh;
     position:relative;
     color:#bbb;
-
+    background-color: #051426;
+    z-index: 999; //this is to ensure it is above the window layout
+    
     &.stats-hidden {
         width: 100%;
         .feature-name-row {
@@ -18,41 +20,39 @@
         }
     }
 
-    .header-container {
+    .stats-bar-top {
+        height: 32px;
+        width: 100%;
+        background-color: #051426;
         display: flex;
         flex-direction: row;
-        color: white;
-        height: 25px;
-        width: 100%;
+        position:relative;
+        border-bottom: solid white 2px;
 
-        .header {
+        .filter-bar {
             width: 250px;
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            font-family: "lato_bold", sans-serif;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 0 5px;
+            padding: 4px;
 
-            .title {
-                font-weight: bold;
-            }
-
-            .counts {
-                color: #bbb;
-                font-size: 14px;
+            input {
+                width: 100%;
+                height: 100%;
+                box-sizing: border-box;
+                background: rgba(255, 255, 255, 0.1);
+                color: rgba(255, 255, 255, 0.75);
+                border: none;
+                padding: 0px 6px;
+                line-height: 23px;
+                height: 23px;
             }
         }
 
         .label-row {
             width: 60%;
             font-family: "lato_bold", sans-serif;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
             padding: 0 5px;
             background-color: #061427;
             z-index: 999; //this is to ensure it is above the window layout
-            height: 25px;
-            line-height: 25px;
+            line-height: 32px;
 
             display: flex;
             flex-direction: row;
@@ -71,8 +71,27 @@
         }
     }
 
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-family: "lato_bold", sans-serif;
+        padding: 0 5px;
+        color:white;
+        background-color: #79AAB5;
+
+        .title {
+            font-weight: bold;
+        }
+
+        .counts {
+            color: #bbb;
+            font-size: 14px;
+        }
+    }
+
     .features {
-        height: calc(100% - 25px);
+        height: calc(100% - 57px);
         overflow-y: scroll;
         z-index: 999;
         position: relative;
@@ -87,7 +106,6 @@
         }
 
         .list {
-
             .featureRow {
                 height: 22px;
                 line-height: 22px;
