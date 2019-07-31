@@ -193,9 +193,9 @@ function drawScaleArrow(svgRef, width, height) {
     //line
     d3.select(svgRef)
         .append("line")
-        .attr("x1", width + 55)
+        .attr("x1", width + 45)
         .attr("y1", 100)
-        .attr("x2", width + 55)
+        .attr("x2", width + 45)
         .attr("y2", height - 200)
         .attr("stroke-width", 1)
         .attr("stroke", "black")
@@ -205,13 +205,13 @@ function drawScaleArrow(svgRef, width, height) {
     d3.select(svgRef)
         .append("text")
         .text("Greater")
-        .attr("x", width + 25)
+        .attr("x", width + 20)
         .attr("y", 80);
 
     d3.select(svgRef)
         .append("text")
         .text("Lesser")
-        .attr("x", width + 34)
+        .attr("x", width + 29)
         .attr("y", height - 175);
 }
 
@@ -268,7 +268,7 @@ function drawColorGradient(svgRef, width, height, selectionNames) {
 
 function generateTree(treeData, selectionNames, svgRef) {
     //setup margins and size for the d3 window
-    let margin = { top: 0, right: 20, bottom: 10, left: 65 },
+    let margin = { top: 0, right: 20, bottom: 10, left: 85 },
         i = 0,
         width = svgRef.clientWidth - margin.right - margin.left,
         height = svgRef.clientHeight - margin.top - margin.bottom,
@@ -293,7 +293,6 @@ function generateTree(treeData, selectionNames, svgRef) {
         return col;
     }
 
-
     // Node labels
     function node_label(d) {
         if (d.hidden) return "";
@@ -305,8 +304,8 @@ function generateTree(treeData, selectionNames, svgRef) {
         let float = processFloatingPointNumber(parseFloat(split[2])); //truncate to two decimal places
         let featureName = split[0];
         let name =
-            featureName.length > 10
-                ? featureName.substring(0, 2) + "..." + featureName.substring(featureName.length - 2)
+            featureName.length > 12
+                ? featureName.substring(0, 4) + "..." + featureName.substring(featureName.length - 4)
                 : featureName;
 
         return name + split[1] + float;

@@ -5,17 +5,17 @@ import React, { Component } from "react";
 import Container from "../Container/Container";
 import LeftPanel from "components/LeftPanel/LeftPanel";
 import TopBar from "components/TopBar/TopBar";
-import ControlBar from "components/ControlBar/ControlBar";
 
 class View extends Component {
     render() {
         return (
             <div className="View noselect">
-                <LeftPanel />
-                <div className="rightPanel">
-                    <TopBar />
-                    <ControlBar />
-                    <Container />
+                <TopBar />
+                <div className="bottom-section">
+                    <LeftPanel />
+                    <div className="rightPanel">
+                        <Container />
+                    </div>
                 </div>
             </div>
         );
