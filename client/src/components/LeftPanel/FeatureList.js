@@ -16,6 +16,10 @@ import WorkerSocket from "worker-loader!workers/socket.worker";
 import * as actionFunctions from "actions/actionFunctions";
 import { Sparklines, SparklinesLine } from "react-sparklines";
 import * as actionTypes from "constants/actionTypes";
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import Button from '@material-ui/core/Button';
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 
 /*
     A function used to process a floating point number
@@ -89,20 +93,6 @@ function StatsLabelRow(props) {
     );
 }
 
-/*
-    Bar that handles the form for the feature filtering
-*/
-function FilterBar(props) {
-    return (
-        <div className="filter-bar">
-            <input
-                type="text"
-                placeholder="Filter"
-                onInput={e => props.setFilterString(e.target.value)}
-            />
-        </div>
-    );
-}
 
 /*
     The header for the feature list left panel
@@ -125,6 +115,56 @@ function FeaturePanelHeader(props) {
             >
                 {props.statsHidden ? "Stats >" : "< done"}
             </span>
+        </div>
+    );
+}
+
+/*
+    Component that holds the dropddown menu showing how many features have been selected. 
+*/
+function SelectedDropdown(props) {
+
+    const activeCount = props.featureList.filter(f => f.get("selected")).size;
+    const totalCount = props.featureList.size;
+    const inactive = totalCount - activeCount;
+
+    const [anchorEl, setAnchorEl] = React.useState(null);
+
+    function handleClick(event) {
+        setAnchorEl(event.currentTarget);
+    }
+
+    function handleClose() {
+        setAnchorEl(null);
+    }
+
+    return (
+         <div className="selected-dropdown">
+            <Button 
+                className="selected-dropdown-button"
+                aria-controls="simple-menu"
+                aria-haspopup="true"
+                onClick={handleClick}
+            >
+                {"All Columns ("+totalCount+"/"+totalCount+")"}<ArrowDropDownIcon/>
+            </Button>
+            <Menu 
+                className="dropdownMain"
+                anchorEl={anchorEl}
+                keepMounted
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+            >
+                <MenuItem key="total">
+                    {"All Columns ("+totalCount+"/"+totalCount+")"}
+                </MenuItem>
+                <MenuItem key="selected">
+                    {"Selected ("+activeCount+"/"+totalCount+")"}
+                </MenuItem>
+                <MenuItem key="not_selected">
+                    {"Not Selected ("+inactive+"/"+totalCount+")"}
+                </MenuItem>
+            </Menu>
         </div>
     );
 }
@@ -318,7 +358,6 @@ function FeatureList(props) {
     const activeCount = props.featureList.filter(f => f.get("selected")).size;
     const shownCount = activeCount;
     const totalCount = props.featureList.size;
-
     //manages the hidden state of the statistics panel
     const [statsHidden, setStatsHidden] = useState(true);
     //a map from feature names to their current list indices
@@ -327,8 +366,6 @@ function FeatureList(props) {
     const [featureData, setFeatureData] = useState({});
     //the holder of the stats data
     const [featureStats, setFeatureStats] = useState({});
-    //fitler string
-    const [filterString, setFilterString] = useState("");
     //limit to the number of feature stats to load on page start
     const lazyLimit = 12;
     const [statsLoading, setStatsLoading] = useState(false);
@@ -473,8 +510,8 @@ function FeatureList(props) {
     //sorts them by their indices stored in featureIndices
     const sortedFeatureNames = featureNames
         .filter(featureName =>
-            filterString
-                ? featureName.toLowerCase().startsWith(filterString.toLowerCase())
+            props.filterString
+                ? featureName.toLowerCase().startsWith(props.filterString.toLowerCase())
                 : true
         )
         .concat() //this is so it operates on a copy of stuff
@@ -500,8 +537,8 @@ function FeatureList(props) {
                 shownCount={shownCount}
             />
             <div className="stats-bar-top">
-                <FilterBar
-                    setFilterString={setFilterString}
+                <SelectedDropdown
+                    featureList={props.featureList}
                 />
                 <StatsLabelRow statsHidden={statsHidden} />
             </div>

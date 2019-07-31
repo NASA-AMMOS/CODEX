@@ -457,6 +457,18 @@ function DragList(props) {
                         {
                             selectionsGroupList
                                 .concat()//this is so it does not mutate the original list
+                                .filter(item => {
+                                        if (item.type === "selection") {
+                                            return props.filterString
+                                                ? item.value.name.toLowerCase().startsWith(props.filterString.toLowerCase())
+                                                : true;
+                                        } else if (item.type === "group") {
+                                            return props.filterString
+                                                ? item.value.id.toLowerCase().startsWith(props.filterString.toLowerCase())
+                                                : true;
+                                        }
+                                    }
+                                )
                                 .sort((a,b) => { 
                                     if ( a.index < b.index)
                                         return -1;

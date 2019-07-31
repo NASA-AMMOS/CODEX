@@ -18,6 +18,23 @@
     background: #383838;
 }
 
+.filter-bar {
+    width: 250px;
+    padding: 4px;
+
+    input {
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.75);
+        border: none;
+        padding: 0px 6px;
+        line-height: 23px;
+        height: 23px;
+    }
+}
+
 .Panel #content {
     width: auto;
     height: 100%;
