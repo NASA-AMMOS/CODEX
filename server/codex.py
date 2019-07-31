@@ -52,7 +52,7 @@ from zmq.error import ZMQError
 import math
 
 def throttled_cpu_count():
-    return max( 1, math.floor(cpu_count() * 0.40))
+    return max( 1, math.floor(cpu_count() * 0.75))
 # create our process pools
 executor = ProcessPool(max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
 readpool = ThreadPool( max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
@@ -170,7 +170,7 @@ def execute_request(queue, message):
         queue - Queue to write into
         message - Message from frontend:w
     '''
-    
+
     msg = json.loads(message)
 
 
@@ -326,6 +326,6 @@ if __name__ == '__main__':
     ioloop.IOLoop.instance().start()
 
     # gracefully shut down cache server
-    stop_cache_server() 
+    stop_cache_server()
     codex_hash_server.join() # wait for process shutdown
-    
+
