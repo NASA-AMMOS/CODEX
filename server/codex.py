@@ -22,11 +22,10 @@ from tornado import web
 from tornado import ioloop
 from tornado import websocket
 from tornado import gen
-from concurrent.futures import ProcessPoolExecutor
-from multiprocessing import Process
+from pebble import ProcessPool, ThreadPool
+from multiprocessing import Manager, Process, cpu_count
 from tornado.ioloop import IOLoop
 import ssl
-import concurrent.futures
 import base64
 import threading
 import datetime
@@ -50,9 +49,14 @@ import codex_analysis_manager
 import codex_eta_manager
 from codex_hash import get_cache, create_cache_server, stop_cache_server, NoSessionSpecifiedError
 from zmq.error import ZMQError
+import math
 
-# create a `ThreadPoolExecutor` instance
-executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
+def throttled_cpu_count():
+    return max( 1, math.floor(cpu_count() * 0.75))
+# create our process pools
+executor = ProcessPool(max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
+readpool = ThreadPool( max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
+queuemgr = Manager()
 
 fileChunks = []
 
@@ -112,11 +116,94 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
         stringMsg = json.dumps(result)
         self.write_message(stringMsg)
 
+def route_request(msg, result):
+    '''
+    This is the main router function for CODEX. This takes a message and a result, and returns either:
+
+    1) just the result object, which will be directly sent to the client
+    2) an iterator, which will be iterated over in the worker process and sent
+       piecemeal to the client.
+    '''
+
+    routine = msg['routine']
+    if(routine == 'algorithm'):
+        yield codex_algorithm_manager.algorithm_call(msg, result)
+    elif(routine == 'workflow'):
+        yield codex_workflow_manager.workflow_call(msg, result)
+    elif(routine == 'guidance'):
+        yield codex_guidance_manager.get_guidance(msg, result)
+    elif (routine == "save_session"):
+        yield codex_session_manager.save_session(msg, result)
+    elif (routine == "load_session"):
+        yield codex_session_manager.load_session(msg, result)
+    elif (routine == "get_sessions"):
+        yield codex_session_manager.get_sessions(msg, result)
+    elif (routine == 'time'):
+        yield codex_eta_manager.get_time_estimate(msg, result)
+    elif (routine == 'arrange'):
+        activity = msg["activity"]
+        if (activity == "add"):
+            yield codex_data_manager.add_data(msg, result)
+        elif (activity == "get"):
+            yield codex_data_manager.get_data(msg, result)
+        elif (activity == "delete"):
+            yield codex_data_manager.delete_data(msg, result)
+        elif (activity == "update"):
+            yield codex_data_manager.update_data(msg, result)
+        elif (activity == "metrics"):
+            for metric in codex_data_manager.get_data_metrics(msg, result):
+                yield metric
+
+    elif (routine == 'download_code'):
+        yield codex_analysis_manager.download_code(msg, result)
+    else:
+        result['message'] = 'Unknown Routine'
+        yield result
+
+def execute_request(queue, message):
+    '''
+    This function calls the request router, and determines if the result is a singular result or a
+    generator. The result is either stuffed entirely into the output queue or iterated over into the
+    output queue.
+
+    Inputs:
+        queue - Queue to write into
+        message - Message from frontend:w
+    '''
+
+    msg = json.loads(message)
+
+
+    result = msg
+    # log the response but without the data
+    codex_system.codex_log("{time} : Message from front end: {json}".format(time=now.isoformat(), json={k:(msg[k] if k != 'data' else '[data removed]') for k in msg}))
+
+    if 'sessionkey' not in msg:
+        print('session_key not in message!')
+        raise NoSessionSpecifiedError()
+
+
+    # actually execute the function requested
+    try:
+        # while the generator has more values...
+        for chunk in route_request(msg, result):
+            # ...shovel the result into a queue
+            chunk['message'] = "success"
+            queue.put_nowait( {'result': chunk, 'done': False} )
+    except e:
+        response = {'message': 'failure'}
+        queue.put_nowait( { 'result': response, 'done': False} )
+
+    # let the readers know that we've drained the queue
+    queue.put_nowait({ 'done': True })
+
 
 # Tornado Websocket
 class CodexSocket(tornado.websocket.WebSocketHandler):
-
     connection = set()
+    queue      = None
+    future     = None
+    reader     = None
 
     def open(self):
         codex_system.codex_log("{self}".format(self=self))
@@ -132,75 +219,50 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         ioloop.IOLoop.current().add_callback(
             functools.partial(self.on_response, response))
 
+    def on_close(self):
+        # close the executor
+        if self.future is not None and (not self.future.done()):
+            self.future.cancel()
+
+        # ...and close the reader
+        if self.reader is not None and (not self.reader.done()):
+            self.reader.cancel()
+
     @gen.engine
     def on_message(self, message):
-        result = executor.submit(self.handle_request, message)
-        result.add_done_callback(self._on_response_ready)
+        self.queue = queuemgr.Queue()
+        # Helpful reading about multiprocessing.Queue from Tornado: https://stackoverflow.com/a/46864186
+
+        # Essentially, the strategy is to:
+        #       1) Send a job into the process pool
+        #       2) Send another job to read the queue, as
+        #          it blocks
+        self.future = executor.schedule(functools.partial(execute_request, self.queue, message))
+
+        while True:
+            # Wait on reading the queue
+            self.reader = readpool.schedule( self.queue.get )
+            response = yield self.reader
+
+            # if we're done, there's nothing more to be read and we can stop
+            if response['done']:
+                break
+
+            result = response['result']
+            codex_system.codex_log("{time} : Response to front end: {json}".format(time=now.isoformat(), json={k:(result[k] if k != 'data' else '[data removed]') for k in result}))
+
+            yield self.write_message(json.dumps(response['result']))
+
+        # close the thread? i don't think this is necessary
+        yield self.future
         try:
             codex_system.codex_server_memory_check(session=json.loads(message)['sessionkey'])
         except:
             raise
 
-    def handle_request(self, message):
-        '''
-        Inputs:
-
-        Outputs:
-
-        Notes:
-            Helpful link for multi-threading: https://stackoverflow.com/questions/32211102/tornado-with-threadpoolexecutor
-
-        Examples:
-
-        '''
-        msg = json.loads(message)
-
-
-        result = msg
-        # log the response but without the data
-        codex_system.codex_log("{time} : Message from front end: {json}".format(time=now.isoformat(), json={k:(msg[k] if k != 'data' else '[data removed]') for k in msg}))
-
-        if 'sessionkey' not in msg:
-            print('session_key not in message!!!')
-            raise NoSessionSpecifiedError()
-
-        routine = msg['routine']
-        if(routine == 'algorithm'):
-            result = codex_algorithm_manager.algorithm_call(msg, result)
-        elif(routine == 'workflow'):
-            result = codex_workflow_manager.workflow_call(msg, result)
-        elif(routine == 'guidance'):
-            result = codex_guidance_manager.get_guidance(msg, result)
-        elif (routine == "save_session"):
-            result = codex_session_manager.save_session(msg, result)
-        elif (routine == "load_session"):
-            result = codex_session_manager.load_session(msg, result)
-        elif (routine == "get_sessions"):
-            result = codex_session_manager.get_sessions(msg, result)
-        elif (routine == 'time'):
-            result = codex_eta_manager.get_time_estimate(msg, result)
-        elif (routine == 'arrange'):
-            activity = msg["activity"]
-            if (activity == "add"):
-                result = codex_data_manager.add_data(msg, result)
-            elif (activity == "get"):
-                result = codex_data_manager.get_data(msg, result)
-            elif (activity == "delete"):
-                result = codex_data_manager.delete_data(msg, result)
-            elif (activity == "update"):
-                result = codex_data_manager.update_data(msg, result)
-            elif (activity == "metrics"):
-                result = codex_data_manager.get_data_metrics(msg, result)
-
-        elif (routine == 'download_code'):
-            result = codex_analysis_manager.download_code(msg, result)
-        else:
-            result['message'] = 'Unknown Routine'
-
-        result['message'] = "success"
-        stringMsg = json.dumps(result)
-        codex_system.codex_log("{time} : Response to front end: {json}".format(time=now.isoformat(), json={k:(result[k] if k != 'data' else '[data removed]') for k in result}))
-        return stringMsg
+        # make sure the socket gets closed
+        self.on_close()
+        self.close()
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -232,7 +294,7 @@ def make_cache_process():
             else:
                 raise
         except Exception as e:
-            print('Cache server launch failure!')
+            print('Cache server launch failure!', e)
             raise
     return Process(target=run_cache)
 
@@ -255,7 +317,7 @@ if __name__ == '__main__':
     else:
         app = tornado.httpserver.HTTPServer(app)
 
-    # create the cache server process and start it
+    # create the cache server process
     codex_hash_server = make_cache_process()
     codex_hash_server.start()
 
@@ -264,6 +326,6 @@ if __name__ == '__main__':
     ioloop.IOLoop.instance().start()
 
     # gracefully shut down cache server
-    stop_cache_server() 
+    stop_cache_server()
     codex_hash_server.join() # wait for process shutdown
-    
+

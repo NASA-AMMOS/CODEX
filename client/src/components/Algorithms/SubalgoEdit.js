@@ -14,11 +14,12 @@ import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import * as algorithmActions from "actions/algorithmActions";
 import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 
 function handleRunAlgorithm(props) {
-    if (!props.subalgoState.serverData.eta) return; // Don't run the algorithm until we have a time estimate from the server
+    // todo: re-enable when we need this
+    //if (!props.subalgoState.serverData.eta) return; // Don't run the algorithm until we have a time estimate from the server
     props.runAlgorithm(props.subalgoState, props.selectedFeatures, props.winId);
 }
 

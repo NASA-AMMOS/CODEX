@@ -9,7 +9,10 @@ import {
     featureSelect,
     featureUnselect,
     featureAdd,
-    fileLoad
+    fileLoad,
+    statSetFeatureLoading,
+    statSetFeatureFailed,
+    statSetFeatureResolved
 } from "actions/data";
 import { fromJS, Set } from "immutable";
 import { batchActions } from "redux-batched-actions";
@@ -248,9 +251,17 @@ export function useCurrentSelection() {
  * Get all feature names.
  */
 export function useFeatureNames() {
-    const dispatch = useDispatch();
     const features = useSelector(state => state.data.get("featureList")).map(f => f.get("name"));
 
+    return features;
+}
+
+/**
+ * Get all feature metadata
+ * @returns {Map} a reference to the store's featurelist metadata
+ */
+export function useFeatureMetadata() {
+    const features = useSelector(state => state.data.get("featureList"));
     return features;
 }
 
@@ -336,4 +347,84 @@ export function useNewFeature(dispatch) {
 export function useFileUpload() {
     const dispatch = useDispatch();
     return files => fileLoad(files)(dispatch);
+}
+
+/**
+ * Load feature statistics
+ * This manages a stream socket and ensures that the features are properly in the store.
+ */
+export function useFeatureStatisticsLoader() {
+    const dispatch = useDispatch();
+    // get the features and the existing statistics
+    const features = useSelector(store => store.data.get("featureList"));
+    const existing = useSelector(store => store.data.get("featureStats"));
+
+    // hold the socket's close method
+    const socket = useRef(null);
+
+    // callback for when the socket gives us data
+    const sock_cb = msg => {
+        if (msg.message !== "success" || msg.status !== "success") {
+            dispatch(statSetFeatureFailed(msg.name));
+        }
+        dispatch(statSetFeatureResolved(msg.name, msg));
+    };
+
+    // figure out the diff between the features that we need
+    // and the ones we have
+    useEffect(() => {
+        const fnames = features.map(f => f.get("name"));
+
+        let actions = fnames.filter(n => !existing.has(n)).toJS();
+
+        if (actions.length > 0) {
+            if (socket.current !== null) {
+                socket.current(); // call the cancel function
+                socket.current = null;
+            }
+
+            // create the request
+            const request = {
+                routine: "arrange",
+                hashType: "feature",
+                activity: "metrics",
+                name: actions,
+                sessionkey: utils.getGlobalSessionKey()
+            };
+
+            // dispatch, save the cancel function
+            socket.current = utils.makeStreamRequest(request, sock_cb);
+
+            // dispatch onto the store
+            actions = actions.map(n => statSetFeatureLoading(n));
+            dispatch(batchActions(actions));
+        }
+    }, [features]);
+
+    // Clean up the socket if this gets unmounted
+    useEffect(() => {
+        return () => {
+            if (socket.current !== null) {
+                socket.current(); // call the cancel function
+            }
+        };
+    }, []);
+}
+
+/**
+ * Get the feature statistics from the store
+ * @see useFeatureStatisticsLoader
+ * @param {string} feature feature name
+ * @return {threeple} [loading, failed, stats]. stats will be null until loaded
+ */
+export function useFeatureStatistics(feature) {
+    const existing = useSelector(store => store.data.get("featureStats"));
+
+    if (!existing.has(feature)) {
+        return [true, false, null];
+    }
+
+    const stats_entry = existing.get(feature);
+
+    return [stats_entry.get("loading"), stats_entry.get("failed"), stats_entry.get("stats", null)];
 }

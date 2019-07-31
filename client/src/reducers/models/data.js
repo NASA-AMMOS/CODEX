@@ -10,6 +10,7 @@ import { createMemorableId } from "utils/utils";
 export const dataState = Immutable.fromJS({
     data: [],
     loadedData: [],
+    featureStats: {},
     filename: null,
     master: {},
     currentSelectedRows: [],
