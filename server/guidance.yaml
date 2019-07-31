@@ -523,9 +523,25 @@ explain_this_page:
 
     general_explain_this: |
 
-        # Explain This
+        Explain This is a workflow that allows you to describe the difference between two selections of data. 
+
+        The procedure goes as follows: 
+          - You open up a plot and make two selections of data that you would like to explain the difference between.
+          - Select the features that you wish to be used in the trianing process.  
+          - You then choose these selections on the dropdown list and hit run.
+          - Explain This will then train several decision tree classifiers on the data from your selections.
+          - These classifiers will then be visualized in the window. 
         
-        Explain This is a workflow that allows you to describe the difference between two selections of data.
+        The purpose of the tree diagram seen in the window is to visualize a decision tree classifier. What this 
+        algorithm does is it finds the optimal "splits" in the dimensions of your selected features that seperate
+        the two given classes. A "split" just takes a feature and seperates the feature into two sides one greater than
+        and one less then a chosen value. This "split" on a chosen value is meant to maximize purity of both sides of 
+        said "split". The The color of the branches represents the proportion of the two input classes(selections) flowing down 
+        a branch, all one color being 100% one class and all another meaning 100% the other class. The tree diagram 
+        is also collapseable if you touch one of the tree nodes. At the rightmost side of the tree the "leaf" nodes' colors 
+        represent the predicted class for samples flowing down the tree to that "leaf". The size of the branches 
+        represents the number of samples from the entire dataset flowing down a specific branch.  
+
 
 
 classification_page:
