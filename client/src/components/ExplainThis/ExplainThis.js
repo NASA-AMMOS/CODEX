@@ -226,13 +226,13 @@ function drawColorGradient(svgRef, width, height, selectionNames) {
     gradientContainer
         .append("text")
         .text(selectionNames[1])
-        .attr("x", width / 8 - 10 - textSize(selectionNames[1]).width)
+        .attr("x", width / 8 - textSize(selectionNames[1]).width)
         .attr("y", 5 + barHeight / 2);
     //janky constants needed to center the gradient container
     gradientContainer
         .append("text")
         .text(selectionNames[0])
-        .attr("x", width / 8 + width / 2 + 10)
+        .attr("x", width / 8 + width / 2 + 20)
         .attr("y", 5 + barHeight / 2);
 
     let linearGradient = gradientContainer
@@ -257,7 +257,7 @@ function drawColorGradient(svgRef, width, height, selectionNames) {
 
     let gradientRect = gradientContainer
         .append("rect")
-        .attr("x", width / 8)
+        .attr("x", width / 8 + 10)
         .attr("y", 0)
         .attr("width", width / 2)
         .attr("height", barHeight)
