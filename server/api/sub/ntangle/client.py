@@ -6,7 +6,6 @@ import msgpack
 import functools
 import sys
 
-codex_zmq_context = zmq.Context() 
 
 # something happened on the remote
 class RemoteError(Exception):
@@ -19,6 +18,7 @@ class Client:
     timeout = None
     __socket = None
     __context = None
+    __should_destroy_context = False
 
     # set up the object
     def __init__(self, remote, context=None, timeout=None):
@@ -27,9 +27,10 @@ class Client:
 
         # if we don't have a zmq context, create a new one
         if context is None:
-            global codex_zmq_context
-            self.__context = codex_zmq_context
+            self.__context = zmq.Context()
+            self.__should_destroy_context = True
         else:
+            self.__should_destroy_context = False
             self.__context = context
 
         # create a socket
@@ -43,6 +44,8 @@ class Client:
 
     def __del__(self):
         # clean up the socket so we don't hang the program
+        if self.__should_destroy_context:
+            self.__context.destroy()
         self.__socket.close()
 
     # make a remote function call

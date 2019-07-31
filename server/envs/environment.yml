@@ -28,3 +28,4 @@ dependencies:
     - pysptools
     - scikit-image==0.15.0
     - fastdtw
+    - Pebble

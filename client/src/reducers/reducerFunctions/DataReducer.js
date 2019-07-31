@@ -476,4 +476,63 @@ export default class DataReducer {
             refCount > 0 ? refCount - 1 : 0
         );
     }
+
+    /**
+     * Handle a STAT_SET_FEATURE_LOADING
+     * @param {Map} state current state
+     * @param {object} action action
+     * @return {Map} new state
+     */
+    static statSetFeatureLoading(state, action) {
+        if (state.get("featureStats").has(action.feature)) {
+            return state;
+        }
+
+        return state.setIn(
+            ["featureStats", action.feature],
+            Immutable.fromJS({ loading: true, success: false })
+        );
+    }
+
+    /**
+     * Handle a STAT_SET_FEATURE_FAILED
+     * @param {Map} state current state
+     * @param {object} action action
+     * @return {Map} new state
+     */
+    static statSetFeatureFailed(state, action) {
+        if (!state.get("featureStats").has(action.feature)) {
+            return state;
+        }
+
+        return state.setIn(
+            ["featureStats", action.feature],
+            Immutable.fromJS({
+                success: false,
+                loading: false,
+                stats: null
+            })
+        );
+    }
+
+    /**
+     * Handle a STAT_SET_FEATURE_RESOLVED
+     * @param {Map} state current state
+     * @param {object} action action
+     * @return {Map} new state
+     */
+    static statSetFeatureResolved(state, action) {
+        if (!state.get("featureStats").has(action.feature)) {
+            return state;
+        }
+
+        return state.setIn(
+            ["featureStats", action.feature],
+            Immutable.fromJS({
+                success: false,
+                loading: false,
+                stats: action.data
+            })
+        );
+    }
 }

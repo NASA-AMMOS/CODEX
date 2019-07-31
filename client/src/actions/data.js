@@ -257,3 +257,35 @@ export const addDataset = (featureName, data) => ({
     feature: featureName,
     data
 });
+
+/**
+ * Set a feature's stat status to loading
+ * @param {string} featureName
+ * @return {object} non-dispatched action object
+ */
+export const statSetFeatureLoading = featureName => ({
+    type: types.STAT_SET_FEATURE_LOADING,
+    feature: featureName
+});
+
+/**
+ * Set a feature's stat status to failed
+ * @param {string} featureName
+ * @return {object} non-dispatched action object
+ */
+export const statSetFeatureFailed = featureName => ({
+    type: types.STAT_SET_FEATURE_FAILED,
+    feature: featureName
+});
+
+/**
+ * Set a feature's stats
+ * @param {string} featureName
+ * @param {array} data
+ * @return {object} non-dispatched action object
+ */
+export const statSetFeatureResolved = (featureName, data) => ({
+    type: types.STAT_SET_FEATURE_RESOLVED,
+    feature: featureName,
+    data
+});
