@@ -460,11 +460,11 @@ function DragList(props) {
                                 .filter(item => {
                                         if (item.type === "selection") {
                                             return props.filterString
-                                                ? item.value.name.toLowerCase().startsWith(props.filterString.toLowerCase())
+                                                ? item.value.name.startsWith(props.filterString)
                                                 : true;
                                         } else if (item.type === "group") {
                                             return props.filterString
-                                                ? item.value.id.toLowerCase().startsWith(props.filterString.toLowerCase())
+                                                ? item.value.id.startsWith(props.filterStringss)
                                                 : true;
                                         }
                                     }

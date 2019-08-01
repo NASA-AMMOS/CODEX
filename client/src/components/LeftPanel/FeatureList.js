@@ -454,7 +454,7 @@ function FeatureList(props) {
     const sortedFeatureNames = featureNames
         .filter(featureName =>
             props.filterString
-                ? featureName.toLowerCase().startsWith(props.filterString.toLowerCase())
+                ? featureName.startsWith(props.filterString)
                 : true
         )
         .concat() //this is so it operates on a copy of stuff
