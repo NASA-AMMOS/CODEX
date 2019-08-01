@@ -33,6 +33,9 @@ import {
     WindowTogglableCover
 } from "components/WindowHelpers/WindowLayout";
 
+
+// this section of code is mostly d3 and stuff that directly facilitates the tree rendering
+
 //general helper functions go here
 function createExplainThisRequest(filename, selections, dataFeatures) {
     return {
@@ -547,6 +550,9 @@ function generateTree(treeData, selectionNames, svgRef) {
     load_dataset(treeData);
 }
 
+
+// ------------ this is where actual components start ------------
+
 /*
     The component that allows the user to select two selections
     to explain
@@ -882,7 +888,8 @@ function ExplainThis(props) {
     const [helpActive, setHelpActive] = useState(false);
     const [summaryActive, setSummaryActive] = useState(false);
 
-    //handles the dynamic loading of selections
+    //this code handles automatically inputting two selections into the dropdown lists
+    //if they exist
     useEffect(
         _ => {
             let newChosenSelections = [...chosenSelections];
@@ -909,8 +916,13 @@ function ExplainThis(props) {
         [props.selections]
     );
 
+    /*
+        Code that handles running the explain this workflow after the 
+        run button has been pressed
+    */
     useEffect(
         _ => {
+            //code to handle pulling the data from the selections chosen in the dropdown lists
             if (chosenSelections[0] == null || chosenSelections[1] == null || !runButtonPressed) {
                 return;
             }
@@ -942,7 +954,6 @@ function ExplainThis(props) {
                     props.selections[chosenSelections[0]].name,
                     props.selections[chosenSelections[1]].name
                 ];
-                console.log(data);
                 setDataState({ ...data, selectionNames: selectionNames });
             });
 
@@ -1000,6 +1011,10 @@ function ExplainThis(props) {
             </Button>
             {
                 (function(){
+                    /*
+                        Code to render the cover for either the help screen or the summary screen
+                        selectively
+                    */
                     if (helpActive) {
                         return (
                             <WindowTogglableCover

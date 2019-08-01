@@ -36,6 +36,10 @@ function createFMLTRequest(filename, selections, featureList, similarityThreshol
     };
 }
 
+/*
+    The section of the screen that holds the parameter input
+    forms
+*/
 function ParameterSection(props) {
     function findSelectionById(id) {
         return props.activeSelections.filter(selection => {
@@ -81,6 +85,10 @@ function ParameterSection(props) {
     );
 }
 
+/*
+    The box on the screen that holds information about the 
+    output of the model after it is run
+*/
 function OutputSection(props) {
     if (!props.loading && props.outputMessage != null) {
         return (
@@ -146,6 +154,7 @@ function FindMoreLikeThis(props) {
         [props.savedSelections]
     );
 
+    //handles running the algorithm
     useEffect(
         _ => {
             if (buttonClicked) {
