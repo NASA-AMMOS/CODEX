@@ -41,7 +41,6 @@ function makeParamPreviews(props, baseParam, serverData, paramValue) {
                     })
                 }
                 titleText={roundedValue}
-                previewMode={true}
             />
         );
     }
