@@ -16,6 +16,15 @@ export function openClassificationWindow() {
     };
 }
 
+function formatClassificationParam(param) {
+    switch (param.mode) {
+        case "range":
+            return classificationFunctions.createRange(param.subParams);
+        case "rangeWithNull":
+            return classificationFunctions.createRange(param.subParams, true);
+    }
+}
+
 // Creates a request object for a classification run that can be converted to JSON and sent to the server.
 function createClassificationRequest(
     filename,
@@ -26,6 +35,10 @@ function createClassificationRequest(
     scoring,
     classificationState
 ) {
+    const parameters = classificationState.paramData.map(param => {
+        return { [param.name]: formatClassificationParam(param) };
+    });
+
     return {
         routine: "algorithm",
         algorithmName: classificationState.name,
@@ -33,14 +46,7 @@ function createClassificationRequest(
         dataFeatures: selectedFeatures.filter(f => f !== labelName),
         filename,
         identification: { id: "dev0" },
-        parameters:
-            classificationState.paramData.mode === "range"
-                ? {
-                      [classificationState.paramData.name]: classificationFunctions.createRange(
-                          classificationState.paramData.params
-                      )
-                  }
-                : {},
+        parameters,
         dataSelections: [],
         downsampled: false,
         cross_val: parseInt(crossVal),
@@ -73,8 +79,9 @@ export function createClassificationOutput(
             .filter(classificationState => classificationState.selected);
 
         const filename = getState().data.get("filename");
+
         const requests = classificationsToRun
-           .map(classificationState =>
+            .map(classificationState =>
                 createClassificationRequest(
                     filename,
                     selectedFeatures,
@@ -89,7 +96,19 @@ export function createClassificationOutput(
                 const { req, cancel } = utils.makeSimpleRequest(request);
                 return { req, cancel, requestObj: request };
             });
-
+        console.log(
+            classificationsToRun.map(classificationState =>
+                createClassificationRequest(
+                    filename,
+                    selectedFeatures,
+                    crossVal,
+                    labelName,
+                    searchType,
+                    scoring,
+                    classificationState
+                )
+            )
+        );
         dispatch({
             type: actionTypes.OPEN_NEW_WINDOW,
             info: {

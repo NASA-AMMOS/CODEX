@@ -81,14 +81,21 @@ function classificationStateReducer(classificationState, action) {
                     ? { ...classification, eta: action.eta, etaLoaded: true }
                     : classification
             );
-        case "updateParam":
+        case "updateParam": //TODO: This really needs to be collapsed w/ some kind of utility function for mapping
             return classificationState.map(classification =>
                 classification.name === action.classificationName
                     ? {
                           ...classification,
                           paramData: classification.paramData.map(param =>
                               param.name === action.paramName
-                                  ? { ...param, value: action.value }
+                                  ? {
+                                        ...param,
+                                        subParams: param.subParams.map(subParam =>
+                                            subParam.name === action.subParam
+                                                ? { ...subParam, value: action.value }
+                                                : subParam
+                                        )
+                                    }
                                   : param
                           )
                       }
@@ -107,26 +114,33 @@ function classificationStateReducer(classificationState, action) {
     }
 }
 
-function makeNumericInput(param, classificationName, classificationStateDispatch, focus) {
+function makeNumericInput(
+    paramName,
+    subParam,
+    classificationName,
+    classificationStateDispatch,
+    focus
+) {
     return (
-        <React.Fragment key={param.name}>
+        <React.Fragment key={subParam.name}>
             <TextField
                 autoFocus={focus}
                 className="parameterInput"
                 fullWidth
-                label={param.label}
-                helperText={param.helperText}
+                label={subParam.label}
+                helperText={subParam.helperText}
                 margin="normal"
                 variant="filled"
                 type="number"
-                value={param.value}
+                value={subParam.value}
                 onChange={e =>
                     classificationStateDispatch({
                         type: "updateParam",
                         classificationName,
-                        paramName: param.name,
+                        paramName,
+                        subParam: subParam.name,
                         value:
-                            param.type === "int"
+                            subParam.type === "int"
                                 ? parseInt(e.target.value)
                                 : parseFloat(e.target.value)
                     })
@@ -136,23 +150,30 @@ function makeNumericInput(param, classificationName, classificationStateDispatch
     );
 }
 
-function makeStringChoiceInput(param, classificationName, classificationStateDispatch, focus) {
+function makeStringChoiceInput(
+    paramName,
+    subParam,
+    classificationName,
+    classificationStateDispatch,
+    focus
+) {
     return (
-        <FormControl key={param.name}>
-            <InputLabel>{param.name}</InputLabel>
+        <FormControl key={subParam.name}>
+            <InputLabel>{subParam.name}</InputLabel>
             <Select
                 autoFocus={focus}
-                value={param.value || param.default}
+                value={subParam.value || subParam.default}
                 onChange={e =>
                     classificationStateDispatch({
                         type: "updateParam",
                         classificationName,
-                        paramName: param.name,
+                        paramName,
+                        subParam: subParam.name,
                         value: e.target.value
                     })
                 }
             >
-                {param.options.map(f => (
+                {subParam.options.map(f => (
                     <MenuItem key={f} value={f}>
                         {f.charAt(0).toUpperCase() + f.slice(1)}
                     </MenuItem>
@@ -162,14 +183,27 @@ function makeStringChoiceInput(param, classificationName, classificationStateDis
     );
 }
 
-function makeSubParamInput(param, classificationName, classificationStateDispatch, focus) {
-    switch (param.type) {
+function makeSubParamInput(
+    paramName,
+    subParam,
+    classificationName,
+    classificationStateDispatch,
+    focus
+) {
+    switch (subParam.type) {
         case "int":
         case "float":
-            return makeNumericInput(param, classificationName, classificationStateDispatch, focus);
+            return makeNumericInput(
+                paramName,
+                subParam,
+                classificationName,
+                classificationStateDispatch,
+                focus
+            );
         case "string":
             return makeStringChoiceInput(
-                param,
+                paramName,
+                subParam,
                 classificationName,
                 classificationStateDispatch,
                 focus
@@ -222,16 +256,18 @@ function makeClassificationRow(
 
 // Uses the Classification Types constants file to generate state objects for each classification.
 function getInitialParamState() {
-    return classificationTypes.CLASSIFICATION_TYPES.map(classification => {
-        const state = {
-            name: classification,
-            eta: null,
-            etaLoaded: false,
-            paramData: classificationTypes.CLASSIFICATION_PARAMS[classification],
-            selected: true
-        };
-        return state;
-    });
+    return Object.entries(classificationTypes.CLASSIFICATION_PARAMS).map(
+        ([name, classification]) => {
+            const state = {
+                name: name,
+                eta: null,
+                etaLoaded: false,
+                paramData: classification,
+                selected: true
+            };
+            return state;
+        }
+    );
 }
 
 function ClassificationOverview(props) {
@@ -270,16 +306,12 @@ function ClassificationOverview(props) {
     // handles those Promise returns and updates the classification states as necessary. It also includes
     // a cleanup function that will cancel all requests if the user closes the window.
     useEffect(_ => {
-        const requests = classificationTypes.CLASSIFICATION_TYPES.map(classification => {
-            const { req, cancel } = classificationFunctions.getEta(
-                classification,
-                selectedFeatures,
-                100
-            );
+        const requests = Object.entries(classificationTypes.CLASSIFICATION_PARAMS).map(([name]) => {
+            const { req, cancel } = classificationFunctions.getEta(name, selectedFeatures, 100);
             req.then(data =>
                 classificationStateDispatch({
                     type: "updateEta",
-                    name: classification,
+                    name,
                     eta: data.eta && Math.ceil(data.eta)
                 })
             );
@@ -434,6 +466,7 @@ function ClassificationOverview(props) {
                                     <div>{param.name}</div>
                                     {param.subParams.map((subParam, idx) =>
                                         makeSubParamInput(
+                                            param.name,
                                             subParam,
                                             activeClassificationName,
                                             classificationStateDispatch,
