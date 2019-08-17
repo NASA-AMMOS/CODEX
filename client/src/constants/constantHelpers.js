@@ -1,6 +1,18 @@
+import * as classificationRegressionTypes from "constants/classificationRegressionTypes";
 /*
     Creates a list of objects that are used to create the forms for ranges 
 */
+
+function formatHelperText(value) {
+    switch (value) {
+        case classificationRegressionTypes.LARGER_THAN_ZERO:
+            return "Greater than 0";
+        case classificationRegressionTypes.LARGER_OR_EQUAL_TO_ZERO:
+            return "0 or larger";
+    }
+    return null;
+}
+
 export function createRange({ min, defaultMin, max, defaultMax, stepSize, type, allowNull }) {
     const nullLabel = allowNull ? " (can be null)" : "";
     let minObj = {
@@ -10,7 +22,7 @@ export function createRange({ min, defaultMin, max, defaultMax, stepSize, type, 
         value: defaultMin === null ? "" : defaultMin,
         min: min,
         max: max,
-        helperText: min + " or higher" + nullLabel
+        helperText: (formatHelperText(min) || min + " or higher") + nullLabel
     };
 
     let maxObj = {
@@ -20,7 +32,7 @@ export function createRange({ min, defaultMin, max, defaultMax, stepSize, type, 
         value: defaultMax === null ? "" : defaultMax,
         min: min,
         max: max,
-        helperText: `Up to ${max}` + nullLabel
+        helperText: (formatHelperText(max) || `Up to ${max}`) + nullLabel
     };
 
     let stepSizeObj = {
@@ -30,7 +42,7 @@ export function createRange({ min, defaultMin, max, defaultMax, stepSize, type, 
         value: stepSize,
         min: min,
         max: max,
-        helperText: "Between " + min + " and " + max
+        helperText: formatHelperText(max) || "Between " + min + " and " + max
     };
 
     return [minObj, maxObj, stepSizeObj];

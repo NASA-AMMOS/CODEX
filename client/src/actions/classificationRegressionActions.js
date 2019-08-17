@@ -1,20 +1,11 @@
 import * as actionTypes from "constants/actionTypes";
-import * as classificationTypes from "constants/classificationTypes";
+import * as classificationTypes from "constants/classificationRegressionTypes";
 import * as actionFunctions from "actions/actionFunctions";
 import * as utils from "utils/utils";
 import * as classificationFunctions from "components/Classification/classificationFunctions";
 
 /* eslint import/no-webpack-loader-syntax: off */
 import WorkerSocket from "worker-loader!workers/socket.worker";
-
-export function openClassificationWindow() {
-    return {
-        type: actionTypes.OPEN_NEW_WINDOW,
-        info: {
-            windowType: classificationTypes.CLASSIFICATION_WINDOW
-        }
-    };
-}
 
 function formatClassificationParam(param) {
     switch (param.mode) {
@@ -27,6 +18,7 @@ function formatClassificationParam(param) {
 
 // Creates a request object for a classification run that can be converted to JSON and sent to the server.
 function createClassificationRequest(
+    algorithmType,
     filename,
     selectedFeatures,
     crossVal,
@@ -42,7 +34,7 @@ function createClassificationRequest(
     return {
         routine: "algorithm",
         algorithmName: classificationState.name,
-        algorithmType: "classification",
+        algorithmType,
         dataFeatures: selectedFeatures.filter(f => f !== labelName),
         filename,
         identification: { id: "dev0" },
@@ -61,14 +53,16 @@ Creates a server request for each chosen classification, sends that request to t
 closes the classification select window and opens a new one while handing off the server requests (as Promises)
 to the ClassificationResults window. */
 
-export function createClassificationOutput(
+export function createAlgoOutput(
+    algorithmType,
     classificationStates,
     selectedFeatures,
     crossVal,
     labelName,
     searchType,
     scoring,
-    winId
+    winId,
+    resultsWindowType
 ) {
     return (dispatch, getState) => {
         // Close classification options window and open a loading window
@@ -83,6 +77,7 @@ export function createClassificationOutput(
         const requests = classificationsToRun
             .map(classificationState =>
                 createClassificationRequest(
+                    algorithmType,
                     filename,
                     selectedFeatures,
                     crossVal,
@@ -99,6 +94,7 @@ export function createClassificationOutput(
         console.log(
             classificationsToRun.map(classificationState =>
                 createClassificationRequest(
+                    algorithmType,
                     filename,
                     selectedFeatures,
                     crossVal,
@@ -112,7 +108,7 @@ export function createClassificationOutput(
         dispatch({
             type: actionTypes.OPEN_NEW_WINDOW,
             info: {
-                windowType: classificationTypes.CLASSIFICATION_RESULTS_WINDOW,
+                windowType: resultsWindowType,
                 requests,
                 runParams: { selectedFeatures, crossVal, labelName, scoring, searchType }
             }

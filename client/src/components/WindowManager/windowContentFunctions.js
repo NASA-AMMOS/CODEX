@@ -15,8 +15,7 @@ import FindMoreLikeThis from "components/FindMoreLikeThis/FindMoreLikeThis";
 import Sessions from "components/Sessions/Sessions";
 import TimeSeriesGraph from "components/Graphs/TimeSeriesGraph";
 import * as algorithmTypes from "constants/algorithmTypes";
-import * as classificationTypes from "constants/classificationTypes";
-import * as regressionTypes from "constants/regressionTypes";
+import * as classificationRegressionTypes from "constants/classificationRegressionTypes";
 import * as uiTypes from "constants/uiTypes";
 import DimensionalityReduction from "components/DimensionalityReduction/DimensionalityReduction";
 import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
@@ -53,7 +52,7 @@ export function getWindowContent(win) {
                     selectedFeatures={win.get("selectedFeatures")}
                 />
             );
-        case classificationTypes.CLASSIFICATION_WINDOW:
+        case classificationRegressionTypes.CLASSIFICATION_WINDOW:
             return (
                 <ClassificationOverview
                     selectedFeatures={win.get("selectedFeatures")}
@@ -61,14 +60,14 @@ export function getWindowContent(win) {
                     winId={win.get("id")}
                 />
             );
-        case classificationTypes.CLASSIFICATION_RESULTS_WINDOW:
+        case classificationRegressionTypes.CLASSIFICATION_RESULTS_WINDOW:
             return (
                 <ClassificationResults
                     requests={win.get("requests")}
                     runParams={win.get("runParams")}
                 />
             );
-        case regressionTypes.REGRESSION_WINDOW:
+        case classificationRegressionTypes.REGRESSION_WINDOW:
             return (
                 <RegressionsOverview
                     selectedFeatures={win.get("selectedFeatures")}
@@ -76,7 +75,7 @@ export function getWindowContent(win) {
                     winId={win.get("id")}
                 />
             );
-        case regressionTypes.REGRESSION_RESULTS_WINDOW:
+        case classificationRegressionTypes.REGRESSION_RESULTS_WINDOW:
             return (
                 <RegressionResults
                     requests={win.get("requests")}

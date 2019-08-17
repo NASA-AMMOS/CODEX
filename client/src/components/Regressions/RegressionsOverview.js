@@ -1,11 +1,12 @@
 // This component creates a window that allows users to configure a new regression run.
 
 import React, { useEffect, useState, useReducer } from "react";
-import * as regressionTypes from "constants/regressionTypes";
+import * as regressionTypes from "constants/classificationRegressionTypes";
 import * as regressionFunctions from "components/Regressions/regressionFunctions";
-import * as regressionActions from "actions/regressionActions";
+import * as regressionActions from "actions/classificationRegressionActions";
 import Button from "@material-ui/core/Button";
 import { bindActionCreators } from "redux";
+import * as classifierRegressionUtils from "utils/classifierRegressionUtils";
 import "components/regressions/regressions.scss";
 import { connect } from "react-redux";
 import Menu from "@material-ui/core/Menu";
@@ -42,7 +43,7 @@ function RegressionHeaderBar(props) {
                 <Button
                     variant="contained"
                     color="primary"
-                    onClick={_ => props.createRegressionOutput(...props.regressionOutputParams)}
+                    onClick={_ => props.createAlgoOutput(...props.regressionOutputParams)}
                 >
                     Run
                 </Button>
@@ -68,162 +69,6 @@ function HelpBarHeader(props) {
     );
 }
 
-// Reducer to handle changes to each individual regression's state, which contains info
-// about parameters and expected run times.
-function regressionStateReducer(regressionState, action) {
-    switch (action.type) {
-        case "updateEta":
-            return regressionState.map(regression =>
-                regression.name === action.name
-                    ? { ...regression, eta: action.eta, etaLoaded: true }
-                    : regression
-            );
-        case "updateParam":
-            return regressionState.map(regression =>
-                regression.name === action.regressionName
-                    ? {
-                          ...regression,
-                          paramData: regression.paramData.map(param =>
-                              param.name === action.paramName
-                                  ? { ...param, value: action.value }
-                                  : param
-                          )
-                      }
-                    : regression
-            );
-        case "setSelection":
-            return regressionState.map(regression =>
-                regression.name === action.regressionName
-                    ? { ...regression, selected: !regression.selected }
-                    : regression
-            );
-        case "setAllSelections":
-            return regressionState.map(regression => {
-                return { ...regression, selected: action.selected };
-            });
-    }
-}
-
-function makeNumericInput(param, regressionName, regressionStateDispatch) {
-    return (
-        <React.Fragment key={param.name}>
-            <TextField
-                className="parameterInput"
-                fullWidth
-                label={param.label}
-                helperText={param.helperText}
-                margin="normal"
-                variant="filled"
-                type="number"
-                value={param.value}
-                onChange={e =>
-                    regressionStateDispatch({
-                        type: "updateParam",
-                        regressionName,
-                        paramName: param.name,
-                        value:
-                            param.type === "int"
-                                ? parseInt(e.target.value)
-                                : parseFloat(e.target.value)
-                    })
-                }
-            />
-        </React.Fragment>
-    );
-}
-
-function makeStringChoiceInput(param, regressionName, regressionStateDispatch) {
-    return (
-        <FormControl key={param.name}>
-            <InputLabel>{param.name}</InputLabel>
-            <Select
-                value={param.value || param.default}
-                onChange={e =>
-                    regressionStateDispatch({
-                        type: "updateParam",
-                        regressionName,
-                        paramName: param.name,
-                        value: e.target.value
-                    })
-                }
-            >
-                {param.options.map(f => (
-                    <MenuItem key={f} value={f}>
-                        {f.charAt(0).toUpperCase() + f.slice(1)}
-                    </MenuItem>
-                ))}
-            </Select>
-        </FormControl>
-    );
-}
-
-function makeSubParamInput(param, regressionName, regressionStateDispatch) {
-    switch (param.type) {
-        case "int":
-        case "float":
-            return makeNumericInput(param, regressionName, regressionStateDispatch);
-        case "string":
-            return makeStringChoiceInput(param, regressionName, regressionStateDispatch);
-    }
-}
-
-function makeRegressionRow(
-    activeRegressionName,
-    setActiveRegressionName,
-    regressionStateDispatch,
-    regression
-) {
-    const etaLabel = regression.eta
-        ? `(${Math.ceil(regression.eta / 60)} min)`
-        : regression.etaLoaded && "(n/a)";
-    const rowClass = classnames({
-        checkboxRow: true,
-        active: regression.name === activeRegressionName
-    });
-    return (
-        <React.Fragment key={regression.name}>
-            <div
-                key={regression.name}
-                className={rowClass}
-                onClick={_ => setActiveRegressionName(regression.name)}
-            >
-                <Checkbox
-                    color="primary"
-                    checked={regression.selected}
-                    onChange={_ =>
-                        regressionStateDispatch({
-                            type: "setSelection",
-                            regressionName: regression.name
-                        })
-                    }
-                />
-                <div className="checkboxLabels">
-                    <Typography inline className="checkboxLabel">
-                        {regression.name}
-                    </Typography>
-                    <Typography inline className="checkboxLabel" color="textSecondary">
-                        {etaLabel}
-                    </Typography>
-                </div>
-            </div>
-        </React.Fragment>
-    );
-}
-
-// Uses the regression Types constants file to generate state objects for each regression.
-function getInitialParamState() {
-    return regressionTypes.REGRESSION_TYPES.map(regression => {
-        const state = {
-            name: regression,
-            eta: null,
-            etaLoaded: false,
-            paramData: regressionTypes.REGRESSION_PARAMS[regression],
-            selected: true
-        };
-        return state;
-    });
-}
-
 function RegressionsOverview(props) {
     const win = useWindowManager(props, {
         width: 850,
@@ -238,8 +83,8 @@ function RegressionsOverview(props) {
 
     // Create and store regression states
     const [regressionStates, regressionStateDispatch] = useReducer(
-        regressionStateReducer,
-        getInitialParamState()
+        classifierRegressionUtils.stateReducer,
+        classifierRegressionUtils.getInitialParamState(regressionTypes.REGRESSION_PARAMS)
     );
 
     const selectedFeatures = props.featureList
@@ -272,7 +117,7 @@ function RegressionsOverview(props) {
     // handles those Promise returns and updates the regression states as necessary. It also includes
     // a cleanup function that will cancel all requests if the user closes the window.
     useEffect(_ => {
-        const requests = regressionTypes.REGRESSION_TYPES.map(regression => {
+        const requests = Object.values(regressionTypes.REGRESSION_PARAMS).map(regression => {
             const { req, cancel } = regressionFunctions.getEta(regression, selectedFeatures, 100);
             req.then(data =>
                 regressionStateDispatch({
@@ -293,13 +138,15 @@ function RegressionsOverview(props) {
     const algoVerb = "regression";
 
     const regressionOutput = [
+        regressionTypes.REGRESSION_ALGO,
         regressionStates,
         selectedFeatures,
         crossVal,
         label,
         searchType,
         scoring,
-        props.winId
+        props.winId,
+        regressionTypes.REGRESSION_RESULTS_WINDOW
     ];
 
     // Render the HTML for the page.
@@ -319,7 +166,7 @@ function RegressionsOverview(props) {
                 <RegressionHeaderBar
                     selectedFeatures={selectedFeatures}
                     regressionOutputParams={regressionOutput}
-                    createRegressionOutput={props.createRegressionOutput}
+                    createAlgoOutput={props.createAlgoOutput}
                     setHelpModeState={setHelpModeState}
                     label={label}
                     setLabel={setLabel}
@@ -363,7 +210,7 @@ function RegressionsOverview(props) {
                     </div>
                     <FormGroup classes={{ root: "regressionList" }}>
                         {regressionStates.map(regression =>
-                            makeRegressionRow(
+                            classifierRegressionUtils.makeAlgoRow(
                                 activeRegressionName,
                                 setActiveRegressionName,
                                 regressionStateDispatch,
@@ -423,11 +270,14 @@ function RegressionsOverview(props) {
                                 <React.Fragment key={param.name}>
                                     <hr />
                                     <div>{param.name}</div>
-                                    {param.subParams.map(subParam =>
-                                        makeSubParamInput(
+                                    {param.subParams.map((subParam, idx) =>
+                                        classifierRegressionUtils.makeSubParamInput(
+                                            param.name,
                                             subParam,
                                             activeRegressionName,
-                                            regressionStateDispatch
+                                            regressionStateDispatch,
+                                            idx === 0,
+                                            props.featureList
                                         )
                                     )}
                                 </React.Fragment>
@@ -447,10 +297,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        createRegressionOutput: bindActionCreators(
-            regressionActions.createRegressionOutput,
-            dispatch
-        )
+        createAlgoOutput: bindActionCreators(regressionActions.createAlgoOutput, dispatch)
     };
 }
 

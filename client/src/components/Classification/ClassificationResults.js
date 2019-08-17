@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useReducer } from "react";
-import * as classificationTypes from "constants/classificationTypes";
+import * as classificationTypes from "constants/classificationRegressionTypes";
 import Typography from "@material-ui/core/Typography";
 import Plot from "react-plotly.js";
 import classnames from "classnames";

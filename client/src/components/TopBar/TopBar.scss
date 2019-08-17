@@ -1,0 +1,116 @@
+.top-bar {
+    color: white;
+}
+
+.session-bar {
+    display: inline-flex;
+    width: 100%;
+    z-index: 2147483548;
+    padding: 5px;
+
+    label {
+        margin-bottom: 0;
+    }
+
+    & > * {
+        margin-right: 10px !important;
+    }
+}
+
+.session-bar-file-input {
+    position: absolute !important;
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+}
+
+.session-bar-button {
+    color: white;
+    background-color: transparent;
+    margin: 0px;
+    margin-left: 10px;
+    margin-right: 10px;
+    height: 32px;
+    padding: 0px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.session-bar-list {
+    list-style: none;
+    width: 100%;
+    display: flex;
+    flex-direction: horizontal;
+    margin: 0;
+}
+
+.session-bar-list-element {
+    display: inline-block;
+}
+
+.navigation-bar {
+    width: 100%;
+    height: 30px;
+    display: inline-flex;
+    justify-content: space-between;
+    /*background: linear-gradient( to right, #ededed, #f1f1f1, #ededed );*/
+    background: #061427;
+    position: relative;
+    transition: background 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+    z-index: 1;
+}
+
+.navigation-bar #topBarMenu {
+    z-index: 2147483548;
+    /*background: linear-gradient( to right, #7d39e0, #05101f );*/
+}
+
+.navigation-bar #topBarTools {
+    z-index: 2147483548;
+    /*background: linear-gradient( to right, #05101f, #7d39e0 );*/
+}
+
+.navigation-bar .dropdownMain {
+    margin-left: 0px;
+}
+.navigation-bar .dropdownMain.right > div {
+    right: 0;
+    left: unset;
+}
+.navigation-bar .dropdownToggle {
+    color: white;
+    border-radius: 0;
+    border: none;
+    background: transparent;
+}
+.navigation-bar .dropdownToggle.thin {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+.navigation-bar .dropdownToggle > span {
+    border-top: 4px dashed #fff;
+}
+
+.navigation-bar .triTopLeft {
+    display: none;
+    position: absolute;
+    top: 0px;
+    left: 251px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 30px 150px 0 0;
+    border-color: #05101f transparent transparent transparent;
+}
+.navigation-bar .triTopRight {
+    display: none;
+    position: absolute;
+    top: 0px;
+    right: 269px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0px 0px 30px 150px;
+    border-color: transparent transparent #05101f transparent;
+}

@@ -1,8 +1,8 @@
 // This component creates a window that allows users to configure a new classification run.
 import React, { useEffect, useState, useReducer } from "react";
-import * as classificationTypes from "constants/classificationTypes";
+import * as classificationRegressionTypes from "constants/classificationRegressionTypes";
 import * as classificationFunctions from "components/Classification/classificationFunctions";
-import * as classificationActions from "actions/classificationActions";
+import * as classificationActions from "actions/classificationRegressionActions";
 import Button from "@material-ui/core/Button";
 import { bindActionCreators } from "redux";
 import "components/Classification/classification.scss";
@@ -22,7 +22,7 @@ import HelpContent from "components/Help/HelpContent";
 import HelpOutline from "@material-ui/icons/HelpOutline";
 import Close from "@material-ui/icons/Close";
 import IconButton from "@material-ui/core/IconButton";
-
+import * as classifierRegressionUtils from "utils/classifierRegressionUtils";
 import { useWindowManager } from "hooks/WindowHooks";
 
 function ClassificationHeaderBar(props) {
@@ -42,9 +42,7 @@ function ClassificationHeaderBar(props) {
                 <Button
                     variant="contained"
                     color="primary"
-                    onClick={_ =>
-                        props.createClassificationOutput(...props.classificationOutputParams)
-                    }
+                    onClick={_ => props.createAlgoOutput(...props.classificationOutputParams)}
                 >
                     Run
                 </Button>
@@ -71,205 +69,6 @@ function HelpBarHeader(props) {
     );
 }
 
-// Reducer to handle changes to each individual classification's state, which contains info
-// about parameters and expected run times.
-function classificationStateReducer(classificationState, action) {
-    switch (action.type) {
-        case "updateEta":
-            return classificationState.map(classification =>
-                classification.name === action.name
-                    ? { ...classification, eta: action.eta, etaLoaded: true }
-                    : classification
-            );
-        case "updateParam": //TODO: This really needs to be collapsed w/ some kind of utility function for mapping
-            return classificationState.map(classification =>
-                classification.name === action.classificationName
-                    ? {
-                          ...classification,
-                          paramData: classification.paramData.map(param =>
-                              param.name === action.paramName
-                                  ? {
-                                        ...param,
-                                        subParams: param.subParams.map(subParam =>
-                                            subParam.name === action.subParam
-                                                ? { ...subParam, value: action.value }
-                                                : subParam
-                                        )
-                                    }
-                                  : param
-                          )
-                      }
-                    : classification
-            );
-        case "setSelection":
-            return classificationState.map(classification =>
-                classification.name === action.classificationName
-                    ? { ...classification, selected: !classification.selected }
-                    : classification
-            );
-        case "setAllSelections":
-            return classificationState.map(classification => {
-                return { ...classification, selected: action.selected };
-            });
-    }
-}
-
-function makeNumericInput(
-    paramName,
-    subParam,
-    classificationName,
-    classificationStateDispatch,
-    focus
-) {
-    return (
-        <React.Fragment key={subParam.name}>
-            <TextField
-                autoFocus={focus}
-                className="parameterInput"
-                fullWidth
-                label={subParam.label}
-                helperText={subParam.helperText}
-                margin="normal"
-                variant="filled"
-                type="number"
-                value={subParam.value}
-                onChange={e =>
-                    classificationStateDispatch({
-                        type: "updateParam",
-                        classificationName,
-                        paramName,
-                        subParam: subParam.name,
-                        value:
-                            subParam.type === "int"
-                                ? parseInt(e.target.value)
-                                : parseFloat(e.target.value)
-                    })
-                }
-            />
-        </React.Fragment>
-    );
-}
-
-function makeStringChoiceInput(
-    paramName,
-    subParam,
-    classificationName,
-    classificationStateDispatch,
-    focus
-) {
-    return (
-        <FormControl key={subParam.name}>
-            <InputLabel>{subParam.name}</InputLabel>
-            <Select
-                autoFocus={focus}
-                value={subParam.value || subParam.default}
-                onChange={e =>
-                    classificationStateDispatch({
-                        type: "updateParam",
-                        classificationName,
-                        paramName,
-                        subParam: subParam.name,
-                        value: e.target.value
-                    })
-                }
-            >
-                {subParam.options.map(f => (
-                    <MenuItem key={f} value={f}>
-                        {f.charAt(0).toUpperCase() + f.slice(1)}
-                    </MenuItem>
-                ))}
-            </Select>
-        </FormControl>
-    );
-}
-
-function makeSubParamInput(
-    paramName,
-    subParam,
-    classificationName,
-    classificationStateDispatch,
-    focus
-) {
-    switch (subParam.type) {
-        case "int":
-        case "float":
-            return makeNumericInput(
-                paramName,
-                subParam,
-                classificationName,
-                classificationStateDispatch,
-                focus
-            );
-        case "string":
-            return makeStringChoiceInput(
-                paramName,
-                subParam,
-                classificationName,
-                classificationStateDispatch,
-                focus
-            );
-    }
-}
-
-function makeClassificationRow(
-    activeClassificationName,
-    setActiveClassificationName,
-    classificationStateDispatch,
-    classification
-) {
-    const etaLabel = classification.eta
-        ? `(${Math.ceil(classification.eta / 60)} min)`
-        : classification.etaLoaded && "(n/a)";
-    const rowClass = classnames({
-        checkboxRow: true,
-        active: classification.name === activeClassificationName
-    });
-    return (
-        <React.Fragment key={classification.name}>
-            <div
-                key={classification.name}
-                className={rowClass}
-                onClick={_ => setActiveClassificationName(classification.name)}
-            >
-                <Checkbox
-                    color="primary"
-                    checked={classification.selected}
-                    onChange={_ =>
-                        classificationStateDispatch({
-                            type: "setSelection",
-                            classificationName: classification.name
-                        })
-                    }
-                />
-                <div className="checkboxLabels">
-                    <Typography inline className="checkboxLabel">
-                        {classification.name}
-                    </Typography>
-                    <Typography inline className="checkboxLabel" color="textSecondary">
-                        {etaLabel}
-                    </Typography>
-                </div>
-            </div>
-        </React.Fragment>
-    );
-}
-
-// Uses the Classification Types constants file to generate state objects for each classification.
-function getInitialParamState() {
-    return Object.entries(classificationTypes.CLASSIFICATION_PARAMS).map(
-        ([name, classification]) => {
-            const state = {
-                name: name,
-                eta: null,
-                etaLoaded: false,
-                paramData: classification,
-                selected: true
-            };
-            return state;
-        }
-    );
-}
-
 function ClassificationOverview(props) {
     const win = useWindowManager(props, {
         width: 850,
@@ -280,8 +79,10 @@ function ClassificationOverview(props) {
 
     // Create and store classification states
     const [classificationStates, classificationStateDispatch] = useReducer(
-        classificationStateReducer,
-        getInitialParamState()
+        classifierRegressionUtils.stateReducer,
+        classifierRegressionUtils.getInitialParamState(
+            classificationRegressionTypes.CLASSIFICATION_PARAMS
+        )
     );
 
     const selectedFeatures = props.featureList
@@ -306,17 +107,19 @@ function ClassificationOverview(props) {
     // handles those Promise returns and updates the classification states as necessary. It also includes
     // a cleanup function that will cancel all requests if the user closes the window.
     useEffect(_ => {
-        const requests = Object.entries(classificationTypes.CLASSIFICATION_PARAMS).map(([name]) => {
-            const { req, cancel } = classificationFunctions.getEta(name, selectedFeatures, 100);
-            req.then(data =>
-                classificationStateDispatch({
-                    type: "updateEta",
-                    name,
-                    eta: data.eta && Math.ceil(data.eta)
-                })
-            );
-            return cancel;
-        });
+        const requests = Object.entries(classificationRegressionTypes.CLASSIFICATION_PARAMS).map(
+            ([name]) => {
+                const { req, cancel } = classificationFunctions.getEta(name, selectedFeatures, 100);
+                req.then(data =>
+                    classificationStateDispatch({
+                        type: "updateEta",
+                        name,
+                        eta: data.eta && Math.ceil(data.eta)
+                    })
+                );
+                return cancel;
+            }
+        );
 
         return function cleanup() {
             requests.forEach(cancel => cancel());
@@ -340,13 +143,15 @@ function ClassificationOverview(props) {
     const [label, setLabel] = useState(selectedFeatures[0]);
 
     const classificationOutput = [
+        classificationRegressionTypes.CLASSIFICATION_ALGO,
         classificationStates,
         selectedFeatures,
         crossVal,
         label,
         searchType,
         scoring,
-        props.winId
+        props.winId,
+        classificationRegressionTypes.CLASSIFICATION_RESULTS_WINDOW
     ];
 
     return (
@@ -355,7 +160,7 @@ function ClassificationOverview(props) {
                 <ClassificationHeaderBar
                     selectedFeatures={selectedFeatures}
                     classificationOutputParams={classificationOutput}
-                    createClassificationOutput={props.createClassificationOutput}
+                    createAlgoOutput={props.createAlgoOutput}
                     setHelpModeState={setHelpModeState}
                     label={label}
                     setLabel={setLabel}
@@ -404,7 +209,7 @@ function ClassificationOverview(props) {
                     </div>
                     <FormGroup classes={{ root: "classificationList" }}>
                         {classificationStates.map(classification =>
-                            makeClassificationRow(
+                            classifierRegressionUtils.makeAlgoRow(
                                 activeClassificationName,
                                 setActiveClassificationName,
                                 classificationStateDispatch,
@@ -465,12 +270,13 @@ function ClassificationOverview(props) {
                                     <hr />
                                     <div>{param.name}</div>
                                     {param.subParams.map((subParam, idx) =>
-                                        makeSubParamInput(
+                                        classifierRegressionUtils.makeSubParamInput(
                                             param.name,
                                             subParam,
                                             activeClassificationName,
                                             classificationStateDispatch,
-                                            idx === 0
+                                            idx === 0,
+                                            props.featureList
                                         )
                                     )}
                                 </React.Fragment>
@@ -490,10 +296,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        createClassificationOutput: bindActionCreators(
-            classificationActions.createClassificationOutput,
-            dispatch
-        )
+        createAlgoOutput: bindActionCreators(classificationActions.createAlgoOutput, dispatch)
     };
 }
 

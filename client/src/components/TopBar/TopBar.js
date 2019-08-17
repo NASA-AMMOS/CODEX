@@ -1,28 +1,24 @@
 import "components/TopBar/TopBar.css";
 
-import { Button, ButtonGroup } from "reactstrap";
+import { ButtonGroup } from "reactstrap";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
 import PropTypes from "prop-types";
-import React, { Component, useRef , useEffect} from "react";
+import React, { useRef } from "react";
 
 import { openAlgorithm, openDevelopment, openWorkflow } from "actions/ui";
-import TextField from "@material-ui/core/TextField";
-import * as algorithmActions from "actions/algorithmActions";
-import * as algorithmTypes from "constants/algorithmTypes";
-import * as uiTypes from "constants/uiTypes";
-import * as windowTypes from "constants/windowTypes";
-import * as workflowTypes from "constants/workflowTypes";
-import * as workflowActions from "actions/workflowActions";
-import * as windowManagerActions from "actions/windowManagerActions";
-import * as classificationActions from "actions/classificationActions";
-import * as regressionActions from "actions/regressionActions";
-import * as sessionsActions from "actions/sessionsActions";
-import * as exportActions from "actions/exportActions";
-import * as dataActions from "actions/data";
 import ControlBar from "components/ControlBar/ControlBar";
 import SessionBar from "components/TopBar/SessionBar";
+import * as algorithmActions from "actions/algorithmActions";
+import * as algorithmTypes from "constants/algorithmTypes";
+import * as dataActions from "actions/data";
+import * as exportActions from "actions/exportActions";
+import * as sessionsActions from "actions/sessionsActions";
+import * as windowManagerActions from "actions/windowManagerActions";
+import * as windowTypes from "constants/windowTypes";
+import * as workflowActions from "actions/workflowActions";
+import * as workflowTypes from "constants/workflowTypes";
 
 function NavigationBar(props) {
     const defaultBackground = "#05101f";
@@ -136,7 +132,7 @@ function NavigationBar(props) {
                     }}
                 />
             */}
-            <ControlBar/>
+            <ControlBar />
             <div id="topBarTools">
                 <ButtonGroup>
                     <Dropdown>
@@ -189,11 +185,6 @@ function mapDispatchToProps(dispatch) {
         createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name)),
         createWorkflow: name => dispatch(workflowActions.createWorkflow(name)),
         setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch),
-        openClassificationWindow: bindActionCreators(
-            classificationActions.openClassificationWindow,
-            dispatch
-        ),
-        openRegressionWindow: bindActionCreators(regressionActions.openRegressionWindow, dispatch),
         openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch),
         saveSession: bindActionCreators(sessionsActions.saveSession, dispatch),
         fileLoad: bindActionCreators(dataActions.fileLoad, dispatch),
