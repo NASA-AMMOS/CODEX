@@ -3,7 +3,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import { useSavedSelections, useFilename, useSelectedFeatureNames } from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
-import { useGlobalChartState } from "hooks/UiHooks";
+import { useGlobalChartState } from "hooks/UIHooks";
 import * as utils from "utils/utils";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Button from "@material-ui/core/Button";

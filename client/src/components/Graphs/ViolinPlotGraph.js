@@ -16,7 +16,7 @@ import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import { useCurrentSelection, useSavedSelections, usePinnedFeatures } from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
-import { useGlobalChartState } from "hooks/UiHooks";
+import { useGlobalChartState } from "hooks/UIHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_SELECTION_COLOR = "#FF0000";

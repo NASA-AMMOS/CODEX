@@ -21,7 +21,7 @@ import {
     useHoveredSelection
 } from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
-import { useGlobalChartState } from "hooks/UiHooks";
+import { useGlobalChartState } from "hooks/UIHooks";
 
 const DEFAULT_POINT_COLOR = "#000000";
 const ANIMATION_RANGE = 15;
