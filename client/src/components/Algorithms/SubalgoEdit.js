@@ -54,7 +54,7 @@ function getActionButtons(props) {
                         Back
                     </Button>
                     <Button
-                        variant="outlined"
+                        variant="contained"
                         color="primary"
                         onClick={_ =>
                             props.paramDispatch({
