@@ -7,7 +7,7 @@ import * as regressionActions from "actions/classificationRegressionActions";
 import Button from "@material-ui/core/Button";
 import { bindActionCreators } from "redux";
 import * as classifierRegressionUtils from "utils/classifierRegressionUtils";
-import "components/regressions/regressions.scss";
+import "components/Regressions/regressions.scss";
 import { connect } from "react-redux";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";

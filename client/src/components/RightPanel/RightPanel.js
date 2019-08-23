@@ -1,7 +1,7 @@
 import React, { Component, useState } from "react";
 import "components/RightPanel/RightPanel.scss";
 import Close from "@material-ui/icons/Close";
-import Menu from "@material-ui/icons/menu";
+import MenuIcon from "@material-ui/icons/Menu";
 import IconButton from "@material-ui/core/IconButton";
 
 function RightPanel() {
@@ -10,7 +10,7 @@ function RightPanel() {
     return (
         <React.Fragment>
             <IconButton className="menu-button-icon" hidden={open} onClick={_ => setOpen(!open)}>
-                <Menu className="menu-button"/>
+                <MenuIcon className="menu-button"/>
             </IconButton>
             <div className="right-panel" hidden={!open}>
                 <IconButton className="close-button-icon" onClick={_ => setOpen(!open)}>
