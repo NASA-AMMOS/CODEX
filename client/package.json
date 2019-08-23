@@ -50,6 +50,7 @@
         "react-sparklines": "^1.7.0",
         "reactcss": "^1.2.3",
         "reactstrap": "^5.0.0",
+        "recompose": "^0.30.0",
         "redux": "^4.0.4",
         "redux-batched-actions": "^0.4.1",
         "redux-logger": "^3.0.6",

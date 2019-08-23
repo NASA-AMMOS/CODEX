@@ -3,7 +3,6 @@ import "components/DimensionalityReduction/dimensionalityReductions.scss";
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Plot from "react-plotly.js";
-import Plotly from "plotly.js";
 import React, { useEffect, useState } from "react";
 import Slider from "@material-ui/lab/Slider";
 import Typography from "@material-ui/core/Typography";
@@ -142,7 +141,7 @@ function makeDRPlot(algo, maxYRange, changeSliderVal, featureAdd) {
                 max={algo.dataFeatures.length}
                 step={1}
                 onChange={(_, val) => {
-                    Plotly.Fx.hover(id, [{ curveNumber: 0, pointNumber: val - 1 }]);
+                    //Plotly.Fx.hover(id, [{ curveNumber: 0, pointNumber: val - 1 }]);
                     changeSliderVal(algo.algorithmName, val);
                 }}
             />

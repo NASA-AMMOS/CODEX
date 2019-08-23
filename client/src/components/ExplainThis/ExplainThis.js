@@ -7,7 +7,6 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import * as utils from "utils/utils";
 import ReactResizeDetector from "react-resize-detector";
 import * as d3 from "d3";
-import * as d3Hierarchy from "d3-hierarchy";
 import * as d3SC from "d3-scale-chromatic";
 import Plot from "react-plotly.js";
 import Button from "@material-ui/core/Button";
