@@ -87,6 +87,7 @@ function ScatterGraph(props) {
         chartState.data[0].marker.color.forEach((row, idx) => {
             chartState.data[0].marker.color[idx] = DEFAULT_POINT_COLOR;
         });
+        console.log(props.savedSelections);
         props.savedSelections
             .concat()
             .reverse()
@@ -117,7 +118,7 @@ function ScatterGraph(props) {
         [props.savedSelections]
     );
 
-    // Functions to animate selectionst that are being hovered over.
+    // Functions to animate selections that are being hovered over.
     const animationState = useRef({ index: 0, ascending: true });
     useEffect(
         _ => {
