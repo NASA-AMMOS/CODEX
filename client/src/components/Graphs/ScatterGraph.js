@@ -87,7 +87,7 @@ function ScatterGraph(props) {
         chartState.data[0].marker.color.forEach((row, idx) => {
             chartState.data[0].marker.color[idx] = DEFAULT_POINT_COLOR;
         });
-        console.log(props.savedSelections);
+
         props.savedSelections
             .concat()
             .reverse()
