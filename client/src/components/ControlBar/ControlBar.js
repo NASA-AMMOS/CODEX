@@ -23,35 +23,35 @@ const hotkeys = {
 function ControlBar(props) {
     const previousChartMode = useRef(null);
     const keyPressTimer = useRef(null);
-    useEffect(
-        _ => {
-            function handleKeyDown(e) {
-                if (!Object.keys(hotkeys).includes(e.code) || keyPressTimer.current) return;
-                keyPressTimer.current = setTimeout(_ => {
-                    previousChartMode.current = props.globalChartState;
-                    props.changeGlobalChartState(hotkeys[e.code]);
-                    clearTimeout(keyPressTimer.current);
-                }, 500);
-            }
+    // useEffect(
+    //     _ => {
+    //         function handleKeyDown(e) {
+    //             if (!Object.keys(hotkeys).includes(e.code) || keyPressTimer.current) return;
+    //             keyPressTimer.current = setTimeout(_ => {
+    //                 previousChartMode.current = props.globalChartState;
+    //                 props.changeGlobalChartState(hotkeys[e.code]);
+    //                 clearTimeout(keyPressTimer.current);
+    //             }, 500);
+    //         }
 
-            function handleKeyUp(e) {
-                clearTimeout(keyPressTimer.current);
-                keyPressTimer.current = null;
-                props.changeGlobalChartState(previousChartMode.current);
-            }
+    //         function handleKeyUp(e) {
+    //             clearTimeout(keyPressTimer.current);
+    //             keyPressTimer.current = null;
+    //             props.changeGlobalChartState(previousChartMode.current);
+    //         }
 
-            if (props.windows.some(win => uiTypes.GRAPH_TYPES.includes(win.get("windowType")))) {
-                document.addEventListener("keydown", handleKeyDown);
-                document.addEventListener("keyup", handleKeyUp);
-            }
+    //         if (props.windows.some(win => uiTypes.GRAPH_TYPES.includes(win.get("windowType")))) {
+    //             document.addEventListener("keydown", handleKeyDown);
+    //             document.addEventListener("keyup", handleKeyUp);
+    //         }
 
-            return _ => {
-                document.removeEventListener("keydown", handleKeyDown);
-                document.removeEventListener("keyup", handleKeyUp);
-            };
-        },
-        [props.windows]
-    );
+    //         return _ => {
+    //             document.removeEventListener("keydown", handleKeyDown);
+    //             document.removeEventListener("keyup", handleKeyUp);
+    //         };
+    //     },
+    //     [props.windows]
+    // );
 
     const lassoClass = classnames({ icon: true, active: props.globalChartState === "lasso" });
     const zoomClass = classnames({ icon: true, active: props.globalChartState === "zoom" });
