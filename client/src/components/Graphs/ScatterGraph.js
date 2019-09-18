@@ -25,7 +25,7 @@ import { useGlobalChartState } from "hooks/UIHooks";
 
 const DEFAULT_POINT_COLOR = "rgba(0, 0, 0 ,0.5)";
 const ANIMATION_RANGE = 15;
-const ANIMATION_SPEED = 2;
+const ANIMATION_SPEED = 0.75;
 const COLOR_CURRENT_SELECTION = "#FF0000";
 
 function ScatterGraph(props) {
@@ -148,7 +148,7 @@ function ScatterGraph(props) {
                         : animationState.current.ascending;
 
                 animationState.current.index = animationState.current.ascending
-                    ? animationState.current.index + 1
+                    ? animationState.current.index + 2
                     : animationState.current.index - 1;
 
                 const nextColor = colorGradient[animationState.current.index];
