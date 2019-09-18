@@ -147,6 +147,9 @@ function ScatterGraph(props) {
                         ? false
                         : animationState.current.ascending;
 
+                // changing gradient going toward color saturation happens faster than
+                // going toward de-saturated, which makes the points more saturated for
+                // more time. I think.
                 animationState.current.index = animationState.current.ascending
                     ? animationState.current.index + 2
                     : animationState.current.index - 1;
