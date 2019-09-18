@@ -23,7 +23,7 @@ import {
 import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
 
-const DEFAULT_POINT_COLOR = "rgba(39, 93, 189, 0.5)";
+const DEFAULT_POINT_COLOR = "rgba(0, 0, 0 ,0.5)";
 const ANIMATION_RANGE = 15;
 const ANIMATION_SPEED = 2;
 const COLOR_CURRENT_SELECTION = "#FF0000";
