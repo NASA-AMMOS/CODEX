@@ -2,9 +2,16 @@
  * Color palette for newly created selections, as well as a master and brush selection
  */
 export const SELECTIONS_COLOR_PALETTE = [
+    "#3988E3",
+    "#9EDF11",
+    "#11D3DF",
+    "#FF891C",
+    "#FF11E7",
+    "#1C7306",
+    "#F3AEEC",
+    "#98e633",
     "#7733e6",
     "#e63380",
-    "#98e633",
     "#33e6c5",
     "#333be6",
     "#e63333",
