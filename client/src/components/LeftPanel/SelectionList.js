@@ -1,4 +1,4 @@
-import React, { Component, useState, useEffect } from "react";
+import React, { Component, useState, useEffect, useRef } from "react";
 import "components/LeftPanel/SelectionList.scss";
 import { connect } from "react-redux";
 import classnames from "classnames";
@@ -19,6 +19,8 @@ import RemoveRedEye from "@material-ui/icons/RemoveRedEye";
 import CheckboxIcon from "@material-ui/icons/CheckBox";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
+function RenameDialog() {}
+
 function SelectionContextMenu(props) {
     const [contextMode, setContextMode] = useState(null);
 
@@ -32,6 +34,17 @@ function SelectionContextMenu(props) {
             props.renameSelection(props.contextActiveSelection.id, renameSelectionBuffer);
         }
     }
+
+    // To make sure the autofocus works, don't create the rename text field until we need it.
+    const renameTextField =
+        contextMode === "rename" ? (
+            <TextField
+                value={renameSelectionBuffer}
+                onChange={e => setRenameSelectionBuffer(e.target.value)}
+                onKeyPress={submitRenamedSelection}
+                autoFocus
+            />
+        ) : null;
 
     return (
         <List>
@@ -57,11 +70,7 @@ function SelectionContextMenu(props) {
                 Delete Selection
             </ListItem>
             <ListItem hidden={contextMode !== "rename"}>
-                <TextField
-                    value={renameSelectionBuffer}
-                    onChange={e => setRenameSelectionBuffer(e.target.value)}
-                    onKeyPress={submitRenamedSelection}
-                />
+                {renameTextField}
                 <Button
                     variant="outlined"
                     style={{ marginLeft: "10px" }}
@@ -75,53 +84,48 @@ function SelectionContextMenu(props) {
 }
 
 function GroupDisplayItem(props) {
-
     return (
-        <div
-            className="group-display-item"
-        >
+        <div className="group-display-item">
             <Checkbox
                 checked={props.active}
                 value="checkedA"
-                icon={<CheckboxOutlineBlank style={{fill: "#828282"}} />}
-                checkedIcon={<CheckboxIcon style={{ fill:"#3988E3"}} />}
-                onClick={
-                    _ => {
-                        props.toggleGroupActive();
-                    }
-                }
-                style={{height:"22px",  padding:"0px"}}
+                icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
+                checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
+                onClick={_ => {
+                    props.toggleGroupActive();
+                }}
+                style={{ height: "22px", padding: "0px" }}
             />
-            <div className="group-display-name-tag"><span> {props.name} </span></div>
+            <div className="group-display-name-tag">
+                <span> {props.name} </span>
+            </div>
             <Checkbox
                 className="eye-icon-checkbox"
                 checked={props.hidden}
                 value="checkedA"
-                icon={<RemoveRedEye style={{fill: "#DADADA"}} />}
-                checkedIcon={<RemoveRedEye style={{ fill:"#061427"}} />}
+                icon={<RemoveRedEye style={{ fill: "#DADADA" }} />}
+                checkedIcon={<RemoveRedEye style={{ fill: "#061427" }} />}
                 onClick={_ => {
                     props.toggleGroupHidden();
-                    }
-                }
-                style={{height:"22px", padding:"0px"}}
+                }}
+                style={{ height: "22px", padding: "0px" }}
             />
             <Checkbox
                 className="keyboard-toggle"
                 checked={!props.groupExpanded}
                 value="checkedA"
-                icon={<KeyboardArrowDown className="keyboard-arrow"/>}
-                checkedIcon={<KeyboardArrowUp className="keyboard-arrow"/>}
+                icon={<KeyboardArrowDown className="keyboard-arrow" />}
+                checkedIcon={<KeyboardArrowUp className="keyboard-arrow" />}
                 onClick={_ => {
-                        props.setGroupExpanded(!props.groupExpanded)
-                    }
-                }
-                style={{height:"22px", padding:"0px"}}
+                    props.setGroupExpanded(!props.groupExpanded);
+                }}
+                style={{ height: "22px", padding: "0px" }}
             />
         </div>
     );
 }
 
-function SelectionDisplayItem(props){
+function SelectionDisplayItem(props) {
     return (
         <div
             className="selection"
@@ -199,8 +203,7 @@ const reorder = (list, startIndex, endIndex) => {
     //shift everything with an index after up one
     function findElementWithIndex(index) {
         for (let i = 0; i < list.length; i++) {
-            if (list[i].index === index)
-                return i;
+            if (list[i].index === index) return i;
         }
     }
     //set the element at startIndex's index to endIndex
@@ -230,27 +233,19 @@ const reorder = (list, startIndex, endIndex) => {
 };
 
 function SelectionGroup(props) {
-
     const [groupExpanded, setGroupExpanded] = useState(true);
 
     return (
-        <Draggable 
-            key={props.groupKey} 
-            draggableId={props.groupKey+""} 
-            index={props.index}
-        >
+        <Draggable key={props.groupKey} draggableId={props.groupKey + ""} index={props.index}>
             {(provided, snapshot) => (
-                <div 
+                <div
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                 >
                     <Droppable droppableId={props.groupKey} type={props.groupKey}>
                         {(provided, snapshot) => (
-                            <div
-                                className="group-container"
-                                ref={provided.innerRef}
-                            >
+                            <div className="group-container" ref={provided.innerRef}>
                                 <GroupDisplayItem
                                     name={props.groupKey}
                                     hidden={props.group.hidden}
@@ -264,52 +259,62 @@ function SelectionGroup(props) {
                                     className="selection-group-sub-selections"
                                     hidden={!groupExpanded}
                                 >
-                                    {
-                                        props.group
-                                            .concat()//this is so it does not mutate the original list
-                                            .sort((a,b) => { 
-                                                if ( a.index < b.index)
-                                                    return -1;
-                                                else if (a.index > b.index)
-                                                    return 1;
-                                                else 
-                                                    return 0;
-                                            }).map((selection, index) => {
-
-                                                if (selection == undefined) return <div> </div>;
-                                                return (
-                                                    <Draggable key={selection.id} draggableId={selection.id+""} index={index}>  
-                                                        {(provided, snapshot) => (
-                                                            <div 
-                                                                ref={provided.innerRef}
-                                                                {...provided.draggableProps}
-                                                                {...provided.dragHandleProps}
-                                                            >  
-                                                                <SelectionDisplayItem
-                                                                    hoverSelection={props.hoverSelection}     
-                                                                    selection={selection.value}
-                                                                    toggleSelectionActive={props.toggleSelectionActive}
-                                                                    toggleSelectionHidden={props.toggleSelectionHidden}
-                                                                    setContextMenuVisible={props.setContextMenuVisible}
-                                                                    setContextMenuPosition={props.setContextMenuPosition}
-                                                                    setContextActiveSelection={props.setContextActiveSelection}
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </Draggable>
-                                                );
-                                            })
-                                    }
+                                    {props.group
+                                        .concat() //this is so it does not mutate the original list
+                                        .sort((a, b) => {
+                                            if (a.index < b.index) return -1;
+                                            else if (a.index > b.index) return 1;
+                                            else return 0;
+                                        })
+                                        .map((selection, index) => {
+                                            if (selection == undefined) return <div> </div>;
+                                            return (
+                                                <Draggable
+                                                    key={selection.id}
+                                                    draggableId={selection.id + ""}
+                                                    index={index}
+                                                >
+                                                    {(provided, snapshot) => (
+                                                        <div
+                                                            ref={provided.innerRef}
+                                                            {...provided.draggableProps}
+                                                            {...provided.dragHandleProps}
+                                                        >
+                                                            <SelectionDisplayItem
+                                                                hoverSelection={
+                                                                    props.hoverSelection
+                                                                }
+                                                                selection={selection.value}
+                                                                toggleSelectionActive={
+                                                                    props.toggleSelectionActive
+                                                                }
+                                                                toggleSelectionHidden={
+                                                                    props.toggleSelectionHidden
+                                                                }
+                                                                setContextMenuVisible={
+                                                                    props.setContextMenuVisible
+                                                                }
+                                                                setContextMenuPosition={
+                                                                    props.setContextMenuPosition
+                                                                }
+                                                                setContextActiveSelection={
+                                                                    props.setContextActiveSelection
+                                                                }
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </Draggable>
+                                            );
+                                        })}
                                 </div>
                                 {provided.placeholder}
                             </div>
                         )}
-                  </Droppable>
+                    </Droppable>
                 </div>
             )}
         </Draggable>
     );
-    
 }
 
 const generateSelectionsGroupList = (savedSelections, selectionGroups, group) => {
@@ -318,16 +323,14 @@ const generateSelectionsGroupList = (savedSelections, selectionGroups, group) =>
     function getValuesOfGroup(groupID) {
         let values = [];
         for (let selection of savedSelections) {
-            if (selection.groupID === groupID)
-                values.push(selection);
+            if (selection.groupID === groupID) values.push(selection);
         }
         return values;
     }
 
     function getGroupObjectById(groupID) {
         for (let group of selectionGroups) {
-            if (groupID === group.id)
-                return group;
+            if (groupID === group.id) return group;
         }
     }
 
@@ -336,26 +339,26 @@ const generateSelectionsGroupList = (savedSelections, selectionGroups, group) =>
     for (let i = 0; i < savedSelections.length; i++) {
         const selection = savedSelections[i];
         if (selection.groupID == null || selection.groupID == undefined || group) {
-            list.push(
-                {
-                    type:"selection",
-                    id: selection.id,
-                    value:selection,
-                    index: list.length
-                }
-            );
-        } else if(usedGroups.indexOf(selection.groupID) == -1){
+            list.push({
+                type: "selection",
+                id: selection.id,
+                value: selection,
+                index: list.length
+            });
+        } else if (usedGroups.indexOf(selection.groupID) == -1) {
             const groupObject = getGroupObjectById(selection.groupID);
-            list.push(
-                {
-                    type:"group",
-                    id: selection.groupID,
-                    hidden: groupObject.hidden,
-                    active: groupObject.active,
-                    value: generateSelectionsGroupList(getValuesOfGroup(selection.groupID), selectionGroups, true),
-                    index: list.length
-                }
-            );
+            list.push({
+                type: "group",
+                id: selection.groupID,
+                hidden: groupObject.hidden,
+                active: groupObject.active,
+                value: generateSelectionsGroupList(
+                    getValuesOfGroup(selection.groupID),
+                    selectionGroups,
+                    true
+                ),
+                index: list.length
+            });
             usedGroups.push(selection.groupID);
         }
     }
@@ -374,52 +377,57 @@ function DragList(props) {
     const [selectionsGroupList, setSelectionsGroupList] = useState([]);
 
     //detects changes to the group sand saved selections and updates selectionsGroupList
-    useEffect(_ => {
+    useEffect(
+        _ => {
+            function keepOldIndices(oldList, newListUncopied) {
+                let newList = JSON.parse(JSON.stringify(newListUncopied));
 
-        function keepOldIndices(oldList, newListUncopied) {
-            let newList = JSON.parse(JSON.stringify(newListUncopied));
-
-            for (let i = 0; i < newList.length; i++) {
-                if (i < oldList.length) {
-                    newList[i].index = oldList[i].index;
-                    if (newList[i].type === "group") {
-                        newList[i].value = keepOldIndices(oldList[i].value, newList[i].value);
+                for (let i = 0; i < newList.length; i++) {
+                    if (i < oldList.length) {
+                        newList[i].index = oldList[i].index;
+                        if (newList[i].type === "group") {
+                            newList[i].value = keepOldIndices(oldList[i].value, newList[i].value);
+                        }
                     }
                 }
+
+                return newList;
             }
+            const newGenerated = generateSelectionsGroupList(
+                props.savedSelections,
+                props.selectionGroups,
+                false
+            );
+            const newSelectionsGroupList = keepOldIndices(selectionsGroupList, newGenerated);
+            setSelectionsGroupList(newSelectionsGroupList);
+        },
+        [props.savedSelections, props.selectionGroups]
+    );
 
-            return newList;
-        }
-        const newGenerated = generateSelectionsGroupList(props.savedSelections, props.selectionGroups, false);
-        const newSelectionsGroupList = keepOldIndices(selectionsGroupList, newGenerated);
-        setSelectionsGroupList(newSelectionsGroupList);
-    }, [props.savedSelections, props.selectionGroups]);
-
-    function onDragEnd(result){
+    function onDragEnd(result) {
         // dropped outside the list
         if (!result.destination) {
             return;
         }
 
         function findElementIndexByType(type) {
-
             for (let i = 0; i < selectionsGroupList.length; i++) {
                 if (selectionsGroupList[i].type === "group") {
                     const group = selectionsGroupList[i];
-                    if (group.id === type)
-                        return i;
+                    if (group.id === type) return i;
                 }
             }
 
             return -1;
         }
 
-        if (result.source.droppableId != "droppable" 
-            || result.destination.droppableId != "droppable") {
+        if (
+            result.source.droppableId != "droppable" ||
+            result.destination.droppableId != "droppable"
+        ) {
             //a nested list is being dropped and should then be passed into reorder
             const newArrIndex = findElementIndexByType(result.type);
-            if (newArrIndex == -1)
-                return;
+            if (newArrIndex == -1) return;
 
             const outputArr = reorder(
                 selectionsGroupList[newArrIndex].value,
@@ -440,89 +448,103 @@ function DragList(props) {
         );
 
         setSelectionsGroupList(outputList);
-    }   
+    }
 
     return (
         <div className="list">
-            <DragDropContext 
-                onDragEnd={onDragEnd}
-            >
+            <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="droppable" type="OUTER">
-                  {(provided, snapshot) => (
-                    <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className="drag-drop-div"
-                    >
-                        {
-                            selectionsGroupList
-                                .concat()//this is so it does not mutate the original list
+                    {(provided, snapshot) => (
+                        <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className="drag-drop-div"
+                        >
+                            {selectionsGroupList
+                                .concat() //this is so it does not mutate the original list
                                 .filter(item => {
-                                        if (item.type === "selection") {
-                                            return props.filterString
-                                                ? item.value.name.startsWith(props.filterString)
-                                                : true;
-                                        } else if (item.type === "group") {
-                                            return props.filterString
-                                                ? item.value.id.startsWith(props.filterStringss)
-                                                : true;
-                                        }
+                                    if (item.type === "selection") {
+                                        return props.filterString
+                                            ? item.value.name.startsWith(props.filterString)
+                                            : true;
+                                    } else if (item.type === "group") {
+                                        return props.filterString
+                                            ? item.value.id.startsWith(props.filterStringss)
+                                            : true;
                                     }
-                                )
-                                .sort((a,b) => { 
-                                    if ( a.index < b.index)
-                                        return -1;
-                                    else if (a.index > b.index)
-                                        return 1;
-                                    else 
-                                        return 0;
+                                })
+                                .sort((a, b) => {
+                                    if (a.index < b.index) return -1;
+                                    else if (a.index > b.index) return 1;
+                                    else return 0;
                                 })
                                 .map((item, index) => {
-                                if (item.type === "selection") {
-                                    return (
-                                         <Draggable key={item.id} draggableId={item.id+""} index={index}>
-                                            {(provided, snapshot) => (
-                                                <div 
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    {...provided.dragHandleProps}
-                                                >
-                                                    <SelectionDisplayItem
-                                                        hoverSelection={props.hoverSelection}     
-                                                        selection={item.value}
-                                                        toggleSelectionActive={props.toggleSelectionActive}
-                                                        toggleSelectionHidden={props.toggleSelectionHidden}
-                                                        setContextMenuVisible={props.setContextMenuVisible}
-                                                        setContextMenuPosition={props.setContextMenuPosition}
-                                                        setContextActiveSelection={props.setContextActiveSelection}
-                                                    />
-                                                </div>
-                                            )}
-                                        </Draggable>
-                                    );
-                                } else if (item.type === "group") {
-                                    return (
-                                        <SelectionGroup
-                                            hoverSelection={props.hoverSelection}
-                                            toggleSelectionActive={props.toggleSelectionActive}
-                                            toggleSelectionHidden={props.toggleSelectionHidden}
-                                            setContextMenuVisible={props.setContextMenuVisible}
-                                            setContextMenuPosition={props.setContextMenuPosition}
-                                            setContextActiveSelection={props.setContextActiveSelection}
-                                            toggleGroupActive={function(){props.toggleGroupActive(item.id)}}
-                                            toggleGroupHidden={function(){props.toggleGroupHidden(item.id)}}
-                                            key={item.id}
-                                            groupKey={item.id}
-                                            group={item.value}
-                                            index={index}
-                                        />
-                                    );
-                                }
-                            })
-                        }
-                        {provided.placeholder}
-                    </div>
-                  )}
+                                    if (item.type === "selection") {
+                                        return (
+                                            <Draggable
+                                                key={item.id}
+                                                draggableId={item.id + ""}
+                                                index={index}
+                                            >
+                                                {(provided, snapshot) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                    >
+                                                        <SelectionDisplayItem
+                                                            hoverSelection={props.hoverSelection}
+                                                            selection={item.value}
+                                                            toggleSelectionActive={
+                                                                props.toggleSelectionActive
+                                                            }
+                                                            toggleSelectionHidden={
+                                                                props.toggleSelectionHidden
+                                                            }
+                                                            setContextMenuVisible={
+                                                                props.setContextMenuVisible
+                                                            }
+                                                            setContextMenuPosition={
+                                                                props.setContextMenuPosition
+                                                            }
+                                                            setContextActiveSelection={
+                                                                props.setContextActiveSelection
+                                                            }
+                                                        />
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        );
+                                    } else if (item.type === "group") {
+                                        return (
+                                            <SelectionGroup
+                                                hoverSelection={props.hoverSelection}
+                                                toggleSelectionActive={props.toggleSelectionActive}
+                                                toggleSelectionHidden={props.toggleSelectionHidden}
+                                                setContextMenuVisible={props.setContextMenuVisible}
+                                                setContextMenuPosition={
+                                                    props.setContextMenuPosition
+                                                }
+                                                setContextActiveSelection={
+                                                    props.setContextActiveSelection
+                                                }
+                                                toggleGroupActive={function() {
+                                                    props.toggleGroupActive(item.id);
+                                                }}
+                                                toggleGroupHidden={function() {
+                                                    props.toggleGroupHidden(item.id);
+                                                }}
+                                                key={item.id}
+                                                groupKey={item.id}
+                                                group={item.value}
+                                                index={index}
+                                            />
+                                        );
+                                    }
+                                })}
+                            {provided.placeholder}
+                        </div>
+                    )}
                 </Droppable>
             </DragDropContext>
             <CurrentSelection
@@ -582,6 +604,7 @@ function SelectionList(props) {
                         contextActiveSelection={contextActiveSelection}
                         setContextActiveSelection={setContextActiveSelection}
                         setContextMenuPosition={setContextMenuPosition}
+                        renameSelection={props.renameSelection}
                     />
                 </ClickAwayListener>
             </Popover>
@@ -593,7 +616,7 @@ function mapStateToProps(state) {
     return {
         savedSelections: state.selections.savedSelections,
         currentSelection: state.selections.currentSelection,
-        selectionGroups: state.selections.groups,
+        selectionGroups: state.selections.groups
     };
 }
 
@@ -607,7 +630,7 @@ function mapDispatchToProps(dispatch) {
         renameSelection: bindActionCreators(selectionActions.renameSelection, dispatch),
         setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
         saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch),
-        hoverSelection: bindActionCreators(selectionActions.hoverSelection, dispatch),
+        hoverSelection: bindActionCreators(selectionActions.hoverSelection, dispatch)
     };
 }
 

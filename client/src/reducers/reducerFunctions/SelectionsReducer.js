@@ -44,7 +44,6 @@ export default class SelectionsReducer {
     }
 
     static saveNewSelection(state, action) {
-
         return {
             ...state,
             savedSelections: state.savedSelections.concat([
@@ -68,7 +67,8 @@ export default class SelectionsReducer {
     static deleteSelection(state, action) {
         return {
             ...state,
-            savedSelections: state.savedSelections.filter(selection => selection.id !== action.id)
+            savedSelections: state.savedSelections.filter(selection => selection.id !== action.id),
+            hoverSelection: state.hoverSelection === action.id ? null : state.hoverSelection
         };
     }
 
@@ -99,21 +99,18 @@ export default class SelectionsReducer {
     }
 
     static createSelectionGroup(state, action) {
-        const uniqueID = (
-            function(){
-                for(let group of state.groups){
-                    if (action.id === group.id)
-                        return false;
-                }
-                return true;
+        const uniqueID = (function() {
+            for (let group of state.groups) {
+                if (action.id === group.id) return false;
             }
-        )();
-        if (!uniqueID)
-            return state;
+            return true;
+        })();
+        if (!uniqueID) return state;
 
         return {
             ...state,
-            groups: [...state.groups, 
+            groups: [
+                ...state.groups,
                 {
                     id: action.id,
                     active: true,
@@ -121,31 +118,31 @@ export default class SelectionsReducer {
                     info: null
                 }
             ]
-        }
+        };
     }
 
     static toggleGroupHidden(state, action) {
         return {
             ...state,
             groups: state.groups.map(group =>
-                group.id === action.id ? { ...group, hidden: !group.hidden} : group
+                group.id === action.id ? { ...group, hidden: !group.hidden } : group
             )
-        }
+        };
     }
 
     static toggleGroupActive(state, action) {
         return {
             ...state,
             groups: state.groups.map(group =>
-                group.id === action.id ? { ...group, active: !group.active} : group
+                group.id === action.id ? { ...group, active: !group.active } : group
             )
-        }
+        };
     }
 
     static removeAllSelections(state, action) {
         return {
             ...state,
             savedSelections: []
-        }
+        };
     }
 }

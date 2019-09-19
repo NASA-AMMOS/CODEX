@@ -110,7 +110,7 @@ function makeDRPlot(algo, maxYRange, changeSliderVal, featureAdd) {
             },
             yaxis: {
                 automargin: true,
-                range: [0, maxYRange]
+                range: [0, maxYRange + maxYRange * 0.05] // Add a 5% buffer so we can see the top of the chart (#204)
             }
         },
         config: {

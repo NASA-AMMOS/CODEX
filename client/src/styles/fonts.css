@@ -1,3 +1,5 @@
+@import "resources/Fonts/Inter/inter.css";
+
 @font-face {
     font-family: "lato";
     src: url(resources/Fonts/Lato/Lato-Regular.ttf);

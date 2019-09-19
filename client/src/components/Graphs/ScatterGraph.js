@@ -23,9 +23,9 @@ import {
 import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
 
-const DEFAULT_POINT_COLOR = "#000000";
+const DEFAULT_POINT_COLOR = "rgba(0, 0, 0 ,0.5)";
 const ANIMATION_RANGE = 15;
-const ANIMATION_SPEED = 2;
+const ANIMATION_SPEED = 0.75;
 const COLOR_CURRENT_SELECTION = "#FF0000";
 
 function ScatterGraph(props) {
@@ -87,6 +87,7 @@ function ScatterGraph(props) {
         chartState.data[0].marker.color.forEach((row, idx) => {
             chartState.data[0].marker.color[idx] = DEFAULT_POINT_COLOR;
         });
+
         props.savedSelections
             .concat()
             .reverse()
@@ -117,7 +118,7 @@ function ScatterGraph(props) {
         [props.savedSelections]
     );
 
-    // Functions to animate selectionst that are being hovered over.
+    // Functions to animate selections that are being hovered over.
     const animationState = useRef({ index: 0, ascending: true });
     useEffect(
         _ => {
@@ -146,8 +147,11 @@ function ScatterGraph(props) {
                         ? false
                         : animationState.current.ascending;
 
+                // changing gradient going toward color saturation happens faster than
+                // going toward de-saturated, which makes the points more saturated for
+                // more time. I think.
                 animationState.current.index = animationState.current.ascending
-                    ? animationState.current.index + 1
+                    ? animationState.current.index + 2
                     : animationState.current.index - 1;
 
                 const nextColor = colorGradient[animationState.current.index];

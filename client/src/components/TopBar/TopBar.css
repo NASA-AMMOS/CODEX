@@ -1,6 +1,6 @@
 .top-bar {
     color: white;
-    width:100%;
+    width: 100%;
 }
 
 .controlBar {
@@ -17,12 +17,12 @@
     display: inline-flex;
     /*justify-content: space-between;*/
     position: relative;
-    z-index: 2147000000;
+    /*z-index: 2147000000;*/
 }
 
 .navigation-bar #topBarMenu {
     /*background: linear-gradient( to right, #7d39e0, #05101f );*/
-    flex:1;
+    flex: 1;
 }
 
 .navigation-bar #topBarTools {
