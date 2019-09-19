@@ -1,10 +1,11 @@
 .feature-list-container {
     height: 40vh;
-    position:relative;
-    color:#bbb;
+    position: relative;
+    color: #bbb;
     background-color: #051426;
+    font-family: "Inter", "Roboto", sans-serif;
     z-index: 999; //this is to ensure it is above the window layout
-    
+
     &.stats-hidden {
         width: 100%;
         .feature-name-row {
@@ -15,7 +16,7 @@
     &.stats-not-hidden {
         width: 250%;
 
-        .feature-name-row{ 
+        .feature-name-row {
             width: 40%;
         }
     }
@@ -26,12 +27,11 @@
         background-color: #051426;
         display: flex;
         flex-direction: row;
-        position:relative;
+        position: relative;
         border-bottom: none;
 
         .label-row {
             width: 60%;
-            font-family: "lato_bold", sans-serif;
             padding: 0 5px;
             background-color: #061427;
             z-index: 999; //this is to ensure it is above the window layout
@@ -40,11 +40,13 @@
             display: flex;
             flex-direction: row;
 
-            .classification, .regression {
+            .classification,
+            .regression {
                 width: 25px;
             }
 
-            .mean, .median {
+            .mean,
+            .median {
                 width: 75px;
             }
 
@@ -56,34 +58,31 @@
         .selected-dropdown {
             width: 250px;
             & > div {
-                color:white;
+                color: white;
                 border: solid white 1px;
                 border-radius: 4px;
                 width: 95%;
-                margin:4px;
-                height:28px;
+                margin: 4px;
+                height: 28px;
                 line-height: 28px;
                 padding: 0px;
                 padding-left: 10px;
             }
 
             svg {
-                float:right;
-                fill:white;
+                float: right;
+                fill: white;
             }
         }
     }
-
-    
 
     .header {
         display: flex;
         justify-content: space-between;
         align-items: baseline;
-        font-family: "lato_bold", sans-serif;
         padding: 0 5px;
-        color:white;
-        background-color: #79AAB5;
+        color: white;
+        background-color: #79aab5;
 
         .title {
             font-weight: bold;
@@ -107,7 +106,7 @@
             height: 100%;
             display: flex;
             justify-content: center;
-            align-items: center; 
+            align-items: center;
         }
 
         .list {
@@ -117,21 +116,21 @@
                 display: flex;
                 flex-direction: row;
 
-                &:hover{
-                    background-color:#bbbbbb;
+                &:hover {
+                    background-color: #bbbbbb;
                     color: #051426;
                 }
 
                 .feature-name-row {
                     display: flex;
-                    flex-direction:row;
+                    flex-direction: row;
                     .selected-checkbox {
                         width: 25px;
                     }
 
                     .feature-name {
                         display: inline-block;
-                        overflow:hidden;
+                        overflow: hidden;
                         white-space: nowrap;
                         padding-left: 5px;
                         padding-right: 5px;
@@ -151,7 +150,8 @@
                         width: 22px;
                     }
 
-                    .mean-span, .median-span {
+                    .mean-span,
+                    .median-span {
                         width: 75px;
                     }
 

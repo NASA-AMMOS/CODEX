@@ -11,14 +11,14 @@ body {
     margin: 0;
     padding: 0;
     overflow: hidden !important;
-    font-family: sans-serif;
+    font-family: "Inter", sans-serif;
     color: #181818;
 }
 
 #root {
     width: 100%;
     height: 100%;
-    font-family: "lato";
+    font-family: "Inter", "Roboto", sans-serif;
 }
 
 .noselect {
