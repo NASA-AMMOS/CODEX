@@ -78,14 +78,20 @@ function NavigationBar(props) {
             <div id="topBarMenu">
                 <Dropdown className="dropdownMain" autoOpen={false}>
                     <Dropdown.Toggle className="dropdownToggle" title="Graphs" />
-                    <Dropdown.Menu>{getGraphMenuItems()}</Dropdown.Menu>
+                    <Dropdown.Menu>
+                        {createMenuItem(windowTypes.graphs.SCATTER_GRAPH, "Scatterplot (2F)")}
+                        {getGraphMenuItems()}
+                    </Dropdown.Menu>
                 </Dropdown>
 
                 <Dropdown className="dropdownMain" autoOpen={false}>
                     <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
                     <Dropdown.Menu>
-                        {createMenuItem(windowTypes.CLUSTER_ALGORITHM)}
-                        {createMenuItem(windowTypes.CLASSIFICATION_WINDOW, "Classification")}
+                        {createMenuItem(windowTypes.CLUSTER_ALGORITHM, "Clustering (2+F)")}
+                        {createMenuItem(
+                            windowTypes.CLASSIFICATION_WINDOW,
+                            "Classification (2+F, 1L)"
+                        )}
                         {createMenuItem(windowTypes.REGRESSION_WINDOW, "Regression")}
 
                         {createMenuItem(
