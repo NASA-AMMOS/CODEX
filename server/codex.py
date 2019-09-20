@@ -38,7 +38,6 @@ import inspect
 import codex_workflow_manager
 import codex_algorithm_manager
 import codex_guidance_manager
-import codex_read_data_api
 import codex_system
 import codex_return_code
 import codex_time_log
@@ -101,6 +100,10 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
 
             else:
                 result['message'] = "Currently unsupported filetype"
+                stringMsg = json.dumps(result)
+                self.write_message(stringMsg)
+
+            sentinel_values = codex_hash.getSentinelValues(featureList) 
 
         else:
             contents = base64.decodebytes(str.encode(msg["chunk"]))
@@ -110,6 +113,9 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
             codex_system.codex_log('Finished file save.')
             result['status'] = 'complete'
             result['feature_names'] = featureList
+            result["nan"]  = sentinel_values["nan"]
+            result["inf"]  = sentinel_values["inf"]
+            result["ninf"] = sentinel_values["ninf"]
         else:
             result['status'] = 'streaming'
 

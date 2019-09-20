@@ -84,8 +84,7 @@ def codex_read_csv(file, featureList, hashType, session=None):
             codex_system.codex_log("Tokenizing {f}.".format(f=feature_name))
             feature_data = codex_system.string2token(feature_data)
 
-        feature_hash = codex_hash.hashArray(
-            feature_name, feature_data, hashType)
+        feature_hash = codex_hash.hashArray(feature_name, feature_data, hashType)
         hashList.append(feature_hash['hash'])
 
     return hashList, list(featureList)
@@ -198,8 +197,7 @@ def codex_read_hd5(file, featureList, hashType, session=None):
             codex_system.codex_log(
                 "Log: codex_read_hd5: Tokenized " + feature_name)
 
-        feature_hash = codex_hash.hashArray(
-            feature_name, feature_data, hashType)
+        feature_hash = codex_hash.hashArray(feature_name, feature_data, hashType)
         hashList.append(feature_hash['hash'])
 
     f.close()
@@ -240,8 +238,7 @@ def codex_read_npy(file, featureList, hashType, session=None):
 
         feature_name = "feature_" + str(x)
         featureList.append(feature_name)
-        feature_hash = codex_hash.hashArray(
-            feature_name, feature_data, hashType)
+        feature_hash = codex_hash.hashArray(feature_name, feature_data, hashType)
         hashList.append(feature_hash['hash'])
 
     return hashList, featureList

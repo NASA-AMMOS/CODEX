@@ -452,6 +452,25 @@ class CodexHash:
 
         return newHash
 
+    @expose('getSentinelValues')
+    def getSentinelValues(self, featureList, session=None):
+
+        session = self.__set_session(session)
+        
+        combined = np.array([], dtype=float)
+        for feature in featureList:
+            r = self.findHashArray("name", feature, "feature", session=session)
+            r_unique = np.unique(r['data']).astype(float)
+            combined = np.concatenate((combined, r_unique))
+
+        combined_unique = np.unique(combined)
+
+        max_val = np.max(combined_unique)
+        ninf = round((max_val * 10) + 1)
+        inf  = round((max_val * 10) + 2)
+        nan  = round((max_val * 10) + 3)
+
+        return {"inf":inf, "ninf":ninf, "nan":nan}
 
     def printHashList(self, hashType, session=None):
         '''
@@ -732,10 +751,7 @@ class CodexHash:
             if(r is not None):
                 hashList.append(r['hash'])
             else:
-                codex_system.codex_log(
-                    "WARNING: feature2hashList - could not add " +
-                    feature +
-                    " to feature list.")
+                codex_system.codex_log("WARNING: feature2hashList - could not add {feature} to feature list.".format(feature=feature))
         return hashList
 
 
@@ -1030,8 +1046,7 @@ class CodexHash:
     @expose('import_hd5')
     def import_hd5(self, filepath, session=None):
         import codex_read_data_api
-        hashList, featureList = codex_read_data_api.codex_read_hd5(
-            filepath, None, "feature", session=WrappedCache(session, cache=self))
+        hashList, featureList = codex_read_data_api.codex_read_hd5(filepath, None, "feature", session=WrappedCache(session, cache=self))
     
         return hashList, featureList
 
@@ -1039,8 +1054,7 @@ class CodexHash:
     def import_csv(self, filepath, session=None):
         import codex_read_data_api
 
-        hashList, featureList = codex_read_data_api.codex_read_csv(
-            filepath, None, "feature", session=WrappedCache(session, cache=self))
+        hashList, featureList = codex_read_data_api.codex_read_csv(filepath, None, "feature", session=WrappedCache(session, cache=self))
 
         return hashList, featureList
 
@@ -1048,8 +1062,7 @@ class CodexHash:
     def import_npy(self, filepath, session=None):
         import codex_read_data_api
 
-        hashList, featureList = codex_read_data_api.codex_read_npy(
-            filepath, None, "feature", session=WrappedCache(session, cache=self))
+        hashList, featureList = codex_read_data_api.codex_read_npy(filepath, None, "feature", session=WrappedCache(session, cache=self))
 
         return hashList, featureList
 
