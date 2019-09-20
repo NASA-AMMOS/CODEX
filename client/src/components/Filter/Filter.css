@@ -14,7 +14,7 @@
     align-items: stretch;
     justify-content: flex-begin;
 
-    font-family: "bitstreamvera", monospace;
+    font-family: "Inter", monospace;
 }
 
 .Filter__expr:not(.Filter__expr--valid) > input {
