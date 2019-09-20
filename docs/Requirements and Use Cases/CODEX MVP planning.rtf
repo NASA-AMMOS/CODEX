@@ -1,0 +1,82 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
+{\fonttbl\f0\fnil\fcharset0 Merriweather-Regular;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww14000\viewh16280\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs26 \cf0 - visual guidance around why you do things\
+- visual previews\
+\
+- make brushing nicer\
+	- allows you to falsify your hypothesis quickly!\
+\
+- look through data and find bad points\
+\
+\
+\
+1. Pose questions of the graphs so that they can answer things for you\
+- heat vs. scatter -> histogram\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 1. \'93Explain this\'94\
+- \'93Applied classification\'94\
+- Take a selection and :\
+- make decision-tree classifier on this selection vs. everything else\
+- visualize why it\'92s different or unique\
+- \'93which of the 1000 values matter?\'94\
+- LUKAS HAS AN EXAMPLE HE CODED\
+- also explain 
+\i how
+\i0  the answer was derived\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 1.1. Filter out garbage\
+- what\'92s 
+\b good/bad\
+
+\b0 - can\'92t do 
+\i anything
+\i0  without filtering your data set first\
+- relationships between Features to make sure that it makes sense\
+- min/max/etc. for a Feature\
+- derived Features\
+- mask things out that are garbage\
+- anything empty/null etc.\
+- normalization\
+- manual filtration\
+- interactive sortable heatmap of values\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
+
+\i 1.5. Directed
+\i0  classification/regression\
+- don\'92t optimize hyper-parameters for me\
+- but GUIDE me\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 1.5. Train a model to predict X (Classification/Regression)\
+What did I learn?  How well did it work?  Cross-validate. Generalized test error\'85\
+even on the same features you can use the Classification as a way to LEARN ABOUT THE DATA\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
+1.5. Reliability:\
+- Error handling so it\'92s not busted\
+- Saving sessions\
+- Selecting Features & Selections and interacting with algorithms and charts\
+\
+\
+2. \'93
+\b More like this
+\b0 \'94\
+\
+\
+2. Dimensionality reduction:\
+- \'93not minimal\'94\
+- high user need because most people won\'92t do it\
+- back-end needs this in order to do clustering, but the user doesn\'92t need it critically right now\
+\
+3. Real-time algorithms that show each round so you can decide when to stop\
+}
