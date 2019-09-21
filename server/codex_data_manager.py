@@ -17,10 +17,12 @@ import sys
 sys.path.insert(1, os.path.join(CODEX_ROOT, 'api'))
 sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
 
+import traceback
 import base64
 import numpy as np
 import scipy
 import scipy.signal
+import math
 
 import codex_doctest
 from codex_hash import get_cache
@@ -32,7 +34,7 @@ def get_data_metrics(msg, result):
 
     Outputs:
 
-    Notes:
+    Notes: Currently just ignores any NaNs when calculating metrics
 
     Examples:
 
@@ -46,32 +48,39 @@ def get_data_metrics(msg, result):
     codex_hash = get_cache(msg['sessionkey'])
 
     for feature_name in msg['name']:
-        data = codex_hash.findHashArray("name",  feature_name, "feature")['data']
-        result = {}
+
+        hashLib = codex_hash.findHashArray("name",  feature_name, "feature")
+
+        if hashLib:
+            data = hashLib['data']
+        else:
+            codex_system.codex_log("Failed to return hashLib")
+            result = {}
+            result["status"] = "failed"
+            result['name'] = feature_name   
+            yield result
+
         try:
-            result['min'] = np.min(data)
-            result['max'] = np.max(data)
-            result['median'] = np.median(data)
-            result['mean'] = np.mean(data)
-            #result['mode'] = scipy.stats.mode(data)[0][0]
-            result['std'] = np.std(data)
-            result['var'] = np.var(data)
+
+            result['min'] = np.nanmin(data)
+            result['max'] = np.nanmax(data)
+            result['median'] = np.nanmedian(data)
+            result['mean'] = np.nanmean(data)
+            result['std'] = np.nanstd(data)
+            result['var'] = np.nanvar(data)
             result['name'] = feature_name
-
-            #returns the downsample of the given row
-            #fake stuff right now
-            result['downsample'] = scipy.signal.resample(data,100).tolist()
-
-            hist, bin_edges = np.histogram(data)
+            result['downsample'] = scipy.signal.resample(data[~np.isnan(data)],100).tolist()
+            hist, bin_edges = np.histogram(data[~np.isnan(data)])
             result['hist_data'] = hist.tolist()
             result['hist_edges'] = bin_edges.tolist()
             result["status"] = "success"
+            codex_system.codex_log("Successfully retrieved {f} metrics".format(f=feature_name))
+
         except:
             codex_system.codex_log("Error occured while computing feature data metrics")
-            result = {}
             result["status"] = "failed"
             result['name'] = feature_name
-
+    
         yield result
 
 
@@ -133,7 +142,7 @@ def add_data(msg, result):
 
     return result
 
-def get_data(msg, result):
+def get_data(msg, nan, inf, ninf, result):
     '''
     Inputs:
 
@@ -147,11 +156,10 @@ def get_data(msg, result):
     >>> codex_hash = get_cache(DOCTEST_SESSION)
     >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
-    >>> message = {'routine': 'arrange', 'hashType': 'feature', 'activity': 'get', 'name': ['TiO2'], 'cid': '8vrjn', 'sessionkey': DOCTEST_SESSION}
-    >>> result = get_data(message, {})
+    >>> message = {'routine': 'arrange', 'hashType': 'feature', 'activity': 'get', 'name': ['TiO2','FeOT'], 'cid': '8vrjn', 'sessionkey': DOCTEST_SESSION}
+    >>> result = get_data(message, 1, 2, 3, {})
     '''
     codex_hash = get_cache(msg['sessionkey'])
-
 
     hashType = msg['hashType']
     names = msg["name"]
@@ -171,14 +179,20 @@ def get_data(msg, result):
             result["message"] = 'failure'
 
         if not array:
-            result["message"] = 'failed to find ' + name + ' feature '
+            result["message"] = 'failed to find {name} feature.'.format(name=name)
             status = False
             break
         else:
             data.append(array['data'])
 
+
     if (status):
+
         return_data = np.column_stack(data)
+        return_data[return_data == float("nan")] = nan
+        return_data[return_data == float("inf")] = inf
+        return_data[return_data == float("-inf")] = ninf
+
         result['data'] = return_data.tolist()
 
     return result

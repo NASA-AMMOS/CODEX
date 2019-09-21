@@ -678,7 +678,7 @@ class CodexHash:
 
         '''
         session = self.__set_session(session)
-
+        
         if(hashList is None):
             codex_system.codex_log("ERROR: mergeHashResults hashList is None")
             return None
@@ -701,6 +701,7 @@ class CodexHash:
         returnArray = result['data']
         returnName = result['name']
 
+
         if(verbose):
             codex_system.codex_log("Merging: " + returnName)
 
@@ -708,8 +709,7 @@ class CodexHash:
             currentHash = hashList[featureNum]
             result = self.findHashArray("hash", currentHash, "feature", session=session)
             if(result is None):
-                codex_system.codex_log(
-                    "Warning, hash not found in mergeHashResults")
+                codex_system.codex_log("Warning, hash not found in mergeHashResults")
                 return None
 
             resultArray = result['data']
@@ -729,17 +729,10 @@ class CodexHash:
                 returnArray = np.column_stack((resultArray, returnArray))
             else:
                 # TODO - long term, how do we want to handle this?
-                codex_system.codex_log(
-                    "WARNING: " +
-                    resultName +
-                    " does not match shape of previous features(" +
-                    str(s1) +
-                    "/" +
-                    str(s2) +
-                    "). Exlucding.")
-
+                codex_system.codex_log("WARNING: " + resultName + " does not match shape of previous features(" + str(s1) + "/" +str(s2) + "). Exlucding.")
+    
         return returnArray
-
+        
 
     @expose('feature2hashList')
     def feature2hashList(self, featureList, session=None):

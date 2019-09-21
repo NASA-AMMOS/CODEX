@@ -9,22 +9,6 @@ Notes :
 Copyright 2019 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
 '''
-
-import os
-## Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-
-import sys
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api'))
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
-from tornado import web
-from tornado import ioloop
-from tornado import websocket
-from tornado import gen
-from pebble import ProcessPool, ThreadPool
-from multiprocessing import Manager, Process, cpu_count
-from tornado.ioloop import IOLoop
 import ssl
 import base64
 import threading
@@ -33,6 +17,21 @@ import functools
 import tornado
 import json
 import inspect
+import sys
+import os
+
+from tornado         import web
+from tornado         import ioloop
+from tornado         import websocket
+from tornado         import gen
+from pebble          import ProcessPool, ThreadPool
+from multiprocessing import Manager, Process, cpu_count
+from tornado.ioloop  import IOLoop
+
+## Enviornment variable for setting CODEX root directory.
+CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, os.path.join(CODEX_ROOT, 'api'))
+sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
 
 # CODEX
 import codex_workflow_manager
@@ -50,14 +49,21 @@ from codex_hash import get_cache, create_cache_server, stop_cache_server, NoSess
 from zmq.error import ZMQError
 import math
 
+
 def throttled_cpu_count():
     return max( 1, math.floor(cpu_count() * 0.75))
+
 # create our process pools
 executor = ProcessPool(max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
 readpool = ThreadPool( max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
 queuemgr = Manager()
 
 fileChunks = []
+
+# Temporary sentinel values for JSON transfer
+nan = None
+inf = None
+ninf = None
 
 class uploadSocket(tornado.websocket.WebSocketHandler):
     def open(self):
@@ -69,6 +75,10 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
 
         global fileChunks
+        global nan
+        global inf
+        global ninf
+
         msg = json.loads(message)
         result = {}
 
@@ -104,18 +114,21 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
                 self.write_message(stringMsg)
 
             sentinel_values = codex_hash.getSentinelValues(featureList) 
+            nan  = sentinel_values["nan"]
+            inf  = sentinel_values["inf"]
+            ninf = sentinel_values["ninf"]
 
         else:
             contents = base64.decodebytes(str.encode(msg["chunk"]))
             fileChunks.append(contents)
 
         if msg['done']:
-            codex_system.codex_log('Finished file save.')
             result['status'] = 'complete'
             result['feature_names'] = featureList
             result["nan"]  = sentinel_values["nan"]
             result["inf"]  = sentinel_values["inf"]
             result["ninf"] = sentinel_values["ninf"]
+            codex_system.codex_log('Finished file save.')
         else:
             result['status'] = 'streaming'
 
@@ -130,6 +143,10 @@ def route_request(msg, result):
     2) an iterator, which will be iterated over in the worker process and sent
        piecemeal to the client.
     '''
+
+    global nan
+    global inf
+    global ninf
 
     routine = msg['routine']
     if(routine == 'algorithm'):
@@ -151,7 +168,7 @@ def route_request(msg, result):
         if (activity == "add"):
             yield codex_data_manager.add_data(msg, result)
         elif (activity == "get"):
-            yield codex_data_manager.get_data(msg, result)
+            yield codex_data_manager.get_data(msg, nan, inf, ninf, result)
         elif (activity == "delete"):
             yield codex_data_manager.delete_data(msg, result)
         elif (activity == "update"):
@@ -181,6 +198,7 @@ def execute_request(queue, message):
 
 
     result = msg
+
     # log the response but without the data
     codex_system.codex_log("{time} : Message from front end: {json}".format(time=now.isoformat(), json={k:(msg[k] if k != 'data' else '[data removed]') for k in msg}))
 
@@ -255,11 +273,11 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
                 break
 
             result = response['result']
-            codex_system.codex_log("{time} : Response to front end: {json}".format(time=now.isoformat(), json={k:(result[k] if k != 'data' else '[data removed]') for k in result}))
+            #codex_system.codex_log("{time} : Response to front end: {json}".format(time=now.isoformat(), json={k:(result[k] if k != 'data' else '[data removed]') for k in result}))
 
             yield self.write_message(json.dumps(response['result']))
 
-        # close the thread? i don't think this is necessary
+        # close the thread? I don't think this is necessary
         yield self.future
         try:
             codex_system.codex_server_memory_check(session=json.loads(message)['sessionkey'])
@@ -274,7 +292,6 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         return
-
 
 def make_app():
     settings = dict(
