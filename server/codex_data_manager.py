@@ -148,7 +148,8 @@ def get_data(msg, nan, inf, ninf, result):
 
     Outputs:
 
-    Notes:
+    Notes: TODO - need to validate inf/-inf
+           TODO - nested ndarray structure should be fixed.  Need to coordiante with client parser.  Commented code for future non-nested ndarray
 
     Examples:
 
@@ -163,6 +164,7 @@ def get_data(msg, nan, inf, ninf, result):
 
     hashType = msg['hashType']
     names = msg["name"]
+    #data = np.array([])
     data = []
     status = True
 
@@ -183,17 +185,27 @@ def get_data(msg, nan, inf, ninf, result):
             status = False
             break
         else:
+            #data = np.vstack([data, array['data']]) if data.size else array['data']
             data.append(array['data'])
 
-
     if (status):
+        data = np.column_stack(data)
+        x_, y_ = data.shape
+        data = data.astype(float)
+        for x in range(0, x_):
+            if(np.isnan(data[x][0])):
+                data[x][0] = nan
+            elif(np.isinf(data[x][0]) and data[x][0] > 0):
+                data[x][0] = inf
+            elif(np.isinf(data[x][0]) and data[x][0] < 0):
+                data[x][0] = ninf
 
-        return_data = np.column_stack(data)
-        return_data[return_data == float("nan")] = nan
-        return_data[return_data == float("inf")] = inf
-        return_data[return_data == float("-inf")] = ninf
+        #data[data == np.float64("nan")] = nan
+        #data[data == np.float64("inf")] = inf
+        #data[data == np.float64("-inf")] = ninf
 
-        result['data'] = return_data.tolist()
+        result['data'] = data.tolist()
+        print(data.tolist())
 
     return result
 

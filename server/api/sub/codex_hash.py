@@ -307,7 +307,6 @@ class CodexHash:
 
         return True
 
-
     @expose('resetCacheList')
     def resetCacheList(self, hashType, session=None):
         '''
@@ -342,7 +341,6 @@ class CodexHash:
             self.sessions[session]["regressorList"] = []
         else:
             codex_system.codex_log("Unknown hash type.  Not resetting")
-
 
     @expose('hashArray')
     def hashArray(self, arrayName, inputArray, hashType, virtual=False, session=None):
@@ -460,12 +458,12 @@ class CodexHash:
         combined = np.array([], dtype=float)
         for feature in featureList:
             r = self.findHashArray("name", feature, "feature", session=session)
-            r_unique = np.unique(r['data']).astype(float)
-            combined = np.concatenate((combined, r_unique))
+            if r:
+                r_unique = np.unique(r['data']).astype(float)
+                combined = np.concatenate((combined, r_unique))
 
         combined_unique = np.unique(combined)
-
-        max_val = np.max(combined_unique)
+        max_val = np.nanmax(combined_unique)
         ninf = round((max_val * 10) + 1)
         inf  = round((max_val * 10) + 2)
         nan  = round((max_val * 10) + 3)
@@ -564,7 +562,6 @@ class CodexHash:
         else:
             codex_system.codex_log("ERROR: printHashList - unknown hashType")
 
-
     @expose('findHashArray')
     def findHashArray(self, field, name, hashType, session=None):
         '''
@@ -660,7 +657,6 @@ class CodexHash:
             codex_system.codex_log("ERROR: findHashArray - hash not found")
             return None
 
-
     @expose('mergeHashResults')
     def mergeHashResults(self, hashList, verbose=False, session=None):
         '''
@@ -733,7 +729,6 @@ class CodexHash:
     
         return returnArray
         
-
     @expose('feature2hashList')
     def feature2hashList(self, featureList, session=None):
         session = self.__set_session(session)
@@ -746,7 +741,6 @@ class CodexHash:
             else:
                 codex_system.codex_log("WARNING: feature2hashList - could not add {feature} to feature list.".format(feature=feature))
         return hashList
-
 
     @expose('applySubsetMask')
     def applySubsetMask(self, featureArray, subsetHash, session=None):
@@ -813,7 +807,6 @@ class CodexHash:
                     count += 1
 
             return outData, returnDict['name']
-
 
     @expose('pickle_data')
     def pickle_data(self, session_name, front_end_state, session=None):
@@ -968,7 +961,6 @@ class CodexHash:
         state = pickle.load(open(pickle_path, "rb"))
 
         return {'features':features, 'labels':labels, 'subsets':subsets, 'downsample':downsamples, 'state':state}
-
 
     @expose('saveModel')
     def saveModel(self, modelName, inputModel, modelType, session=None):

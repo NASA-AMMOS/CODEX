@@ -125,9 +125,9 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
         if msg['done']:
             result['status'] = 'complete'
             result['feature_names'] = featureList
-            result["nan"]  = sentinel_values["nan"]
-            result["inf"]  = sentinel_values["inf"]
-            result["ninf"] = sentinel_values["ninf"]
+            result["nan"]  = nan
+            result["inf"]  = inf
+            result["ninf"] = ninf
             codex_system.codex_log('Finished file save.')
         else:
             result['status'] = 'streaming'
@@ -193,10 +193,7 @@ def execute_request(queue, message):
         queue - Queue to write into
         message - Message from frontend:w
     '''
-
     msg = json.loads(message)
-
-
     result = msg
 
     # log the response but without the data
@@ -205,7 +202,6 @@ def execute_request(queue, message):
     if 'sessionkey' not in msg:
         print('session_key not in message!')
         raise NoSessionSpecifiedError()
-
 
     # actually execute the function requested
     try:
@@ -273,7 +269,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
                 break
 
             result = response['result']
-            #codex_system.codex_log("{time} : Response to front end: {json}".format(time=now.isoformat(), json={k:(result[k] if k != 'data' else '[data removed]') for k in result}))
+            codex_system.codex_log("{time} : Response to front end: {json}".format(time=now.isoformat(), json={k:(result[k] if k != 'data' else '[data removed]') for k in result}))
 
             yield self.write_message(json.dumps(response['result']))
 
