@@ -428,3 +428,16 @@ export function useFeatureStatistics(feature) {
 
     return [stats_entry.get("loading"), stats_entry.get("failed"), stats_entry.get("stats", null)];
 }
+
+/**
+ * Gets file information (name, NaN/inf/ninf) sentinel values from the store
+ *
+ */
+export function useFileInfo() {
+    return {
+        filename: useSelector(store => store.data.get("filename")),
+        nan: useSelector(store => store.data.get("nan")),
+        inf: useSelector(store => store.data.get("inf")),
+        ninf: useSelector(store => store.data.get("ninf"))
+    };
+}

@@ -1,6 +1,6 @@
 import "components/Graphs/TimeSeriesGraph.css";
 
-import React, { useRef, useState, useEffect, createRef} from "react";
+import React, { useRef, useState, useEffect, createRef } from "react";
 import { bindActionCreators } from "redux";
 import * as selectionActions from "actions/selectionActions";
 import { connect } from "react-redux";
@@ -14,32 +14,33 @@ import ReactResizeDetector from "react-resize-detector";
 import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
 
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import { useCurrentSelection, useSavedSelections, usePinnedFeatures } from "hooks/DataHooks";
+import {
+    useCurrentSelection,
+    useSavedSelections,
+    usePinnedFeatures,
+    useFileInfo
+} from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 
-function generatePlotData(features) {
+function generatePlotData(features, fileInfo) {
+    const cols = utils.removeSentinelValues(features.map(feature => feature.data), fileInfo);
+
     //generate time axis list
-    let timeAxis = [];
-    for (let i = 0; i < features[0].data.length; i++) {
-        timeAxis.push(i);
-    }
+    const timeAxis = [...Array(cols[0].length).keys()];
 
-    let data = [];
-
-    for (let i = 0; i < features.length; i++) {
-        data[i] = {
+    return features.map((feature, idx) => {
+        return {
             x: timeAxis,
-            y: features[i].data,
+            y: cols[idx],
             xaxis: "x",
             yaxis: "y1",
             mode: "lines",
             type: "scatter"
         };
-    }
-    return data;
+    });
 }
 
 function generateLayouts(features) {
@@ -74,18 +75,20 @@ function generateLayouts(features) {
 
 function TimeSeriesGraph(props) {
     const features = props.data.toJS();
-    const featureNames = features.map((feature) => {return feature.feature;})
+    const featureNames = features.map(feature => {
+        return feature.feature;
+    });
 
     const chartRefs = useRef(featureNames.map(() => createRef()));
 
-    let data = generatePlotData(features);
+    let data = generatePlotData(features, props.fileInfo);
 
     let layouts = generateLayouts(features);
 
     return (
         <GraphWrapper
             resizeHandler={_ =>
-                chartRefs.current.forEach((chartRef) => chartRef.current.resizeHandler())
+                chartRefs.current.forEach(chartRef => chartRef.current.resizeHandler())
             }
         >
             <ul className="time-series-plot-container">
@@ -178,6 +181,7 @@ export default props => {
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
     const [savedSelections, saveCurrentSelection] = useSavedSelections();
     const [globalChartState, setGlobalChartState] = useGlobalChartState();
+    const fileInfo = useFileInfo();
 
     const features = usePinnedFeatures(win);
 
@@ -202,6 +206,7 @@ export default props => {
             saveCurrentSelection={saveCurrentSelection}
             globalChartState={globalChartState}
             data={features}
+            fileInfo={fileInfo}
         />
     );
 };

@@ -22,7 +22,10 @@ export const dataState = Immutable.fromJS({
     },
     featureList: [],
     featureListLoading: false,
-    serverSessionKey: createMemorableId()
+    serverSessionKey: createMemorableId(),
+    nan: null,
+    inf: null,
+    ninf: null
 });
 
 export const loadedDataModel = {

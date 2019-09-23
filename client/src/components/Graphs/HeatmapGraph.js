@@ -9,7 +9,12 @@ import * as utils from "utils/utils";
 import GraphWrapper from "components/Graphs/GraphWrapper";
 
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import { useCurrentSelection, useSavedSelections, usePinnedFeatures } from "hooks/DataHooks";
+import {
+    useCurrentSelection,
+    useSavedSelections,
+    usePinnedFeatures,
+    useFileInfo
+} from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
 
@@ -125,8 +130,10 @@ function HeatmapGraph(props) {
         "linear"
     );
 
-    //const data = props.data.get("data");
-    const data = props.data.map(f => f.get("data")).toJS();
+    const data = utils.removeSentinelValues(
+        props.data.map(f => f.get("data")).toJS(),
+        props.fileInfo
+    );
 
     //calculate range of data for axis labels
     const xAxis = props.data.getIn([0, "feature"]);
@@ -222,6 +229,7 @@ export default props => {
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
     //const [savedSelections, saveCurrentSelection] = useSavedSelections();
     //const [globalChartState, setGlobalChartState] = useGlobalChartState();
+    const fileInfo = useFileInfo();
 
     const features = usePinnedFeatures(win);
 
@@ -236,6 +244,7 @@ export default props => {
                 currentSelection={currentSelection}
                 setCurrentSelection={setCurrentSelection}
                 data={features}
+                fileInfo={fileInfo}
             />
         );
     } else {
