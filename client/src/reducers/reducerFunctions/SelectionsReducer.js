@@ -44,11 +44,17 @@ export default class SelectionsReducer {
     }
 
     static saveNewSelection(state, action) {
+        const id = [...Array(state.savedSelections.length + 1).keys()].reduce((acc, idx) => {
+            if (acc) return acc;
+            if (state.savedSelections.every(sel => sel.id !== idx)) {
+                return idx;
+            }
+        });
         return {
             ...state,
             savedSelections: state.savedSelections.concat([
                 {
-                    id: state.savedSelections.length,
+                    id,
                     rowIndices: action.rowIndices,
                     color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
                     active: true,
@@ -131,10 +137,14 @@ export default class SelectionsReducer {
     }
 
     static toggleGroupActive(state, action) {
+        const isActive = state.groups.find(group => group.id == action.id).active;
         return {
             ...state,
+            savedSelections: state.savedSelections.map(sel =>
+                sel.groupID === action.id ? { ...sel, active: isActive } : sel
+            ),
             groups: state.groups.map(group =>
-                group.id === action.id ? { ...group, active: !group.active } : group
+                group.id === action.id ? { ...group, active: !isActive } : group
             )
         };
     }
