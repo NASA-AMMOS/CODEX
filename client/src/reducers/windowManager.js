@@ -15,7 +15,7 @@ export default function windowManager(
         case actionTypes.CLOSE_ALL_WINDOWS:
             return opt_reducer.closeAllWindows(state, action);
         case actionTypes.SET_WINDOW_TILE_ACTION_PENDING:
-            return opt_reducer.setWindowTileActionPending(state, action);
+            return opt_reducer.tileWindows(state, action);
         case actionTypes.UPDATE_WINDOWS:
             return opt_reducer.updateWindows(state, action);
         case actionTypes.TOGGLE_MINIMIZE_WINDOW:

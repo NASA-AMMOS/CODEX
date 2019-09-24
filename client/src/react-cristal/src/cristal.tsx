@@ -40,6 +40,8 @@ export interface CristalProps {
     minSize?: Size;
     width?: number;
     height?: number;
+    x?: number;
+    y?: number;
 }
 
 export interface CristalState {
@@ -90,12 +92,18 @@ export class Cristal extends Component<CristalProps, CristalState> {
     }
 
     componentWillReceiveProps(props: CristalProps) {
-        // force a rerender when the width/height props change
+        // force a rerender when the width/height/position props change
         if (this.state.width !== props.width) {
             this.setState({ width: props.width });
         }
         if (this.state.height !== props.height) {
             this.setState({ height: props.height });
+        }
+        if (props.x !== undefined && this.state.x !== props.x) {
+            this.setState({ x: props.x });
+        }
+        if (props.y !== undefined && this.state.y !== props.y) {
+            this.setState({ y: props.y });
         }
     }
 
