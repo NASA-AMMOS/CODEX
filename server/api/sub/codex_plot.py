@@ -12,15 +12,15 @@ import h5py
 import time
 import os
 
-import numpy             as np
-import matplotlib.pyplot as plt
-import matplotlib.image  as mpimg
+import numpy as np
 
 from random import randint
 from scipy  import misc
 
 import matplotlib
 matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.image  as mpimg
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 

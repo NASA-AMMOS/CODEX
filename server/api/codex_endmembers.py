@@ -4,7 +4,7 @@ Date  : 7/15/17
 
 Brief : Dimmensionality reduction algorithms, formatted for CODEX
 
-Notes :
+Notes : Not currently functional
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
@@ -12,18 +12,12 @@ U.S. Government Sponsorship acknowledged.
 import sys
 import os
 import traceback
-import pysptools.eea.eea
-import pysptools.eea
+#import pysptools.eea.eea
+#import pysptools.eea
 import time
 import inspect
 
 import numpy as np
-
-from sklearn.preprocessing import StandardScaler
-from sklearn.neighbors import kneighbors_graph
-from sklearn import cluster, datasets
-from random import randint
-from scipy import misc
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
@@ -195,7 +189,7 @@ def codex_ATGP(inputHash, subsetHash, q, downsampled, session=None):
 
     data = codex_impute(data)
 
-    results = pysptools.eea.eea.ATGP(data, int(q))
+    results = None#pysptools.eea.eea.ATGP(data, int(q))
 
     dictionary = {
         'eta': eta, 'endmember_array': np.array_str(
@@ -265,7 +259,7 @@ def codex_FIPPI(inputHash, subsetHash, q, downsampled, session=None):
 
     data = codex_impute(data)
 
-    results = pysptools.eea.eea.FIPPI(data, int(q))
+    results = None#pysptools.eea.eea.FIPPI(data, int(q))
 
     endTime = time.time()
     computeTime = endTime - startTime
@@ -331,7 +325,7 @@ def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled, session=None):
 
     data = codex_impute(data)
 
-    results = pysptools.eea.eea.PPI(data, int(q), int(numSkewers))
+    results = None#pysptools.eea.eea.PPI(data, int(q), int(numSkewers))
 
     endTime = time.time()
     computeTime = endTime - startTime
