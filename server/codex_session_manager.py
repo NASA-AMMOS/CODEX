@@ -17,8 +17,7 @@ from os.path import isfile, join, isdir
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-import codex_doctest
-from codex_hash import get_cache
+from api.sub.codex_hash import get_cache
 
 def save_session(msg, result):
     codex_hash = get_cache(msg['sessionkey'])
@@ -61,5 +60,6 @@ def get_sessions(msg, result):
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 

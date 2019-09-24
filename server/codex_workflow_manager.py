@@ -15,12 +15,12 @@ import inspect
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-import codex_workflow
-import codex_doctest
-import codex_return_code
-import codex_system
-
-from codex_hash import get_cache
+from api.codex_workflow import explain_this
+from api.codex_workflow import find_more_like_this
+from api.codex_workflow import general_classifier
+from api.sub.codex_return_code import logReturnCode
+from api.sub.codex_system import get_featureList
+from api.sub.codex_hash import get_cache
 
 def workflow_call(msg, result):
     '''
@@ -35,60 +35,60 @@ def workflow_call(msg, result):
 
     if(msg['workflow'] == "explain_this"):
         featureList = msg["dataFeatures"]
-        featureList = codex_system.get_featureList(featureList)
+        featureList = get_featureList(featureList)
 
         dataSelections = msg["dataSelections"]
 
         hashList = codex_hash.feature2hashList(featureList)
-        codex_return_code.logReturnCode(inspect.currentframe())
+        logReturnCode(inspect.currentframe())
 
         data = codex_hash.mergeHashResults(hashList)
-        codex_return_code.logReturnCode(inspect.currentframe())
+        logReturnCode(inspect.currentframe())
         inputHash = codex_hash.hashArray('Merged', data, "feature")
 
         if (inputHash != None):
-            codex_return_code.logReturnCode(inspect.currentframe())
+            logReturnCode(inspect.currentframe())
             inputHash = inputHash["hash"]
 
-        result = codex_workflow.explain_this(inputHash, featureList, dataSelections, result, session=codex_hash)
+        result = explain_this(inputHash, featureList, dataSelections, result, session=codex_hash)
     elif (msg['workflow'] == "find_more_like_this"):
         featureList = msg["featureList"]
-        featureList = codex_system.get_featureList(featureList)
+        featureList = get_featureList(featureList)
 
         dataSelections = msg["dataSelections"]
         similarityThreshold = float(msg["similarityThreshold"])
 
         hashList = codex_hash.feature2hashList(featureList)
-        codex_return_code.logReturnCode(inspect.currentframe())
+        logReturnCode(inspect.currentframe())
 
         data = codex_hash.mergeHashResults(hashList)
-        codex_return_code.logReturnCode(inspect.currentframe())
+        logReturnCode(inspect.currentframe())
         inputHash = codex_hash.hashArray('Merged', data, "feature")
 
         if (inputHash != None):
-            codex_return_code.logReturnCode(inspect.currentframe())
+            logReturnCode(inspect.currentframe())
             inputHash = inputHash["hash"]
 
-        result = codex_workflow.find_more_like_this(inputHash, featureList, dataSelections, similarityThreshold, result, session=codex_hash)
+        result = find_more_like_this(inputHash, featureList, dataSelections, similarityThreshold, result, session=codex_hash)
     elif (msg['workflow'] == "general_classifier"):
         featureList = msg["featureList"]
-        featureList = codex_system.get_featureList(featureList)
+        featureList = get_featureList(featureList)
 
         dataSelections = msg["dataSelections"]
         similarityThreshold = msg["similarityThreshold"]
 
         hashList = codex_hash.feature2hashList(featureList)
-        codex_return_code.logReturnCode(inspect.currentframe())
+        logReturnCode(inspect.currentframe())
 
         data = codex_hash.mergeHashResults(hashList)
-        codex_return_code.logReturnCode(inspect.currentframe())
+        logReturnCode(inspect.currentframe())
         inputHash = codex_hash.hashArray('Merged', data, "feature")
 
         if (inputHash != None):
-            codex_return_code.logReturnCode(inspect.currentframe())
+            logReturnCode(inspect.currentframe())
             inputHash = inputHash["hash"]
 
-        result = codex_workflow.general_classifier(inputHash, featureList, dataSelections, similarityThreshold, result, session=codex_hash)
+        result = general_classifier(inputHash, featureList, dataSelections, similarityThreshold, result, session=codex_hash)
     else:
         result['message'] = "Cannot parse workflow"
 
@@ -98,7 +98,8 @@ def workflow_call(msg, result):
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from codex_doctest import run_codex_doctest
+    run_codex_doctest()
 
 
 

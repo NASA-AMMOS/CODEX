@@ -19,26 +19,26 @@ from api.sub.codex_time_log import getComputeTimeEstimate
 
 def get_time_estimate(msg, result):
 
-	algorithmType = msg['algorithmType']
-	algorithmName = msg['algorithmName']
-	numSamples = int(msg['numSamples'])
+    algorithmType = msg['algorithmType']
+    algorithmName = msg['algorithmName']
+    numSamples = int(msg['numSamples'])
 
-	# TODO - extend computeTimeEstimate to factor in number of features
-	numFeatures = int(msg['numFeatures'])
+    # TODO - extend computeTimeEstimate to factor in number of features
+    numFeatures = int(msg['numFeatures'])
 
-	eta = getComputeTimeEstimate(algorithmType, algorithmName, numSamples)
+    eta = getComputeTimeEstimate(algorithmType, algorithmName, numSamples)
 
-	result['eta'] = eta
-	result['message'] = 'success'
-	result['algorithmType'] = msg['algorithmType']
-	result['algorithmName'] = msg['algorithmName']
-	result['numSamples'] = int(msg['numSamples'])
-	result['numFeatures'] = int(msg['numFeatures'])
+    result['eta'] = eta
+    result['message'] = 'success'
+    result['algorithmType'] = msg['algorithmType']
+    result['algorithmName'] = msg['algorithmName']
+    result['numSamples'] = int(msg['numSamples'])
+    result['numFeatures'] = int(msg['numFeatures'])
 
-	return result
+    return result
 
 
 if __name__ == "__main__":
 
-	from api.sub.codex_doctest import run_codex_doctest
+    from api.sub.codex_doctest import run_codex_doctest
     run_codex_doctest()

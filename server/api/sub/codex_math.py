@@ -19,11 +19,10 @@ import time
 import collections
 from scipy import linalg
 
-CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
-import codex_system
-import codex_doctest
+import api.sub.codex_system
 
 def codex_impute(data):
     '''
@@ -81,7 +80,13 @@ def codex_impute(data):
 
 
 def codex_explained_variance_ratio(X, n_components):
+    '''
+    Inputs:
 
+    Outputs:
+
+    Examples:
+    '''
     X -= np.mean(X, axis=0)
     n_samples, n_features = X.shape
     U, S, V = linalg.svd(X, full_matrices=False)
@@ -97,4 +102,5 @@ def codex_explained_variance_ratio(X, n_components):
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from codex_doctest import run_codex_doctest
+    run_codex_doctest()

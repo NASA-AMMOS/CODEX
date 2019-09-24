@@ -15,11 +15,11 @@ import base64
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-import api.sub.codex_return_code
+from api.sub.codex_return_code import dump_code_to_file
 
 def download_code(msg, result):
 
-    codex_return_code.dump_code_to_file()
+    dump_code_to_file()
     f = open(CODEX_ROOT + "returned_code.py", "r")
     lines = f.readlines()
     outString = "".join(lines)

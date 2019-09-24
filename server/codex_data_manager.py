@@ -21,10 +21,9 @@ import numpy as np
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-import codex_doctest
-import codex_system
 
-from codex_hash import get_cache
+from api.sub.codex_system import codex_log
+from api.sub.codex_hash   import get_cache
 
 def get_data_metrics(msg, result):
     '''
@@ -52,7 +51,7 @@ def get_data_metrics(msg, result):
         if hashLib:
             data = hashLib['data']
         else:
-            codex_system.codex_log("Failed to return hashLib")
+            codex_log("Failed to return hashLib")
             result = {}
             result["status"] = "failed"
             result['name'] = feature_name   
@@ -72,10 +71,10 @@ def get_data_metrics(msg, result):
             result['hist_data'] = hist.tolist()
             result['hist_edges'] = bin_edges.tolist()
             result["status"] = "success"
-            codex_system.codex_log("Successfully retrieved {f} metrics".format(f=feature_name))
+            codex_log("Successfully retrieved {f} metrics".format(f=feature_name))
 
         except:
-            codex_system.codex_log("Error occured while computing feature data metrics")
+            codex_log("Error occured while computing feature data metrics")
             result["status"] = "failed"
             result['name'] = feature_name
     
@@ -283,5 +282,6 @@ def update_data(msg, result):
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from codex_doctest import run_codex_doctest
+    run_codex_doctest()
 

@@ -27,13 +27,13 @@ from scipy           import stats
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
-import codex_math
-import codex_time_log
-import codex_read_data_api
-import codex_return_code
-import codex_system
+import api.sub.codex_math
+import api.sub.codex_time_log
+import api.sub.codex_read_data_api
+import api.sub.codex_return_code
+import api.sub.codex_system
 
-from codex_hash import get_cache
+from api.sub.codex_hash import get_cache
 
 def ml_quality_scan(
         inputHash,
@@ -463,7 +463,7 @@ def codex_column_threshold(
 
 if __name__ == "__main__":
 
-    from codex_doctest import run_codex_doctest
+    from api.sub.codex_doctest import run_codex_doctest
     run_codex_doctest()
 
 

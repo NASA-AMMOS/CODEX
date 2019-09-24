@@ -27,21 +27,23 @@ import time
 import h5py
 import hashlib
 import sys
-import numpy as np
-import os
 import pickle
 import psutil
 import time
 import warnings
 import functools
-CODEX_ROOT = os.getenv('CODEX_ROOT')
+
+import numpy as np
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # IPC support
-from ntangle.client import Client
-from ntangle.server import Server, expose
+from api.sub.ntangle.client import Client
+from api.sub.ntangle.server import Server, expose
 
 # CODEX Support
-import codex_system
+from api.sub.codex_system import codex_log
+from api.sub.codex_system import string2token
 
 DEFAULT_CODEX_HASH_BIND    = 'tcp://*:64209'
 DEFAULT_CODEX_HASH_CONNECT = 'tcp://localhost:64209'
@@ -102,11 +104,11 @@ class CodexHash:
         '''
         session = self.__set_session(session)
 
-        codex_system.codex_log("Feature Cache Size           : " + str(len(self.sessions[session]["featureList"])))
-        codex_system.codex_log("Subset Cache Size            : " + str(len(self.sessions[session]["subsetList"])))
-        codex_system.codex_log("Downsample Cache Size        : " + str(len(self.sessions[session]["downsampleList"])))
-        codex_system.codex_log("Number of classifier models  : " + str(len(self.sessions[session]["regressorList"])))
-        codex_system.codex_log("Number of regressor models   : " + str(len(self.sessions[session]["classifierList"])))
+        codex_log("Feature Cache Size           : " + str(len(self.sessions[session]["featureList"])))
+        codex_log("Subset Cache Size            : " + str(len(self.sessions[session]["subsetList"])))
+        codex_log("Downsample Cache Size        : " + str(len(self.sessions[session]["downsampleList"])))
+        codex_log("Number of classifier models  : " + str(len(self.sessions[session]["regressorList"])))
+        codex_log("Number of regressor models   : " + str(len(self.sessions[session]["classifierList"])))
 
     @expose('remove_stale_data')
     def remove_stale_data(self, verbose=False, session=None):
@@ -149,11 +151,11 @@ class CodexHash:
         session = self.__set_session(session)
 
         if(verbose):
-            codex_system.codex_log("Before clearing cache:")
+            codex_log("Before clearing cache:")
             self.printCacheCount(session=session)
             process = psutil.Process(os.getpid())
             current_ram = process.memory_info().rss
-            codex_system.codex_log(current_ram)
+            codex_log(current_ram)
 
         oldestTime = time.time()
         oldestType = "downsample"
@@ -179,11 +181,11 @@ class CodexHash:
 
         status = self.deleteHashName(oldestName, oldestType, session=session)
         if(status != True):
-            codex_system.codex_log("Deleting hash failed")
+            codex_log("Deleting hash failed")
             return None
 
         if(verbose):
-            codex_system.codex_log("After clearing cache:")
+            codex_log("After clearing cache:")
             self.printCacheCount(session=session)
             process = psutil.Process(os.getpid())
             current_ram = process.memory_info().rss
@@ -340,7 +342,7 @@ class CodexHash:
         elif(hashType == "regressor"):
             self.sessions[session]["regressorList"] = []
         else:
-            codex_system.codex_log("Unknown hash type.  Not resetting")
+            codex_log("Unknown hash type.  Not resetting")
 
     @expose('hashArray')
     def hashArray(self, arrayName, inputArray, hashType, virtual=False, session=None):
@@ -407,7 +409,7 @@ class CodexHash:
         try:
             inputArray = inputArray.astype(float)
         except BaseException:
-            inputArray = codex_system.string2token(inputArray)
+            inputArray = string2token(inputArray)
 
         hashValue = hashlib.sha1(inputArray).hexdigest()
         samples = len(inputArray)
@@ -445,7 +447,7 @@ class CodexHash:
         elif(hashType == "NOSAVE"):
             pass
         else:
-            codex_system.codex_log("ERROR: Hash type not recognized! Not logged for future use.")
+            codex_log("ERROR: Hash type not recognized! Not logged for future use.")
             return None
 
         return newHash
@@ -535,41 +537,41 @@ class CodexHash:
         if(hashType == "feature"):
 
             for point in self.sessions[session]["featureList"]:
-                codex_system.codex_log("Name: " + point['name'])
-                codex_system.codex_log("Hash: " + point['hash'])
-                codex_system.codex_log("Data Shape: " + str(point['data'].shape))
-                codex_system.codex_log("Color: " + str(point["color"]))
-                codex_system.codex_log("Z-Order: " + str(point["z-order"]))
+                codex_log("Name: " + point['name'])
+                codex_log("Hash: " + point['hash'])
+                codex_log("Data Shape: " + str(point['data'].shape))
+                codex_log("Color: " + str(point["color"]))
+                codex_log("Z-Order: " + str(point["z-order"]))
 
         elif(hashType == "subset"):
 
             for point in self.sessions[session]["subsetList"]:
-                codex_system.codex_log("Name: " + point['name'])
-                codex_system.codex_log("Hash: " + point['hash'])
-                codex_system.codex_log("Data Shape: " + str(point['data'].shape))
-                codex_system.codex_log("Color: " + str(point["color"]))
-                codex_system.codex_log("Z-Order: " + str(point["z-order"]))
+                codex_log("Name: " + point['name'])
+                codex_log("Hash: " + point['hash'])
+                codex_log("Data Shape: " + str(point['data'].shape))
+                codex_log("Color: " + str(point["color"]))
+                codex_log("Z-Order: " + str(point["z-order"]))
 
         elif(hashType == "downsample"):
 
             for point in self.sessions[session]["downsampleList"]:
-                codex_system.codex_log("Name: " + point['name'])
-                codex_system.codex_log("Hash: " + point['hash'])
-                codex_system.codex_log("Data Shape: " + str(point['data'].shape))
-                codex_system.codex_log("Color: " + str(point["color"]))
-                codex_system.codex_log("Z-Order: " + str(point["z-order"]))
+                codex_log("Name: " + point['name'])
+                codex_log("Hash: " + point['hash'])
+                codex_log("Data Shape: " + str(point['data'].shape))
+                codex_log("Color: " + str(point["color"]))
+                codex_log("Z-Order: " + str(point["z-order"]))
 
         elif(hashType == "label"):
 
             for point in self.sessions[session]["labelList"]:
-                codex_system.codex_log("Name: " + point['name'])
-                codex_system.codex_log("Hash: " + point['hash'])
-                codex_system.codex_log("Data Shape: " + str(point['data'].shape))
-                codex_system.codex_log("Color: " + str(point["color"]))
-                codex_system.codex_log("Z-Order: " + str(point["z-order"]))
+                codex_log("Name: " + point['name'])
+                codex_log("Hash: " + point['hash'])
+                codex_log("Data Shape: " + str(point['data'].shape))
+                codex_log("Color: " + str(point["color"]))
+                codex_log("Z-Order: " + str(point["z-order"]))
 
         else:
-            codex_system.codex_log("ERROR: printHashList - unknown hashType")
+            codex_log("ERROR: printHashList - unknown hashType")
 
     @expose('findHashArray')
     def findHashArray(self, field, name, hashType, session=None):
@@ -663,7 +665,7 @@ class CodexHash:
             return None
 
         else:
-            codex_system.codex_log("ERROR: findHashArray - hash not found")
+            codex_log("ERROR: findHashArray - hash not found")
             return None
 
     @expose('mergeHashResults')
@@ -685,22 +687,22 @@ class CodexHash:
         session = self.__set_session(session)
         
         if(hashList is None):
-            codex_system.codex_log("ERROR: mergeHashResults hashList is None")
+            codex_log("ERROR: mergeHashResults hashList is None")
             return None
 
         if(hashList == []):
-            codex_system.codex_log("ERROR: mergeHashResults hashList is empty")
+            codex_log("ERROR: mergeHashResults hashList is empty")
             return None
 
         totalFeatures = len(hashList)
 
         if(verbose):
-            codex_system.codex_log("Number of features: " + str(totalFeatures))
+            codex_log("Number of features: " + str(totalFeatures))
 
         currentHash = hashList[0]
         result = self.findHashArray("hash", currentHash, "feature", session=session)
         if(result is None):
-            codex_system.codex_log("Warning, hash not found in mergeHashResults")
+            codex_log("Warning, hash not found in mergeHashResults")
             return None
 
         returnArray = result['data']
@@ -708,20 +710,20 @@ class CodexHash:
 
 
         if(verbose):
-            codex_system.codex_log("Merging: " + returnName)
+            codex_log("Merging: " + returnName)
 
         for featureNum in range(1, totalFeatures):
             currentHash = hashList[featureNum]
             result = self.findHashArray("hash", currentHash, "feature", session=session)
             if(result is None):
-                codex_system.codex_log("Warning, hash not found in mergeHashResults")
+                codex_log("Warning, hash not found in mergeHashResults")
                 return None
 
             resultArray = result['data']
             resultName = result['name']
 
             if(verbose):
-                codex_system.codex_log("Merging: " + resultName)
+                codex_log("Merging: " + resultName)
 
             try:
                 (s1, f1) = returnArray.shape
@@ -734,7 +736,7 @@ class CodexHash:
                 returnArray = np.column_stack((resultArray, returnArray))
             else:
                 # TODO - long term, how do we want to handle this?
-                codex_system.codex_log("WARNING: " + resultName + " does not match shape of previous features(" + str(s1) + "/" +str(s2) + "). Exlucding.")
+                codex_log("WARNING: {resultName} does not match shape of previous features(" + str(s1) + "/" +str(s2) + "). Exlucding.".format(resultName=resultName))
     
         return returnArray
         
@@ -748,7 +750,7 @@ class CodexHash:
             if(r is not None):
                 hashList.append(r['hash'])
             else:
-                codex_system.codex_log("WARNING: feature2hashList - could not add {feature} to feature list.".format(feature=feature))
+                codex_log("WARNING: feature2hashList - could not add {feature} to feature list.".format(feature=feature))
         return hashList
 
     @expose('applySubsetMask')
@@ -771,7 +773,7 @@ class CodexHash:
 
         returnDict = self.findHashArray("hash", subsetHash, "subset", session=session)
         if(returnDict is None):
-            codex_system.codex_log("Hash not found. Returning!")
+            codex_log("Hash not found. Returning!")
             return None
 
         indexArray = returnDict['data']
@@ -782,7 +784,7 @@ class CodexHash:
             x2 = indexArray.size
 
             if(x1 != x2):
-                codex_system.codex_log("Error: mask must match length of feature")
+                codex_log("Error: mask must match length of feature")
                 return None
 
             included = np.count_nonzero(indexArray)
@@ -803,7 +805,7 @@ class CodexHash:
             x2 = indexArray.size
 
             if(x1 != x2):
-                codex_system.codex_log("Error: mask must match length of feature")
+                codex_log("Error: mask must match length of feature")
                 return None
 
             included = np.count_nonzero(indexArray)
@@ -1031,8 +1033,7 @@ class CodexHash:
             if not any(d['hash'] == newHash["hash"] for d in self.sessions[session]["classifierList"]):
                 self.sessions[session]["classifierList"].append(newHash)
         else:
-            codex_system.codex_log(
-                "ERROR: Model hash type not recognized! Not logged for future use.")
+            codex_log("ERROR: Model hash type not recognized! Not logged for future use.")
             return None
 
         return newHash
@@ -1181,5 +1182,5 @@ if __name__ == "__main__":
         create_cache_server()
 
     else:
-        import codex_doctest
-        codex_doctest.run_codex_doctest()
+        from codex_doctest import run_codex_doctest
+        run_codex_doctest()

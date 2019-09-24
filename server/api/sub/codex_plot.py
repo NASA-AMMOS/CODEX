@@ -10,18 +10,19 @@ Notes :
 import sys
 import h5py
 import time
+import os
+
+import numpy             as np
+import matplotlib.pyplot as plt
+import matplotlib.image  as mpimg
+
 from random import randint
-from scipy import misc
+from scipy  import misc
 
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 
-import numpy as np
-import os
-
-CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 
 def getColorMap():

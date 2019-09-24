@@ -12,16 +12,19 @@ import h5py
 import hashlib
 import sys
 import json
-from types import ModuleType
 import inspect
-import numpy as np
 import os.path
-CODEX_ROOT = os.getenv('CODEX_ROOT')
 
+from types import ModuleType
+
+import numpy as np
+
+CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 returnedCodePath = os.path.join(CODEX_ROOT,"returned_code.py")
 contents = []
 
-import codex_hash
+from api.sub.codex_hash import WrappedCache
 
 def logReturnCode(frame):
     '''
@@ -84,7 +87,7 @@ def logReturnCode(frame):
             arg_string = "{arg}=np.array(({value}))".format(arg=arg, value=value)
             arg_string = arg_string.replace("\n","")
             arg_string = arg_string.replace(" ",",")
-        elif isinstance(value, codex_hash.WrappedCache):
+        elif isinstance(value, WrappedCache):
             arg_string = ""
         elif isinstance(value, ModuleType):
             arg_string = ""
@@ -134,7 +137,13 @@ def makeReturnCode():
 
 
 def code_unique(seq):
+    '''
+    Inputs:
 
+    Outputs:
+
+    Examples:
+    '''
     seen = set()
     seen_add = seen.add
     return [x for x in seq if not (x in seen or seen_add(x))]

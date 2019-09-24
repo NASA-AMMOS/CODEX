@@ -25,12 +25,11 @@ from skimage.segmentation import felzenszwalb
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
-import api.sub.codex_math
-import api.sub.codex_system
-import api.sub.codex_time_log
-import api.sub.codex_downsample
-import api.sub.codex_read_data_api
-import api.sub.codex_return_code
+from api.sub.codex_math             import codex_impute
+from api.sub.codex_system           import codex_log
+from api.sub.codex_time_log         import logTime
+from api.sub.codex_downsample       import downsample
+from api.sub.codex_return_code      import logReturnCode
 
 from api.sub.codex_hash import get_cache
 
@@ -92,7 +91,7 @@ def ml_segmentation(
     if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
-        codex_system.codex_log("Feature hash failure in ml_cluster")
+        codex_log("Feature hash failure in ml_cluster")
         result['message'] = "Feature hash failure in ml_cluster"
         return None
 
@@ -110,35 +109,34 @@ def ml_segmentation(
         try:
             scale = float(parms['scale'])
         except BaseException:
-            codex_system.codex_log("scale parameter not set")
+            codex_log("scale parameter not set")
             result['message'] = "scale parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             sigma = float(parms['sigma'])
         except BaseException:
-            codex_system.codex_log("sigma parameter not set")
+            codex_log("sigma parameter not set")
             result['message'] = "sigma parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             min_size = int(parms['min_size'])
         except BaseException:
-            codex_system.codex_log("min_size parameter not set")
+            codex_log("min_size parameter not set")
             result['message'] = "min_size parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             result = codex_segmentation_felzenszwalb(
                 inputHash, subsetHash, downsampled, scale, sigma, min_size, session=codex_hash)
         except BaseException:
-            codex_system.codex_log(
-                "Failed to run felzenszwalb segmentation algorithm")
+            codex_log("Failed to run felzenszwalb segmentation algorithm")
             result['message'] = "Failed to run felzenszwalb segmentation algorithm"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
     elif(algorithmName == 'quickshift'):
@@ -146,39 +144,38 @@ def ml_segmentation(
         try:
             kernel_size = float(parms['kernel_size'])
         except BaseException:
-            codex_system.codex_log("kernel_size parameter not set")
+            codex_log("kernel_size parameter not set")
             result['message'] = "kernel_size parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             sigma = float(parms['sigma'])
         except BaseException:
-            codex_system.codex_log("sigma parameter not set")
+            codex_log("sigma parameter not set")
             result['message'] = "sigma parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             max_dist = int(parms['max_dist'])
         except BaseException:
-            codex_system.codex_log("max_dist parameter not set")
+            codex_log("max_dist parameter not set")
             result['message'] = "max_dist parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             result = codex_segmentation_quickshift(
                 inputHash, subsetHash, downsampled, kernel_size, max_dist, sigma, session=codex_hash)
         except BaseException:
-            codex_system.codex_log(
-                "Failed to run quickshift segmentation algorithm")
+            codex_log("Failed to run quickshift segmentation algorithm")
             result['message'] = "Failed to run quickshift segmentation algorithm"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
     else:
-        codex_system.codex_log("Cannot find requested segmentation algorithm")
+        codex_log("Cannot find requested segmentation algorithm")
         result['message'] = "Cannot find requested segmentation algorithm"
 
     return result
@@ -221,13 +218,13 @@ def codex_segmentation_quickshift(
     '''
     codex_hash = get_cache(session)
 
-    codex_return_code.logReturnCode(inspect.currentframe())
+    logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
-        codex_system.codex_log("Hash not found. Returning!")
+        codex_log("Hash not found. Returning!")
         return
 
     data = returnHash['data']
@@ -235,16 +232,12 @@ def codex_segmentation_quickshift(
     if(subsetHash is not False):
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log(
-                "ERROR: codex_segmentation quickshift - subsetHash returned None.")
+            codex_log("ERROR: codex_segmentation quickshift - subsetHash returned None.")
             return None
 
     if(downsampled is not False):
-        codex_system.codex_log(
-            "Downsampling to " +
-            str(downsampled) +
-            " percent")
-        data = codex_downsample.downsample(data, percentage=downsampled, session=codex_hash)
+        codex_log("Downsampling to {downsample} percent".format(downsample=downsampled))
+        data = downsample(data, percentage=downsampled, session=codex_hash)
 
     data = np.dstack((data, data, data))
     segments = quickshift(
@@ -255,7 +248,7 @@ def codex_segmentation_quickshift(
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime(
+    logTime(
         "segmentation",
         "quickshift",
         computeTime,
@@ -314,13 +307,13 @@ def codex_segmentation_felzenszwalb(
     '''
     codex_hash = get_cache(session)
 
-    codex_return_code.logReturnCode(inspect.currentframe())
+    logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
-        codex_system.codex_log("Hash not found. Returning!")
+        codex_log("Hash not found. Returning!")
         return
 
     data = returnHash['data']
@@ -328,23 +321,19 @@ def codex_segmentation_felzenszwalb(
     if(subsetHash is not False):
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log(
-                "ERROR: codex_segmentation felzenswalb - subsetHash returned None.")
+            codex_log("ERROR: codex_segmentation felzenswalb - subsetHash returned None.")
             return None
 
     if(downsampled is not False):
-        codex_system.codex_log(
-            "Downsampling to " +
-            str(downsampled) +
-            " percent")
-        data = codex_downsample.downsample(data, percentage=downsampled, session=codex_hash)
+        codex_log("Downsampling to " + str(downsampled) + " percent")
+        data = downsample(data, percentage=downsampled, session=codex_hash)
 
-    data = codex_math.codex_impute(data)
+    data = codex_impute(data)
     segments = felzenszwalb(data, scale=scale, sigma=sigma, min_size=min_size)
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime(
+    logTime(
         "segmentation",
         "felzenszwalb",
         computeTime,

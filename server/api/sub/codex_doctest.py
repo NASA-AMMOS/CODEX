@@ -8,16 +8,14 @@ Notes :
 '''
 import os
 import sys
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
-# Python Libraries
-import numpy as np
 import random
 
+import numpy as np
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
 # CODEX Support
-import codex_read_data_api
+import api.sub.codex_read_data_api
 
 def doctest_get_image_path():
 

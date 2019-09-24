@@ -22,11 +22,13 @@ from sklearn.preprocessing import StandardScaler
 from matplotlib.image      import imread
 from PIL                   import Image
 
-# CODEX Support
-import codex_return_code
-import codex_system
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-from codex_hash import get_cache
+# CODEX Support
+import api.sub.codex_return_code
+import api.sub.codex_system
+
+from api.sub.codex_hash import get_cache
 
 def codex_read_csv(file, featureList, hashType, session=None):
     '''

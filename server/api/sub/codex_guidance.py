@@ -11,9 +11,9 @@ import os
 import sys
 import yaml
 
-CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-import codex_yaml
+import api.sub.codex_yaml
 
 def get_guidance_text_block(page, section):
     '''

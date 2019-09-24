@@ -18,7 +18,7 @@ import inspect
 
 import numpy as np
 
-from detect_peaks import detect_peaks
+
 from scipy.signal import find_peaks_cwt
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
@@ -32,7 +32,8 @@ import api.sub.codex_downsample
 import api.sub.codex_plot
 import api.sub.codex_time_log
 
-from api.sub.codex_hash import get_cache
+from api.sub.detect_peaks import detect_peaks
+from api.sub.codex_hash   import get_cache
 
 # Note: algorithm source: https://blog.ytotech.com/2015/11/01/findpeaks-in-python/
 # Note: algorithm source:
