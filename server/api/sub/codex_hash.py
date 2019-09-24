@@ -307,7 +307,6 @@ class CodexHash:
 
         return True
 
-
     @expose('resetCacheList')
     def resetCacheList(self, hashType, session=None):
         '''
@@ -342,7 +341,6 @@ class CodexHash:
             self.sessions[session]["regressorList"] = []
         else:
             codex_system.codex_log("Unknown hash type.  Not resetting")
-
 
     @expose('hashArray')
     def hashArray(self, arrayName, inputArray, hashType, virtual=False, session=None):
@@ -452,6 +450,34 @@ class CodexHash:
 
         return newHash
 
+    @expose('getSentinelValues')
+    def getSentinelValues(self, featureList, session=None):
+
+        session = self.__set_session(session)
+        sentinel_values = {"inf":None, "ninf":None, "nan":None}
+
+        combined = np.array([], dtype=float)
+        for feature in featureList:
+            r = self.findHashArray("name", feature, "feature", session=session)
+            if r:
+                r_unique = np.unique(r['data']).astype(float)
+                combined = np.concatenate((combined, r_unique))
+
+        combined_unique = np.unique(combined)
+        max_val = np.nanmax(combined_unique)
+
+        if(np.isnan(combined_unique).any()):
+            sentinel_values['nan']  = round((max_val * 10) + 3)
+
+        if(np.isneginf(combined_unique).any()):
+            sentinel_values['ninf'] = round((max_val * 10) + 1)
+
+        if(np.isinf(combined_unique).any()):
+            sentinel_values['inf']  = round((max_val * 10) + 2)
+
+
+        print(sentinel_values)
+        return sentinel_values
 
     def printHashList(self, hashType, session=None):
         '''
@@ -544,7 +570,6 @@ class CodexHash:
 
         else:
             codex_system.codex_log("ERROR: printHashList - unknown hashType")
-
 
     @expose('findHashArray')
     def findHashArray(self, field, name, hashType, session=None):
@@ -641,7 +666,6 @@ class CodexHash:
             codex_system.codex_log("ERROR: findHashArray - hash not found")
             return None
 
-
     @expose('mergeHashResults')
     def mergeHashResults(self, hashList, verbose=False, session=None):
         '''
@@ -659,7 +683,7 @@ class CodexHash:
 
         '''
         session = self.__set_session(session)
-
+        
         if(hashList is None):
             codex_system.codex_log("ERROR: mergeHashResults hashList is None")
             return None
@@ -682,6 +706,7 @@ class CodexHash:
         returnArray = result['data']
         returnName = result['name']
 
+
         if(verbose):
             codex_system.codex_log("Merging: " + returnName)
 
@@ -689,8 +714,7 @@ class CodexHash:
             currentHash = hashList[featureNum]
             result = self.findHashArray("hash", currentHash, "feature", session=session)
             if(result is None):
-                codex_system.codex_log(
-                    "Warning, hash not found in mergeHashResults")
+                codex_system.codex_log("Warning, hash not found in mergeHashResults")
                 return None
 
             resultArray = result['data']
@@ -710,18 +734,10 @@ class CodexHash:
                 returnArray = np.column_stack((resultArray, returnArray))
             else:
                 # TODO - long term, how do we want to handle this?
-                codex_system.codex_log(
-                    "WARNING: " +
-                    resultName +
-                    " does not match shape of previous features(" +
-                    str(s1) +
-                    "/" +
-                    str(s2) +
-                    "). Exlucding.")
-
+                codex_system.codex_log("WARNING: " + resultName + " does not match shape of previous features(" + str(s1) + "/" +str(s2) + "). Exlucding.")
+    
         return returnArray
-
-
+        
     @expose('feature2hashList')
     def feature2hashList(self, featureList, session=None):
         session = self.__set_session(session)
@@ -732,12 +748,8 @@ class CodexHash:
             if(r is not None):
                 hashList.append(r['hash'])
             else:
-                codex_system.codex_log(
-                    "WARNING: feature2hashList - could not add " +
-                    feature +
-                    " to feature list.")
+                codex_system.codex_log("WARNING: feature2hashList - could not add {feature} to feature list.".format(feature=feature))
         return hashList
-
 
     @expose('applySubsetMask')
     def applySubsetMask(self, featureArray, subsetHash, session=None):
@@ -804,7 +816,6 @@ class CodexHash:
                     count += 1
 
             return outData, returnDict['name']
-
 
     @expose('pickle_data')
     def pickle_data(self, session_name, front_end_state, session=None):
@@ -960,7 +971,6 @@ class CodexHash:
 
         return {'features':features, 'labels':labels, 'subsets':subsets, 'downsample':downsamples, 'state':state}
 
-
     @expose('saveModel')
     def saveModel(self, modelName, inputModel, modelType, session=None):
         '''
@@ -1030,8 +1040,7 @@ class CodexHash:
     @expose('import_hd5')
     def import_hd5(self, filepath, session=None):
         import codex_read_data_api
-        hashList, featureList = codex_read_data_api.codex_read_hd5(
-            filepath, None, "feature", session=WrappedCache(session, cache=self))
+        hashList, featureList = codex_read_data_api.codex_read_hd5(filepath, None, "feature", session=WrappedCache(session, cache=self))
     
         return hashList, featureList
 
@@ -1039,8 +1048,7 @@ class CodexHash:
     def import_csv(self, filepath, session=None):
         import codex_read_data_api
 
-        hashList, featureList = codex_read_data_api.codex_read_csv(
-            filepath, None, "feature", session=WrappedCache(session, cache=self))
+        hashList, featureList = codex_read_data_api.codex_read_csv(filepath, None, "feature", session=WrappedCache(session, cache=self))
 
         return hashList, featureList
 
@@ -1048,8 +1056,7 @@ class CodexHash:
     def import_npy(self, filepath, session=None):
         import codex_read_data_api
 
-        hashList, featureList = codex_read_data_api.codex_read_npy(
-            filepath, None, "feature", session=WrappedCache(session, cache=self))
+        hashList, featureList = codex_read_data_api.codex_read_npy(filepath, None, "feature", session=WrappedCache(session, cache=self))
 
         return hashList, featureList
 

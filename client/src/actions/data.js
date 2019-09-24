@@ -30,7 +30,10 @@ export function fileLoad(fileList) {
             dispatch({
                 type: types.FILE_LOAD,
                 data: res.feature_names,
-                filename: res.filename
+                filename: res.filename,
+                nan: res.nan,
+                inf: res.inf,
+                ninf: res.ninf
             });
             dispatch({ type: types.FEATURE_LIST_LOADING, isLoading: false });
             workerUpload = null;

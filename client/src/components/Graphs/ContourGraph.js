@@ -9,7 +9,12 @@ import * as utils from "utils/utils";
 import GraphWrapper from "components/Graphs/GraphWrapper.js";
 
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import { useCurrentSelection, useSavedSelections, usePinnedFeatures } from "hooks/DataHooks";
+import {
+    useCurrentSelection,
+    useSavedSelections,
+    usePinnedFeatures,
+    useFileInfo
+} from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
 
@@ -311,7 +316,10 @@ function ContourGraph(props) {
     const chart = useRef(null);
 
     // plug through props
-    const cols = props.data.map(f => f.get("data")).toJS();
+    const cols = utils.removeSentinelValues(
+        props.data.map(f => f.get("data")).toJS(),
+        props.fileInfo
+    );
     const xAxis = props.data.getIn([0, "feature"]);
     const yAxis = props.data.getIn([1, "feature"]);
 
@@ -414,6 +422,7 @@ export default props => {
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
     const [savedSelections, saveCurrentSelection] = useSavedSelections();
     const [globalChartState, setGlobalChartState] = useGlobalChartState();
+    const fileInfo = useFileInfo();
 
     const features = usePinnedFeatures(win);
 
@@ -431,6 +440,7 @@ export default props => {
                 saveCurrentSelection={saveCurrentSelection}
                 globalChartState={globalChartState}
                 data={features}
+                fileInfo={fileInfo}
             />
         );
     } else {
