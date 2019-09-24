@@ -454,7 +454,8 @@ class CodexHash:
     def getSentinelValues(self, featureList, session=None):
 
         session = self.__set_session(session)
-        
+        sentinel_values = {"inf":None, "ninf":None, "nan":None}
+
         combined = np.array([], dtype=float)
         for feature in featureList:
             r = self.findHashArray("name", feature, "feature", session=session)
@@ -464,11 +465,19 @@ class CodexHash:
 
         combined_unique = np.unique(combined)
         max_val = np.nanmax(combined_unique)
-        ninf = round((max_val * 10) + 1)
-        inf  = round((max_val * 10) + 2)
-        nan  = round((max_val * 10) + 3)
 
-        return {"inf":inf, "ninf":ninf, "nan":nan}
+        if(np.isnan(combined_unique).any()):
+            sentinel_values['nan']  = round((max_val * 10) + 3)
+
+        if(np.isneginf(combined_unique).any()):
+            sentinel_values['ninf'] = round((max_val * 10) + 1)
+
+        if(np.isinf(combined_unique).any()):
+            sentinel_values['inf']  = round((max_val * 10) + 2)
+
+
+        print(sentinel_values)
+        return sentinel_values
 
     def printHashList(self, hashType, session=None):
         '''

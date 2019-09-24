@@ -193,6 +193,7 @@ def get_data(msg, nan, inf, ninf, result):
         x_, y_ = data.shape
         data = data.astype(float)
         for x in range(0, x_):
+
             if(np.isnan(data[x][0])):
                 data[x][0] = nan
             elif(np.isinf(data[x][0]) and data[x][0] > 0):
