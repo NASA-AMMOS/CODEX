@@ -203,7 +203,7 @@ export function makeStreamRequest(request, cb) {
  * @returns {array} data columns, with any row that has sentinel values returned.
  */
 export function removeSentinelValues(cols, fileInfo) {
-    const sentinelValues = [fileInfo.nan, fileInfo.inf, fileInfo.finf];
+    const sentinelValues = [fileInfo.nan, fileInfo.inf, fileInfo.ninf];
 
     // If there aren't any sentinel values, avoid filtering.
     if (sentinelValues.every(val => val === null)) return cols;
