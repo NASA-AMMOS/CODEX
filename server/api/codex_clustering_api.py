@@ -16,28 +16,24 @@ import time
 import h5py
 import inspect
 import traceback
+
 import numpy as np
+
 from sklearn.neighbors import kneighbors_graph
-from sklearn import cluster
+from sklearn           import cluster
 
-DEBUG = False
-
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
-import codex_return_code
-import codex_math
-import codex_time_log
-import codex_doctest
-import codex_plot
-import codex_read_data_api
-import codex_downsample
-from codex_hash import get_cache
-import codex_dimmension_reduction_api
-import codex_system
-import codex_labels
+from api.sub.codex_return_code          import logReturnCode
+from api.sub.codex_math                 import codex_impute
+from api.sub.codex_time_log             import getComputeTimeEstimate
+from api.sub.codex_time_log             import logTime
+from api.sub.codex_downsample           import downsample
+from api.codex_dimmension_reduction_api import run_codex_dim_reduction
+from api.sub.codex_system               import codex_log
+from api.sub.codex_labels               import label_swap
+from api.sub.codex_hash                 import get_cache
 
 def ml_cluster(
         inputHash,
@@ -89,7 +85,7 @@ def ml_cluster(
     codex_hash = get_cache(session)
 
     if len(hashList) < 2:
-        codex_system.codex_log("Clustering requires >= 2 features.")
+        codex_log("Clustering requires >= 2 features.")
         return None
 
     if subsetHashName is not None:
@@ -104,14 +100,14 @@ def ml_cluster(
 
     try:
         
-        pca = codex_dimmension_reduction_api.run_codex_dim_reduction(inputHash, subsetHash, {"n_components":2}, downsampled, False, "PCA", session=codex_hash)
+        pca = run_codex_dim_reduction(inputHash, subsetHash, {"n_components":2}, downsampled, False, "PCA", session=codex_hash)
         result = run_codex_clustering(pca['outputHash'], subsetHash, downsampled, algorithmName, parms, session=codex_hash)
         result['data'] = pca['data']
 
     except BaseException:
-        codex_system.codex_log("Failed to clustering algorithm")
+        codex_log("Failed to clustering algorithm")
         result['message'] = "Failed to run clustering algorithm"
-        codex_system.codex_log(traceback.format_exc())
+        codex_log(traceback.format_exc())
 
     return result
 
@@ -143,8 +139,8 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
     '''
     codex_hash = get_cache(session)
 
-    codex_return_code.logReturnCode(inspect.currentframe())
-    codex_system.codex_log(str(parms))
+    logReturnCode(inspect.currentframe())
+    codex_log(str(parms))
     startTime = time.time()
     result = {'algorithm': algorithm,
               'downsample': downsampled,
@@ -152,7 +148,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
-        codex_system.codex_log("Clustering: run_codex_clustering: Hash not found. Returning!")
+        codex_log("Clustering: run_codex_clustering: Hash not found. Returning!")
         return None
 
     data = returnHash['data']
@@ -162,22 +158,22 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
     if subsetHash is not False:
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log("ERROR: run_codex_clustering - subsetHash returned None.")
+            codex_log("ERROR: run_codex_clustering - subsetHash returned None.")
             return None
 
     full_samples = len(data)
     if downsampled is not False:
-        codex_system.codex_log("Downsampling to {downsampled} samples".format(downsampled=downsampled))
-        data = codex_downsample.downsample(data, samples=downsampled, session=codex_hash)
-        codex_system.codex_log("Downsampled to {samples} samples".format(samples=len(data)))
+        codex_log("Downsampling to {downsampled} samples".format(downsampled=downsampled))
+        data = downsample(data, samples=downsampled, session=codex_hash)
+        codex_log("Downsampled to {samples} samples".format(samples=len(data)))
 
-    result['eta'] = codex_time_log.getComputeTimeEstimate("clustering", algorithm, full_samples)
+    result['eta'] = getComputeTimeEstimate("clustering", algorithm, full_samples)
     if data.ndim < 2:
-        codex_system.codex_log("ERROR: run_codex_clustering - insufficient data dimmensions")
+        codex_log("ERROR: run_codex_clustering - insufficient data dimmensions")
         return None
 
     X = data
-    X = codex_math.codex_impute(X)
+    X = codex_impute(X)
     result['data'] = X.tolist()
 
     try:
@@ -231,7 +227,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
                     'WARNING': algorithm + " not supported."}
 
     except:
-        codex_system.codex_log(str(traceback.format_exc()))
+        codex_log(str(traceback.format_exc()))
 
         return {'algorithm': algorithm,
                 'data': X.tolist(),
@@ -245,7 +241,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
 
     # temporary to not change API right now
     merged_hash = codex_hash.hashArray("temporary", X, "feature")
-    y_pred = codex_labels.label_swap(y_pred, merged_hash["hash"], session=codex_hash)
+    y_pred = label_swap(y_pred, merged_hash["hash"], session=codex_hash)
     label_hash = codex_hash.hashArray(merged_hash["hash"], y_pred, "label")
 
     result['numClusters'] = np.unique(y_pred).size
@@ -260,7 +256,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime(
+    logTime(
         "clustering",
         algorithm,
         computeTime,
@@ -274,10 +270,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
 
 if __name__ == "__main__":
 
-    #codex_doctest.run_codex_doctest()
-    from codex_hash import DOCTEST_SESSION
-    codex_hash = get_cache(DOCTEST_SESSION)
-    testData = codex_doctest.doctest_get_data(session=codex_hash)
-    run_codex_clustering(testData['inputHash'], False, 500, "kmeans", {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, session=codex_hash)
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 
     

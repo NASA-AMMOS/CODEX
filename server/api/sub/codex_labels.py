@@ -12,12 +12,15 @@ import time
 import h5py
 import hashlib
 import sys
-import numpy as np
 import random
 import math
 import operator
+
+import numpy as np
+
 from random import shuffle
-CODEX_ROOT = os.getenv('CODEX_ROOT')
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 
 def label_swap(labels, dataHash, verbose=False, session=None):

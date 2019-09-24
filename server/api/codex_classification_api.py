@@ -13,58 +13,54 @@ U.S. Government Sponsorship acknowledged.
 # Enviornment variable for setting CODEX root directory.
 import os
 import sys
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
 import time
 import inspect
 import traceback
+import random
+import json
+
 import numpy as np
-from sklearn import model_selection
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import RandomizedSearchCV
-import random, json
-from sklearn.metrics import confusion_matrix
 
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.ensemble import BaggingClassifier
-from sklearn.mixture import BayesianGaussianMixture
-from sklearn.naive_bayes import BernoulliNB
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn.naive_bayes import ComplementNB
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import ExtraTreesClassifier
-from sklearn.tree import ExtraTreeClassifier
-from sklearn.mixture import GaussianMixture
-from sklearn.naive_bayes import GaussianNB
-from sklearn.gaussian_process import GaussianProcessClassifier
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.semi_supervised import LabelPropagation
-from sklearn.semi_supervised import LabelSpreading
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import LogisticRegressionCV
-from sklearn.neural_network import MLPClassifier
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.svm import NuSVC
-from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import SGDClassifier
-from sklearn.svm import SVC
+from sklearn                        import model_selection
+from sklearn.model_selection        import GridSearchCV
+from sklearn.model_selection        import RandomizedSearchCV
+from sklearn.metrics                import confusion_matrix
+from sklearn.ensemble               import AdaBoostClassifier
+from sklearn.ensemble               import BaggingClassifier
+from sklearn.mixture                import BayesianGaussianMixture
+from sklearn.naive_bayes            import BernoulliNB
+from sklearn.calibration            import CalibratedClassifierCV
+from sklearn.naive_bayes            import ComplementNB
+from sklearn.tree                   import DecisionTreeClassifier
+from sklearn.ensemble               import ExtraTreesClassifier
+from sklearn.tree                   import ExtraTreeClassifier
+from sklearn.mixture                import GaussianMixture
+from sklearn.naive_bayes            import GaussianNB
+from sklearn.gaussian_process       import GaussianProcessClassifier
+from sklearn.ensemble               import GradientBoostingClassifier
+from sklearn.neighbors              import KNeighborsClassifier
+from sklearn.semi_supervised        import LabelPropagation
+from sklearn.semi_supervised        import LabelSpreading
+from sklearn.discriminant_analysis  import LinearDiscriminantAnalysis
+from sklearn.linear_model           import LogisticRegression
+from sklearn.linear_model           import LogisticRegressionCV
+from sklearn.neural_network         import MLPClassifier
+from sklearn.naive_bayes            import MultinomialNB
+from sklearn.svm                    import NuSVC
+from sklearn.discriminant_analysis  import QuadraticDiscriminantAnalysis
+from sklearn.ensemble               import RandomForestClassifier
+from sklearn.linear_model           import SGDClassifier
+from sklearn.svm                    import SVC
 
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-import codex_return_code
-import codex_math
-import codex_time_log
-import codex_doctest
-import codex_plot
-import codex_read_data_api
-import codex_downsample
-from codex_hash import get_cache
-import codex_dimmension_reduction_api
-import codex_system
-import codex_labels
+from api.sub.codex_return_code import logReturnCode
+from api.sub.codex_math        import codex_impute
+from api.sub.codex_time_log    import logTime
+from api.sub.codex_time_log    import getComputeTimeEstimate
+from api.sub.codex_downsample  import downsample
+from api.sub.codex_system      import codex_log
+from api.sub.codex_hash        import get_cache
 
 def ml_classification(
         inputHash,
@@ -90,7 +86,7 @@ def ml_classification(
     codex_hash = get_cache(session)
 
     if len(hashList) < 2:
-        codex_system.codex_log("Classification requires >= 2 features.")
+        codex_log("Classification requires >= 2 features.")
         return None
 
     if subsetHashName is not None:
@@ -104,12 +100,11 @@ def ml_classification(
 
     try:
         result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=session)
-        codex_system.codex_log("Completed classification run with warnings: {r}".format(r=result["WARNING"]))
+        codex_log("Completed classification run with warnings: {r}".format(r=result["WARNING"]))
     except BaseException:
-        codex_system.codex_log(
-            "Failed to run classification algorithm")
+        codex_log("Failed to run classification algorithm")
         result['message'] = "Failed to run classification algorithm"
-        codex_system.codex_log(traceback.format_exc())
+        codex_log(traceback.format_exc())
         return None
 
     return result
@@ -154,7 +149,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         None
     '''
     codex_hash = get_cache(session)
-    codex_return_code.logReturnCode(inspect.currentframe())
+    logReturnCode(inspect.currentframe())
     startTime = time.time()
     result = {'algorithm': algorithm,
               'downsample': downsampled,
@@ -164,7 +159,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
-        codex_system.codex_log("Classification: " + algorithm + ": Hash not found. Returning!")
+        codex_log("Classification: {algorithm}: Hash not found. Returning!".format(algorithm=algorithm))
         return None
 
     data = returnHash['data']
@@ -174,24 +169,24 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     if subsetHash is not False and subsetHash is not None:
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log("ERROR: run_codex_classification - subsetHash returned None.")
+            codex_log("ERROR: run_codex_classification - subsetHash returned None.")
             return None
             
     full_samples = len(data)
     if downsampled is not False:
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+        codex_log("Downsampling to " + str(downsampled) + " percent")
         samples = len(data)
-        data = codex_downsample.downsample(data, percentage=downsampled, session=session)
+        data = downsample(data, percentage=downsampled, session=session)
 
     if data.ndim < 2:
-        codex_system.codex_log("ERROR: run_codex_classification - insufficient data dimmensions")
+        codex_log("ERROR: run_codex_classification - insufficient data dimmensions")
         return None
 
     X = data
-    X = codex_math.codex_impute(X)
+    X = codex_impute(X)
     result['X'] = X.tolist()
 
-    result['eta'] = codex_time_log.getComputeTimeEstimate("classification", algorithm, full_samples)
+    result['eta'] = getComputeTimeEstimate("classification", algorithm, full_samples)
 
     accepted_scoring_metrics = ["accuracy", "balanced_accuracy", "average_precision", "brier_score_loss", "f1, f1_micro", "f1_macro", "f1_weighted", "f1_samples", "neg_log_loss", "precision", "recall", "jaccard", "roc_auc"]
     if scoring not in accepted_scoring_metrics:
@@ -201,7 +196,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     # TODO - labels are currently cached under features
     labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
     if labelHash_dict is None:
-        codex_system.codex_log("label hash {hash} not found. Returning!".format(hash=labelHash))
+        codex_log("label hash {hash} not found. Returning!".format(hash=labelHash))
         return {'algorithm': algorithm,
                 'downsample': downsampled,
                 'cross_val': cross_val,
@@ -446,7 +441,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime(
+    logTime(
         "classification",
         algorithm,
         computeTime,
@@ -459,8 +454,6 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
-    #testData = codex_doctest.doctest_get_data()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 
-    #result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'precision', session='__doctest__')
-    

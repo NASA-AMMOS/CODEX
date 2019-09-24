@@ -7,30 +7,28 @@ Brief : Read/write and file management for CODEX
 Notes :
 '''
 import os
-import numpy as np
-from collections import defaultdict
-from sklearn.neighbors import kneighbors_graph
-from sklearn.preprocessing import StandardScaler
+import errno
 import h5py
 import csv
 import time
-import pandas as pd
-import os
-import errno
-from matplotlib.image import imread
-from PIL import Image
 import sys
 
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
+import numpy  as np
+import pandas as pd
+
+from collections           import defaultdict
+from sklearn.neighbors     import kneighbors_graph
+from sklearn.preprocessing import StandardScaler
+from matplotlib.image      import imread
+from PIL                   import Image
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
-import codex_doctest
-import codex_return_code
-from codex_hash import get_cache
-import codex_system
+import api.sub.codex_return_code
+import api.sub.codex_system
 
+from api.sub.codex_hash import get_cache
 
 def codex_read_csv(file, featureList, hashType, session=None):
     '''
@@ -314,5 +312,5 @@ def codex_save_subset(inputHash, subsetHash, saveFilePath, session=None):
 
 if __name__ == "__main__":
 
-
-    codex_doctest.run_codex_doctest()
+    from codex_doctest import run_codex_doctest
+    run_codex_doctest()

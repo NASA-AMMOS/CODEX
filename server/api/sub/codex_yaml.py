@@ -10,7 +10,8 @@ Notes :
 import os
 import sys
 import yaml
-CODEX_ROOT = os.getenv('CODEX_ROOT')
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 
 def codex_read_yaml(filepath):
@@ -20,7 +21,7 @@ def codex_read_yaml(filepath):
     Outputs:
 
     Examples:
-    >>> result = codex_read_yaml(CODEX_ROOT + 'guidance.yaml')
+    >>> result = codex_read_yaml('../../guidance.yaml')
     >>> print(result['unit_tests']['test'])
     This is a unit test
     '''
@@ -31,5 +32,5 @@ def codex_read_yaml(filepath):
 
 if __name__ == "__main__":
 
-    import codex_doctest
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()

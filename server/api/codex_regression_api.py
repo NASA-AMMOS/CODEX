@@ -12,81 +12,76 @@ U.S. Government Sponsorship acknowledged.
 
 import os
 import sys
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
-import codex_math
-import codex_doctest
-import codex_system
-import codex_read_data_api
-import codex_return_code
-import codex_plot
-import codex_time_log
-from codex_hash import get_cache
 import sys
 import random
 import inspect
 import sklearn
 import subprocess
-import h5py
 import time
 import traceback
-import numpy as np
+
+import numpy                       as np
 import numpy.polynomial.polynomial as poly
-from sklearn.metrics import log_loss
-from sklearn import model_selection
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import RandomizedSearchCV
-from sklearn.metrics import confusion_matrix
 
-from sklearn.linear_model import ARDRegression
-from sklearn.ensemble import AdaBoostRegressor
-from sklearn.ensemble import BaggingRegressor
-from sklearn.linear_model import BayesianRidge
-from sklearn.cross_decomposition import CCA
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.linear_model import ElasticNet
-from sklearn.linear_model import ElasticNetCV
-from sklearn.tree import ExtraTreeRegressor
-from sklearn.ensemble import ExtraTreesRegressor
-from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.linear_model import HuberRegressor
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.kernel_ridge import KernelRidge
-from sklearn.linear_model import Lars
-from sklearn.linear_model import LarsCV
-from sklearn.linear_model import Lasso
-from sklearn.linear_model import LassoCV
-from sklearn.linear_model import LassoLars
-from sklearn.linear_model import LassoLarsCV
-from sklearn.linear_model import LassoLarsIC
-from sklearn.linear_model import LinearRegression
-from sklearn.svm import LinearSVR
-from sklearn.neural_network import MLPRegressor
-from sklearn.linear_model import MultiTaskElasticNet
-from sklearn.linear_model import MultiTaskElasticNetCV
-from sklearn.linear_model import MultiTaskLasso
-from sklearn.linear_model import MultiTaskLassoCV
-from sklearn.svm import NuSVR
-from sklearn.linear_model import OrthogonalMatchingPursuit
-from sklearn.linear_model import OrthogonalMatchingPursuitCV
-from sklearn.cross_decomposition import PLSCanonical
-from sklearn.cross_decomposition import PLSRegression
-from sklearn.linear_model import PassiveAggressiveRegressor
-from sklearn.linear_model import RANSACRegressor
-from sklearn.neighbors import RadiusNeighborsRegressor
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import Ridge
-from sklearn.linear_model import RidgeCV
-from sklearn.linear_model import SGDRegressor
-from sklearn.svm import SVR
-from sklearn.linear_model import TheilSenRegressor
-from sklearn.compose import TransformedTargetRegressor
+from sklearn.metrics               import log_loss
+from sklearn                       import model_selection
+from sklearn.model_selection       import GridSearchCV
+from sklearn.model_selection       import RandomizedSearchCV
+from sklearn.metrics               import confusion_matrix
 
+from sklearn.linear_model          import ARDRegression
+from sklearn.ensemble              import AdaBoostRegressor
+from sklearn.ensemble              import BaggingRegressor
+from sklearn.linear_model          import BayesianRidge
+from sklearn.cross_decomposition   import CCA
+from sklearn.tree                  import DecisionTreeRegressor
+from sklearn.linear_model          import ElasticNet
+from sklearn.linear_model          import ElasticNetCV
+from sklearn.tree                  import ExtraTreeRegressor
+from sklearn.ensemble              import ExtraTreesRegressor
+from sklearn.gaussian_process      import GaussianProcessRegressor
+from sklearn.ensemble              import GradientBoostingRegressor
+from sklearn.linear_model          import HuberRegressor
+from sklearn.neighbors             import KNeighborsRegressor
+from sklearn.kernel_ridge          import KernelRidge
+from sklearn.linear_model          import Lars
+from sklearn.linear_model          import LarsCV
+from sklearn.linear_model          import Lasso
+from sklearn.linear_model          import LassoCV
+from sklearn.linear_model          import LassoLars
+from sklearn.linear_model          import LassoLarsCV
+from sklearn.linear_model          import LassoLarsIC
+from sklearn.linear_model          import LinearRegression
+from sklearn.svm                   import LinearSVR
+from sklearn.neural_network        import MLPRegressor
+from sklearn.linear_model          import MultiTaskElasticNet
+from sklearn.linear_model          import MultiTaskElasticNetCV
+from sklearn.linear_model          import MultiTaskLasso
+from sklearn.linear_model          import MultiTaskLassoCV
+from sklearn.svm                   import NuSVR
+from sklearn.linear_model          import OrthogonalMatchingPursuit
+from sklearn.linear_model          import OrthogonalMatchingPursuitCV
+from sklearn.cross_decomposition   import PLSCanonical
+from sklearn.cross_decomposition   import PLSRegression
+from sklearn.linear_model          import PassiveAggressiveRegressor
+from sklearn.linear_model          import RANSACRegressor
+from sklearn.neighbors             import RadiusNeighborsRegressor
+from sklearn.ensemble              import RandomForestRegressor
+from sklearn.linear_model          import Ridge
+from sklearn.linear_model          import RidgeCV
+from sklearn.linear_model          import SGDRegressor
+from sklearn.svm                   import SVR
+from sklearn.linear_model          import TheilSenRegressor
+from sklearn.compose               import TransformedTargetRegressor
 
-DEBUG = False
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+from api.sub.codex_math        import codex_impute
+from api.sub.codex_system      import codex_log
+from api.sub.codex_return_code import logReturnCode
+from api.sub.codex_time_log    import getComputeTimeEstimate
+from api.sub.codex_time_log    import logTime
+from api.sub.codex_hash        import get_cache
 
 
 def ml_regression(
@@ -136,9 +131,9 @@ def ml_regression(
     try:
         result =  run_codex_regression(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=codex_hash)
     except BaseException:
-        codex_system.codex_log("Failed to run regression algorithm")
+        codex_log("Failed to run regression algorithm")
         result['message'] = "Failed to run regression algorithm"
-        codex_system.codex_log(traceback.format_exc())
+        codex_log(traceback.format_exc())
         return None
 
     return result
@@ -229,7 +224,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
     '''
     codex_hash = get_cache(session)
 
-    codex_return_code.logReturnCode(inspect.currentframe())
+    logReturnCode(inspect.currentframe())
     startTime = time.time()
     result = {'algorithm': algorithm,
               'downsample': downsampled,
@@ -239,7 +234,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
-        codex_system.codex_log("Regression: " + algorithm + ": Hash not found. Returning!")
+        codex_log("Regression: " + algorithm + ": Hash not found. Returning!")
         return None
 
     data = returnHash['data']
@@ -249,24 +244,24 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
     if subsetHash is not False  and subsetHash is not None:
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log("ERROR: run_codex_regression - subsetHash returned None.")
+            codex_log("ERROR: run_codex_regression - subsetHash returned None.")
             return None
 
     full_samples = len(data)
     if downsampled is not False:
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+        codex_log("Downsampling to " + str(downsampled) + " percent")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled, session=codex_hash)
 
     if data.ndim < 2:
-        codex_system.codex_log("ERROR: run_codex_regression - insufficient data dimmensions")
+        codex_log("ERROR: run_codex_regression - insufficient data dimmensions")
         return None
 
     X = data
-    X = codex_math.codex_impute(X)
+    X = codex_impute(X)
     result['X'] = X.tolist()
 
-    result['eta'] = codex_time_log.getComputeTimeEstimate("regression", algorithm, full_samples)
+    result['eta'] = getComputeTimeEstimate("regression", algorithm, full_samples)
 
     accepted_scoring_metrics = ["explained_variance", "max_error", "neg_mean_absolute_error", "neg_mean_squared_error", "neg_mean_squared_log_error", "neg_median_absolute_error", "r2"]
     if scoring not in accepted_scoring_metrics:
@@ -276,7 +271,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
     # TODO - labels are currently cached under features
     labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
     if labelHash_dict is None:
-        codex_system.codex_log("label hash not found. Returning!")
+        codex_log("label hash not found. Returning!")
         return {'algorithm': algorithm,
                 'downsample': downsampled,
                 'cross_val': cross_val,
@@ -677,7 +672,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime(
+    logTime(
         "regression",
         algorithm,
         computeTime,
@@ -690,7 +685,8 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 
 
 

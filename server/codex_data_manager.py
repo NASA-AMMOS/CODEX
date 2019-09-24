@@ -10,23 +10,20 @@ Copyright 2019 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
 '''
 import os
-## Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-
 import sys
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api'))
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
 import traceback
 import base64
-import numpy as np
 import scipy
 import scipy.signal
 import math
 
-import codex_doctest
-from codex_hash import get_cache
-import codex_system
+import numpy as np
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+
+from api.sub.codex_system import codex_log
+from api.sub.codex_hash   import get_cache
 
 def get_data_metrics(msg, result):
     '''
@@ -54,7 +51,7 @@ def get_data_metrics(msg, result):
         if hashLib:
             data = hashLib['data']
         else:
-            codex_system.codex_log("Failed to return hashLib")
+            codex_log("Failed to return hashLib")
             result = {}
             result["status"] = "failed"
             result['name'] = feature_name   
@@ -74,10 +71,10 @@ def get_data_metrics(msg, result):
             result['hist_data'] = hist.tolist()
             result['hist_edges'] = bin_edges.tolist()
             result["status"] = "success"
-            codex_system.codex_log("Successfully retrieved {f} metrics".format(f=feature_name))
+            codex_log("Successfully retrieved {f} metrics".format(f=feature_name))
 
         except:
-            codex_system.codex_log("Error occured while computing feature data metrics")
+            codex_log("Error occured while computing feature data metrics")
             result["status"] = "failed"
             result['name'] = feature_name
     
@@ -285,5 +282,6 @@ def update_data(msg, result):
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 

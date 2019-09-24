@@ -13,13 +13,13 @@ import sys
 import math
 import gc
 import psutil
+
 import numpy as np
-CODEX_ROOT = os.getenv('CODEX_ROOT')
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
-import codex_yaml
-
-
+from api.sub.codex_yaml        import codex_read_yaml
 
 def get_featureList(featureList):
     '''
@@ -37,15 +37,8 @@ def get_featureList(featureList):
         Success
 
     '''
-    import codex_return_code
-
-    # TODO - do I need featureString?
-    #featureString = "featureList =['"
-    #for feature_name in featureList:
-    #    featureString += (feature_name + "','")
-    #featureString = featureString.rstrip(",'")
-    #featureString += "']"
-    codex_return_code.logReturnCode(inspect.currentframe())
+    from api.sub.codex_return_code import logReturnCode
+    logReturnCode(inspect.currentframe())
 
     return featureList
 
@@ -147,7 +140,7 @@ def get_setting(settingName):
     500
     '''
 
-    yaml = codex_yaml.codex_read_yaml(CODEX_ROOT + "/codex_settings.yaml")
+    yaml = codex_read_yaml(CODEX_ROOT + "/codex_settings.yaml")
     return yaml[settingName]
 
 
@@ -213,6 +206,6 @@ def codex_server_memory_check(verbose=False, session=None):
 
 if __name__ == "__main__":
 
-    import codex_doctest
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 

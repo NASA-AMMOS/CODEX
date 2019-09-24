@@ -11,30 +11,27 @@ U.S. Government Sponsorship acknowledged.
 '''
 import os
 import sys
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
-# Python Libraries
 import traceback
-from sklearn.metrics import r2_score
-from scipy import stats
 import numpy.polynomial.chebyshev
-import numpy as np
 import time
 import statistics
 import math
 import h5py
 import inspect
 
+import numpy as np
+
+from sklearn.metrics import r2_score
+from scipy           import stats
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
 # CODEX Support
-import codex_doctest
-import codex_math
-import codex_time_log
-from codex_hash import get_cache
-import codex_read_data_api
-import codex_return_code
-import codex_system
+from api.sub.codex_math        import codex_impute
+from api.sub.codex_time_log    import logTime
+from api.sub.codex_return_code import logReturnCode
+from api.sub.codex_system      import codex_log
+from api.sub.codex_hash        import get_cache
 
 def ml_quality_scan(
         inputHash,
@@ -77,9 +74,9 @@ def ml_quality_scan(
         try:
             result = codex_count_oddities(inputHash, subsetHash, session=codex_hash)
         except BaseException:
-            codex_system.codex_log("Failed to run count_oddities")
+            codex_log("Failed to run count_oddities")
             result['message'] = "Failed to run count_oddities"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
     elif(algorithmName == 'sigma_data'):
@@ -87,25 +84,25 @@ def ml_quality_scan(
         try:
             sigma = int(parms["sigma"])
         except BaseException:
-            codex_system.codex_log("sigma parameter not set")
+            codex_log("sigma parameter not set")
             result['message'] = "sigma parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             inside = parms["inside"]
         except BaseException:
-            codex_system.codex_log("inside parameter not set")
+            codex_log("inside parameter not set")
             result['message'] = "inside parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             result = codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=codex_hash)
         except BaseException:
-            codex_system.codex_log("Failed to run codex_get_sigma_data")
+            codex_log("Failed to run codex_get_sigma_data")
             result['message'] = "Failed to run codex_get_sigma_data"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
     else:
@@ -147,7 +144,7 @@ def codex_count_oddities(inputHash, subsetHash, session=None):
     '''
 
     codex_hash = get_cache(session)
-    codex_return_code.logReturnCode(inspect.currentframe())
+    logReturnCode(inspect.currentframe())
     startTime = time.time()
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
@@ -159,7 +156,7 @@ def codex_count_oddities(inputHash, subsetHash, session=None):
     feature_name = returnHash['name']
     dtype = feature.dtype
 
-    feature = codex_math.codex_impute(feature)
+    feature = codex_impute(feature)
 
     if(subsetHash is not False):
         feature = codex_hash.applySubsetMask(data, subsetHash)
@@ -202,7 +199,7 @@ def codex_count_oddities(inputHash, subsetHash, session=None):
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime(
+    logTime(
         "quality_scan",
         "count_oddities",
         computeTime,
@@ -252,7 +249,7 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=None):
     '''
     codex_hash = get_cache(session)
 
-    codex_return_code.logReturnCode(inspect.currentframe())
+    logReturnCode(inspect.currentframe())
     startTime = time.time()
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
@@ -298,7 +295,7 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=None):
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime(
+    logTime(
         "quality_scan",
         "sigma_data",
         computeTime,
@@ -339,7 +336,7 @@ def codex_column_correlation(inputHash, subsetHash, session=None):
         '''
 
     codex_hash = get_cache(session)
-    codex_return_code.logReturnCode(inspect.currentframe())
+    logReturnCode(inspect.currentframe())
     startTime = time.time()
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
@@ -373,7 +370,7 @@ def codex_column_correlation(inputHash, subsetHash, session=None):
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime(
+    logTime(
         "quality_scan",
         "column_correlation",
         computeTime,
@@ -418,7 +415,7 @@ def codex_column_threshold(
     '''
     codex_hash = get_cache(session)
 
-    codex_return_code.logReturnCode(inspect.currentframe())
+    logReturnCode(inspect.currentframe())
     startTime = time.time()
     returnList = []
 
@@ -448,7 +445,7 @@ def codex_column_threshold(
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime(
+    logTime(
         "quality_scan",
         "column_threshold",
         computeTime,
@@ -459,12 +456,14 @@ def codex_column_threshold(
                   "threshold_min": threshold_min,
                   "threshold_max": threshold_max,
                   "percentage_data": dataPercentage}
+
     return dictionary
 
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 
 
     

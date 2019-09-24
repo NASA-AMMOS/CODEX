@@ -13,14 +13,14 @@ import sys
 import numpy as np
 import traceback
 
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX library imports
-import codex_system
-from codex_hash import get_cache
-import codex_doctest
-from spanning import mask_spanning_subset
+import api.sub.codex_system
+import api.sub.codex_math
+
+from api.sub.codex_hash import get_cache
+from api.sub.spanning   import mask_spanning_subset
 
 def downsample(inputArray, samples=0, percentage=0.0, session=None):
     '''
@@ -72,6 +72,7 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None):
     # first, create a hash of the input array, don't save
     inputHash = codex_hash.hashArray("NOSAVE", inputArray, "NOSAVE")
     inputHashCode = inputHash["hash"]
+    inputArray = codex_math.codex_impute(inputArray) # TODO - mblib spanning seems to have problems with NaNs.  Impute until fixed.
 
     if inputArray.ndim == 1:
         inputList = [inputArray.tolist()]
@@ -129,4 +130,5 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None):
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from codex_doctest import run_codex_doctest
+    run_codex_doctest()

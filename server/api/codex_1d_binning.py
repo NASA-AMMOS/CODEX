@@ -11,26 +11,21 @@ U.S. Government Sponsorship acknowledged.
 '''
 import os
 import sys
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
 import time
 import collections
 import traceback
-import numpy as N
-from scipy import stats
-
-# CODEX Support
-import codex_doctest
-import codex_time_log
-from codex_hash import get_cache
-import codex_read_data_api
-import codex_return_code
 import inspect
 
-DEBUG = False
+import numpy as N
 
+from scipy import stats
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+# CODEX Support
+from api.sub.codex_time_log    import logTime
+from api.sub.codex_return_code import logReturnCode
+from api.sub.codex_hash        import get_cache
 
 def ml_binning(
         inputHash,
@@ -154,12 +149,13 @@ def codex_binned_stat(
 
         >>> from codex_hash import DOCTEST_SESSION
         >>> codex_hash = get_cache(DOCTEST_SESSION)
+        >>> from api.sub.codex_read_data_api import codex_read_hd5
 
         >>> codex_binned_stat(None, bins = range(10), session=codex_hash)
         Hash not found. Returning!
 
         >>> featureList = ['L2/RetrievalResults/xco2']
-        >>> hashList = codex_read_data_api.codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature", session=codex_hash)
+        >>> hashList = codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature", session=codex_hash)
 
         >>> inputHash = hashList[0][0]
         >>> results = codex_binned_stat(inputHash, session=codex_hash)
@@ -324,9 +320,9 @@ def codex_binned_stat(
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("binning", "1d", computeTime, len(x), x.ndim)
+    logTime("binning", "1d", computeTime, len(x), x.ndim)
 
-    codex_return_code.logReturnCode(inspect.currentframe())
+    logReturnCode(inspect.currentframe())
 
     dictionary = {"bin_centers": bins.tolist(), 'values': values.tolist()}
     return dictionary
@@ -334,7 +330,8 @@ def codex_binned_stat(
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 
 
 

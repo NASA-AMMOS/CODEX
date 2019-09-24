@@ -8,17 +8,21 @@ Notes :
 '''
 import os
 import sys
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-
 import time
 import h5py
 import os.path
+
 import numpy as np
-from scipy import misc
-from random import randint
-from heapq import nsmallest
-from os import listdir
-from os.path import isfile, join, isdir
+
+from scipy    import misc
+from random   import randint
+from heapq    import nsmallest
+from os       import listdir
+from os.path  import isfile
+from os.path  import join
+from os.path  import isdir 
+
+CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 logPath = os.path.join(CODEX_ROOT, "timeLogs")
 timeLogs = {}

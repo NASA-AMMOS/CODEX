@@ -11,30 +11,25 @@ U.S. Government Sponsorship acknowledged.
 '''
 import sys
 import os
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
 import traceback
 import time
 import math
-from scipy.spatial.distance import euclidean
-import numpy as np
-from fastdtw import fastdtw
 import inspect
 
+import numpy as np
+
+from scipy.spatial.distance import euclidean
+from fastdtw                import fastdtw
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
 # CODEX Support
-import codex_downsample
-import codex_system
-import codex_doctest
-import codex_time_log
-import codex_return_code
-from codex_hash import get_cache
-import codex_math
-import codex_read_data_api
-
-DEBUG = False
-
+from api.sub.codex_downsample  import downsample
+from api.sub.codex_system      import codex_log
+from api.sub.codex_time_log    import logTime
+from api.sub.codex_return_code import logReturnCode
+from api.sub.codex_math        import codex_impute
+from api.sub.codex_hash        import get_cache
 
 def ml_template_scan(
         inputHash,
@@ -52,9 +47,9 @@ def ml_template_scan(
     Outputs:
 
     Examples:
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = api.sub.codex_doctest.doctest_get_data(session=codex_hash)
 
     # Missing algorithmType
     >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "temp", False, {'num_templates': 1, 'scan_jump': 50}, {}, session=codex_hash)
@@ -79,7 +74,7 @@ def ml_template_scan(
     if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
-        codex_system.codex_log("Feature hash failure in ml_cluster")
+        codex_log("Feature hash failure in ml_cluster")
         result['message'] = "Feature hash failure in ml_cluster"
         return None
 
@@ -100,7 +95,7 @@ def ml_template_scan(
         else:
             templateHash = templateHash["hash"]
     else:
-        codex_system.codex_log("Template hash name not given")
+        codex_log("Template hash name not given")
         return None
 
     if(algorithmName == 'template'):
@@ -108,17 +103,17 @@ def ml_template_scan(
         try:
             num_templates = int(parms['num_templates'])
         except BaseException:
-            codex_system.codex_log("num_templates parameter not set")
+            codex_log("num_templates parameter not set")
             result['message'] = "num_templates parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             scan_jump = int(parms['scan_jump'])
         except BaseException:
-            codex_system.codex_log("scan_jump parameter not set")
+            codex_log("scan_jump parameter not set")
             result['message'] = "scan_jump parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
@@ -131,9 +126,9 @@ def ml_template_scan(
                 scan_jump,
                 session=codex_hash)
         except BaseException:
-            codex_system.codex_log("Failed to run template scan algorithm")
+            codex_log("Failed to run template scan algorithm")
             result['message'] = "Failed to run template scan algorithm"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
     else:
@@ -168,7 +163,7 @@ def codex_template_scan(
     '''
     codex_hash = get_cache(session)
 
-    codex_return_code.logReturnCode(inspect.currentframe())
+    logReturnCode(inspect.currentframe())
     startTime = time.time()
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
@@ -182,7 +177,7 @@ def codex_template_scan(
         X = codex_hash.applySubsetMask(X, subsetHash)
 
     if(downsampled is not False):
-        X = codex_downsample.downsample(X, percentage=downsampled, session=codex_hash)
+        X = downsample(X, percentage=downsampled, session=codex_hash)
 
     returnTemplateHash = codex_hash.findHashArray(
         "hash", templateHash, "feature")
@@ -190,7 +185,7 @@ def codex_template_scan(
         print("Error: codex_template_scan: templateHash not found.")
         return
 
-    X = codex_math.codex_impute(X)
+    X = codex_impute(X)
     y = returnTemplateHash['data']
 
     templateLength = len(y)
@@ -224,7 +219,7 @@ def codex_template_scan(
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("template_scan", "dtw", computeTime, len(X), X.ndim)
+    logTime("template_scan", "dtw", computeTime, len(X), X.ndim)
 
     uniques = np.unique(similarAreas)
     locationsFound = len(uniques) - 1
@@ -235,4 +230,5 @@ def codex_template_scan(
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
