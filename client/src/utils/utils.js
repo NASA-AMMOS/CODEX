@@ -195,3 +195,22 @@ export function makeStreamRequest(request, cb) {
 
     return cancel;
 }
+
+/**
+ * Removes any row that has sentinel values from a dataset.
+ * @param {array} array of data columns
+ * @param {object} object with the sentinel values defined
+ * @returns {array} data columns, with any row that has sentinel values returned.
+ */
+export function removeSentinelValues(cols, fileInfo) {
+    const sentinelValues = [fileInfo.nan, fileInfo.inf, fileInfo.finf];
+
+    // If there aren't any sentinel values, avoid filtering.
+    if (sentinelValues.every(val => val === null)) return cols;
+
+    return unzip(
+        zip(cols).filter(row => {
+            return row.every(val => !sentinelValues.includes(val));
+        })
+    );
+}

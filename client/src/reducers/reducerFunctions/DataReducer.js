@@ -27,31 +27,10 @@ export default class DataReducer {
                 )
             )
             .set("filename", action.filename)
-            .set(
-                "master",
-                Immutable.fromJS({
-                    name: "Master",
-                    mask: action.data.length
-                        ? Array.from(Array(action.data.length - 1), () => true)
-                        : [],
-                    color: uiTypes.SELECTIONS_MASTER_COLOR,
-                    visible: true,
-                    emphasize: false
-                })
-            )
+            .set("nan", action.nan)
+            .set("inf", action.inf)
+            .set("ninf", action.ninf)
             .set("selections", Immutable.fromJS([]))
-            .set(
-                "brush",
-                Immutable.fromJS({
-                    name: "Brush",
-                    mask: action.data.length
-                        ? Array.from(Array(action.data.length - 1), () => false)
-                        : [],
-                    color: uiTypes.SELECTIONS_BRUSH_COLOR,
-                    visible: true,
-                    emphasize: false
-                })
-            )
             .set("loadedData", Immutable.fromJS([]));
     }
 

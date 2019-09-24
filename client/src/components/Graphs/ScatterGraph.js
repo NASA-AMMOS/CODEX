@@ -18,7 +18,8 @@ import {
     useCurrentSelection,
     useSavedSelections,
     usePinnedFeatures,
-    useHoveredSelection
+    useHoveredSelection,
+    useFileInfo
 } from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
@@ -31,8 +32,11 @@ const COLOR_CURRENT_SELECTION = "#FF0000";
 function ScatterGraph(props) {
     const chart = useRef(null);
 
-    // plug through data props
-    const cols = props.data.map(f => f.get("data")).toJS();
+    const cols = utils.removeSentinelValues(
+        props.data.map(f => f.get("data")).toJS(),
+        props.fileInfo
+    );
+
     const xAxis = props.data.getIn([0, "feature"]);
     const yAxis = props.data.getIn([1, "feature"]);
 
@@ -221,6 +225,7 @@ export default props => {
     const [savedSelections, saveCurrentSelection] = useSavedSelections();
     const [globalChartState, setGlobalChartState] = useGlobalChartState();
     const [hoverSelection, saveHoverSelection] = useHoveredSelection();
+    const fileInfo = useFileInfo();
 
     const features = usePinnedFeatures(win);
 
@@ -244,6 +249,7 @@ export default props => {
                 hoverSelection={hoverSelection}
                 globalChartState={globalChartState}
                 data={features}
+                fileInfo={fileInfo}
             />
         );
     } else {
