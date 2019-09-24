@@ -20,9 +20,9 @@ import matplotlib.image as mpimg
 
 import numpy as np
 import os
+
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
-import codex_doctest
 
 def getColorMap():
     '''
@@ -132,5 +132,5 @@ def codex_plot_peak(data, indexes):
 
 if __name__ == "__main__":
 
-
-    codex_doctest.run_codex_doctest()
+    from codex_doctest import run_codex_doctest
+    run_codex_doctest()

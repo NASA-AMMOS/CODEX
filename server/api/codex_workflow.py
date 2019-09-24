@@ -14,28 +14,27 @@ import sys
 import time
 import h5py
 import traceback
+
 import numpy as np
 np.set_printoptions(threshold=sys.maxsize)
-from sklearn.neighbors import kneighbors_graph
+
+from sklearn.neighbors       import kneighbors_graph
 from sklearn.model_selection import train_test_split
-from sklearn import cluster
+from sklearn                 import cluster
+from sklearn.tree            import DecisionTreeClassifier
+from sklearn.ensemble        import RandomForestClassifier
+from sklearn.model_selection import RandomizedSearchCV
 
-
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
-import codex_return_code
-import codex_math
-import codex_time_log
-import codex_doctest
-from codex_hash import get_cache
-import codex_system
-import codex_labels
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import RandomizedSearchCV
+import api.sub.codex_return_code
+import api.sub.codex_math
+import api.sub.codex_time_log
+import api.sub.codex_system
+import api.sub.codex_labels
+
+from api.sub.codex_hash import get_cache
 
 def get_proportion_tree_sums(clf, X_test, y_test):
     """
@@ -465,4 +464,5 @@ def find_more_like_this(inputHash, featureList, dataSelections, similarityThresh
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()

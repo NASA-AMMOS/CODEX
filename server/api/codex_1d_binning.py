@@ -11,26 +11,23 @@ U.S. Government Sponsorship acknowledged.
 '''
 import os
 import sys
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
 import time
 import collections
 import traceback
-import numpy as N
-from scipy import stats
-
-# CODEX Support
-import codex_doctest
-import codex_time_log
-from codex_hash import get_cache
-import codex_read_data_api
-import codex_return_code
 import inspect
 
-DEBUG = False
+import numpy as N
 
+from scipy import stats
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+# CODEX Support
+import api.sub.codex_time_log
+import api.sub.codex_read_data_api
+import api.sub.codex_return_code
+
+from api.sub.codex_hash import get_cache
 
 def ml_binning(
         inputHash,
@@ -334,7 +331,8 @@ def codex_binned_stat(
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 
 
 

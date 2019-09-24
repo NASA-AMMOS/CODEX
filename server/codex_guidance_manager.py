@@ -10,16 +10,11 @@ Copyright 2019 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
 '''
 import os
-## Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-
 import sys
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api'))
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
 
-import codex_guidance
-import codex_doctest
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+from api.sub.codex_guidance import get_guidance_text_block
 
 def get_guidance(msg, result):
     '''
@@ -35,7 +30,7 @@ def get_guidance(msg, result):
     split = guidance.split(":")
     
     if (len(split) == 2):
-        guidanceString = codex_guidance.get_guidance_text_block(split[0], split[1])
+        guidanceString = get_guidance_text_block(split[0], split[1])
         if (guidanceString is not None):
             result["guidance"] = guidanceString
             result["message"] = "success"
@@ -55,5 +50,6 @@ def get_guidance(msg, result):
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 

@@ -11,20 +11,17 @@ U.S. Government Sponsorship acknowledged.
 '''
 import os
 import sys
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
 import traceback
-import numpy as np
 import statistics
 import math
 
-DEBUG = False
+import numpy as np
 
-import codex_system
-from codex_hash import get_cache
-import codex_doctest
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+import api.sub.codex_system
+
+from api.sub.codex_hash import get_cache
 
 def ml_normalize(
         hashList,
@@ -150,6 +147,7 @@ def codex_n(X):
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 
     

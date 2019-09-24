@@ -10,9 +10,9 @@ Notes :
 import os
 import sys
 import yaml
+
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
-import codex_doctest
 import codex_yaml
 
 def get_guidance_text_block(page, section):
@@ -44,4 +44,5 @@ def get_guidance_text_block(page, section):
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from codex_doctest import run_codex_doctest
+    run_codex_doctest()

@@ -10,18 +10,16 @@ Copyright 2019 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
 '''
 import os
-## Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-
 import sys
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api'))
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
 import inspect
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
 import codex_workflow
 import codex_doctest
 import codex_return_code
 import codex_system
+
 from codex_hash import get_cache
 
 def workflow_call(msg, result):

@@ -13,13 +13,13 @@ import sys
 import math
 import gc
 import psutil
+
 import numpy as np
+
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 
 # CODEX Support
 import codex_yaml
-
-
 
 def get_featureList(featureList):
     '''
@@ -213,6 +213,6 @@ def codex_server_memory_check(verbose=False, session=None):
 
 if __name__ == "__main__":
 
-    import codex_doctest
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 

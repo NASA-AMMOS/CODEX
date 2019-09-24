@@ -11,30 +11,28 @@ U.S. Government Sponsorship acknowledged.
 '''
 import os
 import sys
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
 import time
 import h5py
 import traceback
-from detect_peaks import detect_peaks
-from scipy.signal import find_peaks_cwt
-import numpy as np
 import inspect
 
-# CODEX Support
-import codex_math
-import codex_system
-import codex_doctest
-import codex_read_data_api
-import codex_return_code
-import codex_downsample
-import codex_plot
-import codex_time_log
-from codex_hash import get_cache
+import numpy as np
 
-DEBUG = False
+from detect_peaks import detect_peaks
+from scipy.signal import find_peaks_cwt
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+# CODEX Support
+import api.sub.codex_math
+import api.sub.codex_system
+import api.sub.codex_read_data_api
+import api.sub.codex_return_code
+import api.sub.codex_downsample
+import api.sub.codex_plot
+import api.sub.codex_time_log
+
+from api.sub.codex_hash import get_cache
 
 # Note: algorithm source: https://blog.ytotech.com/2015/11/01/findpeaks-in-python/
 # Note: algorithm source:
@@ -406,6 +404,7 @@ def codex_matlab_findpeaks(
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 
     

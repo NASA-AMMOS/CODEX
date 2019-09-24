@@ -16,28 +16,26 @@ import time
 import h5py
 import inspect
 import traceback
+
 import numpy as np
+
 from sklearn.neighbors import kneighbors_graph
-from sklearn import cluster
+from sklearn           import cluster
 
-DEBUG = False
-
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
-import codex_return_code
-import codex_math
-import codex_time_log
-import codex_doctest
-import codex_plot
-import codex_read_data_api
-import codex_downsample
-from codex_hash import get_cache
-import codex_dimmension_reduction_api
-import codex_system
-import codex_labels
+import api.sub.codex_return_code
+import api.sub.codex_math
+import api.sub.codex_time_log
+import api.sub.codex_plot
+import api.sub.codex_read_data_api
+import api.sub.codex_downsample
+import api.codex_dimmension_reduction_api
+import api.sub.codex_system
+import api.sub.codex_labels
+
+from api.sub.codex_hash import get_cache
 
 def ml_cluster(
         inputHash,
@@ -274,10 +272,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
 
 if __name__ == "__main__":
 
-    #codex_doctest.run_codex_doctest()
-    from codex_hash import DOCTEST_SESSION
-    codex_hash = get_cache(DOCTEST_SESSION)
-    testData = codex_doctest.doctest_get_data(session=codex_hash)
-    run_codex_clustering(testData['inputHash'], False, 500, "kmeans", {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, session=codex_hash)
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 
     

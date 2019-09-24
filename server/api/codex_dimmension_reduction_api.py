@@ -12,12 +12,6 @@ U.S. Government Sponsorship acknowledged.
 '''
 import os
 import sys
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
-import numpy as np
-from sklearn.decomposition import PCA, FastICA
 import h5py
 import time
 import sklearn
@@ -25,16 +19,21 @@ import collections
 import traceback
 import inspect
 
-# CODEX Support
-import codex_system
-import codex_math
-import codex_downsample
-import codex_doctest
-from codex_hash import get_cache
-import codex_read_data_api
-import codex_return_code
-import codex_time_log
+import numpy as np
 
+from sklearn.decomposition import PCA, FastICA
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+# CODEX Support
+import api.sub.codex_system
+import api.sub.codex_math
+import api.sub.codex_downsample
+import api.sub.codex_read_data_api
+import api.sub.codex_return_code
+import api.sub.codex_time_log
+
+from api.sub.codex_hash import get_cache
 
 def ml_dimensionality_reduction(
         inputHash,
@@ -137,7 +136,7 @@ def run_codex_dim_reduction(
     data = codex_math.codex_impute(data)
 
     if(data.ndim > n_components):
-        codex_system.codex_log("ERROR: run_codex_dim_reduction: features (" + str(data.ndim) +") > requested components (" +str(n_components) +")")
+        codex_system.codex_log("ERROR: run_codex_dim_reduction: features ({ndim}) > requested components ({components})".format(ndim=data.ndim, components=n_components))
         return None
 
     try:
@@ -206,5 +205,6 @@ def run_codex_dim_reduction(
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 

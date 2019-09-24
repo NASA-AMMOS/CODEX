@@ -13,7 +13,6 @@
 # note that the function peakdetect is derived from code which was released to
 # public domain see: http://billauer.co.il/peakdet.html
 #
-
 import logging
 from math import pi, log
 import numpy as np

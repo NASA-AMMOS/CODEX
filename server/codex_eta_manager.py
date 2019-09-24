@@ -9,17 +9,13 @@ Notes :
 Copyright 2019 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
 '''
-
 import os
-## Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-
 import sys
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api'))
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
 
-import codex_time_log
-import codex_doctest
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+from api.sub.codex_time_log import getComputeTimeEstimate
+
 
 def get_time_estimate(msg, result):
 
@@ -30,7 +26,7 @@ def get_time_estimate(msg, result):
 	# TODO - extend computeTimeEstimate to factor in number of features
 	numFeatures = int(msg['numFeatures'])
 
-	eta = codex_time_log.getComputeTimeEstimate(algorithmType, algorithmName, numSamples)
+	eta = getComputeTimeEstimate(algorithmType, algorithmName, numSamples)
 
 	result['eta'] = eta
 	result['message'] = 'success'
@@ -44,4 +40,5 @@ def get_time_estimate(msg, result):
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+	from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()

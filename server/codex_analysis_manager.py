@@ -10,16 +10,12 @@ Copyright 2019 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
 '''
 import os
-## Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-
 import sys
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api'))
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
 import base64
 
-import codex_return_code
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+import api.sub.codex_return_code
 
 def download_code(msg, result):
 
@@ -36,6 +32,7 @@ def download_code(msg, result):
 
 
 if __name__ == "__main__":
+    
     import codex_doctest
     codex_doctest.run_codex_doctest()
 

@@ -11,30 +11,29 @@ U.S. Government Sponsorship acknowledged.
 '''
 import os
 import sys
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
-# Python Libraries
 import traceback
-from sklearn.metrics import r2_score
-from scipy import stats
 import numpy.polynomial.chebyshev
-import numpy as np
 import time
 import statistics
 import math
 import h5py
 import inspect
 
+import numpy as np
+
+from sklearn.metrics import r2_score
+from scipy           import stats
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
 # CODEX Support
-import codex_doctest
 import codex_math
 import codex_time_log
-from codex_hash import get_cache
 import codex_read_data_api
 import codex_return_code
 import codex_system
+
+from codex_hash import get_cache
 
 def ml_quality_scan(
         inputHash,
@@ -464,7 +463,8 @@ def codex_column_threshold(
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from codex_doctest import run_codex_doctest
+    run_codex_doctest()
 
 
     

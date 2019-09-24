@@ -11,30 +11,27 @@ U.S. Government Sponsorship acknowledged.
 '''
 import sys
 import os
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
 import traceback
 import time
 import math
-from scipy.spatial.distance import euclidean
-import numpy as np
-from fastdtw import fastdtw
 import inspect
 
+import numpy as np
+
+from scipy.spatial.distance import euclidean
+from fastdtw                import fastdtw
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
 # CODEX Support
-import codex_downsample
-import codex_system
-import codex_doctest
-import codex_time_log
-import codex_return_code
-from codex_hash import get_cache
-import codex_math
-import codex_read_data_api
+import api.sub.codex_downsample
+import api.sub.codex_system
+import api.sub.codex_time_log
+import api.sub.codex_return_code
+import api.sub.codex_math
+import api.sub.codex_read_data_api
 
-DEBUG = False
-
+from api.sub.codex_hash import get_cache
 
 def ml_template_scan(
         inputHash,
@@ -235,4 +232,5 @@ def codex_template_scan(
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()

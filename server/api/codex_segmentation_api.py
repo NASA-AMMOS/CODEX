@@ -11,32 +11,28 @@ U.S. Government Sponsorship acknowledged.
 '''
 import os
 import sys
-# Enviornment variable for setting CODEX root directory.
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
 import h5py
 import traceback
-from skimage.segmentation import quickshift
-from skimage.segmentation import felzenszwalb
-import numpy as np
-import sys
 import time
-import statistics
 import math
 import inspect
 
-# CODEX Support
-import codex_math
-import codex_system
-import codex_time_log
-import codex_doctest
-from codex_hash import get_cache
-import codex_downsample
-import codex_read_data_api
-import codex_return_code
+import numpy as np
 
-DEBUG = False
+from skimage.segmentation import quickshift
+from skimage.segmentation import felzenszwalb
+
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+# CODEX Support
+import api.sub.codex_math
+import api.sub.codex_system
+import api.sub.codex_time_log
+import api.sub.codex_downsample
+import api.sub.codex_read_data_api
+import api.sub.codex_return_code
+
+from api.sub.codex_hash import get_cache
 
 
 def ml_segmentation(
@@ -371,6 +367,7 @@ def codex_segmentation_felzenszwalb(
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 
     

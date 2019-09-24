@@ -21,7 +21,6 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 returnedCodePath = os.path.join(CODEX_ROOT,"returned_code.py")
 contents = []
 
-import codex_doctest
 import codex_hash
 
 def logReturnCode(frame):
@@ -162,5 +161,6 @@ def dump_code_to_file():
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 

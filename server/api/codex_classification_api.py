@@ -13,58 +13,58 @@ U.S. Government Sponsorship acknowledged.
 # Enviornment variable for setting CODEX root directory.
 import os
 import sys
-CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
-
 import time
 import inspect
 import traceback
+import random
+import json
+
 import numpy as np
-from sklearn import model_selection
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import RandomizedSearchCV
-import random, json
-from sklearn.metrics import confusion_matrix
 
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.ensemble import BaggingClassifier
-from sklearn.mixture import BayesianGaussianMixture
-from sklearn.naive_bayes import BernoulliNB
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn.naive_bayes import ComplementNB
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import ExtraTreesClassifier
-from sklearn.tree import ExtraTreeClassifier
-from sklearn.mixture import GaussianMixture
-from sklearn.naive_bayes import GaussianNB
-from sklearn.gaussian_process import GaussianProcessClassifier
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.semi_supervised import LabelPropagation
-from sklearn.semi_supervised import LabelSpreading
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import LogisticRegressionCV
-from sklearn.neural_network import MLPClassifier
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.svm import NuSVC
-from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import SGDClassifier
-from sklearn.svm import SVC
+from sklearn                        import model_selection
+from sklearn.model_selection        import GridSearchCV
+from sklearn.model_selection        import RandomizedSearchCV
+from sklearn.metrics                import confusion_matrix
+from sklearn.ensemble               import AdaBoostClassifier
+from sklearn.ensemble               import BaggingClassifier
+from sklearn.mixture                import BayesianGaussianMixture
+from sklearn.naive_bayes            import BernoulliNB
+from sklearn.calibration            import CalibratedClassifierCV
+from sklearn.naive_bayes            import ComplementNB
+from sklearn.tree                   import DecisionTreeClassifier
+from sklearn.ensemble               import ExtraTreesClassifier
+from sklearn.tree                   import ExtraTreeClassifier
+from sklearn.mixture                import GaussianMixture
+from sklearn.naive_bayes            import GaussianNB
+from sklearn.gaussian_process       import GaussianProcessClassifier
+from sklearn.ensemble               import GradientBoostingClassifier
+from sklearn.neighbors              import KNeighborsClassifier
+from sklearn.semi_supervised        import LabelPropagation
+from sklearn.semi_supervised        import LabelSpreading
+from sklearn.discriminant_analysis  import LinearDiscriminantAnalysis
+from sklearn.linear_model           import LogisticRegression
+from sklearn.linear_model           import LogisticRegressionCV
+from sklearn.neural_network         import MLPClassifier
+from sklearn.naive_bayes            import MultinomialNB
+from sklearn.svm                    import NuSVC
+from sklearn.discriminant_analysis  import QuadraticDiscriminantAnalysis
+from sklearn.ensemble               import RandomForestClassifier
+from sklearn.linear_model           import SGDClassifier
+from sklearn.svm                    import SVC
 
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-import codex_return_code
-import codex_math
-import codex_time_log
-import codex_doctest
-import codex_plot
-import codex_read_data_api
-import codex_downsample
-from codex_hash import get_cache
-import codex_dimmension_reduction_api
-import codex_system
-import codex_labels
+import api.sub.codex_return_code
+import api.sub.codex_math
+import api.sub.codex_time_log
+import api.sub.codex_plot
+import api.sub.codex_read_data_api
+import api.sub.codex_downsample
+import api.codex_dimmension_reduction_api
+import api.sub.codex_system
+import api.sub.codex_labels
+
+from api.sub.codex_hash import get_cache
 
 def ml_classification(
         inputHash,
@@ -459,8 +459,6 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
 if __name__ == "__main__":
 
-    codex_doctest.run_codex_doctest()
-    #testData = codex_doctest.doctest_get_data()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 
-    #result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'precision', session='__doctest__')
-    
