@@ -1,5 +1,6 @@
 import Immutable from "immutable";
 import { defaultInitialSettings } from "constants/windowSettings";
+import * as utils from "utils/utils";
 
 export default class WindowManagerReducer {
     static openNewWindow(state, action) {
@@ -11,11 +12,15 @@ export default class WindowManagerReducer {
                       .toString(36)
                       .substring(7);
 
-        const info = Immutable.fromJS({
+        const baseInfo = Immutable.fromJS({
             ...defaultInitialSettings,
             ...action.info,
             id
         });
+
+        // Set new window position
+        const info = baseInfo.merge(utils.getNewWindowPosition(baseInfo, state.get("windows")));
+
         state = state.set("activeWindow", id);
         return state.set("windows", state.get("windows").concat([info]));
     }
@@ -28,8 +33,8 @@ export default class WindowManagerReducer {
         return state.set("windows", []);
     }
 
-    static setWindowTileActionPending(state, action) {
-        return state.set("tileActionPending", action.isPending);
+    static tileWindows(state, action) {
+        return state.set("windows", utils.tileWindows(state.get("windows")));
     }
 
     static updateWindows(state, action) {

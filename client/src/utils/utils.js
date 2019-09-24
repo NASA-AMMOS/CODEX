@@ -4,6 +4,8 @@ import * as actionTypes from "constants/actionTypes";
 import WorkerSocket from "worker-loader!workers/socket.worker";
 import StreamSocket from "worker-loader!workers/stream.worker";
 
+import ShelfPack from "@mapbox/shelf-pack";
+
 import { generateCombination } from "gfycat-style-urls";
 import { store } from "index";
 
@@ -213,4 +215,114 @@ export function removeSentinelValues(cols, fileInfo) {
             return row.every(val => !sentinelValues.includes(val));
         })
     );
+}
+
+function getWindowContainerBounds() {
+    const windowContainer = document.getElementById("Container");
+    const bounds = windowContainer.getBoundingClientRect();
+    bounds.width = Math.floor(bounds.width);
+    bounds.height = Math.floor(bounds.height);
+    return bounds;
+}
+
+function createPackingObject(win, idx) {
+    return {
+        id: idx,
+        width: win.get("width"),
+        height: win.get("height"),
+        winId: win.get("id"),
+        x: win.get("x"),
+        y: win.get("y")
+    };
+}
+
+export function getNewWindowPosition(newWindow, windows) {
+    // Default to top-left if this is the only window on screen
+    if (windows.length === 0)
+        return {
+            x: 0,
+            y: 0
+        };
+
+    const bounds = getWindowContainerBounds();
+    const currentWindows = windows.filter(win => win.get("x") !== null).map(createPackingObject);
+
+    // Build a matrix of occupied and unoccupied space, adding a 10px buffer to window borders
+    const matrix = Array(bounds.height)
+        .fill()
+        .map((_, y) =>
+            Array(bounds.width)
+                .fill(0)
+                .map((_, x) => true)
+        );
+
+    currentWindows.forEach(win => {
+        for (let y = win.y; y < win.height + win.y + 10; y++) {
+            for (let x = win.x; x < win.width + win.x + 10; x++) {
+                matrix[y][x] = false;
+            }
+        }
+    });
+
+    // Search the matrix for available space and return the x and y coordinates if we find some
+    let cache = Array(bounds.width).fill(0);
+    const stack = [];
+    const width = newWindow.get("width");
+    const height = newWindow.get("height");
+
+    for (let row = 0; row < bounds.height; row++) {
+        cache = cache.map((col, idx) => (matrix[row][idx] ? col + 1 : 0));
+
+        let currentWidth = 0;
+        for (let col = 0; col < bounds.width; col++) {
+            if (cache[col] >= height) {
+                // We've found the start of a box that's tall enough
+                currentWidth = cache[col] >= height ? currentWidth + 1 : 0;
+            }
+
+            if (currentWidth === width) {
+                // And now we have one that's wide enough
+                return { y: row - height + 1, x: col - width + 1 };
+            }
+        }
+    }
+
+    // No available space, default to a simpler heuristic
+    return {
+        x: windows.length * 30 + 10,
+        y: windows.length * 30 + 10
+    };
+}
+
+export function tileWindows(windows) {
+    const bounds = getWindowContainerBounds();
+    let sprite = new ShelfPack(bounds.width, bounds.height, { autoResize: false });
+
+    // First try tiling windows at their current size.
+    let packReqs = windows.map(createPackingObject);
+    let packed = sprite.pack(packReqs);
+
+    // Success - we can tile all windows on the first try
+    if (packed.length === windows.length)
+        return windows.map(win => {
+            const packedIdx = packReqs.find(p => p.winId === win.get("id")).id;
+            return win.set("x", packed[packedIdx].x).set("y", packed[packedIdx].y);
+        });
+
+    return windows;
+
+    // // Shrink windows to their initial size and try tiling again
+    // refAry.forEach(([key, cristalObj]) => {
+    //     const windowType = props.windows.find(win => win.id === key).windowType;
+    //     const { width, height } = windowSettings.initialSizes[windowType];
+    //     cristalObj.state.width = width;
+    //     cristalObj.state.height = height;
+    // });
+
+    // packReqs = createPackingObject(refAry);
+    // sprite = new ShelfPack(bounds.width, bounds.height, { autoResize: false }); // For some reason the clear() method doesn't work with batch packing
+    // packed = sprite.pack(packReqs);
+    // if (packed.length === refAry.length) return tileWindowsFromPackedObject(refAry, packed);
+
+    // console.log("Can't tile windows! Not enough space!");
 }

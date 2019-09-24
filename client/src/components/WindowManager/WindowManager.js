@@ -14,61 +14,6 @@ import * as selectionActions from "actions/selectionActions";
 import * as windowSettings from "constants/windowSettings";
 import WindowErrorBoundary from "components/WindowHelpers/WindowErrorBoundary";
 
-function tileWindowsFromPackedObject(refAry, packed) {
-    refAry.forEach(([key], idx) => {
-        const { x, y } = packed[idx];
-        const [_, win] = refAry[idx];
-        win.snapToPosition({ x, y });
-    });
-}
-
-function createPackingObject(refAry) {
-    return refAry.map(([key, cristalObj], idx) => {
-        return {
-            id: idx,
-            width: cristalObj.state.width,
-            height: cristalObj.state.height,
-            winId: key,
-            x: cristalObj.state.x,
-            y: cristalObj.state.y
-        };
-    });
-}
-
-function tileWindows(props, refs) {
-    const windowContainer = document.getElementById("Container");
-    const bounds = windowContainer.getBoundingClientRect();
-    let sprite = new ShelfPack(bounds.width, bounds.height, { autoResize: false });
-
-    const oldWindows = props.windows;
-
-    // Treat the window ref list as an array so we can use numeric IDs, which are faster with ShelfPack
-    const refAry = Object.entries(refs.current);
-
-    // First try tiling windows at their current size.
-    let packReqs = createPackingObject(refAry);
-    let packed = sprite.pack(packReqs);
-
-    // In all cases, if the number of packed windows doesn't match the number of existing windows,
-    // we know we can't tile all the windows in the available space and have to try something else.
-    if (packed.length === refAry.length) return tileWindowsFromPackedObject(refAry, packed);
-
-    // Shrink windows to their initial size and try tiling again
-    refAry.forEach(([key, cristalObj]) => {
-        const windowType = props.windows.find(win => win.id === key).windowType;
-        const { width, height } = windowSettings.initialSizes[windowType];
-        cristalObj.state.width = width;
-        cristalObj.state.height = height;
-    });
-
-    packReqs = createPackingObject(refAry);
-    sprite = new ShelfPack(bounds.width, bounds.height, { autoResize: false }); // For some reason the clear() method doesn't work with batch packing
-    packed = sprite.pack(packReqs);
-    if (packed.length === refAry.length) return tileWindowsFromPackedObject(refAry, packed);
-
-    console.log("Can't tile windows! Not enough space!");
-}
-
 /**
  * Binary space partition
  */
@@ -163,15 +108,6 @@ function BSPTile(windows) {
     );
 }
 
-// Simple heuristic for window position
-function getNewWindowPosition(props, refs, width, height) {
-    const activeWindows = Object.keys(refs.current).length;
-    return {
-        x: activeWindows * 30,
-        y: activeWindows * 30
-    };
-}
-
 function makeMinimizedBar(props) {
     return (
         <div className="minimizedBar">
@@ -247,10 +183,7 @@ function WindowManager(props) {
     const windows = props.windows
         .filter(win => !win.get("minimizedOnly"))
         .map((win, idx) => {
-            const initialPos =
-                win.get("x") && win.get("y")
-                    ? { x: win.get("x"), y: win.get("y") }
-                    : getNewWindowPosition(props, refs, win.get("width"), win.get("height"));
+            const initialPos = { x: win.get("x"), y: win.get("y") };
 
             const settings = {
                 title: win.get("title"),
