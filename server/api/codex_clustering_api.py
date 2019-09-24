@@ -50,8 +50,9 @@ def ml_cluster(
     Outputs:
 
     Examples:
-    >>> testData = codex_doctest.doctest_get_data()
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
+    >>> testData = doctest_get_data()
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
     >>> codex_hash = get_cache(DOCTEST_SESSION)
 
     >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "kmean", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=codex_hash)

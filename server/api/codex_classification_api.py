@@ -136,9 +136,10 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
     Examples:
 
-        >>> from codex_hash import DOCTEST_SESSION
+        >>> from api.sub.codex_doctest import doctest_get_data
+        >>> from api.sub.codex_hash import DOCTEST_SESSION
         >>> codex_hash = get_cache(DOCTEST_SESSION)
-        >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+        >>> testData = doctest_get_data(session=codex_hash)
 
         >>> result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'fake_scoring_metric', session=codex_hash)
         >>> print(result["WARNING"])

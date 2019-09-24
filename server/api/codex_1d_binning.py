@@ -27,6 +27,7 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 from api.sub.codex_time_log    import logTime
 from api.sub.codex_return_code import logReturnCode
 from api.sub.codex_hash        import get_cache
+from api.sub.codex_doctest     import run_codex_doctest
 
 def ml_binning(
         inputHash,
@@ -43,8 +44,9 @@ def ml_binning(
     Outputs:
 
     Examples:
-    >>> testData = codex_doctest.doctest_get_data()
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
+    >>> testData = doctest_get_data()
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
     >>> codex_hash = get_cache(DOCTEST_SESSION)
 
     >>> result = ml_binning(testData['inputHash'], testData['hashList'], None, "stats", False, {}, {}, session=codex_hash)
@@ -148,7 +150,7 @@ def codex_binned_stat(
 
         # First try without valid inputHash
 
-        >>> from codex_hash import DOCTEST_SESSION
+        >>> from api.sub.codex_hash import DOCTEST_SESSION
         >>> codex_hash = get_cache(DOCTEST_SESSION)
         >>> from api.sub.codex_read_data_api import codex_read_hd5
 
@@ -331,7 +333,6 @@ def codex_binned_stat(
 
 if __name__ == "__main__":
 
-    from api.sub.codex_doctest import run_codex_doctest
     run_codex_doctest()
 
 

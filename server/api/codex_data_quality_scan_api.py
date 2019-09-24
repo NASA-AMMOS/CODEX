@@ -32,7 +32,7 @@ from api.sub.codex_time_log    import logTime
 from api.sub.codex_return_code import logReturnCode
 from api.sub.codex_system      import codex_log
 from api.sub.codex_hash        import get_cache
-
+from api.sub.codex_doctest     import doctest_get_data
 def ml_quality_scan(
         inputHash,
         hashList,
@@ -48,9 +48,9 @@ def ml_quality_scan(
     Outputs:
 
     Examples:
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
     >>> result = ml_quality_scan(testData['inputHash'], testData['hashList'], None, "oddities", False, {'sigma': 3, 'inside': True}, {}, session=codex_hash)
 
@@ -132,7 +132,7 @@ def codex_count_oddities(inputHash, subsetHash, session=None):
     Examples:
 
     # integer example
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
     >>> codex_hash = get_cache(DOCTEST_SESSION)
     >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
 
@@ -258,7 +258,7 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=None):
         return
 
     feature = returnHash['data']
-    feature = codex_math.codex_impute(feature)
+    feature = codex_impute(feature)
 
     if(subsetHash is not False):
         feature = codex_hash.applySubsetMask(data, subsetHash)
@@ -345,7 +345,7 @@ def codex_column_correlation(inputHash, subsetHash, session=None):
         return
 
     data = returnHash['data']
-    data = codex_math.codex_impute(data)
+    data = codex_impute(data)
 
     if(subsetHash is not False):
         data = codex_hash.applySubsetMask(data, subsetHash)
@@ -431,7 +431,7 @@ def codex_column_threshold(
     if(subsetHash is not False):
         data = codex_hash.applySubsetMask(data, subsetHash)
 
-    data = codex_math.codex_impute(data)
+    data = codex_impute(data)
 
     # TODO - this needs to handle multiple features correctly
     for value in data:
