@@ -26,14 +26,14 @@ from sklearn.decomposition import PCA, FastICA
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
-import api.sub.codex_system
-import api.sub.codex_math
-import api.sub.codex_downsample
-import api.sub.codex_read_data_api
-import api.sub.codex_return_code
-import api.sub.codex_time_log
-
-from api.sub.codex_hash import get_cache
+from api.sub.codex_system      import codex_log
+from api.sub.codex_math        import codex_impute
+from api.sub.codex_math        import codex_explained_variance_ratio
+from api.sub.codex_downsample  import downsample
+from api.sub.codex_return_code import logReturnCode
+from api.sub.codex_time_log    import logTime
+from api.sub.codex_time_log    import getComputeTimeEstimate
+from api.sub.codex_hash        import get_cache
 
 def ml_dimensionality_reduction(
         inputHash,
@@ -67,9 +67,9 @@ def ml_dimensionality_reduction(
     try:
         result = run_codex_dim_reduction(inputHash, subsetHash, parms, downsampled, False, algorithmName, session=codex_hash)
     except BaseException:
-        codex_system.codex_log("Failed to run dimensionality reduction analysis")
+        codex_log("Failed to run dimensionality reduction analysis")
         result['message'] = "Failed to run dimensionality reduction analysis"
-        codex_system.codex_log(traceback.format_exc())
+        codex_log(traceback.format_exc())
         return None
 
     return result
@@ -107,7 +107,7 @@ def run_codex_dim_reduction(
 
     codex_hash = get_cache(session)
     
-    codex_return_code.logReturnCode(inspect.currentframe())
+    logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
 
@@ -123,20 +123,20 @@ def run_codex_dim_reduction(
     if(subsetHash is not False):
         data, datName = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log("ERROR: run_codex_dim_reduction: subsetHash returned None.")
+            codex_log("ERROR: run_codex_dim_reduction: subsetHash returned None.")
             return None
 
     full_samples = len(data)
     if(downsampled is not False):
-        codex_system.codex_log("Downsampling to {ds} samples.".format(ds=downsampled))
-        data = codex_downsample.downsample(data, samples=downsampled, session=codex_hash)
+        codex_log("Downsampling to {ds} samples.".format(ds=downsampled))
+        data = downsample(data, samples=downsampled, session=codex_hash)
 
-    eta = codex_time_log.getComputeTimeEstimate("dimension_reduction", algorithm, full_samples)
+    eta = getComputeTimeEstimate("dimension_reduction", algorithm, full_samples)
 
-    data = codex_math.codex_impute(data)
+    data = codex_impute(data)
 
     if(data.ndim > n_components):
-        codex_system.codex_log("ERROR: run_codex_dim_reduction: features ({ndim}) > requested components ({components})".format(ndim=data.ndim, components=n_components))
+        codex_log("ERROR: run_codex_dim_reduction: features ({ndim}) > requested components ({components})".format(ndim=data.ndim, components=n_components))
         return None
 
     try:
@@ -159,7 +159,7 @@ def run_codex_dim_reduction(
 
     except:
 
-        codex_system.codex_log(str(traceback.format_exc()))
+        codex_log(str(traceback.format_exc()))
 
         return {'algorithm': algorithm,
                 'inputHash': inputHash,
@@ -172,11 +172,11 @@ def run_codex_dim_reduction(
         codex_plot.plot_dimensionality(exp_var_ratio, "PCA Explained Variance", show=True)
 
     X_transformed = dim_r.fit_transform(data)
-    exp_var_ratio = codex_math.codex_explained_variance_ratio(X_transformed, n_components)
+    exp_var_ratio = codex_explained_variance_ratio(X_transformed, n_components)
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime(
+    logTime(
         "dimension_reduction",
         algorithm,
         computeTime,

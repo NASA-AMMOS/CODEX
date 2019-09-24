@@ -19,6 +19,7 @@ import json
 import inspect
 import sys
 import os
+import math
 
 from tornado         import web
 from tornado         import ioloop
@@ -27,28 +28,36 @@ from tornado         import gen
 from pebble          import ProcessPool, ThreadPool
 from multiprocessing import Manager, Process, cpu_count
 from tornado.ioloop  import IOLoop
+from zmq.error       import ZMQError
+
 
 ## Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api'))
-sys.path.insert(1, os.path.join(CODEX_ROOT, 'api/sub'))
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX
-import codex_workflow_manager
-import codex_algorithm_manager
-import codex_guidance_manager
-import codex_system
-import codex_return_code
-import codex_time_log
-import codex_doctest
-import codex_session_manager
-import codex_data_manager
-import codex_analysis_manager
-import codex_eta_manager
-from codex_hash import get_cache, create_cache_server, stop_cache_server, NoSessionSpecifiedError
-from zmq.error import ZMQError
-import math
-
+from codex_workflow_manager       import workflow_call
+from codex_algorithm_manager      import algorithm_call
+from codex_guidance_manager       import get_guidance
+from codex_session_manager        import save_session
+from codex_session_manager        import load_session
+from codex_session_manager        import get_sessions
+from codex_data_manager           import add_data
+from codex_data_manager           import get_data
+from codex_data_manager           import delete_data
+from codex_data_manager           import update_data
+from codex_data_manager           import get_data_metrics
+from codex_analysis_manager       import download_code
+from codex_eta_manager            import get_time_estimate
+from api.sub.codex_system         import codex_log
+from api.sub.codex_system         import codex_server_memory_check
+from api.sub.codex_return_code    import logReturnCode
+from api.sub.codex_return_code    import makeReturnCode
+from api.sub.codex_time_log       import getTimeLogDict
+from api.sub.codex_hash           import get_cache
+from api.sub.codex_hash           import create_cache_server
+from api.sub.codex_hash           import stop_cache_server
+from api.sub.codex_hash           import NoSessionSpecifiedError
 
 def throttled_cpu_count():
     return max( 1, math.floor(cpu_count() * 0.75))
@@ -86,7 +95,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
         filepath = os.path.join(CODEX_ROOT, "uploads", filename)
 
         if (msg["done"] == True):
-            codex_system.codex_log('Finished file transfer, initiating save...')
+            codex_log('Finished file transfer, initiating save...')
             codex_hash = get_cache(msg['sessionkey'], timeout=None)
 
             f = open(filepath, 'wb')
@@ -98,15 +107,15 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
             fileExtension = filename.split(".")[-1]
             if (fileExtension == "csv"):
                 hashList, featureList = codex_hash.import_csv(filepath)
-                codex_return_code.logReturnCode(inspect.currentframe())
+                logReturnCode(inspect.currentframe())
 
             elif (fileExtension == "h5"):
                 hashList, featureList = codex_hash.import_hd5(filepath)
-                codex_return_code.logReturnCode(inspect.currentframe())
+                logReturnCode(inspect.currentframe())
 
             elif (fileExtension == "npy"):
                 hashList, featureList = codex_hash.import_npy(filepath)
-                codex_return_code.logReturnCode(inspect.currentframe())
+                logReturnCode(inspect.currentframe())
 
             else:
                 result['message'] = "Currently unsupported filetype"
@@ -128,7 +137,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
             result["nan"]  = nan
             result["inf"]  = inf
             result["ninf"] = ninf
-            codex_system.codex_log('Finished file save.')
+            codex_log('Finished file save.')
         else:
             result['status'] = 'streaming'
 
@@ -150,35 +159,35 @@ def route_request(msg, result):
 
     routine = msg['routine']
     if(routine == 'algorithm'):
-        yield codex_algorithm_manager.algorithm_call(msg, result)
+        yield algorithm_call(msg, result)
     elif(routine == 'workflow'):
-        yield codex_workflow_manager.workflow_call(msg, result)
+        yield workflow_call(msg, result)
     elif(routine == 'guidance'):
-        yield codex_guidance_manager.get_guidance(msg, result)
+        yield get_guidance(msg, result)
     elif (routine == "save_session"):
-        yield codex_session_manager.save_session(msg, result)
+        yield save_session(msg, result)
     elif (routine == "load_session"):
-        yield codex_session_manager.load_session(msg, result)
+        yield load_session(msg, result)
     elif (routine == "get_sessions"):
-        yield codex_session_manager.get_sessions(msg, result)
+        yield get_sessions(msg, result)
     elif (routine == 'time'):
-        yield codex_eta_manager.get_time_estimate(msg, result)
+        yield get_time_estimate(msg, result)
     elif (routine == 'arrange'):
         activity = msg["activity"]
         if (activity == "add"):
-            yield codex_data_manager.add_data(msg, result)
+            yield add_data(msg, result)
         elif (activity == "get"):
-            yield codex_data_manager.get_data(msg, nan, inf, ninf, result)
+            yield get_data(msg, nan, inf, ninf, result)
         elif (activity == "delete"):
-            yield codex_data_manager.delete_data(msg, result)
+            yield delete_data(msg, result)
         elif (activity == "update"):
-            yield codex_data_manager.update_data(msg, result)
+            yield update_data(msg, result)
         elif (activity == "metrics"):
-            for metric in codex_data_manager.get_data_metrics(msg, result):
+            for metric in get_data_metrics(msg, result):
                 yield metric
 
     elif (routine == 'download_code'):
-        yield codex_analysis_manager.download_code(msg, result)
+        yield download_code(msg, result)
     else:
         result['message'] = 'Unknown Routine'
         yield result
@@ -197,7 +206,7 @@ def execute_request(queue, message):
     result = msg
 
     # log the response but without the data
-    codex_system.codex_log("{time} : Message from front end: {json}".format(time=now.isoformat(), json={k:(msg[k] if k != 'data' else '[data removed]') for k in msg}))
+    codex_log("{time} : Message from front end: {json}".format(time=now.isoformat(), json={k:(msg[k] if k != 'data' else '[data removed]') for k in msg}))
 
     if 'sessionkey' not in msg:
         print('session_key not in message!')
@@ -226,8 +235,8 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
     reader     = None
 
     def open(self):
-        codex_system.codex_log("{self}".format(self=self))
-        codex_system.codex_log("Websocket opened")
+        codex_log("{self}".format(self=self))
+        codex_log("Websocket opened")
 
     def check_origin(self, origin):
         return True
@@ -269,14 +278,14 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
                 break
 
             result = response['result']
-            codex_system.codex_log("{time} : Response to front end: {json}".format(time=now.isoformat(), json={k:(result[k] if k != 'data' else '[data removed]') for k in result}))
+            codex_log("{time} : Response to front end: {json}".format(time=now.isoformat(), json={k:(result[k] if k != 'data' else '[data removed]') for k in result}))
 
             yield self.write_message(json.dumps(response['result']))
 
         # close the thread? I don't think this is necessary
         yield self.future
         try:
-            codex_system.codex_server_memory_check(session=json.loads(message)['sessionkey'])
+            codex_server_memory_check(session=json.loads(message)['sessionkey'])
         except:
             raise
 
@@ -321,10 +330,10 @@ if __name__ == '__main__':
 
     print("CODEX Server Started")
     now = datetime.datetime.now()
-    codex_system.codex_log("Server started at: " + str(now.isoformat()))
-    codex_return_code.makeReturnCode()
+    codex_log("Server started at: " + str(now.isoformat()))
+    makeReturnCode()
 
-    codex_time_log.getTimeLogDict()
+    getTimeLogDict()
 
     app = make_app()
     if (len(sys.argv) > 1) and (sys.argv[1] == '-ssl'):

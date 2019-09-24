@@ -35,6 +35,7 @@ import functools
 
 import numpy as np
 
+CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # IPC support

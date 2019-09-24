@@ -137,9 +137,9 @@ def explain_this(inputHash, featureNames, dataSelections, result, session=None):
 
     Examples:
 
-    >>> from codex_hash import DOCTEST_SESSION
-    >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> codex_hash = api.sub.codex_hash.get_cache(DOCTEST_SESSION)
+    >>> testData = api.sub.codex_doctest.doctest_get_data(session=codex_hash)
 
     
     '''

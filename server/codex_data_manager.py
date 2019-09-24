@@ -282,6 +282,6 @@ def update_data(msg, result):
 
 if __name__ == "__main__":
 
-    from codex_doctest import run_codex_doctest
+    from api.sub.codex_doctest import run_codex_doctest
     run_codex_doctest()
 

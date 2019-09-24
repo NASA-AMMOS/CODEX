@@ -19,7 +19,6 @@ import numpy as np
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
-from api.sub.codex_return_code import logReturnCode
 from api.sub.codex_yaml        import codex_read_yaml
 
 def get_featureList(featureList):
@@ -38,6 +37,7 @@ def get_featureList(featureList):
         Success
 
     '''
+    from api.sub.codex_return_code import logReturnCode
     logReturnCode(inspect.currentframe())
 
     return featureList

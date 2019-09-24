@@ -54,17 +54,13 @@ from sklearn.svm                    import SVC
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-import api.sub.codex_return_code
-import api.sub.codex_math
-import api.sub.codex_time_log
-import api.sub.codex_plot
-import api.sub.codex_read_data_api
-import api.sub.codex_downsample
-import api.codex_dimmension_reduction_api
-import api.sub.codex_system
-import api.sub.codex_labels
-
-from api.sub.codex_hash import get_cache
+from api.sub.codex_return_code import logReturnCode
+from api.sub.codex_math        import codex_impute
+from api.sub.codex_time_log    import logTime
+from api.sub.codex_time_log    import getComputeTimeEstimate
+from api.sub.codex_downsample  import downsample
+from api.sub.codex_system      import codex_log
+from api.sub.codex_hash        import get_cache
 
 def ml_classification(
         inputHash,
@@ -90,7 +86,7 @@ def ml_classification(
     codex_hash = get_cache(session)
 
     if len(hashList) < 2:
-        codex_system.codex_log("Classification requires >= 2 features.")
+        codex_log("Classification requires >= 2 features.")
         return None
 
     if subsetHashName is not None:
@@ -104,12 +100,11 @@ def ml_classification(
 
     try:
         result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=session)
-        codex_system.codex_log("Completed classification run with warnings: {r}".format(r=result["WARNING"]))
+        codex_log("Completed classification run with warnings: {r}".format(r=result["WARNING"]))
     except BaseException:
-        codex_system.codex_log(
-            "Failed to run classification algorithm")
+        codex_log("Failed to run classification algorithm")
         result['message'] = "Failed to run classification algorithm"
-        codex_system.codex_log(traceback.format_exc())
+        codex_log(traceback.format_exc())
         return None
 
     return result
@@ -154,7 +149,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         None
     '''
     codex_hash = get_cache(session)
-    codex_return_code.logReturnCode(inspect.currentframe())
+    logReturnCode(inspect.currentframe())
     startTime = time.time()
     result = {'algorithm': algorithm,
               'downsample': downsampled,
@@ -164,7 +159,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
-        codex_system.codex_log("Classification: " + algorithm + ": Hash not found. Returning!")
+        codex_log("Classification: {algorithm}: Hash not found. Returning!".format(algorithm=algorithm))
         return None
 
     data = returnHash['data']
@@ -174,24 +169,24 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     if subsetHash is not False and subsetHash is not None:
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log("ERROR: run_codex_classification - subsetHash returned None.")
+            codex_log("ERROR: run_codex_classification - subsetHash returned None.")
             return None
             
     full_samples = len(data)
     if downsampled is not False:
-        codex_system.codex_log("Downsampling to " + str(downsampled) + " percent")
+        codex_log("Downsampling to " + str(downsampled) + " percent")
         samples = len(data)
-        data = codex_downsample.downsample(data, percentage=downsampled, session=session)
+        data = downsample(data, percentage=downsampled, session=session)
 
     if data.ndim < 2:
-        codex_system.codex_log("ERROR: run_codex_classification - insufficient data dimmensions")
+        codex_log("ERROR: run_codex_classification - insufficient data dimmensions")
         return None
 
     X = data
-    X = codex_math.codex_impute(X)
+    X = codex_impute(X)
     result['X'] = X.tolist()
 
-    result['eta'] = codex_time_log.getComputeTimeEstimate("classification", algorithm, full_samples)
+    result['eta'] = getComputeTimeEstimate("classification", algorithm, full_samples)
 
     accepted_scoring_metrics = ["accuracy", "balanced_accuracy", "average_precision", "brier_score_loss", "f1, f1_micro", "f1_macro", "f1_weighted", "f1_samples", "neg_log_loss", "precision", "recall", "jaccard", "roc_auc"]
     if scoring not in accepted_scoring_metrics:
@@ -201,7 +196,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     # TODO - labels are currently cached under features
     labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
     if labelHash_dict is None:
-        codex_system.codex_log("label hash {hash} not found. Returning!".format(hash=labelHash))
+        codex_log("label hash {hash} not found. Returning!".format(hash=labelHash))
         return {'algorithm': algorithm,
                 'downsample': downsampled,
                 'cross_val': cross_val,
@@ -446,7 +441,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime(
+    logTime(
         "classification",
         algorithm,
         computeTime,

@@ -18,22 +18,20 @@ import inspect
 
 import numpy as np
 
-
 from scipy.signal import find_peaks_cwt
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
-import api.sub.codex_math
-import api.sub.codex_system
-import api.sub.codex_read_data_api
-import api.sub.codex_return_code
-import api.sub.codex_downsample
-import api.sub.codex_plot
-import api.sub.codex_time_log
-
-from api.sub.detect_peaks import detect_peaks
-from api.sub.codex_hash   import get_cache
+from api.sub.codex_math        import codex_impute
+from api.sub.codex_system      import codex_log
+from api.sub.codex_return_code import logReturnCode
+from api.sub.codex_downsample  import downsample
+from api.sub.codex_plot        import codex_plot_peak
+from api.sub.codex_time_log    import getComputeTimeEstimate
+from api.sub.codex_time_log    import logTime
+from api.sub.detect_peaks      import detect_peaks
+from api.sub.codex_hash        import get_cache
 
 # Note: algorithm source: https://blog.ytotech.com/2015/11/01/findpeaks-in-python/
 # Note: algorithm source:
@@ -70,7 +68,7 @@ def ml_peak_detect(
     if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
-        codex_system.codex_log("Feature hash failure in ml_cluster")
+        codex_log("Feature hash failure in ml_cluster")
         result['message'] = "Feature hash failure in ml_cluster"
         return None
 
@@ -87,33 +85,33 @@ def ml_peak_detect(
         try:
             peak_width = int(parms["peak_width"])
         except BaseException:
-            codex_system.codex_log("peak_width parameter not set")
+            codex_log("peak_width parameter not set")
             result['message'] = "peak_width parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             gap_threshold = float(parms["gap_threshold"])
         except BaseException:
-            codex_system.codex_log("gap_threshold parameter not set")
+            codex_log("gap_threshold parameter not set")
             result['message'] = "gap_threshold parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             min_snr = float(parms["min_snr"])
         except BaseException:
-            codex_system.codex_log("min_snr parameter not set")
+            codex_log("min_snr parameter not set")
             result['message'] = "min_snr parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             noise_perc = float(parms["noise_perc"])
         except BaseException:
-            codex_system.codex_log("noise_perc parameter not set")
+            codex_log("noise_perc parameter not set")
             result['message'] = "noise_perc parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
@@ -128,10 +126,9 @@ def ml_peak_detect(
                 noise_perc,
                 session=codex_hash)
         except BaseException:
-            codex_system.codex_log(
-                "Failed to run codex_scipy_signal_peak_cwt peak detection algorithm")
+            codex_log("Failed to run codex_scipy_signal_peak_cwt peak detection algorithm")
             result['message'] = "Failed to run codex_scipy_signal_peak_cwt peak detection algorithm"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
     if(algorithmName == "findpeaks"):
@@ -139,49 +136,49 @@ def ml_peak_detect(
         try:
             mph = int(parms["mph"])
         except BaseException:
-            codex_system.codex_log("mph parameter not set")
+            codex_log("mph parameter not set")
             result['message'] = "mph parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             mpd = int(parms["mpd"])
         except BaseException:
-            codex_system.codex_log("mpd parameter not set")
+            codex_log("mpd parameter not set")
             result['message'] = "mpd parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             threshold = int(parms["threshold"])
         except BaseException:
-            codex_system.codex_log("threshold parameter not set")
+            codex_log("threshold parameter not set")
             result['message'] = "threshold parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             edge = int(parms["edge"])
         except BaseException:
-            codex_system.codex_log("edge parameter not set")
+            codex_log("edge parameter not set")
             result['message'] = "edge parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             kpsh = int(parms["kpsh"])
         except BaseException:
-            codex_system.codex_log("kpsh parameter not set")
+            codex_log("kpsh parameter not set")
             result['message'] = "kpsh parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
             valley = boolean(parms["valley"])
         except BaseException:
-            codex_system.codex_log("valley parameter not set")
+            codex_log("valley parameter not set")
             result['message'] = "valley parameter not set"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
         try:
@@ -198,10 +195,9 @@ def ml_peak_detect(
                 False,
                 session=codex_hash)
         except BaseException:
-            codex_system.codex_log(
-                "Failed to run matlab-findpeaks peak detection algorithm")
+            codex_log("Failed to run matlab-findpeaks peak detection algorithm")
             result['message'] = "Failed to run matlab-findpeaks peak detection algorithm"
-            codex_system.codex_log(traceback.format_exc())
+            codex_log(traceback.format_exc())
             return None
 
     else:
@@ -260,20 +256,16 @@ def codex_scipy_signal_peak_cwt(
     if(subsetHash is not False):
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log(
-                "ERROR: codex_peak_detection scipy_signal_peak_cwt - subsetHash returned None.")
+            codex_log("ERROR: codex_peak_detection scipy_signal_peak_cwt - subsetHash returned None.")
             return None
 
     if(downsampled is not False):
-        codex_system.codex_log(
-            "Downsampling to " +
-            str(downsampled) +
-            " samples")
+        codex_log("Downsampling to " + str(downsampled) + " samples")
         samples = len(data)
-        data = codex_downsample.downsample(data, percentage=downsampled, session=codex_hash)
-        eta = codex_time_log.getComputeTimeEstimate("peak", "cwt", samples)
+        data = downsample(data, percentage=downsampled, session=codex_hash)
+        eta = getComputeTimeEstimate("peak", "cwt", samples)
 
-    data = codex_math.codex_impute(data)
+    data = codex_impute(data)
     data = data[:, 0]
     num_samples = len(data)
     width_array = np.asarray(np.arange(1, num_samples / peak_width))
@@ -287,12 +279,12 @@ def codex_scipy_signal_peak_cwt(
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime("peak", "cwt", computeTime, len(data), data.ndim)
+    logTime("peak", "cwt", computeTime, len(data), data.ndim)
 
     if(showPlot):
-        codex_plot.codex_plot_peak(data, indexes)
+        codex_plot_peak(data, indexes)
 
-    codex_return_code.logReturnCode(inspect.currentframe())
+    logReturnCode(inspect.currentframe())
 
     dictionary = {
         'eta': eta,
@@ -341,7 +333,7 @@ def codex_matlab_findpeaks(
     '''
     codex_hash = get_cache(session)
 
-    codex_return_code.logReturnCode(inspect.currentframe())
+    logReturnCode(inspect.currentframe())
     downsampledHash = None
     startTime = time.time()
     eta = None
@@ -356,21 +348,16 @@ def codex_matlab_findpeaks(
     if(subsetHash is not False):
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_system.codex_log(
-                "ERROR: codex_peak_detection matlab_findpeaks - subsetHash returned None.")
+            codex_log("ERROR: codex_peak_detection matlab_findpeaks - subsetHash returned None.")
             return None
 
     if(downsampled is not False):
-        codex_system.codex_log(
-            "Downsampling to " +
-            str(downsampled) +
-            " samples")
+        codex_log("Downsampling to " + str(downsampled) + " samples")
         samples = len(data)
-        data = codex_downsample.downsample(data, percentage=downsampled, session=codex_hash)
-        eta = codex_time_log.getComputeTimeEstimate(
-            "peak", "matlab_findpeaks", samples)
+        data = downsample(data, percentage=downsampled, session=codex_hash)
+        eta = getComputeTimeEstimate("peak", "matlab_findpeaks", samples)
 
-    data = codex_math.codex_impute(data)
+    data = codex_impute(data)
     data = data[:, 0]
     num_samples = len(data)
     indexes = detect_peaks(
@@ -384,7 +371,7 @@ def codex_matlab_findpeaks(
 
     endTime = time.time()
     computeTime = endTime - startTime
-    codex_time_log.logTime(
+    logTime(
         "peak",
         "matlab_findpeaks",
         computeTime,
@@ -392,7 +379,7 @@ def codex_matlab_findpeaks(
         data.ndim)
 
     if(showPlot):
-        codex_plot.codex_plot_peak(data, indexes)
+        codex_plot_peak(data, indexes)
 
     dictionary = {
         'eta': eta,

@@ -15,12 +15,12 @@ import inspect
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-from api.codex_workflow import explain_this
-from api.codex_workflow import find_more_like_this
-from api.codex_workflow import general_classifier
+from api.codex_workflow        import explain_this
+from api.codex_workflow        import find_more_like_this
+from api.codex_workflow        import general_classifier
 from api.sub.codex_return_code import logReturnCode
-from api.sub.codex_system import get_featureList
-from api.sub.codex_hash import get_cache
+from api.sub.codex_system      import get_featureList
+from api.sub.codex_hash        import get_cache
 
 def workflow_call(msg, result):
     '''
@@ -98,7 +98,7 @@ def workflow_call(msg, result):
 
 if __name__ == "__main__":
 
-    from codex_doctest import run_codex_doctest
+    from api.sub.codex_doctest import run_codex_doctest
     run_codex_doctest()
 
 
