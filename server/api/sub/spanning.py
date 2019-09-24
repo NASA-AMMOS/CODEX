@@ -57,7 +57,6 @@ def standardize(var):
     std = N.std(N.array(var, dtype=N.float64), ddof=1)
     return (N.array(var) - N.mean(var)) / std
 
-# ---------------------------
 def is_iterable(item):
     """ Checks whether an item is an iterable or a singleton.
     >>> is_iterable("hello")
@@ -66,10 +65,23 @@ def is_iterable(item):
     False
     >>> is_iterable([2,])
     True
-    >>> print is_not_iterable(2) == (not is_iterable(2))
+    >>> print(is_not_iterable(2) == (not is_iterable(2)))
     True
     """
     return hasattr(item, '__iter__')
+
+def is_not_iterable(item):
+    """ Checks whether an item is not an iterable or a singleton.
+    >>> is_not_iterable("hello")
+    True
+    >>> is_not_iterable(2)
+    True
+    >>> is_not_iterable([2,])
+    False
+    >>> print is_not_iterable([2,]) == (not is_iterable([2,]))
+    True
+    """
+    return not hasattr(item,'__iter__')
 
 
 def scale(var):

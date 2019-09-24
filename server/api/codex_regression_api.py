@@ -103,9 +103,10 @@ def ml_regression(
     Outputs:
 
     Examples:
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
     # Standard use - linear regression
     >>> result = ml_regression(testData['inputHash'], testData['hashList'], None, testData['classLabelHash'], "linear", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5, 'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, 'explained_variance', "grid", 3, {}, session=codex_hash)
@@ -168,9 +169,10 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
     Examples:
 
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
     >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ARDRegression", {}, "grid", 3, 'fake_score', session=codex_hash)
     >>> print(result["WARNING"])

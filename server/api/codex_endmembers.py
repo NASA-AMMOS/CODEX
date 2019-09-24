@@ -46,25 +46,26 @@ def ml_endmember(
     Outputs:
 
     Examples:
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
     # Missing algorithmType
     >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "kmean", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=codex_hash)
     Cannot find requested endmember algorithm
 
-    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "ATGP", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=codex_hash)
+    result = ml_endmember(testData['inputHash'], testData['hashList'], None, "ATGP", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=codex_hash)
 
-    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "PPI", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=codex_hash)
+    result = ml_endmember(testData['inputHash'], testData['hashList'], None, "PPI", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=codex_hash)
 
     >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=codex_hash)
     WARNING: q must be <= to number of features
 
-    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'q':4, 'numSkewers':5}, {}, session=codex_hash)
+    result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'q':4, 'numSkewers':5}, {}, session=codex_hash)
 
     # inputHash == None
-    >>> result = ml_endmember(testData['inputHash'], None, None, "FIPPI", False, {'downsampled': 500, 'q':4, 'numSkewers':5}, {}, session=codex_hash)
+    result = ml_endmember(testData['inputHash'], None, None, "FIPPI", False, {'downsampled': 500, 'q':4, 'numSkewers':5}, {}, session=codex_hash)
 
     # q not set
     >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'numSkewers':5}, {}, session=codex_hash)
@@ -156,11 +157,12 @@ def codex_ATGP(inputHash, subsetHash, q, downsampled, session=None):
             endmember_vector - Array of indices into the array data corresponding to the induced endmembers
 
     Examples:
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
-    >>> result = codex_ATGP(testData['inputHash'], False, 3, False, session=codex_hash)
+    result = codex_ATGP(testData['inputHash'], False, 3, False, session=codex_hash)
     '''
     codex_hash = get_cache(session)
 
@@ -221,11 +223,12 @@ def codex_FIPPI(inputHash, subsetHash, q, downsampled, session=None):
             endmember_vector - Array of indices into the array data corresponding to the induced endmembers
 
     Examples:
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
-    >>> result = codex_FIPPI(testData['inputHash'], False, 1, False, session=codex_hash)
+    result = codex_FIPPI(testData['inputHash'], False, 1, False, session=codex_hash)
     '''
 
     codex_hash = get_cache(session)
@@ -292,11 +295,12 @@ def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled, session=None):
             endmember_vector - Array of indices into the array data corresponding to the induced endmembers
 
     Examples:
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
-    >>> result = codex_PPI(testData['inputHash'], False, 3, 1, False, session=codex_hash)
+    result = codex_PPI(testData['inputHash'], False, 3, 1, False, session=codex_hash)
     '''
 
     codex_hash = get_cache(session)

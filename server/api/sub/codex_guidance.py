@@ -11,9 +11,10 @@ import os
 import sys
 import yaml
 
+CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-import api.sub.codex_yaml
+from api.sub.codex_yaml import codex_read_yaml
 
 def get_guidance_text_block(page, section):
     '''
@@ -34,7 +35,7 @@ def get_guidance_text_block(page, section):
 
     >>> result = get_guidance_text_block('unit_tests', 'not_a_test')
     '''
-    yaml = codex_yaml.codex_read_yaml(os.path.join(CODEX_ROOT, "guidance.yaml"))
+    yaml = codex_read_yaml(os.path.join(CODEX_ROOT, "guidance.yaml"))
 
     try:
         return yaml[page][section]

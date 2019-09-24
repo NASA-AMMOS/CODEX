@@ -32,7 +32,7 @@ def label_swap(labels, dataHash, verbose=False, session=None):
     Examples:
 
     '''
-    from codex_hash import get_cache
+    from api.sub.codex_hash import get_cache
     codex_hash = get_cache(session)
 
     test_uniq_labels = np.unique(labels)

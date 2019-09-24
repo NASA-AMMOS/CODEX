@@ -36,9 +36,10 @@ def ml_normalize(
     Outputs:
 
     Examples:
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
     '''
     codex_hash = get_cache(session)

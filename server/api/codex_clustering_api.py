@@ -133,10 +133,6 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
 
     Examples:
 
-    >>> testData = codex_doctest.doctest_get_data()
-
-    >>> run_codex_clustering()
-
     '''
     codex_hash = get_cache(session)
 

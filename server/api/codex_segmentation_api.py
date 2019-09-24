@@ -48,9 +48,10 @@ def ml_segmentation(
     Outputs:
 
     Examples:
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
     # Standard use
     >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {}, session=codex_hash)
@@ -208,9 +209,10 @@ def codex_segmentation_quickshift(
         Algorithm: http://scikit-image.org/docs/dev/api/skimage.segmentation.html#quickshift
 
     Examples:
-        >>> from codex_hash import DOCTEST_SESSION
+        >>> from api.sub.codex_hash import DOCTEST_SESSION
+        >>> from api.sub.codex_doctest import doctest_get_data
         >>> codex_hash = get_cache(DOCTEST_SESSION)
-        >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+        >>> testData = doctest_get_data(session=codex_hash)
 
         >>> segments = codex_segmentation_quickshift(testData['inputHash'], False, 50, 20.0, 5.0, 2.0, session=codex_hash)
         Downsampling to 50 percent
@@ -297,9 +299,10 @@ def codex_segmentation_felzenszwalb(
 
     Examples:
 
-        >>> from codex_hash import DOCTEST_SESSION
+        >>> from api.sub.codex_hash import DOCTEST_SESSION
+        >>> from api.sub.codex_doctest import doctest_get_data
         >>> codex_hash = get_cache(DOCTEST_SESSION)
-        >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+        >>> testData = doctest_get_data(session=codex_hash)
 
         >>> segments = codex_segmentation_felzenszwalb(testData['inputHash'], False, 50, 3.0, 0.95, 3, session=codex_hash)
         Downsampling to 50 percent

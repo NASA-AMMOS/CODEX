@@ -54,9 +54,10 @@ def ml_peak_detect(
     Outputs:
 
     Examples:
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
     #>>> result = ml_peak_detect(testData['hashList'], None, "peak_cwt", False, {'peak_width': 3, 'gap_threshold': 5, 'min_snr': 3, 'noise_perc': 10}, {})
 

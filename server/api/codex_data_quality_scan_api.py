@@ -134,8 +134,9 @@ def codex_count_oddities(inputHash, subsetHash, session=None):
 
     # integer example
     >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
     #>>> dictionary = codex_count_oddities(testData['inputHash'], False)
 
@@ -243,9 +244,10 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=None):
     Examples:
 
     # collect data inside sigma range
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
     '''
     codex_hash = get_cache(session)
@@ -328,9 +330,10 @@ def codex_column_correlation(inputHash, subsetHash, session=None):
 
     Examples:
 
-        >>> from codex_hash import DOCTEST_SESSION
+        >>> from api.sub.codex_hash import DOCTEST_SESSION
+        >>> from api.sub.codex_doctest import doctest_get_data
         >>> codex_hash = get_cache(DOCTEST_SESSION)
-        >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+        >>> testData = doctest_get_data(session=codex_hash)
 
         >>> results = codex_column_correlation(testData['inputHash'], False, session=codex_hash)
 
@@ -405,9 +408,10 @@ def codex_column_threshold(
 
     Examples:
 
-        >>> from codex_hash import DOCTEST_SESSION
+        >>> from api.sub.codex_hash import DOCTEST_SESSION
+        >>> from api.sub.codex_doctest import doctest_get_data
         >>> codex_hash = get_cache(DOCTEST_SESSION)
-        >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+        >>> testData = doctest_get_data(session=codex_hash)
 
         >>> dictionary = codex_column_threshold(testData['inputHash'], False, 0, 0.000394, session=codex_hash)
         >>> print(dictionary["threshold_max"])
