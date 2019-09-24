@@ -20,6 +20,7 @@ import numpy as N
 
 from scipy import stats
 
+CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support

@@ -30,8 +30,7 @@ from api.sub.codex_system           import codex_log
 from api.sub.codex_time_log         import logTime
 from api.sub.codex_downsample       import downsample
 from api.sub.codex_return_code      import logReturnCode
-
-from api.sub.codex_hash import get_cache
+from api.sub.codex_hash             import get_cache
 
 
 def ml_segmentation(

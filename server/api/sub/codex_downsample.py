@@ -16,9 +16,8 @@ import traceback
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX library imports
-import api.sub.codex_system
-import api.sub.codex_math
-
+from api.sub.codex_system import codex_log
+from api.sub.codex_math import codex_impute
 from api.sub.codex_hash import get_cache
 from api.sub.spanning   import mask_spanning_subset
 
@@ -72,7 +71,7 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None):
     # first, create a hash of the input array, don't save
     inputHash = codex_hash.hashArray("NOSAVE", inputArray, "NOSAVE")
     inputHashCode = inputHash["hash"]
-    inputArray = codex_math.codex_impute(inputArray) # TODO - mblib spanning seems to have problems with NaNs.  Impute until fixed.
+    inputArray = codex_impute(inputArray) # TODO - mblib spanning seems to have problems with NaNs.  Impute until fixed.
 
     if inputArray.ndim == 1:
         inputList = [inputArray.tolist()]
@@ -89,11 +88,11 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None):
         if(percentage <= 100 and percentage >= 0):
             usedSamples = int(float(percentage / 100) * totalPoints)
         else:
-            codex_system.codex_log("ERROR: downsample - perceange out of bounds 0-100")
+            codex_log("ERROR: downsample - perceange out of bounds 0-100")
             usedSamples = totalPoints
 
     else:
-        codex_system.codex_log("ERROR: downsample - samples and percentage both 0.")
+        codex_log("ERROR: downsample - samples and percentage both 0.")
         usedSamples = totalPoints
 
     # first, check if this downsampling has already been done before
@@ -114,7 +113,7 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None):
         except BaseException:
 
 
-            codex_system.codex_log("ERROR: downsample - failed to downsample.\n\n{trace}".format(trace=traceback.format_exc()))
+            codex_log("ERROR: downsample - failed to downsample.\n\n{trace}".format(trace=traceback.format_exc()))
             outputList = inputList
 
             # Convert back to numpy array

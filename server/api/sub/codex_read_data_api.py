@@ -22,12 +22,12 @@ from sklearn.preprocessing import StandardScaler
 from matplotlib.image      import imread
 from PIL                   import Image
 
+CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
-import api.sub.codex_return_code
-import api.sub.codex_system
-
+from api.sub.codex_system import codex_log
+from api.sub.codex_system import string2token
 from api.sub.codex_hash import get_cache
 
 def codex_read_csv(file, featureList, hashType, session=None):
@@ -60,7 +60,7 @@ def codex_read_csv(file, featureList, hashType, session=None):
                     columns[k].append(v)
         f.close()
     except BaseException:
-        codex_system.codex_log("ERROR: codex_read_csv - cannot open file")
+        codex_log("ERROR: codex_read_csv - cannot open file")
         return None
 
     if(featureList is None):
@@ -70,7 +70,7 @@ def codex_read_csv(file, featureList, hashType, session=None):
         try:
             feature_data = columns[feature_name][:]
         except BaseException:
-            codex_system.codex_log("Error: codex_read_csv: Feature not found.")
+            codex_log("Error: codex_read_csv: Feature not found.")
             return None
 
         if(isinstance(feature_data, list)):
@@ -79,8 +79,8 @@ def codex_read_csv(file, featureList, hashType, session=None):
         try:
             feature_data = feature_data.astype(np.float)
         except BaseException:
-            codex_system.codex_log("Tokenizing {f}.".format(f=feature_name))
-            feature_data = codex_system.string2token(feature_data)
+            codex_log("Tokenizing {f}.".format(f=feature_name))
+            feature_data = string2token(feature_data)
 
         feature_hash = codex_hash.hashArray(feature_name, feature_data, hashType)
         hashList.append(feature_hash['hash'])
@@ -175,7 +175,7 @@ def codex_read_hd5(file, featureList, hashType, session=None):
     try:
         f = h5py.File(file, 'r+')
     except BaseException:
-        codex_system.codex_log("ERROR: codex_read_hd5 - cannot open file")
+        codex_log("ERROR: codex_read_hd5 - cannot open file")
         return None
 
     if(featureList is None):
@@ -185,15 +185,14 @@ def codex_read_hd5(file, featureList, hashType, session=None):
         try:
             feature_data = f[feature_name][:]
         except BaseException:
-            codex_system.codex_log("Error: codex_read_hd5: Feature not found.")
+            codex_log("Error: codex_read_hd5: Feature not found.")
             return
 
         try:
             feature_data = feature_data.astype(float)
         except BaseException:
-            feature_data = codex_system.string2token(feature_data)
-            codex_system.codex_log(
-                "Log: codex_read_hd5: Tokenized " + feature_name)
+            feature_data = string2token(feature_data)
+            codex_log("Log: codex_read_hd5: Tokenized " + feature_name)
 
         feature_hash = codex_hash.hashArray(feature_name, feature_data, hashType)
         hashList.append(feature_hash['hash'])
@@ -220,7 +219,7 @@ def codex_read_npy(file, featureList, hashType, session=None):
     try:
         data = np.load(file)
     except BaseException:
-        codex_system.codex_log("ERROR: codex_read_npy - cannot open file")
+        codex_log("ERROR: codex_read_npy - cannot open file")
         return None
 
     samples, features = data.shape
@@ -230,9 +229,8 @@ def codex_read_npy(file, featureList, hashType, session=None):
         try:
             feature_data = data[:, x].astype(float)
         except BaseException:
-            feature_data = codex_system.string2token(data[:, x])
-            codex_system.codex_log(
-                "Log: codex_read_npy: Tokenized " + feature_name)
+            feature_data = string2token(data[:, x])
+            codex_log("Log: codex_read_npy: Tokenized " + feature_name)
 
         feature_name = "feature_" + str(x)
         featureList.append(feature_name)
@@ -288,7 +286,7 @@ def codex_save_subset(inputHash, subsetHash, saveFilePath, session=None):
     codex_hash = get_cache(session)
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
-        codex_system.codex_log("Hash not found. Returning!")
+        codex_log("Hash not found. Returning!")
         return
 
     data = returnHash['data']
