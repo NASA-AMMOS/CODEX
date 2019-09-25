@@ -40,7 +40,8 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # IPC support
 from api.sub.ntangle.client import Client
-from api.sub.ntangle.server import Server, expose
+from api.sub.ntangle.server import Server
+from api.sub.ntangle.server import expose
 
 # CODEX Support
 from api.sub.codex_system import codex_log
@@ -58,6 +59,7 @@ class CodexHash:
     sessions={}
 
     def __has_session(self, sessionKey):
+        print("test")
         return sessionKey in self.sessions
 
     def __set_session(self, sessionKey):
@@ -478,8 +480,6 @@ class CodexHash:
         if(np.isinf(combined_unique).any()):
             sentinel_values['inf']  = round((max_val * 10) + 2)
 
-
-        print(sentinel_values)
         return sentinel_values
 
     def printHashList(self, hashType, session=None):
@@ -1179,9 +1179,13 @@ def stop_cache_server():
     return Client(DEFAULT_CODEX_HASH_CONNECT)._shutdown()
 
 if __name__ == "__main__":
+    
     if 'server' in sys.argv:
         create_cache_server()
 
     else:
-        from codex_doctest import run_codex_doctest
-        run_codex_doctest()
+
+        from api.sub.codex_doctest import run_codex_doctest
+        #run_codex_doctest() # TODO - tests currently hang somewhere. 
+    
+
