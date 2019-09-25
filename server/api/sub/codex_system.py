@@ -182,7 +182,7 @@ def codex_server_memory_check(verbose=False, session=None):
     >>> codex_server_memory_check(session=codex_hash)
 
     '''
-    from codex_hash import get_cache # defer import to try to circumvent circular import
+    from api.sub.codex_hash import get_cache # defer import to try to circumvent circular import
     codex_hash = get_cache(session)
     allowed_ram = get_setting("working_ram")
     current_ram = get_codex_memory_usage()
