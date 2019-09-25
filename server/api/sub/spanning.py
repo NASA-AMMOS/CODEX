@@ -60,7 +60,7 @@ def standardize(var):
 def is_iterable(item):
     """ Checks whether an item is an iterable or a singleton.
     >>> is_iterable("hello")
-    False
+    True
     >>> is_iterable(2)
     False
     >>> is_iterable([2,])
@@ -68,17 +68,17 @@ def is_iterable(item):
     >>> print(is_not_iterable(2) == (not is_iterable(2)))
     True
     """
-    return hasattr(item, '__iter__')
+    return hasattr(item,'__iter__')
 
 def is_not_iterable(item):
     """ Checks whether an item is not an iterable or a singleton.
     >>> is_not_iterable("hello")
-    True
+    False
     >>> is_not_iterable(2)
     True
     >>> is_not_iterable([2,])
     False
-    >>> print is_not_iterable([2,]) == (not is_iterable([2,]))
+    >>> print(is_not_iterable([2,]) == (not is_iterable([2,])))
     True
     """
     return not hasattr(item,'__iter__')
@@ -128,13 +128,11 @@ def separating_noise(vals, divisor=100.0):
 
     >>> N.random.seed(0)
     >>> separating_noise( (1,1,1,2,2,3,4,5,9) )
-    array([ 0.00048814,  0.00215189,  0.00102763,  0.00044883, -0.00076345,
-            0.00145894, -0.00062413,  0.00391773,  0.00463663])
+    array([ 0.00048814,  0.00215189,  0.00102763,  0.00044883, -0.00076345,  0.00145894, -0.00062413,  0.00391773,  0.00463663])
 
     >>> N.random.seed(0)
     >>> separating_noise( (1,1,1,2,2,3,4,5,9), divisor = 100000 )
-    array([  4.88135039e-07,   2.15189366e-06,   1.02763376e-06,
-             4.48831830e-07,  -7.63452007e-07,   1.45894113e-06,
+    array([  4.88135039e-07,   2.15189366e-06,   1.02763376e-06,   4.48831830e-07,  -7.63452007e-07,   1.45894113e-06,
             -6.24127887e-07,   3.91773001e-06,   4.63662761e-06])
 
     >>> N.random.seed(0)
@@ -143,8 +141,7 @@ def separating_noise(vals, divisor=100.0):
 
     >>> N.random.seed(0)
     >>> separating_noise( (1,1,1,2,2,3,4,5,N.nan) )
-    array([ 0.00048814,  0.00215189,  0.00102763,  0.00044883, -0.00076345,
-            0.00145894, -0.00062413,  0.00391773,  0.00463663])
+    array([ 0.00048814,  0.00215189,  0.00102763,  0.00044883, -0.00076345,  0.00145894, -0.00062413,  0.00391773,  0.00463663])
 
     """
 

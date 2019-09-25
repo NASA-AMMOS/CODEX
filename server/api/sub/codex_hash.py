@@ -59,7 +59,6 @@ class CodexHash:
     sessions={}
 
     def __has_session(self, sessionKey):
-        print("test")
         return sessionKey in self.sessions
 
     def __set_session(self, sessionKey):
