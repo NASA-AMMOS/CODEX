@@ -43,10 +43,11 @@ class Client:
         self.__refresh_remote()
 
     def __del__(self):
+        self.__socket.close()
+
         # clean up the socket so we don't hang the program
         if self.__should_destroy_context:
             self.__context.destroy()
-        self.__socket.close()
 
     # make a remote function call
     def __call(self, func, *args, **kwargs):

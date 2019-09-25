@@ -1186,6 +1186,6 @@ if __name__ == "__main__":
     else:
 
         from api.sub.codex_doctest import run_codex_doctest
-        #run_codex_doctest() # TODO - tests currently hang somewhere. 
+        run_codex_doctest()
     
 
