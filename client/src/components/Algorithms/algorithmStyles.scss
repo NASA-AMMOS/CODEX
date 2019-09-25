@@ -43,10 +43,13 @@
     display: flex;
     justify-content: space-between;
     font-size: 16px;
-    margin-left: 10px;
     &.selected {
         color: #fff;
     }
+}
+
+.subalgo-title-text {
+    margin-left: 5px;
 }
 
 .subalgo-chart-loading {
@@ -72,6 +75,11 @@
     position: absolute;
     bottom: 15px;
     right: 18px;
+}
+
+.subalgo-header-time {
+    display: none;
+    margin-right: 5px;
 }
 
 .subalgo-focus {
@@ -159,11 +167,10 @@
             text-align: right;
             margin-right: 2em;
         }
-        
     }
 
     .params {
-        width: 49%;
+        width: 50%;
 
         hr {
             margin: 5px 0;
@@ -181,6 +188,12 @@
                 .subalgo-plot {
                     width: 135px;
                     height: 130px;
+                }
+                .subalgo-header-time {
+                    display: inline;
+                }
+                .subalgo-time {
+                    display: none;
                 }
             }
         }
