@@ -177,7 +177,7 @@ def codex_server_memory_check(verbose=False, session=None):
         Value returned in MB
 
     Examples:
-    >>> from codex_hash import DOCTEST_SESSION, get_cache
+    >>> from api.sub.codex_hash import DOCTEST_SESSION, get_cache
     >>> codex_hash = get_cache(DOCTEST_SESSION)
     >>> codex_server_memory_check(session=codex_hash)
 
