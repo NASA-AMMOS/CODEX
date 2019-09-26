@@ -10,10 +10,13 @@ Notes :
 import os
 import sys
 import yaml
+import logging
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 from api.sub.codex_yaml import codex_read_yaml
+
+logger = logging.getLogger(__name__)
 
 def get_guidance_text_block(page, section, readPath):
     '''

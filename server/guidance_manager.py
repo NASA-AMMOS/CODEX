@@ -12,11 +12,13 @@ U.S. Government Sponsorship acknowledged.
 import os
 import sys
 import traceback
+import logging
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
+
 from api.sub.codex_guidance import get_guidance_text_block
-from api.sub.codex_system   import codex_log
 
 def get_guidance(msg, result, guidancePath):
     '''
@@ -47,7 +49,7 @@ def get_guidance(msg, result, guidancePath):
             result["message"] = "failure"
 
     except:
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
 
     return result
 

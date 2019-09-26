@@ -14,6 +14,7 @@ import sys
 import time
 import h5py
 import traceback
+import logging
 
 import numpy as np
 np.set_printoptions(threshold=sys.maxsize)
@@ -27,8 +28,9 @@ from sklearn.model_selection import RandomizedSearchCV
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
+
 # CODEX Support
-from api.sub.codex_system import codex_log
 from api.sub.codex_hash   import get_cache
 
 def get_proportion_tree_sums(clf, X_test, y_test):
@@ -145,7 +147,7 @@ def explain_this(inputHash, featureNames, dataSelections, result, session=None):
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
-        codex_log("ERROR: explain_this: Hash not found. Returning.")
+        warning("ERROR: explain_this: Hash not found. Returning.")
         return None
 
     data = returnHash['data']
@@ -153,7 +155,7 @@ def explain_this(inputHash, featureNames, dataSelections, result, session=None):
         return None
 
     if data.ndim < 2:
-        codex_log("ERROR: explain_this - insufficient data dimmensions")
+        warning("ERROR: explain_this - insufficient data dimmensions")
         return None
 
     X,y = create_data_from_indices(dataSelections, data)
@@ -314,7 +316,7 @@ def general_classifier(inputHash, featureList, dataSelections, similarityThresho
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
-        codex_log("ERROR: general_classifier: Hash not found. Returning.")
+        warning("ERROR: general_classifier: Hash not found. Returning.")
         return None
 
     data = returnHash['data']
@@ -324,15 +326,15 @@ def general_classifier(inputHash, featureList, dataSelections, similarityThresho
     #first create a mask from the dataSelections indices
     formatted_data = create_data_from_indices(dataSelections, data)
 
-    codex_log(str(formatted_data))
+    info(str(formatted_data))
     #run the trian model script
     clf = train_general_classifier_model(formatted_data)
     
     #evaluate the trained model on the whole dataset
     output_predictions_probabilities = clf.predict_proba(data)
 
-    codex_log(str(output_predictions_probabilities))
-    codex_log(str(clf.predict_proba(data)))
+    info(str(output_predictions_probabilities))
+    info(str(clf.predict_proba(data)))
     #convert probability array to mask
     output_predictions_mask = []
     for probs in output_predictions_probabilities:
@@ -364,7 +366,7 @@ def find_more_like_this(inputHash, featureList, dataSelections, similarityThresh
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
-        codex_log("ERROR: general_classifier: Hash not found. Returning.")
+        warning("ERROR: general_classifier: Hash not found. Returning.")
         return None
 
     data = returnHash['data']

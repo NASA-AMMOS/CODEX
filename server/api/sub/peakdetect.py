@@ -24,6 +24,8 @@ from scipy import fft, ifft
 from scipy.optimize import curve_fit
 from scipy.signal import cspline1d_eval, cspline1d
 
+logger = logging.getLogger(__name__)
+
 __all__ = [
         "peakdetect",
         "peakdetect_fft",

@@ -15,12 +15,15 @@ import time
 import collections
 import traceback
 import inspect
+import logging
 
 import numpy as N
 
 from scipy import stats
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+logger = logging.getLogger(__name__)
 
 # CODEX Support
 from api.sub.codex_time_log    import logTime
@@ -60,7 +63,7 @@ def ml_binning(
     if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
-        codex_system.codex_log("Feature hash failure in ml_cluster")
+        logging.warning("Feature hash failure in ml_cluster")
         result['message'] = "Feature hash failure in ml_cluster"
         return None
 
@@ -78,9 +81,9 @@ def ml_binning(
         try:
             result = codex_binned_stat(inputHash, subsetHash, session=session)
         except BaseException:
-            codex_system.codex_log("Failed to run 1-d binned statistics")
+            logging.warning("Failed to run 1-d binned statistics")
             result['message'] = "Failed to run 1-d binned statistics"
-            codex_system.codex_log(traceback.format_exc())
+            logging.warning(traceback.format_exc())
             return None
 
     else:
@@ -151,7 +154,7 @@ def codex_binned_stat(
 
         >>> from api.sub.codex_hash import DOCTEST_SESSION
         >>> codex_hash = get_cache(DOCTEST_SESSION)
-        >>> from api.sub.codex_read_data_api import codex_read_hd5
+        >>> from api.sub.read_data import codex_read_hd5
 
         >>> codex_binned_stat(None, bins = range(10), session=codex_hash)
         Hash not found. Returning!

@@ -11,6 +11,7 @@ import sys
 import h5py
 import time
 import os
+import logging
 
 import numpy as np
 
@@ -24,6 +25,7 @@ import matplotlib.image  as mpimg
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
 
 def getColorMap():
     '''

@@ -6,6 +6,9 @@
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 
+import logging
+logger = logging.getLogger(__name__)
+
 import numpy as N
 import scipy.spatial.distance as SD
 

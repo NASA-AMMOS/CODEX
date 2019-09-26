@@ -15,6 +15,7 @@ import traceback
 import time
 import math
 import inspect
+import logging
 
 import numpy as np
 
@@ -23,9 +24,10 @@ from fastdtw                import fastdtw
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
+
 # CODEX Support
 from api.sub.codex_downsample  import downsample
-from api.sub.codex_system      import codex_log
 from api.sub.codex_time_log    import logTime
 from api.sub.return_code       import logReturnCode
 from api.sub.codex_math        import codex_impute
@@ -75,7 +77,7 @@ def ml_template_scan(
     if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
-        codex_log("Feature hash failure in ml_cluster")
+        warning("Feature hash failure in ml_cluster")
         result['message'] = "Feature hash failure in ml_cluster"
         return None
 
@@ -96,7 +98,7 @@ def ml_template_scan(
         else:
             templateHash = templateHash["hash"]
     else:
-        codex_log("Template hash name not given")
+        wanrning("Template hash name not given")
         return None
 
     if(algorithmName == 'template'):
@@ -104,17 +106,17 @@ def ml_template_scan(
         try:
             num_templates = int(parms['num_templates'])
         except BaseException:
-            codex_log("num_templates parameter not set")
+            warning("num_templates parameter not set")
             result['message'] = "num_templates parameter not set"
-            codex_log(traceback.format_exc())
+            warning(traceback.format_exc())
             return None
 
         try:
             scan_jump = int(parms['scan_jump'])
         except BaseException:
-            codex_log("scan_jump parameter not set")
+            warning("scan_jump parameter not set")
             result['message'] = "scan_jump parameter not set"
-            codex_log(traceback.format_exc())
+            warning(traceback.format_exc())
             return None
 
         try:
@@ -127,9 +129,9 @@ def ml_template_scan(
                 scan_jump,
                 session=codex_hash)
         except BaseException:
-            codex_log("Failed to run template scan algorithm")
+            warning("Failed to run template scan algorithm")
             result['message'] = "Failed to run template scan algorithm"
-            codex_log(traceback.format_exc())
+            warning(traceback.format_exc())
             return None
 
     else:

@@ -20,6 +20,8 @@ import inspect
 import sys
 import os
 import math
+import logging
+import traceback
 
 from tornado         import web
 from tornado         import ioloop
@@ -30,10 +32,11 @@ from multiprocessing import Manager, Process, cpu_count
 from tornado.ioloop  import IOLoop
 from zmq.error       import ZMQError
 
-
 ## Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+logger = logging.getLogger(__name__)
 
 # CODEX
 from workflow_manager       import workflow_call
@@ -49,7 +52,6 @@ from data_manager           import update_data
 from data_manager           import get_data_metrics
 from analysis_manager       import download_code
 from eta_manager            import get_time_estimate
-from api.sub.codex_system   import codex_log
 from api.sub.codex_system   import codex_server_memory_check
 from api.sub.return_code    import logReturnCode
 from api.sub.return_code    import makeReturnCode
@@ -76,7 +78,7 @@ ninf = None
 
 class uploadSocket(tornado.websocket.WebSocketHandler):
     def open(self):
-        print("Upload Websocket opened")
+        logging.info("Upload Websocket opened")
 
     def check_origin(self, origin):
         return True
@@ -95,7 +97,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
         filepath = os.path.join(CODEX_ROOT, "uploads", filename)
 
         if (msg["done"] == True):
-            codex_log('Finished file transfer, initiating save...')
+            logging.info('Finished file transfer, initiating save...')
             codex_hash = get_cache(msg['sessionkey'], timeout=None)
 
             f = open(filepath, 'wb')
@@ -137,7 +139,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
             result["nan"]  = nan
             result["inf"]  = inf
             result["ninf"] = ninf
-            codex_log('Finished file save.')
+            logging.info('Finished file save.')
         else:
             result['status'] = 'streaming'
 
@@ -152,7 +154,6 @@ def route_request(msg, result):
     2) an iterator, which will be iterated over in the worker process and sent
        piecemeal to the client.
     '''
-
     global nan
     global inf
     global ninf
@@ -206,10 +207,10 @@ def execute_request(queue, message):
     result = msg
 
     # log the response but without the data
-    codex_log("{time} : Message from front end: {json}".format(time=now.isoformat(), json={k:(msg[k] if k != 'data' else '[data removed]') for k in msg}))
+    logging.info("{time} : Message from front end: {json}".format(time=now.isoformat(), json={k:(msg[k] if k != 'data' else '[data removed]') for k in msg}))
 
     if 'sessionkey' not in msg:
-        print('session_key not in message!')
+        logging.warning('session_key not in message!')
         raise NoSessionSpecifiedError()
 
     # actually execute the function requested
@@ -236,8 +237,8 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
     reader     = None
 
     def open(self):
-        codex_log("{self}".format(self=self))
-        codex_log("Websocket opened")
+        logging.info("{self}".format(self=self))
+        logging.info("Websocket opened")
 
     def check_origin(self, origin):
         return True
@@ -279,7 +280,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
                 break
 
             result = response['result']
-            codex_log("{time} : Response to front end: {json}".format(time=now.isoformat(), json={k:(result[k] if (k != 'data' and k != 'downsample') else '[data removed]') for k in result}))
+            logging.info("{time} : Response to front end: {json}".format(time=now.isoformat(), json={k:(result[k] if (k != 'data' and k != 'downsample') else '[data removed]') for k in result}))
 
             yield self.write_message(json.dumps(response['result']))
 
@@ -305,8 +306,6 @@ def make_app():
         static_path=os.path.join(os.path.dirname(__file__), "static"),
         debug=True)
 
-    print(settings['static_path'])
-
     return web.Application([
         (r"/", MainHandler),
         (r"/codex", CodexSocket),
@@ -319,21 +318,20 @@ def make_cache_process():
             create_cache_server()
         except ZMQError as e:
             if e.strerror == 'Address already in use':
-                print('Cache server already running!')
+                logging.warning('Cache server already running!')
             else:
                 raise
         except Exception as e:
-            print('Cache server launch failure!', e)
+            logging.warning('Cache server launch failure!', e)
             raise
     return Process(target=run_cache)
 
 if __name__ == '__main__':
 
-    print("CODEX Server Started")
-    now = datetime.datetime.now()
-    codex_log("Server started at: " + str(now.isoformat()))
-    makeReturnCode()
+    logging.basicConfig(filename='logs/{time}.log'.format(time=datetime.datetime.now()), level=0)
+    logging.info("CODEX Server Started")
 
+    makeReturnCode()
     getTimeLogDict()
 
     app = make_app()

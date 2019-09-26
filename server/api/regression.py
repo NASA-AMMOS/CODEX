@@ -19,6 +19,7 @@ import sklearn
 import subprocess
 import time
 import traceback
+import logging
 
 import numpy                       as np
 import numpy.polynomial.polynomial as poly
@@ -76,8 +77,9 @@ from sklearn.compose               import TransformedTargetRegressor
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
+
 from api.sub.codex_math        import codex_impute
-from api.sub.codex_system      import codex_log
 from api.sub.return_code       import logReturnCode
 from api.sub.codex_time_log    import getComputeTimeEstimate
 from api.sub.codex_time_log    import logTime
@@ -132,9 +134,9 @@ def ml_regression(
     try:
         result =  run_codex_regression(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=codex_hash)
     except BaseException:
-        codex_log("Failed to run regression algorithm")
+        logging.warning("Failed to run regression algorithm")
         result['message'] = "Failed to run regression algorithm"
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
         return None
 
     return result
@@ -236,7 +238,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
-        codex_log("Regression: " + algorithm + ": Hash not found. Returning!")
+        logging.warning("Regression: {algorithm}: Hash not found. Returning!".format(algorithm=algorithm))
         return None
 
     data = returnHash['data']
@@ -246,17 +248,17 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
     if subsetHash is not False  and subsetHash is not None:
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_log("ERROR: run_codex_regression - subsetHash returned None.")
+            logging.warning("ERROR: run_codex_regression - subsetHash returned None.")
             return None
 
     full_samples = len(data)
     if downsampled is not False:
-        codex_log("Downsampling to " + str(downsampled) + " percent")
+        logging.info("Downsampling to " + str(downsampled) + " percent")
         samples = len(data)
         data = codex_downsample.downsample(data, percentage=downsampled, session=codex_hash)
 
     if data.ndim < 2:
-        codex_log("ERROR: run_codex_regression - insufficient data dimmensions")
+        logging.warning("ERROR: run_codex_regression - insufficient data dimmensions")
         return None
 
     X = data
@@ -273,7 +275,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
     # TODO - labels are currently cached under features
     labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
     if labelHash_dict is None:
-        codex_log("label hash not found. Returning!")
+        logging.warning("label hash not found. Returning!")
         return {'algorithm': algorithm,
                 'downsample': downsampled,
                 'cross_val': cross_val,

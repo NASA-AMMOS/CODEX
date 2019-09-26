@@ -18,6 +18,7 @@ import statistics
 import math
 import h5py
 import inspect
+import logging
 
 import numpy as np
 
@@ -26,11 +27,12 @@ from scipy           import stats
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
+
 # CODEX Support
 from api.sub.codex_math        import codex_impute
 from api.sub.codex_time_log    import logTime
 from api.sub.return_code       import logReturnCode
-from api.sub.codex_system      import codex_log
 from api.sub.codex_hash        import get_cache
 from api.sub.codex_doctest     import doctest_get_data
 
@@ -75,9 +77,9 @@ def ml_quality_scan(
         try:
             result = codex_count_oddities(inputHash, subsetHash, session=codex_hash)
         except BaseException:
-            codex_log("Failed to run count_oddities")
+            logging.warning("Failed to run count_oddities")
             result['message'] = "Failed to run count_oddities"
-            codex_log(traceback.format_exc())
+            logging.warning(traceback.format_exc())
             return None
 
     elif(algorithmName == 'sigma_data'):
@@ -85,25 +87,25 @@ def ml_quality_scan(
         try:
             sigma = int(parms["sigma"])
         except BaseException:
-            codex_log("sigma parameter not set")
+            logging.warning("sigma parameter not set")
             result['message'] = "sigma parameter not set"
-            codex_log(traceback.format_exc())
+            logging.warning(traceback.format_exc())
             return None
 
         try:
             inside = parms["inside"]
         except BaseException:
-            codex_log("inside parameter not set")
+            logging.warning("inside parameter not set")
             result['message'] = "inside parameter not set"
-            codex_log(traceback.format_exc())
+            logging.warning(traceback.format_exc())
             return None
 
         try:
             result = codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=codex_hash)
         except BaseException:
-            codex_log("Failed to run codex_get_sigma_data")
+            logging.warning("Failed to run codex_get_sigma_data")
             result['message'] = "Failed to run codex_get_sigma_data"
-            codex_log(traceback.format_exc())
+            logging.warning(traceback.format_exc())
             return None
 
     else:

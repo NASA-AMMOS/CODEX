@@ -11,6 +11,7 @@ import sys
 import time
 import h5py
 import os.path
+import logging
 
 import numpy as np
 
@@ -23,6 +24,8 @@ from os.path  import join
 from os.path  import isdir 
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+logger = logging.getLogger(__name__)
 
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 logPath = os.path.join(CODEX_ROOT, "timeLogs")

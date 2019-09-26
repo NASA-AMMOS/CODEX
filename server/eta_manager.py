@@ -12,11 +12,13 @@ U.S. Government Sponsorship acknowledged.
 import os
 import sys
 import traceback
+import logging
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
+
 from api.sub.codex_time_log import getComputeTimeEstimate
-from api.sub.codex_system   import codex_log
 
 def get_time_estimate(msg, result):
     '''
@@ -46,7 +48,7 @@ def get_time_estimate(msg, result):
         result['numFeatures'] = int(msg['numFeatures'])
 
     except:
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
 
     return result
 

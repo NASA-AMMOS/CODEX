@@ -13,16 +13,18 @@ import os
 import sys
 import inspect
 import traceback
+import logging
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-from api.codex_workflow        import explain_this
-from api.codex_workflow        import find_more_like_this
-from api.codex_workflow        import general_classifier
+logger = logging.getLogger(__name__)
+
+from api.workflow              import explain_this
+from api.workflow              import find_more_like_this
+from api.workflow              import general_classifier
 from api.sub.return_code       import logReturnCode
 from api.sub.codex_system      import get_featureList
 from api.sub.codex_hash        import get_cache
-from api.sub.codex_system      import codex_log
 
 def workflow_call(msg, result):
     '''
@@ -99,7 +101,7 @@ def workflow_call(msg, result):
         result['message'] = 'success'
 
     except:
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
 
     return result
 

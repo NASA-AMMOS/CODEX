@@ -18,6 +18,7 @@ import sklearn
 import collections
 import traceback
 import inspect
+import logging
 
 import numpy as np
 
@@ -25,8 +26,9 @@ from sklearn.decomposition import PCA, FastICA
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
+
 # CODEX Support
-from api.sub.codex_system      import codex_log
 from api.sub.codex_math        import codex_impute
 from api.sub.codex_math        import codex_explained_variance_ratio
 from api.sub.codex_downsample  import downsample
@@ -67,9 +69,9 @@ def ml_dimensionality_reduction(
     try:
         result = run_codex_dim_reduction(inputHash, subsetHash, parms, downsampled, False, algorithmName, session=codex_hash)
     except BaseException:
-        codex_log("Failed to run dimensionality reduction analysis")
+        logging.warning("Failed to run dimensionality reduction analysis")
         result['message'] = "Failed to run dimensionality reduction analysis"
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
         return None
 
     return result
@@ -124,12 +126,12 @@ def run_codex_dim_reduction(
     if(subsetHash is not False):
         data, datName = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_log("ERROR: run_codex_dim_reduction: subsetHash returned None.")
+            logging.warning("ERROR: run_codex_dim_reduction: subsetHash returned None.")
             return None
 
     full_samples = len(data)
     if(downsampled is not False):
-        codex_log("Downsampling to {ds} samples.".format(ds=downsampled))
+        logging.warning("Downsampling to {ds} samples.".format(ds=downsampled))
         data = downsample(data, samples=downsampled, session=codex_hash)
 
     eta = getComputeTimeEstimate("dimension_reduction", algorithm, full_samples)
@@ -137,7 +139,7 @@ def run_codex_dim_reduction(
     data = codex_impute(data)
 
     if(data.ndim > n_components):
-        codex_log("ERROR: run_codex_dim_reduction: features ({ndim}) > requested components ({components})".format(ndim=data.ndim, components=n_components))
+        logging.warning("ERROR: run_codex_dim_reduction: features ({ndim}) > requested components ({components})".format(ndim=data.ndim, components=n_components))
         return None
 
     try:
@@ -160,7 +162,7 @@ def run_codex_dim_reduction(
 
     except:
 
-        codex_log(str(traceback.format_exc()))
+        logging.warning(str(traceback.format_exc()))
 
         return {'algorithm': algorithm,
                 'inputHash': inputHash,

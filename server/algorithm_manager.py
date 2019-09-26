@@ -13,8 +13,11 @@ import os
 import sys
 import inspect
 import traceback
+import logging
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+logger = logging.getLogger(__name__)
 
 from api.binning                 import ml_binning
 from api.clustering              import ml_cluster
@@ -28,7 +31,6 @@ from api.segmentation            import ml_segmentation
 from api.template_scan           import ml_template_scan
 from api.classification          import ml_classification
 
-from api.sub.codex_system        import codex_log
 from api.sub.codex_system        import get_featureList
 from api.sub.return_code         import logReturnCode
 from api.sub.codex_hash          import get_cache
@@ -128,7 +130,7 @@ def algorithm_call(msg, result):
 
 
     except:
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
 
     return result
 

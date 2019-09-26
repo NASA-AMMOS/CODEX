@@ -16,6 +16,7 @@ import time
 import h5py
 import inspect
 import traceback
+import logging
 
 import numpy as np
 
@@ -24,6 +25,8 @@ from sklearn           import cluster
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
+
 # CODEX Support
 from api.sub.return_code                import logReturnCode
 from api.sub.codex_math                 import codex_impute
@@ -31,7 +34,6 @@ from api.sub.codex_time_log             import getComputeTimeEstimate
 from api.sub.codex_time_log             import logTime
 from api.sub.codex_downsample           import downsample
 from api.dimmension_reduction           import run_codex_dim_reduction
-from api.sub.codex_system               import codex_log
 from api.sub.codex_labels               import label_swap
 from api.sub.codex_hash                 import get_cache
 
@@ -86,7 +88,7 @@ def ml_cluster(
     codex_hash = get_cache(session)
 
     if len(hashList) < 2:
-        codex_log("Clustering requires >= 2 features.")
+        logging.warning("Clustering requires >= 2 features.")
         return None
 
     if subsetHashName is not None:
@@ -106,9 +108,9 @@ def ml_cluster(
         result['data'] = pca['data']
 
     except BaseException:
-        codex_log("Failed to clustering algorithm")
+        logging.warning("Failed to clustering algorithm")
         result['message'] = "Failed to run clustering algorithm"
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
 
     return result
 
@@ -137,7 +139,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
     codex_hash = get_cache(session)
 
     logReturnCode(inspect.currentframe())
-    codex_log(str(parms))
+    logging.warning(str(parms))
     startTime = time.time()
     result = {'algorithm': algorithm,
               'downsample': downsampled,
@@ -145,7 +147,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
-        codex_log("Clustering: run_codex_clustering: Hash not found. Returning!")
+        logging.warning("Clustering: run_codex_clustering: Hash not found. Returning!")
         return None
 
     data = returnHash['data']
@@ -155,18 +157,18 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
     if subsetHash is not False:
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_log("ERROR: run_codex_clustering - subsetHash returned None.")
+            logging.warning("ERROR: run_codex_clustering - subsetHash returned None.")
             return None
 
     full_samples = len(data)
     if downsampled is not False:
-        codex_log("Downsampling to {downsampled} samples".format(downsampled=downsampled))
+        logging.warning("Downsampling to {downsampled} samples".format(downsampled=downsampled))
         data = downsample(data, samples=downsampled, session=codex_hash)
-        codex_log("Downsampled to {samples} samples".format(samples=len(data)))
+        logging.warning("Downsampled to {samples} samples".format(samples=len(data)))
 
     result['eta'] = getComputeTimeEstimate("clustering", algorithm, full_samples)
     if data.ndim < 2:
-        codex_log("ERROR: run_codex_clustering - insufficient data dimmensions")
+        logging.warning("ERROR: run_codex_clustering - insufficient data dimmensions")
         return None
 
     X = data
@@ -224,7 +226,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
                     'WARNING': algorithm + " not supported."}
 
     except:
-        codex_log(str(traceback.format_exc()))
+        logging.warning(str(traceback.format_exc()))
 
         return {'algorithm': algorithm,
                 'data': X.tolist(),

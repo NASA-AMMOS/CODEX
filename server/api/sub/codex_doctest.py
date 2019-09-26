@@ -9,14 +9,17 @@ Notes :
 import os
 import sys
 import random
+import logging
 
 import numpy as np
 
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
+
 # CODEX Support
-from api.sub.codex_read_data_api import codex_read_csv
+from api.sub.read_data import codex_read_csv
 
 def doctest_base_path():
     return CODEX_ROOT

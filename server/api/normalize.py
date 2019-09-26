@@ -14,12 +14,14 @@ import sys
 import traceback
 import statistics
 import math
+import logging
 
 import numpy as np
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-from api.sub.codex_system import codex_log
+logger = logging.getLogger(__name__)
+
 from api.sub.codex_hash   import get_cache
 
 def ml_normalize(
@@ -49,7 +51,7 @@ def ml_normalize(
     if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
-        codex_log("Feature hash failure in ml_cluster")
+        logging.warning("Feature hash failure in ml_cluster")
         result['message'] = "Feature hash failure in ml_cluster"
         return None
 
@@ -66,26 +68,26 @@ def ml_normalize(
         try:
             minRange = int(parms['min'])
         except BaseException:
-            codex_log("min parameter not set")
+            logging.warning("min parameter not set")
             result['message'] = "min parameter not set"
-            codex_log(traceback.format_exc())
+            logging.warning(traceback.format_exc())
             return None
 
         try:
             maxRange = int(parms['max'])
         except BaseException:
-            codex_log("max parameter not set")
+            logging.warning("max parameter not set")
             result['message'] = "max parameter not set"
-            codex_log(traceback.format_exc())
+            logging.warning(traceback.format_exc())
             return None
 
         try:
             # TODO - fix
             result = codex_normalize_min_max(inputHash, minRange, maxRange)
         except BaseException:
-            codex_log("Failed to run regression algorithm")
+            logging.warning("Failed to run regression algorithm")
             result['message'] = "Failed to run regression algorithm"
-            codex_log(traceback.format_exc())
+            logging.warning(traceback.format_exc())
             return None
 
     else:

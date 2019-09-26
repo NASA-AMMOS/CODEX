@@ -14,12 +14,15 @@ import sys
 import json
 import inspect
 import os.path
+import logging
 
 from types import ModuleType
 
 import numpy as np
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+logger = logging.getLogger(__name__)
 
 contents = []
 
@@ -114,7 +117,7 @@ def makeReturnCode():
     contents.append('import os\n')
     contents.append("CODEX_ROOT  = os.getenv('CODEX_ROOT')\n")
     contents.append("import sys\n")
-    contents.append("import time, h5py, codex_read_data_api, codex_plot, codex_time_log\n")
+    contents.append("import time, h5py, read_data, codex_plot, codex_time_log\n")
     contents.append("import codex_data_quality_scan_api\n")
     contents.append("import numpy as np\n")
     contents.append("import matplotlib.pyplot as plt\n")

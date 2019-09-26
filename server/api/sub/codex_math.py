@@ -17,9 +17,13 @@ import os
 import psutil
 import time
 import collections
+import logging
+
 from scipy import linalg
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+logger = logging.getLogger(__name__)
 
 def codex_impute(data):
     '''

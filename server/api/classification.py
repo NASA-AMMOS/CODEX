@@ -18,6 +18,7 @@ import inspect
 import traceback
 import random
 import json
+import logging
 
 import numpy as np
 
@@ -54,12 +55,13 @@ from sklearn.svm                    import SVC
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
+
 from api.sub.return_code       import logReturnCode
 from api.sub.codex_math        import codex_impute
 from api.sub.codex_time_log    import logTime
 from api.sub.codex_time_log    import getComputeTimeEstimate
 from api.sub.codex_downsample  import downsample
-from api.sub.codex_system      import codex_log
 from api.sub.codex_hash        import get_cache
 
 def ml_classification(
@@ -86,7 +88,7 @@ def ml_classification(
     codex_hash = get_cache(session)
 
     if len(hashList) < 2:
-        codex_log("Classification requires >= 2 features.")
+        logging.warning("Classification requires >= 2 features.")
         return None
 
     if subsetHashName is not None:
@@ -100,11 +102,11 @@ def ml_classification(
 
     try:
         result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=session)
-        codex_log("Completed classification run with warnings: {r}".format(r=result["WARNING"]))
+        logging.warning("Completed classification run with warnings: {r}".format(r=result["WARNING"]))
     except BaseException:
-        codex_log("Failed to run classification algorithm")
+        logging.warning("Failed to run classification algorithm")
         result['message'] = "Failed to run classification algorithm"
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
         return None
 
     return result
@@ -160,7 +162,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
     returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
-        codex_log("Classification: {algorithm}: Hash not found. Returning!".format(algorithm=algorithm))
+        logging.warning("Classification: {algorithm}: Hash not found. Returning!".format(algorithm=algorithm))
         return None
 
     data = returnHash['data']
@@ -170,17 +172,17 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     if subsetHash is not False and subsetHash is not None:
         data = codex_hash.applySubsetMask(data, subsetHash)
         if(data is None):
-            codex_log("ERROR: run_codex_classification - subsetHash returned None.")
+            logging.warning("ERROR: run_codex_classification - subsetHash returned None.")
             return None
             
     full_samples = len(data)
     if downsampled is not False:
-        codex_log("Downsampling to " + str(downsampled) + " percent")
+        logging.warning("Downsampling to " + str(downsampled) + " percent")
         samples = len(data)
         data = downsample(data, percentage=downsampled, session=session)
 
     if data.ndim < 2:
-        codex_log("ERROR: run_codex_classification - insufficient data dimmensions")
+        logging.warning("ERROR: run_codex_classification - insufficient data dimmensions")
         return None
 
     X = data
@@ -197,7 +199,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     # TODO - labels are currently cached under features
     labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
     if labelHash_dict is None:
-        codex_log("label hash {hash} not found. Returning!".format(hash=labelHash))
+        logging.warning("label hash {hash} not found. Returning!".format(hash=labelHash))
         return {'algorithm': algorithm,
                 'downsample': downsampled,
                 'cross_val': cross_val,

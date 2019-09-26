@@ -10,10 +10,12 @@ Notes :
 import os
 import sys
 import yaml
+import logging
 
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
 
 def codex_read_yaml(filepath):
     '''

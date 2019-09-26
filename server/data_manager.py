@@ -12,17 +12,14 @@ U.S. Government Sponsorship acknowledged.
 import os
 import sys
 import traceback
-import base64
-import scipy
-import scipy.signal
-import math
-import traceback
+import logging
 
 import numpy as np
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-from api.sub.codex_system import codex_log
+logger = logging.getLogger(__name__)
+
 from api.sub.codex_hash   import get_cache
 
 def get_data_metrics(msg, result):
@@ -35,9 +32,10 @@ def get_data_metrics(msg, result):
 
     Examples:
 
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
     >>> message = {'routine': 'arrange', 'hashType': 'feature', 'activity': 'metrics', 'name': ['TiO2'], 'cid': '8vrjn', 'sessionkey': DOCTEST_SESSION}
     >>> result = get_data_metrics(message, {})
@@ -52,7 +50,7 @@ def get_data_metrics(msg, result):
             if hashLib:
                 data = hashLib['data']
             else:
-                codex_log("Failed to return hashLib")
+                logging.warning("Failed to return hashLib")
                 result = {}
                 result["status"] = "failed"
                 result['name'] = feature_name   
@@ -72,15 +70,15 @@ def get_data_metrics(msg, result):
                 result['hist_data'] = hist.tolist()
                 result['hist_edges'] = bin_edges.tolist()
                 result["status"] = "success"
-                codex_log("Successfully retrieved {f} metrics".format(f=feature_name))
+                logging.info("Successfully retrieved {f} metrics".format(f=feature_name))
 
             except:
-                codex_log("Error occured while computing feature data metrics")
+                logging.warning("Error occured while computing feature data metrics")
                 result["status"] = "failed"
                 result['name'] = feature_name
         
     except:
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
 
     yield result
 
@@ -93,9 +91,10 @@ def add_data(msg, result):
     Notes:
         Data must be a 1D array!
     Examples:
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
     >>> message = {'routine': 'arrange', 'hashType': 'feature', 'activity': 'add', 'name': 'TiO2', 'data': [1, 2, 3, 4], 'sessionkey': DOCTEST_SESSION}
     >>> results = add_data
@@ -139,7 +138,7 @@ def add_data(msg, result):
         result['message'] = 'success'
 
     except:
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
 
     return result
 
@@ -154,9 +153,10 @@ def get_data(msg, nan, inf, ninf, result):
 
     Examples:
 
-    >>> from codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_hash import DOCTEST_SESSION
+    >>> from api.sub.codex_doctest import doctest_get_data
     >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = codex_doctest.doctest_get_data(session=codex_hash)
+    >>> testData = doctest_get_data(session=codex_hash)
 
     >>> message = {'routine': 'arrange', 'hashType': 'feature', 'activity': 'get', 'name': ['TiO2','FeOT'], 'cid': '8vrjn', 'sessionkey': DOCTEST_SESSION}
     >>> result = get_data(message, 1, 2, 3, {})
@@ -209,7 +209,7 @@ def get_data(msg, nan, inf, ninf, result):
             result['data'] = data.tolist()
 
     except:
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
 
     return result
 
@@ -248,7 +248,7 @@ def delete_data(msg, result):
             result['message'] = 'failure'
 
     except:
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
 
     return result
 
@@ -289,7 +289,7 @@ def update_data(msg, result):
             result['message'] = 'failure'
 
     except:
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
 
     return result
     

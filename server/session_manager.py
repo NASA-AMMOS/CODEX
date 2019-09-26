@@ -10,14 +10,16 @@ U.S. Government Sponsorship acknowledged.
 import os
 import sys
 import traceback
+import logging
 
 from os      import listdir
 from os.path import isfile, join, isdir
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
+
 from api.sub.codex_hash    import get_cache
-from api.sub.codex_system  import codex_log
 
 def save_session(msg, result, savePath):
     '''
@@ -41,7 +43,7 @@ def save_session(msg, result, savePath):
             result["WARNING"] = session_name + " already exists."
 
     except:
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
 
     return result
 
@@ -69,7 +71,7 @@ def load_session(msg, result, loadPath):
             result["WARNING"] = session_name + " does not exist."
 
     except:
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
 
     return result
 
@@ -89,7 +91,7 @@ def get_sessions(msg, result, sessionPath):
         result['sessions'] = [f for f in listdir(path) if isdir(join(path, f))]
 
     except:
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
 
     return result
 

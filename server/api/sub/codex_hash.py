@@ -32,10 +32,13 @@ import psutil
 import time
 import warnings
 import functools
+import logging
 
 import numpy as np
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+logger = logging.getLogger(__name__)
 
 # IPC support
 from api.sub.ntangle.client import Client
@@ -43,7 +46,6 @@ from api.sub.ntangle.server import Server
 from api.sub.ntangle.server import expose
 
 # CODEX Support
-from api.sub.codex_system import codex_log
 from api.sub.codex_system import string2token
 
 DEFAULT_CODEX_HASH_BIND    = 'tcp://*:64209'
@@ -64,9 +66,6 @@ class CodexHash:
         if sessionKey is None:
             raise NoSessionSpecifiedError()
         if not self.__has_session(sessionKey):
-            # not using codex_log bc it breaks tests unnecessarily
-            # sys.stderr.write('Creating a new session for key {}'.format(sessionKey));
-            # sys.stderr.flush()
             self.sessions[sessionKey] = {
                 "featureList": [],
                 "subsetList": [],
@@ -105,11 +104,11 @@ class CodexHash:
         '''
         session = self.__set_session(session)
 
-        codex_log("Feature Cache Size           : " + str(len(self.sessions[session]["featureList"])))
-        codex_log("Subset Cache Size            : " + str(len(self.sessions[session]["subsetList"])))
-        codex_log("Downsample Cache Size        : " + str(len(self.sessions[session]["downsampleList"])))
-        codex_log("Number of classifier models  : " + str(len(self.sessions[session]["regressorList"])))
-        codex_log("Number of regressor models   : " + str(len(self.sessions[session]["classifierList"])))
+        logging.info("Feature Cache Size           : " + str(len(self.sessions[session]["featureList"])))
+        logging.info("Subset Cache Size            : " + str(len(self.sessions[session]["subsetList"])))
+        logging.info("Downsample Cache Size        : " + str(len(self.sessions[session]["downsampleList"])))
+        logging.info("Number of classifier models  : " + str(len(self.sessions[session]["regressorList"])))
+        logging.info("Number of regressor models   : " + str(len(self.sessions[session]["classifierList"])))
 
     @expose('remove_stale_data')
     def remove_stale_data(self, verbose=False, session=None):
@@ -152,11 +151,11 @@ class CodexHash:
         session = self.__set_session(session)
 
         if(verbose):
-            codex_log("Before clearing cache:")
+            logging.info("Before clearing cache:")
             self.printCacheCount(session=session)
             process = psutil.Process(os.getpid())
             current_ram = process.memory_info().rss
-            codex_log(current_ram)
+            logging.info(current_ram)
 
         oldestTime = time.time()
         oldestType = "downsample"
@@ -182,15 +181,15 @@ class CodexHash:
 
         status = self.deleteHashName(oldestName, oldestType, session=session)
         if(status != True):
-            codex_log("Deleting hash failed")
+            logging.warning("Deleting hash failed")
             return None
 
         if(verbose):
-            codex_log("After clearing cache:")
+            logging.info("After clearing cache:")
             self.printCacheCount(session=session)
             process = psutil.Process(os.getpid())
             current_ram = process.memory_info().rss
-            print(current_ram)
+            logging.info(current_ram)
 
 
     @expose('deleteHashName')
@@ -343,7 +342,7 @@ class CodexHash:
         elif(hashType == "regressor"):
             self.sessions[session]["regressorList"] = []
         else:
-            codex_log("Unknown hash type.  Not resetting")
+            logging.warning("Unknown hash type.  Not resetting")
 
     @expose('hashArray')
     def hashArray(self, arrayName, inputArray, hashType, virtual=False, session=None):
@@ -448,7 +447,7 @@ class CodexHash:
         elif(hashType == "NOSAVE"):
             pass
         else:
-            codex_log("ERROR: Hash type not recognized! Not logged for future use.")
+            logging.warning("ERROR: Hash type not recognized! Not logged for future use.")
             return None
 
         return newHash
@@ -536,41 +535,41 @@ class CodexHash:
         if(hashType == "feature"):
 
             for point in self.sessions[session]["featureList"]:
-                codex_log("Name: " + point['name'])
-                codex_log("Hash: " + point['hash'])
-                codex_log("Data Shape: " + str(point['data'].shape))
-                codex_log("Color: " + str(point["color"]))
-                codex_log("Z-Order: " + str(point["z-order"]))
+                logging.info("Name: " + point['name'])
+                logging.info("Hash: " + point['hash'])
+                logging.info("Data Shape: " + str(point['data'].shape))
+                logging.info("Color: " + str(point["color"]))
+                logging.info("Z-Order: " + str(point["z-order"]))
 
         elif(hashType == "subset"):
 
             for point in self.sessions[session]["subsetList"]:
-                codex_log("Name: " + point['name'])
-                codex_log("Hash: " + point['hash'])
-                codex_log("Data Shape: " + str(point['data'].shape))
-                codex_log("Color: " + str(point["color"]))
-                codex_log("Z-Order: " + str(point["z-order"]))
+                logging.info("Name: " + point['name'])
+                logging.info("Hash: " + point['hash'])
+                logging.info("Data Shape: " + str(point['data'].shape))
+                logging.info("Color: " + str(point["color"]))
+                logging.info("Z-Order: " + str(point["z-order"]))
 
         elif(hashType == "downsample"):
 
             for point in self.sessions[session]["downsampleList"]:
-                codex_log("Name: " + point['name'])
-                codex_log("Hash: " + point['hash'])
-                codex_log("Data Shape: " + str(point['data'].shape))
-                codex_log("Color: " + str(point["color"]))
-                codex_log("Z-Order: " + str(point["z-order"]))
+                logging.info("Name: " + point['name'])
+                logging.info("Hash: " + point['hash'])
+                logging.info("Data Shape: " + str(point['data'].shape))
+                logging.info("Color: " + str(point["color"]))
+                logging.info("Z-Order: " + str(point["z-order"]))
 
         elif(hashType == "label"):
 
             for point in self.sessions[session]["labelList"]:
-                codex_log("Name: " + point['name'])
-                codex_log("Hash: " + point['hash'])
-                codex_log("Data Shape: " + str(point['data'].shape))
-                codex_log("Color: " + str(point["color"]))
-                codex_log("Z-Order: " + str(point["z-order"]))
+                logging.info("Name: " + point['name'])
+                logging.info("Hash: " + point['hash'])
+                logging.info("Data Shape: " + str(point['data'].shape))
+                logging.info("Color: " + str(point["color"]))
+                logging.info("Z-Order: " + str(point["z-order"]))
 
         else:
-            codex_log("ERROR: printHashList - unknown hashType")
+            logging.warning("ERROR: printHashList - unknown hashType")
 
     @expose('findHashArray')
     def findHashArray(self, field, name, hashType, session=None):
@@ -664,7 +663,7 @@ class CodexHash:
             return None
 
         else:
-            codex_log("ERROR: findHashArray - hash not found")
+            logging.warning("ERROR: findHashArray - hash not found")
             return None
 
     @expose('mergeHashResults')
@@ -686,22 +685,22 @@ class CodexHash:
         session = self.__set_session(session)
         
         if(hashList is None):
-            codex_log("ERROR: mergeHashResults hashList is None")
+            logging.warning("ERROR: mergeHashResults hashList is None")
             return None
 
         if(hashList == []):
-            codex_log("ERROR: mergeHashResults hashList is empty")
+            logging.warning("ERROR: mergeHashResults hashList is empty")
             return None
 
         totalFeatures = len(hashList)
 
         if(verbose):
-            codex_log("Number of features: " + str(totalFeatures))
+            logging.warning("Number of features: " + str(totalFeatures))
 
         currentHash = hashList[0]
         result = self.findHashArray("hash", currentHash, "feature", session=session)
         if(result is None):
-            codex_log("Warning, hash not found in mergeHashResults")
+            logging.warning("Warning, hash not found in mergeHashResults")
             return None
 
         returnArray = result['data']
@@ -709,20 +708,20 @@ class CodexHash:
 
 
         if(verbose):
-            codex_log("Merging: " + returnName)
+            logging.info("Merging: " + returnName)
 
         for featureNum in range(1, totalFeatures):
             currentHash = hashList[featureNum]
             result = self.findHashArray("hash", currentHash, "feature", session=session)
             if(result is None):
-                codex_log("Warning, hash not found in mergeHashResults")
+                logging.warning("Warning, hash not found in mergeHashResults")
                 return None
 
             resultArray = result['data']
             resultName = result['name']
 
             if(verbose):
-                codex_log("Merging: " + resultName)
+                logging.info("Merging: " + resultName)
 
             try:
                 (s1, f1) = returnArray.shape
@@ -735,7 +734,7 @@ class CodexHash:
                 returnArray = np.column_stack((resultArray, returnArray))
             else:
                 # TODO - long term, how do we want to handle this?
-                codex_log("WARNING: {resultName} does not match shape of previous features(" + str(s1) + "/" +str(s2) + "). Exlucding.".format(resultName=resultName))
+                logging.warning("WARNING: {resultName} does not match shape of previous features(" + str(s1) + "/" +str(s2) + "). Exlucding.".format(resultName=resultName))
     
         return returnArray
         
@@ -749,7 +748,7 @@ class CodexHash:
             if(r is not None):
                 hashList.append(r['hash'])
             else:
-                codex_log("WARNING: feature2hashList - could not add {feature} to feature list.".format(feature=feature))
+                logging.warning("WARNING: feature2hashList - could not add {feature} to feature list.".format(feature=feature))
         return hashList
 
     @expose('applySubsetMask')
@@ -772,7 +771,7 @@ class CodexHash:
 
         returnDict = self.findHashArray("hash", subsetHash, "subset", session=session)
         if(returnDict is None):
-            codex_log("Hash not found. Returning!")
+            logging.warning("Hash not found. Returning!")
             return None
 
         indexArray = returnDict['data']
@@ -783,7 +782,7 @@ class CodexHash:
             x2 = indexArray.size
 
             if(x1 != x2):
-                codex_log("Error: mask must match length of feature")
+                logging.warning("Error: mask must match length of feature")
                 return None
 
             included = np.count_nonzero(indexArray)
@@ -804,7 +803,7 @@ class CodexHash:
             x2 = indexArray.size
 
             if(x1 != x2):
-                codex_log("Error: mask must match length of feature")
+                logging.warning("Error: mask must match length of feature")
                 return None
 
             included = np.count_nonzero(indexArray)
@@ -1034,7 +1033,7 @@ class CodexHash:
             if not any(d['hash'] == newHash["hash"] for d in self.sessions[session]["classifierList"]):
                 self.sessions[session]["classifierList"].append(newHash)
         else:
-            codex_log("ERROR: Model hash type not recognized! Not logged for future use.")
+            logging.warning("ERROR: Model hash type not recognized! Not logged for future use.")
             return None
 
         return newHash
@@ -1042,7 +1041,7 @@ class CodexHash:
     @expose('import_hd5')
     def import_hd5(self, filepath, session=None):
 
-        from api.sub.codex_read_data_api import codex_read_hd5
+        from api.sub.read_data import codex_read_hd5
         hashList, featureList = codex_read_hd5(filepath, None, "feature", session=WrappedCache(session, cache=self))
     
         return hashList, featureList
@@ -1050,7 +1049,7 @@ class CodexHash:
     @expose('import_csv')
     def import_csv(self, filepath, session=None):
 
-        from api.sub.codex_read_data_api import codex_read_csv
+        from api.sub.read_data import codex_read_csv
         hashList, featureList = codex_read_csv(filepath, None, "feature", session=WrappedCache(session, cache=self))
 
         return hashList, featureList
@@ -1058,7 +1057,7 @@ class CodexHash:
     @expose('import_npy')
     def import_npy(self, filepath, session=None):
 
-        from api.sub.codex_read_data_api import codex_read_npy
+        from api.sub.read_data import codex_read_npy
         hashList, featureList = codex_read_npy(filepath, None, "feature", session=WrappedCache(session, cache=self))
 
         return hashList, featureList

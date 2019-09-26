@@ -13,11 +13,14 @@ import sys
 import math
 import gc
 import psutil
+import logging
 
 import numpy as np
 
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+logger = logging.getLogger(__name__)
 
 # CODEX Support
 from api.sub.codex_yaml        import codex_read_yaml
@@ -107,28 +110,6 @@ def string2Numpy(dataString):
 
     return outData
 
-
-def codex_log(message, verbose=True):
-    '''
-    Inputs:
-
-    Outputs:
-
-    Examples:
-
-    '''
-    try:
-        f = open(CODEX_ROOT + "/codex.log", "a")
-    except BaseException:
-        f = open(CODEX_ROOT + "/codex.log", 'w+')
-
-    if(verbose):
-        print(message)
-
-    f.write(message + "\n")
-    f.close()
-
-
 def get_setting(settingName):
     '''
     Inputs:
@@ -188,7 +169,7 @@ def codex_server_memory_check(verbose=False, session=None):
     current_ram = get_codex_memory_usage()
 
     if(verbose):
-        print("RAM Usage: " + str(current_ram) + "/" + str(allowed_ram))
+        logging.info("RAM Usage: " + str(current_ram) + "/" + str(allowed_ram))
 
     while(current_ram > allowed_ram):
         last_ram = current_ram
@@ -199,7 +180,7 @@ def codex_server_memory_check(verbose=False, session=None):
         current_ram = get_codex_memory_usage()
 
         if(verbose):
-            print("RAM Usage: " + str(current_ram) + "/" + str(allowed_ram))
+            logging.info("RAM Usage: " + str(current_ram) + "/" + str(allowed_ram))
 
         if(math.isclose(current_ram, last_ram, abs_tol=10)):
             return

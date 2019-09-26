@@ -15,6 +15,7 @@ import sys
 import random
 import math
 import operator
+import logging
 
 import numpy as np
 
@@ -22,8 +23,9 @@ from random import shuffle
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
 
-def label_swap(labels, dataHash, verbose=False, session=None):
+def label_swap(labels, dataHash, session=None):
     '''
     Inputs:
 
@@ -38,12 +40,6 @@ def label_swap(labels, dataHash, verbose=False, session=None):
     test_uniq_labels = np.unique(labels)
     num_labels = labels.size
 
-    if(verbose):
-        codex_system.codex_log("test labels:")
-        codex_system.codex_log(labels)
-        codex_system.codex_log("test_uniq_labels:")
-        codex_system.codex_log(test_uniq_labels)
-
     tmp = codex_hash.findHashArray("name", dataHash, "label")
     if(tmp is None):
         return labels
@@ -52,30 +48,18 @@ def label_swap(labels, dataHash, verbose=False, session=None):
     ref_uniq_labels = np.unique(saved_labels)
     num_saved_labels = saved_labels.size
 
-    if(verbose):
-        codex_system.codex_log("reference labels:")
-        codex_system.codex_log(saved_labels)
-        codex_system.codex_log("ref_uniq_labels:")
-        codex_system.codex_log(ref_uniq_labels)
-
     # If reference labels are from DBSCAN, don't attempt to use them
     if(np.any(ref_uniq_labels[:] == -1)):
-        if(verbose):
-            codex_system.codex_log("Found -1, returning")
         return labels
 
     # If test labels are from DBSCAN, don't attempt to use them
     if(np.any(test_uniq_labels[:] == -1)):
-        if(verbose):
-            codex_system.codex_log("Found -1, returning")
         return labels
 
     # Do not attempt to remap label colors if the k values of the
     #    test and reference label sets have a delta larger than 5
     if(abs(ref_uniq_labels.size - test_uniq_labels.size) > 5):
-        if(verbose):
-            codex_system.codex_log(
-                "Difference between test and reference labels is too high, returning original labels")
+        logging.warning("Difference between test and reference labels is too high, returning original labels")
         return labels
 
     finalMap = {}

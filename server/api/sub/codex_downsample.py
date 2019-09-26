@@ -12,11 +12,13 @@ import random
 import sys
 import numpy as np
 import traceback
+import logging
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
+
 # CODEX library imports
-from api.sub.codex_system import codex_log
 from api.sub.codex_math import codex_impute
 from api.sub.codex_hash import get_cache
 from api.sub.spanning   import mask_spanning_subset
@@ -88,11 +90,11 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None):
         if(percentage <= 100 and percentage >= 0):
             usedSamples = int(float(percentage / 100) * totalPoints)
         else:
-            codex_log("ERROR: downsample - perceange out of bounds 0-100")
+            logging.warning("ERROR: downsample - perceange out of bounds 0-100")
             usedSamples = totalPoints
 
     else:
-        codex_log("ERROR: downsample - samples and percentage both 0.")
+        logging.warning("ERROR: downsample - samples and percentage both 0.")
         usedSamples = totalPoints
 
     # first, check if this downsampling has already been done before
@@ -113,7 +115,7 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None):
         except BaseException:
 
 
-            codex_log("ERROR: downsample - failed to downsample.\n\n{trace}".format(trace=traceback.format_exc()))
+            logging.warning("ERROR: downsample - failed to downsample.\n\n{trace}".format(trace=traceback.format_exc()))
             outputList = inputList
 
             # Convert back to numpy array

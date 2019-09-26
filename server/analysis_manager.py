@@ -13,11 +13,13 @@ import os
 import sys
 import base64
 import traceback
+import logging
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+logger = logging.getLogger(__name__)
+
 from api.sub.return_code       import dump_code_to_file
-from api.sub.codex_system      import codex_log
 
 def download_code(msg, result, savePath):
     '''
@@ -39,7 +41,7 @@ def download_code(msg, result, savePath):
         f.close()
 
     except:
-        codex_log(traceback.format_exc())
+        logging.warning(traceback.format_exc())
 
     return result
 
