@@ -25,12 +25,12 @@ from sklearn           import cluster
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
-from api.sub.codex_return_code          import logReturnCode
+from api.sub.return_code                import logReturnCode
 from api.sub.codex_math                 import codex_impute
 from api.sub.codex_time_log             import getComputeTimeEstimate
 from api.sub.codex_time_log             import logTime
 from api.sub.codex_downsample           import downsample
-from api.codex_dimmension_reduction_api import run_codex_dim_reduction
+from api.dimmension_reduction           import run_codex_dim_reduction
 from api.sub.codex_system               import codex_log
 from api.sub.codex_labels               import label_swap
 from api.sub.codex_hash                 import get_cache

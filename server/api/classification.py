@@ -54,7 +54,7 @@ from sklearn.svm                    import SVC
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-from api.sub.codex_return_code import logReturnCode
+from api.sub.return_code       import logReturnCode
 from api.sub.codex_math        import codex_impute
 from api.sub.codex_time_log    import logTime
 from api.sub.codex_time_log    import getComputeTimeEstimate

@@ -126,7 +126,7 @@ def makeReturnCode():
     contents.append("from sklearn.neighbors import kneighbors_graph\n")
     contents.append("from sklearn.preprocessing import StandardScaler\n")
     contents.append("from codex_plot import getColorMap\n")
-    contents.append("import codex_hash, codex_return_code\n")
+    contents.append("import codex_hash, return_code\n")
     contents.append("import codex_clustering_api, codex_dimmension_reduction_api\n")
     contents.append("import codex_template_scan_api, codex_endmembers\n")
     contents.append("import codex_segmentation_api, codex_regression_api\n")

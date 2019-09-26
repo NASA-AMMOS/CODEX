@@ -25,7 +25,7 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 # CODEX Support
 from api.sub.codex_math        import codex_impute
 from api.sub.codex_system      import codex_log
-from api.sub.codex_return_code import logReturnCode
+from api.sub.return_code       import logReturnCode
 from api.sub.codex_downsample  import downsample
 from api.sub.codex_plot        import codex_plot_peak
 from api.sub.codex_time_log    import getComputeTimeEstimate

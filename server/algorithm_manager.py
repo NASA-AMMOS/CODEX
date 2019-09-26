@@ -16,22 +16,22 @@ import traceback
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-from api.codex_1d_binning                  import ml_binning
-from api.codex_clustering_api              import ml_cluster
-from api.codex_data_quality_scan_api       import ml_quality_scan
-from api.codex_dimmension_reduction_api    import ml_dimensionality_reduction
-from api.codex_endmembers                  import ml_endmember
-from api.codex_normalize                   import ml_normalize
-from api.codex_peak_detection_api          import ml_peak_detect
-from api.codex_regression_api              import ml_regression
-from api.codex_segmentation_api            import ml_segmentation
-from api.codex_template_scan_api           import ml_template_scan
-from api.codex_classification_api          import ml_classification
+from api.binning                 import ml_binning
+from api.clustering              import ml_cluster
+from api.quality_scan            import ml_quality_scan
+from api.dimmension_reduction    import ml_dimensionality_reduction
+from api.endmember               import ml_endmember
+from api.normalize               import ml_normalize
+from api.peak_detection          import ml_peak_detect
+from api.regression              import ml_regression
+from api.segmentation            import ml_segmentation
+from api.template_scan           import ml_template_scan
+from api.classification          import ml_classification
 
-from api.sub.codex_system                  import codex_log
-from api.sub.codex_system                  import get_featureList
-from api.sub.codex_return_code             import logReturnCode
-from api.sub.codex_hash                    import get_cache
+from api.sub.codex_system        import codex_log
+from api.sub.codex_system        import get_featureList
+from api.sub.return_code         import logReturnCode
+from api.sub.codex_hash          import get_cache
 
 def algorithm_call(msg, result):
     '''

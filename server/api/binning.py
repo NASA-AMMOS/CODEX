@@ -24,7 +24,7 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
 from api.sub.codex_time_log    import logTime
-from api.sub.codex_return_code import logReturnCode
+from api.sub.return_code       import logReturnCode
 from api.sub.codex_hash        import get_cache
 from api.sub.codex_doctest     import run_codex_doctest
 

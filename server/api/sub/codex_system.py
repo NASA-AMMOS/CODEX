@@ -38,7 +38,7 @@ def get_featureList(featureList):
         Success
 
     '''
-    #from api.sub.codex_return_code import logReturnCode
+    #from api.sub.return_code import logReturnCode
     #logReturnCode(inspect.currentframe()) # TODO - need to figure out why this does not work
 
     return featureList

@@ -19,7 +19,7 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 from api.codex_workflow        import explain_this
 from api.codex_workflow        import find_more_like_this
 from api.codex_workflow        import general_classifier
-from api.sub.codex_return_code import logReturnCode
+from api.sub.return_code       import logReturnCode
 from api.sub.codex_system      import get_featureList
 from api.sub.codex_hash        import get_cache
 from api.sub.codex_system      import codex_log
