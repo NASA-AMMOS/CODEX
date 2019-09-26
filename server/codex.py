@@ -36,19 +36,19 @@ CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX
-from codex_workflow_manager       import workflow_call
-from codex_algorithm_manager      import algorithm_call
-from codex_guidance_manager       import get_guidance
-from codex_session_manager        import save_session
-from codex_session_manager        import load_session
-from codex_session_manager        import get_sessions
-from codex_data_manager           import add_data
-from codex_data_manager           import get_data
-from codex_data_manager           import delete_data
-from codex_data_manager           import update_data
-from codex_data_manager           import get_data_metrics
-from codex_analysis_manager       import download_code
-from codex_eta_manager            import get_time_estimate
+from workflow_manager       import workflow_call
+from algorithm_manager      import algorithm_call
+from guidance_manager       import get_guidance
+from session_manager        import save_session
+from session_manager        import load_session
+from session_manager        import get_sessions
+from data_manager           import add_data
+from data_manager           import get_data
+from data_manager           import delete_data
+from data_manager           import update_data
+from data_manager           import get_data_metrics
+from analysis_manager       import download_code
+from eta_manager            import get_time_estimate
 from api.sub.codex_system         import codex_log
 from api.sub.codex_system         import codex_server_memory_check
 from api.sub.codex_return_code    import logReturnCode
@@ -163,13 +163,13 @@ def route_request(msg, result):
     elif(routine == 'workflow'):
         yield workflow_call(msg, result)
     elif(routine == 'guidance'):
-        yield get_guidance(msg, result)
+        yield get_guidance(msg, result, CODEX_ROOT)
     elif (routine == "save_session"):
-        yield save_session(msg, result)
+        yield save_session(msg, result, CODEX_ROOT)
     elif (routine == "load_session"):
-        yield load_session(msg, result)
+        yield load_session(msg, result, CODEX_ROOT)
     elif (routine == "get_sessions"):
-        yield get_sessions(msg, result)
+        yield get_sessions(msg, result, CODEX_ROOT)
     elif (routine == 'time'):
         yield get_time_estimate(msg, result)
     elif (routine == 'arrange'):
@@ -187,7 +187,7 @@ def route_request(msg, result):
                 yield metric
 
     elif (routine == 'download_code'):
-        yield download_code(msg, result)
+        yield download_code(msg, result, CODEX_ROOT)
     else:
         result['message'] = 'Unknown Routine'
         yield result
@@ -219,6 +219,7 @@ def execute_request(queue, message):
             # ...shovel the result into a queue
             chunk['message'] = "success"
             queue.put_nowait( {'result': chunk, 'done': False} )
+            
     except e:
         response = {'message': 'failure'}
         queue.put_nowait( { 'result': response, 'done': False} )

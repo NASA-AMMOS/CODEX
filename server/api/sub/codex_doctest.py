@@ -18,8 +18,10 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 # CODEX Support
 from api.sub.codex_read_data_api import codex_read_csv
 
-def doctest_get_image_path():
+def doctest_base_path():
+    return CODEX_ROOT
 
+def doctest_get_image_path():
     return (os.path.join(CODEX_ROOT, 'uploads', 'test_image.JPG'))
 
 

@@ -21,9 +21,6 @@ from scipy import linalg
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-# CODEX Support
-import api.sub.codex_system
-
 def codex_impute(data):
     '''
     Inputs:

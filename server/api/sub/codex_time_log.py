@@ -22,8 +22,9 @@ from os.path  import isfile
 from os.path  import join
 from os.path  import isdir 
 
-CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
+CODEX_ROOT = os.getenv('CODEX_ROOT')
 logPath = os.path.join(CODEX_ROOT, "timeLogs")
 timeLogs = {}
 
@@ -47,7 +48,7 @@ def logTime(domain, algorithm, time, samples, features):
     if(timeLogs == {}):
         getTimeLogDict()
 
-    algorithmPath = logPath + domain + "/" + algorithm
+    algorithmPath = os.path.join(logPath, domain, algorithm)
     if not os.path.exists(algorithmPath):
         try:
             os.makedirs(algorithmPath)
@@ -130,9 +131,7 @@ def getComputeTimeEstimate(domain, algorithm, inputSamples):
         numReferences = len(samples)
 
         # Get the five closest reference samples, take average time
-        resultSamples = nsmallest(
-            5, samples, key=lambda x: abs(
-                x - inputSamples))
+        resultSamples = nsmallest(5, samples, key=lambda x: abs(x - inputSamples))
 
         for x in range(0, numReferences):
             if(samples[x] in resultSamples):
@@ -148,6 +147,6 @@ def getComputeTimeEstimate(domain, algorithm, inputSamples):
 
 if __name__ == "__main__":
 
-    import codex_doctest
-    codex_doctest.run_codex_doctest()
+    from api.sub.codex_doctest import run_codex_doctest
+    run_codex_doctest()
 

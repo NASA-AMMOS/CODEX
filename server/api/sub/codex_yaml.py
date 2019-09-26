@@ -22,7 +22,8 @@ def codex_read_yaml(filepath):
     Outputs:
 
     Examples:
-    >>> result = codex_read_yaml(os.path.join(CODEX_ROOT,'guidance.yaml'))
+    >>> from api.sub.codex_doctest import doctest_base_path
+    >>> result = codex_read_yaml(os.path.join(doctest_base_path(),'guidance.yaml'))
     >>> print(result['unit_tests']['test'])
     This is a unit test
     '''

@@ -20,7 +20,6 @@ import numpy as N
 
 from scipy import stats
 
-CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # CODEX Support
@@ -157,11 +156,9 @@ def codex_binned_stat(
         >>> codex_binned_stat(None, bins = range(10), session=codex_hash)
         Hash not found. Returning!
 
-        >>> featureList = ['L2/RetrievalResults/xco2']
-        >>> hashList = codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature", session=codex_hash)
-
-        >>> inputHash = hashList[0][0]
-        >>> results = codex_binned_stat(inputHash, session=codex_hash)
+        >>> from api.sub.codex_doctest import doctest_get_data
+        >>> testData = doctest_get_data()
+        >>> results = codex_binned_stat(testData['inputHash'], session=codex_hash)
 
         #print(results)
 

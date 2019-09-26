@@ -35,7 +35,6 @@ import functools
 
 import numpy as np
 
-CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 # IPC support
@@ -820,7 +819,7 @@ class CodexHash:
             return outData, returnDict['name']
 
     @expose('pickle_data')
-    def pickle_data(self, session_name, front_end_state, session=None):
+    def pickle_data(self, session_name, front_end_state, savePath, session=None):
         '''
         Inputs:
 
@@ -830,6 +829,7 @@ class CodexHash:
 
         Examples:
 
+        >>> from api.sub.codex_doctest import doctest_base_path
         >>> session = 'foo'
         >>> ch = CodexHash()
         >>> from sklearn import datasets, linear_model
@@ -855,12 +855,12 @@ class CodexHash:
         >>> hashResult = ch.hashArray("x1", x1, "downsample", session=session)
         >>> hashResult = ch.hashArray("x1", x1, "label", session=session)
 
-        >>> ch.pickle_data("test_session", {"front_end_payload":"payload_value"}, session=session)
+        >>> ch.pickle_data("test_session", {"front_end_payload":"payload_value"}, doctest_base_path(), session=session)
 
         '''
         session = self.__set_session(session)
 
-        session_path = os.path.join(CODEX_ROOT, 'sessions', session_name)
+        session_path = os.path.join(savePath, 'sessions', session_name)
         if not os.path.exists(os.path.join(session_path)):
             os.makedirs(session_path)
 
@@ -893,7 +893,7 @@ class CodexHash:
         pickle.dump(front_end_state, open(pickle_path, 'wb'))
 
     @expose('unpickle_data')
-    def unpickle_data(self, session_name, session=None):
+    def unpickle_data(self, session_name, loadPath, session=None):
         '''
         Inputs:
 
@@ -905,9 +905,10 @@ class CodexHash:
 
         Examples:
 
+        >>> from api.sub.codex_doctest import doctest_base_path
         >>> session = 'foo'
         >>> ch = CodexHash()
-        >>> ch.unpickle_data("test_session", session=session)
+        >>> ch.unpickle_data("test_session", doctest_base_path(), session=session)
         {'features': ['x1'], 'labels': ['x1'], 'subsets': ['x1'], 'downsample': ['x1'], 'state': {'front_end_payload': 'payload_value'}}
 
         >>> ch.printCacheCount(session=session)
@@ -919,7 +920,7 @@ class CodexHash:
         '''
         session = self.__set_session(session)
 
-        session_path = os.path.join(CODEX_ROOT, 'sessions', session_name)
+        session_path = os.path.join(loadPath, 'sessions', session_name)
         if not os.path.exists(os.path.join(session_path)):
             os.makedirs(session_path)
 

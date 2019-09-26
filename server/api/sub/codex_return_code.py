@@ -19,9 +19,7 @@ from types import ModuleType
 
 import numpy as np
 
-CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
-returnedCodePath = os.path.join(CODEX_ROOT,"returned_code.py")
 
 contents = []
 
@@ -116,8 +114,6 @@ def makeReturnCode():
     contents.append('import os\n')
     contents.append("CODEX_ROOT  = os.getenv('CODEX_ROOT')\n")
     contents.append("import sys\n")
-    contents.append("sys.path.insert(1,CODEX_ROOT + '/api/')\n")
-    contents.append("sys.path.insert(1,CODEX_ROOT + '/api/sub/')\n")
     contents.append("import time, h5py, codex_read_data_api, codex_plot, codex_time_log\n")
     contents.append("import codex_data_quality_scan_api\n")
     contents.append("import numpy as np\n")
@@ -150,7 +146,7 @@ def code_unique(seq):
     return [x for x in seq if not (x in seen or seen_add(x))]
 
 
-def dump_code_to_file():
+def dump_code_to_file(returnedCodePath):
     '''
     Inputs:
 
