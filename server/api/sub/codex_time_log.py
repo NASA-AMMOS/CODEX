@@ -78,15 +78,21 @@ def logTime(domain, algorithm, time, samples, features):
 
 
 def getTimeLogDict():
+    '''
+    Inputs:
 
+    Outputs:
+
+    Examples:
+        >>> getTimeLogDict()
+    '''
     if not os.path.exists(logPath):
         os.makedirs(logPath)
 
     algorithmTypes = [f for f in listdir(logPath) if isdir(join(logPath, f))]
     for algorithmType in algorithmTypes:
         timeLogs[algorithmType] = {}
-        algorithms = [
-            f for f in listdir(join(logPath, algorithmType)) if isdir(join(join(logPath, algorithmType), f))]
+        algorithms = [f for f in listdir(join(logPath, algorithmType)) if isdir(join(join(logPath, algorithmType), f))]
         for algorithm in algorithms:
             timeLogs[algorithmType][algorithm] = {}
             try:
@@ -113,7 +119,7 @@ def getComputeTimeEstimate(domain, algorithm, inputSamples):
     >>> time = getComputeTimeEstimate("clustering", "kmeans", 9000)
     '''
 
-    algorithmPath = logPath + domain + "/" + algorithm
+    algorithmPath = os.path.join(logPath, domain, algorithm)
     count = 0
     totalTime = 0
 

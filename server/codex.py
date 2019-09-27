@@ -205,7 +205,7 @@ def execute_request(queue, message):
     '''
     msg = json.loads(message)
     result = msg
-
+    
     # log the response but without the data
     logging.info("{time} : Message from front end: {json}".format(time=datetime.datetime.now().isoformat(), json={k:(msg[k] if k != 'data' else '[data removed]') for k in msg}))
 
@@ -326,6 +326,9 @@ def make_cache_process():
     return Process(target=run_cache)
 
 if __name__ == '__main__':
+
+    if not os.path.exists("logs/"):
+        os.makedirs("logs/")
 
     logging.basicConfig(filename='logs/{time}.log'.format(time=datetime.datetime.now()), level=0)
     logging.info("CODEX Server Started")

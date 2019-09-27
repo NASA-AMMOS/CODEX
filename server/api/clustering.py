@@ -55,27 +55,27 @@ def ml_cluster(
     >>> from api.sub.codex_doctest import doctest_get_data
     >>> testData = doctest_get_data()
     >>> from api.sub.codex_hash import DOCTEST_SESSION
-    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> ch = get_cache(DOCTEST_SESSION)
 
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "kmean", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=codex_hash)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "kmeans", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=codex_hash)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "mean_shift", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=codex_hash)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "birch", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=codex_hash)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "ward", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=codex_hash)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "spectral", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=codex_hash)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "dbscan", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=codex_hash)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "agglomerative", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=codex_hash)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "affinity_propagation", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=codex_hash)
+    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "kmean", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
+    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "kmeans", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
+    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "mean_shift", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
+    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "birch", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
+    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "ward", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
+    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "spectral", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
+    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "dbscan", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
+    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "agglomerative", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
+    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "affinity_propagation", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     if len(hashList) < 2:
         logging.warning("Clustering requires >= 2 features.")
         return None
 
     if subsetHashName is not None:
-        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
+        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -86,8 +86,8 @@ def ml_cluster(
 
     try:
         
-        pca = run_codex_dim_reduction(inputHash, subsetHash, {"n_components":2}, downsampled, False, "PCA", session=codex_hash)
-        result = run_codex_clustering(pca['outputHash'], subsetHash, downsampled, algorithmName, parms, session=codex_hash)
+        pca = run_codex_dim_reduction(inputHash, subsetHash, {"n_components":2}, downsampled, False, "PCA", session=ch)
+        result = run_codex_clustering(pca['outputHash'], subsetHash, downsampled, algorithmName, parms, session=ch)
         result['data'] = pca['data']
 
     except BaseException:
@@ -119,7 +119,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
     Examples:
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     logReturnCode(inspect.currentframe())
 
@@ -128,7 +128,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
               'downsample': downsampled,
               "WARNING":None}
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
         logging.warning("Clustering: run_codex_clustering: Hash not found. Returning!")
         return None
@@ -138,7 +138,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
         return None
 
     if subsetHash is not False:
-        data = codex_hash.applySubsetMask(data, subsetHash)
+        data = ch.applySubsetMask(data, subsetHash)
         if(data is None):
             logging.warning("ERROR: run_codex_clustering - subsetHash returned None.")
             return None
@@ -146,7 +146,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
     full_samples = len(data)
     if downsampled is not False:
         logging.warning("Downsampling to {downsampled} samples".format(downsampled=downsampled))
-        data = downsample(data, samples=downsampled, session=codex_hash)
+        data = downsample(data, samples=downsampled, session=ch)
         logging.warning("Downsampled to {samples} samples".format(samples=len(data)))
 
     result['eta'] = getComputeTimeEstimate("clustering", algorithm, full_samples)
@@ -222,9 +222,9 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
     y_pred = cluster_alg.labels_.astype(np.int)
 
     # temporary to not change API right now
-    merged_hash = codex_hash.hashArray("temporary", X, "feature")
-    y_pred = label_swap(y_pred, merged_hash["hash"], session=codex_hash)
-    label_hash = codex_hash.hashArray(merged_hash["hash"], y_pred, "label")
+    merged_hash = ch.hashArray("temporary", X, "feature")
+    y_pred = label_swap(y_pred, merged_hash["hash"], session=ch)
+    label_hash = ch.hashArray(merged_hash["hash"], y_pred, "label")
 
     result['numClusters'] = np.unique(y_pred).size
     result['clusters'] = y_pred.tolist()
@@ -238,12 +238,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
 
     endTime = time.time()
     computeTime = endTime - startTime
-    logTime(
-        "clustering",
-        algorithm,
-        computeTime,
-        len(data),
-        data.ndim)
+    logTime("clustering", algorithm, computeTime, len(data), data.ndim)
 
     result['message'] = "success"
     return result

@@ -98,7 +98,6 @@ def ml_segmentation(
         except BaseException:
             logging.warning("scale parameter not set")
             result['message'] = "scale parameter not set"
-            logging.warning(traceback.format_exc())
             return None
 
         try:
@@ -106,7 +105,6 @@ def ml_segmentation(
         except BaseException:
             logging.warning("sigma parameter not set")
             result['message'] = "sigma parameter not set"
-            logging.warning(traceback.format_exc())
             return None
 
         try:
@@ -114,7 +112,6 @@ def ml_segmentation(
         except BaseException:
             logging.warning("min_size parameter not set")
             result['message'] = "min_size parameter not set"
-            logging.warning(traceback.format_exc())
             return None
 
         try:
@@ -133,7 +130,6 @@ def ml_segmentation(
         except BaseException:
             logging.warning("kernel_size parameter not set")
             result['message'] = "kernel_size parameter not set"
-            logging.warning(traceback.format_exc())
             return None
 
         try:
@@ -149,12 +145,10 @@ def ml_segmentation(
         except BaseException:
             logging.warning("max_dist parameter not set")
             result['message'] = "max_dist parameter not set"
-            logging.warning(traceback.format_exc())
             return None
 
         try:
-            result = codex_segmentation_quickshift(
-                inputHash, subsetHash, downsampled, kernel_size, max_dist, sigma, session=codex_hash)
+            result = codex_segmentation_quickshift(inputHash, subsetHash, downsampled, kernel_size, max_dist, sigma, session=codex_hash)
         except BaseException:
             logging.warning("Failed to run quickshift segmentation algorithm")
             result['message'] = "Failed to run quickshift segmentation algorithm"
