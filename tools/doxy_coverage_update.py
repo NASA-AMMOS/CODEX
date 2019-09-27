@@ -89,6 +89,8 @@ def pep8Report(coveragePathList, outputPath, failOnfail=False):
 
     if not os.path.exists(outputPath):
         os.makedirs(outputPath)
+    else:
+        shutil.rmtree(outputPath)
 
     for directory in coveragePathList:
         print('TESTING ' + directory)
@@ -122,6 +124,7 @@ def pep8Report(coveragePathList, outputPath, failOnfail=False):
         np.save(outputPath + '/paths.npy', relDir)
         shutil.rmtree(directory + '/tmp/')
 
+    makePep8Index(outputPath)
     return rc
 
 
@@ -356,8 +359,6 @@ if __name__ == '__main__':
         if rc != 0 and failonfail == True:
             print('Pep8 Report Failed.')
             sys.exit(rc)
-
-        makePep8Index(PROJECT_ROOT + '../tools/website/pep8/')
 
     if args.websitePath is not None:
         if args.doxyFilePath is not None:
