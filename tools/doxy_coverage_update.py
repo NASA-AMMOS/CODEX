@@ -87,9 +87,8 @@ def pep8Report(coveragePathList, outputPath, failOnfail=False):
 
     firstPath = coveragePathList[0]
 
-    if os.path.exists(outputPath):
-        shutil.rmtree(outputPath)
-    os.makedirs(outputPath)
+    if not os.path.exists(outputPath):
+        os.makedirs(outputPath)
 
     for directory in coveragePathList:
         print('TESTING ' + directory)
