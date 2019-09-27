@@ -29,3 +29,4 @@ dependencies:
     - scikit-image==0.15.0
     - fastdtw
     - Pebble
+    - pytest-cov==2.7.1
