@@ -96,11 +96,6 @@ class CodexHash:
         >>> hashResult = ch.hashArray("x2", x1, "feature", session=session)
         >>> hashResult = ch.hashArray("s1", x1, "subset", session=session)
         >>> ch.printCacheCount(session=session)
-        Feature Cache Size           : 1
-        Subset Cache Size            : 1
-        Downsample Cache Size        : 0
-        Number of classifier models  : 0
-        Number of regressor models   : 1
         '''
         session = self.__set_session(session)
 
@@ -274,20 +269,10 @@ class CodexHash:
         >>> hashResult = ch.hashArray("x1", x1, "subset", session=session)
 
         >>> ch.printHashList("subset", session=session)
-        Name: x1
-        Hash: bb99f457e6632e9944b801e6c53ad7353e08ce00
-        Data Shape: (4,)
-        Color: None
-        Z-Order: None
 
         >>> result = ch.hashUpdate("name","x1","x2","subset", session=session)
 
         >>> ch.printHashList("subset", session=session)
-        Name: x2
-        Hash: bb99f457e6632e9944b801e6c53ad7353e08ce00
-        Data Shape: (4,)
-        Color: None
-        Z-Order: None
 
         '''
         session = self.__set_session(session)
@@ -324,7 +309,6 @@ class CodexHash:
         >>> ch.resetCacheList("subset", session=session)
         >>> ch.resetCacheList("label", session=session)
         >>> ch.resetCacheList("unknown", session=session)
-        Unknown hash type.  Not resetting
 
         '''
         session = self.__set_session(session)
@@ -378,7 +362,6 @@ class CodexHash:
 
         # Incorrect hashType input
         >>> ch.hashArray("x1",x1,"log", session=session)
-        ERROR: Hash type not recognized! Not logged for future use.
 
         >>> ch.resetCacheList("feature", session=session)
         >>> x1 = np.array([2,3,1,0])
@@ -388,11 +371,6 @@ class CodexHash:
         >>> hashResult = ch.hashArray("x1", x1, "feature", session=session)
 
         >>> ch.printHashList("feature", session=session)
-        Name: x1
-        Hash: bb99f457e6632e9944b801e6c53ad7353e08ce00
-        Data Shape: (4,)
-        Color: None
-        Z-Order: None
         '''
         session = self.__set_session(session)
 
@@ -500,35 +478,14 @@ class CodexHash:
         >>> hashResult = ch.hashArray("x1_label", x1, "label", session=session)
 
         >>> ch.printHashList("feature", session=session)
-        Name: x1_feature
-        Hash: bb99f457e6632e9944b801e6c53ad7353e08ce00
-        Data Shape: (4,)
-        Color: None
-        Z-Order: None
 
         >>> ch.printHashList("subset", session=session)
-        Name: x1_subset
-        Hash: bb99f457e6632e9944b801e6c53ad7353e08ce00
-        Data Shape: (4,)
-        Color: None
-        Z-Order: None
 
         >>> ch.printHashList("downsample", session=session)
-        Name: x1_downsample
-        Hash: bb99f457e6632e9944b801e6c53ad7353e08ce00
-        Data Shape: (4,)
-        Color: None
-        Z-Order: None
 
         >>> ch.printHashList("label", session=session)
-        Name: x1_label
-        Hash: bb99f457e6632e9944b801e6c53ad7353e08ce00
-        Data Shape: (4,)
-        Color: None
-        Z-Order: None
 
         >>> ch.printHashList("unknown", session=session)
-        ERROR: printHashList - unknown hashType
         '''
         session = self.__set_session(session)
 
@@ -616,7 +573,6 @@ class CodexHash:
         None
 
         >>> result = ch.findHashArray('hash',hashResult_subset["hash"],"unknown_type", session=session)
-        ERROR: findHashArray - hash not found
         '''
         session = self.__set_session(session)
 
@@ -679,7 +635,6 @@ class CodexHash:
         >>> session = 'foo'
         >>> ch = CodexHash()
         >>> ch.mergeHashResults(None, session=session)
-        ERROR: mergeHashResults hashList is None
 
         '''
         session = self.__set_session(session)
@@ -911,11 +866,6 @@ class CodexHash:
         {'features': ['x1'], 'labels': ['x1'], 'subsets': ['x1'], 'downsample': ['x1'], 'state': {'front_end_payload': 'payload_value'}}
 
         >>> ch.printCacheCount(session=session)
-        Feature Cache Size           : 1
-        Subset Cache Size            : 1
-        Downsample Cache Size        : 1
-        Number of classifier models  : 0
-        Number of regressor models   : 1
         '''
         session = self.__set_session(session)
 

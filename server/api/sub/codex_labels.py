@@ -59,7 +59,7 @@ def label_swap(labels, dataHash, session=None):
     # Do not attempt to remap label colors if the k values of the
     #    test and reference label sets have a delta larger than 5
     if(abs(ref_uniq_labels.size - test_uniq_labels.size) > 5):
-        logging.warning("Difference between test and reference labels is too high, returning original labels")
+        logging.info("Difference between test and reference labels is too high, returning original labels")
         return labels
 
     finalMap = {}

@@ -13,6 +13,7 @@ import os
 import sys
 import traceback
 import logging
+import scipy
 
 import numpy as np
 
@@ -74,13 +75,14 @@ def get_data_metrics(msg, result):
 
             except:
                 logging.warning("Error occured while computing feature data metrics")
+                logging.warning(traceback.format_exc())
                 result["status"] = "failed"
                 result['name'] = feature_name
-        
+            
+            yield result  
     except:
         logging.warning(traceback.format_exc())
-
-    yield result
+        yield result
 
 def add_data(msg, result):
     '''

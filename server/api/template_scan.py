@@ -56,19 +56,15 @@ def ml_template_scan(
 
     # Missing algorithmType
     >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "temp", False, {'num_templates': 1, 'scan_jump': 50}, {}, session=codex_hash)
-    Template hash name not given
 
     # Standard usage
     >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': 50}, {}, session=codex_hash)
-    Template hash name not given
 
     # Incorrect num_templates
     >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': "String", 'scan_jump': 50}, {}, session=codex_hash)
-    Template hash name not given
 
     # Incorrect scan_jump
     >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': "String"}, {}, session=codex_hash)
-    Template hash name not given
     '''
     codex_hash = get_cache(session)
 
@@ -77,7 +73,7 @@ def ml_template_scan(
     if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
-        warning("Feature hash failure in ml_cluster")
+        logging.warning("Feature hash failure in ml_cluster")
         result['message'] = "Feature hash failure in ml_cluster"
         return None
 
@@ -98,7 +94,7 @@ def ml_template_scan(
         else:
             templateHash = templateHash["hash"]
     else:
-        wanrning("Template hash name not given")
+        logging.warning("Template hash name not given")
         return None
 
     if(algorithmName == 'template'):
@@ -106,17 +102,17 @@ def ml_template_scan(
         try:
             num_templates = int(parms['num_templates'])
         except BaseException:
-            warning("num_templates parameter not set")
+            logging.warning("num_templates parameter not set")
             result['message'] = "num_templates parameter not set"
-            warning(traceback.format_exc())
+            logging.warning(traceback.format_exc())
             return None
 
         try:
             scan_jump = int(parms['scan_jump'])
         except BaseException:
-            warning("scan_jump parameter not set")
+            logging.warning("scan_jump parameter not set")
             result['message'] = "scan_jump parameter not set"
-            warning(traceback.format_exc())
+            logging.warning(traceback.format_exc())
             return None
 
         try:
@@ -129,9 +125,9 @@ def ml_template_scan(
                 scan_jump,
                 session=codex_hash)
         except BaseException:
-            warning("Failed to run template scan algorithm")
+            logging.warning("Failed to run template scan algorithm")
             result['message'] = "Failed to run template scan algorithm"
-            warning(traceback.format_exc())
+            logging.warning(traceback.format_exc())
             return None
 
     else:

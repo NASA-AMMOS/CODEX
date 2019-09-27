@@ -102,9 +102,7 @@ def run_codex_dim_reduction(
         >>> testData = doctest_get_data(session=codex_hash)
 
         >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, False, False, "PCA", session=codex_hash)
-
         >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, 500, False, "ICA", session=codex_hash)
-        Downsampling to 500 samples.
 
     '''
 
@@ -131,7 +129,7 @@ def run_codex_dim_reduction(
 
     full_samples = len(data)
     if(downsampled is not False):
-        logging.warning("Downsampling to {ds} samples.".format(ds=downsampled))
+        logging.info("Downsampling to {ds} samples.".format(ds=downsampled))
         data = downsample(data, samples=downsampled, session=codex_hash)
 
     eta = getComputeTimeEstimate("dimension_reduction", algorithm, full_samples)
@@ -209,5 +207,6 @@ def run_codex_dim_reduction(
 if __name__ == "__main__":
 
     from api.sub.codex_doctest import run_codex_doctest
+    logging.basicConfig(level=0, stream=sys.stdout)
     run_codex_doctest()
 

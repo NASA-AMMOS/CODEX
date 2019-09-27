@@ -55,27 +55,21 @@ def ml_endmember(
 
     # Missing algorithmType
     >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "kmean", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=codex_hash)
-    Cannot find requested endmember algorithm
 
     result = ml_endmember(testData['inputHash'], testData['hashList'], None, "ATGP", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=codex_hash)
 
     result = ml_endmember(testData['inputHash'], testData['hashList'], None, "PPI", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=codex_hash)
 
     >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=codex_hash)
-    WARNING: q must be <= to number of features
 
     result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'q':4, 'numSkewers':5}, {}, session=codex_hash)
 
     # inputHash == None
     result = ml_endmember(testData['inputHash'], None, None, "FIPPI", False, {'downsampled': 500, 'q':4, 'numSkewers':5}, {}, session=codex_hash)
 
-    # q not set
+
     >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'numSkewers':5}, {}, session=codex_hash)
-    q parameter not set
-    Traceback (most recent call last):
-    ...
-    KeyError: 'q'
-    <BLANKLINE>
+
     '''
     codex_hash = get_cache(session)
 
@@ -93,7 +87,6 @@ def ml_endmember(
     except BaseException:
         logging.warning("q parameter not set")
         result['message'] = "q parameter not set"
-        logging.warning(traceback.format_exc())
         return result
 
     if(algorithmName == "ATGP"):
@@ -121,7 +114,6 @@ def ml_endmember(
         except BaseException:
             logging.warning("numSkewers parameter not set")
             result['message'] = "numSkewers parameter not set"
-            logging.warning(traceback.format_exc())
             return result
 
         try:

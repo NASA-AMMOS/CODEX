@@ -62,10 +62,9 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None):
     True
 
     >>> result3 = downsample(array, percentage=120, session=codex_hash)
-    ERROR: downsample - perceange out of bounds 0-100
 
     >>> result4 = downsample(array, session=codex_hash)
-    ERROR: downsample - samples and percentage both 0.
+
     '''
 
     codex_hash = get_cache(session)

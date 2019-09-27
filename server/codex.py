@@ -186,7 +186,7 @@ def route_request(msg, result):
         elif (activity == "metrics"):
             for metric in get_data_metrics(msg, result):
                 yield metric
-
+                
     elif (routine == 'download_code'):
         yield download_code(msg, result, CODEX_ROOT)
     else:
@@ -207,7 +207,7 @@ def execute_request(queue, message):
     result = msg
 
     # log the response but without the data
-    logging.info("{time} : Message from front end: {json}".format(time=now.isoformat(), json={k:(msg[k] if k != 'data' else '[data removed]') for k in msg}))
+    logging.info("{time} : Message from front end: {json}".format(time=datetime.datetime.now().isoformat(), json={k:(msg[k] if k != 'data' else '[data removed]') for k in msg}))
 
     if 'sessionkey' not in msg:
         logging.warning('session_key not in message!')
@@ -280,7 +280,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
                 break
 
             result = response['result']
-            logging.info("{time} : Response to front end: {json}".format(time=now.isoformat(), json={k:(result[k] if (k != 'data' and k != 'downsample') else '[data removed]') for k in result}))
+            logging.info("{time} : Response to front end: {json}".format(time=datetime.datetime.now().isoformat(), json={k:(result[k] if (k != 'data' and k != 'downsample') else '[data removed]') for k in result}))
 
             yield self.write_message(json.dumps(response['result']))
 
@@ -303,8 +303,7 @@ class MainHandler(tornado.web.RequestHandler):
 def make_app():
     settings = dict(
         app_name=u"JPL Complex Data Explorer",
-        static_path=os.path.join(os.path.dirname(__file__), "static"),
-        debug=True)
+        static_path=os.path.join(os.path.dirname(__file__), "static"))
 
     return web.Application([
         (r"/", MainHandler),

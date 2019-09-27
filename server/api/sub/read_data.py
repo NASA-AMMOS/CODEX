@@ -43,8 +43,6 @@ def codex_read_csv(file, featureList, hashType, session=None):
     >>> codex_hash = get_cache(DOCTEST_SESSION)
     >>> featureList = ['TiO2','FeOT','SiO2','Total']
     >>> hashList = codex_read_csv(doctest_base_path() + '/uploads/missing.csv',featureList, "feature", session=codex_hash)
-    ERROR: codex_read_csv - cannot open file
-
     >>> featureList = ['fake_feature','FeOT','SiO2','Total']
     >>> hashList = codex_read_csv(doctest_base_path() + '/uploads/doctest.csv',featureList, "feature", session=codex_hash)
 
@@ -62,7 +60,7 @@ def codex_read_csv(file, featureList, hashType, session=None):
                     columns[k].append(v)
         f.close()
     except BaseException:
-        logging.waring("codex_read_csv - cannot open file")
+        logging.warning("codex_read_csv - cannot open file")
         return None
 
     if(featureList is None):
@@ -166,10 +164,7 @@ def codex_read_hd5(file, featureList, hashType, session=None):
 
     >>> featureList = ['L2/RetrievalGeometry/retrieval_latitude/','L2/RetrievalResults/xco2','missing_feature']
     >>> result = codex_read_hd5(doctest_base_path() + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature", session=codex_hash)
-    Error: codex_read_hd5: Feature not found.
-
     >>> result = codex_read_hd5(doctest_base_path() + '/uploads/lnd_glint_subsample_1000.h5', featureList, "feature", session=codex_hash)
-    ERROR: codex_read_hd5 - cannot open file
     '''
     codex_hash = get_cache(session)
 
@@ -261,7 +256,6 @@ def codex_save_subset(inputHash, subsetHash, saveFilePath, session=None):
     >>> readingHash = codex_read_hd5(doctest_base_path() + '/uploads/save_subset_output_test.h5', [resultingName], "feature", session=codex_hash)
 
     >>> codex_save_subset(None, None, doctest_base_path() + '/uploads/', session=codex_hash)
-    Hash not found. Returning!
 
     >>> inputArray = np.array([10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200])
     >>> randomSubset = np.array([0,1,0,1,0,1,1,0,0,0,0,0,1,1,1,0,0,1,0,1])

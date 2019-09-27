@@ -60,31 +60,16 @@ def ml_segmentation(
 
     # Scale cannot be cast
     >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': "string", 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {}, session=codex_hash)
-    scale parameter not set
-    Traceback (most recent call last):
-    ...
-    ValueError: could not convert string to float: 'string'
-    <BLANKLINE>
 
     # Sigma cannot be cast
     >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': "String", 'min_size': 10, 'downsampled': 500}, {}, session=codex_hash)
-    sigma parameter not set
-    Traceback (most recent call last):
-    ...
-    ValueError: could not convert string to float: 'String'
-    <BLANKLINE>
 
     # min_size incorrectly called min_scale
     >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': 7, 'min_scale': 10, 'downsampled': 500}, {}, session=codex_hash)
-    min_size parameter not set
-    Traceback (most recent call last):
-    ...
-    KeyError: 'min_size'
-    <BLANKLINE>
 
     # incorrect algorithmType
     >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwa", False, {'scale': 3, 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {}, session=codex_hash)
-    Cannot find requested segmentation algorithm
+
     '''
     codex_hash = get_cache(session)
 
@@ -217,7 +202,7 @@ def codex_segmentation_quickshift(
         >>> testData = doctest_get_data(session=codex_hash)
 
         >>> segments = codex_segmentation_quickshift(testData['inputHash'], False, 50, 20.0, 5.0, 2.0, session=codex_hash)
-        Downsampling to 50 percent
+
     '''
     codex_hash = get_cache(session)
 
@@ -239,7 +224,7 @@ def codex_segmentation_quickshift(
             return None
 
     if(downsampled is not False):
-        info("Downsampling to {downsample} percent".format(downsample=downsampled))
+        logging.info("Downsampling to {downsample} percent".format(downsample=downsampled))
         data = downsample(data, percentage=downsampled, session=codex_hash)
 
     data = np.dstack((data, data, data))
@@ -307,7 +292,7 @@ def codex_segmentation_felzenszwalb(
         >>> testData = doctest_get_data(session=codex_hash)
 
         >>> segments = codex_segmentation_felzenszwalb(testData['inputHash'], False, 50, 3.0, 0.95, 3, session=codex_hash)
-        Downsampling to 50 percent
+
     '''
     codex_hash = get_cache(session)
 
@@ -329,7 +314,7 @@ def codex_segmentation_felzenszwalb(
             return None
 
     if(downsampled is not False):
-        info("Downsampling to " + str(downsampled) + " percent")
+        logging.info("Downsampling to " + str(downsampled) + " percent")
         data = downsample(data, percentage=downsampled, session=codex_hash)
 
     data = codex_impute(data)
