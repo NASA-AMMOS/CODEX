@@ -212,7 +212,7 @@ def updateCoverage():
 
 
     '''
-    rc = subprocess.call(f'pytest {join(PROJECT_ROOT, "src")} -v --cov --cov-report html:{join(PROJECT_ROOT, "website/cov")}', shell=True)
+    rc = subprocess.call(f'pytest {PROJECT_ROOT} -v --cov --cov-report html:{join(PROJECT_ROOT, "website/cov")}', shell=True)
 
     if rc != 0:
         print('WARNING: Unit test file failure')
