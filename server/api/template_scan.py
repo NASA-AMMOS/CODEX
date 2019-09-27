@@ -48,23 +48,6 @@ def ml_template_scan(
 
     Outputs:
 
-    Examples:
-    >>> from api.sub.codex_hash import DOCTEST_SESSION
-    >>> from api.sub.codex_doctest import doctest_get_data
-    >>> ch = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=ch)
-
-    # Missing algorithmType
-    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "temp", False, {'num_templates': 1, 'scan_jump': 50}, {}, session=ch)
-
-    # Standard usage
-    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': 50}, {}, session=ch)
-
-    # Incorrect num_templates
-    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': "String", 'scan_jump': 50}, {}, session=ch)
-
-    # Incorrect scan_jump
-    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': "String"}, {}, session=ch)
     '''
     ch = get_cache(session)
 
@@ -156,8 +139,6 @@ def codex_template_scan(
         templateFound (int)        - number of templates successfully found
         indexes  (array)           - mask of template matches. 0 if not similar, 1 if in best template match, 2 if in next, etc.
 
-    Examples:
-
     '''
     ch = get_cache(session)
 
@@ -166,7 +147,7 @@ def codex_template_scan(
 
     returnHash = ch.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
-        print("Error: codex_template_scan: inputHash not found.")
+        logging.warning("Error: codex_template_scan: inputHash not found.")
         return
 
     X = returnHash['data']
@@ -179,7 +160,7 @@ def codex_template_scan(
 
     returnTemplateHash = ch.findHashArray("hash", templateHash, "feature")
     if(returnTemplateHash is None):
-        print("Error: codex_template_scan: templateHash not found.")
+        logging.warning("Error: codex_template_scan: templateHash not found.")
         return
 
     X = codex_impute(X)
@@ -225,7 +206,3 @@ def codex_template_scan(
     return dictionary
 
 
-if __name__ == "__main__":
-
-    from api.sub.codex_doctest import run_codex_doctest
-    run_codex_doctest()

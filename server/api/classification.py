@@ -82,8 +82,6 @@ def ml_classification(
 
     Outputs:
 
-    Examples:
-
     '''
     ch = get_cache(session)
 
@@ -136,20 +134,6 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     Notes:
         Scoring Metrics: https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
 
-    Examples:
-
-        >>> from api.sub.codex_doctest import doctest_get_data
-        >>> from api.sub.codex_hash import DOCTEST_SESSION
-        >>> ch = get_cache(DOCTEST_SESSION)
-        >>> testData = doctest_get_data(session=ch)
-
-        >>> result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'fake_scoring_metric', session=ch)
-        >>> print(result["WARNING"])
-        fake_scoring_metric not a valid scoring metric for classification.
-
-        >>> result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'precision', session=ch)
-        >>> print(result["WARNING"])
-        None
     '''
     ch = get_cache(session)
     logReturnCode(inspect.currentframe())
@@ -453,10 +437,4 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
     return result
 
-
-
-if __name__ == "__main__":
-
-    from api.sub.codex_doctest import run_codex_doctest
-    run_codex_doctest()
 

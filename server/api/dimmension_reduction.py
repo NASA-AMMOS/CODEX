@@ -51,8 +51,6 @@ def ml_dimensionality_reduction(
 
     Outputs:
 
-    Examples:
-
     '''
 
     ch = get_cache(session)
@@ -94,18 +92,7 @@ def run_codex_dim_reduction(
 
     Outputs:
 
-    Examples:
-
-        >>> from api.sub.codex_hash import DOCTEST_SESSION
-        >>> from api.sub.codex_doctest import doctest_get_data
-        >>> ch = get_cache(DOCTEST_SESSION)
-        >>> testData = doctest_get_data(session=ch)
-
-        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, False, False, "PCA", session=ch)
-        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, 500, False, "ICA", session=ch)
-
     '''
-
     ch = get_cache(session)
     
     logReturnCode(inspect.currentframe())
@@ -202,11 +189,4 @@ def run_codex_dim_reduction(
     return output
 
 
-
-
-if __name__ == "__main__":
-
-    from api.sub.codex_doctest import run_codex_doctest
-    logging.basicConfig(level=0, stream=sys.stdout)
-    run_codex_doctest()
 

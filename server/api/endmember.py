@@ -47,29 +47,6 @@ def ml_endmember(
 
     Outputs:
 
-    Examples:
-    >>> from api.sub.codex_hash import DOCTEST_SESSION
-    >>> from api.sub.codex_doctest import doctest_get_data
-    >>> ch = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=ch)
-
-    # Missing algorithmType
-    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "kmean", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=ch)
-
-    result = ml_endmember(testData['inputHash'], testData['hashList'], None, "ATGP", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=ch)
-
-    result = ml_endmember(testData['inputHash'], testData['hashList'], None, "PPI", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=ch)
-
-    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=ch)
-
-    result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'q':4, 'numSkewers':5}, {}, session=ch)
-
-    # inputHash == None
-    result = ml_endmember(testData['inputHash'], None, None, "FIPPI", False, {'downsampled': 500, 'q':4, 'numSkewers':5}, {}, session=ch)
-
-
-    >>> result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'numSkewers':5}, {}, session=ch)
-
     '''
     ch = get_cache(session)
 
@@ -149,17 +126,8 @@ def codex_ATGP(inputHash, subsetHash, q, downsampled, session=None):
         Dictionary -
             endmember_array  - Set of induced endmembers (N x p)
             endmember_vector - Array of indices into the array data corresponding to the induced endmembers
-
-    Examples:
-    >>> from api.sub.codex_hash import DOCTEST_SESSION
-    >>> from api.sub.codex_doctest import doctest_get_data
-    >>> ch = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=ch)
-
-    result = codex_ATGP(testData['inputHash'], False, 3, False, session=ch)
     '''
     ch = get_cache(session)
-
     logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
@@ -194,12 +162,7 @@ def codex_ATGP(inputHash, subsetHash, q, downsampled, session=None):
 
     endTime = time.time()
     computeTime = endTime - startTime
-    logTime(
-        "endmember",
-        "ATGP",
-        computeTime,
-        len(data),
-        data.ndim)
+    logTime("endmember", "ATGP", computeTime, len(data), data.ndim)
 
     return dictionary
 
@@ -216,15 +179,7 @@ def codex_FIPPI(inputHash, subsetHash, q, downsampled, session=None):
             endmember_array  - Set of induced endmembers (N x p)
             endmember_vector - Array of indices into the array data corresponding to the induced endmembers
 
-    Examples:
-    >>> from api.sub.codex_hash import DOCTEST_SESSION
-    >>> from api.sub.codex_doctest import doctest_get_data
-    >>> ch = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=ch)
-
-    result = codex_FIPPI(testData['inputHash'], False, 1, False, session=ch)
     '''
-
     ch = get_cache(session)
     logReturnCode(inspect.currentframe())
     startTime = time.time()
@@ -283,15 +238,7 @@ def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled, session=None):
             endmember_array  - Set of induced endmembers (N x p)
             endmember_vector - Array of indices into the array data corresponding to the induced endmembers
 
-    Examples:
-    >>> from api.sub.codex_hash import DOCTEST_SESSION
-    >>> from api.sub.codex_doctest import doctest_get_data
-    >>> ch = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=ch)
-
-    result = codex_PPI(testData['inputHash'], False, 3, 1, False, session=ch)
     '''
-
     ch = get_cache(session)
     logReturnCode(inspect.currentframe())
     startTime = time.time()
@@ -331,11 +278,3 @@ def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled, session=None):
 
     return dictionary
 
-
-if __name__ == "__main__":
-
-    from api.sub.codex_doctest import run_codex_doctest
-    run_codex_doctest()
-
-
-    

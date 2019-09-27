@@ -51,22 +51,6 @@ def ml_cluster(
 
     Outputs:
 
-    Examples:
-    >>> from api.sub.codex_doctest import doctest_get_data
-    >>> testData = doctest_get_data()
-    >>> from api.sub.codex_hash import DOCTEST_SESSION
-    >>> ch = get_cache(DOCTEST_SESSION)
-
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "kmean", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "kmeans", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "mean_shift", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "birch", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "ward", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "spectral", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "dbscan", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "agglomerative", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
-    >>> result = ml_cluster(testData['inputHash'], testData['hashList'], None, "affinity_propagation", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
-
     '''
     ch = get_cache(session)
 
@@ -115,8 +99,6 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
             k (int)                  - number of clusters found
             downsample (int)         - number of data points used in quicklook
             numClusters (int)        - number of clusters calculated by the algorithm (unique of clusters)
-
-    Examples:
 
     '''
     ch = get_cache(session)
@@ -244,10 +226,3 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
     return result
 
 
-
-if __name__ == "__main__":
-
-    from api.sub.codex_doctest import run_codex_doctest
-    run_codex_doctest()
-
-    

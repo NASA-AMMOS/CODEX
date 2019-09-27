@@ -50,17 +50,7 @@ def ml_quality_scan(
 
     Outputs:
 
-    Examples:
-    >>> from api.sub.codex_hash import DOCTEST_SESSION
-    >>> ch = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=ch)
-
-    >>> result = ml_quality_scan(testData['inputHash'], testData['hashList'], None, "oddities", False, {'sigma': 3, 'inside': True}, {}, session=ch)
-
-    >>> result = ml_quality_scan(testData['inputHash'], testData['hashList'], None, "sigma_data", False, {'sigma': 3, 'inside': True}, {}, session=ch)
-
     '''
-
     ch = get_cache(session)
 
     if(subsetHashName is not None):
@@ -131,19 +121,6 @@ def codex_count_oddities(inputHash, subsetHash, session=None):
 
     Notes:
     - Currently only works on single feature.  Call for each feature
-
-    Examples:
-
-    # integer example
-    >>> from api.sub.codex_hash import DOCTEST_SESSION
-    >>> from api.sub.codex_doctest import doctest_get_data
-    >>> ch = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=ch)
-
-    #>>> dictionary = codex_count_oddities(testData['inputHash'], False)
-
-    >>> dictionary = codex_count_oddities(None,False, session=ch)
-    Error: codex_count_oddities: Hash not found
 
     '''
 
@@ -243,14 +220,6 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=None):
             count       - count of values in the requested area (inside/outside of specified sigma range)
             percentage  - percentage of the data set falling inside the return array
 
-    Examples:
-
-    # collect data inside sigma range
-    >>> from api.sub.codex_hash import DOCTEST_SESSION
-    >>> from api.sub.codex_doctest import doctest_get_data
-    >>> ch = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=ch)
-
     '''
     ch = get_cache(session)
 
@@ -300,12 +269,7 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=None):
 
     endTime = time.time()
     computeTime = endTime - startTime
-    logTime(
-        "quality_scan",
-        "sigma_data",
-        computeTime,
-        feature,
-        feature.ndim)
+    logTime("quality_scan", "sigma_data", computeTime, feature, feature.ndim)
 
     dictionary = {"values": resultValuesString,
                   "std": std_value_string,
@@ -330,16 +294,7 @@ def codex_column_correlation(inputHash, subsetHash, session=None):
             r2_matrix (2d-array)      - array of r2 coefficients.  Calculated using sklearn r2_score()
             pearson_matrix (2d-array) - array of pearson coefficients.  Calculated using scipy.stats.pearson()
 
-    Examples:
-
-        >>> from api.sub.codex_hash import DOCTEST_SESSION
-        >>> from api.sub.codex_doctest import doctest_get_data
-        >>> ch = get_cache(DOCTEST_SESSION)
-        >>> testData = doctest_get_data(session=ch)
-
-        >>> results = codex_column_correlation(testData['inputHash'], False, session=ch)
-
-        '''
+    '''
 
     ch = get_cache(session)
     logReturnCode(inspect.currentframe())
@@ -376,12 +331,7 @@ def codex_column_correlation(inputHash, subsetHash, session=None):
 
     endTime = time.time()
     computeTime = endTime - startTime
-    logTime(
-        "quality_scan",
-        "column_correlation",
-        computeTime,
-        data,
-        data.ndim)
+    logTime("quality_scan", "column_correlation", computeTime, data, data.ndim)
 
     dictionary = {"r2_matrix": r2Array.tolist(),
                   "pearson_matrix": pearsonArray.tolist()}
@@ -407,17 +357,6 @@ def codex_column_threshold(
             threshold_min             - threshold_min input value
             threshold_max             - threshold_max input value
             percentage_data           - percentage of data from original feature remaining in filtered feature column
-
-    Examples:
-
-        >>> from api.sub.codex_hash import DOCTEST_SESSION
-        >>> from api.sub.codex_doctest import doctest_get_data
-        >>> ch = get_cache(DOCTEST_SESSION)
-        >>> testData = doctest_get_data(session=ch)
-
-        >>> dictionary = codex_column_threshold(testData['inputHash'], False, 0, 0.000394, session=ch)
-        >>> print(dictionary["threshold_max"])
-        0.000394
 
     '''
     ch = get_cache(session)
@@ -452,12 +391,7 @@ def codex_column_threshold(
 
     endTime = time.time()
     computeTime = endTime - startTime
-    logTime(
-        "quality_scan",
-        "column_threshold",
-        computeTime,
-        data,
-        data.ndim)
+    logTime("quality_scan", "column_threshold", computeTime, data, data.ndim)
 
     dictionary = {"resulting_array": returnArray,
                   "threshold_min": threshold_min,
@@ -465,12 +399,6 @@ def codex_column_threshold(
                   "percentage_data": dataPercentage}
 
     return dictionary
-
-
-if __name__ == "__main__":
-
-    from api.sub.codex_doctest import run_codex_doctest
-    run_codex_doctest()
 
 
     

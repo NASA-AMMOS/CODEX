@@ -55,14 +55,6 @@ def ml_peak_detect(
 
     Outputs:
 
-    Examples:
-    >>> from api.sub.codex_hash import DOCTEST_SESSION
-    >>> from api.sub.codex_doctest import doctest_get_data
-    >>> ch = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=ch)
-
-    #>>> result = ml_peak_detect(testData['hashList'], None, "peak_cwt", False, {'peak_width': 3, 'gap_threshold': 5, 'min_snr': 3, 'noise_perc': 10}, {})
-
     '''
     ch = get_cache(session)
 
@@ -240,8 +232,6 @@ def codex_scipy_signal_peak_cwt(
         downsampled (int)         - Number of data points to use for quicklook
         downsampledHash (string)  - Hash of newly created dataset which has downsampling (and potential subset) applied
 
-    Examples:
-
     '''
     ch = get_cache(session)
 
@@ -295,6 +285,7 @@ def codex_scipy_signal_peak_cwt(
         "inputHash": inputHash,
         'subsetHash': subsetHash,
         'downsampled': downsampled}
+
     return dictionary
 
 
@@ -330,8 +321,6 @@ def codex_matlab_findpeaks(
         subsetHash (string)       - Hash value corresponding to the subselection (false if full feature)
         downsampled (int)         - Number of data points to use for quicklook
         downsampledHash (string)  - Hash of newly created dataset which has downsampling (and potential subset) applied
-
-    Examples:
 
     '''
     ch = get_cache(session)
@@ -386,11 +375,5 @@ def codex_matlab_findpeaks(
         'subsetHash': subsetHash,
         'downsampled': downsampled}
     return dictionary
-
-
-if __name__ == "__main__":
-
-    from api.sub.codex_doctest import run_codex_doctest
-    run_codex_doctest()
 
     

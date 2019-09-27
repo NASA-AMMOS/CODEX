@@ -37,12 +37,6 @@ def ml_normalize(
 
     Outputs:
 
-    Examples:
-    >>> from api.sub.codex_hash import DOCTEST_SESSION
-    >>> from api.sub.codex_doctest import doctest_get_data
-    >>> ch = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=ch)
-
     '''
     ch = get_cache(session)
 
@@ -102,8 +96,6 @@ def codex_normalize_min_max(inputHash, minRange, maxRange):
 
     Outputs:
 
-    Examples:
-
     '''
     # TODO - fix
     return None
@@ -119,8 +111,6 @@ def codex_n(X):
     Inuputs:
 
     Outputs:
-
-    Examples:
 
     '''
     dp = X[0]
@@ -147,9 +137,3 @@ def codex_n(X):
             mode_value = None
 
 
-if __name__ == "__main__":
-
-    from api.sub.codex_doctest import run_codex_doctest
-    run_codex_doctest()
-
-    

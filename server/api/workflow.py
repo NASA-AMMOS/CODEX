@@ -132,15 +132,6 @@ def explain_this(inputHash, featureNames, dataSelections, result, session=None):
 
     Notes: Only works for binary classification.  0 class should be main data, 1 class should be isolated data to explain.
 
-    Examples:
-
-    >>> from api.sub.codex_hash import DOCTEST_SESSION
-    >>> from api.sub.codex_hash import get_cache
-    >>> from api.sub.codex_doctest import doctest_get_data
-    >>> ch = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=ch)
-
-    
     '''
     ch = get_cache(session)
 
@@ -462,7 +453,3 @@ def find_more_like_this(inputHash, featureList, dataSelections, similarityThresh
 
     return result
 
-if __name__ == "__main__":
-
-    from api.sub.codex_doctest import run_codex_doctest
-    run_codex_doctest()
