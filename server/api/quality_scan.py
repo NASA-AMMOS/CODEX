@@ -52,19 +52,19 @@ def ml_quality_scan(
 
     Examples:
     >>> from api.sub.codex_hash import DOCTEST_SESSION
-    >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=codex_hash)
+    >>> ch = get_cache(DOCTEST_SESSION)
+    >>> testData = doctest_get_data(session=ch)
 
-    >>> result = ml_quality_scan(testData['inputHash'], testData['hashList'], None, "oddities", False, {'sigma': 3, 'inside': True}, {}, session=codex_hash)
+    >>> result = ml_quality_scan(testData['inputHash'], testData['hashList'], None, "oddities", False, {'sigma': 3, 'inside': True}, {}, session=ch)
 
-    >>> result = ml_quality_scan(testData['inputHash'], testData['hashList'], None, "sigma_data", False, {'sigma': 3, 'inside': True}, {}, session=codex_hash)
+    >>> result = ml_quality_scan(testData['inputHash'], testData['hashList'], None, "sigma_data", False, {'sigma': 3, 'inside': True}, {}, session=ch)
 
     '''
 
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     if(subsetHashName is not None):
-        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
+        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -75,7 +75,7 @@ def ml_quality_scan(
     if(algorithmName == 'oddities'):
 
         try:
-            result = codex_count_oddities(inputHash, subsetHash, session=codex_hash)
+            result = codex_count_oddities(inputHash, subsetHash, session=ch)
         except BaseException:
             logging.warning("Failed to run count_oddities")
             result['message'] = "Failed to run count_oddities"
@@ -101,7 +101,7 @@ def ml_quality_scan(
             return None
 
         try:
-            result = codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=codex_hash)
+            result = codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=ch)
         except BaseException:
             logging.warning("Failed to run codex_get_sigma_data")
             result['message'] = "Failed to run codex_get_sigma_data"
@@ -137,21 +137,21 @@ def codex_count_oddities(inputHash, subsetHash, session=None):
     # integer example
     >>> from api.sub.codex_hash import DOCTEST_SESSION
     >>> from api.sub.codex_doctest import doctest_get_data
-    >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=codex_hash)
+    >>> ch = get_cache(DOCTEST_SESSION)
+    >>> testData = doctest_get_data(session=ch)
 
     #>>> dictionary = codex_count_oddities(testData['inputHash'], False)
 
-    >>> dictionary = codex_count_oddities(None,False, session=codex_hash)
+    >>> dictionary = codex_count_oddities(None,False, session=ch)
     Error: codex_count_oddities: Hash not found
 
     '''
 
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
     logReturnCode(inspect.currentframe())
     startTime = time.time()
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         print("Error: codex_count_oddities: Hash not found")
         return None
@@ -163,7 +163,7 @@ def codex_count_oddities(inputHash, subsetHash, session=None):
     feature = codex_impute(feature)
 
     if(subsetHash is not False):
-        feature = codex_hash.applySubsetMask(data, subsetHash)
+        feature = ch.applySubsetMask(data, subsetHash)
 
     nan_count = 0
     ninf_count = 0
@@ -248,16 +248,16 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=None):
     # collect data inside sigma range
     >>> from api.sub.codex_hash import DOCTEST_SESSION
     >>> from api.sub.codex_doctest import doctest_get_data
-    >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=codex_hash)
+    >>> ch = get_cache(DOCTEST_SESSION)
+    >>> testData = doctest_get_data(session=ch)
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     logReturnCode(inspect.currentframe())
     startTime = time.time()
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         print("Error: codex_get_sigma_data: Hash not found!")
         return
@@ -266,7 +266,7 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=None):
     feature = codex_impute(feature)
 
     if(subsetHash is not False):
-        feature = codex_hash.applySubsetMask(data, subsetHash)
+        feature = ch.applySubsetMask(data, subsetHash)
 
     sigmaList = []
     feature_length = len(feature)
@@ -334,27 +334,27 @@ def codex_column_correlation(inputHash, subsetHash, session=None):
 
         >>> from api.sub.codex_hash import DOCTEST_SESSION
         >>> from api.sub.codex_doctest import doctest_get_data
-        >>> codex_hash = get_cache(DOCTEST_SESSION)
-        >>> testData = doctest_get_data(session=codex_hash)
+        >>> ch = get_cache(DOCTEST_SESSION)
+        >>> testData = doctest_get_data(session=ch)
 
-        >>> results = codex_column_correlation(testData['inputHash'], False, session=codex_hash)
+        >>> results = codex_column_correlation(testData['inputHash'], False, session=ch)
 
         '''
 
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
     logReturnCode(inspect.currentframe())
     startTime = time.time()
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
-        print("Error: codex_column_correlation: Hash not found!")
+        logging.warning("Error: codex_column_correlation: Hash not found!")
         return
 
     data = returnHash['data']
     data = codex_impute(data)
 
     if(subsetHash is not False):
-        data = codex_hash.applySubsetMask(data, subsetHash)
+        data = ch.applySubsetMask(data, subsetHash)
 
     samples, features = data.shape
     arraySize = (features, features)
@@ -362,7 +362,7 @@ def codex_column_correlation(inputHash, subsetHash, session=None):
     pearsonArray = np.zeros(arraySize)
 
     if(features < 2):
-        print("Error: Need at least two features to do a correlation!")
+        logging.warning("Error: Need at least two features to do a correlation!")
         return
 
     for x in range(0, features):
@@ -412,21 +412,21 @@ def codex_column_threshold(
 
         >>> from api.sub.codex_hash import DOCTEST_SESSION
         >>> from api.sub.codex_doctest import doctest_get_data
-        >>> codex_hash = get_cache(DOCTEST_SESSION)
-        >>> testData = doctest_get_data(session=codex_hash)
+        >>> ch = get_cache(DOCTEST_SESSION)
+        >>> testData = doctest_get_data(session=ch)
 
-        >>> dictionary = codex_column_threshold(testData['inputHash'], False, 0, 0.000394, session=codex_hash)
+        >>> dictionary = codex_column_threshold(testData['inputHash'], False, 0, 0.000394, session=ch)
         >>> print(dictionary["threshold_max"])
         0.000394
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     logReturnCode(inspect.currentframe())
     startTime = time.time()
     returnList = []
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         print("Error: codex_column_correlation: Hash not found!")
         return
@@ -436,7 +436,7 @@ def codex_column_threshold(
     inThresholdCount = 0
 
     if(subsetHash is not False):
-        data = codex_hash.applySubsetMask(data, subsetHash)
+        data = ch.applySubsetMask(data, subsetHash)
 
     data = codex_impute(data)
 

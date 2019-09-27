@@ -55,10 +55,10 @@ def ml_dimensionality_reduction(
 
     '''
 
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     if(subsetHashName is not None):
-        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
+        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -67,7 +67,7 @@ def ml_dimensionality_reduction(
         subsetHash = False
 
     try:
-        result = run_codex_dim_reduction(inputHash, subsetHash, parms, downsampled, False, algorithmName, session=codex_hash)
+        result = run_codex_dim_reduction(inputHash, subsetHash, parms, downsampled, False, algorithmName, session=ch)
     except BaseException:
         logging.warning("Failed to run dimensionality reduction analysis")
         result['message'] = "Failed to run dimensionality reduction analysis"
@@ -98,15 +98,15 @@ def run_codex_dim_reduction(
 
         >>> from api.sub.codex_hash import DOCTEST_SESSION
         >>> from api.sub.codex_doctest import doctest_get_data
-        >>> codex_hash = get_cache(DOCTEST_SESSION)
-        >>> testData = doctest_get_data(session=codex_hash)
+        >>> ch = get_cache(DOCTEST_SESSION)
+        >>> testData = doctest_get_data(session=ch)
 
-        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, False, False, "PCA", session=codex_hash)
-        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, 500, False, "ICA", session=codex_hash)
+        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, False, False, "PCA", session=ch)
+        >>> result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, 500, False, "ICA", session=ch)
 
     '''
 
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
     
     logReturnCode(inspect.currentframe())
     startTime = time.time()
@@ -114,7 +114,7 @@ def run_codex_dim_reduction(
 
     n_components = parms["n_components"]
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         print("Error: run_codex_dim_reduction: Hash not found")
         return
@@ -122,7 +122,7 @@ def run_codex_dim_reduction(
     data = returnHash['data']
 
     if(subsetHash is not False):
-        data, datName = codex_hash.applySubsetMask(data, subsetHash)
+        data, datName = ch.applySubsetMask(data, subsetHash)
         if(data is None):
             logging.warning("ERROR: run_codex_dim_reduction: subsetHash returned None.")
             return None
@@ -130,7 +130,7 @@ def run_codex_dim_reduction(
     full_samples = len(data)
     if(downsampled is not False):
         logging.info("Downsampling to {ds} samples.".format(ds=downsampled))
-        data = downsample(data, samples=downsampled, session=codex_hash)
+        data = downsample(data, samples=downsampled, session=ch)
 
     eta = getComputeTimeEstimate("dimension_reduction", algorithm, full_samples)
 
@@ -185,7 +185,7 @@ def run_codex_dim_reduction(
         data.ndim)
 
     # print("saving out PCA")
-    # outputHash = codex_hash.hashArray('PCA_', X_transformed, "feature", virtual=True)
+    # outputHash = ch.hashArray('PCA_', X_transformed, "feature", virtual=True)
 
     output = {
         'eta': eta,

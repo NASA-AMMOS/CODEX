@@ -52,29 +52,29 @@ def ml_segmentation(
     Examples:
     >>> from api.sub.codex_hash import DOCTEST_SESSION
     >>> from api.sub.codex_doctest import doctest_get_data
-    >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=codex_hash)
+    >>> ch = get_cache(DOCTEST_SESSION)
+    >>> testData = doctest_get_data(session=ch)
 
     # Standard use
-    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {}, session=codex_hash)
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {}, session=ch)
 
     # Scale cannot be cast
-    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': "string", 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {}, session=codex_hash)
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': "string", 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {}, session=ch)
 
     # Sigma cannot be cast
-    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': "String", 'min_size': 10, 'downsampled': 500}, {}, session=codex_hash)
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': "String", 'min_size': 10, 'downsampled': 500}, {}, session=ch)
 
     # min_size incorrectly called min_scale
-    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': 7, 'min_scale': 10, 'downsampled': 500}, {}, session=codex_hash)
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwalb", False, {'scale': 3, 'sigma': 7, 'min_scale': 10, 'downsampled': 500}, {}, session=ch)
 
     # incorrect algorithmType
-    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwa", False, {'scale': 3, 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {}, session=codex_hash)
+    >>> result = ml_segmentation(testData['inputHash'], testData['hashList'], None, "felzenszwa", False, {'scale': 3, 'sigma': 7, 'min_size': 10, 'downsampled': 500}, {}, session=ch)
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
-    data = codex_hash.mergeHashResults(hashList)
-    inputHash = codex_hash.hashArray('Merged', data, "feature")
+    data = ch.mergeHashResults(hashList)
+    inputHash = ch.hashArray('Merged', data, "feature")
     if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
@@ -83,7 +83,7 @@ def ml_segmentation(
         return None
 
     if(subsetHashName is not None):
-        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
+        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -116,7 +116,7 @@ def ml_segmentation(
 
         try:
             result = codex_segmentation_felzenszwalb(
-                inputHash, subsetHash, downsampled, scale, sigma, min_size, session=codex_hash)
+                inputHash, subsetHash, downsampled, scale, sigma, min_size, session=ch)
         except BaseException:
             logging.warning("Failed to run felzenszwalb segmentation algorithm")
             result['message'] = "Failed to run felzenszwalb segmentation algorithm"
@@ -148,7 +148,7 @@ def ml_segmentation(
             return None
 
         try:
-            result = codex_segmentation_quickshift(inputHash, subsetHash, downsampled, kernel_size, max_dist, sigma, session=codex_hash)
+            result = codex_segmentation_quickshift(inputHash, subsetHash, downsampled, kernel_size, max_dist, sigma, session=ch)
         except BaseException:
             logging.warning("Failed to run quickshift segmentation algorithm")
             result['message'] = "Failed to run quickshift segmentation algorithm"
@@ -192,19 +192,19 @@ def codex_segmentation_quickshift(
     Examples:
         >>> from api.sub.codex_hash import DOCTEST_SESSION
         >>> from api.sub.codex_doctest import doctest_get_data
-        >>> codex_hash = get_cache(DOCTEST_SESSION)
-        >>> testData = doctest_get_data(session=codex_hash)
+        >>> ch = get_cache(DOCTEST_SESSION)
+        >>> testData = doctest_get_data(session=ch)
 
-        >>> segments = codex_segmentation_quickshift(testData['inputHash'], False, 50, 20.0, 5.0, 2.0, session=codex_hash)
+        >>> segments = codex_segmentation_quickshift(testData['inputHash'], False, 50, 20.0, 5.0, 2.0, session=ch)
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         logging.warning("Hash not found. Returning!")
         return
@@ -212,14 +212,14 @@ def codex_segmentation_quickshift(
     data = returnHash['data']
 
     if(subsetHash is not False):
-        data = codex_hash.applySubsetMask(data, subsetHash)
+        data = ch.applySubsetMask(data, subsetHash)
         if(data is None):
             logging.warning("ERROR: codex_segmentation quickshift - subsetHash returned None.")
             return None
 
     if(downsampled is not False):
         logging.info("Downsampling to {downsample} percent".format(downsample=downsampled))
-        data = downsample(data, percentage=downsampled, session=codex_hash)
+        data = downsample(data, percentage=downsampled, session=ch)
 
     data = np.dstack((data, data, data))
     segments = quickshift(
@@ -230,15 +230,10 @@ def codex_segmentation_quickshift(
 
     endTime = time.time()
     computeTime = endTime - startTime
-    logTime(
-        "segmentation",
-        "quickshift",
-        computeTime,
-        len(data),
-        data.ndim)
+    logTime("segmentation", "quickshift", computeTime, len(data), data.ndim)
 
     # temporary to not change API right now
-    merged_hash = codex_hash.hashArray("temporary", data, "feature")
+    merged_hash = ch.hashArray("temporary", data, "feature")
 
     output = {
         'eta': eta,
@@ -282,19 +277,19 @@ def codex_segmentation_felzenszwalb(
 
         >>> from api.sub.codex_hash import DOCTEST_SESSION
         >>> from api.sub.codex_doctest import doctest_get_data
-        >>> codex_hash = get_cache(DOCTEST_SESSION)
-        >>> testData = doctest_get_data(session=codex_hash)
+        >>> ch = get_cache(DOCTEST_SESSION)
+        >>> testData = doctest_get_data(session=ch)
 
-        >>> segments = codex_segmentation_felzenszwalb(testData['inputHash'], False, 50, 3.0, 0.95, 3, session=codex_hash)
+        >>> segments = codex_segmentation_felzenszwalb(testData['inputHash'], False, 50, 3.0, 0.95, 3, session=ch)
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         logging.warning("Hash not found. Returning!")
         return
@@ -308,23 +303,18 @@ def codex_segmentation_felzenszwalb(
             return None
 
     if(downsampled is not False):
-        logging.info("Downsampling to " + str(downsampled) + " percent")
-        data = downsample(data, percentage=downsampled, session=codex_hash)
+        logging.info("Downsampling to {downsampled} percent".format(downsampled=downsampled))
+        data = downsample(data, percentage=downsampled, session=ch)
 
     data = codex_impute(data)
     segments = felzenszwalb(data, scale=scale, sigma=sigma, min_size=min_size)
 
     endTime = time.time()
     computeTime = endTime - startTime
-    logTime(
-        "segmentation",
-        "felzenszwalb",
-        computeTime,
-        len(data),
-        data.ndim)
+    logTime("segmentation", "felzenszwalb", computeTime, len(data), data.ndim)
 
     # temporary to not change API right now
-    merged_hash = codex_hash.hashArray("temporary", data, "feature")
+    merged_hash = ch.hashArray("temporary", data, "feature")
 
     output = {
         'eta': eta,

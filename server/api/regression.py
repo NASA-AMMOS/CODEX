@@ -9,7 +9,6 @@ Notes :
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government Sponsorship acknowledged.
 '''
-
 import os
 import sys
 import sys
@@ -107,23 +106,23 @@ def ml_regression(
     Examples:
     >>> from api.sub.codex_hash import DOCTEST_SESSION
     >>> from api.sub.codex_doctest import doctest_get_data
-    >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=codex_hash)
+    >>> ch = get_cache(DOCTEST_SESSION)
+    >>> testData = doctest_get_data(session=ch)
 
     # Standard use - linear regression
-    >>> result = ml_regression(testData['inputHash'], testData['hashList'], None, testData['classLabelHash'], "linear", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5, 'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, 'explained_variance', "grid", 3, {}, session=codex_hash)
+    >>> result = ml_regression(testData['inputHash'], testData['hashList'], None, testData['classLabelHash'], "linear", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5, 'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, 'explained_variance', "grid", 3, {}, session=ch)
 
     # Standard use - lasso regression
-    >>> result = ml_regression(testData['inputHash'], testData['hashList'], None, testData['classLabelHash'], "lasso", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5,'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, 'explained_variance', "grid", 3, {}, session=codex_hash)
+    >>> result = ml_regression(testData['inputHash'], testData['hashList'], None, testData['classLabelHash'], "lasso", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5,'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, 'explained_variance', "grid", 3, {}, session=ch)
 
     # Standard use - random forest regression
-    >>> result = ml_regression(testData['inputHash'], testData['hashList'], None, testData['classLabelHash'], "randomForest", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5,'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, 'explained_variance', "grid", 3, {}, session=codex_hash)
+    >>> result = ml_regression(testData['inputHash'], testData['hashList'], None, testData['classLabelHash'], "randomForest", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5,'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, 'explained_variance', "grid", 3, {}, session=ch)
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     if(subsetHashName is not None):
-        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
+        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -132,7 +131,7 @@ def ml_regression(
         subsetHash = False
 
     try:
-        result =  run_codex_regression(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=codex_hash)
+        result =  run_codex_regression(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=ch)
     except BaseException:
         logging.warning("Failed to run regression algorithm")
         result['message'] = "Failed to run regression algorithm"
@@ -173,60 +172,60 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
     >>> from api.sub.codex_hash import DOCTEST_SESSION
     >>> from api.sub.codex_doctest import doctest_get_data
-    >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=codex_hash)
+    >>> ch = get_cache(DOCTEST_SESSION)
+    >>> testData = doctest_get_data(session=ch)
 
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ARDRegression", {}, "grid", 3, 'fake_score', session=codex_hash)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ARDRegression", {}, "grid", 3, 'fake_score', session=ch)
     >>> print(result["WARNING"])
     fake_score not a valid scoring metric for regression.
 
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ARDRegression", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "AdaBoostRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "BaggingRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "BayesianRidge", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "CCA", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "DecisionTreeRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ElasticNet", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ElasticNetCV", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ExtraTreeRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ExtraTreesRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "GaussianProcessRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "GradientBoostingRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "HuberRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "KNeighborsRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "KernelRidge", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "Lars", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LarsCV", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "Lasso", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LassoCV", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LassoLars", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LassoLarsCV", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LassoLarsIC", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LinearRegression", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LinearSVR", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MLPRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MultiTaskElasticNet", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MultiTaskElasticNetCV", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MultiTaskLasso", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MultiTaskLassoCV", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "NuSVR", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "OrthogonalMatchingPursuit", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "OrthogonalMatchingPursuitCV", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "PLSCanonical", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "PLSRegression", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "PassiveAggressiveRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "RANSACRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "RadiusNeighborsRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "RandomForestRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "Ridge", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "RidgeCV", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "SGDRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "SVR", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "TheilSenRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
-    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "TransformedTargetRegressor", {}, "grid", 3, 'explained_variance', session=codex_hash)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ARDRegression", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "AdaBoostRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "BaggingRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "BayesianRidge", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "CCA", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "DecisionTreeRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ElasticNet", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ElasticNetCV", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ExtraTreeRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ExtraTreesRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "GaussianProcessRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "GradientBoostingRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "HuberRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "KNeighborsRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "KernelRidge", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "Lars", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LarsCV", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "Lasso", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LassoCV", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LassoLars", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LassoLarsCV", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LassoLarsIC", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LinearRegression", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LinearSVR", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MLPRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MultiTaskElasticNet", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MultiTaskElasticNetCV", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MultiTaskLasso", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MultiTaskLassoCV", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "NuSVR", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "OrthogonalMatchingPursuit", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "OrthogonalMatchingPursuitCV", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "PLSCanonical", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "PLSRegression", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "PassiveAggressiveRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "RANSACRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "RadiusNeighborsRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "RandomForestRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "Ridge", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "RidgeCV", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "SGDRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "SVR", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "TheilSenRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    >>> result = run_codex_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "TransformedTargetRegressor", {}, "grid", 3, 'explained_variance', session=ch)
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     logReturnCode(inspect.currentframe())
     startTime = time.time()
@@ -236,7 +235,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
               'scoring': scoring,
               'WARNING': "None"}
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
         logging.warning("Regression: {algorithm}: Hash not found. Returning!".format(algorithm=algorithm))
         return None
@@ -246,16 +245,16 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
         return None
 
     if subsetHash is not False  and subsetHash is not None:
-        data = codex_hash.applySubsetMask(data, subsetHash)
+        data = ch.applySubsetMask(data, subsetHash)
         if(data is None):
             logging.warning("ERROR: run_codex_regression - subsetHash returned None.")
             return None
 
     full_samples = len(data)
     if downsampled is not False:
-        logging.info("Downsampling to " + str(downsampled) + " percent")
+        logging.info("Downsampling to {downsampled} percent".format(downsampled=downsampled))
         samples = len(data)
-        data = codex_downsample.downsample(data, percentage=downsampled, session=codex_hash)
+        data = codex_downsample.downsample(data, percentage=downsampled, session=ch)
 
     if data.ndim < 2:
         logging.warning("ERROR: run_codex_regression - insufficient data dimmensions")
@@ -273,7 +272,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
         return result
 
     # TODO - labels are currently cached under features
-    labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
+    labelHash_dict = ch.findHashArray("hash", labelHash, "feature")
     if labelHash_dict is None:
         logging.warning("label hash not found. Returning!")
         return {'algorithm': algorithm,
@@ -667,7 +666,7 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
     # TODO - The front end should specify a save name for the model
     model_name = algorithm +  "_" + str(random.random())
-    model_dict = codex_hash.saveModel(model_name, regr.best_estimator_, "regressor")
+    model_dict = ch.saveModel(model_name, regr.best_estimator_, "regressor")
     if not model_dict:
         result['WARNING'] = "Model could not be saved."
     else:

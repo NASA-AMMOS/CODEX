@@ -159,12 +159,12 @@ def codex_server_memory_check(verbose=False, session=None):
 
     Examples:
     >>> from api.sub.codex_hash import DOCTEST_SESSION, get_cache
-    >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> codex_server_memory_check(session=codex_hash)
+    >>> ch = get_cache(DOCTEST_SESSION)
+    >>> codex_server_memory_check(session=ch)
 
     '''
     from api.sub.codex_hash import get_cache # defer import to try to circumvent circular import
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
     allowed_ram = get_setting("working_ram")
     current_ram = get_codex_memory_usage()
 
@@ -173,7 +173,7 @@ def codex_server_memory_check(verbose=False, session=None):
 
     while(current_ram > allowed_ram):
         last_ram = current_ram
-        status = codex_hash.remove_stale_data()
+        status = ch.remove_stale_data()
         if(status != True):
             return
 

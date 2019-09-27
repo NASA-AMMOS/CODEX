@@ -40,14 +40,14 @@ def ml_normalize(
     Examples:
     >>> from api.sub.codex_hash import DOCTEST_SESSION
     >>> from api.sub.codex_doctest import doctest_get_data
-    >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=codex_hash)
+    >>> ch = get_cache(DOCTEST_SESSION)
+    >>> testData = doctest_get_data(session=ch)
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
-    data = codex_hash.mergeHashResults(hashList)
-    inputHash = codex_hash.hashArray('Merged', data, "feature")
+    data = ch.mergeHashResults(hashList)
+    inputHash = ch.hashArray('Merged', data, "feature")
     if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
@@ -56,7 +56,7 @@ def ml_normalize(
         return None
 
     if(subsetHashName is not None):
-        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
+        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:

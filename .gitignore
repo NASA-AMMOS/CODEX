@@ -6,6 +6,7 @@ server/sessions/
 serverreturned_code.py
 serverTimeLogs/
 server/timeLogs*
+server/logs/*
 
 # misc
 .DS_Store

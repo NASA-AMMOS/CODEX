@@ -85,14 +85,14 @@ def ml_classification(
     Examples:
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     if len(hashList) < 2:
         logging.warning("Classification requires >= 2 features.")
         return None
 
     if subsetHashName is not None:
-        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
+        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -140,18 +140,18 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
         >>> from api.sub.codex_doctest import doctest_get_data
         >>> from api.sub.codex_hash import DOCTEST_SESSION
-        >>> codex_hash = get_cache(DOCTEST_SESSION)
-        >>> testData = doctest_get_data(session=codex_hash)
+        >>> ch = get_cache(DOCTEST_SESSION)
+        >>> testData = doctest_get_data(session=ch)
 
-        >>> result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'fake_scoring_metric', session=codex_hash)
+        >>> result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'fake_scoring_metric', session=ch)
         >>> print(result["WARNING"])
         fake_scoring_metric not a valid scoring metric for classification.
 
-        >>> result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'precision', session=codex_hash)
+        >>> result = run_codex_classification(testData['inputHash'], False, testData['classLabelHash'], False, "AdaBoostClassifier", {"n_estimators":[10]}, "grid", 3, 'precision', session=ch)
         >>> print(result["WARNING"])
         None
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
     logReturnCode(inspect.currentframe())
     startTime = time.time()
     result = {'algorithm': algorithm,
@@ -160,7 +160,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
               'scoring': scoring,
               'WARNING': "None"}
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
         logging.warning("Classification: {algorithm}: Hash not found. Returning!".format(algorithm=algorithm))
         return None
@@ -170,7 +170,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         return None
 
     if subsetHash is not False and subsetHash is not None:
-        data = codex_hash.applySubsetMask(data, subsetHash)
+        data = ch.applySubsetMask(data, subsetHash)
         if(data is None):
             logging.warning("ERROR: run_codex_classification - subsetHash returned None.")
             return None
@@ -197,7 +197,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         return result
 
     # TODO - labels are currently cached under features
-    labelHash_dict = codex_hash.findHashArray("hash", labelHash, "feature")
+    labelHash_dict = ch.findHashArray("hash", labelHash, "feature")
     if labelHash_dict is None:
         logging.warning("label hash {hash} not found. Returning!".format(hash=labelHash))
         return {'algorithm': algorithm,
@@ -435,7 +435,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
     # TODO - The front end should specify a save name for the model
     model_name = algorithm +  "_" + str(random.random())
-    model_dict = codex_hash.saveModel(model_name, clf.best_estimator_, "classifier")
+    model_dict = ch.saveModel(model_name, clf.best_estimator_, "classifier")
     if not model_dict:
         result['WARNING'] = "Model could not be saved."
     else:   

@@ -35,12 +35,12 @@ def label_swap(labels, dataHash, session=None):
 
     '''
     from api.sub.codex_hash import get_cache
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     test_uniq_labels = np.unique(labels)
     num_labels = labels.size
 
-    tmp = codex_hash.findHashArray("name", dataHash, "label")
+    tmp = ch.findHashArray("name", dataHash, "label")
     if(tmp is None):
         return labels
 

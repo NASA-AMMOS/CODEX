@@ -137,17 +137,17 @@ def explain_this(inputHash, featureNames, dataSelections, result, session=None):
     >>> from api.sub.codex_hash import DOCTEST_SESSION
     >>> from api.sub.codex_hash import get_cache
     >>> from api.sub.codex_doctest import doctest_get_data
-    >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=codex_hash)
+    >>> ch = get_cache(DOCTEST_SESSION)
+    >>> testData = doctest_get_data(session=ch)
 
     
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     startTime = time.time()
     result = {"WARNING":None}
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
         warning("ERROR: explain_this: Hash not found. Returning.")
         return None
@@ -316,7 +316,7 @@ def general_classifier(inputHash, featureList, dataSelections, similarityThresho
     startTime = time.time()
     result = {"WARNING":None}
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
         warning("ERROR: general_classifier: Hash not found. Returning.")
         return None
@@ -361,12 +361,12 @@ def general_classifier(inputHash, featureList, dataSelections, similarityThresho
 
 def find_more_like_this(inputHash, featureList, dataSelections, similarityThreshold, result, session=None):
     
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     startTime = time.time()
     result = {"WARNING":None}
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
         warning("ERROR: general_classifier: Hash not found. Returning.")
         return None

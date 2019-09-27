@@ -39,38 +39,37 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None):
 
     Examples:
     >>> from codex_hash import DOCTEST_SESSION
-    >>> codex_hash = get_cache(DOCTEST_SESSION)
+    >>> ch = get_cache(DOCTEST_SESSION)
     >>> array = np.random.rand(200)
 
-    >>> result = downsample(array,percentage=10, session=codex_hash)
+    >>> result = downsample(array,percentage=10, session=ch)
     >>> print(len(result))
     20
 
-    >>> result = downsample(array,samples=50, session=codex_hash)
+    >>> result = downsample(array,samples=50, session=ch)
     >>> print(len(result))
     50
 
     # More samples than in array
-    >>> result = downsample(array,samples=250, session=codex_hash)
+    >>> result = downsample(array,samples=250, session=ch)
     >>> print(len(result))
     200
 
-    >>> codex_hash.resetCacheList("downsample")
-    >>> result1 = downsample(array, samples=50, session=codex_hash)
-    >>> result2 = downsample(array, samples=50, session=codex_hash)
+    >>> ch.resetCacheList("downsample")
+    >>> result1 = downsample(array, samples=50, session=ch)
+    >>> result2 = downsample(array, samples=50, session=ch)
     >>> print(np.array_equal(result1, result2))
     True
 
-    >>> result3 = downsample(array, percentage=120, session=codex_hash)
+    >>> result3 = downsample(array, percentage=120, session=ch)
 
-    >>> result4 = downsample(array, session=codex_hash)
+    >>> result4 = downsample(array, session=ch)
 
     '''
-
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     # first, create a hash of the input array, don't save
-    inputHash = codex_hash.hashArray("NOSAVE", inputArray, "NOSAVE")
+    inputHash = ch.hashArray("NOSAVE", inputArray, "NOSAVE")
     inputHashCode = inputHash["hash"]
     inputArray = codex_impute(inputArray) # TODO - mblib spanning seems to have problems with NaNs.  Impute until fixed.
 
@@ -97,7 +96,7 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None):
         usedSamples = totalPoints
 
     # first, check if this downsampling has already been done before
-    existingHashCheck = codex_hash.findHashArray("name", inputHashCode, "downsample")
+    existingHashCheck = ch.findHashArray("name", inputHashCode, "downsample")
 
     # Check if raw length is already less than requested downsample rate.
     #   If it is, use that, otherwise, resample.
@@ -124,7 +123,7 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None):
 
     # Hash the downsampled output, using the hash of the input in place of the name.
     #	Later look up using this, w.r.t origin data
-    outputHash = codex_hash.hashArray(inputHashCode, outputArray, "downsample")
+    outputHash = ch.hashArray(inputHashCode, outputArray, "downsample")
     return outputArray
 
 

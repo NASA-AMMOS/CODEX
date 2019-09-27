@@ -51,25 +51,25 @@ def ml_template_scan(
     Examples:
     >>> from api.sub.codex_hash import DOCTEST_SESSION
     >>> from api.sub.codex_doctest import doctest_get_data
-    >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=codex_hash)
+    >>> ch = get_cache(DOCTEST_SESSION)
+    >>> testData = doctest_get_data(session=ch)
 
     # Missing algorithmType
-    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "temp", False, {'num_templates': 1, 'scan_jump': 50}, {}, session=codex_hash)
+    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "temp", False, {'num_templates': 1, 'scan_jump': 50}, {}, session=ch)
 
     # Standard usage
-    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': 50}, {}, session=codex_hash)
+    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': 50}, {}, session=ch)
 
     # Incorrect num_templates
-    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': "String", 'scan_jump': 50}, {}, session=codex_hash)
+    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': "String", 'scan_jump': 50}, {}, session=ch)
 
     # Incorrect scan_jump
-    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': "String"}, {}, session=codex_hash)
+    >>> result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': "String"}, {}, session=ch)
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
-    data = codex_hash.mergeHashResults(hashList)
-    inputHash = codex_hash.hashArray('Merged', data, "feature")
+    data = ch.mergeHashResults(hashList)
+    inputHash = ch.hashArray('Merged', data, "feature")
     if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
@@ -78,7 +78,7 @@ def ml_template_scan(
         return None
 
     if(subsetHashName is not None):
-        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
+        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -87,8 +87,7 @@ def ml_template_scan(
         subsetHash = False
 
     if(templateHashName is not None):
-        templateHash = codex_hash.findHashArray(
-            "name", templateHashName, "subset")
+        templateHash = ch.findHashArray("name", templateHashName, "subset")
         if(templateHash is None):
             templateHash = False
         else:
@@ -123,7 +122,7 @@ def ml_template_scan(
                 templateHash,
                 num_templates,
                 scan_jump,
-                session=codex_hash)
+                session=ch)
         except BaseException:
             logging.warning("Failed to run template scan algorithm")
             result['message'] = "Failed to run template scan algorithm"
@@ -160,12 +159,12 @@ def codex_template_scan(
     Examples:
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     logReturnCode(inspect.currentframe())
     startTime = time.time()
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         print("Error: codex_template_scan: inputHash not found.")
         return
@@ -173,13 +172,12 @@ def codex_template_scan(
     X = returnHash['data']
 
     if(subsetHash is not False):
-        X = codex_hash.applySubsetMask(X, subsetHash)
+        X = ch.applySubsetMask(X, subsetHash)
 
     if(downsampled is not False):
-        X = downsample(X, percentage=downsampled, session=codex_hash)
+        X = downsample(X, percentage=downsampled, session=ch)
 
-    returnTemplateHash = codex_hash.findHashArray(
-        "hash", templateHash, "feature")
+    returnTemplateHash = ch.findHashArray("hash", templateHash, "feature")
     if(returnTemplateHash is None):
         print("Error: codex_template_scan: templateHash not found.")
         return

@@ -51,22 +51,22 @@ def doctest_get_data(session=None):
     '''
     from api.sub.codex_hash import get_cache, DOCTEST_SESSION
 
-    codex_hash = get_cache(DOCTEST_SESSION if session is None else session)
+    ch = get_cache(DOCTEST_SESSION if session is None else session)
 
     featureList = ['TiO2', 'FeOT', 'SiO2', 'Total']
-    hashList, featureList = codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv', featureList, "feature", session=codex_hash)
+    hashList, featureList = codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv', featureList, "feature", session=ch)
     
     # merge 1d arrays to nd-array
-    data = codex_hash.mergeHashResults(hashList)
+    data = ch.mergeHashResults(hashList)
     samples, features = data.shape
 
-    inputHash = codex_hash.hashArray('Merged', data, "feature")
+    inputHash = ch.hashArray('Merged', data, "feature")
 
     template = np.zeros(samples)
-    templateHashDictionary = codex_hash.hashArray("template", template, "feature")
+    templateHashDictionary = ch.hashArray("template", template, "feature")
     templateHash = templateHashDictionary['hash']
 
-    labelHash = codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv', ["labels"], "feature", session=codex_hash)
+    labelHash = codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv', ["labels"], "feature", session=ch)
     labelHash = labelHash[0][0]
 
     regrLabelData = []
@@ -76,7 +76,7 @@ def doctest_get_data(session=None):
         regrLabelData.append(random.randint(0, 10))
 
     regrLabelData = np.asarray(regrLabelData)
-    regrLabelDictionary = codex_hash.hashArray("regrLabelHash", regrLabelData, "feature")
+    regrLabelDictionary = ch.hashArray("regrLabelHash", regrLabelData, "feature")
     regrLabelHash = regrLabelDictionary['hash']
 
     return {"inputHash":inputHash['hash'], 'featureNames':featureList, "hashList":hashList, "templateHash": templateHash, "classLabelHash":labelHash, "regrLabelHash": regrLabelHash}

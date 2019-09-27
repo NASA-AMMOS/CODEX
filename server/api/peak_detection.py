@@ -58,16 +58,16 @@ def ml_peak_detect(
     Examples:
     >>> from api.sub.codex_hash import DOCTEST_SESSION
     >>> from api.sub.codex_doctest import doctest_get_data
-    >>> codex_hash = get_cache(DOCTEST_SESSION)
-    >>> testData = doctest_get_data(session=codex_hash)
+    >>> ch = get_cache(DOCTEST_SESSION)
+    >>> testData = doctest_get_data(session=ch)
 
     #>>> result = ml_peak_detect(testData['hashList'], None, "peak_cwt", False, {'peak_width': 3, 'gap_threshold': 5, 'min_snr': 3, 'noise_perc': 10}, {})
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
-    data = codex_hash.mergeHashResults(hashList)
-    inputHash = codex_hash.hashArray('Merged', data, "feature")
+    data = ch.mergeHashResults(hashList)
+    inputHash = ch.hashArray('Merged', data, "feature")
     if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
@@ -76,7 +76,7 @@ def ml_peak_detect(
         return None
 
     if(subsetHashName is not None):
-        subsetHash = codex_hash.findHashArray("name", subsetHashName, "subset")
+        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -127,7 +127,7 @@ def ml_peak_detect(
                 gap_threshold,
                 min_snr,
                 noise_perc,
-                session=codex_hash)
+                session=ch)
         except BaseException:
             logging.warning("Failed to run codex_scipy_signal_peak_cwt peak detection algorithm")
             result['message'] = "Failed to run codex_scipy_signal_peak_cwt peak detection algorithm"
@@ -196,7 +196,7 @@ def ml_peak_detect(
                 kpsh,
                 valley,
                 False,
-                session=codex_hash)
+                session=ch)
         except BaseException:
             logging.warning("Failed to run matlab-findpeaks peak detection algorithm")
             result['message'] = "Failed to run matlab-findpeaks peak detection algorithm"
@@ -243,13 +243,13 @@ def codex_scipy_signal_peak_cwt(
     Examples:
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     downsampledHash = None
     startTime = time.time()
     eta = None
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         print("Hash not found. Returning!")
         return
@@ -257,15 +257,15 @@ def codex_scipy_signal_peak_cwt(
     data = returnHash['data']
 
     if(subsetHash is not False):
-        data = codex_hash.applySubsetMask(data, subsetHash)
+        data = ch.applySubsetMask(data, subsetHash)
         if(data is None):
             logging.warning("ERROR: codex_peak_detection scipy_signal_peak_cwt - subsetHash returned None.")
             return None
 
     if(downsampled is not False):
-        logging.warning("Downsampling to " + str(downsampled) + " samples")
+        logging.info("Downsampling to {downsampled} samples".format(downsampled=downsampled))
         samples = len(data)
-        data = downsample(data, percentage=downsampled, session=codex_hash)
+        data = downsample(data, percentage=downsampled, session=ch)
         eta = getComputeTimeEstimate("peak", "cwt", samples)
 
     data = codex_impute(data)
@@ -334,30 +334,30 @@ def codex_matlab_findpeaks(
     Examples:
 
     '''
-    codex_hash = get_cache(session)
+    ch = get_cache(session)
 
     logReturnCode(inspect.currentframe())
     downsampledHash = None
     startTime = time.time()
     eta = None
 
-    returnHash = codex_hash.findHashArray("hash", inputHash, "feature")
+    returnHash = ch.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
-        print("Hash not found. Returning!")
+        logging.warning("Hash not found. Returning!")
         return
 
     data = returnHash['data']
 
     if(subsetHash is not False):
-        data = codex_hash.applySubsetMask(data, subsetHash)
+        data = ch.applySubsetMask(data, subsetHash)
         if(data is None):
             logging.warning("ERROR: codex_peak_detection matlab_findpeaks - subsetHash returned None.")
             return None
 
     if(downsampled is not False):
-        logging.info("Downsampling to " + str(downsampled) + " samples")
+        logging.info("Downsampling to {downsampled} samples".format(downsampled=downsampled))
         samples = len(data)
-        data = downsample(data, percentage=downsampled, session=codex_hash)
+        data = downsample(data, percentage=downsampled, session=ch)
         eta = getComputeTimeEstimate("peak", "matlab_findpeaks", samples)
 
     data = codex_impute(data)
@@ -374,12 +374,7 @@ def codex_matlab_findpeaks(
 
     endTime = time.time()
     computeTime = endTime - startTime
-    logTime(
-        "peak",
-        "matlab_findpeaks",
-        computeTime,
-        len(data),
-        data.ndim)
+    logTime("peak", "matlab_findpeaks", computeTime, len(data), data.ndim)
 
     if(showPlot):
         codex_plot_peak(data, indexes)
