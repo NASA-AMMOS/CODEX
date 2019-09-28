@@ -167,31 +167,30 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
         logging.warning("Regression: {algorithm}: Hash not found. Returning!".format(algorithm=algorithm))
         return None
 
-    data = returnHash['data']
-    if data is None:
+    X = returnHash['data']
+    if X is None:
         return None
 
-    if subsetHash is not False  and subsetHash is not None:
-        data = ch.applySubsetMask(data, subsetHash)
-        if(data is None):
-            logging.warning("ERROR: run_codex_regression - subsetHash returned None.")
-            return None
-
-    full_samples = len(data)
-    if downsampled is not False:
-        logging.info("Downsampling to {downsampled} percent".format(downsampled=downsampled))
-        samples = len(data)
-        data = downsample(data, percentage=downsampled, session=ch)
-
-    if data.ndim < 2:
+    if X.ndim < 2:
         logging.warning("ERROR: run_codex_regression - insufficient data dimmensions")
         return None
 
-    X = data
+    full_samples, full_features = X.shape
+    result['eta'] = getComputeTimeEstimate("regression", algorithm, full_samples, full_features)
+
+    if subsetHash is not False  and subsetHash is not None:
+        X = ch.applySubsetMask(X, subsetHash)
+        if(X is None):
+            logging.warning("ERROR: run_codex_regression - subsetHash returned None.")
+            return None
+
+    if downsampled is not False:
+        X = downsample(X, samples=downsampled, session=cache)
+        logging.info("Downsampled to {samples} samples".format(samples=len(X)))
+
+    computed_samples, computed_features = X.shape
     X = impute(X)
     result['X'] = X.tolist()
-
-    result['eta'] = getComputeTimeEstimate("regression", algorithm, full_samples)
 
     accepted_scoring_metrics = ["explained_variance", "max_error", "neg_mean_absolute_error", "neg_mean_squared_error", "neg_mean_squared_log_error", "neg_median_absolute_error", "r2"]
     if scoring not in accepted_scoring_metrics:
@@ -602,10 +601,8 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
 
     endTime = time.time()
     computeTime = endTime - startTime
-    logTime("regression", algorithm, computeTime, len(X), X.ndim)
+    logTime("regression", algorithm, computeTime, computed_samples, computed_features)
 
     return result
-
-
 
 

@@ -30,11 +30,9 @@ def get_time_estimate(msg, result):
         algorithmType = msg['algorithmType']
         algorithmName = msg['algorithmName']
         numSamples = int(msg['numSamples'])
-
-        # TODO - extend computeTimeEstimate to factor in number of features
         numFeatures = int(msg['numFeatures'])
 
-        eta = getComputeTimeEstimate(algorithmType, algorithmName, numSamples)
+        eta = getComputeTimeEstimate(algorithmType, algorithmName, numSamples, numFeatures)
 
         result['eta'] = eta
         result['message'] = 'success'

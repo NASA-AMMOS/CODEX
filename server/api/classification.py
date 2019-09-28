@@ -97,7 +97,7 @@ def ml_classification(
         subsetHash = False
 
     try:
-        result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=session)
+        result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=cache)
         logging.warning("Completed classification run with warnings: {r}".format(r=result["WARNING"]))
     except BaseException:
         logging.warning("Failed to run classification algorithm")
@@ -147,31 +147,30 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         logging.warning("Classification: {algorithm}: Hash not found. Returning!".format(algorithm=algorithm))
         return None
 
-    data = returnHash['data']
-    if data is None:
+    X = returnHash['data']
+    if X is None:
         return None
 
-    if subsetHash is not False and subsetHash is not None:
-        data = cache.applySubsetMask(data, subsetHash)
-        if(data is None):
-            logging.warning("ERROR: run_codex_classification - subsetHash returned None.")
-            return None
-            
-    full_samples = len(data)
-    if downsampled is not False:
-        logging.warning("Downsampling to " + str(downsampled) + " percent")
-        samples = len(data)
-        data = downsample(data, percentage=downsampled, session=session)
-
-    if data.ndim < 2:
+    if X.ndim < 2:
         logging.warning("ERROR: run_codex_classification - insufficient data dimmensions")
         return None
 
-    X = data
+    full_samples, full_features = X.shape
+    result['eta'] = getComputeTimeEstimate("classification", algorithm, full_samples, full_features)
+
+    if subsetHash is not False and subsetHash is not None:
+        X = cache.applySubsetMask(X, subsetHash)
+        if(X is None):
+            logging.warning("ERROR: run_codex_classification - subsetHash returned None.")
+            return None
+            
+    if downsampled is not False:
+        X = downsample(X, samples=downsampled, session=cache)
+        logging.info("Downsampled to {samples} samples".format(samples=len(X)))
+
+    computed_samples, computed_features = X.shape
     X = impute(X)
     result['X'] = X.tolist()
-
-    result['eta'] = getComputeTimeEstimate("classification", algorithm, full_samples)
 
     accepted_scoring_metrics = ["accuracy", "balanced_accuracy", "average_precision", "brier_score_loss", "f1, f1_micro", "f1_macro", "f1_weighted", "f1_samples", "neg_log_loss", "precision", "recall", "jaccard", "roc_auc"]
     if scoring not in accepted_scoring_metrics:
@@ -404,7 +403,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
                 'scoring': scoring,
                 'WARNING': traceback.format_exc()}
 
-    clf.fit(X,y)
+    clf.fit(X, y)
     y_pred = clf.predict(X)
 
     cm = confusion_matrix(y, y_pred)
@@ -426,13 +425,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
     endTime = time.time()
     computeTime = endTime - startTime
-    logTime(
-        "classification",
-        algorithm,
-        computeTime,
-        len(X),
-        X.ndim)
+    logTime("classification", algorithm, computeTime, computed_samples, computed_features)
 
     return result
-
 

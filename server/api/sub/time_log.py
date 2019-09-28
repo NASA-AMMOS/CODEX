@@ -13,13 +13,14 @@ import logging
 
 import numpy as np
 
-from scipy    import misc
-from random   import randint
-from heapq    import nsmallest
-from os       import listdir
-from os.path  import isfile
-from os.path  import join
-from os.path  import isdir 
+from scipy        import misc
+from random       import randint
+from heapq        import nsmallest
+from os           import listdir
+from os.path      import isfile
+from os.path      import join
+from os.path      import isdir 
+from sklearn.tree import DecisionTreeRegressor
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
@@ -94,7 +95,7 @@ def getTimeLogDict():
                 pass
 
 
-def getComputeTimeEstimate(domain, algorithm, inputSamples):
+def getComputeTimeEstimate(domain, algorithm, inputSamples, inputFeatures):
     '''
     Inputs:
         domain (string)     - string indicating the domain type of the algorithm you're seeking.
@@ -110,8 +111,6 @@ def getComputeTimeEstimate(domain, algorithm, inputSamples):
     '''
 
     algorithmPath = os.path.join(logPath, domain, algorithm)
-    count = 0
-    totalTime = 0
 
     if(timeLogs == {}):
         getTimeLogDict()
@@ -123,24 +122,20 @@ def getComputeTimeEstimate(domain, algorithm, inputSamples):
 
     if(data is not None):
 
-        samples = data[:, 0]
-        features = data[:, 1]
-        times = data[:, 2]
+        # data = [samples, features, times]
+        X = data[:,0:2]
+        y = data[:,2]
 
-        numReferences = len(samples)
+        regr = DecisionTreeRegressor()
+        regr.fit(X, y)
 
-        # Get the five closest reference samples, take average time
-        resultSamples = nsmallest(5, samples, key=lambda x: abs(x - inputSamples))
+        testData = np.array([[inputSamples, inputFeatures]])
+        outTime = regr.predict(testData)[0]
 
-        for x in range(0, numReferences):
-            if(samples[x] in resultSamples):
-                totalTime += times[x]
-                count += 1
-
-        outTime = (totalTime / count)
     else:
         outTime = None
 
     return outTime
+
 
 

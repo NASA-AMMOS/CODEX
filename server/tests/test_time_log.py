@@ -23,4 +23,4 @@ def test_getTimeLogDict(capsys):
 
 def test_getComputeTimeEstimate(capsys):
 
-    time = getComputeTimeEstimate("clustering", "kmeans", 9000)
+    time = getComputeTimeEstimate("clustering", "kmeans", 9000, 500)

@@ -111,27 +111,28 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
         logging.warning("Clustering: run_codex_clustering: Hash not found. Returning!")
         return None
 
-    data = returnHash['data']
-    if data is None:
+    X = returnHash['data']
+    if X is None:
         return None
 
-    if subsetHash is not False:
-        data = cache.applySubsetMask(data, subsetHash)
-        if(data is None):
-            logging.warning("ERROR: run_codex_clustering - subsetHash returned None.")
-            return None
-
-    full_samples = len(data)
-    if downsampled is not False:
-        data = downsample(data, samples=downsampled, session=cache)
-        logging.info("Downsampled to {samples} samples".format(samples=len(data)))
-
-    result['eta'] = getComputeTimeEstimate("clustering", algorithm, full_samples)
-    if data.ndim < 2:
+    if X.ndim < 2:
         logging.warning("ERROR: run_codex_clustering - insufficient data dimmensions")
         return None
 
-    X = data
+    full_samples, full_features = X.shape
+    result['eta'] = getComputeTimeEstimate("clustering", algorithm, full_samples, full_features)
+
+    if subsetHash is not False:
+        X = cache.applySubsetMask(X, subsetHash)
+        if(X is None):
+            logging.warning("ERROR: run_codex_clustering - subsetHash returned None.")
+            return None
+
+    if downsampled is not False:
+        X = downsample(X, samples=downsampled, session=cache)
+        logging.info("Downsampled to {samples} samples".format(samples=len(X)))
+
+    computed_samples, computed_features = X.shape
     X = impute(X)
     result['data'] = X.tolist()
 
@@ -187,12 +188,10 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
 
     except:
         logging.warning(str(traceback.format_exc()))
-
         return {'algorithm': algorithm,
                 'data': X.tolist(),
                 'downsample': downsampled,
-                'WARNING': traceback.format_exc()}
-
+                'WARNING': "{algorithm} not supported.".format(algorithm=algorithm)}
 
 
     cluster_alg.fit(X)
@@ -215,7 +214,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
 
     endTime = time.time()
     computeTime = endTime - startTime
-    logTime("clustering", algorithm, computeTime, len(data), data.ndim)
+    logTime("clustering", algorithm, computeTime, computed_samples, computed_features)
 
     result['message'] = "success"
     return result

@@ -95,7 +95,6 @@ def run_codex_dim_reduction(
     
     logReturnCode(inspect.currentframe())
     startTime = time.time()
-    eta = None
 
     n_components = parms["n_components"]
 
@@ -104,26 +103,29 @@ def run_codex_dim_reduction(
         logging.warning("Error: run_codex_dim_reduction: Hash not found")
         return
 
-    data = returnHash['data']
+    X = returnHash['data']
+    if X is None:
+        return None
+
+    if(X.ndim > n_components):
+        logging.warning("ERROR: run_codex_dim_reduction: features ({ndim}) > requested components ({components})".format(ndim=X.ndim, components=n_components))
+        return None
+
+    full_samples, full_features = X.shape
+    eta = getComputeTimeEstimate("dimension_reduction", algorithm, full_samples, full_features)
 
     if(subsetHash is not False):
-        data, datName = ch.applySubsetMask(data, subsetHash)
-        if(data is None):
+        X, datName = ch.applySubsetMask(X, subsetHash)
+        if(X is None):
             logging.warning("ERROR: run_codex_dim_reduction: subsetHash returned None.")
             return None
 
-    full_samples = len(data)
     if(downsampled is not False):
-        data = downsample(data, samples=downsampled, session=cache)
-        logging.info("Downsampled to {samples} samples".format(samples=len(data)))
+        X = downsample(X, samples=downsampled, session=cache)
+        logging.info("Downsampled to {samples} samples".format(samples=len(X)))
 
-    eta = getComputeTimeEstimate("dimension_reduction", algorithm, full_samples)
-
-    data = impute(data)
-
-    if(data.ndim > n_components):
-        logging.warning("ERROR: run_codex_dim_reduction: features ({ndim}) > requested components ({components})".format(ndim=data.ndim, components=n_components))
-        return None
+    computed_samples, computed_features = X.shape
+    X = impute(X)
 
     try:
 
@@ -157,12 +159,12 @@ def run_codex_dim_reduction(
     if showPlot:
         plot_dimensionality(exp_var_ratio, "PCA Explained Variance", show=True)
 
-    X_transformed = dim_r.fit_transform(data)
+    X_transformed = dim_r.fit_transform(X)
     exp_var_ratio = explained_variance_ratio(X_transformed, n_components)
 
     endTime = time.time()
     computeTime = endTime - startTime
-    logTime("dimension_reduction", algorithm, computeTime, len(data), data.ndim)
+    logTime("dimension_reduction", algorithm, computeTime, computed_samples, computed_features)
 
     # print("saving out PCA")
     # outputHash = ch.hashArray('PCA_', X_transformed, "feature", virtual=True)
@@ -180,6 +182,5 @@ def run_codex_dim_reduction(
         'message':"success"}
 
     return output
-
 
 

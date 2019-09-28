@@ -10,8 +10,12 @@ U.S. Government Sponsorship acknowledged.
 import sys
 import os
 import traceback
-#import pysptools.eea.eea
-#import pysptools.eea
+
+import matplotlib # Necessary for pysptools matplotlib backend issue
+matplotlib.use('Agg') # Necessary for pysptools matplotlib backend issue
+import pysptools.eea.eea
+import pysptools.eea
+
 import time
 import inspect
 import logging
@@ -46,10 +50,14 @@ def ml_endmember(
     Outputs:
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
-    if(subsetHashName is not None):
-        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
+    if len(hashList) < 2:
+        logging.warning("Clustering requires >= 2 features.")
+        return None
+
+    if subsetHashName is not None:
+        subsetHash = cache.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -58,221 +66,84 @@ def ml_endmember(
         subsetHash = False
 
     try:
-        q = int(parms['q'])
+        result = run_codex_endmember(inputHash, subsetHash, downsampled, algorithmName, parms, session=cache)
+
     except BaseException:
-        logging.warning("q parameter not set")
-        result['message'] = "q parameter not set"
-        return result
-
-    if(algorithmName == "ATGP"):
-        try:
-            result = codex_ATGP(inputHash, subsetHash, q, downsampled, session=ch)
-        except BaseException:
-            logging.warning("Failed to run ATGP endmember algorithm")
-            result['message'] = "Failed to run ATGP endmember algorithm"
-            logging.warning(traceback.format_exc())
-            return result
-
-    elif(algorithmName == "FIPPI"):
-        try:
-            result = codex_FIPPI(inputHash, subsetHash, q, downsampled, session=ch)
-        except BaseException:
-            logging.warning("Failed to run FIPPI endmember algorithm")
-            result['message'] = "Failed to run FIPPI endmember algorithm"
-            logging.warning(traceback.format_exc())
-            return result
-
-    elif(algorithmName == "PPI"):
-
-        try:
-            numSkewers = int(parms["numSkewers"])
-        except BaseException:
-            logging.warning("numSkewers parameter not set")
-            result['message'] = "numSkewers parameter not set"
-            return result
-
-        try:
-            result = codex_PPI(
-                inputHash,
-                subsetHash,
-                q,
-                numSkewers,
-                downsampled,
-                session=ch)
-        except BaseException:
-            logging.warning("Failed to run PPI endmember algorithm")
-            result['message'] = "Failed to run PPI endmember algorithm"
-            logging.warning(traceback.format_exc())
-            return result
-
-    else:
-        logging.warning("Cannot find requested endmember algorithm")
-        result['message'] = "Cannot find requested endmember algorithm"
-        return result
+        logging.warning("Failed to run endmember algorithm")
+        result['message'] = "Failed to run endmember algorithm"
+        logging.warning(traceback.format_exc())
 
     return result
 
 
-def codex_ATGP(inputHash, subsetHash, q, downsampled, session=None):
+def run_codex_endmember(inputHash, subsetHash, downsampled, algorithm, parms, session=None):
     '''
     Inputs:
         inputHash (string)   - hash value corresponding to the data to cluster
         subsetHash (string)  - hash value corresponding to the subselection (false if full feature)
-        q  (int)  			 - Number of endmembers to be induced (positive integer > 0)
+        q  (int)             - Number of endmembers to be induced (positive integer > 0)
 
     Outputs:
         Dictionary -
             endmember_array  - Set of induced endmembers (N x p)
             endmember_vector - Array of indices into the array data corresponding to the induced endmembers
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
+
     logReturnCode(inspect.currentframe())
     startTime = time.time()
-    eta = None
 
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
+    returnHash = cache.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         logging.warning("Hash not found. Returning!")
         return None
 
-    data = returnHash['data']
-
-    if(subsetHash is not False):
-        data = ch.applySubsetMask(data, subsetHash)
-        if(data is None):
-            logging.warning("ERROR: codex_endmembers - ATGP - subsetHash returned None.")
-            return None
-
-    if(downsampled is not False):
-        logging.info("Downsampling to {downsampled} samples".format(downsampled=downsampled))
-        samples = len(data)
-        data = downsample(data, percentage=downsampled, session=ch)
-        eta = getComputeTimeEstimate("endmember", "ATGP", samples)
-
-    data = impute(data)
-
-    results = None#pysptools.eea.eea.ATGP(data, int(q))
-
-    dictionary = {
-        'eta': eta, 'endmember_array': np.array_str(
-            results[0]), 'endmember_vector': np.array_str(
-            results[1]), 'downsample': downsampled}
-
-    endTime = time.time()
-    computeTime = endTime - startTime
-    logTime("endmember", "ATGP", computeTime, len(data), data.ndim)
-
-    return dictionary
-
-
-def codex_FIPPI(inputHash, subsetHash, q, downsampled, session=None):
-    '''
-    Inputs:
-        inputHash (string)   - hash value corresponding to the data to cluster
-        subsetHash (string)  - hash value corresponding to the subselection (false if full feature)
-        q  (int)  			 - Number of endmembers to be induced (positive integer > 0)
-
-    Outputs:
-        Dictionary -
-            endmember_array  - Set of induced endmembers (N x p)
-            endmember_vector - Array of indices into the array data corresponding to the induced endmembers
-
-    '''
-    ch = get_cache(session)
-    logReturnCode(inspect.currentframe())
-    startTime = time.time()
-    eta = None
-
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
-        logging.warning("Hash not found. Returning!")
+    X = returnHash['data']
+    if X is None:
         return None
 
-    data = returnHash['data']
-    x, y = data.shape
+    #if(q > y):
+    #    logging.warning("WARNING: q must be <= to number of features")
+    #    return None
 
-    if(q > y):
-        logging.warning("WARNING: q must be <= to number of features")
-        return None
+    full_samples, full_features = X.shape
+    eta = getComputeTimeEstimate("dimension_reduction", algorithm, full_samples, full_features)
 
     if(subsetHash is not False):
-        data = ch.applySubsetMask(data, subsetHash)
-        if(data is None):
-            logging.warning("ERROR: codex_endmembers - FIPPI - subsetHash returned None.")
+        X, datName = ch.applySubsetMask(X, subsetHash)
+        if(X is None):
+            logging.warning("ERROR: run_codex_endmember: subsetHash returned None.")
             return None
 
     if(downsampled is not False):
-        logging.warning("Downsampling to " + str(downsampled) + " samples")
-        samples = len(data)
-        data = downsample(data, percentage=downsampled, session=ch)
-        eta = getComputeTimeEstimate("endmember", "FIPPI", samples)
+        X = downsample(X, samples=downsampled, session=cache)
+        logging.info("Downsampled to {samples} samples".format(samples=len(X)))
 
-    data = impute(data)
+    computed_samples, computed_features = X.shape
+    X = impute(X)
 
-    results = None#pysptools.eea.eea.FIPPI(data, int(q))
+    if algorithm == "ATGP":
+        results = pysptools.eea.eea.ATGP(X, int(parms['q']))
+    elif algorithm == "FIPPI":
+        results = pysptools.eea.eea.FIPPI(X, int(parms['q']))
+    elif algorithm == "PPI":
+        results = pysptools.eea.eea.PPI(X, int(parms['q']), int(parms['numSkewers']))
+    else:
+        return {'algorithm': algorithm,
+                'data': X.tolist(),
+                'downsample': downsampled,
+                'WARNING': "{algorithm} not supported.".format(algorithm=algorithm)}
+
+    dictionary = {
+            'eta': eta, 
+            'endmember_array': np.array_str(results[0]), 
+            'endmember_vector': np.array_str(results[1]), 
+            'downsample': downsampled}
 
     endTime = time.time()
     computeTime = endTime - startTime
-    logTime("endmember", "FIPPI", computeTime, len(data), data.ndim)
-
-    dictionary = {
-        'eta': eta, 'endmember_array': np.array_str(
-            results[0]), 'endmember_vector': np.array_str(
-            results[1]), 'downsample': downsampled}
+    logTime("endmember", algorithm, computeTime, computed_samples, computed_features)
 
     return dictionary
 
-
-def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled, session=None):
-    '''
-    Inputs:
-        inputHash (string)   - hash value corresponding to the data to cluster
-        subsetHash (string)  - hash value corresponding to the subselection (false if full feature)
-        q  (int)  			 - Number of endmembers to be induced (positive integer > 0)
-        numSkewers (int)	 - Number of “skewer” vectors to project data onto.
-
-    Outputs:
-        Dictionary -
-            endmember_array  - Set of induced endmembers (N x p)
-            endmember_vector - Array of indices into the array data corresponding to the induced endmembers
-
-    '''
-    ch = get_cache(session)
-    logReturnCode(inspect.currentframe())
-    startTime = time.time()
-    eta = None
-
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
-        logging.warning("Hash not found. Returning!")
-        return
-
-    data = returnHash['data']
-
-    if(subsetHash is not False):
-        data = ch.applySubsetMask(data, subsetHash)
-        if(data is None):
-            logging.warning("ERROR: codex_endmembers - PPI - subsetHash returned None.")
-            return None
-
-    if(downsampled is not False):
-        logging.warning("Downsampling to {downsampled} samples".format(downsampled=downsampled))
-        samples = len(data)
-        data = downsample(data, percentage=downsampled, session=ch)
-        eta = getComputeTimeEstimate("endmember", "PPI", samples)
-
-    data = impute(data)
-
-    results = None#pysptools.eea.eea.PPI(data, int(q), int(numSkewers))
-
-    endTime = time.time()
-    computeTime = endTime - startTime
-    logTime("endmember", "PPI", computeTime, len(data), data.ndim)
-
-    dictionary = {
-        'eta': eta, 'endmember_array': np.array_str(
-            results[0]), 'endmember_vector': np.array_str(
-            results[1]), 'downsample': downsampled}
-
-    return dictionary
 
