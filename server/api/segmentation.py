@@ -1,9 +1,7 @@
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
-
 Brief : Segmentation algorithms, formatted for CODEX
-
 Notes :
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
@@ -28,11 +26,11 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.codex_math             import codex_impute
-from api.sub.codex_time_log         import logTime
-from api.sub.codex_downsample       import downsample
-from api.sub.return_code            import logReturnCode
-from api.sub.codex_hash             import get_cache
+from api.sub.codex_math        import impute
+from api.sub.time_log          import logTime
+from api.sub.downsample        import downsample
+from api.sub.return_code       import logReturnCode
+from api.sub.hash              import get_cache
 
 
 def ml_segmentation(
@@ -50,10 +48,10 @@ def ml_segmentation(
     Outputs:
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
-    data = ch.mergeHashResults(hashList)
-    inputHash = ch.hashArray('Merged', data, "feature")
+    data = cache.mergeHashResults(hashList)
+    inputHash = cache.hashArray('Merged', data, "feature")
     if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
@@ -62,7 +60,7 @@ def ml_segmentation(
         return None
 
     if(subsetHashName is not None):
-        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
+        subsetHash = cache.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -95,7 +93,7 @@ def ml_segmentation(
 
         try:
             result = codex_segmentation_felzenszwalb(
-                inputHash, subsetHash, downsampled, scale, sigma, min_size, session=ch)
+                inputHash, subsetHash, downsampled, scale, sigma, min_size, session=cache)
         except BaseException:
             logging.warning("Failed to run felzenszwalb segmentation algorithm")
             result['message'] = "Failed to run felzenszwalb segmentation algorithm"
@@ -127,7 +125,7 @@ def ml_segmentation(
             return None
 
         try:
-            result = codex_segmentation_quickshift(inputHash, subsetHash, downsampled, kernel_size, max_dist, sigma, session=ch)
+            result = codex_segmentation_quickshift(inputHash, subsetHash, downsampled, kernel_size, max_dist, sigma, session=cache)
         except BaseException:
             logging.warning("Failed to run quickshift segmentation algorithm")
             result['message'] = "Failed to run quickshift segmentation algorithm"
@@ -169,13 +167,13 @@ def codex_segmentation_quickshift(
         Algorithm: http://scikit-image.org/docs/dev/api/skimage.segmentation.html#quickshift
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
     logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
 
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
+    returnHash = cache.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         logging.warning("Hash not found. Returning!")
         return
@@ -183,14 +181,14 @@ def codex_segmentation_quickshift(
     data = returnHash['data']
 
     if(subsetHash is not False):
-        data = ch.applySubsetMask(data, subsetHash)
+        data = cache.applySubsetMask(data, subsetHash)
         if(data is None):
             logging.warning("ERROR: codex_segmentation quickshift - subsetHash returned None.")
             return None
 
     if(downsampled is not False):
         logging.info("Downsampling to {downsample} percent".format(downsample=downsampled))
-        data = downsample(data, percentage=downsampled, session=ch)
+        data = downsample(data, percentage=downsampled, session=cache)
 
     data = np.dstack((data, data, data))
     segments = quickshift(
@@ -204,7 +202,7 @@ def codex_segmentation_quickshift(
     logTime("segmentation", "quickshift", computeTime, len(data), data.ndim)
 
     # temporary to not change API right now
-    merged_hash = ch.hashArray("temporary", data, "feature")
+    merged_hash = cache.hashArray("temporary", data, "feature")
 
     output = {
         'eta': eta,
@@ -245,13 +243,13 @@ def codex_segmentation_felzenszwalb(
         Algorithm: http://scikit-image.org/docs/dev/api/skimage.segmentation.html#skimage.segmentation.felzenszwalb
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
     logReturnCode(inspect.currentframe())
     startTime = time.time()
     eta = None
 
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
+    returnHash = cache.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         logging.warning("Hash not found. Returning!")
         return
@@ -259,16 +257,16 @@ def codex_segmentation_felzenszwalb(
     data = returnHash['data']
 
     if(subsetHash is not False):
-        data = codex_hash.applySubsetMask(data, subsetHash)
+        data = cache.applySubsetMask(data, subsetHash)
         if(data is None):
             logging.warning("ERROR: codex_segmentation felzenswalb - subsetHash returned None.")
             return None
 
     if(downsampled is not False):
         logging.info("Downsampling to {downsampled} percent".format(downsampled=downsampled))
-        data = downsample(data, percentage=downsampled, session=ch)
+        data = downsample(data, percentage=downsampled, session=cache)
 
-    data = codex_impute(data)
+    data = impute(data)
     segments = felzenszwalb(data, scale=scale, sigma=sigma, min_size=min_size)
 
     endTime = time.time()
@@ -276,7 +274,7 @@ def codex_segmentation_felzenszwalb(
     logTime("segmentation", "felzenszwalb", computeTime, len(data), data.ndim)
 
     # temporary to not change API right now
-    merged_hash = ch.hashArray("temporary", data, "feature")
+    merged_hash = cache.hashArray("temporary", data, "feature")
 
     output = {
         'eta': eta,

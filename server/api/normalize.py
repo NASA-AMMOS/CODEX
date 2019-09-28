@@ -1,9 +1,7 @@
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
-
 Brief : Peak detection algorithms, formatted for CODEX
-
 Notes :
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
@@ -22,7 +20,7 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 logger = logging.getLogger(__name__)
 
-from api.sub.codex_hash   import get_cache
+from api.sub.hash   import get_cache
 
 def ml_normalize(
         hashList,
@@ -38,10 +36,10 @@ def ml_normalize(
     Outputs:
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
-    data = ch.mergeHashResults(hashList)
-    inputHash = ch.hashArray('Merged', data, "feature")
+    data = cache.mergeHashResults(hashList)
+    inputHash = cache.hashArray('Merged', data, "feature")
     if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
@@ -50,7 +48,7 @@ def ml_normalize(
         return None
 
     if(subsetHashName is not None):
-        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
+        subsetHash = cache.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:

@@ -1,10 +1,7 @@
-
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
-
 Brief : Clustering algorithms, formatted for CODEX
-
 Notes :
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
@@ -28,14 +25,14 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.return_code                import logReturnCode
-from api.sub.codex_math                 import codex_impute
-from api.sub.codex_time_log             import getComputeTimeEstimate
-from api.sub.codex_time_log             import logTime
-from api.sub.codex_downsample           import downsample
-from api.dimmension_reduction           import run_codex_dim_reduction
-from api.sub.codex_labels               import label_swap
-from api.sub.codex_hash                 import get_cache
+from api.sub.return_code        import logReturnCode
+from api.sub.codex_math         import impute
+from api.sub.time_log           import getComputeTimeEstimate
+from api.sub.time_log           import logTime
+from api.sub.downsample         import downsample
+from api.dimmension_reduction   import run_codex_dim_reduction
+from api.sub.labels             import label_swap
+from api.sub.hash               import get_cache
 
 def ml_cluster(
         inputHash,
@@ -52,14 +49,14 @@ def ml_cluster(
     Outputs:
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
     if len(hashList) < 2:
         logging.warning("Clustering requires >= 2 features.")
         return None
 
     if subsetHashName is not None:
-        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
+        subsetHash = cache.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -110,7 +107,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
               'downsample': downsampled,
               "WARNING":None}
 
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
+    returnHash = cache.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
         logging.warning("Clustering: run_codex_clustering: Hash not found. Returning!")
         return None
@@ -120,7 +117,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
         return None
 
     if subsetHash is not False:
-        data = ch.applySubsetMask(data, subsetHash)
+        data = cache.applySubsetMask(data, subsetHash)
         if(data is None):
             logging.warning("ERROR: run_codex_clustering - subsetHash returned None.")
             return None
@@ -137,7 +134,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
         return None
 
     X = data
-    X = codex_impute(X)
+    X = impute(X)
     result['data'] = X.tolist()
 
     try:
@@ -204,9 +201,9 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
     y_pred = cluster_alg.labels_.astype(np.int)
 
     # temporary to not change API right now
-    merged_hash = ch.hashArray("temporary", X, "feature")
+    merged_hash = cache.hashArray("temporary", X, "feature")
     y_pred = label_swap(y_pred, merged_hash["hash"], session=ch)
-    label_hash = ch.hashArray(merged_hash["hash"], y_pred, "label")
+    label_hash = cache.hashArray(merged_hash["hash"], y_pred, "label")
 
     result['numClusters'] = np.unique(y_pred).size
     result['clusters'] = y_pred.tolist()

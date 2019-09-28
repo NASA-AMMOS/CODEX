@@ -1,9 +1,7 @@
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
-
 Brief : classification algorithms, formatted for CODEX
-
 Notes :
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
@@ -58,11 +56,11 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 from api.sub.return_code       import logReturnCode
-from api.sub.codex_math        import codex_impute
-from api.sub.codex_time_log    import logTime
-from api.sub.codex_time_log    import getComputeTimeEstimate
-from api.sub.codex_downsample  import downsample
-from api.sub.codex_hash        import get_cache
+from api.sub.codex_math        import impute
+from api.sub.time_log          import logTime
+from api.sub.time_log          import getComputeTimeEstimate
+from api.sub.downsample        import downsample
+from api.sub.hash              import get_cache
 
 def ml_classification(
         inputHash,
@@ -90,7 +88,7 @@ def ml_classification(
         return None
 
     if subsetHashName is not None:
-        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
+        subsetHash = cache.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -135,7 +133,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         Scoring Metrics: https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
     logReturnCode(inspect.currentframe())
     startTime = time.time()
     result = {'algorithm': algorithm,
@@ -144,7 +142,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
               'scoring': scoring,
               'WARNING': "None"}
 
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
+    returnHash = cache.findHashArray("hash", inputHash, "feature")
     if returnHash is None:
         logging.warning("Classification: {algorithm}: Hash not found. Returning!".format(algorithm=algorithm))
         return None
@@ -154,7 +152,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         return None
 
     if subsetHash is not False and subsetHash is not None:
-        data = ch.applySubsetMask(data, subsetHash)
+        data = cache.applySubsetMask(data, subsetHash)
         if(data is None):
             logging.warning("ERROR: run_codex_classification - subsetHash returned None.")
             return None
@@ -170,7 +168,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         return None
 
     X = data
-    X = codex_impute(X)
+    X = impute(X)
     result['X'] = X.tolist()
 
     result['eta'] = getComputeTimeEstimate("classification", algorithm, full_samples)
@@ -181,7 +179,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
         return result
 
     # TODO - labels are currently cached under features
-    labelHash_dict = ch.findHashArray("hash", labelHash, "feature")
+    labelHash_dict = cache.findHashArray("hash", labelHash, "feature")
     if labelHash_dict is None:
         logging.warning("label hash {hash} not found. Returning!".format(hash=labelHash))
         return {'algorithm': algorithm,
@@ -419,7 +417,7 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
 
     # TODO - The front end should specify a save name for the model
     model_name = algorithm +  "_" + str(random.random())
-    model_dict = ch.saveModel(model_name, clf.best_estimator_, "classifier")
+    model_dict = cache.saveModel(model_name, clf.best_estimator_, "classifier")
     if not model_dict:
         result['WARNING'] = "Model could not be saved."
     else:   

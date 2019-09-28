@@ -65,9 +65,5 @@ def _trackeback(D):
     q.insert(0, 0)
     return (array(p), array(q))
 
-if __name__ == "__main__":
 
-    import doctest
-    results = doctest.testmod(optionflags=doctest.ELLIPSIS)
-    sys.exit(results.failed)
     

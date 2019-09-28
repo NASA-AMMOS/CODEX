@@ -1,9 +1,7 @@
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
-
 Brief : Regression algorithms, formatted for CODEX
-
 Notes :
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
@@ -78,12 +76,12 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 logger = logging.getLogger(__name__)
 
-from api.sub.codex_math        import codex_impute
+from api.sub.codex_math        import impute
 from api.sub.return_code       import logReturnCode
-from api.sub.codex_time_log    import getComputeTimeEstimate
-from api.sub.codex_time_log    import logTime
-from api.sub.codex_hash        import get_cache
-
+from api.sub.time_log          import getComputeTimeEstimate
+from api.sub.time_log          import logTime
+from api.sub.hash              import get_cache
+from api.sub.downsample        import downsample
 
 def ml_regression(
         inputHash,
@@ -183,14 +181,14 @@ def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorith
     if downsampled is not False:
         logging.info("Downsampling to {downsampled} percent".format(downsampled=downsampled))
         samples = len(data)
-        data = codex_downsample.downsample(data, percentage=downsampled, session=ch)
+        data = downsample(data, percentage=downsampled, session=ch)
 
     if data.ndim < 2:
         logging.warning("ERROR: run_codex_regression - insufficient data dimmensions")
         return None
 
     X = data
-    X = codex_impute(X)
+    X = impute(X)
     result['X'] = X.tolist()
 
     result['eta'] = getComputeTimeEstimate("regression", algorithm, full_samples)

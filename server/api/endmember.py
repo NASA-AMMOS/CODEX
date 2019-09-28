@@ -1,9 +1,7 @@
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
-
 Brief : Dimmensionality reduction algorithms, formatted for CODEX
-
 Notes : Not currently functional
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
@@ -25,12 +23,12 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.codex_math        import codex_impute
-from api.sub.codex_downsample  import downsample
-from api.sub.codex_time_log    import getComputeTimeEstimate
-from api.sub.codex_time_log    import logTime
+from api.sub.codex_math        import impute
+from api.sub.downsample        import downsample
+from api.sub.time_log          import getComputeTimeEstimate
+from api.sub.time_log          import logTime
 from api.sub.return_code       import logReturnCode
-from api.sub.codex_hash        import get_cache
+from api.sub.hash              import get_cache
 
 
 def ml_endmember(
@@ -151,7 +149,7 @@ def codex_ATGP(inputHash, subsetHash, q, downsampled, session=None):
         data = downsample(data, percentage=downsampled, session=ch)
         eta = getComputeTimeEstimate("endmember", "ATGP", samples)
 
-    data = codex_impute(data)
+    data = impute(data)
 
     results = None#pysptools.eea.eea.ATGP(data, int(q))
 
@@ -209,7 +207,7 @@ def codex_FIPPI(inputHash, subsetHash, q, downsampled, session=None):
         data = downsample(data, percentage=downsampled, session=ch)
         eta = getComputeTimeEstimate("endmember", "FIPPI", samples)
 
-    data = codex_impute(data)
+    data = impute(data)
 
     results = None#pysptools.eea.eea.FIPPI(data, int(q))
 
@@ -263,7 +261,7 @@ def codex_PPI(inputHash, subsetHash, q, numSkewers, downsampled, session=None):
         data = downsample(data, percentage=downsampled, session=ch)
         eta = getComputeTimeEstimate("endmember", "PPI", samples)
 
-    data = codex_impute(data)
+    data = impute(data)
 
     results = None#pysptools.eea.eea.PPI(data, int(q), int(numSkewers))
 

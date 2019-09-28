@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 contents = []
 
-from api.sub.codex_hash import WrappedCache
+from api.sub.hash import WrappedCache
 
 def logReturnCode(frame):
     '''
@@ -34,7 +34,6 @@ def logReturnCode(frame):
 
     Outputs:
 
-    Examples:
     '''
     args, _, _, values = inspect.getargvalues(frame)
     trace = inspect.getframeinfo(frame)
@@ -112,12 +111,11 @@ def makeReturnCode():
 
     Outputs:
 
-    Examples:
     '''
     contents.append('import os\n')
     contents.append("CODEX_ROOT  = os.getenv('CODEX_ROOT')\n")
     contents.append("import sys\n")
-    contents.append("import time, h5py, read_data, codex_plot, codex_time_log\n")
+    contents.append("import time, h5py, read_data, plot, time_log\n")
     contents.append("import codex_data_quality_scan_api\n")
     contents.append("import numpy as np\n")
     contents.append("import matplotlib.pyplot as plt\n")
@@ -128,8 +126,8 @@ def makeReturnCode():
     contents.append("from sklearn import cluster, datasets\n")
     contents.append("from sklearn.neighbors import kneighbors_graph\n")
     contents.append("from sklearn.preprocessing import StandardScaler\n")
-    contents.append("from codex_plot import getColorMap\n")
-    contents.append("import codex_hash, return_code\n")
+    contents.append("from plot import getColorMap\n")
+    contents.append("import hash, return_code\n")
     contents.append("import codex_clustering_api, codex_dimmension_reduction_api\n")
     contents.append("import codex_template_scan_api, codex_endmembers\n")
     contents.append("import codex_segmentation_api, codex_regression_api\n")
@@ -142,7 +140,6 @@ def code_unique(seq):
 
     Outputs:
 
-    Examples:
     '''
     seen = set()
     seen_add = seen.add
@@ -155,7 +152,6 @@ def dump_code_to_file(returnedCodePath):
 
     Outputs:
 
-    Examples:
     '''
 
     file = open(returnedCodePath, 'w+')
@@ -167,9 +163,4 @@ def dump_code_to_file(returnedCodePath):
 
     file.close()
 
-
-if __name__ == "__main__":
-
-    from api.sub.codex_doctest import run_codex_doctest
-    run_codex_doctest()
 

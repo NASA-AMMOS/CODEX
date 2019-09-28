@@ -1,23 +1,15 @@
 '''
 Author: Jack Lightholder
 Date  : 7/15/18
-
 Brief : Math library for CODEX cache categories
-
 Notes :
 
 '''
 import os
-import time
-import h5py
-import hashlib
 import sys
-import numpy as np
-import os
-import psutil
-import time
-import collections
 import logging
+
+import numpy as np
 
 from scipy import linalg
 
@@ -25,40 +17,13 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 logger = logging.getLogger(__name__)
 
-def codex_impute(data):
+def impute(data):
     '''
     Inputs:
 
     Outputs:
 
-    Examples:
-
-        # Check multiple feature case
-        >>> a = np.array(([10,5,10],[5,10,np.inf],[None,2,3],[6,-np.inf,8]))
-        >>> print(a)
-        [[10 5 10]
-         [5 10 inf]
-         [None 2 3]
-         [6 -inf 8]]
-        >>> a = codex_impute(a)
-        >>> print(a)
-        [[10.  5. 10.]]
-
-        # Check single feature case
-        a = np.array(([5],[5],[5],[np.inf],[5],[5],[5],[5]))
-        a = codex_impute(a)
-        print(a.shape)
-        (7, 1)
-        print(a)
-        [[5.]
-         [5.]
-         [5.]
-         [5.]
-         [5.]
-         [5.]
-         [5.]]
     '''
-
     data = data.astype(float)
     nan = np.isnan(data)
     inf = np.isinf(data)
@@ -74,19 +39,18 @@ def codex_impute(data):
         # Not currently supported, but needs to be
         return None
     else:
-        print(str(data.ndim) + " not supported")
+        logging.warning("{dim} not supported".format(dim=data.ndim))
         return None
 
     return data
 
 
-def codex_explained_variance_ratio(X, n_components):
+def explained_variance_ratio(X, n_components):
     '''
     Inputs:
 
     Outputs:
 
-    Examples:
     '''
     X -= np.mean(X, axis=0)
     n_samples, n_features = X.shape
@@ -101,7 +65,3 @@ def codex_explained_variance_ratio(X, n_components):
     return exp_var_ratio
 
 
-if __name__ == "__main__":
-
-    from codex_doctest import run_codex_doctest
-    run_codex_doctest()

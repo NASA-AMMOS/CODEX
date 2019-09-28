@@ -31,7 +31,7 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.codex_hash   import get_cache
+from api.sub.hash   import get_cache
 
 def get_proportion_tree_sums(clf, X_test, y_test):
     """

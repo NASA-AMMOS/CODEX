@@ -1,9 +1,7 @@
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
-
 Brief : Peak detection algorithms, formatted for CODEX
-
 Notes :
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
@@ -26,14 +24,14 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.codex_math        import codex_impute
+from api.sub.codex_math        import impute
 from api.sub.return_code       import logReturnCode
-from api.sub.codex_downsample  import downsample
-from api.sub.codex_plot        import codex_plot_peak
-from api.sub.codex_time_log    import getComputeTimeEstimate
-from api.sub.codex_time_log    import logTime
+from api.sub.downsample        import downsample
+from api.sub.plot              import plot_peak
+from api.sub.time_log          import getComputeTimeEstimate
+from api.sub.time_log          import logTime
 from api.sub.detect_peaks      import detect_peaks
-from api.sub.codex_hash        import get_cache
+from api.sub.hash              import get_cache
 
 # Note: algorithm source: https://blog.ytotech.com/2015/11/01/findpeaks-in-python/
 # Note: algorithm source:
@@ -258,7 +256,7 @@ def codex_scipy_signal_peak_cwt(
         data = downsample(data, percentage=downsampled, session=ch)
         eta = getComputeTimeEstimate("peak", "cwt", samples)
 
-    data = codex_impute(data)
+    data = impute(data)
     data = data[:, 0]
     num_samples = len(data)
     width_array = np.asarray(np.arange(1, num_samples / peak_width))
@@ -275,7 +273,7 @@ def codex_scipy_signal_peak_cwt(
     logTime("peak", "cwt", computeTime, len(data), data.ndim)
 
     if(showPlot):
-        codex_plot_peak(data, indexes)
+        plot_peak(data, indexes)
 
     logReturnCode(inspect.currentframe())
 
@@ -349,7 +347,7 @@ def codex_matlab_findpeaks(
         data = downsample(data, percentage=downsampled, session=ch)
         eta = getComputeTimeEstimate("peak", "matlab_findpeaks", samples)
 
-    data = codex_impute(data)
+    data = impute(data)
     data = data[:, 0]
     num_samples = len(data)
     indexes = detect_peaks(
@@ -366,7 +364,7 @@ def codex_matlab_findpeaks(
     logTime("peak", "matlab_findpeaks", computeTime, len(data), data.ndim)
 
     if(showPlot):
-        codex_plot_peak(data, indexes)
+        plot_peak(data, indexes)
 
     dictionary = {
         'eta': eta,

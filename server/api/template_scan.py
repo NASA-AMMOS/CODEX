@@ -27,11 +27,11 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.codex_downsample  import downsample
-from api.sub.codex_time_log    import logTime
+from api.sub.downsample        import downsample
+from api.sub.time_log          import logTime
 from api.sub.return_code       import logReturnCode
-from api.sub.codex_math        import codex_impute
-from api.sub.codex_hash        import get_cache
+from api.sub.codex_math        import impute
+from api.sub.hash              import get_cache
 
 def ml_template_scan(
         inputHash,
@@ -163,7 +163,7 @@ def codex_template_scan(
         logging.warning("Error: codex_template_scan: templateHash not found.")
         return
 
-    X = codex_impute(X)
+    X = impute(X)
     y = returnTemplateHash['data']
 
     templateLength = len(y)

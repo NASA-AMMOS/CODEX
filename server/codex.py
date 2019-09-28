@@ -39,27 +39,27 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX
-from workflow_manager       import workflow_call
-from algorithm_manager      import algorithm_call
-from guidance_manager       import get_guidance
-from session_manager        import save_session
-from session_manager        import load_session
-from session_manager        import get_sessions
-from data_manager           import add_data
-from data_manager           import get_data
-from data_manager           import delete_data
-from data_manager           import update_data
-from data_manager           import get_data_metrics
-from analysis_manager       import download_code
-from eta_manager            import get_time_estimate
-from api.sub.codex_system   import codex_server_memory_check
+from api.workflow_manager   import workflow_call
+from api.algorithm_manager  import algorithm_call
+from api.guidance_manager   import get_guidance
+from api.session_manager    import save_session
+from api.session_manager    import load_session
+from api.session_manager    import get_sessions
+from api.data_manager       import add_data
+from api.data_manager       import get_data
+from api.data_manager       import delete_data
+from api.data_manager       import update_data
+from api.data_manager       import get_data_metrics
+from api.analysis_manager   import download_code
+from api.eta_manager        import get_time_estimate
+from api.sub.system         import codex_server_memory_check
 from api.sub.return_code    import logReturnCode
 from api.sub.return_code    import makeReturnCode
-from api.sub.codex_time_log import getTimeLogDict
-from api.sub.codex_hash     import get_cache
-from api.sub.codex_hash     import create_cache_server
-from api.sub.codex_hash     import stop_cache_server
-from api.sub.codex_hash     import NoSessionSpecifiedError
+from api.sub.time_log       import getTimeLogDict
+from api.sub.hash           import get_cache
+from api.sub.hash           import create_cache_server
+from api.sub.hash           import stop_cache_server
+from api.sub.hash           import NoSessionSpecifiedError
 
 def throttled_cpu_count():
     return max( 1, math.floor(cpu_count() * 0.75))
@@ -98,7 +98,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
 
         if (msg["done"] == True):
             logging.info('Finished file transfer, initiating save...')
-            codex_hash = get_cache(msg['sessionkey'], timeout=None)
+            cache = get_cache(msg['sessionkey'], timeout=None)
 
             f = open(filepath, 'wb')
             for chunk in fileChunks:
@@ -108,15 +108,15 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
 
             fileExtension = filename.split(".")[-1]
             if (fileExtension == "csv"):
-                hashList, featureList = codex_hash.import_csv(filepath)
+                hashList, featureList = cache.import_csv(filepath)
                 logReturnCode(inspect.currentframe())
 
             elif (fileExtension == "h5"):
-                hashList, featureList = codex_hash.import_hd5(filepath)
+                hashList, featureList = cache.import_hd5(filepath)
                 logReturnCode(inspect.currentframe())
 
             elif (fileExtension == "npy"):
-                hashList, featureList = codex_hash.import_npy(filepath)
+                hashList, featureList = cache.import_npy(filepath)
                 logReturnCode(inspect.currentframe())
 
             else:
@@ -124,7 +124,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
                 stringMsg = json.dumps(result)
                 self.write_message(stringMsg)
 
-            sentinel_values = codex_hash.getSentinelValues(featureList) 
+            sentinel_values = cache.getSentinelValues(featureList) 
             nan  = sentinel_values["nan"]
             inf  = sentinel_values["inf"]
             ninf = sentinel_values["ninf"]
@@ -205,7 +205,7 @@ def execute_request(queue, message):
     '''
     msg = json.loads(message)
     result = msg
-    
+
     # log the response but without the data
     logging.info("{time} : Message from front end: {json}".format(time=datetime.datetime.now().isoformat(), json={k:(msg[k] if k != 'data' else '[data removed]') for k in msg}))
 

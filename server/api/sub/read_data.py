@@ -28,8 +28,8 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.codex_system import string2token
-from api.sub.codex_hash import get_cache
+from api.sub.system  import string2token
+from api.sub.hash    import get_cache
 
 def codex_read_csv(file, featureList, hashType, session=None):
     '''
@@ -37,18 +37,8 @@ def codex_read_csv(file, featureList, hashType, session=None):
 
     Outputs:
 
-    Examples:
-    >>> from api.sub.codex_doctest import doctest_base_path
-    >>> from codex_hash import DOCTEST_SESSION
-    >>> ch = get_cache(DOCTEST_SESSION)
-    >>> featureList = ['TiO2','FeOT','SiO2','Total']
-    >>> hashList = codex_read_csv(doctest_base_path() + '/uploads/missing.csv',featureList, "feature", session=ch)
-    >>> featureList = ['fake_feature','FeOT','SiO2','Total']
-    >>> hashList = codex_read_csv(doctest_base_path() + '/uploads/doctest.csv',featureList, "feature", session=ch)
-
-
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
     hashList = []
     columns = defaultdict(list)
 
@@ -82,7 +72,7 @@ def codex_read_csv(file, featureList, hashType, session=None):
             logging.info("Tokenizing {f}.".format(f=feature_name))
             feature_data = string2token(feature_data)
 
-        feature_hash = ch.hashArray(feature_name, feature_data, hashType)
+        feature_hash = cache.hashArray(feature_name, feature_data, hashType)
         hashList.append(feature_hash['hash'])
 
     return hashList, list(featureList)
@@ -97,10 +87,8 @@ def codex_read_image(file, show=False, session=None):
     Notes:
         PIL Image modes: https://pillow.readthedocs.io/en/3.1.x/handbook/concepts.html#concept-modes
 
-    Examples:
-
     '''
-    session = get_cache(session)
+    cache = get_cache(session)
 
     image = Image.open(file)
     if(image.format == "PNG"):
@@ -115,7 +103,7 @@ def codex_read_image(file, show=False, session=None):
     pixels = [pixels[i * width:(i + 1) * width] for i in range(height)]
     pixels = np.asarray(pixels)
 
-    feature_hash = ch.hashArray("image", pixels, "feature")
+    feature_hash = cache.hashArray("image", pixels, "feature")
     dictionary = {"pixels": pixels, "rows": y, "cols": x}
     return dictionary
 
@@ -127,8 +115,6 @@ def traverse_datasets(hdf_file):
     Outputs:
 
     Notes:
-
-    Examples:
 
     '''
     def h5py_dataset_iterator(g, prefix=''):
@@ -153,20 +139,8 @@ def codex_read_hd5(file, featureList, hashType, session=None):
 
     Notes:
 
-    Examples:
-    >>> from api.sub.codex_doctest import doctest_base_path
-    >>> from codex_hash import DOCTEST_SESSION
-    >>> ch = get_cache(DOCTEST_SESSION)
-    >>> featureList = ['L2/RetrievalGeometry/retrieval_latitude/','L2/RetrievalResults/xco2']
-    >>> result = codex_read_hd5(doctest_base_path() + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature", session=ch)
-    >>> print(result)
-    (['314f2860593b8d3a5c8612693aed9232874210a3', '5d3d72c3ad2afcccb86d1693fd1a4b3bb39f407a'], ['L2/RetrievalGeometry/retrieval_latitude/', 'L2/RetrievalResults/xco2'])
-
-    >>> featureList = ['L2/RetrievalGeometry/retrieval_latitude/','L2/RetrievalResults/xco2','missing_feature']
-    >>> result = codex_read_hd5(doctest_base_path() + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature", session=ch)
-    >>> result = codex_read_hd5(doctest_base_path() + '/uploads/lnd_glint_subsample_1000.h5', featureList, "feature", session=ch)
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
     hashList = []
 
@@ -192,7 +166,7 @@ def codex_read_hd5(file, featureList, hashType, session=None):
             feature_data = string2token(feature_data)
             logging.info("Log: codex_read_hd5: Tokenized " + feature_name)
 
-        feature_hash = ch.hashArray(feature_name, feature_data, hashType)
+        feature_hash = cache.hashArray(feature_name, feature_data, hashType)
         hashList.append(feature_hash['hash'])
 
     f.close()
@@ -207,10 +181,8 @@ def codex_read_npy(file, featureList, hashType, session=None):
 
     Notes:
 
-    Examples:
-
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
     hashList = []
 
@@ -232,7 +204,7 @@ def codex_read_npy(file, featureList, hashType, session=None):
 
         feature_name = "feature_" + str(x)
         featureList.append(feature_name)
-        feature_hash = ch.hashArray(feature_name, feature_data, hashType)
+        feature_hash = cache.hashArray(feature_name, feature_data, hashType)
         hashList.append(feature_hash['hash'])
 
     return hashList, featureList
@@ -244,45 +216,9 @@ def codex_save_subset(inputHash, subsetHash, saveFilePath, session=None):
 
     Outputs:
 
-    Examples:
-    >>> from api.sub.codex_doctest import doctest_base_path
-    >>> from codex_hash import DOCTEST_SESSION
-    >>> ch = get_cache(DOCTEST_SESSION)
-    >>> inputArray = np.array([10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200])
-    >>> randomSubset = np.array([0,1,0,1,0,1,1,0,0,0,0,0,1,1,1,0,0,1,0,1])
-    >>> inputHash = ch.hashArray('input_array', inputArray, 'feature')
-    >>> subsetHash = ch.hashArray('subset_hash', randomSubset, 'subset')
-    >>> outputHash,resultingName = codex_save_subset(inputHash['hash'], False, doctest_base_path() + '/uploads/save_subset_output_test.h5', session=ch)
-    >>> readingHash = codex_read_hd5(doctest_base_path() + '/uploads/save_subset_output_test.h5', [resultingName], "feature", session=ch)
-
-    >>> codex_save_subset(None, None, doctest_base_path() + '/uploads/', session=ch)
-
-    >>> inputArray = np.array([10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200])
-    >>> randomSubset = np.array([0,1,0,1,0,1,1,0,0,0,0,0,1,1,1,0,0,1,0,1])
-
-    >>> inputHash = ch.hashArray('input_array', inputArray, 'feature', session=ch)
-    >>> subsetHash = ch.hashArray('subset_hash', randomSubset, 'subset', session=ch)
-
-
-    # Test scenario of not applying a subset mask
-    >>> outputHash,resultingName = codex_save_subset(inputHash['hash'], False, doctest_base_path() + '/uploads/save_subset_output_test.h5', session=ch)
-    >>> readingHash = codex_read_hd5(doctest_base_path() + '/uploads/save_subset_output_test.h5', [resultingName], "feature", session=ch)
-
-    >>> if(outputHash == readingHash[0][0]):
-    ... 	print("Subset Applied Test:   Successful")
-    Subset Applied Test:   Successful
-
-    # Test scenario of applying subset mask.  Save full feature.
-    >>> outputHash,resultingName = codex_save_subset(inputHash['hash'], subsetHash['hash'], doctest_base_path() + '/uploads/save_subset_output_test.h5', session=ch)
-    >>> readingHash = codex_read_hd5(doctest_base_path() + '/uploads/save_subset_output_test.h5', [resultingName], "feature", session=ch)
-
-    >>> if(outputHash == readingHash[0][0]):
-    ... 	print("No Subset Mask Test:   Successful")
-    No Subset Mask Test:   Successful
-
     '''
-    ch = get_cache(session)
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
+    cache = get_cache(session)
+    returnHash = cache.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         logging.warning("Hash not found. Returning!")
         return
@@ -291,14 +227,14 @@ def codex_save_subset(inputHash, subsetHash, saveFilePath, session=None):
     feature_name = returnHash['name']
 
     if(subsetHash is not False):
-        data, subsetName = ch.applySubsetMask(data, subsetHash)
+        data, subsetName = cache.applySubsetMask(data, subsetHash)
 
     if(subsetHash is not False):
         newFeatureName = feature_name + "_" + subsetName
     else:
         newFeatureName = feature_name
 
-    newHash = ch.hashArray(newFeatureName, data, 'feature')
+    newHash = cache.hashArray(newFeatureName, data, 'feature')
 
     h5f = h5py.File(saveFilePath, 'w')
     h5f.create_dataset(newFeatureName, data=data)
@@ -306,7 +242,3 @@ def codex_save_subset(inputHash, subsetHash, saveFilePath, session=None):
     return newHash['hash'], newFeatureName
 
 
-if __name__ == "__main__":
-
-    from codex_doctest import run_codex_doctest
-    run_codex_doctest()

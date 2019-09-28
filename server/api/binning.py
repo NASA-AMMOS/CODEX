@@ -1,9 +1,7 @@
 '''
 Author: Jack Lightholder
 Date  : 6/20/17
-
 Brief : 1d binning algorithms, formatted for CODEX ingestion
-
 Notes :
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
@@ -26,9 +24,9 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.codex_time_log    import logTime
-from api.sub.return_code       import logReturnCode
-from api.sub.codex_hash        import get_cache
+from api.sub.time_log     import logTime
+from api.sub.return_code  import logReturnCode
+from api.sub.hash         import get_cache
 
 def ml_binning(
         inputHash,
@@ -45,10 +43,10 @@ def ml_binning(
     Outputs:
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
-    data = ch.mergeHashResults(hashList)
-    inputHash = ch.hashArray('Merged', data, "feature")
+    data = cache.mergeHashResults(hashList)
+    inputHash = cache.hashArray('Merged', data, "feature")
     if(inputHash is not None):
         inputHash = inputHash["hash"]
     else:
@@ -57,7 +55,7 @@ def ml_binning(
         return None
 
     if(subsetHashName is not None):
-        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
+        subsetHash = cache.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -68,7 +66,7 @@ def ml_binning(
     if(algorithmName == '1d'):
 
         try:
-            result = codex_binned_stat(inputHash, subsetHash, session=session)
+            result = codex_binned_stat(inputHash, subsetHash, session=cache)
         except BaseException:
             logging.warning("Failed to run 1-d binned statistics")
             result['message'] = "Failed to run 1-d binned statistics"
@@ -134,11 +132,11 @@ def codex_binned_stat(
         bins, values: The bin centers used, and the values (counts) within each bin
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
     startTime = time.time()
 
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
+    returnHash = cache.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         print("Hash not found. Returning!")
         return
@@ -146,7 +144,7 @@ def codex_binned_stat(
     x = returnHash['data']
 
     if(subsetHash is not False):
-        x = ch.applySubsetMask(x, subsetHash)
+        x = cache.applySubsetMask(x, subsetHash)
 
     x = N.array(x, dtype=N.float64)
 
@@ -156,8 +154,7 @@ def codex_binned_stat(
         y = N.array(y, dtype=N.float64)
 
     if is_iterable(bins) and not monotonic(bins, 'strictly increasing'):
-        raise Exception(
-            "Specified bins must be monotonically increasing to be valid")
+        raise Exception("Specified bins must be monotonically increasing to be valid")
 
     nanmask = ~N.isnan(x)
     if y is not None:

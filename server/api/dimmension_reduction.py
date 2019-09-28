@@ -1,10 +1,7 @@
-
 '''
 Author: Jack Lightholder
 Date  : 7/15/17
-
 Brief : Dimmensionality reduction algorithms, formatted for CODEX
-
 Notes :
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
@@ -29,13 +26,14 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.codex_math        import codex_impute
-from api.sub.codex_math        import codex_explained_variance_ratio
-from api.sub.codex_downsample  import downsample
+from api.sub.codex_math        import impute
+from api.sub.codex_math        import explained_variance_ratio
+from api.sub.downsample        import downsample
 from api.sub.return_code       import logReturnCode
-from api.sub.codex_time_log    import logTime
-from api.sub.codex_time_log    import getComputeTimeEstimate
-from api.sub.codex_hash        import get_cache
+from api.sub.time_log          import logTime
+from api.sub.time_log          import getComputeTimeEstimate
+from api.sub.hash              import get_cache
+from api.sub.plot              import plot_dimensionality
 
 def ml_dimensionality_reduction(
         inputHash,
@@ -103,7 +101,7 @@ def run_codex_dim_reduction(
 
     returnHash = ch.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
-        print("Error: run_codex_dim_reduction: Hash not found")
+        logging.warning("Error: run_codex_dim_reduction: Hash not found")
         return
 
     data = returnHash['data']
@@ -121,7 +119,7 @@ def run_codex_dim_reduction(
 
     eta = getComputeTimeEstimate("dimension_reduction", algorithm, full_samples)
 
-    data = codex_impute(data)
+    data = impute(data)
 
     if(data.ndim > n_components):
         logging.warning("ERROR: run_codex_dim_reduction: features ({ndim}) > requested components ({components})".format(ndim=data.ndim, components=n_components))
@@ -157,19 +155,14 @@ def run_codex_dim_reduction(
                 'WARNING': traceback.format_exc()}
 
     if showPlot:
-        codex_plot.plot_dimensionality(exp_var_ratio, "PCA Explained Variance", show=True)
+        plot_dimensionality(exp_var_ratio, "PCA Explained Variance", show=True)
 
     X_transformed = dim_r.fit_transform(data)
-    exp_var_ratio = codex_explained_variance_ratio(X_transformed, n_components)
+    exp_var_ratio = explained_variance_ratio(X_transformed, n_components)
 
     endTime = time.time()
     computeTime = endTime - startTime
-    logTime(
-        "dimension_reduction",
-        algorithm,
-        computeTime,
-        len(data),
-        data.ndim)
+    logTime("dimension_reduction", algorithm, computeTime, len(data), data.ndim)
 
     # print("saving out PCA")
     # outputHash = ch.hashArray('PCA_', X_transformed, "feature", virtual=True)

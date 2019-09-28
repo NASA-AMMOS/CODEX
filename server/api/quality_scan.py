@@ -1,9 +1,7 @@
 '''
 Author: Jack Lightholder
 Date  : 7/19/17
-
 Brief : Custom data quality scan algorithms, formatted for CODEX
-
 Notes :
 
 Copyright 2018 California Institute of Technology.  ALL RIGHTS RESERVED.
@@ -30,11 +28,10 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.codex_math        import codex_impute
-from api.sub.codex_time_log    import logTime
-from api.sub.return_code       import logReturnCode
-from api.sub.codex_hash        import get_cache
-from api.sub.codex_doctest     import doctest_get_data
+from api.sub.codex_math     import impute
+from api.sub.time_log       import logTime
+from api.sub.return_code    import logReturnCode
+from api.sub.hash           import get_cache
 
 def ml_quality_scan(
         inputHash,
@@ -51,10 +48,10 @@ def ml_quality_scan(
     Outputs:
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
     if(subsetHashName is not None):
-        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
+        subsetHash = cache.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -65,7 +62,7 @@ def ml_quality_scan(
     if(algorithmName == 'oddities'):
 
         try:
-            result = codex_count_oddities(inputHash, subsetHash, session=ch)
+            result = codex_count_oddities(inputHash, subsetHash, session=cache)
         except BaseException:
             logging.warning("Failed to run count_oddities")
             result['message'] = "Failed to run count_oddities"
@@ -91,7 +88,7 @@ def ml_quality_scan(
             return None
 
         try:
-            result = codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=ch)
+            result = codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=cache)
         except BaseException:
             logging.warning("Failed to run codex_get_sigma_data")
             result['message'] = "Failed to run codex_get_sigma_data"
@@ -123,12 +120,11 @@ def codex_count_oddities(inputHash, subsetHash, session=None):
     - Currently only works on single feature.  Call for each feature
 
     '''
-
-    ch = get_cache(session)
+    cache = get_cache(session)
     logReturnCode(inspect.currentframe())
     startTime = time.time()
 
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
+    returnHash = cache.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         print("Error: codex_count_oddities: Hash not found")
         return None
@@ -137,10 +133,10 @@ def codex_count_oddities(inputHash, subsetHash, session=None):
     feature_name = returnHash['name']
     dtype = feature.dtype
 
-    feature = codex_impute(feature)
+    feature = impute(feature)
 
     if(subsetHash is not False):
-        feature = ch.applySubsetMask(data, subsetHash)
+        feature = cache.applySubsetMask(data, subsetHash)
 
     nan_count = 0
     ninf_count = 0
@@ -221,21 +217,21 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=None):
             percentage  - percentage of the data set falling inside the return array
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
     logReturnCode(inspect.currentframe())
     startTime = time.time()
 
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
+    returnHash = cache.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
-        print("Error: codex_get_sigma_data: Hash not found!")
+        logging.warning("Error: codex_get_sigma_data: Hash not found!")
         return
 
     feature = returnHash['data']
-    feature = codex_impute(feature)
+    feature = impute(feature)
 
     if(subsetHash is not False):
-        feature = ch.applySubsetMask(data, subsetHash)
+        feature = cache.applySubsetMask(data, subsetHash)
 
     sigmaList = []
     feature_length = len(feature)
@@ -296,20 +292,20 @@ def codex_column_correlation(inputHash, subsetHash, session=None):
 
     '''
 
-    ch = get_cache(session)
+    cache = get_cache(session)
     logReturnCode(inspect.currentframe())
     startTime = time.time()
 
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
+    returnHash = cache.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         logging.warning("Error: codex_column_correlation: Hash not found!")
         return
 
     data = returnHash['data']
-    data = codex_impute(data)
+    data = impute(data)
 
     if(subsetHash is not False):
-        data = ch.applySubsetMask(data, subsetHash)
+        data = cache.applySubsetMask(data, subsetHash)
 
     samples, features = data.shape
     arraySize = (features, features)
@@ -359,13 +355,13 @@ def codex_column_threshold(
             percentage_data           - percentage of data from original feature remaining in filtered feature column
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
     logReturnCode(inspect.currentframe())
     startTime = time.time()
     returnList = []
 
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
+    returnHash = cache.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         print("Error: codex_column_correlation: Hash not found!")
         return
@@ -375,9 +371,9 @@ def codex_column_threshold(
     inThresholdCount = 0
 
     if(subsetHash is not False):
-        data = ch.applySubsetMask(data, subsetHash)
+        data = cache.applySubsetMask(data, subsetHash)
 
-    data = codex_impute(data)
+    data = impute(data)
 
     # TODO - this needs to handle multiple features correctly
     for value in data:
