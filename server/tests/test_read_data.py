@@ -24,11 +24,6 @@ def test_codex_read_csv(capsys):
     featureList = ['fake_feature','FeOT','SiO2','Total']
     hashList = codex_read_csv(CODEX_ROOT + '/uploads/doctest.csv',featureList, "feature", session=ch)
 
-def test_codex_read_image(capsys):
-
-	assert 1 == 1
-
-
 def test_codex_read_hd5(capsys):
 
     ch = get_cache(DOCTEST_SESSION)
@@ -40,17 +35,17 @@ def test_codex_read_hd5(capsys):
     result = codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_10000.h5',featureList, "feature", session=ch)
     result = codex_read_hd5(CODEX_ROOT + '/uploads/lnd_glint_subsample_1000.h5', featureList, "feature", session=ch)
 
-def test_codex_save_subset(capsys):
+def test_save_subset(capsys):
 
     ch = get_cache(DOCTEST_SESSION)
     inputArray = np.array([10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200])
     randomSubset = np.array([0,1,0,1,0,1,1,0,0,0,0,0,1,1,1,0,0,1,0,1])
     inputHash = ch.hashArray('input_array', inputArray, 'feature')
     subsetHash = ch.hashArray('subset_hash', randomSubset, 'subset')
-    outputHash,resultingName = codex_save_subset(inputHash['hash'], False, CODEX_ROOT + '/uploads/save_subset_output_test.h5', session=ch)
+    outputHash,resultingName = save_subset(inputHash['hash'], False, CODEX_ROOT + '/uploads/save_subset_output_test.h5', session=ch)
     readingHash = codex_read_hd5(CODEX_ROOT + '/uploads/save_subset_output_test.h5', [resultingName], "feature", session=ch)
 
-    codex_save_subset(None, None, CODEX_ROOT + '/uploads/', session=ch)
+    save_subset(None, None, CODEX_ROOT + '/uploads/', session=ch)
 
     inputArray = np.array([10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200])
     randomSubset = np.array([0,1,0,1,0,1,1,0,0,0,0,0,1,1,1,0,0,1,0,1])
@@ -59,13 +54,13 @@ def test_codex_save_subset(capsys):
     subsetHash = ch.hashArray('subset_hash', randomSubset, 'subset', session=ch)
 
     # Test scenario of not applying a subset mask
-    outputHash,resultingName = codex_save_subset(inputHash['hash'], False, CODEX_ROOT + '/uploads/save_subset_output_test.h5', session=ch)
+    outputHash,resultingName = save_subset(inputHash['hash'], False, CODEX_ROOT + '/uploads/save_subset_output_test.h5', session=ch)
     readingHash = codex_read_hd5(CODEX_ROOT + '/uploads/save_subset_output_test.h5', [resultingName], "feature", session=ch)
 
     assert outputHash == readingHash[0][0]
 
     # Test scenario of applying subset mask.  Save full feature.
-    outputHash,resultingName = codex_save_subset(inputHash['hash'], subsetHash['hash'], CODEX_ROOT + '/uploads/save_subset_output_test.h5', session=ch)
+    outputHash,resultingName = save_subset(inputHash['hash'], subsetHash['hash'], CODEX_ROOT + '/uploads/save_subset_output_test.h5', session=ch)
     readingHash = codex_read_hd5(CODEX_ROOT + '/uploads/save_subset_output_test.h5', [resultingName], "feature", session=ch)
 
     assert outputHash == readingHash[0][0]

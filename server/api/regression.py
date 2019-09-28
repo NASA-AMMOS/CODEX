@@ -102,10 +102,10 @@ def ml_regression(
     Outputs:
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
     if(subsetHashName is not None):
-        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
+        subsetHash = cache.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -114,7 +114,7 @@ def ml_regression(
         subsetHash = False
 
     try:
-        result =  run_codex_regression(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=ch)
+        result =  run_regression(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=cache)
     except BaseException:
         logging.warning("Failed to run regression algorithm")
         result['message'] = "Failed to run regression algorithm"
@@ -123,7 +123,7 @@ def ml_regression(
 
     return result
 
-def run_codex_regression(inputHash, subsetHash, labelHash, downsampled, algorithm, parms, search_type, cross_val, scoring, session=None):
+def run_regression(inputHash, subsetHash, labelHash, downsampled, algorithm, parms, search_type, cross_val, scoring, session=None):
     '''
     Inputs:
         inputHash (string)  - hash value corresponding to the data to cluster

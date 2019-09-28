@@ -81,7 +81,7 @@ def ml_classification(
     Outputs:
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
     if len(hashList) < 2:
         logging.warning("Classification requires >= 2 features.")
@@ -97,7 +97,7 @@ def ml_classification(
         subsetHash = False
 
     try:
-        result = run_codex_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=cache)
+        result = run_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=cache)
         logging.warning("Completed classification run with warnings: {r}".format(r=result["WARNING"]))
     except BaseException:
         logging.warning("Failed to run classification algorithm")
@@ -107,7 +107,7 @@ def ml_classification(
 
     return result
 
-def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algorithm,  parms, search_type, cross_val, scoring, session=None):
+def run_classification(inputHash, subsetHash, labelHash, downsampled, algorithm,  parms, search_type, cross_val, scoring, session=None):
     '''
     Inputs:
         inputHash (string)  - hash value corresponding to the data to cluster
@@ -215,175 +215,175 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
             if search_type == "random":
                 clf = RandomizedSearchCV(BaggingClassifier(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(BaggingClassifier(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(BaggingClassifier(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "BayesianGaussianMixture"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(BayesianGaussianMixture(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(BayesianGaussianMixture(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(BayesianGaussianMixture(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "BernoulliNB"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(BernoulliNB(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(BernoulliNB(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(BernoulliNB(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "CalibratedClassifierCV"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(CalibratedClassifierCV(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(CalibratedClassifierCV(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(CalibratedClassifierCV(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "ComplementNB"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(ComplementNB(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(ComplementNB(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(ComplementNB(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "DecisionTreeClassifier"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(DecisionTreeClassifier(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(DecisionTreeClassifier(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(DecisionTreeClassifier(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "ExtraTreeClassifier"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(ExtraTreeClassifier(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(ExtraTreeClassifier(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(ExtraTreeClassifier(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "ExtraTreesClassifier"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(ExtraTreesClassifier(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(ExtraTreesClassifier(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(ExtraTreesClassifier(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "GaussianMixture"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(GaussianMixture(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(GaussianMixture(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(GaussianMixture(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "GaussianNB"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(GaussianNB(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(GaussianNB(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(GaussianNB(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "GaussianProcessClassifier"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(GaussianProcessClassifier(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(GaussianProcessClassifier(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(GaussianProcessClassifier(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "GradientBoostingClassifier"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(GradientBoostingClassifier(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(GradientBoostingClassifier(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(GradientBoostingClassifier(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "KNeighborsClassifier"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(KNeighborsClassifier(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(KNeighborsClassifier(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(KNeighborsClassifier(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "LabelPropagation"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(LabelPropagation(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(LabelPropagation(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(LabelPropagation(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "LabelSpreading"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(LabelSpreading(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(LabelSpreading(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(LabelSpreading(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "LinearDiscriminantAnalysis"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(LinearDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(LinearDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(LinearDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "LogisticRegression"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(LogisticRegression(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(LogisticRegression(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(LogisticRegression(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "LogisticRegressionCV"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(LogisticRegressionCV(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(LogisticRegressionCV(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(LogisticRegressionCV(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "MLPClassifier"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(MLPClassifier(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(MLPClassifier(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(MLPClassifier(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "MultinomialNB"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(MultinomialNB(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(MultinomialNB(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(MultinomialNB(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "NuSVC"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(NuSVC(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(NuSVC(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(NuSVC(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "QuadraticDiscriminantAnalysis"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(QuadraticDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(QuadraticDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(QuadraticDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "RandomForestClassifier"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(RandomForestClassifier(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(RandomForestClassifier(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(RandomForestClassifier(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "SGDClassifier"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(SGDClassifier(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(SGDClassifier(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(SGDClassifier(), parms, cv=cross_val, scoring=scoring)
 
         elif(algorithm == "SVC"):
 
             if search_type == "random":
                 clf = RandomizedSearchCV(SVC(), parms, cv=cross_val, scoring=scoring)
             else:
-                clf =  GridSearchCV(SVC(), parms, cv=cross_val, scoring=scoring)
+                clf = GridSearchCV(SVC(), parms, cv=cross_val, scoring=scoring)
 
         else:
             return {'algorithm': algorithm,
@@ -427,5 +427,6 @@ def run_codex_classification(inputHash, subsetHash, labelHash, downsampled, algo
     computeTime = endTime - startTime
     logTime("classification", algorithm, computeTime, computed_samples, computed_features)
 
+    result['message'] = 'success'
     return result
 

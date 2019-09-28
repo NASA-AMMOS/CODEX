@@ -78,36 +78,6 @@ def codex_read_csv(file, featureList, hashType, session=None):
     return hashList, list(featureList)
 
 
-def codex_read_image(file, show=False, session=None):
-    '''
-    Inuputs:
-
-    Outputs:
-
-    Notes:
-        PIL Image modes: https://pillow.readthedocs.io/en/3.1.x/handbook/concepts.html#concept-modes
-
-    '''
-    cache = get_cache(session)
-
-    image = Image.open(file)
-    if(image.format == "PNG"):
-        pass
-    elif(image.format == "JPEG"):
-        bits = image.bits
-
-    x, y = image.size
-
-    pixels = list(image.getdata())
-    width, height = image.size
-    pixels = [pixels[i * width:(i + 1) * width] for i in range(height)]
-    pixels = np.asarray(pixels)
-
-    feature_hash = cache.hashArray("image", pixels, "feature")
-    dictionary = {"pixels": pixels, "rows": y, "cols": x}
-    return dictionary
-
-
 def traverse_datasets(hdf_file):
     '''
     Inuputs:
@@ -210,7 +180,7 @@ def codex_read_npy(file, featureList, hashType, session=None):
     return hashList, featureList
 
 
-def codex_save_subset(inputHash, subsetHash, saveFilePath, session=None):
+def save_subset(inputHash, subsetHash, saveFilePath, session=None):
     '''
     Inuputs:
 
