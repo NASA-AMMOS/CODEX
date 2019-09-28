@@ -63,7 +63,7 @@ def ml_dimensionality_reduction(
         subsetHash = False
 
     try:
-        result = run_codex_dim_reduction(inputHash, subsetHash, parms, downsampled, False, algorithmName, session=cache)
+        result = run_dim_reduction(inputHash, subsetHash, parms, downsampled, False, algorithmName, session=cache)
     except BaseException:
         logging.warning("Failed to run dimensionality reduction analysis")
         result['message'] = "Failed to run dimensionality reduction analysis"
@@ -73,7 +73,7 @@ def ml_dimensionality_reduction(
     return result
 
 
-def run_codex_dim_reduction(
+def run_dim_reduction(
         inputHash,
         subsetHash,
         parms,

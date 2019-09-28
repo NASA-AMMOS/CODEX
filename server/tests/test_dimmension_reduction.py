@@ -13,12 +13,12 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 from api.sub.hash             import DOCTEST_SESSION
 from api.sub.hash             import get_cache
-from api.dimmension_reduction import run_codex_dim_reduction
+from api.dimmension_reduction import *
 from fixtures                 import testData
 
 def test_run_codex_dim_reduction(capsys, testData):
 
 	ch = get_cache(DOCTEST_SESSION)
 
-	result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, False, False, "PCA", session=ch)
-	result = run_codex_dim_reduction(testData['inputHash'], False, {"n_components":2}, 500, False, "ICA", session=ch)
+	result = run_dim_reduction(testData['inputHash'], False, {"n_components":2}, False, False, "PCA", session=ch)
+	result = run_dim_reduction(testData['inputHash'], False, {"n_components":2}, 500, False, "ICA", session=ch)

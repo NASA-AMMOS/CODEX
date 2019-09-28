@@ -25,6 +25,7 @@ def test_ml_template_scan(capsys, testData):
 
     # Standard usage
     result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': 1, 'scan_jump': 50}, {}, session=ch)
+    #assert result['message'] == 'success'
 
     # Incorrect num_templates
     result = ml_template_scan(testData['inputHash'], testData['hashList'], None, None, "template", False, {'num_templates': "String", 'scan_jump': 50}, {}, session=ch)

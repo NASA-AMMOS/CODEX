@@ -49,19 +49,10 @@ def ml_template_scan(
     Outputs:
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
-    data = ch.mergeHashResults(hashList)
-    inputHash = ch.hashArray('Merged', data, "feature")
-    if(inputHash is not None):
-        inputHash = inputHash["hash"]
-    else:
-        logging.warning("Feature hash failure in ml_cluster")
-        result['message'] = "Feature hash failure in ml_cluster"
-        return None
-
-    if(subsetHashName is not None):
-        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
+    if subsetHashName is not None:
+        subsetHash = cache.findHashArray("name", subsetHashName, "subset")
         if(subsetHash is None):
             subsetHash = False
         else:
@@ -69,75 +60,29 @@ def ml_template_scan(
     else:
         subsetHash = False
 
-    if(templateHashName is not None):
-        templateHash = ch.findHashArray("name", templateHashName, "subset")
-        if(templateHash is None):
-            templateHash = False
-        else:
-            templateHash = templateHash["hash"]
-    else:
-        logging.warning("Template hash name not given")
-        return None
+    try:
+        
+        result = run_template_scan(inputHash, subsetHash, templateHashName, downsampled, algorithmName, parms, session=cache)
 
-    if(algorithmName == 'template'):
-
-        try:
-            num_templates = int(parms['num_templates'])
-        except BaseException:
-            logging.warning("num_templates parameter not set")
-            result['message'] = "num_templates parameter not set"
-            logging.warning(traceback.format_exc())
-            return None
-
-        try:
-            scan_jump = int(parms['scan_jump'])
-        except BaseException:
-            logging.warning("scan_jump parameter not set")
-            result['message'] = "scan_jump parameter not set"
-            logging.warning(traceback.format_exc())
-            return None
-
-        try:
-            result = codex_template_scan(
-                inputHash,
-                subsetHash,
-                downsampled,
-                templateHash,
-                num_templates,
-                scan_jump,
-                session=ch)
-        except BaseException:
-            logging.warning("Failed to run template scan algorithm")
-            result['message'] = "Failed to run template scan algorithm"
-            logging.warning(traceback.format_exc())
-            return None
-
-    else:
-        result['message'] = "Cannot find requested clustering algorithm"
+    except BaseException:
+        logging.warning("Failed to run template scan algorithm")
+        result['message'] = "Failed to run template scan algorithm"
+        logging.warning(traceback.format_exc())
 
     return result
 
 
-def codex_template_scan(
-        inputHash,
-        subsetHash,
-        downsampled,
-        templateHash,
-        num_templates,
-        scan_jump,
-        session=None):
+def run_template_scan(inputHash, 
+                      subsetHash,
+                      templateHash,
+                      downsampled, 
+                      algorithm, 
+                      parms, 
+                      session=None):
     '''
     Inputs:
-        inputHash (string)         - hash representing single feature
-        subsetHash (False, string) - hash representing subselection mask
-        downsampled (Flase, int)   - downsample metric, or False for no downsampling
-        templateHash (string)      - hash representing template to compare against
-        num_templates (int)        - number of similar areas to return
-        scan_jump (int)            - amount of samples to jump between template comparisons
 
     Outputs:
-        templateFound (int)        - number of templates successfully found
-        indexes  (array)           - mask of template matches. 0 if not similar, 1 if in best template match, 2 if in next, etc.
 
     '''
     ch = get_cache(session)
@@ -203,6 +148,7 @@ def codex_template_scan(
     locationsFound = len(uniques) - 1
     dictionary = {"templatesFound": locationsFound, 'indexes': similarAreas}
 
+    dictionary['message'] = 'success'
     return dictionary
 
 

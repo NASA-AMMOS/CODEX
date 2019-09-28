@@ -30,7 +30,7 @@ from api.sub.codex_math         import impute
 from api.sub.time_log           import getComputeTimeEstimate
 from api.sub.time_log           import logTime
 from api.sub.downsample         import downsample
-from api.dimmension_reduction   import run_codex_dim_reduction
+from api.dimmension_reduction   import run_dim_reduction
 from api.sub.labels             import label_swap
 from api.sub.hash               import get_cache
 
@@ -66,7 +66,7 @@ def ml_cluster(
 
     try:
         
-        pca = run_codex_dim_reduction(inputHash, subsetHash, {"n_components":2}, downsampled, False, "PCA", session=cache)
+        pca = run_dim_reduction(inputHash, subsetHash, {"n_components":2}, downsampled, False, "PCA", session=cache)
         result = run_codex_clustering(pca['outputHash'], subsetHash, downsampled, algorithmName, parms, session=cache)
         result['data'] = pca['data']
 
