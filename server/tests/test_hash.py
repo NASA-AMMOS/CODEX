@@ -8,6 +8,7 @@ U.S. Government Sponsorship acknowledged.
 import os
 import pytest
 import sys
+from sklearn import datasets, linear_model
 
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
@@ -173,56 +174,50 @@ def test_findHashArray(capsys):
 
 def test_mergeHashResults(capsys):
 
-    session = 'foo'
-    ch = CodexHash()
-    ch.mergeHashResults(None, session=session)
+    cache = CodexHash()
+    cache.mergeHashResults(None, session=cache)
 
 def test_pickle_data(capsys):
 
-    session = 'foo'
-    ch = CodexHash()
-    from sklearn import datasets, linear_model
+    cache = CodexHash()
     diabetes = datasets.load_diabetes()
     regr = linear_model.LinearRegression()
     regr.fit(diabetes.data, diabetes.target)
 
-    model = ch.saveModel("test", regr, "classifier", session=session)
+    model = cache.saveModel("test", regr, "classifier", session=cache)
     assert model['hash'] == "1545eb964d6ec2e0ca5f9569e78fff106c1afbbb"
 
-    ch.resetCacheList("feature", session=session)
-    ch.resetCacheList("subset", session=session)
-    ch.resetCacheList("downsample", session=session)
-    ch.resetCacheList("label", session=session)
+    cache.resetCacheList("feature", session=cache)
+    cache.resetCacheList("subset", session=cache)
+    cache.resetCacheList("downsample", session=cache)
+    cache.resetCacheList("label", session=cache)
 
     x1 = np.array([2,3,1,0])
 
-    hashResult = ch.hashArray("x1", x1, "feature", session=session)
-    hashResult = ch.hashArray("x1", x1, "subset", session=session)
-    hashResult = ch.hashArray("x1", x1, "downsample", session=session)
-    hashResult = ch.hashArray("x1", x1, "label", session=session)
+    hashResult = cache.hashArray("x1", x1, "feature", session=cache)
+    hashResult = cache.hashArray("x1", x1, "subset", session=cache)
+    hashResult = cache.hashArray("x1", x1, "downsample", session=cache)
+    hashResult = cache.hashArray("x1", x1, "label", session=cache)
 
-    ch.pickle_data("test_session", {"front_end_payload":"payload_value"}, CODEX_ROOT, session=session)
+    cache.pickle_data("test_session", {"front_end_payload":"payload_value"}, CODEX_ROOT, session=cache)
 
 def test_unpickle_data(capsys):
 
-    session = 'foo'
-    ch = CodexHash()
-    data = ch.unpickle_data("test_session", CODEX_ROOT, session=session)
+    cache = CodexHash()
+    data = cache.unpickle_data("test_session", CODEX_ROOT, session=cache)
     assert data == {'features': ['x1'], 'labels': ['x1'], 'subsets': ['x1'], 'downsample': ['x1'], 'state': {'front_end_payload': 'payload_value'}}
 
-    ch.printCacheCount(session=session)
+    cache.printCacheCount(session=cache)
 
 
 def test_saveModel(capsys):
 
-    session = 'foo'
-    ch = CodexHash()
-    from sklearn import datasets, linear_model
+    cache = CodexHash()
     diabetes = datasets.load_diabetes()
     regr = linear_model.LinearRegression()
     regr.fit(diabetes.data, diabetes.target)
 
-    model = ch.saveModel("test", regr, "classifier", session=session)
+    model = cache.saveModel("test", regr, "classifier", session=cache)
     assert model['hash'] == "1545eb964d6ec2e0ca5f9569e78fff106c1afbbb"
   
 def test_assert_session(capsys):
