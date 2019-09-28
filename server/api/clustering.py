@@ -64,11 +64,10 @@ def ml_cluster(
     else:
         subsetHash = False
 
-
     try:
         
-        pca = run_codex_dim_reduction(inputHash, subsetHash, {"n_components":2}, downsampled, False, "PCA", session=ch)
-        result = run_codex_clustering(pca['outputHash'], subsetHash, downsampled, algorithmName, parms, session=ch)
+        pca = run_codex_dim_reduction(inputHash, subsetHash, {"n_components":2}, downsampled, False, "PCA", session=cache)
+        result = run_codex_clustering(pca['outputHash'], subsetHash, downsampled, algorithmName, parms, session=cache)
         result['data'] = pca['data']
 
     except BaseException:
@@ -98,7 +97,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
             numClusters (int)        - number of clusters calculated by the algorithm (unique of clusters)
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
 
     logReturnCode(inspect.currentframe())
 
@@ -124,9 +123,8 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
 
     full_samples = len(data)
     if downsampled is not False:
-        logging.warning("Downsampling to {downsampled} samples".format(downsampled=downsampled))
-        data = downsample(data, samples=downsampled, session=ch)
-        logging.warning("Downsampled to {samples} samples".format(samples=len(data)))
+        data = downsample(data, samples=downsampled, session=cache)
+        logging.info("Downsampled to {samples} samples".format(samples=len(data)))
 
     result['eta'] = getComputeTimeEstimate("clustering", algorithm, full_samples)
     if data.ndim < 2:
@@ -202,7 +200,7 @@ def run_codex_clustering(inputHash, subsetHash, downsampled, algorithm, parms, s
 
     # temporary to not change API right now
     merged_hash = cache.hashArray("temporary", X, "feature")
-    y_pred = label_swap(y_pred, merged_hash["hash"], session=ch)
+    y_pred = label_swap(y_pred, merged_hash["hash"], session=cache)
     label_hash = cache.hashArray(merged_hash["hash"], y_pred, "label")
 
     result['numClusters'] = np.unique(y_pred).size

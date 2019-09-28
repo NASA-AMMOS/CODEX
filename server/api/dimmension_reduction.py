@@ -51,7 +51,7 @@ def ml_dimensionality_reduction(
 
     '''
 
-    ch = get_cache(session)
+    cache = get_cache(session)
 
     if(subsetHashName is not None):
         subsetHash = ch.findHashArray("name", subsetHashName, "subset")
@@ -63,7 +63,7 @@ def ml_dimensionality_reduction(
         subsetHash = False
 
     try:
-        result = run_codex_dim_reduction(inputHash, subsetHash, parms, downsampled, False, algorithmName, session=ch)
+        result = run_codex_dim_reduction(inputHash, subsetHash, parms, downsampled, False, algorithmName, session=cache)
     except BaseException:
         logging.warning("Failed to run dimensionality reduction analysis")
         result['message'] = "Failed to run dimensionality reduction analysis"
@@ -91,7 +91,7 @@ def run_codex_dim_reduction(
     Outputs:
 
     '''
-    ch = get_cache(session)
+    cache = get_cache(session)
     
     logReturnCode(inspect.currentframe())
     startTime = time.time()
@@ -99,7 +99,7 @@ def run_codex_dim_reduction(
 
     n_components = parms["n_components"]
 
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
+    returnHash = cache.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         logging.warning("Error: run_codex_dim_reduction: Hash not found")
         return
@@ -114,8 +114,8 @@ def run_codex_dim_reduction(
 
     full_samples = len(data)
     if(downsampled is not False):
-        logging.info("Downsampling to {ds} samples.".format(ds=downsampled))
-        data = downsample(data, samples=downsampled, session=ch)
+        data = downsample(data, samples=downsampled, session=cache)
+        logging.info("Downsampled to {samples} samples".format(samples=len(data)))
 
     eta = getComputeTimeEstimate("dimension_reduction", algorithm, full_samples)
 
