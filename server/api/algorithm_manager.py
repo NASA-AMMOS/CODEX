@@ -323,7 +323,8 @@ if __name__ == '__main__':
     ch = get_cache(DOCTEST_SESSION)
     testData = getTestData(session=ch)
 
-    #result = ml_cluster(testData['inputHash'], testData['hashList'], None, "kmeans", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch)
+    msg = {testData['inputHash'], testData['hashList'], None, "kmeans", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, {}, session=ch}
+    result = algorithm_call(msg, {})
     #print(result['message'])
 
     #test = clustering(inputHash=testData['inputHash'], hashList=testData['hashList'], subsetHashName=None, algorithmName="kmeans", downsampled=False, parms={'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, result={}, session=ch)
