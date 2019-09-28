@@ -29,7 +29,7 @@ def test_add_data(capsys, testData):
     cache = get_cache(DOCTEST_SESSION)
 
     message = {'routine': 'arrange', 'hashType': 'feature', 'activity': 'add', 'name': 'TiO2', 'data': [1, 2, 3, 4], 'sessionkey': DOCTEST_SESSION}
-    results = add_data
+    results = add_data(message, {})
 
 def test_get_data_metrics(capsys, testData):
 
