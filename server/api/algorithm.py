@@ -1,0 +1,143 @@
+'''
+Author: Jack Lightholder
+Date  : 7/19/17
+Brief : 
+Notes :
+
+Copyright 2019 California Institute of Technology.  ALL RIGHTS RESERVED.
+U.S. Government Sponsorship acknowledged.
+'''
+import os
+import sys
+import inspect
+import traceback
+import logging
+import random
+import time
+import json
+
+import numpy as np
+
+from sklearn           import cluster
+
+CODEX_ROOT = os.getenv('CODEX_ROOT')
+sys.path.insert(1, os.getenv('CODEX_ROOT'))
+
+logger = logging.getLogger(__name__)
+
+# CODEX Support
+from api.sub.return_code        import logReturnCode
+from api.sub.codex_math         import impute
+from api.sub.time_log           import getComputeTimeEstimate
+from api.sub.time_log           import logTime
+from api.sub.downsample         import downsample
+from api.sub.labels             import label_swap
+from api.sub.hash               import get_cache
+
+class algorithm():
+    def __init__(self, inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, session):
+        
+        self.inputHash = inputHash
+        self.hashList = hashList
+        self.subsetHashName = subsetHashName
+        self.algorithmName = algorithmName
+        self.downsampled = downsampled
+        self.parms = parms
+        self.result = result
+        self.session = session
+        self.labelHash = labelHash
+        self.scoring = scoring
+        self.search_type = search_type
+        self.cross_val = cross_val
+
+    def run(self):
+
+        try:
+            self.cache = get_cache(self.session)
+
+            logReturnCode(inspect.currentframe())
+
+            startTime = time.time()
+            self.result = {'algorithm': self.algorithmName,
+                      'downsample': self.downsampled,
+                      "WARNING":None}
+
+            returnHash = self.cache.findHashArray("hash", self.inputHash, "feature")
+            if returnHash is None:
+                logging.warning("Hash not found")
+                return None
+
+            self.X = returnHash['data']
+            if self.X is None:
+                return None
+
+            ret = self.check_valid()
+            if not ret:
+                logging.warning("Failed check")
+                return None 
+
+            full_samples, full_features = self.X.shape
+            self.result['eta'] = getComputeTimeEstimate(self.__class__.__name__, self.algorithmName, full_samples, full_features)
+
+            if self.subsetHashName is not False:
+                self.X = self.cache.applySubsetMask(self.X, self.subsetHashName)
+                if(self.X is None):
+                    logging.warning("subsetHash returned None.")
+                    return None
+
+            if self.downsampled is not False:
+                self.X = downsample(self.X, samples=self.downsampled, session=self.cache)
+                logging.info("Downsampled to {samples} samples".format(samples=len(self.X)))
+
+            # TODO - labels are currently cached under features
+            if self.labelHash:
+                labelHash_dict = self.cache.findHashArray("hash", self.labelHash, "feature")
+                if labelHash_dict is None:
+                    logging.warning("label hash not found.")
+                else:
+                    self.y = labelHash_dict['data']
+                    self.result['y'] = self.y.tolist()
+                    unique, counts = np.unique(self.y, return_counts=True)
+                    count_dict = dict(zip(unique, counts))
+                    if any(v < self.cross_val for v in count_dict.values()):
+                        count_dict = dict(zip(unique.astype(str), counts.astype(str)))
+                        self.result['counts'] = json.dumps(count_dict)
+                        self.result['WARNING'] = "Label class has less samples than cross val score"
+                        return self.result
+
+            computed_samples, computed_features = self.X.shape
+            self.X = impute(self.X)
+            self.result['data'] = self.X.tolist()
+
+            self.algorithm = self.get_algorithm()
+            if self.algorithm == None:
+                self.result['message'] = "failure"
+                self.result['WARNING'] = "{alg} algorithm not supported".format(alg=self.algorithmName)
+                return self.result
+
+            self.fit_algorithm()
+
+            # TODO - The front end should specify a save name for the model
+            model_name = self.algorithmName +  "_" + str(random.random())
+            if self.search_type == 'direct':
+                model_dict = self.cache.saveModel(model_name, self.algorithm, "regressor")
+            else:
+                model_dict = self.cache.saveModel(model_name, self.algorithm.best_estimator_, "regressor")
+            if not model_dict:
+                self.result['WARNING'] = "Model could not be saved."
+            else:
+                self.result['model_name'] = model_dict['name']
+                self.result['model_hash'] = model_dict['hash']
+
+
+            endTime = time.time()
+            computeTime = endTime - startTime
+            logTime(self.__class__.__name__, self.algorithmName, computeTime, computed_samples, computed_features)
+
+            self.result['message'] = "success"
+            return self.result
+
+        except:
+            logging.warning(traceback.format_exc())
+            return self.result
+

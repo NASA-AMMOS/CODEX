@@ -16,70 +16,141 @@ from api.sub.hash       import get_cache
 from api.regression     import *
 from fixtures           import testData
 
-def test_ml_regression(capsys, testData):
+#inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, session
+def test_regression(capsys, testData):
 
     ch = get_cache(DOCTEST_SESSION)
 
-    # Standard use - linear regression
-    result = ml_regression(testData['inputHash'], testData['hashList'], None, testData['classLabelHash'], "linear", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5, 'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, 'explained_variance', "grid", 3, {}, session=ch)
+    #result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "ARDRegression",               False, {}, 'fake_score', "grid", 3, {}, ch).run()
 
-    # Standard use - lasso regression
-    result = ml_regression(testData['inputHash'], testData['hashList'], None, testData['classLabelHash'], "lasso", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5,'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, 'explained_variance', "grid", 3, {}, session=ch)
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "ARDRegression",               False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
 
-    # Standard use - random forest regression
-    result = ml_regression(testData['inputHash'], testData['hashList'], None, testData['classLabelHash'], "randomForest", False, {'test_size': 0.9, 'alpha': 1, 'fit_intercept': 0.5,'max_iter':0.5, 'tol':0.9, 'n_estimators':25, 'downsampled': 500}, 'explained_variance', "grid", 3, {}, session=ch)
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "AdaBoostRegressor",           False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
 
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "BaggingRegressor",            False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
 
-def test_run_regression(capsys, testData):
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "BayesianRidge",               False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
 
-    ch = get_cache(DOCTEST_SESSION)
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "CCA",                         False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
 
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ARDRegression", {}, "grid", 3, 'fake_score', session=ch)
-    #print(result["WARNING"])
-    #fake_score not a valid scoring metric for regression.
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "DecisionTreeRegressor",       False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
 
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ARDRegression", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "AdaBoostRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "BaggingRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "BayesianRidge", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "CCA", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "DecisionTreeRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ElasticNet", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ElasticNetCV", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ExtraTreeRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "ExtraTreesRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "GaussianProcessRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "GradientBoostingRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "HuberRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "KNeighborsRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "KernelRidge", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "Lars", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LarsCV", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "Lasso", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LassoCV", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LassoLars", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LassoLarsCV", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LassoLarsIC", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LinearRegression", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "LinearSVR", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MLPRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MultiTaskElasticNet", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MultiTaskElasticNetCV", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MultiTaskLasso", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "MultiTaskLassoCV", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "NuSVR", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "OrthogonalMatchingPursuit", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "OrthogonalMatchingPursuitCV", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "PLSCanonical", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "PLSRegression", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "PassiveAggressiveRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "RANSACRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "RadiusNeighborsRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "RandomForestRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "Ridge", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "RidgeCV", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "SGDRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "SVR", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "TheilSenRegressor", {}, "grid", 3, 'explained_variance', session=ch)
-    result = run_regression(testData['inputHash'], False, testData['regrLabelHash'], False, "TransformedTargetRegressor", {}, "grid", 3, 'explained_variance', session=ch)
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "ElasticNet",                  False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
 
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "ElasticNetCV",                False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "ExtraTreeRegressor",          False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "ExtraTreesRegressor",         False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "GaussianProcessRegressor",    False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "GradientBoostingRegressor",   False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "HuberRegressor",              False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "KNeighborsRegressor",         False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "KernelRidge",                 False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "Lars",                        False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "LarsCV",                      False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "Lasso",                       False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "LassoCV",                     False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "LassoLars",                   False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "LassoLarsCV",                 False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "LassoLarsIC",                 False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "LinearRegression",            False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "LinearSVR",                   False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "MLPRegressor",                False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "MultiTaskElasticNet",         False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "MultiTaskElasticNetCV",       False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "MultiTaskLasso",              False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "MultiTaskLassoCV",            False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "NuSVR",                       False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "OrthogonalMatchingPursuit",   False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "OrthogonalMatchingPursuitCV", False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "PLSCanonical",                False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "PLSRegression",               False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "PassiveAggressiveRegressor",  False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "RANSACRegressor",             False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "RadiusNeighborsRegressor",    False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "RandomForestRegressor",       False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "Ridge",                       False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "RidgeCV",                     False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "SGDRegressor",                False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "SVR",                         False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "TheilSenRegressor",           False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'
+
+    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "TransformedTargetRegressor",  False, {}, 'explained_variance', "grid", 3, {}, ch).run()
+    assert result['message'] == 'success'

@@ -34,153 +34,45 @@ from api.sub.time_log          import logTime
 from api.sub.time_log          import getComputeTimeEstimate
 from api.sub.hash              import get_cache
 from api.sub.plot              import plot_dimensionality
+from api.algorithm             import algorithm
 
-def ml_dimensionality_reduction(
-        inputHash,
-        hashList,
-        subsetHashName,
-        algorithmName,
-        downsampled,
-        parms,
-        result,
-        session=None):
-    '''
-    Inputs:
+class dimension_reduction(algorithm):
 
-    Outputs:
+    def get_algorithm(self):
 
-    '''
+        if(self.algorithmName == "PCA"):
+            dim_r = PCA(n_components=self.parms['n_components'])
 
-    cache = get_cache(session)
+        elif(self.algorithmName == "ICA"):
+            dim_r = FastICA(n_components=self.parms['n_components'])
 
-    if(subsetHashName is not None):
-        subsetHash = ch.findHashArray("name", subsetHashName, "subset")
-        if(subsetHash is None):
-            subsetHash = False
         else:
-            subsetHash = subsetHash["hash"]
-    else:
-        subsetHash = False
-
-    try:
-        result = run_dim_reduction(inputHash, subsetHash, parms, downsampled, False, algorithmName, session=cache)
-    except BaseException:
-        logging.warning("Failed to run dimensionality reduction analysis")
-        result['message'] = "Failed to run dimensionality reduction analysis"
-        logging.warning(traceback.format_exc())
-        return None
-
-    return result
-
-
-def run_dim_reduction(
-        inputHash,
-        subsetHash,
-        parms,
-        downsampled,
-        showPlot,
-        algorithm,
-        session=None):
-    '''
-    Inputs:
-        inputHash (string)  - hash value corresponding to the data to cluster
-        subsetHash (string) - hash value corresponding to the subselection (false if full feature)
-        n_components (int)  - Number of components to keep
-        incremental (bool)  - If set to True, incremental PCA used, else regular
-
-    Outputs:
-
-    '''
-    cache = get_cache(session)
-    
-    logReturnCode(inspect.currentframe())
-    startTime = time.time()
-
-    n_components = parms["n_components"]
-
-    returnHash = cache.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
-        logging.warning("Error: run_codex_dim_reduction: Hash not found")
-        return
-
-    X = returnHash['data']
-    if X is None:
-        return None
-
-    if(X.ndim > n_components):
-        logging.warning("ERROR: run_codex_dim_reduction: features ({ndim}) > requested components ({components})".format(ndim=X.ndim, components=n_components))
-        return None
-
-    full_samples, full_features = X.shape
-    eta = getComputeTimeEstimate("dimension_reduction", algorithm, full_samples, full_features)
-
-    if(subsetHash is not False):
-        X, datName = ch.applySubsetMask(X, subsetHash)
-        if(X is None):
-            logging.warning("ERROR: run_codex_dim_reduction: subsetHash returned None.")
             return None
 
-    if(downsampled is not False):
-        X = downsample(X, samples=downsampled, session=cache)
-        logging.info("Downsampled to {samples} samples".format(samples=len(X)))
+        return dim_r
 
-    computed_samples, computed_features = X.shape
-    X = impute(X)
 
-    try:
+    def fit_algorithm(self):
 
-        if(algorithm == "PCA"):
+        X_transformed = self.algorithm.fit_transform(self.X)
+        exp_var_ratio = explained_variance_ratio(X_transformed, self.parms['n_components'])
 
-            dim_r = PCA(n_components=n_components)
+        self.result['data'] = X_transformed.tolist()
+        self.result['explained_variance_ratio'] = exp_var_ratio.tolist()
+        self.result['n_components'] = self.parms['n_components']
 
-        elif(algorithm == "ICA"):
 
-            dim_r = FastICA(n_components=n_components)
+    def check_valid(self):
 
-        else:
-            return {'algorithm': algorithm,
-                    'inputHash': inputHash,
-                    'subsetHash': subsetHash,
-                    'n_components': n_components,
-                    'downsample': downsampled,
-                    'WARNING': algorithm + " not supported."}
+        if(self.X.ndim > self.parms["n_components"]):
+            logging.warning("ERROR: run_codex_dim_reduction: features ({ndim}) > requested components ({components})".format(ndim=self.X.ndim, components=self.parms['n_components']))
+            return None
 
-    except:
+        return 1
 
-        logging.warning(str(traceback.format_exc()))
 
-        return {'algorithm': algorithm,
-                'inputHash': inputHash,
-                'subsetHash': subsetHash,
-                'n_components': n_components,
-                'downsample': downsampled,
-                'WARNING': traceback.format_exc()}
-
-    if showPlot:
+    def algorithm_plot(self):
         plot_dimensionality(exp_var_ratio, "PCA Explained Variance", show=True)
 
-    X_transformed = dim_r.fit_transform(X)
-    exp_var_ratio = explained_variance_ratio(X_transformed, n_components)
-
-    endTime = time.time()
-    computeTime = endTime - startTime
-    logTime("dimension_reduction", algorithm, computeTime, computed_samples, computed_features)
-
-    # print("saving out PCA")
-    # outputHash = ch.hashArray('PCA_', X_transformed, "feature", virtual=True)
-
-    output = {
-        'eta': eta,
-        'algorithm': algorithm,
-        'data': X_transformed.tolist(),
-        'explained_variance_ratio': exp_var_ratio.tolist(),
-        'inputHash': inputHash,
-        'subsetHash': subsetHash,
-        'outputHash': inputHash, #outputHash["hash"],
-        'n_components': n_components,
-        'downsample': downsampled,
-        'message':"success"}
-
-    return output
 
 

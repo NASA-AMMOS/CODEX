@@ -32,77 +32,26 @@ from api.sub.time_log          import logTime
 from api.sub.return_code       import logReturnCode
 from api.sub.codex_math        import impute
 from api.sub.hash              import get_cache
+from api.algorithm             import algorithm
 
-def ml_template_scan(
-        inputHash,
-        hashList,
-        subsetHashName,
-        templateHashName,
-        algorithmName,
-        downsampled,
-        parms,
-        result,
-        session=None):
-    '''
-    Inputs:
+class template_scan(algorithm):
 
-    Outputs:
+    def get_algorithm(self):
 
-    '''
-    cache = get_cache(session)
-
-    if subsetHashName is not None:
-        subsetHash = cache.findHashArray("name", subsetHashName, "subset")
-        if(subsetHash is None):
-            subsetHash = False
+        if(self.algorithmName == ""):
+            pass
+        elif(self.algorithmName == ""):
+            pass
         else:
-            subsetHash = subsetHash["hash"]
-    else:
-        subsetHash = False
+            return None
 
-    try:
-        
-        result = run_template_scan(inputHash, subsetHash, templateHashName, downsampled, algorithmName, parms, session=cache)
-
-    except BaseException:
-        logging.warning("Failed to run template scan algorithm")
-        result['message'] = "Failed to run template scan algorithm"
-        logging.warning(traceback.format_exc())
-
-    return result
+        return cluster_alg
 
 
-def run_template_scan(inputHash, 
-                      subsetHash,
-                      templateHash,
-                      downsampled, 
-                      algorithm, 
-                      parms, 
-                      session=None):
-    '''
-    Inputs:
 
-    Outputs:
 
-    '''
-    ch = get_cache(session)
 
-    logReturnCode(inspect.currentframe())
-    startTime = time.time()
-
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
-        logging.warning("Error: codex_template_scan: inputHash not found.")
-        return
-
-    X = returnHash['data']
-
-    if(subsetHash is not False):
-        X = ch.applySubsetMask(X, subsetHash)
-
-    if(downsampled is not False):
-        X = downsample(X, percentage=downsampled, session=ch)
-
+'''
     returnTemplateHash = ch.findHashArray("hash", templateHash, "feature")
     if(returnTemplateHash is None):
         logging.warning("Error: codex_template_scan: templateHash not found.")
@@ -150,5 +99,5 @@ def run_template_scan(inputHash,
 
     dictionary['message'] = 'success'
     return dictionary
-
+'''
 

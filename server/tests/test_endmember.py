@@ -13,22 +13,27 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 from api.sub.hash       import DOCTEST_SESSION
 from api.sub.hash       import get_cache
-from api.endmember      import ml_endmember
+from api.endmember      import *
 from fixtures           import testData
 
+#inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, session
 def test_ml_endmember(capsys, testData):
 
 
     cache = get_cache(DOCTEST_SESSION)
 
     # Missing algorithmType
-    result = ml_endmember(testData['inputHash'], testData['hashList'], None, "kmean", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=cache)
+    result = endmember(testData['inputHash'], testData['hashList'], None, False, "kmean", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, None, "direct", None, {}, cache).run()
+    assert result['message'] == 'failure'
+    assert result['WARNING'] == 'kmean algorithm not supported'
 
-    result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'q':5, 'numSkewers':5}, {}, session=cache)
+    result = endmember(testData['inputHash'], testData['hashList'], None, False, "ATGP", False, {'q':5, 'numSkewers':5}, None, "direct", None, {}, cache).run()
+    assert result['message'] == 'success'
 
-    result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'q':4, 'numSkewers':5}, {}, session=cache)
-
-    result = ml_endmember(testData['inputHash'], testData['hashList'], None, "FIPPI", False, {'downsampled': 500, 'numSkewers':5}, {}, session=cache)
-
+    result = endmember(testData['inputHash'], testData['hashList'], None, False, "FIPPI", False, {'q':4, 'numSkewers':5}, None, "direct", None, {}, cache).run()
+    assert result['message'] == 'success'
+    
+    result = endmember(testData['inputHash'], testData['hashList'], None, False, "PPI", False, {'q':4, 'numSkewers':5}, None, "direct", None, {}, cache).run()
+    assert result['message'] == 'success'
 
 
