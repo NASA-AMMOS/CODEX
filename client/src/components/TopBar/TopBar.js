@@ -13,7 +13,6 @@ import SessionBar from "components/TopBar/SessionBar";
 import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as dataActions from "actions/data";
-import * as exportActions from "actions/exportActions";
 import * as sessionsActions from "actions/sessionsActions";
 import * as windowManagerActions from "actions/windowManagerActions";
 import * as windowTypes from "constants/windowTypes";
@@ -193,8 +192,7 @@ function mapDispatchToProps(dispatch) {
         setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch),
         openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch),
         saveSession: bindActionCreators(sessionsActions.saveSession, dispatch),
-        fileLoad: bindActionCreators(dataActions.fileLoad, dispatch),
-        requestServerExport: bindActionCreators(exportActions.requestServerExport, dispatch)
+        fileLoad: bindActionCreators(dataActions.fileLoad, dispatch)
     };
 }
 

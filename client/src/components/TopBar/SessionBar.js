@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { useFilename, useFileUpload } from "hooks/DataHooks";
@@ -13,7 +13,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import Title from "components/Title/Title";
 import classNames from "classnames";
 import * as selectionActions from "actions/selectionActions";
-
+import * as exportActions from "actions/exportActions";
 import "./SessionBar.css";
 
 const SessionBar = props => {
@@ -21,9 +21,12 @@ const SessionBar = props => {
     const fileLoad = useFileUpload();
     const uploadStatus = useUploadStatus();
 
-    useEffect(_ => {
-        props.removeAllSelections();
-    }, [filename])
+    useEffect(
+        _ => {
+            props.removeAllSelections();
+        },
+        [filename]
+    );
 
     let uploadButtonContents = null;
     if (filename === null) {
@@ -141,11 +144,11 @@ const mapStateToProps = state => {
 
 function mapDispatchToProps(dispatch) {
     return {
-        removeAllSelections: bindActionCreators(selectionActions.removeAllSelections, dispatch)
+        removeAllSelections: bindActionCreators(selectionActions.removeAllSelections, dispatch),
+        requestServerExport: bindActionCreators(exportActions.requestServerExport, dispatch)
     };
 }
 
-export { SessionBar };
 export default connect(
     mapStateToProps,
     mapDispatchToProps
