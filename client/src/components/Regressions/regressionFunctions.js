@@ -15,6 +15,7 @@ export function getEta(regression, selectedFeatures, numFeatures) {
         numSamples: selectedFeatures.length,
         numFeatures: numFeatures
     };
+    console.log(request);
 
     return utils.makeSimpleRequest(request);
 }

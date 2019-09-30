@@ -117,7 +117,7 @@ function RegressionsOverview(props) {
     // handles those Promise returns and updates the regression states as necessary. It also includes
     // a cleanup function that will cancel all requests if the user closes the window.
     useEffect(_ => {
-        const requests = Object.values(regressionTypes.REGRESSION_PARAMS).map(regression => {
+        const requests = Object.keys(regressionTypes.REGRESSION_PARAMS).map(regression => {
             const { req, cancel } = regressionFunctions.getEta(regression, selectedFeatures, 100);
             req.then(data =>
                 regressionStateDispatch({
