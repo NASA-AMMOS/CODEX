@@ -190,8 +190,6 @@ function mapDispatchToProps(dispatch) {
         createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name)),
         createWorkflow: name => dispatch(workflowActions.createWorkflow(name)),
         setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch),
-        openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch),
-        saveSession: bindActionCreators(sessionsActions.saveSession, dispatch),
         fileLoad: bindActionCreators(dataActions.fileLoad, dispatch)
     };
 }

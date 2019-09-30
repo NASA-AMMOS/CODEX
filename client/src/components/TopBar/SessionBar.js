@@ -15,6 +15,7 @@ import classNames from "classnames";
 import * as selectionActions from "actions/selectionActions";
 import * as exportActions from "actions/exportActions";
 import "./SessionBar.css";
+import * as sessionsActions from "actions/sessionsActions";
 
 const SessionBar = props => {
     const filename = useFilename();
@@ -145,7 +146,9 @@ const mapStateToProps = state => {
 function mapDispatchToProps(dispatch) {
     return {
         removeAllSelections: bindActionCreators(selectionActions.removeAllSelections, dispatch),
-        requestServerExport: bindActionCreators(exportActions.requestServerExport, dispatch)
+        requestServerExport: bindActionCreators(exportActions.requestServerExport, dispatch),
+        openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch),
+        saveSession: bindActionCreators(sessionsActions.saveSession, dispatch)
     };
 }
 
