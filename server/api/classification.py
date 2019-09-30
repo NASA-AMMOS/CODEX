@@ -61,372 +61,72 @@ from api.sub.time_log          import logTime
 from api.sub.time_log          import getComputeTimeEstimate
 from api.sub.downsample        import downsample
 from api.sub.hash              import get_cache
+from api.algorithm             import algorithm
 
-def ml_classification(
-        inputHash,
-        hashList,
-        subsetHashName,
-        labelHash,
-        algorithmName,
-        downsampled,
-        parms,
-        scoring,
-        search_type,
-        cross_val,
-        result,
-        session=None):
-    '''
-    Inputs:
+class classification(algorithm):
 
-    Outputs:
+    def get_algorithm(self):
 
-    '''
-    cache = get_cache(session)
+        if(self.algorithmName == "AdaBoostClassifier"): algorithm = AdaBoostClassifier()
+        elif(self.algorithmName == "BaggingClassifier"): algorithm = BaggingClassifier()
+        elif(self.algorithmName == "BayesianGaussianMixture"): algorithm = BayesianGaussianMixture()
+        elif(self.algorithmName == "BernoulliNB"): algorithm = BernoulliNB()
+        elif(self.algorithmName == "CalibratedClassifierCV"): algorithm = CalibratedClassifierCV()
+        elif(self.algorithmName == "ComplementNB"): algorithm = ComplementNB()
+        elif(self.algorithmName == "DecisionTreeClassifier"): algorithm = DecisionTreeClassifier()
+        elif(self.algorithmName == "ExtraTreeClassifier"): algorithm = ExtraTreeClassifier()
+        elif(self.algorithmName == "ExtraTreesClassifier"): algorithm = ExtraTreesClassifier()
+        elif(self.algorithmName == "GaussianMixture"): algorithm = GaussianMixture()
+        elif(self.algorithmName == "GaussianNB"): algorithm = GaussianNB()
+        elif(self.algorithmName == "GaussianProcessClassifier"): algorithm = GaussianProcessClassifier()
+        elif(self.algorithmName == "GradientBoostingClassifier"): algorithm = GradientBoostingClassifier()
+        elif(self.algorithmName == "KNeighborsClassifier"): algorithm = KNeighborsClassifier()
+        elif(self.algorithmName == "LabelPropagation"): algorithm = LabelPropagation()
+        elif(self.algorithmName == "LabelSpreading"): algorithm = LabelSpreading()
+        elif(self.algorithmName == "LinearDiscriminantAnalysis"): algorithm = LinearDiscriminantAnalysis()
+        elif(self.algorithmName == "LogisticRegression"): algorithm = LogisticRegression()
+        elif(self.algorithmName == "LogisticRegressionCV"): algorithm = LogisticRegressionCV()
+        elif(self.algorithmName == "MLPClassifier"): algorithm = MLPClassifier()
+        elif(self.algorithmName == "MultinomialNB"): algorithm = MultinomialNB()
+        elif(self.algorithmName == "NuSVC"): algorithm = NuSVC()
+        elif(self.algorithmName == "QuadraticDiscriminantAnalysis"): algorithm = QuadraticDiscriminantAnalysis()
+        elif(self.algorithmName == "RandomForestClassifier"): algorithm = RandomForestClassifier()
+        elif(self.algorithmName == "SGDClassifier"): algorithm = SGDClassifier()
+        elif(self.algorithmName == "SVC"): algorithm = SVC()
+        else: return None
 
-    if len(hashList) < 2:
-        logging.warning("Classification requires >= 2 features.")
-        return None
+        return algorithm
 
-    if subsetHashName is not None:
-        subsetHash = cache.findHashArray("name", subsetHashName, "subset")
-        if(subsetHash is None):
-            subsetHash = False
+    def fit_algorithm(self):
+
+        accepted_scoring_metrics = ["accuracy", "balanced_accuracy", "average_precision", "brier_score_loss", "f1, f1_micro", "f1_macro", "f1_weighted", "f1_samples", "neg_log_loss", "precision", "recall", "jaccard", "roc_auc"]
+        if self.scoring not in accepted_scoring_metrics:
+            self.result["WARNING"] = "{scoring} not a valid scoring metric for classification.".format(scoring=self.scoring)
+            return
+
+        if self.search_type == "random":
+            self.algorithm = RandomizedSearchCV(self.algorithm, self.parms, cv=self.cross_val, scoring=self.scoring)
         else:
-            subsetHash = subsetHash["hash"]
-    else:
-        subsetHash = False
+            self.algorithm = GridSearchCV(self.algorithm, self.parms, cv=self.cross_val, scoring=self.scoring)
 
-    try:
-        result = run_classification(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=cache)
-        logging.warning("Completed classification run with warnings: {r}".format(r=result["WARNING"]))
-    except BaseException:
-        logging.warning("Failed to run classification algorithm")
-        result['message'] = "Failed to run classification algorithm"
-        logging.warning(traceback.format_exc())
-        return None
+        self.algorithm.fit(self.X, self.y)
+        y_pred = self.algorithm.predict(self.X)
 
-    return result
+        cm = confusion_matrix(self.y, y_pred)
+        cm = np.round((cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]) * 100)
 
-def run_classification(inputHash, subsetHash, labelHash, downsampled, algorithm,  parms, search_type, cross_val, scoring, session=None):
-    '''
-    Inputs:
-        inputHash (string)  - hash value corresponding to the data to cluster
-        subsetHash (string) - hash value corresponding to the subselection (false if full feature)
-        downsampled (int)   - number of data points to use for quicklook
-        algorithm (string)  - Name of the classifier to run.  Follows Sklearn naming conventions.
-                                Available keys:  AdaBoostClassifier | BaggingClassifier | BayesianGaussianMixture | 
-                                                 BernoulliNB | CalibratedClassifierCV | ComplementNB | DecisionTreeClassifier | 
-                                                 ExtraTreesClassifier | ExtraTreeClassifier | GaussianMixture | GaussianNB | 
-                                                 GaussianProcessClassifier | GradientBoostingClassifier | KNeighborsClassifier | 
-                                                 LabelPropagation | LabelSpreading | LinearDiscriminantAnalysis |  LogisticRegression | 
-                                                 LogisticRegressionCV | MLPClassifier | MultinomialNB | NuSVC | QuadraticDiscriminantAnalysis | 
-                                                 RandomForestClassifier | SGDClassifier | SVC
+        self.result['cm_data'] = cm.tolist()
+        self.result['classes'] = np.unique(self.y).tolist()
+        self.result["best_parms"] = self.algorithm.best_params_
+        self.result["best_score"] = self.algorithm.best_score_
 
 
-    Outputs:
-        dictionary:
-            algorithm (str)          - Name of the classifier which was run.  Will be same as algorithm input argument
-            data (numpy.ndarray)     - (samples, features) array of features to cluster
-            downsample (int)         - number of data points used in quicklook
+    def check_valid(self):
+        return 1
 
-    Notes:
-        Scoring Metrics: https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
+       
 
-    '''
-    cache = get_cache(session)
-    logReturnCode(inspect.currentframe())
-    startTime = time.time()
-    result = {'algorithm': algorithm,
-              'downsample': downsampled,
-              'cross_val': cross_val,
-              'scoring': scoring,
-              'WARNING': "None"}
 
-    returnHash = cache.findHashArray("hash", inputHash, "feature")
-    if returnHash is None:
-        logging.warning("Classification: {algorithm}: Hash not found. Returning!".format(algorithm=algorithm))
-        return None
 
-    X = returnHash['data']
-    if X is None:
-        return None
 
-    if X.ndim < 2:
-        logging.warning("ERROR: run_codex_classification - insufficient data dimmensions")
-        return None
-
-    full_samples, full_features = X.shape
-    result['eta'] = getComputeTimeEstimate("classification", algorithm, full_samples, full_features)
-
-    if subsetHash is not False and subsetHash is not None:
-        X = cache.applySubsetMask(X, subsetHash)
-        if(X is None):
-            logging.warning("ERROR: run_codex_classification - subsetHash returned None.")
-            return None
-            
-    if downsampled is not False:
-        X = downsample(X, samples=downsampled, session=cache)
-        logging.info("Downsampled to {samples} samples".format(samples=len(X)))
-
-    computed_samples, computed_features = X.shape
-    X = impute(X)
-    result['X'] = X.tolist()
-
-    accepted_scoring_metrics = ["accuracy", "balanced_accuracy", "average_precision", "brier_score_loss", "f1, f1_micro", "f1_macro", "f1_weighted", "f1_samples", "neg_log_loss", "precision", "recall", "jaccard", "roc_auc"]
-    if scoring not in accepted_scoring_metrics:
-        result["WARNING"] = "{scoring} not a valid scoring metric for classification.".format(scoring=scoring)
-        return result
-
-    # TODO - labels are currently cached under features
-    labelHash_dict = cache.findHashArray("hash", labelHash, "feature")
-    if labelHash_dict is None:
-        logging.warning("label hash {hash} not found. Returning!".format(hash=labelHash))
-        return {'algorithm': algorithm,
-                'downsample': downsampled,
-                'cross_val': cross_val,
-                'scoring': scoring,
-                'WARNING': "Label not found in database."}
-    else:
-        y = labelHash_dict['data']
-        result['y'] = y.tolist()
-
-        unique, counts = np.unique(y, return_counts=True)
-        count_dict = dict(zip(unique, counts))
-        if any(v < cross_val for v in count_dict.values()):
-            count_dict = dict(zip(unique.astype(str), counts.astype(str)))
-            return {'algorithm': algorithm,
-                    'cross_val': cross_val,
-                    'downsample': downsampled,
-                    'counts': json.dumps(count_dict),
-                    'scoring': scoring,
-                    'WARNING': "Label class has less samples than cross val score"}         
-
-    try:
-
-        if(algorithm == "AdaBoostClassifier"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(AdaBoostClassifier(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(AdaBoostClassifier(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "BaggingClassifier"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(BaggingClassifier(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(BaggingClassifier(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "BayesianGaussianMixture"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(BayesianGaussianMixture(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(BayesianGaussianMixture(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "BernoulliNB"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(BernoulliNB(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(BernoulliNB(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "CalibratedClassifierCV"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(CalibratedClassifierCV(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(CalibratedClassifierCV(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "ComplementNB"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(ComplementNB(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(ComplementNB(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "DecisionTreeClassifier"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(DecisionTreeClassifier(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(DecisionTreeClassifier(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "ExtraTreeClassifier"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(ExtraTreeClassifier(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(ExtraTreeClassifier(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "ExtraTreesClassifier"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(ExtraTreesClassifier(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(ExtraTreesClassifier(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "GaussianMixture"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(GaussianMixture(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(GaussianMixture(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "GaussianNB"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(GaussianNB(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(GaussianNB(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "GaussianProcessClassifier"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(GaussianProcessClassifier(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(GaussianProcessClassifier(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "GradientBoostingClassifier"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(GradientBoostingClassifier(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(GradientBoostingClassifier(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "KNeighborsClassifier"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(KNeighborsClassifier(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(KNeighborsClassifier(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "LabelPropagation"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(LabelPropagation(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(LabelPropagation(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "LabelSpreading"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(LabelSpreading(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(LabelSpreading(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "LinearDiscriminantAnalysis"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(LinearDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(LinearDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "LogisticRegression"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(LogisticRegression(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(LogisticRegression(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "LogisticRegressionCV"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(LogisticRegressionCV(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(LogisticRegressionCV(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "MLPClassifier"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(MLPClassifier(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(MLPClassifier(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "MultinomialNB"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(MultinomialNB(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(MultinomialNB(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "NuSVC"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(NuSVC(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(NuSVC(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "QuadraticDiscriminantAnalysis"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(QuadraticDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(QuadraticDiscriminantAnalysis(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "RandomForestClassifier"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(RandomForestClassifier(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(RandomForestClassifier(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "SGDClassifier"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(SGDClassifier(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(SGDClassifier(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "SVC"):
-
-            if search_type == "random":
-                clf = RandomizedSearchCV(SVC(), parms, cv=cross_val, scoring=scoring)
-            else:
-                clf = GridSearchCV(SVC(), parms, cv=cross_val, scoring=scoring)
-
-        else:
-            return {'algorithm': algorithm,
-                    'data': X.tolist(),
-                    'labels': y.tolist(),
-                    'downsample': downsampled,
-                    'cross_val': cross_val,
-                    'scoring': scoring,
-                    'WARNING': algorithm + " not supported."}
-
-    except:
-        return {'algorithm': algorithm,
-                'data': X.tolist(),
-                'labels': y.tolist(),
-                'cross_val': cross_val,
-                'downsample': downsampled,
-                'scoring': scoring,
-                'WARNING': traceback.format_exc()}
-
-    clf.fit(X, y)
-    y_pred = clf.predict(X)
-
-    cm = confusion_matrix(y, y_pred)
-    cm = np.round((cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]) * 100)
-    result['cm_data'] = cm.tolist()
-    result['classes'] = np.unique(y).tolist()
-
-    result["best_parms"] = clf.best_params_
-    result["best_score"] = clf.best_score_
-
-    # TODO - The front end should specify a save name for the model
-    model_name = algorithm +  "_" + str(random.random())
-    model_dict = cache.saveModel(model_name, clf.best_estimator_, "classifier")
-    if not model_dict:
-        result['WARNING'] = "Model could not be saved."
-    else:   
-        result['model_name'] = model_dict['name']
-        result['model_hash'] = model_dict['hash']
-
-    endTime = time.time()
-    computeTime = endTime - startTime
-    logTime("classification", algorithm, computeTime, computed_samples, computed_features)
-
-    result['message'] = 'success'
-    return result
 

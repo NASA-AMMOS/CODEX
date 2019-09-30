@@ -82,527 +82,94 @@ from api.sub.time_log          import getComputeTimeEstimate
 from api.sub.time_log          import logTime
 from api.sub.hash              import get_cache
 from api.sub.downsample        import downsample
+from api.algorithm             import algorithm
 
-def ml_regression(
-        inputHash,
-        hashList,
-        subsetHashName,
-        labelHash,
-        algorithmName,
-        downsampled,
-        parms,
-        scoring,
-        search_type,
-        cross_val,
-        result,
-        session=None):
-    '''
-    Inputs:
+class regression(algorithm):
 
-    Outputs:
+    def get_algorithm(self):
 
-    '''
-    cache = get_cache(session)
+        if(self.algorithmName == "ARDRegression"): algorithm = ARDRegression()
+        elif(self.algorithmName == "AdaBoostRegressor"): algorithm = AdaBoostRegressor()
+        elif(self.algorithmName == "BaggingRegressor"): algorithm = BaggingRegressor()
+        elif(self.algorithmName == "BayesianRidge"): algorithm = BayesianRidge()
+        elif(self.algorithmName == "CCA"): algorithm = CCA()
+        elif(self.algorithmName == "DecisionTreeRegressor"): algorithm = DecisionTreeRegressor()
+        elif(self.algorithmName == "ElasticNet"): algorithm = ElasticNet()
+        elif(self.algorithmName == "ElasticNetCV"): algorithm = ElasticNetCV()
+        elif(self.algorithmName == "ExtraTreeRegressor"): algorithm = ExtraTreeRegressor()
+        elif(self.algorithmName == "ExtraTreesRegressor"): algorithm = ExtraTreesRegressor()
+        elif(self.algorithmName == "GaussianProcessRegressor"): algorithm = GaussianProcessRegressor()
+        elif(self.algorithmName == "GradientBoostingRegressor"): algorithm = GradientBoostingRegressor()
+        elif(self.algorithmName == "HuberRegressor"): algorithm = HuberRegressor()
+        elif(self.algorithmName == "KNeighborsRegressor"): algorithm = KNeighborsRegressor()
+        elif(self.algorithmName == "KernelRidge"): algorithm = KernelRidge()
+        elif(self.algorithmName == "Lars"): algorithm = Lars()
+        elif(self.algorithmName == "LarsCV"): algorithm = LarsCV()
+        elif(self.algorithmName == "Lasso"): algorithm = Lasso()
+        elif(self.algorithmName == "LassoCV"): algorithm = LassoCV()
+        elif(self.algorithmName == "LassoLars"): algorithm = LassoLars()
+        elif(self.algorithmName == "LassoLarsCV"): algorithm = LassoLarsCV()
+        elif(self.algorithmName == "LassoLarsIC"): algorithm = LassoLarsIC()
+        elif(self.algorithmName == "LinearRegression"): algorithm = LinearRegression()
+        elif(self.algorithmName == "LinearSVR"): algorithm = LinearSVR()
+        elif(self.algorithmName == "MLPRegressor"): algorithm = MLPRegressor()
+        elif(self.algorithmName == "MultiTaskElasticNet"): algorithm = MultiTaskElasticNet()
+        elif(self.algorithmName == "MultiTaskElasticNetCV"): algorithm = MultiTaskElasticNetCV()
+        elif(self.algorithmName == "MultiTaskLasso"): algorithm = MultiTaskLasso()
+        elif(self.algorithmName == "MultiTaskLassoCV"): algorithm = MultiTaskLassoCV()
+        elif(self.algorithmName == "NuSVR"): algorithm = NuSVR()
+        elif(self.algorithmName == "OrthogonalMatchingPursuit"): algorithm = OrthogonalMatchingPursuit()
+        elif(self.algorithmName == "OrthogonalMatchingPursuitCV"): algorithm = OrthogonalMatchingPursuitCV()
+        elif(self.algorithmName == "PLSCanonical"): algorithm = PLSCanonical()
+        elif(self.algorithmName == "PLSRegression"): algorithm = PLSRegression()
+        elif(self.algorithmName == "PassiveAggressiveRegressor"): algorithm = PassiveAggressiveRegressor()
+        elif(self.algorithmName == "RANSACRegressor"): algorithm = RANSACRegressor()
+        elif(self.algorithmName == "RadiusNeighborsRegressor"): algorithm = RadiusNeighborsRegressor()
+        elif(self.algorithmName == "RandomForestRegressor"): algorithm = RandomForestRegressor()
+        elif(self.algorithmName == "Ridge"): algorithm = Ridge()
+        elif(self.algorithmName == "RidgeCV"): algorithm = RidgeCV()
+        elif(self.algorithmName == "SGDRegressor"): algorithm = SGDRegressor()
+        elif(self.algorithmName == "SVR"): algorithm = SVR()
+        elif(self.algorithmName == "TheilSenRegressor"): algorithm = TheilSenRegressor()
+        elif(self.algorithmName == "TransformedTargetRegressor"): algorithm = TransformedTargetRegressor()
+        else: return None
 
-    if(subsetHashName is not None):
-        subsetHash = cache.findHashArray("name", subsetHashName, "subset")
-        if(subsetHash is None):
-            subsetHash = False
+        return algorithm
+
+
+
+    def fit_algorithm(self):
+
+        accepted_scoring_metrics = ["explained_variance", "max_error", "neg_mean_absolute_error", "neg_mean_squared_error", "neg_mean_squared_log_error", "neg_median_absolute_error", "r2"]
+        if self.scoring not in accepted_scoring_metrics:
+            self.result["WARNING"] = "{scoring} not a valid scoring metric for regression.".format(scoring=self.scoring)
+            return
+
+        if self.search_type == "random":
+            self.algorithm = RandomizedSearchCV(self.algorithm, self.parms, cv=self.cross_val, scoring=self.scoring)
         else:
-            subsetHash = subsetHash["hash"]
-    else:
-        subsetHash = False
+            self.algorithm = GridSearchCV(self.algorithm, self.parms, cv=self.cross_val, scoring=self.scoring)
 
-    try:
-        result =  run_regression(inputHash, subsetHashName, labelHash, downsampled, algorithmName, parms, search_type, cross_val, scoring, session=cache)
-    except BaseException:
-        logging.warning("Failed to run regression algorithm")
-        result['message'] = "Failed to run regression algorithm"
-        logging.warning(traceback.format_exc())
-        return None
+        self.algorithm.fit(self.X, self.y)
+        y_pred = self.algorithm.predict(self.X)
 
-    return result
-
-def run_regression(inputHash, subsetHash, labelHash, downsampled, algorithm, parms, search_type, cross_val, scoring, session=None):
-    '''
-    Inputs:
-        inputHash (string)  - hash value corresponding to the data to cluster
-        subsetHash (string) - hash value corresponding to the subselection (false if full feature)
-        downsampled (int)   - number of data points to use for quicklook
-        algorithm (string)  - Name of the regressor to run.  Follows Sklearn naming conventions.
-                                Available keys: ARDRegression | AdaBoostRegressor | BaggingRegressor | BayesianRidge | CCA
-                                                DecisionTreeRegressor | ElasticNet | ElasticNetCV | ExtraTreeRegressor
-                                                ExtraTreesRegressor | GaussianProcessRegressor | GradientBoostingRegressor
-                                                HuberRegressor | KNeighborsRegressor | KernelRidge | Lars | LarsCV | Lasso
-                                                LassoCV | LassoLars | LassoLarsCV | LassoLarsIC | LinearRegression | LinearSVR
-                                                MLPRegressor | MultiTaskElasticNet | MultiTaskElasticNetCV | MultiTaskLasso
-                                                MultiTaskLassoCV | NuSVR | OrthogonalMatchingPursuit | OrthogonalMatchingPursuitCV
-                                                PLSCanonical | PLSRegression | PassiveAggressiveRegressor | RANSACRegressor
-                                                RadiusNeighborsRegressor | RandomForestRegressor | Ridge | RidgeCV | SGDRegressor
-                                                SVR | TheilSenRegressor | TransformedTargetRegressor
+        self.result["y_pred"] = y_pred.tolist()
+        self.result["best_parms"] = self.algorithm.best_params_
+        self.result["best_score"] = self.algorithm.best_score_
 
 
-    Outputs:
-        dictionary:
-            algorithm (str)          - Name of the regressor which was run.  Will be same as algorithm input argument
-            data (numpy.ndarray)     - (samples, features) array of features to cluster
-            downsample (int)         - number of data points used in quicklook
+    def check_valid(self):
 
-    Notes:
-        Scoring Metrics: https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
-
-    '''
-    ch = get_cache(session)
-
-    logReturnCode(inspect.currentframe())
-    startTime = time.time()
-    result = {'algorithm': algorithm,
-              'downsample': downsampled,
-              'cross_val': cross_val,
-              'scoring': scoring,
-              'WARNING': "None"}
-
-    returnHash = ch.findHashArray("hash", inputHash, "feature")
-    if returnHash is None:
-        logging.warning("Regression: {algorithm}: Hash not found. Returning!".format(algorithm=algorithm))
-        return None
-
-    X = returnHash['data']
-    if X is None:
-        return None
-
-    if X.ndim < 2:
-        logging.warning("ERROR: run_codex_regression - insufficient data dimmensions")
-        return None
-
-    full_samples, full_features = X.shape
-    result['eta'] = getComputeTimeEstimate("regression", algorithm, full_samples, full_features)
-
-    if subsetHash is not False  and subsetHash is not None:
-        X = ch.applySubsetMask(X, subsetHash)
-        if(X is None):
-            logging.warning("ERROR: run_codex_regression - subsetHash returned None.")
+        if self.X.ndim < 2:
+            logging.warning("ERROR: run_codex_regression - insufficient data dimmensions")
             return None
 
-    if downsampled is not False:
-        X = downsample(X, samples=downsampled, session=cache)
-        logging.info("Downsampled to {samples} samples".format(samples=len(X)))
+        return 1
 
-    computed_samples, computed_features = X.shape
-    X = impute(X)
-    result['X'] = X.tolist()
 
-    accepted_scoring_metrics = ["explained_variance", "max_error", "neg_mean_absolute_error", "neg_mean_squared_error", "neg_mean_squared_log_error", "neg_median_absolute_error", "r2"]
-    if scoring not in accepted_scoring_metrics:
-        result["WARNING"] = "{scoring} not a valid scoring metric for regression.".format(scoring=scoring)
-        return result
 
-    # TODO - labels are currently cached under features
-    labelHash_dict = ch.findHashArray("hash", labelHash, "feature")
-    if labelHash_dict is None:
-        logging.warning("label hash not found. Returning!")
-        return {'algorithm': algorithm,
-                'downsample': downsampled,
-                'cross_val': cross_val,
-                'scoring': scoring,
-                'WARNING': "Label not found in database."}
-    else:
-        y = labelHash_dict['data']
-        result['y'] = y.tolist()
 
-    try:
-        if(algorithm == "ARDRegression"):
 
-            if search_type == "random":
-                regr = RandomizedSearchCV(ARDRegression(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(ARDRegression(), parms, cv=cross_val, scoring=scoring)
 
-        elif(algorithm == "AdaBoostRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(AdaBoostRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(AdaBoostRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "BaggingRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(BaggingRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(BaggingRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "BayesianRidge"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(BayesianRidge(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(BayesianRidge(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "CCA"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(CCA(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(CCA(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "DecisionTreeRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(DecisionTreeRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(DecisionTreeRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "ElasticNet"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(ElasticNet(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(ElasticNet(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "ElasticNetCV"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(ElasticNetCV(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(ElasticNetCV(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "ExtraTreeRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(ExtraTreeRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(ExtraTreeRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "ExtraTreesRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(ExtraTreesRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(ExtraTreesRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "GaussianProcessRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(GaussianProcessRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(GaussianProcessRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "GradientBoostingRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(GradientBoostingRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(GradientBoostingRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "HuberRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(HuberRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(HuberRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "KNeighborsRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(KNeighborsRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(KNeighborsRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "KernelRidge"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(KernelRidge(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(KernelRidge(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "Lars"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(Lars(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(Lars(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "LarsCV"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(LarsCV(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(LarsCV(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "Lasso"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(Lasso(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(Lasso(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "LassoCV"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(LassoCV(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(LassoCV(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "LassoLars"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(LassoLars(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(LassoLars(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "LassoLarsCV"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(LassoLarsCV(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(LassoLarsCV(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "LassoLarsIC"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(LassoLarsIC(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(LassoLarsIC(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "LinearRegression"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(LinearRegression(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(LinearRegression(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "LinearSVR"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(LinearSVR(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr = GridSearchCV(LinearSVR(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "MLPRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(MLPRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr = GridSearchCV(MLPRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "MultiTaskElasticNet"):
-
-            if(y.ndim < 2):
-                return {'algorithm': algorithm,
-                        'data': X.tolist(),
-                        'labels': y.tolist(),
-                        'downsample': downsampled,
-                        'cross_val': cross_val,
-                        'scoring': scoring,
-                        'WARNING': algorithm + " requires >= 2 label vectors"}
-            else:
-
-                if search_type == "random":
-                    regr = RandomizedSearchCV(MultiTaskElasticNet(), parms, cv=cross_val, scoring=scoring)
-                else:
-                    regr =  GridSearchCV(MultiTaskElasticNet(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "MultiTaskElasticNetCV"):
-
-            if(y.ndim < 2):
-                return {'algorithm': algorithm,
-                        'data': X.tolist(),
-                        'labels': y.tolist(),
-                        'downsample': downsampled,
-                        'cross_val': cross_val,
-                        'scoring': scoring,
-                        'WARNING': algorithm + " requires >= 2 label vectors"}
-            else:
-
-                if search_type == "random":
-                    regr = RandomizedSearchCV(MultiTaskElasticNetCV(), parms, cv=cross_val, scoring=scoring)
-                else:
-                    regr =  GridSearchCV(MultiTaskElasticNetCV(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "MultiTaskLasso"):
-
-            if(y.ndim < 2):
-                return {'algorithm': algorithm,
-                        'data': X.tolist(),
-                        'labels': y.tolist(),
-                        'downsample': downsampled,
-                        'cross_val': cross_val,
-                        'scoring': scoring,
-                        'WARNING': algorithm + " requires >= 2 label vectors"}
-            else:
-
-                if search_type == "random":
-                    regr = RandomizedSearchCV(MultiTaskLasso(), parms, cv=cross_val, scoring=scoring)
-                else:
-                    regr = GridSearchCV(MultiTaskLasso(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "MultiTaskLassoCV"):
-
-            if(y.ndim < 2):
-                return {'algorithm': algorithm,
-                        'data': X.tolist(),
-                        'labels': y.tolist(),
-                        'downsample': downsampled,
-                        'cross_val': cross_val,
-                        'scoring': scoring,
-                        'WARNING': algorithm + " requires >= 2 label vectors"}
-            else:
-
-                if search_type == "random":
-                    regr = RandomizedSearchCV(MultiTaskLassoCV(), parms, cv=cross_val, scoring=scoring)
-                else:
-                    regr = GridSearchCV(MultiTaskLassoCV(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "NuSVR"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(NuSVR(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(NuSVR(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "OrthogonalMatchingPursuit"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(OrthogonalMatchingPursuit(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(OrthogonalMatchingPursuit(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "OrthogonalMatchingPursuitCV"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(OrthogonalMatchingPursuitCV(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(OrthogonalMatchingPursuitCV(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "PLSCanonical"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(PLSCanonical(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(PLSCanonical(), parms, cv=cross_val, scoring=scoring)
-
-
-        elif(algorithm == "PLSRegression"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(PLSRegression(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(PLSRegression(), parms, cv=cross_val, scoring=scoring)
-
-
-        elif(algorithm == "PassiveAggressiveRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(PassiveAggressiveRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(PassiveAggressiveRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "RANSACRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(RANSACRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(RANSACRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "RadiusNeighborsRegressor"):
-
-            # Handles the issues described here, until a front-end user-feedback solution is implemented
-            #     https://github.com/scikit-learn/scikit-learn/issues/9629
-            parms["outlier_label"] = y.min() - 1
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(RadiusNeighborsRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(RadiusNeighborsRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "RandomForestRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(RandomForestRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(RandomForestRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "Ridge"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(Ridge(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(Ridge(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "RidgeCV"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(RidgeCV(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(RidgeCV(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "SGDRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(SGDRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(SGDRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "SVR"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(SVR(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(SVR(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "TheilSenRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(TheilSenRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(TheilSenRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        elif(algorithm == "TransformedTargetRegressor"):
-
-            if search_type == "random":
-                regr = RandomizedSearchCV(TransformedTargetRegressor(), parms, cv=cross_val, scoring=scoring)
-            else:
-                regr =  GridSearchCV(TransformedTargetRegressor(), parms, cv=cross_val, scoring=scoring)
-
-        else:
-            return {'algorithm': algorithm,
-                    'data': X.tolist(),
-                    'labels': y.tolist(),
-                    'downsample': downsampled,
-                    'cross_val': cross_val,
-                    'scoring': scoring,
-                    'WARNING': algorithm + " not supported."}
-
-    except:
-        return {'algorithm': algorithm,
-                'data': X.tolist(),
-                'labels': y.tolist(),
-                'downsample': downsampled,
-                'cross_val': cross_val,
-                'scoring': scoring,
-                'WARNING': traceback.format_exc()}
-
-    regr.fit(X, y)
-    y_pred = regr.predict(X)
-    result["y_pred"] = y_pred.tolist()
-
-    result["best_parms"] = regr.best_params_
-    result["best_score"] = regr.best_score_
-
-    # TODO - The front end should specify a save name for the model
-    model_name = algorithm +  "_" + str(random.random())
-    model_dict = ch.saveModel(model_name, regr.best_estimator_, "regressor")
-    if not model_dict:
-        result['WARNING'] = "Model could not be saved."
-    else:
-        result['model_name'] = model_dict['name']
-        result['model_hash'] = model_dict['hash']
-
-    endTime = time.time()
-    computeTime = endTime - startTime
-    logTime("regression", algorithm, computeTime, computed_samples, computed_features)
-
-    return result
 
 

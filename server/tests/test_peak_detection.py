@@ -11,6 +11,14 @@ import sys
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
-def test_ml_peak_detect(capsys):
+from api.sub.hash       import get_cache
+from api.sub.hash       import DOCTEST_SESSION
+from api.peak_detection import *
+from fixtures           import testData
+
+def test_peak_detection(capsys):
 	
-	assert 1 == 1
+    ch = get_cache(DOCTEST_SESSION)
+
+    result = peak_detection(testData['inputHash'], testData['hashList'], None, False, "cwt", False, {}, None, "direct", None, {}, ch).run()
+    #assert result['message'] == 'failure'

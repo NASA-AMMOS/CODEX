@@ -32,206 +32,82 @@ from api.sub.codex_math     import impute
 from api.sub.time_log       import logTime
 from api.sub.return_code    import logReturnCode
 from api.sub.hash           import get_cache
+from api.algorithm          import algorithm
 
-def ml_quality_scan(
-        inputHash,
-        hashList,
-        subsetHashName,
-        algorithmName,
-        downsampled,
-        parms,
-        result,
-        session=None):
-    '''
-    Inputs:
 
-    Outputs:
+class quality_scan(algorithm):
 
-    '''
-    cache = get_cache(session)
+    def get_algorithm(self):
 
-    if(subsetHashName is not None):
-        subsetHash = cache.findHashArray("name", subsetHashName, "subset")
-        if(subsetHash is None):
-            subsetHash = False
+        if(self.algorithmName == "oddities"):
+            self.algorithm = "oddities"
+        elif(self.algorithmName == "sigma_data"):
+            self.algorithm == "sigma_data"
         else:
-            subsetHash = subsetHash["hash"]
-    else:
-        subsetHash = False
-
-    if(algorithmName == 'oddities'):
-
-        try:
-            result = codex_count_oddities(inputHash, subsetHash, session=cache)
-        except BaseException:
-            logging.warning("Failed to run count_oddities")
-            result['message'] = "Failed to run count_oddities"
-            logging.warning(traceback.format_exc())
             return None
 
-    elif(algorithmName == 'sigma_data'):
-
-        try:
-            sigma = int(parms["sigma"])
-        except BaseException:
-            logging.warning("sigma parameter not set")
-            result['message'] = "sigma parameter not set"
-            logging.warning(traceback.format_exc())
-            return None
-
-        try:
-            inside = parms["inside"]
-        except BaseException:
-            logging.warning("inside parameter not set")
-            result['message'] = "inside parameter not set"
-            logging.warning(traceback.format_exc())
-            return None
-
-        try:
-            result = codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=cache)
-        except BaseException:
-            logging.warning("Failed to run codex_get_sigma_data")
-            result['message'] = "Failed to run codex_get_sigma_data"
-            logging.warning(traceback.format_exc())
-            return None
-
-    else:
-        result['message'] = "Cannot find requested quality scan algorithm"
-
-    return result
+        return algorithm
 
 
-def codex_count_oddities(inputHash, subsetHash, session=None):
-    '''
-    Inuputs:
-        inputHash (string)   - hash value corresponding to the data to cluster
-        subsetHash (string)  - hash value corresponding to the subselection (false if full feature)
-
-    Outputs:
-        dictionary -
-            nan_count        - count of NaN values in the feature
-            neg_inf_count    - count of negative infinity values in the feature
-            inf_count        - count of negative
-            zero_count       - count of 0 value instances (if integers, else None value)
-            mode_count       - count of mode value instances (if integers, else None value)
-            mode_value       - associated mode value (if integers, else None value)
-
-    Notes:
-    - Currently only works on single feature.  Call for each feature
-
-    '''
-    cache = get_cache(session)
-    logReturnCode(inspect.currentframe())
-    startTime = time.time()
-
-    returnHash = cache.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
-        print("Error: codex_count_oddities: Hash not found")
-        return None
-
-    feature = returnHash['data']
-    feature_name = returnHash['name']
-    dtype = feature.dtype
-
-    feature = impute(feature)
-
-    if(subsetHash is not False):
-        feature = cache.applySubsetMask(data, subsetHash)
-
-    nan_count = 0
-    ninf_count = 0
-    inf_count = 0
-    empty_string = 0
-    zero_count = None
-    mode_count = None
-    mode_value = None
-
-    if(np.issubdtype(feature.dtype, np.integer)):
-        zero_count = 0
-
-        modeInfo = stats.mode(feature, axis=None)
-        mode_value = modeInfo.mode[0]
-        mode_count = modeInfo.count[0]
-
-    samples = len(feature)
-
-    for x in range(0, samples):
-
-        if(feature[x] == ''):
-            empty_string += 1
-
-        # if(np.isnan(feature[x])):
-        #   nan_count += 1
-
-        # if(np.isneginf(feature[x])):
-        #   ninf_count += 1
-
-        # elif(np.isinf(feature[x])):
-        #   inf_count += 1
-
-        if(np.issubdtype(feature.dtype, np.integer)):
-
-            if(feature[x] == 0):
-                zero_count += 1
-
-    endTime = time.time()
-    computeTime = endTime - startTime
-    logTime(
-        "quality_scan",
-        "count_oddities",
-        computeTime,
-        samples,
-        feature.ndim)
-
-    dictionary = {"feature_name": feature_name,
-                  "dtype": str(dtype),
-                  "nan_count": nan_count,
-                  "neg_inf_count": ninf_count,
-                  "inf_count": inf_count,
-                  "zero_count": zero_count,
-                  "mode_value": mode_value,
-                  "mode_count": mode_count,
-                  "empty_string_count": empty_string}
-    return dictionary
+    def fit_algorithm(self):
+        pass
 
 
-def codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=None):
-    '''
-    Inuputs:
-        inputHash (string)   - hash value corresponding to the data to cluster
-        subsetHash (string)  - hash value corresponding to the subselection (false if full feature)
-        sigma(int)           - sigma value to search around
-        inside (bool)        - returns statistics assoicated with values within sigma range if True or values outside
-                                    sigma range if False
-    Outputs:
-        dictionary -
-            values      - array of values inside/outside sigma range (values in range if inside = True, values outside
-                            range if inside = False)
-            std    -      standard deviation of the original feature vector
-            mean   -      mean vaue of the original feature vector
-            sigma_high  - caulcated high-end sigma value for feature vector
-            sigma_low   - calculated low-end sigma value for feature vector
-            sigma       - sigma value
-            inside      - boolean value tracking if data is inside sigma range or outside
-            count       - count of values in the requested area (inside/outside of specified sigma range)
-            percentage  - percentage of the data set falling inside the return array
 
-    '''
-    cache = get_cache(session)
 
-    logReturnCode(inspect.currentframe())
-    startTime = time.time()
+    def check_valid(self):
+        return 1
 
-    returnHash = cache.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
-        logging.warning("Error: codex_get_sigma_data: Hash not found!")
-        return
 
-    feature = returnHash['data']
-    feature = impute(feature)
+'''
+            nan_count = 0
+            ninf_count = 0
+            inf_count = 0
+            empty_string = 0
+            zero_count = None
+            mode_count = None
+            mode_value = None
 
-    if(subsetHash is not False):
-        feature = cache.applySubsetMask(data, subsetHash)
+            if(np.issubdtype(self.X.dtype, np.integer)):
+                zero_count = 0
+
+                modeInfo = stats.mode(feature, axis=None)
+                mode_value = modeInfo.mode[0]
+                mode_count = modeInfo.count[0]
+
+            samples = len(feature)
+
+            for x in range(0, samples):
+
+                if(feature[x] == ''):
+                    empty_string += 1
+
+                # if(np.isnan(feature[x])):
+                #   nan_count += 1
+
+                # if(np.isneginf(feature[x])):
+                #   ninf_count += 1
+
+                # elif(np.isinf(feature[x])):
+                #   inf_count += 1
+
+                if(np.issubdtype(feature.dtype, np.integer)):
+
+                    if(feature[x] == 0):
+                        zero_count += 1
+
+            dictionary = {"feature_name": feature_name,
+                          "dtype": str(dtype),
+                          "nan_count": nan_count,
+                          "neg_inf_count": ninf_count,
+                          "inf_count": inf_count,
+                          "zero_count": zero_count,
+                          "mode_value": mode_value,
+                          "mode_count": mode_count,
+                          "empty_string_count": empty_string}
+
+
+
 
     sigmaList = []
     feature_length = len(feature)
@@ -263,9 +139,6 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=None):
     mean_value_string = np.array2string(mean_value)
     std_value_string = np.array2string(std_value)
 
-    endTime = time.time()
-    computeTime = endTime - startTime
-    logTime("quality_scan", "sigma_data", computeTime, feature, feature.ndim)
 
     dictionary = {"values": resultValuesString,
                   "std": std_value_string,
@@ -276,36 +149,8 @@ def codex_get_sigma_data(inputHash, subsetHash, sigma, inside, session=None):
                   "inside": inside,
                   "count": count,
                   "percentage": percentage}
-    return dictionary
 
 
-def codex_column_correlation(inputHash, subsetHash, session=None):
-    '''
-    Inuputs:
-        inputHash (string)            - hash value corresponding to the data to cluster
-        subsetHash (string)           - hash value corresponding to the subselection (false if full feature)
-
-    Outputs:
-        Dictionary -
-            r2_matrix (2d-array)      - array of r2 coefficients.  Calculated using sklearn r2_score()
-            pearson_matrix (2d-array) - array of pearson coefficients.  Calculated using scipy.stats.pearson()
-
-    '''
-
-    cache = get_cache(session)
-    logReturnCode(inspect.currentframe())
-    startTime = time.time()
-
-    returnHash = cache.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
-        logging.warning("Error: codex_column_correlation: Hash not found!")
-        return
-
-    data = returnHash['data']
-    data = impute(data)
-
-    if(subsetHash is not False):
-        data = cache.applySubsetMask(data, subsetHash)
 
     samples, features = data.shape
     arraySize = (features, features)
@@ -324,56 +169,10 @@ def codex_column_correlation(inputHash, subsetHash, session=None):
             pearsonArray[x, y] = pearson[0]
             r2Array[x, y] = r2_score(f1_data, f2_data)
 
-
-    endTime = time.time()
-    computeTime = endTime - startTime
-    logTime("quality_scan", "column_correlation", computeTime, data, data.ndim)
-
     dictionary = {"r2_matrix": r2Array.tolist(),
                   "pearson_matrix": pearsonArray.tolist()}
-    return dictionary
 
 
-def codex_column_threshold(
-        inputHash,
-        subsetHash,
-        threshold_min,
-        threshold_max,
-        session=None):
-    '''
-    Inuputs:
-        inputHash (string)            - hash value corresponding to the data to cluster
-        subsetHash (string)           - hash value corresponding to the subselection (false if full feature)
-        threshold_min (int/float)     - minimum value to accept into the new column
-        threshold_max (int/float)     - maximum value to accept into the new column
-
-    Outputs:
-        Dictionary -
-            resulting_array           - resulting feature column after threholds are applied to input column feature
-            threshold_min             - threshold_min input value
-            threshold_max             - threshold_max input value
-            percentage_data           - percentage of data from original feature remaining in filtered feature column
-
-    '''
-    cache = get_cache(session)
-
-    logReturnCode(inspect.currentframe())
-    startTime = time.time()
-    returnList = []
-
-    returnHash = cache.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
-        print("Error: codex_column_correlation: Hash not found!")
-        return
-
-    data = returnHash['data']
-    samples = len(data)
-    inThresholdCount = 0
-
-    if(subsetHash is not False):
-        data = cache.applySubsetMask(data, subsetHash)
-
-    data = impute(data)
 
     # TODO - this needs to handle multiple features correctly
     for value in data:
@@ -385,16 +184,11 @@ def codex_column_threshold(
     returnArray = np.asarray(returnList)
     dataPercentage = (inThresholdCount / samples) * 100
 
-    endTime = time.time()
-    computeTime = endTime - startTime
-    logTime("quality_scan", "column_threshold", computeTime, data, data.ndim)
-
     dictionary = {"resulting_array": returnArray,
                   "threshold_min": threshold_min,
                   "threshold_max": threshold_max,
                   "percentage_data": dataPercentage}
-
-    return dictionary
+'''
 
 
     

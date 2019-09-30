@@ -23,15 +23,15 @@ logger = logging.getLogger(__name__)
 
 from api.binning                 import ml_binning
 from api.clustering              import clustering
-from api.quality_scan            import ml_quality_scan
-from api.dimmension_reduction    import ml_dimensionality_reduction
-from api.endmember               import ml_endmember
-from api.normalize               import ml_normalize
-from api.peak_detection          import ml_peak_detect
-from api.regression              import ml_regression
-from api.segmentation            import ml_segmentation
-from api.template_scan           import ml_template_scan
-from api.classification          import ml_classification
+from api.quality_scan            import quality_scan
+from api.dimmension_reduction    import dimension_reduction
+from api.endmember               import endmember
+from api.normalize               import normalize
+from api.peak_detection          import peak_detection
+from api.regression              import regression
+from api.segmentation            import segmentation
+from api.template_scan           import template_scan
+from api.classification          import classification
 
 from api.sub.system              import get_featureList
 from api.sub.return_code         import logReturnCode
@@ -60,7 +60,29 @@ def algorithm_call(msg, result):
         if (subsetHashName != []):
             subsetHashName = subsetHashName[0]
         else:
-            subsetHashName = None
+            subsetHashName = False
+
+        try:
+            labelName = msg["labelName"]
+            labelHash = ch.findHashArray("name", labelName, "feature")['hash']
+        except:
+            labelHash = None
+
+        try:
+            cross_val = msg["cross_val"]
+        except:
+            cross_val = None
+
+        try:
+            search_type = msg["search_type"]
+        except:
+            search_type = 'direct'
+
+        try:
+            scoring = msg["scoring"]
+        except:
+            scoring = None
+
 
         hashList = ch.feature2hashList(featureList)
         logReturnCode(inspect.currentframe())
@@ -80,50 +102,36 @@ def algorithm_call(msg, result):
             result = ml_binning(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result, session=ch)
 
         elif (algorithmType == "clustering"):
-            result = ml_cluster(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result, session=ch)
+            pca = dimension_reduction(inputHash, hashList, labelHash, subsetHashName, "PCA", downsampled, {"n_components":2}, scoring, search_type, cross_val, result, ch).run()
+            result =       clustering(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+            result['data'] = pca['data']
 
         elif (algorithmType == "data_quality_scan"):
-            result = ml_quality_scan(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result, session=ch)
+            result = quality_scan(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         elif (algorithmType == "dimensionality_reduction"):
-            result = ml_dimensionality_reduction(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result, session=ch)
+            result = dimension_reduction(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         elif (algorithmType == "endmember"):
-            result = ml_endmember(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result, session=ch)
+            result = endmember(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         elif (algorithmType == "normalize"):
-            result = ml_normalize(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result, session=ch)
+            result = normalize(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         elif (algorithmType == "peak_detect"):
-            result = ml_peak_detect(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result, session=ch)
+            result = peak_detection(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         elif (algorithmType == "regression"):
-
-            labelName = msg["labelName"]
-            labelHash = ch.findHashArray("name", labelName, "feature")['hash']
-
-            cross_val = msg["cross_val"]
-            search_type = msg["search_type"]
-            scoring = msg["scoring"]
-
-            result = ml_regression(inputHash, hashList, subsetHashName, labelHash, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, session=ch)
+            result = regression(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         elif (algorithmType == "classification"):
-
-            labelName = msg["labelName"]
-            labelHash = ch.findHashArray("name", labelName, "feature")['hash']
-
-            cross_val = msg["cross_val"]
-            search_type = msg["search_type"]
-            scoring = msg["scoring"]
-
-            result = ml_classification(inputHash, hashList, subsetHashName, labelHash, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, session=ch)
+            result = classification(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         elif (algorithmType == "segment"):
-            result = ml_segmentation(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result, session=ch)
+            result = segmentation(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         elif (algorithmType == "template_scan"):
-            result = ml_template_scan(inputHash, hashList, subsetHashName, None, algorithmName, downsampled, parms, result, session=ch)
+            result = template_scan(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         else:
             result['message'] = "Cannot parse algorithmType"
