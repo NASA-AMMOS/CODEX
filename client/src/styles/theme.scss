@@ -1,0 +1,40 @@
+$black: #000000;
+$grey1: #555555;
+$grey3: #808080;
+$grey5: #bbbbbb;
+$grey7: #e5e5e5;
+$grey9: #eeeeee;
+$white: #ffffff;
+$primary-blue: #3988e3;
+$red: #eb5757;
+$header-green: #477680;
+
+$default-point-color: #3386e6;
+
+$selection-color-options: (
+    "#3988E3",
+    "#9EDF11",
+    "#11D3DF",
+    "#FF891C",
+    "#FF11E7",
+    "#1C7306",
+    "#F3AEEC",
+    "#98e633",
+    "#7733e6",
+    "#e63380",
+    "#33e6c5",
+    "#333be6",
+    "#e63333",
+    "#380f7b",
+    "#7b0f3e",
+    "#4c7b0f",
+    "#0f7b67",
+    "#0f157b",
+    "#7b0f0f"
+);
+
+:export {
+    selectionColorOptions: $selection-color-options;
+    defaultPointColor: $default-point-color;
+    primaryBlue: $primary-blue;
+}

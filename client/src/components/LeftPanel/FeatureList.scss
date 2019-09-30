@@ -1,3 +1,5 @@
+@import "styles/theme.scss";
+
 .feature-list-container {
     height: 40vh;
     position: relative;
@@ -82,7 +84,7 @@
         align-items: baseline;
         padding: 0 5px;
         color: white;
-        background-color: #79aab5;
+        background-color: $header-green;
 
         .title {
             font-weight: bold;

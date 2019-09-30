@@ -1,5 +1,5 @@
 import * as actionTypes from "constants/actionTypes";
-
+import theme from "styles/theme.scss";
 /* eslint import/no-webpack-loader-syntax: off */
 import WorkerSocket from "worker-loader!workers/socket.worker";
 import StreamSocket from "worker-loader!workers/stream.worker";
@@ -325,4 +325,11 @@ export function tileWindows(windows) {
     // if (packed.length === refAry.length) return tileWindowsFromPackedObject(refAry, packed);
 
     // console.log("Can't tile windows! Not enough space!");
+}
+
+export function getSelectionPalette() {
+    return theme.selectionColorOptions
+        .replace(/ /g, "")
+        .replace(/"/g, "")
+        .split(",");
 }

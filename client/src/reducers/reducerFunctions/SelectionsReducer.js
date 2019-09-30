@@ -1,5 +1,5 @@
 import * as uiTypes from "constants/uiTypes";
-import * as selectionState from "reducers/models/selections";
+import * as utils from "utils/utils";
 
 export default class SelectionsReducer {
     static setCurrentSelection(state, action) {
@@ -7,21 +7,22 @@ export default class SelectionsReducer {
     }
 
     static saveCurrentSelection(state, action) {
+        const palette = utils.getSelectionPalette();
         return {
             ...state,
             savedSelections: state.savedSelections.concat([
                 {
                     id: state.savedSelections.length,
                     rowIndices: state.currentSelection,
-                    color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
+                    color: palette[state.nextColorIndex],
                     active: false,
                     hidden: false,
-                    name: `Selection ${state.savedSelections.length + 1}`,
+                    name: `Selection ${palette.length + 1}`,
                     groupID: null
                 }
             ]),
             currentSelection: [],
-            nextColorIndex: (state.nextColorIndex + 1) % uiTypes.SELECTIONS_COLOR_PALETTE.length
+            nextColorIndex: (state.nextColorIndex + 1) % palette.length
         };
     }
 
@@ -44,6 +45,7 @@ export default class SelectionsReducer {
     }
 
     static saveNewSelection(state, action) {
+        const palette = utils.getSelectionPalette();
         const id = [...Array(state.savedSelections.length + 1).keys()].reduce((acc, idx) => {
             if (acc) return acc;
             if (state.savedSelections.every(sel => sel.id !== idx)) {
@@ -56,7 +58,7 @@ export default class SelectionsReducer {
                 {
                     id,
                     rowIndices: action.rowIndices,
-                    color: uiTypes.SELECTIONS_COLOR_PALETTE[state.nextColorIndex],
+                    color: palette[state.nextColorIndex],
                     active: true,
                     hidden: false,
                     name: action.name,
@@ -64,9 +66,7 @@ export default class SelectionsReducer {
                 }
             ]),
             nextColorIndex:
-                state.nextColorIndex === uiTypes.SELECTIONS_COLOR_PALETTE.length - 1
-                    ? 0
-                    : state.nextColorIndex + 1
+                state.nextColorIndex === palette.length - 1 ? 0 : state.nextColorIndex + 1
         };
     }
 

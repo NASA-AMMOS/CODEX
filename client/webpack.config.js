@@ -37,7 +37,12 @@ module.exports = {
             },
             {
                 test: /\.(css|scss)$/,
-                use: ["style-loader", "css-loader", "sass-loader"]
+                use: [
+                    "style-loader",
+                    "@teamsupercell/typings-for-css-modules-loader",
+                    "css-loader",
+                    "sass-loader"
+                ]
             },
             {
                 test: /\.(png|jpg|gif|eot|ttf|woff|woff2)$/,

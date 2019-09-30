@@ -19,6 +19,8 @@ export interface HeaderProps {
     isActive?: boolean;
 }
 
+const theme = require("styles/theme.scss");
+
 export const defaultWidth = 200;
 export const defaultHeight = 200;
 export const padding = 10;
@@ -55,7 +57,7 @@ export const Header = styled.div`
     align-items: center;
     justify-content: space-between;
     padding-left: ${padding}px;
-    background-color: ${({ isActive }: HeaderProps) => (isActive ? `#007bff` : `white`)};
+    background-color: ${({ isActive }: HeaderProps) => (isActive ? theme.primaryBlue : `white`)};
     color: ${({ isActive }: HeaderProps) => (isActive ? `white` : `#181818`)};
 `;
 
