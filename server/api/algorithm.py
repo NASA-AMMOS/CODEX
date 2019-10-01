@@ -65,16 +65,16 @@ class algorithm():
             returnHash = self.cache.findHashArray("hash", self.inputHash, "feature")
             if returnHash is None:
                 logging.warning("Hash not found")
-                return None
+                return self.result
 
             self.X = returnHash['data']
             if self.X is None:
-                return None
+                return self.result
 
             ret = self.check_valid()
             if not ret:
                 logging.warning("Failed check")
-                return None 
+                return self.result
 
             full_samples, full_features = self.X.shape
             self.result['eta'] = getComputeTimeEstimate(self.__class__.__name__, self.algorithmName, full_samples, full_features)
@@ -82,8 +82,9 @@ class algorithm():
             if self.subsetHashName is not False:
                 self.X = self.cache.applySubsetMask(self.X, self.subsetHashName)
                 if(self.X is None):
-                    logging.warning("subsetHash returned None.")
-                    return None
+                    logging.warning("Subset hash not found: {subsetHash}".format(self.subsetHashName))
+                    self.result['message'] = "failure"
+                    return self.result
 
             if self.downsampled is not False:
                 self.X = downsample(self.X, samples=self.downsampled, session=self.cache)
@@ -93,17 +94,12 @@ class algorithm():
             if self.labelHash:
                 labelHash_dict = self.cache.findHashArray("hash", self.labelHash, "feature")
                 if labelHash_dict is None:
-                    logging.warning("label hash not found.")
+                    logging.warning("Label hash not found: {labelHash}".format(self.labelHash))
+                    self.result['message'] = "failure"
+                    return self.result                  
                 else:
                     self.y = labelHash_dict['data']
                     self.result['y'] = self.y.tolist()
-                    unique, counts = np.unique(self.y, return_counts=True)
-                    count_dict = dict(zip(unique, counts))
-                    if any(v < self.cross_val for v in count_dict.values()):
-                        count_dict = dict(zip(unique.astype(str), counts.astype(str)))
-                        self.result['counts'] = json.dumps(count_dict)
-                        self.result['WARNING'] = "Label class has less samples than cross val score"
-                        return self.result
 
             computed_samples, computed_features = self.X.shape
             self.X = impute(self.X)

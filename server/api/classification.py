@@ -99,6 +99,14 @@ class classification(algorithm):
 
     def fit_algorithm(self):
 
+        unique, counts = np.unique(self.y, return_counts=True)
+        count_dict = dict(zip(unique, counts))
+        if any(v < self.cross_val for v in count_dict.values()):
+            count_dict = dict(zip(unique.astype(str), counts.astype(str)))
+            self.result['counts'] = json.dumps(count_dict)
+            self.result['WARNING'] = "Label class ({labelCount}) has less samples than cross val score ({cvScore})".format(labelCount=min(list(count_dict.values())), cvScore=self.cross_val)
+            return
+
         accepted_scoring_metrics = ["accuracy", "balanced_accuracy", "average_precision", "brier_score_loss", "f1, f1_micro", "f1_macro", "f1_weighted", "f1_samples", "neg_log_loss", "precision", "recall", "jaccard", "roc_auc"]
         if self.scoring not in accepted_scoring_metrics:
             self.result["WARNING"] = "{scoring} not a valid scoring metric for classification.".format(scoring=self.scoring)
