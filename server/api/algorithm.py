@@ -64,16 +64,19 @@ class algorithm():
 
             returnHash = self.cache.findHashArray("hash", self.inputHash, "feature")
             if returnHash is None:
-                logging.warning("Hash not found")
+                logging.warning("Input hash not found: {inputHash}".format(inputHash=self.inputHash))
+                self.result['message'] = "failure"
                 return self.result
 
             self.X = returnHash['data']
             if self.X is None:
+                self.result['message'] = "failure"
+                logging.warning("X returned None")
                 return self.result
 
             ret = self.check_valid()
             if not ret:
-                logging.warning("Failed check")
+                self.result['message'] = "failure"
                 return self.result
 
             full_samples, full_features = self.X.shape
@@ -82,7 +85,7 @@ class algorithm():
             if self.subsetHashName is not False:
                 self.X = self.cache.applySubsetMask(self.X, self.subsetHashName)
                 if(self.X is None):
-                    logging.warning("Subset hash not found: {subsetHash}".format(self.subsetHashName))
+                    logging.warning("Subset hash not found: {subsetHash}".format(subsetHash=self.subsetHashName))
                     self.result['message'] = "failure"
                     return self.result
 
