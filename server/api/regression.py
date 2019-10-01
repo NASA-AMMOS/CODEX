@@ -87,26 +87,26 @@ from api.algorithm             import algorithm
 class regression(algorithm):
 
     def get_algorithm(self):
-    '''
-    Inputs:
-        algorithm (string)  - Name of the regressor to run.  Follows Sklearn naming conventions.
-                                Available keys: ARDRegression | AdaBoostRegressor | BaggingRegressor | BayesianRidge | CCA
-                                                DecisionTreeRegressor | ElasticNet | ExtraTreeRegressor
-                                                ExtraTreesRegressor | GaussianProcessRegressor | GradientBoostingRegressor
-                                                HuberRegressor | KNeighborsRegressor | KernelRidge | Lars | Lasso
-                                                LassoLars | LinearRegression | LinearSVR | MLPRegressor | NuSVR | 
-                                                OrthogonalMatchingPursuit | PLSCanonical | PLSRegression | 
-                                                PassiveAggressiveRegressor | RANSACRegressor | RandomForestRegressor | 
-                                                Ridge | SGDRegressor | SVR | TheilSenRegressor | TransformedTargetRegressor
+        '''
+        Inputs:
+            algorithm (string)  - Name of the regressor to run.  Follows Sklearn naming conventions.
+                                    Available keys: ARDRegression | AdaBoostRegressor | BaggingRegressor | BayesianRidge | CCA
+                                                    DecisionTreeRegressor | ElasticNet | ExtraTreeRegressor
+                                                    ExtraTreesRegressor | GaussianProcessRegressor | GradientBoostingRegressor
+                                                    HuberRegressor | KNeighborsRegressor | KernelRidge | Lars | Lasso
+                                                    LassoLars | LinearRegression | LinearSVR | MLPRegressor | NuSVR | 
+                                                    OrthogonalMatchingPursuit | PLSCanonical | PLSRegression | 
+                                                    PassiveAggressiveRegressor | RANSACRegressor | RandomForestRegressor | 
+                                                    Ridge | SGDRegressor | SVR | TheilSenRegressor | TransformedTargetRegressor
 
-                                Currently not supporting: ElasticNetCV | LarsCV | LassoCV | LassoLarsCV | LassoLarsIC | 
-                                                MultiTaskElasticNet | MultiTaskElasticNetCV | MultiTaskLasso | MultiTaskLassoCV |
-                                                OrthogonalMatchingPursuitCV | RidgeCV | RadiusNeighborsRegressor
-    Outputs:
+                                    Currently not supporting: ElasticNetCV | LarsCV | LassoCV | LassoLarsCV | LassoLarsIC | 
+                                                    MultiTaskElasticNet | MultiTaskElasticNetCV | MultiTaskLasso | MultiTaskLassoCV |
+                                                    OrthogonalMatchingPursuitCV | RidgeCV | RadiusNeighborsRegressor
+        Outputs:
 
-    Notes:
-        Scoring Metrics: https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
-    '''
+        Notes:
+            Scoring Metrics: https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
+        '''
         if(self.algorithmName == "ARDRegression"): algorithm = ARDRegression()
         elif(self.algorithmName == "AdaBoostRegressor"): algorithm = AdaBoostRegressor()
         elif(self.algorithmName == "BaggingRegressor"): algorithm = BaggingRegressor()
