@@ -193,6 +193,7 @@ def route_request(msg, result):
         result['message'] = 'Unknown Routine'
         yield result
 
+
 def execute_request(queue, message):
     '''
     This function calls the request router, and determines if the result is a singular result or a
@@ -325,6 +326,9 @@ def make_cache_process():
             raise
     return Process(target=run_cache)
 
+#def schedule_func():
+#    print("HERE")
+
 if __name__ == '__main__':
 
     if not os.path.exists("logs/"):
@@ -352,7 +356,12 @@ if __name__ == '__main__':
 
     # start server
     app.listen(8888)
+
     ioloop.IOLoop.instance().start()
+    #main_loop = tornado.ioloop.IOLoop.instance()
+    #sched = tornado.ioloop.PeriodicCallback(schedule_func,1000)
+    #sched.start()
+    #main_loop.start()
 
     # gracefully shut down cache server
     stop_cache_server()
