@@ -87,7 +87,26 @@ from api.algorithm             import algorithm
 class regression(algorithm):
 
     def get_algorithm(self):
+    '''
+    Inputs:
+        algorithm (string)  - Name of the regressor to run.  Follows Sklearn naming conventions.
+                                Available keys: ARDRegression | AdaBoostRegressor | BaggingRegressor | BayesianRidge | CCA
+                                                DecisionTreeRegressor | ElasticNet | ExtraTreeRegressor
+                                                ExtraTreesRegressor | GaussianProcessRegressor | GradientBoostingRegressor
+                                                HuberRegressor | KNeighborsRegressor | KernelRidge | Lars | Lasso
+                                                LassoLars | LinearRegression | LinearSVR | MLPRegressor | NuSVR | 
+                                                OrthogonalMatchingPursuit | PLSCanonical | PLSRegression | 
+                                                PassiveAggressiveRegressor | RANSACRegressor | RandomForestRegressor | 
+                                                Ridge | SGDRegressor | SVR | TheilSenRegressor | TransformedTargetRegressor
 
+                                Currently not supporting: ElasticNetCV | LarsCV | LassoCV | LassoLarsCV | LassoLarsIC | 
+                                                MultiTaskElasticNet | MultiTaskElasticNetCV | MultiTaskLasso | MultiTaskLassoCV |
+                                                OrthogonalMatchingPursuitCV | RidgeCV | RadiusNeighborsRegressor
+    Outputs:
+
+    Notes:
+        Scoring Metrics: https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
+    '''
         if(self.algorithmName == "ARDRegression"): algorithm = ARDRegression()
         elif(self.algorithmName == "AdaBoostRegressor"): algorithm = AdaBoostRegressor()
         elif(self.algorithmName == "BaggingRegressor"): algorithm = BaggingRegressor()
@@ -95,7 +114,6 @@ class regression(algorithm):
         elif(self.algorithmName == "CCA"): algorithm = CCA()
         elif(self.algorithmName == "DecisionTreeRegressor"): algorithm = DecisionTreeRegressor()
         elif(self.algorithmName == "ElasticNet"): algorithm = ElasticNet()
-        elif(self.algorithmName == "ElasticNetCV"): algorithm = ElasticNetCV()
         elif(self.algorithmName == "ExtraTreeRegressor"): algorithm = ExtraTreeRegressor()
         elif(self.algorithmName == "ExtraTreesRegressor"): algorithm = ExtraTreesRegressor()
         elif(self.algorithmName == "GaussianProcessRegressor"): algorithm = GaussianProcessRegressor()
@@ -104,30 +122,19 @@ class regression(algorithm):
         elif(self.algorithmName == "KNeighborsRegressor"): algorithm = KNeighborsRegressor()
         elif(self.algorithmName == "KernelRidge"): algorithm = KernelRidge()
         elif(self.algorithmName == "Lars"): algorithm = Lars()
-        elif(self.algorithmName == "LarsCV"): algorithm = LarsCV()
         elif(self.algorithmName == "Lasso"): algorithm = Lasso()
-        elif(self.algorithmName == "LassoCV"): algorithm = LassoCV()
         elif(self.algorithmName == "LassoLars"): algorithm = LassoLars()
-        elif(self.algorithmName == "LassoLarsCV"): algorithm = LassoLarsCV()
-        elif(self.algorithmName == "LassoLarsIC"): algorithm = LassoLarsIC()
         elif(self.algorithmName == "LinearRegression"): algorithm = LinearRegression()
         elif(self.algorithmName == "LinearSVR"): algorithm = LinearSVR()
         elif(self.algorithmName == "MLPRegressor"): algorithm = MLPRegressor()
-        elif(self.algorithmName == "MultiTaskElasticNet"): algorithm = MultiTaskElasticNet()
-        elif(self.algorithmName == "MultiTaskElasticNetCV"): algorithm = MultiTaskElasticNetCV()
-        elif(self.algorithmName == "MultiTaskLasso"): algorithm = MultiTaskLasso()
-        elif(self.algorithmName == "MultiTaskLassoCV"): algorithm = MultiTaskLassoCV()
         elif(self.algorithmName == "NuSVR"): algorithm = NuSVR()
         elif(self.algorithmName == "OrthogonalMatchingPursuit"): algorithm = OrthogonalMatchingPursuit()
-        elif(self.algorithmName == "OrthogonalMatchingPursuitCV"): algorithm = OrthogonalMatchingPursuitCV()
         elif(self.algorithmName == "PLSCanonical"): algorithm = PLSCanonical()
         elif(self.algorithmName == "PLSRegression"): algorithm = PLSRegression()
         elif(self.algorithmName == "PassiveAggressiveRegressor"): algorithm = PassiveAggressiveRegressor()
         elif(self.algorithmName == "RANSACRegressor"): algorithm = RANSACRegressor()
-        elif(self.algorithmName == "RadiusNeighborsRegressor"): algorithm = RadiusNeighborsRegressor()
         elif(self.algorithmName == "RandomForestRegressor"): algorithm = RandomForestRegressor()
         elif(self.algorithmName == "Ridge"): algorithm = Ridge()
-        elif(self.algorithmName == "RidgeCV"): algorithm = RidgeCV()
         elif(self.algorithmName == "SGDRegressor"): algorithm = SGDRegressor()
         elif(self.algorithmName == "SVR"): algorithm = SVR()
         elif(self.algorithmName == "TheilSenRegressor"): algorithm = TheilSenRegressor()

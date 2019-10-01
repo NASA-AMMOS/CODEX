@@ -54,14 +54,14 @@ class peak_detection(algorithm):
 
     def fit_algorithm(self):
 
-        self.X = self.X[:, 0]
+        self.X = self.X[:, 0] # TODO - this is definitely not the correct long term strategy
         num_samples = len(self.X)
-        width_array = np.asarray(np.arange(1, num_samples / peak_width))
+        width_array = np.asarray(np.arange(1, num_samples / self.parms['peak_width']))
 
         if self.algorithm == "cwt":
-            indexes = find_peaks_cwt(data, width_array, gap_thresh=gap_threshold, min_snr=min_snr, noise_perc=noise_perc)
+            indexes = find_peaks_cwt(self.X, width_array, gap_thresh=self.parms['gap_threshold'], min_snr=self.parms['min_snr'], noise_perc=self.parms['noise_perc'])
         elif self.algorithm == "matlab_findpeaks":
-            indexes = detect_peaks(data, mph=mph, mpd=mpd, threshold=threshold, edge=edge, kpsh=kpsh, valley=valley)
+            indexes = detect_peaks(self.X, mph=self.parms['mph'], mpd=self.parms['mpd'], threshold=self.parms['threshold'], edge=self.parms['edge'], kpsh=self.parms['kpsh'], valley=self.parms['valley'])
 
         self.result["indexes"] = indexes
 

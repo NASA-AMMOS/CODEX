@@ -59,8 +59,8 @@ class algorithm():
 
             startTime = time.time()
             self.result = {'algorithm': self.algorithmName,
-                      'downsample': self.downsampled,
-                      "WARNING":None}
+                           'downsample': self.downsampled,
+                           'WARNING':None}
 
             returnHash = self.cache.findHashArray("hash", self.inputHash, "feature")
             if returnHash is None:

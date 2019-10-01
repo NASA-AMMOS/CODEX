@@ -44,9 +44,6 @@ def test_regression(capsys, testData):
     result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "ElasticNet",                  False, {}, 'explained_variance', "grid", 3, {}, ch).run()
     assert result['message'] == 'success'
 
-    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "ElasticNetCV",                False, {}, 'explained_variance', "grid", 3, {}, ch).run()
-    assert result['message'] == 'success'
-
     result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "ExtraTreeRegressor",          False, {}, 'explained_variance', "grid", 3, {}, ch).run()
     assert result['message'] == 'success'
 
@@ -71,22 +68,10 @@ def test_regression(capsys, testData):
     result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "Lars",                        False, {}, 'explained_variance', "grid", 3, {}, ch).run()
     assert result['message'] == 'success'
 
-    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "LarsCV",                      False, {}, 'explained_variance', "grid", 3, {}, ch).run()
-    assert result['message'] == 'success'
-
     result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "Lasso",                       False, {}, 'explained_variance', "grid", 3, {}, ch).run()
     assert result['message'] == 'success'
 
-    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "LassoCV",                     False, {}, 'explained_variance', "grid", 3, {}, ch).run()
-    assert result['message'] == 'success'
-
     result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "LassoLars",                   False, {}, 'explained_variance', "grid", 3, {}, ch).run()
-    assert result['message'] == 'success'
-
-    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "LassoLarsCV",                 False, {}, 'explained_variance', "grid", 3, {}, ch).run()
-    assert result['message'] == 'success'
-
-    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "LassoLarsIC",                 False, {}, 'explained_variance', "grid", 3, {}, ch).run()
     assert result['message'] == 'success'
 
     result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "LinearRegression",            False, {}, 'explained_variance', "grid", 3, {}, ch).run()
@@ -98,25 +83,10 @@ def test_regression(capsys, testData):
     result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "MLPRegressor",                False, {}, 'explained_variance', "grid", 3, {}, ch).run()
     assert result['message'] == 'success'
 
-    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "MultiTaskElasticNet",         False, {}, 'explained_variance', "grid", 3, {}, ch).run()
-    assert result['message'] == 'success'
-
-    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "MultiTaskElasticNetCV",       False, {}, 'explained_variance', "grid", 3, {}, ch).run()
-    assert result['message'] == 'success'
-
-    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "MultiTaskLasso",              False, {}, 'explained_variance', "grid", 3, {}, ch).run()
-    assert result['message'] == 'success'
-
-    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "MultiTaskLassoCV",            False, {}, 'explained_variance', "grid", 3, {}, ch).run()
-    assert result['message'] == 'success'
-
     result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "NuSVR",                       False, {}, 'explained_variance', "grid", 3, {}, ch).run()
     assert result['message'] == 'success'
 
     result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "OrthogonalMatchingPursuit",   False, {}, 'explained_variance', "grid", 3, {}, ch).run()
-    assert result['message'] == 'success'
-
-    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "OrthogonalMatchingPursuitCV", False, {}, 'explained_variance', "grid", 3, {}, ch).run()
     assert result['message'] == 'success'
 
     result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "PLSCanonical",                False, {}, 'explained_variance', "grid", 3, {}, ch).run()
@@ -131,16 +101,10 @@ def test_regression(capsys, testData):
     result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "RANSACRegressor",             False, {}, 'explained_variance', "grid", 3, {}, ch).run()
     assert result['message'] == 'success'
 
-    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "RadiusNeighborsRegressor",    False, {}, 'explained_variance', "grid", 3, {}, ch).run()
-    assert result['message'] == 'success'
-
     result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "RandomForestRegressor",       False, {}, 'explained_variance', "grid", 3, {}, ch).run()
     assert result['message'] == 'success'
 
     result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "Ridge",                       False, {}, 'explained_variance', "grid", 3, {}, ch).run()
-    assert result['message'] == 'success'
-
-    result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "RidgeCV",                     False, {}, 'explained_variance', "grid", 3, {}, ch).run()
     assert result['message'] == 'success'
 
     result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "SGDRegressor",                False, {}, 'explained_variance', "grid", 3, {}, ch).run()
