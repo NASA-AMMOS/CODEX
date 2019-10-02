@@ -33,12 +33,16 @@ def save_session(msg, result, savePath):
         cache = get_cache(msg['sessionkey'])
 
         session_name = msg['session_name']
-        session_path = os.path.join(savePath, 'sessions', session_name)
 
-        if not os.path.exists(session_path):
+        if session_name == "AUTOSAVE":
             cache.pickle_data(session_name, msg['state'], savePath)
         else:
-            result["WARNING"] = "{session_name} already exists.".format(session_name=session_name)
+            session_path = os.path.join(savePath, 'sessions', session_name)
+
+            if not os.path.exists(session_path):
+                cache.pickle_data(session_name, msg['state'], savePath)
+            else:
+                result["WARNING"] = "{session_name} already exists.".format(session_name=session_name)
 
     except:
         logging.warning(traceback.format_exc())
