@@ -87,6 +87,9 @@
                     &.no-swatch {
                         margin-left: 10px;
                     }
+                    &.disabled {
+                        color: $grey3;
+                    }
                 }
             }
             .slider-control {

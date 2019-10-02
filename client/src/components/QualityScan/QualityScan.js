@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef, useMemo } from "react";
 import { useQualityScanActive } from "hooks/UIHooks";
 import Plot from "react-plotly.js";
-import { useFeatureNames, useFeatures, usePinnedFeatures } from "hooks/DataHooks";
+import { useFeatureNames, useFeatures, usePinnedFeatures, useFileInfo } from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import * as utils from "utils/utils";
@@ -58,6 +58,8 @@ function toggleFilter(changeFunc) {
 }
 
 function Sliders(props) {
+    const fileInfo = useFileInfo();
+
     const colorContext = useContext(ColorContext);
     const [nanColor, setNanColor] = colorContext.nan;
     const [infColor, setInfColor] = colorContext.inf;
@@ -70,12 +72,12 @@ function Sliders(props) {
     const nanSwatchStyles = classnames({
         "color-swatch": true,
         nan: true,
-        active: nanColor.active
+        active: nanColor.active && fileInfo.nan !== null
     });
     const infSwatchStyles = classnames({
         "color-swatch": true,
         inf: true,
-        active: infColor.active
+        active: infColor.active && fileInfo.inf !== null
     });
     const repeatSwatchStyles = classnames({
         "color-swatch": true,
@@ -83,12 +85,21 @@ function Sliders(props) {
         active: repeatColor.active
     });
 
+    const nanTitleStyles = classnames({
+        "title-text": true,
+        disabled: fileInfo.nan === null
+    });
+    const infTitleStyles = classnames({
+        "title-text": true,
+        disabled: fileInfo.inf === null
+    });
+
     return (
         <React.Fragment>
             <div className="slider">
                 <div className="title">
                     <div className={nanSwatchStyles} onClick={toggleFilter(setNanColor)} />
-                    <Typography variant="caption" classes={{ root: "title-text" }}>
+                    <Typography variant="caption" classes={{ root: nanTitleStyles }}>
                         NaN Opacity
                     </Typography>
                 </div>
@@ -96,12 +107,13 @@ function Sliders(props) {
                     classes={{ root: "slider-control" }}
                     value={nanColor.opacity * 100}
                     onChange={handleSliderChange(setNanColor)}
+                    disabled={fileInfo.nan === null}
                 />
             </div>
             <div className="slider">
                 <div className="title">
                     <div className={infSwatchStyles} onClick={toggleFilter(setInfColor)} />
-                    <Typography variant="caption" classes={{ root: "title-text" }}>
+                    <Typography variant="caption" classes={{ root: infTitleStyles }}>
                         Infinity Opacity
                     </Typography>
                 </div>
@@ -109,6 +121,7 @@ function Sliders(props) {
                     classes={{ root: "slider-control" }}
                     value={infColor.opacity * 100}
                     onChange={handleSliderChange(setInfColor)}
+                    disabled={fileInfo.inf === null}
                 />
             </div>
             <div className="slider">
@@ -156,13 +169,21 @@ function SortingDropdown(props) {
     const [colSortValue, setColSortValue] = paramContext.sortOptions.col;
     const [rowSortValue, setRowSortValue] = paramContext.sortOptions.row;
 
+    const fileInfo = useFileInfo();
+
+    function getDisabled(val) {
+        if (val === NANS.val && fileInfo.inf === null) return true;
+        if (val === INFINITIES.val && fileInfo.inf === null) return true;
+        return false;
+    }
+
     return (
         <React.Fragment>
             <div className="dropdown">
                 <label>Column sorting</label>
                 <select onChange={handleDropdownChange(setColSortValue)} value={colSortValue.val}>
                     {COLUMN_SORT_OPTIONS.map(opt => (
-                        <option key={opt.val} value={opt.val}>
+                        <option key={opt.val} value={opt.val} disabled={getDisabled(opt.val)}>
                             {opt.name}
                         </option>
                     ))}
@@ -172,7 +193,7 @@ function SortingDropdown(props) {
                 <label>Row sorting</label>
                 <select onChange={handleDropdownChange(setRowSortValue)} value={rowSortValue.val}>
                     {ROW_SORT_OPTIONS.map(opt => (
-                        <option key={opt.val} value={opt.val}>
+                        <option key={opt.val} value={opt.val} disabled={getDisabled(opt.val)}>
                             {opt.name}
                         </option>
                     ))}
@@ -214,26 +235,28 @@ function countOccurrencesOfValue(ary, value) {
     return ary.reduce((acc, val) => (val === value ? acc + 1 : acc), 0);
 }
 
-function sortCols(cols, sortOption, sentinelValues, repeatsPerColumn, zScoreTable) {
+function sortCols(cols, sortOption, fileInfo, maxRepeatsPerColumn, zScoreTable) {
     const refCols = cols.map((col, idx) => ({ col, idx }));
     switch (sortOption) {
         case SORT_ORIGINAL.val:
             return refCols;
         case NANS.val:
+            if (fileInfo.nan === null) return refCols;
             return refCols.sort(
                 (colA, colB) =>
-                    countOccurrencesOfValue(colB.col, sentinelValues.nan) -
-                    countOccurrencesOfValue(colA.col, sentinelValues.nan)
+                    countOccurrencesOfValue(colB.col, fileInfo.nan) -
+                    countOccurrencesOfValue(colA.col, fileInfo.nan)
             );
         case INFINITIES.val:
+            if (fileInfo.inf === null) return refCols;
             return refCols.sort(
                 (colA, colB) =>
-                    countOccurrencesOfValue(colB.col, sentinelValues.inf) -
-                    countOccurrencesOfValue(colA.col, sentinelValues.inf)
+                    countOccurrencesOfValue(colB.col, fileInfo.inf) -
+                    countOccurrencesOfValue(colA.col, fileInfo.inf)
             );
         case REPEATS.val:
             return refCols
-                .map(ref => ({ ...ref, repeats: repeatsPerColumn[ref.idx] }))
+                .map(ref => ({ ...ref, repeats: maxRepeatsPerColumn[ref.idx] }))
                 .sort((a, b) => b.repeats - a.repeats);
         case ZSCORE.val:
             return refCols
@@ -258,19 +281,13 @@ function QualityScanChart(props) {
     const x = data.map(f => f.get("feature")).toJS();
     const y = [...Array(data.get(0).get("data").size).keys()].reverse();
 
-    const sentinelValues = {
-        nan: 1,
-        inf: 0
-    };
+    const fileInfo = useFileInfo();
 
     // Build base column and row data
     const baseCols = useMemo(_ => data.map(f => f.get("data").toJS()).toJS(), [data]);
     const rows = useMemo(_ => utils.unzip(baseCols), [data]);
 
     const [repeatParams, setRepeatParams] = paramContext.repeat;
-
-    const nanValue = 1;
-    const infValue = 0;
 
     // Creates a per-column lookup table for repeats. Keys are the data values, values are
     // the number of times they are repeated.
@@ -288,11 +305,9 @@ function QualityScanChart(props) {
         [data]
     );
 
-    const repeatsPerColumn = useMemo(
-        _ =>
-            countHashes.map(hash =>
-                Object.values(hash).reduce((acc, val) => (val > 1 ? acc + val : acc), 0)
-            ),
+    // Calculates the greatest number of times a single number is repeated in a column
+    const maxRepeatsPerColumn = useMemo(
+        _ => countHashes.map(hash => Math.max(...Object.values(hash).filter(val => val > 1))),
         [countHashes]
     );
 
@@ -336,12 +351,18 @@ function QualityScanChart(props) {
     );
 
     function makeTraces(cols) {
-        const nanMap = utils.unzip(
-            cols.map(({ col }) => col.map(val => (val === nanValue ? 1 : 0)))
-        );
-        const infMap = utils.unzip(
-            cols.map(({ col }) => col.map(val => (val === infValue ? 1 : 0)))
-        );
+        const nanMap =
+            fileInfo.nan === null
+                ? cols
+                : utils.unzip(
+                      cols.map(({ col }) => col.map(val => (val === fileInfo.nan ? 1 : 0)))
+                  );
+        const infMap =
+            fileInfo.inf === null
+                ? cols
+                : utils.unzip(
+                      cols.map(({ col }) => col.map(val => (val === fileInfo.inf ? 1 : 0)))
+                  );
         const repeatMap = utils.unzip(
             cols.map(({ col, idx }) => {
                 const refRow = countHashes[idx];
@@ -380,25 +401,25 @@ function QualityScanChart(props) {
 
     const annotations = [];
     // const annotations = useMemo(
-    // 	_ => {
-    // 		const buffer = [];
-    // 		for (let yIdx = 0; yIdx < y.length; yIdx++) {
-    // 			for (let xIdx = 0; xIdx < x.length; xIdx++) {
-    // 				const result = {
-    // 					xref: "x1",
-    // 					yref: "y1",
-    // 					x: x[xIdx],
-    // 					y: y[yIdx],
-    // 					text: rows[yIdx][xIdx],
-    // 					showarrow: false
-    // 				};
+    //  _ => {
+    //      const buffer = [];
+    //      for (let yIdx = 0; yIdx < y.length; yIdx++) {
+    //          for (let xIdx = 0; xIdx < x.length; xIdx++) {
+    //              const result = {
+    //                  xref: "x1",
+    //                  yref: "y1",
+    //                  x: x[xIdx],
+    //                  y: y[yIdx],
+    //                  text: rows[yIdx][xIdx],
+    //                  showarrow: false
+    //              };
 
-    // 				buffer.push(result);
-    // 			}
-    // 		}
-    // 		return buffer;
-    // 	},
-    // 	[data]
+    //              buffer.push(result);
+    //          }
+    //      }
+    //      return buffer;
+    //  },
+    //  [data]
     // );
 
     // Initial chart settings. These need to be kept in state and updated as necessary
@@ -462,8 +483,8 @@ function QualityScanChart(props) {
             const cols = sortCols(
                 baseCols,
                 colSortValue,
-                sentinelValues,
-                repeatsPerColumn,
+                fileInfo,
+                maxRepeatsPerColumn,
                 zScoreTable
             );
             const newChartState = { ...chartState };
@@ -489,15 +510,16 @@ function QualityScanChart(props) {
 }
 
 function QualityScan(props) {
+    const fileInfo = useFileInfo();
     const colorContext = {
         nan: useState({
             color: utils.getRGBFromHex(theme.yellow),
-            opacity: 1,
+            opacity: fileInfo.nan !== null ? 1 : 0,
             active: true
         }),
         inf: useState({
             color: utils.getRGBFromHex(theme.green),
-            opacity: 1,
+            opacity: fileInfo.inf !== null ? 1 : 0,
             active: true
         }),
         repeat: useState({
