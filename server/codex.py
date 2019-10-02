@@ -280,7 +280,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
                 break
 
             result = response['result']
-            logging.info("{time} : Response to front end: {json}".format(time=datetime.datetime.now().isoformat(), json={k:(result[k] if (k != 'data' and k != 'downsample' and k != 'y') else '[data removed]') for k in result}))
+            logging.info("{time} : Response to front end: {json}".format(time=datetime.datetime.now().isoformat(), json={k:(result[k] if (k != 'data' and k != 'downsample' and k != 'y' and k != "y_pred") else '[data removed]') for k in result}))
 
             yield self.write_message(json.dumps(response['result']))
 

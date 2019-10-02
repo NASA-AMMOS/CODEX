@@ -150,7 +150,7 @@ class regression(algorithm):
         accepted_scoring_metrics = ["explained_variance", "max_error", "neg_mean_absolute_error", "neg_mean_squared_error", "neg_mean_squared_log_error", "neg_median_absolute_error", "r2"]
         if self.scoring not in accepted_scoring_metrics:
             self.result["WARNING"] = "{scoring} not a valid scoring metric for regression.".format(scoring=self.scoring)
-            return
+            return None
 
         if self.search_type == "random":
             self.algorithm = RandomizedSearchCV(self.algorithm, self.parms, cv=self.cross_val, scoring=self.scoring)
@@ -167,8 +167,15 @@ class regression(algorithm):
 
     def check_valid(self):
 
+        for parm, value in self.parms.items():
+            if value == []:
+                logging.warning("Please set max_depth parameters")
+                self.result["WARNING"] = "Please set max_depth parameters"
+                return None
+
         if self.X.ndim < 2:
-            logging.warning("ERROR: run_codex_regression - insufficient data dimmensions")
+            logging.warning("Insufficient data dimmensions: {dims}".format(dims=self.X.ndim))
+            self.result["WARNING"] = "Please choose more than 2 features"
             return None
 
         return 1
