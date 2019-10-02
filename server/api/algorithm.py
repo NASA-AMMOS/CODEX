@@ -52,91 +52,87 @@ class algorithm():
 
     def run(self):
 
-        try:
-            self.cache = get_cache(self.session)
+        self.cache = get_cache(self.session)
 
-            logReturnCode(inspect.currentframe())
+        logReturnCode(inspect.currentframe())
 
-            startTime = time.time()
-            self.result = {'algorithm': self.algorithmName,
-                           'downsample': self.downsampled,
-                           'WARNING':None}
+        startTime = time.time()
+        self.result = {'algorithm': self.algorithmName,
+                       'downsample': self.downsampled,
+                       'WARNING':None}
 
-            returnHash = self.cache.findHashArray("hash", self.inputHash, "feature")
-            if returnHash is None:
-                logging.warning("Input hash not found: {inputHash}".format(inputHash=self.inputHash))
-                self.result['message'] = "failure"
-                return self.result
-
-            self.X = returnHash['data']
-            if self.X is None:
-                self.result['message'] = "failure"
-                logging.warning("X returned None")
-                return self.result
-
-            ret = self.check_valid()
-            if not ret:
-                self.result['message'] = "failure"
-                return self.result
-
-            full_samples, full_features = self.X.shape
-            self.result['eta'] = getComputeTimeEstimate(self.__class__.__name__, self.algorithmName, full_samples, full_features)
-
-            if self.subsetHashName is not False:
-                self.X = self.cache.applySubsetMask(self.X, self.subsetHashName)
-                if(self.X is None):
-                    logging.warning("Subset hash not found: {subsetHash}".format(subsetHash=self.subsetHashName))
-                    self.result['message'] = "failure"
-                    return self.result
-
-            if self.downsampled is not False:
-                self.X = downsample(self.X, samples=self.downsampled, session=self.cache)
-                logging.info("Downsampled to {samples} samples".format(samples=len(self.X)))
-
-            # TODO - labels are currently cached under features
-            if self.labelHash:
-                labelHash_dict = self.cache.findHashArray("hash", self.labelHash, "feature")
-                if labelHash_dict is None:
-                    logging.warning("Label hash not found: {labelHash}".format(self.labelHash))
-                    self.result['message'] = "failure"
-                    return self.result                  
-                else:
-                    self.y = labelHash_dict['data']
-                    self.result['y'] = self.y.tolist()
-
-            computed_samples, computed_features = self.X.shape
-            self.X = impute(self.X)
-            self.result['data'] = self.X.tolist()
-
-            self.algorithm = self.get_algorithm()
-            if self.algorithm == None:
-                self.result['message'] = "failure"
-                self.result['WARNING'] = "{alg} algorithm not supported".format(alg=self.algorithmName)
-                return self.result
-
-            self.fit_algorithm()
-
-            # TODO - The front end should specify a save name for the model
-            model_name = self.algorithmName +  "_" + str(random.random())
-            if self.search_type == 'direct':
-                model_dict = self.cache.saveModel(model_name, self.algorithm, "regressor")
-            else:
-                model_dict = self.cache.saveModel(model_name, self.algorithm.best_estimator_, "regressor")
-            if not model_dict:
-                self.result['WARNING'] = "Model could not be saved."
-            else:
-                self.result['model_name'] = model_dict['name']
-                self.result['model_hash'] = model_dict['hash']
-
-
-            endTime = time.time()
-            computeTime = endTime - startTime
-            logTime(self.__class__.__name__, self.algorithmName, computeTime, computed_samples, computed_features)
-
-            self.result['message'] = "success"
+        returnHash = self.cache.findHashArray("hash", self.inputHash, "feature")
+        if returnHash is None:
+            logging.warning("Input hash not found: {inputHash}".format(inputHash=self.inputHash))
+            self.result['message'] = "failure"
             return self.result
 
-        except:
-            logging.warning(traceback.format_exc())
+        self.X = returnHash['data']
+        if self.X is None:
+            self.result['message'] = "failure"
+            logging.warning("X returned None")
             return self.result
+
+        ret = self.check_valid()
+        if not ret:
+            self.result['message'] = "failure"
+            return self.result
+
+        full_samples, full_features = self.X.shape
+        self.result['eta'] = getComputeTimeEstimate(self.__class__.__name__, self.algorithmName, full_samples, full_features)
+
+        if self.subsetHashName is not False:
+            self.X = self.cache.applySubsetMask(self.X, self.subsetHashName)
+            if(self.X is None):
+                logging.warning("Subset hash not found: {subsetHash}".format(subsetHash=self.subsetHashName))
+                self.result['message'] = "failure"
+                return self.result
+
+        if self.downsampled is not False:
+            self.X = downsample(self.X, samples=self.downsampled, session=self.cache)
+            logging.info("Downsampled to {samples} samples".format(samples=len(self.X)))
+
+        # TODO - labels are currently cached under features
+        if self.labelHash:
+            labelHash_dict = self.cache.findHashArray("hash", self.labelHash, "feature")
+            if labelHash_dict is None:
+                logging.warning("Label hash not found: {labelHash}".format(self.labelHash))
+                self.result['message'] = "failure"
+                return self.result                  
+            else:
+                self.y = labelHash_dict['data']
+                self.result['y'] = self.y.tolist()
+
+        computed_samples, computed_features = self.X.shape
+        self.X = impute(self.X)
+        self.result['data'] = self.X.tolist()
+
+        self.algorithm = self.get_algorithm()
+        if self.algorithm == None:
+            self.result['message'] = "failure"
+            self.result['WARNING'] = "{alg} algorithm not supported".format(alg=self.algorithmName)
+            return self.result
+
+        self.fit_algorithm()
+
+        # TODO - The front end should specify a save name for the model
+        model_name = self.algorithmName +  "_" + str(random.random())
+        if self.search_type == 'direct':
+            model_dict = self.cache.saveModel(model_name, self.algorithm, "regressor")
+        else:
+            model_dict = self.cache.saveModel(model_name, self.algorithm.best_estimator_, "regressor")
+        if not model_dict:
+            self.result['WARNING'] = "Model could not be saved."
+        else:
+            self.result['model_name'] = model_dict['name']
+            self.result['model_hash'] = model_dict['hash']
+
+
+        endTime = time.time()
+        computeTime = endTime - startTime
+        logTime(self.__class__.__name__, self.algorithmName, computeTime, computed_samples, computed_features)
+
+        self.result['message'] = "success"
+        return self.result
+
 

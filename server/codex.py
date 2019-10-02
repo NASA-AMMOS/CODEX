@@ -326,8 +326,6 @@ def make_cache_process():
             raise
     return Process(target=run_cache)
 
-#def schedule_func():
-#    print("HERE")
 
 if __name__ == '__main__':
 
@@ -356,12 +354,7 @@ if __name__ == '__main__':
 
     # start server
     app.listen(8888)
-
-    ioloop.IOLoop.instance().start()
-    #main_loop = tornado.ioloop.IOLoop.instance()
-    #sched = tornado.ioloop.PeriodicCallback(schedule_func,1000)
-    #sched.start()
-    #main_loop.start()
+    tornado.ioloop.IOLoop.instance().start()
 
     # gracefully shut down cache server
     stop_cache_server()

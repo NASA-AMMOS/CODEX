@@ -167,6 +167,10 @@ class regression(algorithm):
 
     def check_valid(self):
 
+        # TODO - parms come as dictionary in list when should be direct dictionary.  Get client to remove list layer and then remove line below.
+        self.parms = self.parms[0]
+
+
         for parm, value in self.parms.items():
             if value == []:
                 logging.warning("Please set max_depth parameters")

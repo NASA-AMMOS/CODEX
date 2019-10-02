@@ -38,7 +38,7 @@ def save_session(msg, result, savePath):
         if not os.path.exists(session_path):
             cache.pickle_data(session_name, msg['state'], savePath)
         else:
-            result["WARNING"] = session_name + " already exists."
+            result["WARNING"] = "{session_name} already exists.".format(session_name=session_name)
 
     except:
         logging.warning(traceback.format_exc())
