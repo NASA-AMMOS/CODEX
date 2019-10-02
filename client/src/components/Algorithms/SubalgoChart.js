@@ -37,7 +37,7 @@ function makeChart(props) {
                 marker: {
                     color: cols[0].map((val, idx) => {
                         const cluster = props.serverData.clusters[idx];
-                        return cluster === -1 ? "#eee" : uiTypes.SELECTIONS_COLOR_PALETTE[cluster];
+                        return cluster === -1 ? "#eee" : utils.getSelectionPalette()[cluster];
                     }),
                     size: 5
                 },
