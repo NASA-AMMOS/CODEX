@@ -1,5 +1,5 @@
 import Immutable from "immutable";
-import { defaultInitialSettings } from "constants/windowSettings";
+import { defaultInitialSettings, initialSettingsByWindowType } from "constants/windowSettings";
 import * as utils from "utils/utils";
 
 export default class WindowManagerReducer {
@@ -12,9 +12,11 @@ export default class WindowManagerReducer {
                       .toString(36)
                       .substring(7);
 
+        const perWindowSettings = initialSettingsByWindowType[action.info.windowType];
         const baseInfo = Immutable.fromJS({
             ...defaultInitialSettings,
             ...action.info,
+            ...perWindowSettings,
             id
         });
 

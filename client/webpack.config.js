@@ -36,13 +36,12 @@ module.exports = {
                 ]
             },
             {
+                test: /styles\/\.(css|scss)$/,
+                use: ["@teamsupercell/typings-for-css-modules-loader"]
+            },
+            {
                 test: /\.(css|scss)$/,
-                use: [
-                    "style-loader",
-                    "@teamsupercell/typings-for-css-modules-loader",
-                    "css-loader",
-                    "sass-loader"
-                ]
+                use: ["style-loader", "css-loader", "sass-loader"]
             },
             {
                 test: /\.(png|jpg|gif|eot|ttf|woff|woff2)$/,
@@ -69,7 +68,8 @@ module.exports = {
             inject: true,
             template: paths.appHtml
         }),
-        new webpack.HotModuleReplacementPlugin()
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.WatchIgnorePlugin([/css\.d\.ts$/])
     ],
     resolve: {
         modules: [

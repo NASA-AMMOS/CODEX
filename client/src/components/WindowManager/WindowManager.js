@@ -184,6 +184,9 @@ function WindowManager(props) {
         .filter(win => !win.get("minimizedOnly"))
         .map((win, idx) => {
             const initialPos = { x: win.get("x"), y: win.get("y") };
+            const initialSize = win.get("isFullscreen")
+                ? { x: "100%", y: "100%" }
+                : { width: win.get("width"), height: win.get("height") };
 
             const settings = {
                 title: win.get("title"),
@@ -192,12 +195,14 @@ function WindowManager(props) {
                 isDraggable: true,
                 initialPosition: initialPos,
                 restrictToParentDiv: true,
-                initialSize: { width: win.get("width"), height: win.get("height") },
+                initialSize,
                 minSize: win.get("minSize").toJS() || { width: 100, height: 100 },
-                width: win.get("width"),
-                height: win.get("height"),
+                // width: win.get("width"),
+                // height: win.get("height"),
                 x: win.get("x", 0),
-                y: win.get("y", 0)
+                y: win.get("y", 0),
+                style: win.get("isFullscreen") && { width: "100%", height: "100%" },
+                wrapperStyle: win.get("wrapperStyle") ? win.get("wrapperStyle").toJS() : {}
             };
 
             // This is a bit of an odd return fragment, but we want to avoid re-rendering the window's content.
@@ -215,7 +220,7 @@ function WindowManager(props) {
                     onClose={_ => props.closeWindow(win.get("id"))}
                     ref={r => (refs.current[win.get("id")] = r)}
                     onMinimize={_ => props.toggleMinimizeWindow(win.get("id"))}
-                    hideHeader={win.get("minimized")}
+                    hideHeader={win.get("minimized") || win.get("isFullscreen")}
                     onResizeEnd={state =>
                         props.resizeWindow(win.get("id"), {
                             width: state.width,
