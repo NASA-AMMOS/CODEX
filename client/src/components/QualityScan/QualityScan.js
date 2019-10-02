@@ -18,6 +18,25 @@ import { useSelector, useStore, useDispatch } from "react-redux";
 import IconButton from "@material-ui/core/IconButton";
 import * as windowManagerActions from "actions/windowManagerActions";
 
+const SORT_ORIGINAL = { val: "SORT_ORIGINAL", name: "Sort Original" };
+const TOTAL_ERRORS = { val: "TOTAL_ERRORS", name: "Total Errors" };
+const NANS = { val: "NANS", name: "NaNs" };
+const INFINITIES = { val: "INFINITIES", name: "Infinities" };
+const ZSCORE = { val: "ZSCORE", name: "Z-Score" };
+const REPEATS = { val: "REPEATS", name: "Repeats" };
+const SELECTION = { val: "SELECTION", name: "Selection" };
+
+const COLUMN_SORT_OPTIONS = [SORT_ORIGINAL, TOTAL_ERRORS, NANS, INFINITIES, ZSCORE, REPEATS];
+const ROW_SORT_OPTIONS = [
+    SORT_ORIGINAL,
+    SELECTION,
+    TOTAL_ERRORS,
+    NANS,
+    INFINITIES,
+    ZSCORE,
+    REPEATS
+];
+
 const DataContext = React.createContext();
 const ColorContext = React.createContext({});
 const ParamContext = React.createContext({});
@@ -28,6 +47,10 @@ function handleSliderChange(changeFunc) {
         changeFunc(colorObj => {
             return { ...colorObj, opacity: newVal / 100 };
         });
+}
+
+function handleDropdownChange(changeFunc) {
+    return evt => changeFunc(evt.target.value);
 }
 
 function toggleFilter(changeFunc) {
@@ -129,13 +152,33 @@ function Sliders(props) {
 }
 
 function SortingDropdown(props) {
+    const paramContext = useContext(ParamContext);
+    const [colSortValue, setColSortValue] = paramContext.sortOptions.col;
+    const [rowSortValue, setRowSortValue] = paramContext.sortOptions.row;
+
     return (
-        <div className="dropdown">
-            <label>Column sorting</label>
-            <select>
-                <option value={0}>Order by Original</option>
-            </select>
-        </div>
+        <React.Fragment>
+            <div className="dropdown">
+                <label>Column sorting</label>
+                <select onChange={handleDropdownChange(setColSortValue)} value={colSortValue.val}>
+                    {COLUMN_SORT_OPTIONS.map(opt => (
+                        <option key={opt.val} value={opt.val}>
+                            {opt.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <div className="dropdown">
+                <label>Row sorting</label>
+                <select onChange={handleDropdownChange(setRowSortValue)} value={rowSortValue.val}>
+                    {ROW_SORT_OPTIONS.map(opt => (
+                        <option key={opt.val} value={opt.val}>
+                            {opt.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        </React.Fragment>
     );
 }
 
@@ -167,15 +210,62 @@ function buildColor(colorObj) {
     return `rgba(${colorObj[0].color.join(",")},${opacity})`;
 }
 
+function countOccurrencesOfValue(ary, value) {
+    return ary.reduce((acc, val) => (val === value ? acc + 1 : acc), 0);
+}
+
+function sortCols(cols, sortOption, sentinelValues, repeatsPerColumn, zScoreTable) {
+    const refCols = cols.map((col, idx) => ({ col, idx }));
+    switch (sortOption) {
+        case SORT_ORIGINAL.val:
+            return refCols;
+        case NANS.val:
+            return refCols.sort(
+                (colA, colB) =>
+                    countOccurrencesOfValue(colB.col, sentinelValues.nan) -
+                    countOccurrencesOfValue(colA.col, sentinelValues.nan)
+            );
+        case INFINITIES.val:
+            return refCols.sort(
+                (colA, colB) =>
+                    countOccurrencesOfValue(colB.col, sentinelValues.inf) -
+                    countOccurrencesOfValue(colA.col, sentinelValues.inf)
+            );
+        case REPEATS.val:
+            return refCols
+                .map(ref => ({ ...ref, repeats: repeatsPerColumn[ref.idx] }))
+                .sort((a, b) => b.repeats - a.repeats);
+        case ZSCORE.val:
+            return refCols
+                .map(ref => ({
+                    ...ref,
+                    zScoreTotal: zScoreTable[ref.idx].reduce((acc, val) => acc + val, 0)
+                }))
+                .sort((a, b) => b.zScoreTotal - a.zScoreTotal);
+        default:
+            return refCols;
+    }
+}
+
 function QualityScanChart(props) {
     const data = useContext(DataContext);
     const colorContext = useContext(ColorContext);
     const paramContext = useContext(ParamContext);
 
+    const chartRevision = useRef(0);
+
+    // Set up heatmap axes
     const x = data.map(f => f.get("feature")).toJS();
     const y = [...Array(data.get(0).get("data").size).keys()].reverse();
-    const cols = useMemo(_ => data.map(f => f.get("data").toJS()).toJS(), [data]);
-    const rows = useMemo(_ => utils.unzip(cols), [data]);
+
+    const sentinelValues = {
+        nan: 1,
+        inf: 0
+    };
+
+    // Build base column and row data
+    const baseCols = useMemo(_ => data.map(f => f.get("data").toJS()).toJS(), [data]);
+    const rows = useMemo(_ => utils.unzip(baseCols), [data]);
 
     const [repeatParams, setRepeatParams] = paramContext.repeat;
 
@@ -186,7 +276,7 @@ function QualityScanChart(props) {
     // the number of times they are repeated.
     const countHashes = useMemo(
         _ => {
-            return cols.reduce((acc, col, idx) => {
+            return baseCols.reduce((acc, col, idx) => {
                 const seen = {};
                 col.forEach(val => {
                     seen[val] = seen[val] ? seen[val] + 1 : 1;
@@ -194,6 +284,25 @@ function QualityScanChart(props) {
                 acc.push(seen);
                 return acc;
             }, []);
+        },
+        [data]
+    );
+
+    const repeatsPerColumn = useMemo(
+        _ =>
+            countHashes.map(hash =>
+                Object.values(hash).reduce((acc, val) => (val > 1 ? acc + val : acc), 0)
+            ),
+        [countHashes]
+    );
+
+    const zScoreTable = useMemo(
+        _ => {
+            const flatAry = baseCols.reduce((acc, col) => acc.concat(col), []);
+            const total = flatAry.reduce((acc, val) => acc + val, 0);
+            const mean = total / flatAry.length;
+            const stdDev = flatAry.reduce((acc, val) => acc + (val - mean) ** 2) / total;
+            return baseCols.map(col => col.map(val => val - mean / stdDev));
         },
         [data]
     );
@@ -226,22 +335,48 @@ function QualityScanChart(props) {
         [data]
     );
 
-    const nanMap = useMemo(_ => rows.map(row => row.map(val => (val === nanValue ? 1 : 0))), [
-        data
-    ]);
-    const infMap = useMemo(_ => rows.map(row => row.map(val => (val === infValue ? 1 : 0))), [
-        data
-    ]);
-    const repeatMap = useMemo(
-        _ =>
-            cols.map((col, idx) => {
+    function makeTraces(cols) {
+        const nanMap = utils.unzip(
+            cols.map(({ col }) => col.map(val => (val === nanValue ? 1 : 0)))
+        );
+        const infMap = utils.unzip(
+            cols.map(({ col }) => col.map(val => (val === infValue ? 1 : 0)))
+        );
+        const repeatMap = utils.unzip(
+            cols.map(({ col, idx }) => {
                 const refRow = countHashes[idx];
                 return col.map(val => (refRow[val] >= repeatParams.threshold ? 1 : 0));
-            }),
-        [repeatParams]
-    );
+            })
+        );
 
-    const chartRevision = useRef(0);
+        return [
+            {
+                x,
+                y,
+                z: repeatMap,
+                type: "heatmap",
+                showscale: false,
+                colorscale: [[0, "rgba(0,0,0,0)"], [1, buildColor(colorContext.repeat)]]
+            },
+            {
+                x,
+                y,
+                z: infMap,
+                type: "heatmap",
+                showscale: false,
+                colorscale: [[0, "rgba(0,0,0,0)"], [1, buildColor(colorContext.inf)]]
+            },
+            {
+                x,
+                y,
+                z: nanMap,
+                type: "heatmap",
+                showscale: false,
+                colorscale: [[0, "rgba(0,0,0,0)"], [1, buildColor(colorContext.nan)]]
+            }
+        ];
+    }
+    const traces = useMemo(_ => makeTraces(baseCols.map((col, idx) => ({ col, idx }))), [data]);
 
     const annotations = [];
     // const annotations = useMemo(
@@ -269,32 +404,7 @@ function QualityScanChart(props) {
     // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState(_ => {
         return {
-            data: [
-                {
-                    x,
-                    y,
-                    z: nanMap,
-                    type: "heatmap",
-                    showscale: false,
-                    colorscale: [[0, "rgba(0,0,0,0)"], [1, buildColor(colorContext.nan)]]
-                },
-                {
-                    x,
-                    y,
-                    z: infMap,
-                    type: "heatmap",
-                    showscale: false,
-                    colorscale: [[0, "rgba(0,0,0,0)"], [1, buildColor(colorContext.inf)]]
-                },
-                {
-                    x,
-                    y,
-                    z: repeatMap,
-                    type: "heatmap",
-                    showscale: false,
-                    colorscale: [[0, "rgba(0,0,0,0)"], [1, buildColor(colorContext.repeat)]]
-                }
-            ],
+            data: traces,
             layout: {
                 // width: (x.length / y.length) * 5000,
                 // height: 500,
@@ -327,10 +437,10 @@ function QualityScanChart(props) {
         };
     });
 
-    function updateChartRevision() {
+    function updateChart(newChartState) {
         chartRevision.current++;
         setChartState({
-            ...chartState,
+            ...newChartState,
             layout: { ...chartState.layout, datarevision: chartRevision.current }
         });
     }
@@ -338,13 +448,29 @@ function QualityScanChart(props) {
     useEffect(
         _ => {
             const newChartState = { ...chartState };
-            newChartState.data[0].colorscale[1][1] = buildColor(colorContext.nan);
+            newChartState.data[2].colorscale[1][1] = buildColor(colorContext.nan);
             newChartState.data[1].colorscale[1][1] = buildColor(colorContext.inf);
-            newChartState.data[2].colorscale[1][1] = buildColor(colorContext.repeat);
-            setChartState(newChartState);
-            updateChartRevision();
+            newChartState.data[0].colorscale[1][1] = buildColor(colorContext.repeat);
+            updateChart(newChartState);
         },
         [colorContext]
+    );
+
+    const [colSortValue] = paramContext.sortOptions.col;
+    useEffect(
+        _ => {
+            const cols = sortCols(
+                baseCols,
+                colSortValue,
+                sentinelValues,
+                repeatsPerColumn,
+                zScoreTable
+            );
+            const newChartState = { ...chartState };
+            newChartState.data = makeTraces(cols);
+            updateChart(newChartState);
+        },
+        [baseCols, colSortValue]
     );
 
     return (
@@ -388,7 +514,11 @@ function QualityScan(props) {
             max: null,
             numberOfThresholds: 0,
             sliderPosition: 0
-        })
+        }),
+        sortOptions: {
+            row: useState(SORT_ORIGINAL.val),
+            col: useState(SORT_ORIGINAL.val)
+        }
     };
 
     return (
