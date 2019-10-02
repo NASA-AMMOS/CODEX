@@ -333,3 +333,9 @@ export function getSelectionPalette() {
         .replace(/"/g, "")
         .split(",");
 }
+
+export function getRGBFromHex(hex) {
+    hex = hex.charAt(0) === "#" ? hex.substr(1) : hex;
+    const rgb = parseInt(hex, 16);
+    return [(rgb >> 16) & 0xff, (rgb >> 8) & 0xff, rgb & 0xff];
+}

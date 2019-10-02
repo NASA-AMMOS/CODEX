@@ -4,10 +4,14 @@ $grey3: #808080;
 $grey5: #bbbbbb;
 $grey7: #e5e5e5;
 $grey9: #eeeeee;
+$dark-grey: #252525;
 $white: #ffffff;
 $primary-blue: #3988e3;
 $red: #eb5757;
+$yellow: #ffe600;
+$green: #33ff00;
 $header-green: #477680;
+$magenta: #ff00f5;
 
 $default-point-color: #3386e6;
 
@@ -37,4 +41,7 @@ $selection-color-options: (
     selectionColorOptions: $selection-color-options;
     defaultPointColor: $default-point-color;
     primaryBlue: $primary-blue;
+    green: $green;
+    yellow: $yellow;
+    magenta: $magenta;
 }

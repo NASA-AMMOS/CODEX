@@ -124,6 +124,7 @@ function NavigationBar(props) {
                         )}
                         {createMenuItem(windowTypes.TABLE_WINDOW, "Table")}
                         {createMenuItem(windowTypes.TRANSFORM_WINDOW, "Transform")}
+                        {createMenuItem(windowTypes.QUALITY_SCAN_WINDOW, "Quality Scan")}
                     </Dropdown.Menu>
                 </Dropdown>
 

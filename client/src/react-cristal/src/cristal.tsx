@@ -34,7 +34,8 @@ export interface CristalProps {
     restrictToParentDiv?: boolean;
     onMinimize?: () => void;
     hideHeader?: boolean;
-    style?: React.CSSProperties;
+    style?: React.CSSProperties; // Style to be applied to main window div
+    wrapperStyle?: React.CSSProperties; // Style applied to the ContentWrapper
     isActive?: boolean;
     onClick?: () => void;
     minSize?: Size;
@@ -308,9 +309,8 @@ export class Cristal extends Component<CristalProps, CristalState> {
     }
 
     get content() {
-        const { children } = this.props;
-
-        return <ContentWrapper>{children}</ContentWrapper>;
+        const { children, wrapperStyle } = this.props;
+        return <ContentWrapper style={wrapperStyle ? wrapperStyle : {}}>{children}</ContentWrapper>;
     }
 
     renderResizeHandles = () => {
@@ -340,7 +340,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
     render() {
         const { isResizing } = this;
         const { x, y, width, height, isDragging, zIndex } = this.state;
-        const { className, hideHeader, style, minSize } = this.props;
+        const { className, hideHeader, minSize, style } = this.props;
         const isActive = isDragging || isResizing;
         const baseStyle = {
             left: x,
@@ -353,10 +353,9 @@ export class Cristal extends Component<CristalProps, CristalState> {
         const ContentComponent = this.content;
 
         const { restrictToParentDiv } = this.props;
-
         const wrapperDiv = (
             <Wrapper
-                style={style ? style : baseStyle}
+                style={style || baseStyle}
                 innerRef={this.saveWrapperRef}
                 isActive={isActive}
                 className={className}
