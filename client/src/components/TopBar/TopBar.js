@@ -77,10 +77,7 @@ function NavigationBar(props) {
             <div id="topBarMenu">
                 <Dropdown className="dropdownMain" autoOpen={false}>
                     <Dropdown.Toggle className="dropdownToggle" title="Graphs" />
-                    <Dropdown.Menu>
-                        {createMenuItem(windowTypes.graphs.SCATTER_GRAPH, "Scatterplot (2F)")}
-                        {getGraphMenuItems()}
-                    </Dropdown.Menu>
+                    <Dropdown.Menu>{getGraphMenuItems()}</Dropdown.Menu>
                 </Dropdown>
 
                 <Dropdown className="dropdownMain" autoOpen={false}>
