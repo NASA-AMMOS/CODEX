@@ -31,7 +31,6 @@ from api.sub.codex_math        import impute
 from api.sub.downsample        import downsample
 from api.sub.time_log          import getComputeTimeEstimate
 from api.sub.time_log          import logTime
-from api.sub.return_code       import logReturnCode
 from api.sub.hash              import get_cache
 from api.algorithm             import algorithm
 

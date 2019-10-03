@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 from api.workflow              import explain_this
 from api.workflow              import find_more_like_this
 from api.workflow              import general_classifier
-from api.sub.return_code       import logReturnCode
 from api.sub.system            import get_featureList
 from api.sub.hash              import get_cache
 
@@ -44,14 +43,11 @@ def workflow_call(msg, result):
             dataSelections = msg["dataSelections"]
 
             hashList = cache.feature2hashList(featureList)
-            logReturnCode(inspect.currentframe())
 
             data = cache.mergeHashResults(hashList)
-            logReturnCode(inspect.currentframe())
             inputHash = cache.hashArray('Merged', data, "feature")
 
             if (inputHash != None):
-                logReturnCode(inspect.currentframe())
                 inputHash = inputHash["hash"]
 
             result = explain_this(inputHash, featureList, dataSelections, result, session=cache)
@@ -63,14 +59,11 @@ def workflow_call(msg, result):
             similarityThreshold = float(msg["similarityThreshold"])
 
             hashList = cache.feature2hashList(featureList)
-            logReturnCode(inspect.currentframe())
 
             data = cache.mergeHashResults(hashList)
-            logReturnCode(inspect.currentframe())
             inputHash = cache.hashArray('Merged', data, "feature")
 
             if (inputHash != None):
-                logReturnCode(inspect.currentframe())
                 inputHash = inputHash["hash"]
 
             result = find_more_like_this(inputHash, featureList, dataSelections, similarityThreshold, result, session=cache)
@@ -82,14 +75,11 @@ def workflow_call(msg, result):
             similarityThreshold = msg["similarityThreshold"]
 
             hashList = cache.feature2hashList(featureList)
-            logReturnCode(inspect.currentframe())
 
             data = cache.mergeHashResults(hashList)
-            logReturnCode(inspect.currentframe())
             inputHash = cache.hashArray('Merged', data, "feature")
 
             if (inputHash != None):
-                logReturnCode(inspect.currentframe())
                 inputHash = inputHash["hash"]
 
             result = general_classifier(inputHash, featureList, dataSelections, similarityThreshold, result, session=cache)

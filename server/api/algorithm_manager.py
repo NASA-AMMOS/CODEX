@@ -34,7 +34,6 @@ from api.template_scan           import template_scan
 from api.classification          import classification
 
 from api.sub.system              import get_featureList
-from api.sub.return_code         import logReturnCode
 from api.sub.hash                import get_cache
 
 def algorithm_call(msg, result):
@@ -85,14 +84,11 @@ def algorithm_call(msg, result):
 
 
         hashList = ch.feature2hashList(featureList)
-        logReturnCode(inspect.currentframe())
 
         data = ch.mergeHashResults(hashList)
-        logReturnCode(inspect.currentframe())
         inputHash = ch.hashArray('Merged', data, "feature")
 
         if (inputHash != None):
-            logReturnCode(inspect.currentframe())
             inputHash = inputHash["hash"]
 
         if (downsampled != False):

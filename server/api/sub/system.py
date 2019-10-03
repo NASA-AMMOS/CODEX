@@ -31,9 +31,6 @@ def get_featureList(featureList):
         featureList - list - list of feature to be analyzed (pass-through)
 
     '''
-    #from api.sub.return_code import logReturnCode
-    #logReturnCode(inspect.currentframe()) # TODO - need to figure out why this does not work
-
     return featureList
 
 

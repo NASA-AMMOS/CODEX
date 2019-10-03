@@ -13,15 +13,11 @@ import csv
 import time
 import sys
 import logging
+import inspect
 
 import numpy  as np
-import pandas as pd
 
-from collections           import defaultdict
-from sklearn.neighbors     import kneighbors_graph
-from sklearn.preprocessing import StandardScaler
-from matplotlib.image      import imread
-from PIL                   import Image
+from collections import defaultdict
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
@@ -39,6 +35,8 @@ def codex_read_csv(file, featureList, hashType, session=None):
 
     '''
     cache = get_cache(session)
+    #cache.logReturnCode(inspect.currentframe())
+
     hashList = []
     columns = defaultdict(list)
 

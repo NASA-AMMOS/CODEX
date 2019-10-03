@@ -25,7 +25,6 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.return_code        import logReturnCode
 from api.sub.codex_math         import impute
 from api.sub.time_log           import getComputeTimeEstimate
 from api.sub.time_log           import logTime

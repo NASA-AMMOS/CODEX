@@ -33,8 +33,13 @@ import time
 import warnings
 import functools
 import logging
+import inspect
+import json
+import os.path
 
 import numpy as np
+
+from types import ModuleType
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
@@ -72,7 +77,8 @@ class CodexHash:
                 "downsampleList": [],
                 "labelList": [],
                 "classifierList": [],
-                "regressorList": []
+                "regressorList": [],
+                "returnCode": []
             }
         return sessionKey
 
@@ -778,7 +784,7 @@ class CodexHash:
 
         from api.sub.read_data import codex_read_hd5
         hashList, featureList = codex_read_hd5(filepath, None, "feature", session=WrappedCache(session, cache=self))
-    
+
         return hashList, featureList
 
     @expose('import_csv')
@@ -796,6 +802,142 @@ class CodexHash:
         hashList, featureList = codex_read_npy(filepath, None, "feature", session=WrappedCache(session, cache=self))
 
         return hashList, featureList
+
+
+    @expose('logReturnCode')
+    def logReturnCode(self, frame, session=None):
+        '''
+        Inputs:
+
+        Outputs:
+
+        '''
+        session = self.__set_session(session)
+
+        args, _, _, values = inspect.getargvalues(frame)
+        trace = inspect.getframeinfo(frame)
+        func_name = trace[2]
+        file_name = trace[0].rstrip(".py")
+
+        args = dict(zip(args,list(values.values())[:len(args)]))
+
+        function_string = "{file_name}.{func_name}".format(file_name=file_name, func_name=func_name)
+
+        arg_string_list = []
+        for arg, value in args.items():
+            print(arg,value)
+            if isinstance(value, int):
+                arg_string = "{arg}={value}".format(arg=arg, value=value)
+            elif isinstance(value, float):
+                arg_string = "{arg}={value}".format(arg=arg, value=value)
+            elif isinstance(value, bool):
+                arg_string = "{arg}={value}".format(arg=arg, value=value)
+            elif isinstance(value, type(None)):
+                arg_string = "{arg}={value}".format(arg=arg, value=None)
+            elif isinstance(value, str):
+                arg_string = "{arg}='{value}'".format(arg=arg, value=value)
+            elif isinstance(value, list):
+                arg_string = "{arg}={value}".format(arg=arg, value=value)
+            elif isinstance(value, tuple):
+                arg_string = "{arg}={value}".format(arg=arg, value=value)
+            elif isinstance(value, dict):
+
+                ndarray_keys = []
+                for dict_key, dict_value in value.items():
+                    if isinstance(dict_value, (np.ndarray, np.generic)):
+                        value[dict_key] = dict_value.tolist()
+                        ndarray_keys.append(dict_key)
+
+                    # TODO - do these need to be back in byte configuration to actually be used again?
+                    if isinstance(dict_value, bytes):
+                        value[dict_key] = str(dict_value)
+
+                resolved_ndarray_keys = []
+                for key in ndarray_keys:
+                    value[key] = '"{key}":np.array(({payload}))'.format(key=key, payload=value[key])
+                    resolved_ndarray_keys.append(value[key])
+                    del value[key]
+
+                dict_string = json.dumps(value)
+                dict_string = dict_string[:-1]
+                resolved_nd_array_key_string = ",".join(resolved_ndarray_keys)
+                dict_string = "{dict_string},{resolved_nd_array_key_string}}}".format(dict_string=dict_string, resolved_nd_array_key_string=resolved_nd_array_key_string)
+                arg_string = "{arg}={dict_string}".format(arg=arg, dict_string=dict_string)
+
+            elif isinstance(value, (np.ndarray, np.generic)):
+                arg_string = "{arg}=np.array(({value}))".format(arg=arg, value=value)
+                arg_string = arg_string.replace("\n","")
+                arg_string = arg_string.replace(" ",",")
+            elif isinstance(value, WrappedCache):
+                arg_string = ""
+            elif isinstance(value, ModuleType):
+                arg_string = ""
+            else:
+                arg_string = ""
+                logging.warning("Unsupported input type: {type} for {function_string} in {arg}".format(type=type(value), function_string=function_string, arg=arg))
+
+            arg_string_list.append(arg_string)
+        
+        arg_string = ", ".join(arg_string_list)
+
+        full_string = "{function_string}({arg_string})\n".format(function_string=function_string, arg_string=arg_string)
+        self.sessions[session]["returnCode"].append(full_string)
+        return full_string
+
+    @expose('makeReturnCode')
+    def makeReturnCode(self, session=None):
+        '''
+        Inputs:
+
+        Outputs:
+
+        '''
+        session = self.__set_session(session)
+
+        self.sessions[session]["returnCode"].append('import os\n')
+        self.sessions[session]["returnCode"].append("CODEX_ROOT  = os.getenv('CODEX_ROOT')\n")
+        self.sessions[session]["returnCode"].append("import sys\n")
+        self.sessions[session]["returnCode"].append("import time, h5py, read_data, plot, time_log\n")
+        self.sessions[session]["returnCode"].append("import codex_data_quality_scan_api\n")
+        self.sessions[session]["returnCode"].append("import numpy as np\n")
+        self.sessions[session]["returnCode"].append("import matplotlib.pyplot as plt\n")
+        self.sessions[session]["returnCode"].append("import matplotlib.image as mpimg\n")
+        self.sessions[session]["returnCode"].append("import codex_peak_detection_api\n")
+        self.sessions[session]["returnCode"].append("from scipy import misc\n")
+        self.sessions[session]["returnCode"].append("from random import randint\n")
+        self.sessions[session]["returnCode"].append("from sklearn import cluster, datasets\n")
+        self.sessions[session]["returnCode"].append("from sklearn.neighbors import kneighbors_graph\n")
+        self.sessions[session]["returnCode"].append("from sklearn.preprocessing import StandardScaler\n")
+        self.sessions[session]["returnCode"].append("from plot import getColorMap\n")
+        self.sessions[session]["returnCode"].append("import hash, return_code\n")
+        self.sessions[session]["returnCode"].append("import codex_clustering_api, codex_dimmension_reduction_api\n")
+        self.sessions[session]["returnCode"].append("import codex_template_scan_api, codex_endmembers\n")
+        self.sessions[session]["returnCode"].append("import codex_segmentation_api, codex_regression_api\n")
+        self.sessions[session]["returnCode"].append("\n\n#### This code is an auto-generated output of your last session working in CODEX.\n\n")
+
+    @expose('dump_code_to_file')
+    def dump_code_to_file(self, returnedCodePath, session=None):
+        '''
+        Inputs:
+
+        Outputs:
+
+        '''
+        session = self.__set_session(session)
+
+        file = open(returnedCodePath, 'w+')
+
+        self.sessions[session]["returnCode"] = code_unique(self.sessions[session]["returnCode"])
+
+        for line in self.sessions[session]["returnCode"]:
+            file.write(line)
+
+        file.close()
+
+def code_unique(seq):
+    seen = set()
+    seen_add = seen.add
+    return [x for x in seq if not (x in seen or seen_add(x))]
 
 def assert_session(sessionKey):
     '''

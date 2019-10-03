@@ -17,7 +17,7 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 logger = logging.getLogger(__name__)
 
-from api.sub.return_code       import dump_code_to_file
+from api.sub.hash  import get_cache
 
 def download_code(msg, result, savePath):
     '''
@@ -27,8 +27,9 @@ def download_code(msg, result, savePath):
 
     '''
     try:
+        cache = get_cache(msg['sessionkey'])
         saveFile = os.path.join(savePath,"returned_code.py")
-        dump_code_to_file(saveFile)
+        cache.dump_code_to_file(saveFile)
         f = open(saveFile, "r")
         lines = f.readlines()
         outString = "".join(lines)

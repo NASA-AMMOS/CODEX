@@ -25,5 +25,3 @@ Note: Run the following commands before doing the required 'conda activate codex
 $ export PATH=/usr/local/anaconda3/bin:$PATH
 $ source /usr/local/anaconda3/etc/profile.d/conda.sh
 ```
-
-Note:  codex.py must be run with the -ssl flag for use on codex.jpl.nasa.gov

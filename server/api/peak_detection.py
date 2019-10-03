@@ -25,7 +25,6 @@ logger = logging.getLogger(__name__)
 
 # CODEX Support
 from api.sub.codex_math        import impute
-from api.sub.return_code       import logReturnCode
 from api.sub.downsample        import downsample
 from api.sub.plot              import plot_peak
 from api.sub.time_log          import getComputeTimeEstimate

@@ -53,8 +53,6 @@ from api.data_manager       import get_data_metrics
 from api.analysis_manager   import download_code
 from api.eta_manager        import get_time_estimate
 from api.sub.system         import codex_server_memory_check
-from api.sub.return_code    import logReturnCode
-from api.sub.return_code    import makeReturnCode
 from api.sub.time_log       import getTimeLogDict
 from api.sub.hash           import get_cache
 from api.sub.hash           import create_cache_server
@@ -89,7 +87,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
         global nan
         global inf
         global ninf
-
+        
         msg = json.loads(message)
         result = {}
 
@@ -109,15 +107,12 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
             fileExtension = filename.split(".")[-1]
             if (fileExtension == "csv"):
                 hashList, featureList = cache.import_csv(filepath)
-                logReturnCode(inspect.currentframe())
 
             elif (fileExtension == "h5"):
                 hashList, featureList = cache.import_hd5(filepath)
-                logReturnCode(inspect.currentframe())
 
             elif (fileExtension == "npy"):
                 hashList, featureList = cache.import_npy(filepath)
-                logReturnCode(inspect.currentframe())
 
             else:
                 result['message'] = "Currently unsupported filetype"
@@ -287,10 +282,6 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 
         # close the thread? I don't think this is necessary
         yield self.future
-        try:
-            codex_server_memory_check(session=json.loads(message)['sessionkey'])
-        except:
-            raise
 
         # make sure the socket gets closed
         self.on_close()
@@ -335,18 +326,10 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logs/{time}.log'.format(time=datetime.datetime.now()), level=0)
     logging.info("CODEX Server Started")
 
-    makeReturnCode()
     getTimeLogDict()
 
     app = make_app()
-    if (len(sys.argv) > 1) and (sys.argv[1] == '-ssl'):
-        ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        ssl_ctx.load_cert_chain(
-            os.path.join("/web/codex/html/_cert/codex.crt"),
-            os.path.join("/web/codex/html/_cert/codex.key"))
-        app = tornado.httpserver.HTTPServer(app, ssl_options=ssl_ctx)
-    else:
-        app = tornado.httpserver.HTTPServer(app)
+    app = tornado.httpserver.HTTPServer(app)
 
     # create the cache server process
     codex_hash_server = make_cache_process()

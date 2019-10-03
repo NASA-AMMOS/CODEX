@@ -25,7 +25,6 @@ logger = logging.getLogger(__name__)
 
 # CODEX Support
 from api.sub.time_log     import logTime
-from api.sub.return_code  import logReturnCode
 from api.sub.hash         import get_cache
 
 def ml_binning(
@@ -217,8 +216,6 @@ def codex_binned_stat(
     endTime = time.time()
     computeTime = endTime - startTime
     logTime("binning", "1d", computeTime, len(x), x.ndim)
-
-    logReturnCode(inspect.currentframe())
 
     dictionary = {"bin_centers": bins.tolist(), 'values': values.tolist()}
     return dictionary
