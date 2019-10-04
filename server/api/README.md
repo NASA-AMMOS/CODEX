@@ -70,61 +70,6 @@ Client->Server Example JSON:<br/>
 |  kmeans                 |              |      k       |     int      |          3           |    [3,10]    |              |              |                      |              |
 
 
-## Classification API
-
-Client->Server Example JSON:<br/>
-{"routine":"algorithm", "algorithmName":name string, "algorithmType":"classification", 'dataFeatures': [list of feature strings], 'downsampled': False, 'cross_val': 5, file': "doctest.csv", 'guidance': None, 'identification': {'id': 'dev0'}, 'scoring':scoring type,'search_type':"random or grid", 'parameters': {eps': [0.7], 'k':[1,2,3,4,5]}, 'dataSelections': [], 'cid': 'wngyu'}
-
-Fields:<br/>
-"routine": "algorithm" - always set to algorithm.  Tells the server you're requesting algorithmic data processing.<br/>
-"algorithmName": algirithmName from table below<br/>
-"algorithmType": "classification" - Specifies we're doing classification.  Separates the algorithmic processing from things like regression or clustering.<br/>
-"dataFeatures": list of feature names<br/>
-"downsampled": Either False for no downsampling, or a percentage between 1 and 100 (int).<br/>
-"cross_val": integer >= 1.  Determines how many times you want to cross validate the experiment.<br/>
-"file": Path to the file we're processing data from.<br/>
-"guidance": None - Always None for classification algorithmic processing.<br/>
-"identification": Not sure, set on front end, not used by server currently.<br/>
-"dataSelections": List of selection names to apply to processing.<br/>
-"cid": Not sure, set on front end, not used by server currently.<br/>
-"scoring": The metric for evaluating the equality of the model.  Acceptable keys are: accuracy, balanced_accuracy, average_precision, brier_score_loss, f1, f1_micro, f1_macro, f1_weighted, f1_samples, neg_log_loss, precision, recall, jaccard, roc_auc<br/>
-"search_type": Technique for evaluating the parameter space for each algorithm.  Acceptable keys are: "random" or "grid".<br/>
-"parameters": sub dictionary of parameters for the given algorithmName - Defined in the table below.  Only send the ones specified for the given algorithm. Each key should be a list.
-																			When a range is given by the user, the front end should extend it out.  For example, if the user specified min=5, max=10 & step=2 for key "apple", the front end should send "apple":[5,7,9]<br/>
-
-
-
-
-|         algorithmName          | Description  |      parm 1 name     | parm 1 dtype | parm 1 default range   |     parm 1 range     |
-|--------------------------------|--------------|----------------------|--------------|------------------------|----------------------|
-| AdaBoostClassifier             |              | n_estimators         |     int      |          50            |     [1, 100]         |
-| BaggingClassifier              |              | n_estimators         |     int      |          10            |     [1, 100]         |
-| BayesianGaussianMixture        |              | n_components         |     int      |           1            |     [1, 100]         |
-| BernoulliNB                    |              |    alpha             |    float     |           1            |     [0, 100]         |
-| CalibratedClassifierCV         |              |    method            |    string    |       sigmoid          |sigmoid or isotonic   |
-| ComplementNB                   |              |    alpha             |    float     |           1            |     [0, 100]         |
-| DecisionTreeClassifier         |              |  max_depth           |     int      |         None           |  None or [1, 1000]   |
-| ExtraTreesClassifier           |              | n_estimators         |     int      |          10            |     [1, 100]         |
-| ExtraTreeClassifier            |              |  max_depth           |     int      |         None           |  None or [1, 1000]   |
-| GaussianMixture                |              | n_components         |     int      |           1            |     [1, 100]         |
-| GaussianNB                     |              | var_smoothing        |    float     |         1e-09          |     [0, 100]         |
-| GaussianProcessClassifier      |              | n_restarts_optimizer |     int      |           0            |     [0, 100]         |
-| GradientBoostingClassifier     |              | n_estimators         |     int      |          100           |     [1, 1000]        |
-| KNeighborsClassifier           |              | n_neighbors          |     int      |           5            |     [1, 100]         |
-| LabelPropagation               |              | n_neighbors          |     int      |           5            |     [1, 100]         |
-| LabelSpreading                 |              | n_neighbors          |     int      |           5            |     [1, 100]         |
-| LinearDiscriminantAnalysis     |              | n_components         |     int      |           3            | [1, # features -1]   |
-| LogisticRegression             |              | max_iter             |     int      |          100           |    [1, 10000]        |
-| LogisticRegressionCV           |              | max_iter             |     int      |          100           |    [1, 10000]        |
-| MLPClassifier                  |              | max_iter             |     int      |          200           |    [1, 10000]        |
-| MultinomialNB                  |              |    alpha             |    float     |           1            |     [0, 100]         |
-| NuSVC                          |              | max_iter             |     int      |          -1            |    [-1, 10000]       |
-| QuadraticDiscriminantAnalysis  |              | tol                  |    float     |         1.0e-4         |   [1.0e-6, 1.0e-2]   |
-| RandomForestClassifier         |              | n_estimators         |     int      |          10            |     [1, 100]         |
-| SGDClassifier                  |              |    alpha             |    float     |        0.0001          |     [0, 100]         |
-| SVC                            |              | max_iter             |     int      |          -1            |    [-1, 10000]       |
-
-
 ## Regression API
 
 Client->Server Example JSON:<br/>
