@@ -21,3 +21,6 @@ export const GRAPH_TYPES = [
     BOX_PLOT_GRAPH,
     VIOLIN_PLOT_GRAPH
 ];
+
+export const AUTOSAVE_KEY = "AUTOSAVE";
+export const AUTOSAVE_INTERVAL = 1000 * 60 * 5;

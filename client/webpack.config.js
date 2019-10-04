@@ -37,6 +37,7 @@ module.exports = {
             },
             {
                 test: /styles\/\.(css|scss)$/,
+                include: [path.resolve(__dirname, "styles")],
                 use: ["@teamsupercell/typings-for-css-modules-loader"]
             },
             {

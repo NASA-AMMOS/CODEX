@@ -5,6 +5,7 @@ import { bindActionCreators } from "redux";
 import * as sessionsActions from "actions/sessionsActions";
 import "components/Sessions/Sessions.scss";
 import { useWindowManager } from "hooks/WindowHooks";
+import * as uiTypes from "constants/uiTypes";
 
 function sessionsStateReducer(sessionsState, action) {
     switch (action.type) {
@@ -61,24 +62,26 @@ function Sessions(props) {
 
     return (
         <div className="sessions">
-            {Object.entries(sessionsByFileName).map(([fileName, sessionNames]) => {
-                return (
-                    <div key={fileName}>
-                        <div className="fileName">{fileName}</div>
-                        {sessionNames.map(sessionName => {
-                            return (
-                                <div
-                                    className="sessionName"
-                                    key={sessionName}
-                                    onClick={() => props.loadSession(sessionName)}
-                                >
-                                    {transformSessionName(sessionName)}
-                                </div>
-                            );
-                        })}
-                    </div>
-                );
-            })}
+            {Object.entries(sessionsByFileName)
+                .filter(([fileName]) => fileName !== "AUTOSAV")
+                .map(([fileName, sessionNames]) => {
+                    return (
+                        <div key={fileName}>
+                            <div className="fileName">{fileName}</div>
+                            {sessionNames.map(sessionName => {
+                                return (
+                                    <div
+                                        className="sessionName"
+                                        key={sessionName}
+                                        onClick={() => props.loadSession(sessionName)}
+                                    >
+                                        {transformSessionName(sessionName)}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    );
+                })}
         </div>
     );
 }

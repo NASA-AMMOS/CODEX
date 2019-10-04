@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { useFilename, useFileUpload } from "hooks/DataHooks";
@@ -16,11 +16,26 @@ import * as selectionActions from "actions/selectionActions";
 import * as exportActions from "actions/exportActions";
 import "./SessionBar.css";
 import * as sessionsActions from "actions/sessionsActions";
+import * as uiTypes from "constants/uiTypes";
+import classnames from "classnames";
+import { useInterval, useTimeout } from "hooks/UtilHooks";
 
 const SessionBar = props => {
     const filename = useFilename();
     const fileLoad = useFileUpload();
     const uploadStatus = useUploadStatus();
+
+    const [flashSaveButton, setFlashSaveButton] = useState();
+
+    // Load autosave session on first load
+    useEffect(_ => props.loadSession(uiTypes.AUTOSAVE_KEY), []);
+
+    useInterval(_ => {
+        setFlashSaveButton(true);
+        props.saveSession(uiTypes.AUTOSAVE_KEY);
+    }, uiTypes.AUTOSAVE_INTERVAL);
+
+    useTimeout(_ => setFlashSaveButton(false), flashSaveButton && 300);
 
     useEffect(
         _ => {
@@ -68,6 +83,11 @@ const SessionBar = props => {
         loadingClasses = "session-bar-loading-bar";
         loadingStyle = { width: `${uploadStatus * 100}%` };
     }
+
+    const saveButtonClasses = classnames({
+        "session-bar-button": true,
+        highlight: flashSaveButton
+    });
 
     return (
         <div className="session-bar">
@@ -122,7 +142,7 @@ const SessionBar = props => {
                 </li>
                 <li>
                     <MaterialButton
-                        className="session-bar-button"
+                        classes={{ root: saveButtonClasses }}
                         size="small"
                         color="inherit"
                         onClick={() => {
@@ -148,7 +168,8 @@ function mapDispatchToProps(dispatch) {
         removeAllSelections: bindActionCreators(selectionActions.removeAllSelections, dispatch),
         requestServerExport: bindActionCreators(exportActions.requestServerExport, dispatch),
         openSessionsWindow: bindActionCreators(sessionsActions.openSessionsWindow, dispatch),
-        saveSession: bindActionCreators(sessionsActions.saveSession, dispatch)
+        saveSession: bindActionCreators(sessionsActions.saveSession, dispatch),
+        loadSession: bindActionCreators(sessionsActions.loadSession, dispatch)
     };
 }
 

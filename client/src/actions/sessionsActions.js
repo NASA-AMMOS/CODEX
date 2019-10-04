@@ -5,6 +5,7 @@ import { createGraph } from "actions/graphActions";
 
 function serializeClientState(state) {
     return {
+        filename: state.data.get("filename"),
         windows: state.windowManager.get("windows").map(win => {
             return {
                 data: win.get("data"),
@@ -39,11 +40,12 @@ export function loadSession(sessionName) {
             routine: "load_session",
             session_name: sessionName
         });
+
         req.then(data => {
             dispatch({
                 type: types.FILE_LOAD,
                 data: data.session_data.features,
-                filename: data.filename
+                filename: data.session_data.state.filename
             });
 
             data.session_data.state.windows.map(windowData => {

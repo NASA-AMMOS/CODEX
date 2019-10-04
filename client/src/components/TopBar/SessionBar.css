@@ -1,3 +1,5 @@
+@import "styles/theme.scss";
+
 .session-bar {
     position: relative;
     height: 35px;
@@ -59,5 +61,12 @@
     }
     100% {
         background: #7be633;
+    }
+}
+
+.session-bar-button {
+    background: none;
+    &.highlight {
+        background: $primary-blue;
     }
 }
