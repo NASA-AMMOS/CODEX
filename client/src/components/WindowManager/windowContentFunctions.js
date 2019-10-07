@@ -1,7 +1,5 @@
 import React from "react";
 
-import ClassificationResults from "components/Classification/ClassificationResults";
-import ClassificationOverview from "components/Classification/ClassificationOverview";
 import ClusterAlgorithm from "components/Algorithms/ClusterAlgorithm";
 import ContourGraph from "components/Graphs/ContourGraph";
 import ViolinPlotGraph from "components/Graphs/ViolinPlotGraph";
@@ -51,21 +49,6 @@ export function getWindowContent(win) {
                     filename={win.get("filename")}
                     winId={win.get("id")}
                     selectedFeatures={win.get("selectedFeatures")}
-                />
-            );
-        case classificationRegressionTypes.CLASSIFICATION_WINDOW:
-            return (
-                <ClassificationOverview
-                    selectedFeatures={win.get("selectedFeatures")}
-                    selectedFeatureLength={win.get("selectedFeatureLength")}
-                    winId={win.get("id")}
-                />
-            );
-        case classificationRegressionTypes.CLASSIFICATION_RESULTS_WINDOW:
-            return (
-                <ClassificationResults
-                    requests={win.get("requests")}
-                    runParams={win.get("runParams")}
                 />
             );
         case classificationRegressionTypes.REGRESSION_WINDOW:

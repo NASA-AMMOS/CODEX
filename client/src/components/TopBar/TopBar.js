@@ -84,10 +84,6 @@ function NavigationBar(props) {
                     <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
                     <Dropdown.Menu>
                         {createMenuItem(windowTypes.CLUSTER_ALGORITHM, "Clustering (2+F)")}
-                        {createMenuItem(
-                            windowTypes.CLASSIFICATION_WINDOW,
-                            "Classification (2+F, 1L)"
-                        )}
                         {createMenuItem(windowTypes.REGRESSION_WINDOW, "Regression")}
 
                         {createMenuItem(

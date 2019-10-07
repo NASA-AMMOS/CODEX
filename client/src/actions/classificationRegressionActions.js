@@ -2,7 +2,7 @@ import * as actionTypes from "constants/actionTypes";
 import * as classificationTypes from "constants/classificationRegressionTypes";
 import * as actionFunctions from "actions/actionFunctions";
 import * as utils from "utils/utils";
-import * as classificationFunctions from "components/Classification/classificationFunctions";
+import * as regressionFunctions from "components/Regressions/regressionFunctions";
 
 /* eslint import/no-webpack-loader-syntax: off */
 import WorkerSocket from "worker-loader!workers/socket.worker";
@@ -10,9 +10,9 @@ import WorkerSocket from "worker-loader!workers/socket.worker";
 function formatClassificationParam(param) {
     switch (param.mode) {
         case "range":
-            return classificationFunctions.createRange(param.subParams);
+            return regressionFunctions.createRange(param.subParams);
         case "rangeWithNull":
-            return classificationFunctions.createRange(param.subParams, true);
+            return regressionFunctions.createRange(param.subParams, true);
     }
 }
 
