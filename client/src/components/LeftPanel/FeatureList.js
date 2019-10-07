@@ -19,7 +19,7 @@ import * as actionTypes from "constants/actionTypes";
 import FormControl from "@material-ui/core/FormControl";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
-import Button from '@material-ui/core/Button';
+import Button from "@material-ui/core/Button";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 
 import {
@@ -91,15 +91,12 @@ const reorder = (object, startIndex, endIndex) => {
 function StatsLabelRow(props) {
     return (
         <div className="label-row" hidden={props.statsHidden}>
-            <span className="classification"> C </span>
-            <span className="regression"> R </span>
             <span className="mean"> mean </span>
             <span className="median"> median </span>
             <span className="sparkline"> sparkline </span>
         </div>
     );
 }
-
 
 /*
     The header for the feature list left panel
@@ -108,18 +105,15 @@ function FeaturePanelHeader(props) {
     return (
         <div
             className={
-                "header " +
-                (props.statsHidden ? "stats-hidden-header" : "stats-not-hidden-header")
+                "header " + (props.statsHidden ? "stats-hidden-header" : "stats-not-hidden-header")
             }
         >
             <div className="title">Features</div>
             <span
                 className="stats-toggle"
-                onClick={
-                    function() {
-                        props.setStatsHidden(!props.statsHidden);
-                    }
-                }
+                onClick={function() {
+                    props.setStatsHidden(!props.statsHidden);
+                }}
             >
                 {props.statsHidden ? "Stats >" : "< done"}
             </span>
@@ -131,7 +125,6 @@ function FeaturePanelHeader(props) {
     Component that holds the dropddown menu showing how many features have been selected. 
 */
 function SelectedDropdown(props) {
-
     const activeCount = props.featureList.filter(f => f.get("selected")).size;
     const totalCount = props.featureList.size;
     const inactive = totalCount - activeCount;
@@ -143,13 +136,13 @@ function SelectedDropdown(props) {
         function(feature) {
             return true;
         },
-        function (feature) {
+        function(feature) {
             return feature.selected;
         },
-        function (feature) {
+        function(feature) {
             return !feature.selected;
         }
-    ]
+    ];
 
     return (
         <FormControl className="selected-dropdown">
@@ -157,31 +150,20 @@ function SelectedDropdown(props) {
                 value={lastSelected}
                 onChange={e => {
                     setLastSelected(e.target.value);
-                    props.setFeatureFilter({func:featureFilterFunctions[e.target.value]});
+                    props.setFeatureFilter({ func: featureFilterFunctions[e.target.value] });
                 }}
             >
-                <MenuItem 
-                    key="total"
-                    value={0}
-                >
-                    {"All Columns ("+totalCount+"/"+totalCount+")"}
+                <MenuItem key="total" value={0}>
+                    {"All Columns (" + totalCount + "/" + totalCount + ")"}
                 </MenuItem>
-                <MenuItem 
-                    key="selected" 
-                    value={1}
-                >
-                    {"Selected ("+activeCount+"/"+totalCount+")"}
+                <MenuItem key="selected" value={1}>
+                    {"Selected (" + activeCount + "/" + totalCount + ")"}
                 </MenuItem>
-                <MenuItem 
-                    key="not_selected" 
-                    value={2}
-                >
-                    {"Not Selected ("+inactive+"/"+totalCount+")"}
+                <MenuItem key="not_selected" value={2}>
+                    {"Not Selected (" + inactive + "/" + totalCount + ")"}
                 </MenuItem>
             </Select>
-            <ArrowDropDownIcon
-                color="white"
-            />
+            <ArrowDropDownIcon color="white" />
         </FormControl>
     );
 }
@@ -214,22 +196,6 @@ function StatisticsRow(props) {
 
     return (
         <div className="feature-statistics-row">
-            <span
-                className={(featureTypeData.c ? "lit" : "dim") + " class-regression-span"}
-                onClick={function() {
-                    setFeatureTypeData({ r: featureTypeData.r, c: !featureTypeData.c });
-                }}
-            >
-                C
-            </span>
-            <span
-                className={(featureTypeData.r ? "lit" : "dim") + " class-regression-span"}
-                onClick={function() {
-                    setFeatureTypeData({ r: !featureTypeData.r, c: featureTypeData.c });
-                }}
-            >
-                R
-            </span>
             <span className="mean-span"> {mean} </span>
             <span className="median-span"> {median} </span>
             <span className="sparkline-span">
@@ -374,11 +340,11 @@ function FeatureList(props) {
     const activeCount = props.featureList.filter(f => f.get("selected")).size;
     const shownCount = activeCount;
     const totalCount = props.featureList.size;
-    
+
     const stats = useFeatureStatisticsLoader();
     const features = useFeatureMetadata();
     //manages the hidden state of the statistics panel
-    const [statsHidden, setStatsHidden] = useState(true);
+    const [statsHidden, setStatsHidden] = props.panelCollapsed;
     //a map from feature names to their current list indices
     const [featureIndices, setFeatureIndices] = useState({});
     //the holder of feature data for sparklines
@@ -391,12 +357,17 @@ function FeatureList(props) {
     const lazyLimit = 12;
     const [statsLoading, setStatsLoading] = useState(false);
     const [featureFilter, setFeatureFilter] = useState({
-        func:function(feature) {return true;}
+        func: function(feature) {
+            return true;
+        }
     });
 
     //translate featureList into interpretable js list of names
-    const featureNames = props.featureList.toJS()
-        .filter((feature) => {return featureFilter.func(feature)})
+    const featureNames = props.featureList
+        .toJS()
+        .filter(feature => {
+            return featureFilter.func(feature);
+        })
         .map(feature => {
             return feature.name;
         });
@@ -453,9 +424,7 @@ function FeatureList(props) {
     //sorts them by their indices stored in featureIndices
     const sortedFeatureNames = featureNames
         .filter(featureName =>
-            props.filterString
-                ? featureName.startsWith(props.filterString)
-                : true
+            props.filterString ? featureName.startsWith(props.filterString) : true
         )
         .concat() //this is so it operates on a copy of stuff
         .sort((a, b) => {
@@ -471,7 +440,7 @@ function FeatureList(props) {
             className={
                 "feature-list-container " + (statsHidden ? "stats-hidden" : "stats-not-hidden")
             }
-        >   
+        >
             <FeaturePanelHeader
                 statsHidden={statsHidden}
                 setStatsHidden={setStatsHidden}

@@ -4,7 +4,6 @@ import "components/LeftPanel/LeftPanel.css";
 import FeatureList from "components/LeftPanel/FeatureList";
 import SelectionList from "components/LeftPanel/SelectionList";
 
-
 /*
     Bar that handles the form for the feature filtering
 */
@@ -21,18 +20,18 @@ function FilterBar(props) {
 }
 
 function LeftPanel() {
-    //fitler string
+    const panelCollapsed = useState(true);
+
+    //filter string
     const [filterString, setFilterString] = useState("");
 
     return (
         <React.Fragment>
             <div className="Panel">
                 <div id="content">
-                    <FilterBar
-                        setFilterString={setFilterString}
-                    />
-                    <FeatureList filterString={filterString}/>
-                    <SelectionList filterString={filterString}/>
+                    <FilterBar setFilterString={setFilterString} />
+                    <FeatureList filterString={filterString} panelCollapsed={panelCollapsed} />
+                    <SelectionList filterString={filterString} panelCollapsed={panelCollapsed} />
                 </div>
             </div>
         </React.Fragment>

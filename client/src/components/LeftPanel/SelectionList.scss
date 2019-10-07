@@ -1,6 +1,7 @@
 @import "styles/theme.scss";
 
 .selections {
+    margin-top: 10px;
     display: flex;
     flex-flow: column;
     width: 100%;
@@ -15,6 +16,10 @@
         align-items: baseline;
         padding: 0 5px;
         background-color: $header-green;
+
+        &.stats-not-hidden-header {
+            width: 250%;
+        }
 
         .title {
             font-weight: bold;

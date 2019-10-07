@@ -558,6 +558,7 @@ function DragList(props) {
 }
 
 function SelectionList(props) {
+    const [panelCollapsedState] = props.panelCollapsed;
     const activeCount = props.savedSelections.filter(sel => sel.active).length;
     const shownCount = activeCount;
     const totalCount = props.savedSelections.length;
@@ -570,7 +571,12 @@ function SelectionList(props) {
     return (
         <React.Fragment>
             <div className="selections">
-                <div className="header">
+                <div
+                    className={
+                        "header " +
+                        (panelCollapsedState ? "stats-hidden-header" : "stats-not-hidden-header")
+                    }
+                >
                     <div className="title">Selections</div>
                     <span className="counts">
                         {activeCount}/{shownCount}/{totalCount}
