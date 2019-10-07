@@ -84,7 +84,6 @@ function NavigationBar(props) {
                     <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
                     <Dropdown.Menu>
                         {createMenuItem(windowTypes.CLUSTER_ALGORITHM, "Clustering (2+F)")}
-                        {createMenuItem(windowTypes.REGRESSION_WINDOW, "Regression")}
 
                         {createMenuItem(
                             windowTypes.DIMENSIONALITY_REDUCTION_WINDOW,
@@ -106,18 +105,7 @@ function NavigationBar(props) {
                     <Dropdown.Toggle className="dropdownToggle" title="Workflows" />
                     <Dropdown.Menu>
                         {createMenuItem(windowTypes.EXPLAIN_THIS_WINDOW, "Explain This")}
-                        {createMenuItem(windowTypes.FILTER_WINDOW, "Filter")}
-                        {createMenuItem(
-                            windowTypes.FIND_MORE_LIKE_THIS_WINDOW,
-                            "Find More Like This"
-                        )}
-                        {createMenuItem(
-                            windowTypes.GENERAL_CLASSIFIER_WINDOW,
-                            "General Classifier"
-                        )}
                         {createMenuItem(windowTypes.TABLE_WINDOW, "Table")}
-                        {createMenuItem(windowTypes.TRANSFORM_WINDOW, "Transform")}
-                        {createMenuItem(windowTypes.QUALITY_SCAN_WINDOW, "Quality Scan")}
                     </Dropdown.Menu>
                 </Dropdown>
 
