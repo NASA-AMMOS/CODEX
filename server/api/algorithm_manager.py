@@ -21,17 +21,12 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 logger = logging.getLogger(__name__)
 
-from api.binning                 import ml_binning
 from api.clustering              import clustering
-from api.quality_scan            import quality_scan
 from api.dimmension_reduction    import dimension_reduction
-from api.endmember               import endmember
 from api.normalize               import normalize
 from api.peak_detection          import peak_detection
 from api.regression              import regression
-from api.segmentation            import segmentation
 from api.template_scan           import template_scan
-from api.classification          import classification
 
 from api.sub.system              import get_featureList
 from api.sub.hash                import get_cache
@@ -94,22 +89,14 @@ def algorithm_call(msg, result):
         if (downsampled != False):
             downsampled = int(downsampled)
 
-        if (algorithmType == "binning"):
-            result = ml_binning(inputHash, hashList, subsetHashName, algorithmName, downsampled, parms, result, session=ch)
 
-        elif (algorithmType == "clustering"):
+        if (algorithmType == "clustering"):
             pca = dimension_reduction(inputHash, hashList, labelHash, subsetHashName, "PCA", downsampled, {"n_components":2}, scoring, search_type, cross_val, result, ch).run()
             result =       clustering(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
             result['data'] = pca['data']
 
-        elif (algorithmType == "data_quality_scan"):
-            result = quality_scan(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
-
         elif (algorithmType == "dimensionality_reduction"):
             result = dimension_reduction(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
-
-        elif (algorithmType == "endmember"):
-            result = endmember(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         elif (algorithmType == "normalize"):
             result = normalize(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
@@ -119,12 +106,6 @@ def algorithm_call(msg, result):
 
         elif (algorithmType == "regression"):
             result = regression(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
-
-        elif (algorithmType == "classification"):
-            result = classification(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
-
-        elif (algorithmType == "segment"):
-            result = segmentation(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         elif (algorithmType == "template_scan"):
             result = template_scan(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
