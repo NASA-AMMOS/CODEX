@@ -83,8 +83,7 @@ function NavigationBar(props) {
                 <Dropdown className="dropdownMain" autoOpen={false}>
                     <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
                     <Dropdown.Menu>
-                        {createMenuItem(windowTypes.CLUSTER_ALGORITHM, "Clustering (2+F)")}
-
+                        {createMenuItem(windowTypes.CLUSTER_ALGORITHM, "Clustering")}
                         {createMenuItem(
                             windowTypes.DIMENSIONALITY_REDUCTION_WINDOW,
                             "Dimensionality Reduction"
