@@ -45,11 +45,14 @@ function generateLayouts(features) {
         let layout = {
             dragmode: "select",
             selectdirection: "h",
-            margin: { l: 50, r: 5, t: 20, b: 20 }, // Axis tick labels are drawn in the margin space
+            margin: { l: 50, r: 5, t: 20, b: 40 }, // Axis tick labels are drawn in the margin space
             hovermode: "compare", // Turning off hovermode seems to screw up click handling
             yaxis: {
-                title: features[index].feature,
+                title: "Counts",
                 fixedrange: true
+            },
+            xaxis: {
+                title: features[index].feature
             },
             shapes: []
         };
