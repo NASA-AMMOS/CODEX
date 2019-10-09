@@ -126,7 +126,7 @@ def add_data(msg, result):
 
     return result
 
-def get_data(msg, nan, inf, ninf, result):
+def get_data(msg, result):
     '''
     Inputs:
 
@@ -171,11 +171,11 @@ def get_data(msg, nan, inf, ninf, result):
             data = data.astype(float)
             for x in range(0, x_):
                 if(np.isnan(data[x][0])):
-                    data[x][0] = nan
+                    data[x][0] = ch.get_nan()
                 elif(np.isinf(data[x][0]) and data[x][0] > 0):
-                    data[x][0] = inf
+                    data[x][0] = ch.get_inf()
                 elif(np.isinf(data[x][0]) and data[x][0] < 0):
-                    data[x][0] = ninf
+                    data[x][0] = ch.get_ninf()
 
             #data[data == np.float64("nan")] = nan
             #data[data == np.float64("inf")] = inf

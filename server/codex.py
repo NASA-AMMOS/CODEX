@@ -69,11 +69,6 @@ queuemgr = Manager()
 
 fileChunks = []
 
-# Temporary sentinel values for JSON transfer
-nan = None
-inf = None
-ninf = None
-
 class uploadSocket(tornado.websocket.WebSocketHandler):
     def open(self):
         logging.info("Upload Websocket opened")
@@ -84,10 +79,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
 
         global fileChunks
-        global nan
-        global inf
-        global ninf
-        
+  
         msg = json.loads(message)
         result = {}
 
@@ -149,9 +141,6 @@ def route_request(msg, result):
     2) an iterator, which will be iterated over in the worker process and sent
        piecemeal to the client.
     '''
-    global nan
-    global inf
-    global ninf
 
     routine = msg['routine']
     if(routine == 'algorithm'):
@@ -173,7 +162,7 @@ def route_request(msg, result):
         if (activity == "add"):
             yield add_data(msg, result)
         elif (activity == "get"):
-            yield get_data(msg, nan, inf, ninf, result)
+            yield get_data(msg, result)
         elif (activity == "delete"):
             yield delete_data(msg, result)
         elif (activity == "update"):

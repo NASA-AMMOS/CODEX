@@ -78,7 +78,10 @@ class CodexHash:
                 "labelList": [],
                 "classifierList": [],
                 "regressorList": [],
-                "returnCode": []
+                "returnCode": [],
+                "nan": None,
+                "inf": None,
+                "ninf": None
             }
         return sessionKey
 
@@ -97,6 +100,21 @@ class CodexHash:
         logging.info("Downsample Cache Size        : " + str(len(self.sessions[session]["downsampleList"])))
         logging.info("Number of classifier models  : " + str(len(self.sessions[session]["regressorList"])))
         logging.info("Number of regressor models   : " + str(len(self.sessions[session]["classifierList"])))
+
+    @expose('get_nan')
+    def get_nan(self, session=None):
+        session = self.__set_session(session)
+        return self.sessions[session]["nan"]
+
+    @expose('get_inf')
+    def get_inf(self, session=None):
+        session = self.__set_session(session)
+        return self.sessions[session]["inf"]
+
+    @expose('get_ninf')
+    def get_ninf(self, session=None):
+        session = self.__set_session(session)
+        return self.sessions[session]["ninf"]
 
     @expose('remove_stale_data')
     def remove_stale_data(self, verbose=False, session=None):
@@ -359,12 +377,15 @@ class CodexHash:
 
         if(np.isnan(combined_unique).any()):
             sentinel_values['nan']  = round((max_val * 10) + 3)
+            self.sessions[session]['nan'] = sentinel_values['nan']
 
         if(np.isneginf(combined_unique).any()):
             sentinel_values['ninf'] = round((max_val * 10) + 1)
+            self.sessions[session]['ninf'] = sentinel_values['ninf']
 
         if(np.isinf(combined_unique).any()):
             sentinel_values['inf']  = round((max_val * 10) + 2)
+            self.sessions[session]["inf"] = sentinel_values['inf']
 
         return sentinel_values
 
