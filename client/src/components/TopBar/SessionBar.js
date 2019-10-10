@@ -117,42 +117,6 @@ const SessionBar = props => {
                         </MaterialButton>
                     </label>
                 </li>
-                <li className="session-bar__spacer" />
-                <li>
-                    <MaterialButton
-                        className="session-bar-button"
-                        size="small"
-                        color="inherit"
-                        onClick={props.requestServerExport}
-                    >
-                        Export File &nbsp;
-                        <CodeIcon fontSize="small" />
-                    </MaterialButton>
-                </li>
-                <li>
-                    <MaterialButton
-                        className="session-bar-button"
-                        size="small"
-                        color="inherit"
-                        onClick={props.openSessionsWindow}
-                    >
-                        Load Session &nbsp;
-                        <OpenIcon fontSize="small" />
-                    </MaterialButton>
-                </li>
-                <li>
-                    <MaterialButton
-                        classes={{ root: saveButtonClasses }}
-                        size="small"
-                        color="inherit"
-                        onClick={() => {
-                            props.saveSession(`${props.filename}_${new Date().toISOString()}`);
-                        }}
-                    >
-                        Save Session &nbsp;
-                        <SaveIcon fontSize="small" />
-                    </MaterialButton>
-                </li>
             </ul>
         </div>
     );

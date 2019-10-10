@@ -23,4 +23,4 @@ export const GRAPH_TYPES = [
 ];
 
 export const AUTOSAVE_KEY = "AUTOSAVE";
-export const AUTOSAVE_INTERVAL = 1000 * 60 * 5;
+export const AUTOSAVE_INTERVAL = 1000 * 30;

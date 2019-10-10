@@ -53,7 +53,6 @@ export function getSubAlgorithmData(
         dataSelections
     );
 
-    console.log(request);
     const requestObject = {};
     const socketWorker = new WorkerSocket();
 
