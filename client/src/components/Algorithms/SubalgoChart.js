@@ -112,7 +112,7 @@ function SubalgoChart(props) {
         >
             <div className={titleClasses}>
                 <span className="subalgo-title-text">{props.titleText}</span>
-                <span class="subalgo-header-time">{timeToGenerate}</span>
+                <span className="subalgo-header-time">{timeToGenerate}</span>
             </div>
             <div className={loadingClasses} hidden={props.serverData}>
                 <CircularProgress />

@@ -26,9 +26,7 @@ function buildSubalgoServerRequest(
             id: "dev0"
         },
         parameters,
-        dataSelections: dataSelections.map(({ name, color }) => {
-            return { name, color, emphasize: false };
-        }),
+        dataSelections: [],
         downsampled
     };
 }
@@ -55,6 +53,7 @@ export function getSubAlgorithmData(
         dataSelections
     );
 
+    console.log(request);
     const requestObject = {};
     const socketWorker = new WorkerSocket();
 
