@@ -7,6 +7,11 @@ export const ICA = "ICA";
 
 export const DIMENSIONALITY_REDUCTION_TYPES = [PCA, ICA];
 
+export const HUMAN_NAMES = {
+    [PCA]: "Principal Component Analysis",
+    [ICA]: "Independent Component Analysis"
+};
+
 export const DIMENSIONALITY_REDUCTION_PARAMS = {
     [PCA]: [
         {

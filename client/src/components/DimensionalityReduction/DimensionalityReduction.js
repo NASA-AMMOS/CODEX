@@ -101,14 +101,16 @@ function makeDRPlot(algo, maxYRange, changeSliderVal, featureAdd) {
         ],
         layout: {
             autosize: true,
-            margin: { l: 0, r: 5, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
+            margin: { l: 60, r: 5, t: 0, b: 45 }, // Axis tick labels are drawn in the margin space
             hovermode: "closest", // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
             showlegend: false,
             xaxis: {
-                automargin: true
+                automargin: true,
+                title: "Number of Components"
             },
             yaxis: {
+                title: "Cumulative Explained Percentage",
                 automargin: true,
                 range: [0, maxYRange + maxYRange * 0.05] // Add a 5% buffer so we can see the top of the chart (#204)
             }
@@ -145,7 +147,7 @@ function makeDRPlot(algo, maxYRange, changeSliderVal, featureAdd) {
                     changeSliderVal(algo.algorithmName, val);
                 }}
             />
-            <Button fullWidth onClick={e => featureAdd(algo)}>
+            <Button fullWidth onClick={e => featureAdd(algo)} className="saveButton">
                 Save
             </Button>
         </React.Fragment>
@@ -216,24 +218,28 @@ function DimensionalityReductionResults(props) {
     const [helpModeState, setHelpModeState] = useState(false);
     const algoVerb = "dimensionality_reduction";
 
-    const algoGraphs = algoStates.map(algo => (
-        <FixedContainer key={algo.algorithmName}>
-            <div className="regressionHeader" onClick={() => toggleSelected(algo.algorithmName)}>
-                {algo.algorithmName.length <= 20
-                    ? algo.algorithmName
-                    : algo.algorithmName.slice(0, 17) + "..."}
-            </div>
-            <div className="plot">
-                {makeDRPlot(algo, maxYRange, changeSliderVal, props.featureAdd)}
-            </div>
-        </FixedContainer>
-    ));
+    const algoGraphs = algoStates.map(algo => {
+        const humanName = dimensionalityReductionTypes.HUMAN_NAMES[algo.algorithmName];
+        return (
+            <FixedContainer key={algo.algorithmName}>
+                <div
+                    className="regressionHeader"
+                    onClick={() => toggleSelected(algo.algorithmName)}
+                >
+                    {humanName}
+                </div>
+                <div className="plot">
+                    {makeDRPlot(algo, maxYRange, changeSliderVal, props.featureAdd)}
+                </div>
+            </FixedContainer>
+        );
+    });
 
     return (
         <WindowLayout>
             <FixedContainer>
                 <WindowLayout fluid direction="row" align="center">
-                    <Typography variant="h6">All Reductions</Typography>
+                    <Typography variant="h6">Explain Variance with Fewer Features</Typography>
                     <ExpandingContainer />
                     <FixedContainer>
                         <HelpButton
@@ -259,12 +265,12 @@ function DimensionalityReductionResults(props) {
 const DimensionalityReduction = props => {
     const win = useWindowManager(props, {
         title: "Dimensionality Reduction",
-        width: 600,
-        height: 375,
+        width: 620,
+        height: 500,
         resizeable: true,
         minSize: {
-            width: 400,
-            height: 375
+            width: 620,
+            height: 500
         }
     });
 

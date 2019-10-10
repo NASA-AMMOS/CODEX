@@ -107,12 +107,12 @@
 .plot {
     background: #fff;
     margin: 0 auto;
-    width: 200px;
-    height: 200px;
+    width: 300px;
+    height: 300px;
 
     .chartSlider {
         padding-left: 35px;
-        width: 185px;
+        width: 300px;
         margin-top: 10px;
     }
 }
@@ -177,4 +177,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.saveButton {
+    margin-top: 10px !important;
 }
