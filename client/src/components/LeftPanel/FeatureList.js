@@ -10,7 +10,6 @@ import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckboxIcon from "@material-ui/icons/CheckBox";
 import Popover from "@material-ui/core/Popover";
 import Typography from "@material-ui/core/Typography";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import * as utils from "utils/utils";
 import WorkerSocket from "worker-loader!workers/socket.worker";
 import * as actionFunctions from "actions/actionFunctions";
@@ -224,9 +223,6 @@ function FeatureListDNDRow(props) {
 
     return (
         <div
-            ref={props.provided.innerRef}
-            {...props.provided.draggableProps}
-            {...props.provided.dragHandleProps}
             className="featureRow"
             onMouseEnter={function() {
                 setRowHover(true);
@@ -287,48 +283,25 @@ function FeatureListDND(props) {
     }
 
     return (
-        <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="droppable" type="OUTER">
-                {(provided, snapshot) => (
-                    <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className="drag-drop-div"
-                    >
-                        {props.featureNames.map(featureName => {
-                            if (
-                                featureName === undefined ||
-                                props.featureIndices[featureName] === undefined
-                            ) {
-                                return <div key={featureName}> </div>;
-                            }
-                            return (
-                                <Draggable
-                                    key={featureName}
-                                    draggableId={featureName + ""}
-                                    index={props.featureIndices[featureName]}
-                                >
-                                    {(provided, snapshot) => (
-                                        <FeatureListDNDRow
-                                            featureName={featureName}
-                                            featureInfo={props.featureMapping[featureName]}
-                                            stats={props.stats[featureName]}
-                                            data={props.data[featureName]}
-                                            statsHidden={props.statsHidden}
-                                            featureListLoading={props.featureListLoading}
-                                            featureUnselect={props.featureUnselect}
-                                            featureSelect={props.featureSelect}
-                                            provided={provided}
-                                        />
-                                    )}
-                                </Draggable>
-                            );
-                        })}
-                        {provided.placeholder}
-                    </div>
-                )}
-            </Droppable>
-        </DragDropContext>
+        <div className="drag-drop-div">
+            {props.featureNames.map(featureName => {
+                if (featureName === undefined || props.featureIndices[featureName] === undefined) {
+                    return <div key={featureName}> </div>;
+                }
+                return (
+                    <FeatureListDNDRow
+                        featureName={featureName}
+                        featureInfo={props.featureMapping[featureName]}
+                        stats={props.stats[featureName]}
+                        data={props.data[featureName]}
+                        statsHidden={props.statsHidden}
+                        featureListLoading={props.featureListLoading}
+                        featureUnselect={props.featureUnselect}
+                        featureSelect={props.featureSelect}
+                    />
+                );
+            })}
+        </div>
     );
 }
 
