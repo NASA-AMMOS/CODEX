@@ -123,3 +123,19 @@ export function setUploadStateProcessing() {
 export function setUploadStateDone() {
     return { type: types.SET_UPLOAD_STATE_DONE };
 }
+
+export function showConfirmationModal(modalType, yesFunc, noFunc) {
+    return { type: types.SHOW_CONFIRMATION_MODAL, modalType, yesFunc, noFunc };
+}
+
+export function hideConfirmationModal() {
+    return { type: types.HIDE_CONFIRMATION_MODAL };
+}
+
+export function showSnackbar(message) {
+    return { type: types.SHOW_SNACKBAR, visible: true, message };
+}
+
+export function hideSnackbar() {
+    return { type: types.SHOW_SNACKBAR, visible: false };
+}

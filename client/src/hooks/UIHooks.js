@@ -22,3 +22,23 @@ export function useUploadStatus() {
 
     return status;
 }
+
+/**
+ * Returns the current confirmation modal state
+ * @return {object} of confirmation modal state
+ */
+export function useConfirmationModalState() {
+    return useSelector(state => state.ui.get("confirmationModal"));
+}
+
+/**
+ * Returns the current snackbar state
+ * @return {function} to close snackbar
+ */
+export function useSnackbarState() {
+    const dispatch = useDispatch();
+    return [
+        useSelector(state => state.ui.get("snackbar")),
+        _ => dispatch(uiActions.hideSnackbar())
+    ];
+}

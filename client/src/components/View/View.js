@@ -5,6 +5,8 @@ import React, { Component } from "react";
 import Container from "../Container/Container";
 import LeftPanel from "components/LeftPanel/LeftPanel";
 import TopBar from "components/TopBar/TopBar";
+import ConfirmationModal from "components/ConfirmationModal/ConfirmationModal";
+import CodexSnackbar from "components/CodexSnackbar/CodexSnackbar";
 
 function View(props) {
     return (
@@ -17,6 +19,8 @@ function View(props) {
                     <Container />
                 </div>
             </div>
+            <ConfirmationModal />
+            <CodexSnackbar />
         </div>
     );
 }

@@ -250,6 +250,18 @@ export const featureRelease = featureName => ({
 });
 
 /**
+ * Rename a feature
+ * @param {string} oldFeatureName
+ * @param {string} newFeatureName
+ * @return {object} non-dispatched action object
+ */
+export const featureRename = (oldFeatureName, newFeatureName) => ({
+    type: types.RENAME_FEATURE,
+    oldFeatureName,
+    newFeatureName
+});
+
+/**
  * Add a dataset to the store
  * @param {string} featureName
  * @param {array} data
@@ -291,4 +303,14 @@ export const statSetFeatureResolved = (featureName, data) => ({
     type: types.STAT_SET_FEATURE_RESOLVED,
     feature: featureName,
     data
+});
+
+/**
+ * Remove a feature
+ * @param {string} featureName
+ * @return {object} non-dispatched action object
+ */
+export const featureDelete = featureName => ({
+    type: types.DELETE_FEATURE,
+    feature: featureName
 });

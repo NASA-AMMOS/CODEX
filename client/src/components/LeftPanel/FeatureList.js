@@ -1,4 +1,4 @@
-import React, { Component, useState, useEffect } from "react";
+import React, { Component, useState, useEffect, useContext } from "react";
 import "components/LeftPanel/FeatureList.scss";
 import { connect } from "react-redux";
 import classnames from "classnames";
@@ -6,6 +6,9 @@ import { bindActionCreators } from "redux";
 import * as dataActions from "actions/data";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Checkbox from "@material-ui/core/Checkbox";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckboxIcon from "@material-ui/icons/CheckBox";
 import Popover from "@material-ui/core/Popover";
@@ -20,12 +23,18 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import Button from "@material-ui/core/Button";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import TextField from "@material-ui/core/TextField";
 
 import {
     useFeatureStatistics,
     useFeatureStatisticsLoader,
-    useFeatureMetadata
+    useFeatureMetadata,
+    useFeatureDelete,
+    useFeatureRename
 } from "hooks/DataHooks";
+
+const RowContext = React.createContext({});
+const ListContext = React.createContext({});
 
 /*
     A function used to process a floating point number
@@ -210,6 +219,90 @@ function StatisticsRow(props) {
     );
 }
 
+function FeatureContextMenu(props) {
+    const rowContext = useContext(RowContext);
+    const listContext = useContext(ListContext);
+
+    const [visible, setVisible] = rowContext.visible;
+    const [position] = rowContext.position;
+    const [contextMode, setContextMode] = useState(null);
+    const [renameSelectionBuffer, setRenameSelectionBuffer] = useState("");
+
+    function submitRenamedFeature(e) {
+        if (!e.key || (e.key && e.key === "Enter")) {
+            setVisible(false);
+            setContextMode(null);
+            listContext.featureRename(props.featureName, renameSelectionBuffer);
+        }
+    }
+
+    if (!visible) return null;
+
+    // To make sure the autofocus works, don't create the rename text field until we need it.
+    const renameTextField =
+        contextMode === "rename" ? (
+            <TextField
+                value={renameSelectionBuffer}
+                onChange={e => setRenameSelectionBuffer(e.target.value)}
+                onKeyPress={submitRenamedFeature}
+                autoFocus
+            />
+        ) : null;
+
+    return (
+        <Popover
+            id="simple-popper"
+            open={visible}
+            anchorReference="anchorPosition"
+            anchorPosition={{ top: position.top, left: position.left }}
+            anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left"
+            }}
+            transformOrigin={{
+                vertical: "top",
+                horizontal: "left"
+            }}
+        >
+            <ClickAwayListener onClickAway={_ => setVisible(false)}>
+                <List>
+                    <ListItem
+                        button
+                        onClick={_ => {
+                            setContextMode("rename");
+                            //     setRenameSelectionBuffer(props.contextActiveSelection.displayName);
+                        }}
+                        hidden={contextMode}
+                    >
+                        Rename Feature
+                    </ListItem>
+                    <ListItem
+                        button
+                        onClick={_ => {
+                            setVisible(false);
+                            listContext.featureDelete(props.featureName);
+                            //     props.deleteSelection(props.contextActiveSelection.id);
+                            //     props.setContextActiveSelection(null);
+                        }}
+                        hidden={contextMode}
+                    >
+                        Delete Feature
+                    </ListItem>
+                    <ListItem hidden={contextMode !== "rename"}>
+                        {renameTextField}
+                        <Button
+                            variant="outlined"
+                            style={{ marginLeft: "10px" }}
+                            onClick={submitRenamedFeature}
+                        >
+                            Rename
+                        </Button>
+                    </ListItem>
+                </List>
+            </ClickAwayListener>
+        </Popover>
+    );
+}
 /*
     A single row displaying a feature and its corresponding data
     for the drag and drop menu
@@ -219,44 +312,60 @@ function FeatureListDNDRow(props) {
     const selected = props.featureInfo.selected;
     const virtualStyle = { fontStyle: virtual ? "italic" : "normal" };
 
+    const rowContextValue = {
+        visible: useState(false),
+        position: useState({ top: 0, left: 0 })
+    };
+
     const [rowHover, setRowHover] = useState(false);
 
     return (
-        <div
-            className="featureRow"
-            onMouseEnter={function() {
-                setRowHover(true);
-            }}
-            onMouseLeave={function() {
-                setRowHover(false);
-            }}
-        >
-            <div className="feature-name-row">
-                <Checkbox
-                    checked={selected}
-                    className="selected-checkbox"
-                    value="checkedA"
-                    style={{ height: "22px", padding: "0px" }}
-                    icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
-                    checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
-                    onClick={function(e) {
-                        return selected
-                            ? props.featureUnselect(props.featureName, e.shiftKey)
-                            : props.featureSelect(props.featureName, e.shiftKey);
+        <RowContext.Provider value={rowContextValue}>
+            <div
+                className="featureRow"
+                onMouseEnter={function() {
+                    setRowHover(true);
+                }}
+                onMouseLeave={function() {
+                    if (!rowContextValue.visible[0]) setRowHover(false);
+                }}
+            >
+                <div
+                    className="feature-name-row"
+                    onContextMenu={e => {
+                        e.preventDefault();
+
+                        rowContextValue.visible[1](true);
+                        rowContextValue.position[1]({ top: e.clientY, left: e.clientX });
                     }}
-                />
-                <span className="feature-name" style={virtualStyle}>
-                    {props.featureName}
-                </span>
+                >
+                    <Checkbox
+                        checked={selected}
+                        className="selected-checkbox"
+                        value="checkedA"
+                        style={{ height: "22px", padding: "0px" }}
+                        icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
+                        checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
+                        onClick={function(e) {
+                            return selected
+                                ? props.featureUnselect(props.featureName, e.shiftKey)
+                                : props.featureSelect(props.featureName, e.shiftKey);
+                        }}
+                    />
+                    <span className="feature-name" style={virtualStyle}>
+                        {props.featureName}
+                    </span>
+                </div>
+                {props.statsHidden || (
+                    <StatisticsRow
+                        featureName={props.featureName}
+                        featureListLoading={props.featureListLoading}
+                        rowHover={rowHover}
+                    />
+                )}
             </div>
-            {props.statsHidden || (
-                <StatisticsRow
-                    featureName={props.featureName}
-                    featureListLoading={props.featureListLoading}
-                    rowHover={rowHover}
-                />
-            )}
-        </div>
+            <FeatureContextMenu featureName={props.featureName} />
+        </RowContext.Provider>
     );
 }
 
@@ -347,15 +456,22 @@ function FeatureList(props) {
 
     const loadData = (a, b) => {};
 
-    //holds other data about features
-    let featureMapping = {};
+    function createFeatureMapping(featureList) {
+        return featureList.reduce((acc, feature) => {
+            acc[feature.get("name")] = {
+                selected: feature.selected,
+                virtual: feature.virtual
+            };
+            return acc;
+        }, {});
+    }
 
-    props.featureList.toJS().forEach(feature => {
-        featureMapping[feature.name] = {
-            selected: feature.selected,
-            virtual: feature.virtual
-        };
-    });
+    //holds other data about features
+    const [featureMapping, setFeatureMapping] = useState(_ =>
+        createFeatureMapping(props.featureList)
+    );
+
+    useEffect(_ => setFeatureMapping(createFeatureMapping(props.featureList)), [props.featureList]);
 
     //runs on file change
     //it handles clearing the current data
@@ -371,7 +487,7 @@ function FeatureList(props) {
             setFeatureStats({});
             setFeatureData({});
         },
-        [props.filename]
+        [props.featureList]
     );
 
     useEffect(
@@ -408,47 +524,55 @@ function FeatureList(props) {
             else return 0;
         });
 
+    // Create a context to hold dispatches and state we'll need in the lower components
+    const listContext = {
+        featureDelete: useFeatureDelete(),
+        featureRename: useFeatureRename()
+    };
+
     return (
-        <div
-            className={
-                "feature-list-container " + (statsHidden ? "stats-hidden" : "stats-not-hidden")
-            }
-        >
-            <FeaturePanelHeader
-                statsHidden={statsHidden}
-                setStatsHidden={setStatsHidden}
-                totalCount={totalCount}
-                activeCount={activeCount}
-                shownCount={shownCount}
-            />
-            <div className="stats-bar-top">
-                <SelectedDropdown
-                    featureList={props.featureList}
-                    setFeatureFilter={setFeatureFilter}
+        <ListContext.Provider value={listContext}>
+            <div
+                className={
+                    "feature-list-container " + (statsHidden ? "stats-hidden" : "stats-not-hidden")
+                }
+            >
+                <FeaturePanelHeader
+                    statsHidden={statsHidden}
+                    setStatsHidden={setStatsHidden}
+                    totalCount={totalCount}
+                    activeCount={activeCount}
+                    shownCount={shownCount}
                 />
-                <StatsLabelRow statsHidden={statsHidden} />
-            </div>
-            <div className="features">
-                {props.featureListLoading && (
-                    <div className="loading-list">
-                        <CircularProgress />
-                    </div>
-                )}
-                <div className="list" hidden={props.featureListLoading}>
-                    <FeatureListDND
-                        featureIndices={featureIndices}
-                        setFeatureIndices={setFeatureIndices}
-                        data={featureData}
-                        stats={featureStats}
-                        statsHidden={statsHidden}
-                        featureNames={sortedFeatureNames}
-                        featureSelect={props.featureSelect}
-                        featureUnselect={props.featureUnselect}
-                        featureMapping={featureMapping}
+                <div className="stats-bar-top">
+                    <SelectedDropdown
+                        featureList={props.featureList}
+                        setFeatureFilter={setFeatureFilter}
                     />
+                    <StatsLabelRow statsHidden={statsHidden} />
+                </div>
+                <div className="features">
+                    {props.featureListLoading && (
+                        <div className="loading-list">
+                            <CircularProgress />
+                        </div>
+                    )}
+                    <div className="list" hidden={props.featureListLoading}>
+                        <FeatureListDND
+                            featureIndices={featureIndices}
+                            setFeatureIndices={setFeatureIndices}
+                            data={featureData}
+                            stats={featureStats}
+                            statsHidden={statsHidden}
+                            featureNames={sortedFeatureNames}
+                            featureSelect={props.featureSelect}
+                            featureUnselect={props.featureUnselect}
+                            featureMapping={featureMapping}
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
+        </ListContext.Provider>
     );
 }
 

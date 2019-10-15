@@ -8,6 +8,10 @@ export default function data(state = dataState, action, opt_reducer = DataReduce
             return opt_reducer.fileLoad(state, action);
         case actionTypes.FEATURE_ADD:
             return opt_reducer.featureAdd(state, action);
+        case actionTypes.DELETE_FEATURE:
+            return opt_reducer.deleteFeature(state, action);
+        case actionTypes.RENAME_FEATURE:
+            return opt_reducer.renameFeature(state, action);
         case actionTypes.FEATURE_SELECT:
             return opt_reducer.featureSelect(state, action);
         case actionTypes.FEATURE_UNSELECT:

@@ -12,13 +12,17 @@ import {
     fileLoad,
     statSetFeatureLoading,
     statSetFeatureFailed,
-    statSetFeatureResolved
+    statSetFeatureResolved,
+    featureDelete,
+    featureRename
 } from "actions/data";
 import { fromJS, Set } from "immutable";
 import { batchActions } from "redux-batched-actions";
 import * as selectionActions from "actions/selectionActions";
 import * as wmActions from "actions/windowManagerActions";
 import * as utils from "utils/utils";
+import * as uiActions from "actions/ui";
+import * as uiTypes from "constants/uiTypes";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -191,7 +195,7 @@ export function usePinnedFeatures(windowHandle = undefined) {
         } else {
             setPinned(selectedFeatures);
         }
-    }, []); // run once
+    }, [windowHandle]); // We want this to update whenever we change the window datasets externally.
 
     return useFeatures(pinned, windowHandle);
 }
@@ -439,5 +443,81 @@ export function useFileInfo() {
         nan: useSelector(store => store.data.get("nan")),
         inf: useSelector(store => store.data.get("inf")),
         ninf: useSelector(store => store.data.get("ninf"))
+    };
+}
+
+/**
+ * Returns a function that deletes a feature from the app. If there's currently a window open that's using the
+ * feature, we open a confirmation window.
+ */
+export function useFeatureDelete() {
+    const dispatch = useDispatch();
+    const openWindows = useSelector(store => store.windowManager.get("windows"));
+    return featureName => {
+        const windowsUsingFeature = openWindows.filter(win =>
+            win.getIn(["data", "features"]).includes(featureName)
+        );
+
+        let snackbarMessage = `Feature "${featureName}" deleted`;
+        // We attach a batch of actions to this function that will be dispatched by the confirmation modal if the user confirms.
+        if (windowsUsingFeature.length) {
+            return dispatch(
+                uiActions.showConfirmationModal(uiTypes.CLOSE_GRAPH_WHEN_DELETE_FEATURE, _ => {
+                    const windowActions = windowsUsingFeature.map(win =>
+                        wmActions.closeWindow(win.get("id"))
+                    );
+
+                    const featureActions = [
+                        featureRelease(featureName),
+                        featureDelete(featureName)
+                    ];
+
+                    snackbarMessage = [
+                        snackbarMessage,
+                        ...windowsUsingFeature.map(win => `Closing window "${win.get("title")}"`)
+                    ];
+                    console.log(snackbarMessage);
+
+                    return batchActions([
+                        ...windowActions,
+                        ...featureActions,
+                        uiActions.showSnackbar(snackbarMessage)
+                    ]);
+                })
+            );
+        }
+
+        // If no windows are using this feature, just delete it.
+        dispatch(featureRelease(featureName));
+        dispatch(featureDelete(featureName));
+        dispatch(uiActions.showSnackbar(snackbarMessage));
+    };
+}
+
+/**
+ * Returns a function that renames a feature.
+ */
+export function useFeatureRename() {
+    const dispatch = useDispatch();
+    const openWindows = useSelector(store => store.windowManager.get("windows"));
+
+    return (oldFeatureName, newFeatureName) => {
+        // Update the store and loaded data list with the new feature name
+        dispatch(featureRename(oldFeatureName, newFeatureName));
+
+        // Now update any windows that use this feature. We want to do this after we update the store
+        // so the window doesn't try to reload the data from the server.
+        const actions = openWindows
+            .filter(win => win.getIn(["data", "features"], []).includes(oldFeatureName))
+            .map(win =>
+                win.setIn(
+                    ["data", "features"],
+                    win
+                        .getIn(["data", "features"])
+                        .map(f => (f === oldFeatureName ? newFeatureName : f))
+                )
+            )
+            .map(win => wmActions.setWindowData(win.get("id"), win.get("data")));
+        dispatch(batchActions(actions));
     };
 }

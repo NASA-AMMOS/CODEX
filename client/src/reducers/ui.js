@@ -30,6 +30,12 @@ export default function ui(state = uiState, action, opt_reducer = UiReducer) {
             return opt_reducer.setUploadStatusProcessing(state, action);
         case actionTypes.SET_UPLOAD_STATE_DONE:
             return opt_reducer.setUploadStatusDone(state, action);
+        case actionTypes.SHOW_CONFIRMATION_MODAL:
+            return opt_reducer.showConfirmationModal(state, action);
+        case actionTypes.HIDE_CONFIRMATION_MODAL:
+            return opt_reducer.hideConfirmationModal(state, action);
+        case actionTypes.SHOW_SNACKBAR:
+            return opt_reducer.showSnackbar(state, action);
         default:
             return state;
     }

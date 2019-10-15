@@ -19,8 +19,6 @@ import RemoveRedEye from "@material-ui/icons/RemoveRedEye";
 import CheckboxIcon from "@material-ui/icons/CheckBox";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
-function RenameDialog() {}
-
 function SelectionContextMenu(props) {
     const [contextMode, setContextMode] = useState(null);
 
