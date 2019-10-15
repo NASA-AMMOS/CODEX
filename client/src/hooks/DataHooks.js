@@ -182,20 +182,29 @@ export function usePinnedFeatures(windowHandle = undefined) {
         .filter(f => f.get("selected"))
         .map(f => f.get("name"));
 
-    // pin the selected features to the state on the first run
-    const [pinned, setPinned] = useState(null);
-
-    useEffect(() => {
+    function getPinnedFeatures(windowHandle) {
         if (
             windowHandle !== undefined &&
             windowHandle.data !== undefined &&
             windowHandle.data.features !== undefined
         ) {
-            setPinned(windowHandle.data.features);
+            return windowHandle.data.features;
         } else {
-            setPinned(selectedFeatures);
+            return selectedFeatures;
         }
-    }, [windowHandle]); // We want this to update whenever we change the window datasets externally.
+    }
+
+    const [pinned, setPinned] = useState(getPinnedFeatures(windowHandle));
+
+    // If the window handle selected features have changed (i.e. a feature has been renamed),
+    // reload the feature data.
+    useEffect(
+        _ => {
+            const currentlyPinned = getPinnedFeatures(windowHandle);
+            if (!utils.equalArrays(currentlyPinned, pinned)) setPinned(currentlyPinned);
+        },
+        [windowHandle]
+    );
 
     return useFeatures(pinned, windowHandle);
 }

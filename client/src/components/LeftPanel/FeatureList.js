@@ -346,11 +346,11 @@ function FeatureListDNDRow(props) {
                         style={{ height: "22px", padding: "0px" }}
                         icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
                         checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
-                        onClick={function(e) {
-                            return selected
+                        onClick={e =>
+                            selected
                                 ? props.featureUnselect(props.featureName, e.shiftKey)
-                                : props.featureSelect(props.featureName, e.shiftKey);
-                        }}
+                                : props.featureSelect(props.featureName, e.shiftKey)
+                        }
                     />
                     <span className="feature-name" style={virtualStyle}>
                         {props.featureName}
@@ -459,8 +459,8 @@ function FeatureList(props) {
     function createFeatureMapping(featureList) {
         return featureList.reduce((acc, feature) => {
             acc[feature.get("name")] = {
-                selected: feature.selected,
-                virtual: feature.virtual
+                selected: feature.get("selected"),
+                virtual: feature.get("virtual")
             };
             return acc;
         }, {});

@@ -339,3 +339,8 @@ export function getRGBFromHex(hex) {
     const rgb = parseInt(hex, 16);
     return [(rgb >> 16) & 0xff, (rgb >> 8) & 0xff, rgb & 0xff];
 }
+
+export function equalArrays(a, b) {
+    if (a.length !== b.length) return false;
+    return a.every((val, idx) => val === b[idx]);
+}
