@@ -80,6 +80,8 @@ function ViolinPlotGraph(props) {
 
     const chartRefs = useRef(featureNames.map(() => createRef()));
 
+    const [chartIds] = useState(_ => featureNames.map(_ => utils.createNewId()));
+
     let data = generatePlotData(features, props.fileInfo);
 
     let layouts = generateLayouts(features);
@@ -89,6 +91,8 @@ function ViolinPlotGraph(props) {
             resizeHandler={_ =>
                 chartRefs.current.forEach(chartRef => chartRef.current.resizeHandler())
             }
+            win={props.win}
+            chartIds={chartIds}
         >
             <ul className="box-plot-container">
                 {data.map((dataElement, index) => (
@@ -100,6 +104,7 @@ function ViolinPlotGraph(props) {
                         setCurrentSelection={props.setCurrentSelection}
                         currentSelection={props.currentSelection}
                         savedSelections={props.savedSelections}
+                        chartId={chartIds[index]}
                     />
                 ))}
             </ul>
@@ -166,6 +171,7 @@ function ViolinPlotSubGraph(props) {
 
                 props.setCurrentSelection(points);
             }}
+            divId={props.chartId}
         />
     );
 }
@@ -207,6 +213,7 @@ export default props => {
             globalChartState={globalChartState}
             data={features}
             fileInfo={fileInfo}
+            win={win}
         />
     );
 };

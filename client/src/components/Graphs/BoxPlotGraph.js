@@ -67,6 +67,7 @@ function generateLayouts(features) {
 }
 
 function BoxPlotGraph(props) {
+    const [chartId] = useState(utils.createNewId());
     //const features = utils.unzip(props.data.get("data"));
     const features = props.data.toJS();
 
@@ -75,7 +76,6 @@ function BoxPlotGraph(props) {
     });
 
     const chartRefs = useRef(featureNames.map(() => createRef()));
-    console.log(chartRefs);
 
     let data = generatePlotData(features, props.fileInfo);
 
@@ -86,6 +86,8 @@ function BoxPlotGraph(props) {
             resizeHandler={_ =>
                 chartRefs.current.forEach(chartRef => chartRef.current.resizeHandler())
             }
+            chartId={chartId}
+            win={props.win}
         >
             <ul className="box-plot-container">
                 {data.map((dataElement, index) => (
@@ -98,6 +100,7 @@ function BoxPlotGraph(props) {
                         setCurrentSelection={props.setCurrentSelection}
                         currentSelection={props.currentSelection}
                         savedSelections={props.savedSelections}
+                        chartId={chartId}
                     />
                 ))}
             </ul>
@@ -166,6 +169,7 @@ function BoxPlotSubGraph(props) {
 
                 props.setCurrentSelection(points);
             }}
+            divId={props.chartId}
         />
     );
 }
@@ -208,6 +212,7 @@ export default props => {
             globalChartState={globalChartState}
             data={features}
             fileInfo={fileInfo}
+            win={win}
         />
     );
 };

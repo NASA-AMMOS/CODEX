@@ -70,6 +70,7 @@ function HistogramGraph(props) {
         return feature.feature;
     });
 
+    const [chartIds] = useState(_ => featureNames.map(_ => utils.createNewId()));
     const chartRefs = useRef(featureNames.map(() => createRef()));
 
     let data = generatePlotData(features, props.fileInfo);
@@ -81,6 +82,8 @@ function HistogramGraph(props) {
             resizeHandler={_ =>
                 chartRefs.current.forEach(chartRef => chartRef.current.resizeHandler())
             }
+            chartIds={chartIds}
+            win={props.win}
         >
             <ul className="histogram-graph-container">
                 {data.map((dataElement, index) => (
@@ -92,6 +95,7 @@ function HistogramGraph(props) {
                         setCurrentSelection={props.setCurrentSelection}
                         currentSelection={props.currentSelection}
                         savedSelections={props.savedSelections}
+                        chartId={chartIds[index]}
                     />
                 ))}
             </ul>
@@ -159,6 +163,7 @@ function HistogramSubGraph(props) {
                 let points = utils.indicesInRange(chartState.data[0].x, e.range.x[0], e.range.x[1]);
                 props.setCurrentSelection(points);
             }}
+            divId={props.chartId}
         />
     );
 }
@@ -214,6 +219,7 @@ export default props => {
             globalChartState={globalChartState}
             data={features}
             fileInfo={fileInfo}
+            win={win}
         />
     );
 };

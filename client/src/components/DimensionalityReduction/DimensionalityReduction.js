@@ -4,7 +4,7 @@ import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Plot from "react-plotly.js";
 import React, { useEffect, useState } from "react";
-import Slider from "@material-ui/lab/Slider";
+import Slider from "@material-ui/core/Slider";
 import Typography from "@material-ui/core/Typography";
 
 import { WindowCircularProgress, WindowError } from "components/WindowHelpers/WindowCenter";
@@ -127,15 +127,17 @@ function makeDRPlot(algo, maxYRange, changeSliderVal, featureAdd) {
 
     return (
         <React.Fragment>
-            <Plot
-                data={chartOptions.data}
-                layout={chartOptions.layout}
-                config={chartOptions.config}
-                style={{ width: "100%", height: "100%" }}
-                useResizeHandler
-                divId={id}
-                //onBeforeHover={e => console.log(e)}
-            />
+            <div className="plot">
+                <Plot
+                    data={chartOptions.data}
+                    layout={chartOptions.layout}
+                    config={chartOptions.config}
+                    style={{ width: "100%", height: "100%" }}
+                    useResizeHandler
+                    divId={id}
+                    //onBeforeHover={e => console.log(e)}
+                />
+            </div>
             <Slider
                 classes={{ root: "chartSlider" }}
                 value={algo.sliderVal}
@@ -147,7 +149,7 @@ function makeDRPlot(algo, maxYRange, changeSliderVal, featureAdd) {
                     changeSliderVal(algo.algorithmName, val);
                 }}
             />
-            <Button fullWidth onClick={e => featureAdd(algo)} className="saveButton">
+            <Button onClick={e => featureAdd(algo)} className="saveButton">
                 Save
             </Button>
         </React.Fragment>
@@ -228,7 +230,7 @@ function DimensionalityReductionResults(props) {
                 >
                     {humanName}
                 </div>
-                <div className="plot">
+                <div className="plotContainer">
                     {makeDRPlot(algo, maxYRange, changeSliderVal, props.featureAdd)}
                 </div>
             </FixedContainer>
@@ -249,13 +251,13 @@ function DimensionalityReductionResults(props) {
                     </FixedContainer>
                 </WindowLayout>
             </FixedContainer>
-            <ExpandingContainer>
+            <FixedContainer>
                 <WindowXScroller>
                     <WindowLayout fluid direction="row">
                         {algoGraphs}
                     </WindowLayout>
                 </WindowXScroller>
-            </ExpandingContainer>
+            </FixedContainer>
         </WindowLayout>
     );
 }
@@ -265,12 +267,12 @@ function DimensionalityReductionResults(props) {
 const DimensionalityReduction = props => {
     const win = useWindowManager(props, {
         title: "Dimensionality Reduction",
-        width: 620,
-        height: 500,
+        width: 670,
+        height: 520,
         resizeable: true,
         minSize: {
-            width: 620,
-            height: 500
+            width: 670,
+            height: 520
         }
     });
 

@@ -70,7 +70,10 @@ module.exports = {
             template: paths.appHtml
         }),
         new webpack.HotModuleReplacementPlugin(),
-        new webpack.WatchIgnorePlugin([/css\.d\.ts$/])
+        new webpack.WatchIgnorePlugin([/css\.d\.ts$/]),
+        new webpack.DefinePlugin({
+            "process.browser": "true"
+        })
     ],
     resolve: {
         modules: [

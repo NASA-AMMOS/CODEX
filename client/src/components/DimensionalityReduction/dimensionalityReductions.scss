@@ -32,6 +32,12 @@
     flex: 1;
 }
 
+.resultRow {
+    display: flex;
+    justify-content: flex-start;
+    width: 650px;
+}
+
 .buttonRow {
     display: flex;
     justify-content: space-between;
@@ -104,15 +110,25 @@
     min-width: 200px !important;
 }
 
-.plot {
+.plotContainer {
     background: #fff;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
     width: 300px;
-    height: 300px;
+    justify-content: center;
+
+    .plot {
+        margin: 0;
+        padding: 0;
+        height: 300px;
+        width: 300px;
+    }
 
     .chartSlider {
-        padding-left: 35px;
-        width: 300px;
+        margin-left: 35px;
+        width: 250px;
+        height: 25px;
         margin-top: 10px;
     }
 }

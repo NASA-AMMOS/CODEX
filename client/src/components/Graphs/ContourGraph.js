@@ -314,6 +314,7 @@ function getPointIndicesFromPolygon(lassoPoints, dataPoints) {
 
 function ContourGraph(props) {
     const chart = useRef(null);
+    const [chartId] = useState(utils.createNewId());
 
     // plug through props
     const cols = utils.removeSentinelValues(
@@ -387,7 +388,7 @@ function ContourGraph(props) {
     }
 
     return (
-        <GraphWrapper chart={chart}>
+        <GraphWrapper chart={chart} chartId={chartId} win={props.win}>
             <Plot
                 ref={chart}
                 data={chartState.data}
@@ -406,6 +407,7 @@ function ContourGraph(props) {
                     let pointIndices = getPointIndicesFromPolygon(e.lassoPoints, cols);
                     if (e) props.setCurrentSelection(pointIndices);
                 }}*/
+                divId={chartId}
             />
         </GraphWrapper>
     );
@@ -441,6 +443,7 @@ export default props => {
                 globalChartState={globalChartState}
                 data={features}
                 fileInfo={fileInfo}
+                win={win}
             />
         );
     } else {

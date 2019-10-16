@@ -31,6 +31,7 @@ const COLOR_CURRENT_SELECTION = "#FF0000";
 
 function ScatterGraph(props) {
     const chart = useRef(null);
+    const [chartId] = useState(utils.createNewId());
 
     const cols = utils.removeSentinelValues(
         props.data.map(f => f.get("data")).toJS(),
@@ -190,7 +191,7 @@ function ScatterGraph(props) {
     );
 
     return (
-        <GraphWrapper chart={chart}>
+        <GraphWrapper chart={chart} chartId={chartId} win={props.win}>
             <Plot
                 ref={chart}
                 data={chartState.data}
@@ -207,6 +208,7 @@ function ScatterGraph(props) {
                 onSelected={e => {
                     if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
                 }}
+                divId={chartId}
             />
         </GraphWrapper>
     );
@@ -250,6 +252,7 @@ export default props => {
                 globalChartState={globalChartState}
                 data={features}
                 fileInfo={fileInfo}
+                win={win}
             />
         );
     } else {

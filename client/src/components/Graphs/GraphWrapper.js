@@ -9,6 +9,10 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import ReactResizeDetector from "react-resize-detector";
+import Plotly from "plotly.js";
+import mergeImg from "merge-img";
+
+const Jimp = require("jimp");
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_SELECTION_COLOR = "#FF0000";
@@ -28,7 +32,7 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
                 width: 0
             },
             visible: !hidden,
-            selectionId:id,
+            selectionId: id
         };
 
         if (type === "vertical") {
@@ -53,7 +57,6 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
     };
 
     const getRangesFromIndices = indices => {
-
         let min = data[0];
         let max = data[0];
         data.forEach(row => {
@@ -69,16 +72,16 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
 
             for (let index of indices) {
                 let value = Math.floor((data[index] - min) / divisor);
-                ret[value]+=1;
+                ret[value] += 1;
             }
             return ret;
         }
         let buckets = squashDataIntoBuckets();
-        
+
         let ranges = [];
-        for(let i = 0; i < buckets.length; i++) {
+        for (let i = 0; i < buckets.length; i++) {
             if (buckets[i] > 0) {
-                ranges.push({min:min+divisor*i, max:min+divisor*(i+1)});
+                ranges.push({ min: min + divisor * i, max: min + divisor * (i + 1) });
             }
         }
         //todo squash adjacent buckets so there is no white line
@@ -92,21 +95,31 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
             let newShapes = [];
 
             const mappedSavedSelections = savedSelections
-                                            .concat()
-                                            .reverse()
-                                            .map((selection) => {
-                return {indices:selection.rowIndices, color:selection.color, active:selection.active, hidden:selection.hidden};
-            });
+                .concat()
+                .reverse()
+                .map(selection => {
+                    return {
+                        indices: selection.rowIndices,
+                        color: selection.color,
+                        active: selection.active,
+                        hidden: selection.hidden
+                    };
+                });
 
             let allSelections = [...mappedSavedSelections];
             if (currentSelection.length != 0)
-                allSelections.push({indices: currentSelection, color: DEFAULT_SELECTION_COLOR, active: true, hidden: false});
-            
+                allSelections.push({
+                    indices: currentSelection,
+                    color: DEFAULT_SELECTION_COLOR,
+                    active: true,
+                    hidden: false
+                });
+
             //check to see if there are any selections to render
             if (allSelections.length != 0) {
                 allSelections.forEach(selection => {
                     const selectionRanges = getRangesFromIndices(selection.indices);
-                    for (let range of selectionRanges) { 
+                    for (let range of selectionRanges) {
                         const rect = createRectangle(
                             range,
                             selection.color,
@@ -126,6 +139,34 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
     return [shapes];
 };
 
+function handleSingleChartDownload(chartId, title) {
+    return _ =>
+        Plotly.downloadImage(chartId, {
+            format: "png",
+            width: 800,
+            height: 800,
+            filename: title
+        });
+}
+
+function handleMultipleChartDownload(chartIds, title) {
+    return _ => {
+        Promise.all(
+            chartIds.map(id => Plotly.toImage(id, { format: "png", width: 800, height: 800 }))
+        )
+            .then(urls => Promise.all(urls.map(url => Jimp.read(url))))
+            .then(images => mergeImg(images))
+            .then(img => img.getBase64Async("image/png"))
+            .then(url => {
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = title;
+                a.click();
+                a.remove();
+            });
+    };
+}
+
 function GraphWrapper(props) {
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
     const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
@@ -142,6 +183,10 @@ function GraphWrapper(props) {
         setContextMenuVisible(true);
         setContextMenuPosition({ top: e.clientY, left: e.clientX });
     }
+
+    const saveImageFunction = props.chartId
+        ? handleSingleChartDownload(props.chartId, props.win.title)
+        : handleMultipleChartDownload(props.chartIds, props.win.title);
 
     return (
         <React.Fragment>
@@ -173,6 +218,15 @@ function GraphWrapper(props) {
                             }}
                         >
                             Save Selection
+                        </ListItem>
+                        <ListItem
+                            button
+                            onClick={_ => {
+                                saveImageFunction();
+                                setContextMenuVisible(false);
+                            }}
+                        >
+                            Save Plot
                         </ListItem>
                     </List>
                 </ClickAwayListener>

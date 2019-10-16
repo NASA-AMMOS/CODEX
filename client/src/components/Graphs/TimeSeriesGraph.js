@@ -79,6 +79,7 @@ function TimeSeriesGraph(props) {
         return feature.feature;
     });
 
+    const [chartIds] = useState(_ => featureNames.map(_ => utils.createNewId()));
     const chartRefs = useRef(featureNames.map(() => createRef()));
 
     let data = generatePlotData(features, props.fileInfo);
@@ -90,6 +91,8 @@ function TimeSeriesGraph(props) {
             resizeHandler={_ =>
                 chartRefs.current.forEach(chartRef => chartRef.current.resizeHandler())
             }
+            win={props.win}
+            chartIds={chartIds}
         >
             <ul className="time-series-plot-container">
                 {data.map((dataElement, index) => (
@@ -102,6 +105,7 @@ function TimeSeriesGraph(props) {
                         setCurrentSelection={props.setCurrentSelection}
                         currentSelection={props.currentSelection}
                         savedSelections={props.savedSelections}
+                        chartId={chartIds[index]}
                     />
                 ))}
             </ul>
@@ -166,6 +170,7 @@ function TimeSeriesSubGraph(props) {
                 let points = utils.indicesInRange(chartState.data[0].x, e.range.x[0], e.range.x[1]);
                 props.setCurrentSelection(points);
             }}
+            divId={props.chartId}
         />
     );
 }
@@ -207,6 +212,7 @@ export default props => {
             globalChartState={globalChartState}
             data={features}
             fileInfo={fileInfo}
+            win={win}
         />
     );
 };
