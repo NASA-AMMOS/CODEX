@@ -87,6 +87,11 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
         filepath = os.path.join(CODEX_ROOT, "uploads", filename)
 
         if (msg["done"] == True):
+
+            stop_cache_server()
+            codex_hash_server = make_cache_process()
+            codex_hash_server.start()
+        
             logging.info('Finished file transfer, initiating save...')
             cache = get_cache(msg['sessionkey'], timeout=None)
 
@@ -129,6 +134,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
             logging.info('Finished file save.')
         else:
             result['status'] = 'streaming'
+
 
         stringMsg = json.dumps(result)
         self.write_message(stringMsg)
