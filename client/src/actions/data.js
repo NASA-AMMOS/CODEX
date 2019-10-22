@@ -7,6 +7,8 @@ import * as types from "constants/actionTypes";
 import WorkerUpload from "worker-loader!workers/upload.worker";
 import { getGlobalSessionKey } from "utils/utils";
 import * as uiActions from "actions/ui";
+import WorkerSocket from "worker-loader!workers/socket.worker";
+import * as utils from "utils/utils";
 
 export function fileLoad(fileList) {
     return dispatch => {
@@ -310,7 +312,25 @@ export const statSetFeatureResolved = (featureName, data) => ({
  * @param {string} featureName
  * @return {object} non-dispatched action object
  */
-export const featureDelete = featureName => ({
-    type: types.DELETE_FEATURE,
-    feature: featureName
-});
+export const featureDelete = featureName => {
+    const socketWorker = new WorkerSocket();
+    const request = {
+        routine: "arrange",
+        hashType: "feature",
+        sessionkey: utils.getGlobalSessionKey(),
+        activity: "delete",
+        name: [featureName]
+    };
+
+    socketWorker.postMessage(
+        JSON.stringify({
+            action: types.SIMPLE_REQUEST,
+            request
+        })
+    );
+
+    return {
+        type: types.DELETE_FEATURE,
+        feature: featureName
+    };
+};

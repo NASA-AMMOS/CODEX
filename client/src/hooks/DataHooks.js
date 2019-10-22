@@ -14,7 +14,8 @@ import {
     statSetFeatureFailed,
     statSetFeatureResolved,
     featureDelete,
-    featureRename
+    featureRename,
+    removeColumnFromServer
 } from "actions/data";
 import { fromJS, Set } from "immutable";
 import { batchActions } from "redux-batched-actions";
@@ -485,7 +486,6 @@ export function useFeatureDelete() {
                         snackbarMessage,
                         ...windowsUsingFeature.map(win => `Closing window "${win.get("title")}"`)
                     ];
-                    console.log(snackbarMessage);
 
                     return batchActions([
                         ...windowActions,
