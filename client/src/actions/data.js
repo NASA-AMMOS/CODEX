@@ -257,11 +257,31 @@ export const featureRelease = featureName => ({
  * @param {string} newFeatureName
  * @return {object} non-dispatched action object
  */
-export const featureRename = (oldFeatureName, newFeatureName) => ({
-    type: types.RENAME_FEATURE,
-    oldFeatureName,
-    newFeatureName
-});
+export const featureRename = (oldFeatureName, newFeatureName) => {
+    const socketWorker = new WorkerSocket();
+    const request = {
+        routine: "arrange",
+        hashType: "feature",
+        sessionkey: utils.getGlobalSessionKey(),
+        activity: "update",
+        field: "name",
+        old: oldFeatureName,
+        new: newFeatureName
+    };
+
+    socketWorker.postMessage(
+        JSON.stringify({
+            action: types.SIMPLE_REQUEST,
+            request
+        })
+    );
+
+    return {
+        type: types.RENAME_FEATURE,
+        oldFeatureName,
+        newFeatureName
+    };
+};
 
 /**
  * Add a dataset to the store

@@ -522,7 +522,6 @@ export default class DataReducer {
      * @return {Map} new state
      */
     static deleteFeature(state, action) {
-        // TODO: put hook to delete feature from server here
         return state
             .set(
                 "featureList",
