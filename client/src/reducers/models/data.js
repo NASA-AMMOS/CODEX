@@ -25,7 +25,8 @@ export const dataState = Immutable.fromJS({
     serverSessionKey: createMemorableId(),
     nan: null,
     inf: null,
-    ninf: null
+    ninf: null,
+    dataLength: null
 });
 
 export const loadedDataModel = {

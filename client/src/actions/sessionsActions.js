@@ -42,6 +42,7 @@ export function loadSession(sessionName) {
         });
 
         req.then(data => {
+            console.log(data);
             dispatch({
                 type: types.FILE_LOAD,
                 data: data.session_data.features,

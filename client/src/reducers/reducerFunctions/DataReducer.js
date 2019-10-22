@@ -384,7 +384,9 @@ export default class DataReducer {
             references: action.autoRef ? 1 : 0
         });
 
-        return state.set("loadedData", state.get("loadedData").push(newDataset));
+        return state
+            .set("loadedData", state.get("loadedData").push(newDataset))
+            .set("dataLength", action.data.length);
     }
 
     static addFeature(state, action) {
