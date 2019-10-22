@@ -12,6 +12,7 @@ import { Size } from "./domain";
 export interface WrapperProps {
     isActive: boolean;
     minSize?: Size;
+    hidden?: boolean;
 }
 
 export interface HeaderProps {
@@ -38,7 +39,7 @@ const wrapperStyles = ({ isActive }: WrapperProps) => {
 export const Wrapper = styled.div`
     ${wrapperStyles}
     position: absolute;
-    display: inline-flex;
+    display: ${({ hidden }: WrapperProps) => (hidden ? `none` : `inline-flex`)};
     flex-direction: column;
     background: white;
     border-radius: 3px;

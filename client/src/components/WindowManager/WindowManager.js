@@ -208,15 +208,12 @@ function WindowManager(props) {
             // This is a bit of an odd return fragment, but we want to avoid re-rendering the window's content.
             // If the window is minimized, we retain the Cristal (draggable window) reference, but keep it hidden.
             // If the window is in preview mode, we display the window content in preview mode.
-            const hiddenStyle = {
-                display: "none"
-            };
 
             return (
                 <Cristal
+                    hidden={win.get("minimized")}
                     key={win.get("id")}
                     className="newWindow"
-                    style={win.get("minimized") && !win.get("hover") ? hiddenStyle : null}
                     onClose={_ => props.closeWindow(win.get("id"))}
                     ref={r => (refs.current[win.get("id")] = r)}
                     onMinimize={_ => props.toggleMinimizeWindow(win.get("id"))}

@@ -43,6 +43,7 @@ export interface CristalProps {
     height?: number;
     x?: number;
     y?: number;
+    hidden?: boolean;
 }
 
 export interface CristalState {
@@ -340,7 +341,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
     render() {
         const { isResizing } = this;
         const { x, y, width, height, isDragging, zIndex } = this.state;
-        const { className, hideHeader, minSize, style } = this.props;
+        const { className, hideHeader, minSize, style, hidden } = this.props;
         const isActive = isDragging || isResizing;
         const baseStyle = {
             left: x,
@@ -361,6 +362,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
                 className={className}
                 onMouseDown={this.changeZIndex}
                 minSize={minSize}
+                hidden={hidden}
             >
                 {hideHeader ? null : HeaderComponent}
                 {ContentComponent}
