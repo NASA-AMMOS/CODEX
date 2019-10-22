@@ -30,10 +30,12 @@ const SessionBar = props => {
     // Load autosave session on first load
     useEffect(_ => props.loadSession(uiTypes.AUTOSAVE_KEY), []);
 
-    useInterval(_ => {
-        setFlashSaveButton(true);
-        props.saveSession(uiTypes.AUTOSAVE_KEY);
-    }, uiTypes.AUTOSAVE_INTERVAL);
+    if (uiTypes.AUTOSAVE_ENABLED) {
+        useInterval(_ => {
+            setFlashSaveButton(true);
+            props.saveSession(uiTypes.AUTOSAVE_KEY);
+        }, uiTypes.AUTOSAVE_INTERVAL);
+    }
 
     useTimeout(_ => setFlashSaveButton(false), flashSaveButton && 300);
 
