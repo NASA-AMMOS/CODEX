@@ -15,7 +15,9 @@ export function saveCurrentSelection() {
             hashType: "selection",
             sessionkey: utils.getGlobalSessionKey(),
             activity: "add",
-            data: selectionVector
+            data: selectionVector,
+            name: utils.createNewId(),
+            metadata: { color: "some color" }
         };
 
         socketWorker.postMessage(
