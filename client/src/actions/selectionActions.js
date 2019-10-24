@@ -4,6 +4,7 @@ import * as utils from "utils/utils";
 
 export function saveCurrentSelection() {
     return (dispatch, getState) => {
+        const name = `Selection ${getState().selections.savedSelections.length + 1}`;
         const selectionVector = getState().selections.currentSelection.reduce((acc, idx) => {
             acc[idx] = 1;
             return acc;
@@ -16,7 +17,7 @@ export function saveCurrentSelection() {
             sessionkey: utils.getGlobalSessionKey(),
             activity: "add",
             data: selectionVector,
-            name: utils.createNewId(),
+            name,
             metadata: { color: "some color" }
         };
 
@@ -27,7 +28,7 @@ export function saveCurrentSelection() {
             })
         );
 
-        dispatch({ type: actionTypes.SAVE_CURRENT_SELECTION });
+        dispatch({ type: actionTypes.SAVE_CURRENT_SELECTION, name });
     };
 }
 

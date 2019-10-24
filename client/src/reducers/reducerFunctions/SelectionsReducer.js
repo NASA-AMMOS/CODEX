@@ -17,7 +17,7 @@ export default class SelectionsReducer {
                     color: palette[state.nextColorIndex],
                     active: false,
                     hidden: false,
-                    name: `Selection ${palette.length + 1}`,
+                    name: action.name || `Selection ${state.savedSelections.length + 1}`,
                     groupID: null
                 }
             ]),
