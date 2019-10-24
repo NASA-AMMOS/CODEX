@@ -33,7 +33,8 @@ function generatePlotData(features, fileInfo) {
             x: cols[idx],
             xaxis: "x",
             yaxis: "y",
-            type: "histogram"
+            type: "histogram",
+            hoverinfo: "x+y"
         };
     });
 }
@@ -56,7 +57,8 @@ function generateLayouts(features) {
             },
             shapes: [],
             barmode: "overlay",
-            showlegend: false
+            showlegend: false,
+            hoverinfo: "x+y"
         };
 
         layouts.push(layout);
@@ -128,7 +130,8 @@ function getSelectionBins(chartRef, data, selection, color) {
             marker: {
                 color
             },
-            xbins: binInfo
+            xbins: binInfo,
+            hoverinfo: "x+y"
         };
     } catch (e) {
         // We can't overlay other selections until we know the base bin size,
