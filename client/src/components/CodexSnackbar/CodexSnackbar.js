@@ -33,7 +33,7 @@ function CodexSnackbar(props) {
             }
             action={[
                 <IconButton key="close" aria-label="close" color="inherit">
-                    <CloseIcon />
+                    <CloseIcon onClick={closeSnackbar} />
                 </IconButton>
             ]}
         />
