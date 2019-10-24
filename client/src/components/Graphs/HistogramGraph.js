@@ -54,7 +54,9 @@ function generateLayouts(features) {
             xaxis: {
                 title: features[index].feature
             },
-            shapes: []
+            shapes: [],
+            barmode: "overlay",
+            showlegend: false
         };
 
         layouts.push(layout);
@@ -103,6 +105,38 @@ function HistogramGraph(props) {
     );
 }
 
+function getSelectionBins(chartRef, data, selection, color) {
+    if (!chartRef.current) return null;
+    try {
+        const binInfo = chartRef.current.el._fullData[0].xbins;
+
+        const bins = [];
+        for (let i = binInfo.start; i < binInfo.end; i += binInfo.size) {
+            bins.push([i, i + binInfo.size]);
+        }
+
+        const x = selection.reduce((acc, sel) => {
+            const value = data.x[sel];
+            const binIndex = bins.findIndex(bin => bin[0] <= value && bin[1] >= value);
+            acc.push(binIndex);
+            return acc;
+        }, []);
+
+        return {
+            type: "histogram",
+            x: selection.map(sel => data.x[sel]),
+            marker: {
+                color
+            },
+            xbins: binInfo
+        };
+    } catch (e) {
+        // We can't overlay other selections until we know the base bin size,
+        // so we have to wait until the chart renders
+        return null;
+    }
+}
+
 function HistogramSubGraph(props) {
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
@@ -126,20 +160,32 @@ function HistogramSubGraph(props) {
         setChartRevision(revision);
     }
 
-    const [selectionShapes] = useBoxSelection(
-        "horizontal",
-        props.currentSelection,
-        props.savedSelections,
-        chartState.data[0].x
-    );
-
+    // Hook to handle drawing selections
     useEffect(
         _ => {
-            chartState.layout.shapes = selectionShapes;
+            const currentSelection = getSelectionBins(
+                props.chart,
+                props.data,
+                props.currentSelection,
+                "red"
+            );
+            const currentSelectionList = currentSelection ? [currentSelection] : [];
 
+            const savedSelections = props.savedSelections.reduce((acc, sel) => {
+                const selection = getSelectionBins(
+                    props.chart,
+                    props.data,
+                    sel.rowIndices,
+                    sel.color
+                );
+                if (selection) acc.push(selection);
+                return acc;
+            }, []);
+
+            chartState.data = [chartState.data[0], ...savedSelections, ...currentSelectionList];
             updateChartRevision();
         },
-        [selectionShapes]
+        [props.currentSelection, props.savedSelections]
     );
 
     return (
