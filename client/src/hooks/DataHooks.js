@@ -24,6 +24,7 @@ import * as wmActions from "actions/windowManagerActions";
 import * as utils from "utils/utils";
 import * as uiActions from "actions/ui";
 import * as uiTypes from "constants/uiTypes";
+import * as windowTypes from "constants/windowTypes";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -461,11 +462,14 @@ export function useFileInfo() {
  * feature, we open a confirmation window.
  */
 export function useFeatureDelete() {
+    const windowTypesToClose = [windowTypes.CLUSTER_ALGORITHM, windowTypes.REGRESSION_WINDOW];
     const dispatch = useDispatch();
     const openWindows = useSelector(store => store.windowManager.get("windows"));
     return featureName => {
-        const windowsUsingFeature = openWindows.filter(win =>
-            win.getIn(["data", "features"]).includes(featureName)
+        const windowsUsingFeature = openWindows.filter(
+            win =>
+                win.getIn(["data", "features"], []).includes(featureName) ||
+                windowTypesToClose.includes(win.get("windowType"))
         );
 
         let snackbarMessage = `Feature "${featureName}" deleted`;
