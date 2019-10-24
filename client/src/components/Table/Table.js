@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useWindowManager } from "hooks/WindowHooks";
-import { useLiveFeatures } from "hooks/DataHooks";
+import { useLiveFeatures, useFileInfo } from "hooks/DataHooks";
 
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -21,6 +21,7 @@ import {
 } from "components/WindowHelpers/WindowLayout";
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import styled from "styled-components";
+import * as dataTypes from "constants/dataTypes";
 
 import "./Table.css";
 
@@ -66,6 +67,17 @@ const TablePaginationActions = props => {
     );
 };
 
+function formatSentinelValue(value) {
+    switch (value) {
+        case "nan":
+            return "NaN";
+        case "inf":
+            return "Inf";
+        case "ninf":
+            return "N-inf";
+    }
+}
+
 const DataTable = props => {
     const win = useWindowManager(props, {
         title: "Data Table",
@@ -74,6 +86,8 @@ const DataTable = props => {
 
     // by default, this will render as a row per feature
     const features = useLiveFeatures();
+
+    const fileInfo = useFileInfo();
 
     // memoize the transposition bc it is *expensive*
     const [indices, transposed] = useMemo(() => {
@@ -92,7 +106,17 @@ const DataTable = props => {
         // to create a (data length x features) matrix. this must be done carefully
         // in order to preserve the indices for the lookup. because immutable doesn't support
         // N-ary zips, we'll have to emulate it by mapping along axis zero
-        const cleaned = features.map(f => f.get("data")); // indices preserved
+        const cleaned = features
+            .map(f => f.get("data"))
+            .map(f => {
+                // First check if we even have any sentinel values for this file.
+                if (dataTypes.SENTINEL_KEYS.every(key => !fileInfo[key])) return f;
+                // Check if value is a sentinel and change to descriptive string if so.
+                return f.map(v => {
+                    const sentinelValue = dataTypes.SENTINEL_KEYS.find(key => fileInfo[key] === v);
+                    return sentinelValue ? formatSentinelValue(sentinelValue) : v;
+                });
+            }); // indices preserved
 
         // this may be inefficient but w/e
         const transposed = cleaned.get(0).map((f, i) => cleaned.map(row => row.get(i)));
