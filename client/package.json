@@ -126,6 +126,7 @@
         "@atlaskit/field-text": "^8.0.0",
         "@atlaskit/single-select": "^7.0.0",
         "@babel/plugin-transform-regenerator": "^7.4.5",
+        "@babel/preset-env": "^7.6.3",
         "@teamsupercell/typings-for-css-modules-loader": "^2.0.0",
         "babel-eslint": "^10.0.2",
         "babel-polyfill": "^6.26.0",
