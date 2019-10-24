@@ -91,7 +91,7 @@ class uploadSocket(tornado.websocket.WebSocketHandler):
             stop_cache_server()
             codex_hash_server = make_cache_process()
             codex_hash_server.start()
-        
+
             logging.info('Finished file transfer, initiating save...')
             cache = get_cache(msg['sessionkey'], timeout=None)
 
@@ -166,6 +166,7 @@ def route_request(msg, result):
     elif (routine == 'arrange'):
         activity = msg["activity"]
         if (activity == "add"):
+            print(msg)
             yield add_data(msg, result)
         elif (activity == "get"):
             yield get_data(msg, result)
@@ -320,6 +321,7 @@ if __name__ == '__main__':
 
     logging.basicConfig(filename='logs/{time}.log'.format(time=datetime.datetime.now()), level=0)
     logging.info("CODEX Server Started")
+    logging.info(" ".join(sys.argv))
 
     getTimeLogDict()
 

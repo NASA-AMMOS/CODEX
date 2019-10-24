@@ -243,6 +243,7 @@ class CodexHash:
 
         result = self.findHashArray(field, old, hashType, session=session)
         status = self.deleteHashName(old, hashType, session=session)
+        #logging.info("DEBUG:", new)
         result[field] = new
 
         if(hashType == "subset"):

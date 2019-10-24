@@ -16,6 +16,8 @@ import logging
 
 import numpy as np
 
+from sklearn import preprocessing
+
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 logger = logging.getLogger(__name__)
@@ -26,10 +28,10 @@ class normalize(algorithm):
 
     def get_algorithm(self):
 
-        if(self.algorithmName == ""):
-            pass
-        elif(self.algorithmName == ""):
-            pass
+        if(self.algorithmName == "normalize"):
+            algorithm = "normalize"
+        elif(self.algorithmName == "standardize"):
+            algorithm = "standardize"
         else:
             return None
 
@@ -37,7 +39,21 @@ class normalize(algorithm):
 
 
     def fit_algorithm(self):
-        pass
+
+        if self.algorithm == "normalize":
+            print(self.X.shape)
+            normalized_X = preprocessing.normalize(self.X)
+            print(normalized_X.shape)
+        elif self.algorithm == "standardize":
+            print(self.X.shape)
+            print("Standardize")
+            scaler = preprocessing.StandardScaler()
+            scaled_X = scaler.fit_transform(self.X)
+            print(scaled_X.shape)
+        else:
+            logging.warning("Unrecognized normalize scheme:{algorithm}".format(algorithm=self.algorithm))
+        
+
 
 
     def check_valid(self):

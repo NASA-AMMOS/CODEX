@@ -87,37 +87,23 @@ def add_data(msg, result):
         ch = get_cache(msg['sessionkey'])
 
         hashType = msg['hashType']
-        data = msg["data"]
+
+        # assert the data is 1D
+        np_data = np.asarray(msg['data']);
+        assert np_data.ndim == 1;
 
         if (hashType == "selection"):
-            maskLength = msg["length"]
 
-            encoded = data.encode("ascii")
-            decoded = base64.decodebytes(encoded)
-            resultString = "".join(["{:08b}".format(x) for x in decoded])
-
-            numResults = len(resultString)
-            delta = abs(numResults - maskLength)
-
-            maskTmp = np.zeros(numResults)
-
-            for x in range(0, numResults):
-                maskTmp[x] = int(resultString[x])
-
-            mask = maskTmp[delta:]
-
-            hashResult = ch.hashArray(msg["name"], mask, "subset")
+            hashResult = ch.hashArray(msg["name"], np_data, "subset")
 
         elif (hashType == "feature"):
-            # assert the data is 1D
-            np_data = np.asarray(data);
-            assert np_data.ndim == 1;
 
             virtual = msg['virtual'] if 'virtual' in msg else False
             hashResult = ch.hashArray(msg["name"], np_data, "feature", virtual=virtual)
 
         else:
             result["message"] = 'failure'
+            return result
 
         result['message'] = 'success'
 

@@ -60,7 +60,6 @@ class dimension_reduction(algorithm):
         self.result['explained_variance_ratio'] = exp_var_ratio.tolist()
         self.result['n_components'] = self.parms['n_components']
 
-
     def check_valid(self):
 
         if(self.X.ndim > self.parms["n_components"]):
