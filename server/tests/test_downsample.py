@@ -40,9 +40,3 @@ def test_downsample(capsys):
     result3 = downsample(array, percentage=120, session=ch)
 
     result4 = downsample(array, session=ch)
-
-ch = get_cache(DOCTEST_SESSION)
-#array = np.random.rand(300)
-array = np.random.random((300,2))
-
-result = downsample(array,percentage=10, session=ch, algorithm="spanning")
