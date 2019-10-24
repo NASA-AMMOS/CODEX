@@ -49,16 +49,6 @@ function SelectionContextMenu(props) {
             <ListItem
                 button
                 onClick={_ => {
-                    setContextMode("rename");
-                    setRenameSelectionBuffer(props.contextActiveSelection.displayName);
-                }}
-                hidden={contextMode}
-            >
-                Rename Selection
-            </ListItem>
-            <ListItem
-                button
-                onClick={_ => {
                     props.setContextMenuVisible(false);
                     props.deleteSelection(props.contextActiveSelection.id);
                     props.setContextActiveSelection(null);
@@ -80,6 +70,18 @@ function SelectionContextMenu(props) {
         </List>
     );
 }
+
+/*
+       <ListItem
+                button
+                onClick={_ => {
+                    setContextMode("rename");
+                    setRenameSelectionBuffer(props.contextActiveSelection.displayName);
+                }}
+                hidden={contextMode}
+            >
+                Rename Selection
+            </ListItem>*/
 
 function GroupDisplayItem(props) {
     return (

@@ -53,23 +53,25 @@ export function removeAllSelections() {
 }
 
 export function deleteSelection(id) {
-    const socketWorker = new WorkerSocket();
-    const request = {
-        routine: "arrange",
-        hashType: "selection",
-        sessionkey: utils.getGlobalSessionKey(),
-        activity: "delete",
-        name: [id]
+    return (dispatch, getState) => {
+        const socketWorker = new WorkerSocket();
+        const request = {
+            routine: "arrange",
+            hashType: "selection",
+            sessionkey: utils.getGlobalSessionKey(),
+            activity: "delete",
+            name: [getState().selections.savedSelections[id].name]
+        };
+
+        socketWorker.postMessage(
+            JSON.stringify({
+                action: actionTypes.SIMPLE_REQUEST,
+                request
+            })
+        );
+
+        dispatch({ type: actionTypes.DELETE_SELECTION, id });
     };
-
-    socketWorker.postMessage(
-        JSON.stringify({
-            action: actionTypes.SIMPLE_REQUEST,
-            request
-        })
-    );
-
-    return { type: actionTypes.DELETE_SELECTION, id };
 }
 
 export function renameSelection(id, name) {
