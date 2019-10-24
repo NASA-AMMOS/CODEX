@@ -166,7 +166,6 @@ def route_request(msg, result):
     elif (routine == 'arrange'):
         activity = msg["activity"]
         if (activity == "add"):
-            print(msg)
             yield add_data(msg, result)
         elif (activity == "get"):
             yield get_data(msg, result)
