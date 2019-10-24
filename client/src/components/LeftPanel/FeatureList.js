@@ -269,16 +269,6 @@ function FeatureContextMenu(props) {
                     <ListItem
                         button
                         onClick={_ => {
-                            setContextMode("rename");
-                            //     setRenameSelectionBuffer(props.contextActiveSelection.displayName);
-                        }}
-                        hidden={contextMode}
-                    >
-                        Rename Feature
-                    </ListItem>
-                    <ListItem
-                        button
-                        onClick={_ => {
                             setVisible(false);
                             listContext.featureDelete(props.featureName);
                             //     props.deleteSelection(props.contextActiveSelection.id);
@@ -303,6 +293,19 @@ function FeatureContextMenu(props) {
         </Popover>
     );
 }
+
+/*                   <ListItem
+                        button
+                        onClick={_ => {
+                            setContextMode("rename");
+                            //     setRenameSelectionBuffer(props.contextActiveSelection.displayName);
+                        }}
+                        hidden={contextMode}
+                    >
+                        Rename Feature
+                    </ListItem>
+                    */
+
 /*
     A single row displaying a feature and its corresponding data
     for the drag and drop menu
