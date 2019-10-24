@@ -23,7 +23,7 @@ from api.sub.codex_math import impute
 from api.sub.hash       import get_cache
 from api.sub.spanning   import mask_spanning_subset
 
-def downsample(inputArray, samples=0, percentage=0.0, session=None):
+def downsample(inputArray, samples=0, percentage=0.0, session=None, algorithm="simple"):
     '''
     Inputs:
         inputArray  - numpy array       - array to be downsampled
@@ -43,16 +43,10 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None):
     inputHash = cache.hashArray("NOSAVE", inputArray, "NOSAVE")
     inputHashCode = inputHash["hash"]
     inputArray = impute(inputArray) # TODO - mblib spanning seems to have problems with NaNs.  Impute until fixed.
-
-    if inputArray.ndim == 1:
-        inputList = [inputArray.tolist()]
-    else:
-        inputList = inputArray.T.tolist()
-
-    totalPoints = len(inputList[0])
+    totalPoints = inputArray.shape[0]
 
     # if number of samples is provided, use
-    if(samples != 0):
+    if(samples > 0):
         usedSamples = samples
 
     elif(percentage != 0):
@@ -78,19 +72,26 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None):
 
         try:
 
-            mask_, array_ = mask_spanning_subset(inputList, usedSamples)
-            outputArray = inputArray[mask_]
+            if algorithm == "simple":
+
+                outputArray = inputArray[np.random.choice(inputArray.shape[0], usedSamples, replace=False)]
+
+            elif algorithm == "spanning":
+
+                if inputArray.ndim == 1:
+                    inputList = [inputArray.tolist()]
+                else:
+                    inputList = inputArray.T.tolist()
+                mask_, array_ = mask_spanning_subset(inputList, usedSamples)
+                outputArray = inputArray[mask_]
+
+            else:
+                logging.warning("Unknown downsampling algorithm: {algorithm}".format(algorithm=algorithm))
+                outputArray = inputArray
 
         except BaseException:
-
-
-            logging.warning("ERROR: downsample - failed to downsample.\n\n{trace}".format(trace=traceback.format_exc()))
-            outputList = inputList
-
-            # Convert back to numpy array
-            outputArray = np.asarray(outputList)
-            outputArray = outputArray.T
-
+            logging.warning("downsample - failed to downsample.\n\n{trace}".format(trace=traceback.format_exc()))
+            outputArray = inputArray
 
     # Hash the downsampled output, using the hash of the input in place of the name.
     #	Later look up using this, w.r.t origin data

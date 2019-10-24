@@ -86,7 +86,7 @@ class algorithm():
                 return self.result
 
         if self.downsampled is not False:
-            self.X = downsample(self.X, samples=self.downsampled, session=self.cache)
+            self.X = downsample(self.X, samples=self.downsampled, session=self.cache, algorithm='spanning')
             logging.info("Downsampled to {samples} samples".format(samples=len(self.X)))
 
         # TODO - labels are currently cached under features
