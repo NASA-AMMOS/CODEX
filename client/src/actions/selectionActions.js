@@ -53,6 +53,22 @@ export function removeAllSelections() {
 }
 
 export function deleteSelection(id) {
+    const socketWorker = new WorkerSocket();
+    const request = {
+        routine: "arrange",
+        hashType: "selection",
+        sessionkey: utils.getGlobalSessionKey(),
+        activity: "delete",
+        name: [id]
+    };
+
+    socketWorker.postMessage(
+        JSON.stringify({
+            action: actionTypes.SIMPLE_REQUEST,
+            request
+        })
+    );
+
     return { type: actionTypes.DELETE_SELECTION, id };
 }
 
