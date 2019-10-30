@@ -1,14 +1,12 @@
 import "./View.css";
 
-import React, { Component } from "react";
+import React from "react";
 
-import Container from "../Container/Container";
-import LeftPanel from "components/LeftPanel/LeftPanel";
-import TopBar from "components/TopBar/TopBar";
-import ConfirmationModal from "components/ConfirmationModal/ConfirmationModal";
 import CodexSnackbar from "components/CodexSnackbar/CodexSnackbar";
+import ConfirmationModal from "components/ConfirmationModal/ConfirmationModal";
+import LeftPanel from "components/LeftPanel/LeftPanel";
 import PropertyEditor from "components/PropertyEditor/PropertyEditor";
-
+import TopBar from "components/TopBar/TopBar";
 import WindowManager from "components/WindowManager/WindowManager";
 
 function View(props) {
