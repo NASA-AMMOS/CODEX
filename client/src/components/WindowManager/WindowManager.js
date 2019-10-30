@@ -241,10 +241,10 @@ function WindowManager(props) {
         });
 
     return (
-        <React.Fragment>
+        <div className="windowContainer">
             {windows}
             {makeMinimizedBar(props)}
-        </React.Fragment>
+        </div>
     );
 }
 

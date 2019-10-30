@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import * as wmActions from "actions/windowManagerActions";
 import { defaultInitialSettings } from "constants/windowSettings";
 import { fromJS } from "immutable";
-
+import * as actionTypes from "constants/actionTypes";
 /*
  * Basically, this hook:
  *      1) checks if an ID was passed down from the window manager
@@ -103,6 +103,33 @@ export function useActiveWindow() {
     const setActiveWindow = id => id !== activeWindow && dispatch(wmActions.setActiveWindow(id));
 
     return [activeWindow, setActiveWindow];
+}
+
+/**
+ * Getter for the window list
+ * @return {object} value
+ */
+export function useWindowList() {
+    const dispatch = useDispatch();
+    return useSelector(state => state.windowManager.get("windows"));
+}
+
+/**
+ * Getter/setter for a specific graph window's feature list
+ * @return {tuple} value/setter function
+ */
+export function useWindowFeatureList(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+    const features = win.getIn(["data", "features"]);
+
+    return [
+        features,
+        newFeatures =>
+            dispatch(wmActions.setWindowData(id, win.get("data").set("features", newFeatures)))
+    ];
 }
 
 export default useWindowManager;

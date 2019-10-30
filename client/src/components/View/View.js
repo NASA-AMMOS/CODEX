@@ -7,6 +7,9 @@ import LeftPanel from "components/LeftPanel/LeftPanel";
 import TopBar from "components/TopBar/TopBar";
 import ConfirmationModal from "components/ConfirmationModal/ConfirmationModal";
 import CodexSnackbar from "components/CodexSnackbar/CodexSnackbar";
+import PropertyEditor from "components/PropertyEditor/PropertyEditor";
+
+import WindowManager from "components/WindowManager/WindowManager";
 
 function View(props) {
     return (
@@ -15,9 +18,8 @@ function View(props) {
 
             <div className="bottom-section">
                 <LeftPanel />
-                <div className="rightPanel">
-                    <Container />
-                </div>
+                <WindowManager />
+                <PropertyEditor />
             </div>
             <ConfirmationModal />
             <CodexSnackbar />

@@ -1,3 +1,9 @@
+.windowContainer {
+    flex-grow: 2;
+    position: relative;
+    flex-shrink: 2;
+}
+
 .windowBody {
     width: 100%;
     height: 100%;

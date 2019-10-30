@@ -19,6 +19,7 @@ import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
+const DEFAULT_BUCKET_COUNT = 50;
 
 // Returns a single rgb color interpolation between given rgb color
 // based on the factor given; via https://codepen.io/njmcode/pen/axoyD?editors=0010
@@ -117,11 +118,14 @@ function generateRange(low, high, increment) {
     return range;
 }
 
+function generateDataAxis(col) {
+    const [min, max] = dataRange(col);
+    return generateRange(min, max, (max - min) / DEFAULT_BUCKET_COUNT);
+}
+
 function HeatmapGraph(props) {
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
-
-    let defaultBucketCount = 50;
 
     //the number of interpolation steps that you can take caps at 5?
     const interpolatedColors = interpolateColors(
@@ -132,29 +136,28 @@ function HeatmapGraph(props) {
     );
 
     const data = utils.removeSentinelValues(
-        props.data.map(f => f.get("data")).toJS(),
+        props.win.data.features.map(colName =>
+            props.data
+                .find(col => col.get("feature") === colName)
+                .get("data")
+                .toJS()
+        ),
         props.fileInfo
     );
 
     //calculate range of data for axis labels
-    const xAxis = props.data.getIn([0, "feature"]);
-    const yAxis = props.data.getIn([1, "feature"]);
+    const xAxis = props.win.data.features[0];
+    const yAxis = props.win.data.features[1];
 
-    const [xMin, xMax] = dataRange(data[0]);
-    const [yMin, yMax] = dataRange(data[1]);
-
-    //const xAxis = data[0][0];
-    //const yAxis = data[0][1];
-
-    const cols = squashDataIntoBuckets(data, defaultBucketCount);
+    const cols = squashDataIntoBuckets(data, DEFAULT_BUCKET_COUNT);
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
     // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState({
         data: [
             {
-                x: generateRange(xMin, xMax, (xMax - xMin) / defaultBucketCount),
-                y: generateRange(yMin, yMax, (yMax - yMin) / defaultBucketCount),
+                x: generateDataAxis(data[0]),
+                y: generateDataAxis(data[1]),
                 z: cols,
                 type: "heatmap",
                 showscale: true,
@@ -196,6 +199,19 @@ function HeatmapGraph(props) {
         setChartRevision(revision);
     }
 
+    // Effect to keep axes updated if they've been swapped
+    useEffect(
+        _ => {
+            chartState.data[0].x = generateDataAxis(data[0]);
+            chartState.data[0].y = generateDataAxis(data[1]);
+            chartState.data[0].z = squashDataIntoBuckets(data, DEFAULT_BUCKET_COUNT);
+            chartState.layout.xaxis.title = xAxis;
+            chartState.layout.yaxis.title = yAxis;
+            updateChartRevision();
+        },
+        [props.win.data.features]
+    );
+
     return (
         <GraphWrapper chart={chart} chartId={chartId} win={props.win}>
             <Plot
@@ -235,12 +251,12 @@ export default props => {
 
     const features = usePinnedFeatures(win);
 
-    if (features === null) {
+    if (features === null || !win.data) {
         return <WindowCircularProgress />;
     }
 
     if (features.size === 2) {
-        win.setTitle(features.map(f => f.get("feature")).join(" vs "));
+        win.setTitle(win.data.features.join(" vs "));
         return (
             <HeatmapGraph
                 currentSelection={currentSelection}
