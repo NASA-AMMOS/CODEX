@@ -241,7 +241,7 @@ function WindowManager(props) {
         });
 
     return (
-        <div className="windowContainer">
+        <div className="windowContainer" id="windowContainer">
             {windows}
             {makeMinimizedBar(props)}
         </div>
