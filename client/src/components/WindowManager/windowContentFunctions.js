@@ -26,6 +26,7 @@ import Debugger from "components/Debug/Debug";
 import Table from "components/Table/Table";
 import Transform from "components/Transform/Transform";
 import QualityScan from "components/QualityScan/QualityScan";
+import SingleXMultipleYGraph from "components/Graphs/SingleXMultipleYGraph";
 
 export function getWindowContent(win) {
     switch (win.get("windowType")) {
@@ -86,6 +87,8 @@ export function getWindowContent(win) {
             return <Transform />;
         case windowTypes.QUALITY_SCAN_WINDOW:
             return <QualityScan data={win.get("data")} />;
+        case windowTypes.SINGLE_X_MULTIPLE_Y:
+            return <SingleXMultipleYGraph data={win.get("data")} />;
         default:
             return (
                 <p>

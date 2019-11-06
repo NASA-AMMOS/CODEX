@@ -42,7 +42,10 @@ const wrapWindow = (win, dispatch) => {
             }
         },
         setData: data => {
-            if (fromJS(data) !== win.get("data")) {
+            if (typeof data === "function") {
+                data = data(win.get("data")); // Allow a callback function with the existing data as an argument
+            }
+            if (data && !fromJS(data).equals(win.get("data"))) {
                 dispatch(wmActions.setWindowData(win.get("id"), data));
             }
         },
@@ -129,6 +132,39 @@ export function useWindowFeatureList(id) {
         features,
         newFeatures =>
             dispatch(wmActions.setWindowData(id, win.get("data").set("features", newFeatures)))
+    ];
+}
+
+/**
+ * Getter/setter for a specific graph window's feature info list
+ * @return {tuple} value/setter function
+ */
+export function useWindowFeatureInfoList(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "featureInfo"], []),
+        newInfo =>
+            dispatch(wmActions.setWindowData(id, win.get("data").set("featureInfo", newInfo)))
+    ];
+}
+
+/**
+ * Getter/setter for a specific graph window x axis
+ * @return {tuple} value/setter function
+ */
+export function useWindowXAxis(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "xAxis"]),
+        xAxis => dispatch(wmActions.setWindowData(id, win.get("data").set("xAxis", xAxis)))
     ];
 }
 

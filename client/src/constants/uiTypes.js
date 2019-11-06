@@ -27,3 +27,4 @@ export const AUTOSAVE_ENABLED = false;
 export const AUTOSAVE_INTERVAL = 1000 * 30;
 
 export const CLOSE_GRAPH_WHEN_DELETE_FEATURE = "CLOSE_GRAPH_WHEN_DELETE_FEATURE";
+export const GRAPH_INDEX = "Index";
