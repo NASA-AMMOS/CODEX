@@ -1,4 +1,4 @@
-// import "components/Graphs/SingleXMultipleYGraph.scss";
+import "components/Graphs/SingleXMultipleYGraph.scss";
 
 import React, { useRef, useState, useEffect } from "react";
 import { bindActionCreators } from "redux";
@@ -40,7 +40,9 @@ function SingleXMultipleYGraph(props) {
             props.fileInfo
         );
     }
+
     const processedData = getProcessedData();
+    const dataLength = processedData[0].length;
 
     // Generic index array
     const indexAry = [...Array(processedData[0].length)].map((_, idx) => idx);
@@ -125,7 +127,7 @@ function SingleXMultipleYGraph(props) {
             titlefont: { size: 5 },
             xaxis: {
                 automargin: true,
-                title: getXAxisTitle()
+                title: ""
             },
             yaxis: {
                 automargin: true,
@@ -165,100 +167,86 @@ function SingleXMultipleYGraph(props) {
             });
     }
 
-    function updateSelections() {
-        // Remove all selections so we can re-render them
-        chartState.data = chartState.data.filter(
-            trace => !trace.title || trace.title.text !== "selection"
-        );
-
-        // Add saved selections
-        chartState.data = chartState.data.concat(
-            ...props.savedSelections.map(selection => makeSelectionTrace(selection, cols))
-        );
-
-        // Add currrent selection (if there is one)
-        if (props.currentSelection && props.currentSelection.length) {
-            chartState.data = chartState.data.concat(
-                makeSelectionTrace({
-                    rowIndices: props.currentSelection,
-                    color: "red"
-                })
-            );
-        }
-
-        updateChartRevision();
+    /* SELECTION HANDLERS
+    Selections are handled as a bunch of tick plots that are generated below the main plot.
+    The selection graph objects are stored in state and then rendered. We don't modify these charts
+    after they are created.
+    */
+    const [selectionChartStates, setSelectionChartStates] = useState([]);
+    function makeTickPlotForSelection(selection) {
+        const z = [
+            selection.rowIndices.reduce((acc, sel) => {
+                acc[sel] = 1;
+                return acc;
+            }, Array(dataLength).fill(0))
+        ];
+        return {
+            data: [
+                {
+                    z,
+                    type: "heatmap",
+                    showscale: false,
+                    colorscale: [["0.0", "rgba(0,0,0,0)"], ["1.0", selection.color]]
+                }
+            ],
+            layout: {
+                autosize: true,
+                margin: { l: 40, r: 0, t: 0, b: 10, pad: 10 },
+                xaxis: {
+                    showline: false,
+                    showgrid: false,
+                    zeroline: false,
+                    showticklabels: false,
+                    ticks: ""
+                },
+                yaxis: {
+                    showline: false,
+                    showgrid: false,
+                    zeroline: false,
+                    showticklabels: false,
+                    ticks: ""
+                }
+            },
+            config: {
+                responsive: true,
+                displaylogo: false,
+                displayModeBar: false
+            }
+        };
     }
 
-    // Function to update the chart with the latest global chart selections. NOTE: The data is modified in-place.
-    useEffect(_ => updateSelections(), [props.currentSelection, props.savedSelections]);
+    // Effect to handle changed global selections
+    const [previousSelectionCount, setPreviousSelectionCount] = useState(0);
+    useEffect(
+        _ => {
+            let selections = [];
 
-    // useEffect(
-    //     _ => {
-    //         setSelectionColors();
-    //         updateChartRevision();
-    //     },
-    //     [props.savedSelections]
-    // );
+            // Add currrent selection (if there is one)
+            if (props.currentSelection && props.currentSelection.length) {
+                selections = selections.concat(
+                    makeTickPlotForSelection({
+                        rowIndices: props.currentSelection,
+                        color: "red"
+                    })
+                );
+            }
 
-    // // Functions to animate selections that are being hovered over.
-    // const animationState = useRef({ index: 0, ascending: true });
-    // useEffect(
-    //     _ => {
-    //         if (props.hoverSelection === null) {
-    //             setSelectionColors();
-    //             updateChartRevision();
-    //             return;
-    //         }
+            // Add saved selections
+            selections = selections.concat(
+                ...props.savedSelections.map(selection => makeTickPlotForSelection(selection, cols))
+            );
 
-    //         const activeSelection =
-    //             props.hoverSelection === "current_selection"
-    //                 ? { color: COLOR_CURRENT_SELECTION, isCurrentSelection: true }
-    //                 : props.savedSelections.find(sel => sel.id === props.hoverSelection);
+            setSelectionChartStates(selections);
 
-    //         const colorGradient = utils.createGradientStops(
-    //             activeSelection.color,
-    //             DEFAULT_POINT_COLOR,
-    //             ANIMATION_RANGE
-    //         );
+            // Increase or decrease the window height to accomodate the selections.
+            props.win.resizeY(props.win.height + (selections.length - previousSelectionCount) * 30);
+            setPreviousSelectionCount(selections.length);
+            setStaticResize(true);
+        },
+        [props.currentSelection, props.savedSelections]
+    );
 
-    //         const animationInterval = setInterval(_ => {
-    //             animationState.current.ascending =
-    //                 animationState.current.index === 0
-    //                     ? true
-    //                     : animationState.current.index === ANIMATION_RANGE - 1
-    //                     ? false
-    //                     : animationState.current.ascending;
-
-    //             // changing gradient going toward color saturation happens faster than
-    //             // going toward de-saturated, which makes the points more saturated for
-    //             // more time. I think.
-    //             animationState.current.index = animationState.current.ascending
-    //                 ? animationState.current.index + 2
-    //                 : animationState.current.index - 1;
-
-    //             const nextColor = colorGradient[animationState.current.index];
-
-    //             if (activeSelection.isCurrentSelection) {
-    //                 chartState.data[0].selected.marker.color = nextColor;
-    //             } else {
-    //                 activeSelection.rowIndices.forEach(row => {
-    //                     chartState.data[0].marker.color[row] = nextColor;
-    //                 });
-    //             }
-    //             updateChartRevision();
-    //         }, ANIMATION_SPEED);
-
-    //         return _ => {
-    //             clearInterval(animationInterval);
-    //             animationState.current = { index: 0, ascending: true };
-    //             chartState.data[0].selected.marker.color = COLOR_CURRENT_SELECTION;
-    //             setSelectionColors();
-    //             updateChartRevision();
-    //         };
-    //     },
-    //     [props.hoverSelection]
-    // );
-
+    // TODO: How do selections work in this chart?
     useEffect(
         _ => {
             chartState.layout.dragmode = props.globalChartState; // Weirdly this works, can't do it with setChartState
@@ -282,33 +270,45 @@ function SingleXMultipleYGraph(props) {
                 hoverinfo: "x+y"
             }));
 
-            chartState.layout.xaxis.title = getXAxisTitle();
             chartState.layout.yaxis.title = getYAxisTitle();
-            updateSelections();
         },
         [props.win.data.features, props.win.data.xAxis]
     );
 
     return (
         <GraphWrapper chart={chart} chartId={chartId} win={props.win}>
-            <Plot
-                ref={chart}
-                data={chartState.data}
-                layout={chartState.layout}
-                config={chartState.config}
-                style={{ width: "100%", height: "100%" }}
-                useResizeHandler
-                onInitialized={figure => setChartState(figure)}
-                onUpdate={figure => setChartState(figure)}
-                onClick={e => {
-                    if (e.event.button === 2 || e.event.ctrlKey) return;
-                    props.setCurrentSelection([]);
-                }}
-                onSelected={e => {
-                    if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
-                }}
-                divId={chartId}
-            />
+            <React.Fragment>
+                <Plot
+                    ref={chart}
+                    data={chartState.data}
+                    layout={chartState.layout}
+                    config={chartState.config}
+                    style={{
+                        width: "100%",
+                        height: `calc(100% - ${previousSelectionCount * 30}px)`
+                    }}
+                    onInitialized={figure => setChartState(figure)}
+                    onUpdate={figure => setChartState(figure)}
+                    onClick={e => {
+                        if (e.event.button === 2 || e.event.ctrlKey) return;
+                        props.setCurrentSelection([]);
+                    }}
+                    onSelected={e => {
+                        if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
+                    }}
+                    divId={chartId}
+                    useResizeHandler
+                />
+                {selectionChartStates.map(selectionState => (
+                    <Plot
+                        data={selectionState.data}
+                        layout={selectionState.layout}
+                        config={selectionState.config}
+                        style={{ width: "100%", height: "20px" }}
+                    />
+                ))}
+                <div className="x-axis-title">{getXAxisTitle()}</div>
+            </React.Fragment>
         </GraphWrapper>
     );
 }

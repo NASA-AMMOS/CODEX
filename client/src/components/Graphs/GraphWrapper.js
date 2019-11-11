@@ -173,7 +173,7 @@ function GraphWrapper(props) {
 
     //you either need a custom resize handler or to give GraphWrapper chart
     const resizeHandler =
-        props.resizeHandler != undefined
+        props.resizeHandler !== undefined
             ? props.resizeHandler
             : _ => props.chart.current.resizeHandler();
 
