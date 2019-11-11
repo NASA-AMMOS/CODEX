@@ -17,7 +17,7 @@
         color: white;
         margin-top: 10px;
         margin-left: 14px;
-        margin-bottom: 40px;
+        margin-bottom: 10px;
     }
 
     .axis {
@@ -64,5 +64,17 @@
         line-height: 17px;
         color: $grey9;
         margin-bottom: 5px;
+    }
+
+    .title-field {
+        margin-left: 18px;
+        margin-bottom: 10px;
+        input {
+            color: #eeeeee;
+            user-select: text;
+            &::selection {
+                background: blue;
+            }
+        }
     }
 }

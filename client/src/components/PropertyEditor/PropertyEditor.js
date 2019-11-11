@@ -1,22 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import "components/PropertyEditor/PropertyEditor.scss";
 import {
     useActiveWindow,
     useWindowList,
     useWindowFeatureList,
     useWindowFeatureInfoList,
-    useWindowXAxis
+    useWindowXAxis,
+    useWindowTitle
 } from "hooks/WindowHooks";
 import * as windowTypes from "constants/windowTypes";
 import Button from "@material-ui/core/Button";
 import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import SwapAxesIcon from "components/Icons/SwapAxes";
 import * as uiTypes from "constants/uiTypes";
+import TextField from "@material-ui/core/TextField";
 
 function MultiAxisGraphEditor(props) {
     const [featureInfo, setFeatureInfo] = useWindowFeatureInfoList(props.activeWindowId);
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [xAxis, setXAxis] = useWindowXAxis(props.activeWindowId);
+    const [windowTitle, setWindowTitle] = useWindowTitle(props.activeWindowId);
 
     if (!features) return null;
 
@@ -25,7 +28,9 @@ function MultiAxisGraphEditor(props) {
             <select onChange={e => setXAxis(e.target.value)} value={xAxis}>
                 <option value={uiTypes.GRAPH_INDEX}>Index</option>
                 {features.map(f => (
-                    <option value={f}>{f}</option>
+                    <option value={f} key={f}>
+                        {f}
+                    </option>
                 ))}
             </select>
         ) : (
@@ -35,6 +40,11 @@ function MultiAxisGraphEditor(props) {
     return (
         <React.Fragment>
             <div className="header">Graph Details</div>
+            <TextField
+                className="title-field"
+                value={windowTitle}
+                onChange={e => setWindowTitle(e.target.value)}
+            />
             <div className="axis">
                 <label>X-Axis</label>
                 {xAxisSelect}
@@ -44,7 +54,7 @@ function MultiAxisGraphEditor(props) {
                 {featureInfo
                     .filter(feature => feature.get("name") !== xAxis)
                     .map(feature => (
-                        <div className="line-plot">
+                        <div className="line-plot" key={feature.get("name")}>
                             <span>{feature.get("name")}</span>
                             <div
                                 className="color-swatch"

@@ -335,7 +335,7 @@ export default props => {
     }
 
     if (features.size) {
-        win.setTitle(win.data.features.join(","));
+        if (!win.title) win.setTitle(win.data.features.join(", "));
         return (
             <SingleXMultipleYGraph
                 currentSelection={currentSelection}

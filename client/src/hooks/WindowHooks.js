@@ -168,4 +168,16 @@ export function useWindowXAxis(id) {
     ];
 }
 
+/**
+ * Getter/setter for a specific graph window title
+ * @return {tuple} value/setter function
+ */
+export function useWindowTitle(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+    return [win.get("title"), title => dispatch(wmActions.setWindowTitle(id, title))];
+}
+
 export default useWindowManager;
