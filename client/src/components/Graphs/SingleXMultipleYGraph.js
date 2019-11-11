@@ -53,7 +53,7 @@ function SingleXMultipleYGraph(props) {
     function getXAxis() {
         if (!props.win.data.xAxis || props.win.data.xAxis === uiTypes.GRAPH_INDEX) return indexAry;
         const colIndex = props.data.findIndex(col => col.get("feature") === props.win.data.xAxis);
-        return processedData[colIndex];
+        return Array.from(processedData[colIndex]).sort((a, b) => b - a);
     }
     const xAxisData = getXAxis();
 
@@ -270,6 +270,7 @@ function SingleXMultipleYGraph(props) {
             }));
 
             chartState.layout.yaxis.title = getYAxisTitle();
+            updateChartRevision();
         },
         [props.win.data.features, props.win.data.xAxis]
     );
