@@ -24,11 +24,35 @@ import {
 import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
 import * as uiTypes from "constants/uiTypes";
+import Plotly from "plotly.js";
+import mergeImg from "merge-img";
+
+const Jimp = require("jimp");
 
 const DEFAULT_POINT_COLOR = "rgba(0, 0, 0 ,0.5)";
 const ANIMATION_RANGE = 15;
 const ANIMATION_SPEED = 0.75;
 const COLOR_CURRENT_SELECTION = "#FF0000";
+
+// Custom image save function to handle tick plots
+function saveImageFunction(chartIds, title) {
+    Promise.all([
+        Plotly.toImage(chartIds[0], { format: "png", width: 800, height: 800 }),
+        ...chartIds
+            .slice(1)
+            .map(id => Plotly.toImage(id, { format: "png", width: 800, height: 30 }))
+    ])
+        .then(urls => Promise.all(urls.map(url => Jimp.read(url))))
+        .then(images => mergeImg(images, { direction: true }))
+        .then(img => img.getBase64Async("image/png"))
+        .then(url => {
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = title;
+            a.click();
+            a.remove();
+        });
+}
 
 function SingleXMultipleYGraph(props) {
     const chart = useRef(null);
@@ -181,6 +205,7 @@ function SingleXMultipleYGraph(props) {
             }, Array(dataLength).fill(0))
         ];
         return {
+            id: utils.createNewId(),
             data: [
                 {
                     z,
@@ -275,8 +300,15 @@ function SingleXMultipleYGraph(props) {
         [props.win.data.features, props.win.data.xAxis]
     );
 
+    const chartIds = [chartId, ...selectionChartStates.map(sel => sel.id)];
     return (
-        <GraphWrapper chart={chart} chartId={chartId} win={props.win}>
+        <GraphWrapper
+            chart={chart}
+            chartIds={chartIds}
+            win={props.win}
+            saveOptions={{ type: "singleXMultipleY" }}
+            saveImageFunction={_ => saveImageFunction(chartIds, props.win.title)}
+        >
             <React.Fragment>
                 <Plot
                     ref={chart}
@@ -301,11 +333,12 @@ function SingleXMultipleYGraph(props) {
                 />
                 {selectionChartStates.map(selectionState => (
                     <Plot
-                        key={utils.createNewId()}
+                        key={selectionState.id}
                         data={selectionState.data}
                         layout={selectionState.layout}
                         config={selectionState.config}
                         style={{ width: "100%", height: "20px" }}
+                        divId={selectionState.id}
                     />
                 ))}
                 <div className="x-axis-title">{getXAxisTitle()}</div>

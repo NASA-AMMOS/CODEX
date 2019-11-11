@@ -184,7 +184,9 @@ function GraphWrapper(props) {
         setContextMenuPosition({ top: e.clientY, left: e.clientX });
     }
 
-    const saveImageFunction = props.chartId
+    const saveImageFunction = props.saveImageFunction
+        ? props.saveImageFunction
+        : props.chartId
         ? handleSingleChartDownload(props.chartId, props.win.title)
         : handleMultipleChartDownload(props.chartIds, props.win.title);
 
