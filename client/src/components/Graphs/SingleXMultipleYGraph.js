@@ -241,7 +241,6 @@ function SingleXMultipleYGraph(props) {
             // Increase or decrease the window height to accomodate the selections.
             props.win.resizeY(props.win.height + (selections.length - previousSelectionCount) * 30);
             setPreviousSelectionCount(selections.length);
-            setStaticResize(true);
         },
         [props.currentSelection, props.savedSelections]
     );
@@ -301,6 +300,7 @@ function SingleXMultipleYGraph(props) {
                 />
                 {selectionChartStates.map(selectionState => (
                     <Plot
+                        key={utils.createNewId()}
                         data={selectionState.data}
                         layout={selectionState.layout}
                         config={selectionState.config}
