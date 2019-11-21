@@ -180,4 +180,23 @@ export function useWindowTitle(id) {
     return [win.get("title"), title => dispatch(wmActions.setWindowTitle(id, title))];
 }
 
+/**
+ * Getter/setter for a specific graph window bin size
+ * @return {tuple} value/setter function
+ */
+export function useWindowGraphBinSize(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "binSize"]),
+        binSize => {
+            binSize = binSize.map(val => (!val || val <= 0 ? 1 : val > 200 ? 200 : val));
+            dispatch(wmActions.setWindowData(id, win.get("data").set("binSize", binSize)));
+        }
+    ];
+}
+
 export default useWindowManager;

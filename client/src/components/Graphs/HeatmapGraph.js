@@ -1,22 +1,14 @@
 import "components/Graphs/ContourGraph.css";
 
-import React, { useRef, useState, useEffect } from "react";
-import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
+import Immutable from "immutable";
 import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
-import GraphWrapper from "components/Graphs/GraphWrapper";
+import React, { useRef, useState, useEffect } from "react";
 
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import {
-    useCurrentSelection,
-    useSavedSelections,
-    usePinnedFeatures,
-    useFileInfo
-} from "hooks/DataHooks";
+import { useCurrentSelection, usePinnedFeatures, useFileInfo } from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
-import { useGlobalChartState } from "hooks/UIHooks";
+import GraphWrapper from "components/Graphs/GraphWrapper";
+import * as utils from "utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_BUCKET_COUNT = 50;
@@ -149,7 +141,14 @@ function HeatmapGraph(props) {
     const xAxis = props.win.data.features[0];
     const yAxis = props.win.data.features[1];
 
-    const cols = squashDataIntoBuckets(data, DEFAULT_BUCKET_COUNT);
+    function getCols() {
+        return squashDataIntoBuckets(
+            data,
+            props.win.data.binSize ? props.win.data.binSize.x : DEFAULT_BUCKET_COUNT
+        );
+    }
+    const cols = getCols();
+
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
     // Initial chart settings. These need to be kept in state and updated as necessary
@@ -212,6 +211,15 @@ function HeatmapGraph(props) {
         [props.win.data.features]
     );
 
+    useEffect(
+        _ => {
+            console.log(props.win.data.binSize);
+            chartState.data[0].z = getCols();
+            updateChartRevision();
+        },
+        [props.win.data.binSize]
+    );
+
     return (
         <GraphWrapper chart={chart} chartId={chartId} win={props.win}>
             <Plot
@@ -257,6 +265,14 @@ export default props => {
 
     if (features.size === 2) {
         win.setTitle(win.data.features.join(" vs "));
+        if (!win.data.binSize)
+            win.setData(data =>
+                data.set(
+                    "binSize",
+                    Immutable.fromJS({ x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT })
+                )
+            );
+
         return (
             <HeatmapGraph
                 currentSelection={currentSelection}

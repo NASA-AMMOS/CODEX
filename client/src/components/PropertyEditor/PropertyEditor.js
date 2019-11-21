@@ -1,5 +1,9 @@
-import React, { useState } from "react";
 import "components/PropertyEditor/PropertyEditor.scss";
+
+import Button from "@material-ui/core/Button";
+import React from "react";
+import TextField from "@material-ui/core/TextField";
+
 import {
     useActiveWindow,
     useWindowList,
@@ -8,12 +12,11 @@ import {
     useWindowXAxis,
     useWindowTitle
 } from "hooks/WindowHooks";
-import * as windowTypes from "constants/windowTypes";
-import Button from "@material-ui/core/Button";
-import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import SwapAxesIcon from "components/Icons/SwapAxes";
 import * as uiTypes from "constants/uiTypes";
-import TextField from "@material-ui/core/TextField";
+import * as windowTypes from "constants/windowTypes";
+
+import { useWindowGraphBinSize } from "../../hooks/WindowHooks";
 
 function MultiAxisGraphEditor(props) {
     const [featureInfo, setFeatureInfo] = useWindowFeatureInfoList(props.activeWindowId);
@@ -69,6 +72,7 @@ function MultiAxisGraphEditor(props) {
 
 function TwoAxisGraphEditor(props) {
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+    const [binSize, setBinSize] = useWindowGraphBinSize(props.activeWindowId);
     if (!features) return null;
 
     return (
@@ -89,6 +93,27 @@ function TwoAxisGraphEditor(props) {
     );
 }
 
+function TwoAxisGraphEditorWithBinSizeControls(props) {
+    const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+    const [binSize, setBinSize] = useWindowGraphBinSize(props.activeWindowId);
+    if (!features) return null;
+
+    return (
+        <React.Fragment>
+            <TwoAxisGraphEditor {...props} />
+            <div>
+                <label>Grid-width</label>
+                <TextField
+                    className="title-field"
+                    value={binSize.get("x")}
+                    type="number"
+                    onChange={e => setBinSize(binSize.set("x", parseInt(e.target.value)))}
+                />
+            </div>
+        </React.Fragment>
+    );
+}
+
 function PropertyEditor(props) {
     const [activeWindowId] = useActiveWindow();
     const windowList = useWindowList();
@@ -101,8 +126,9 @@ function PropertyEditor(props) {
         switch (activeWindow.get("windowType")) {
             case windowTypes.SCATTER_GRAPH:
             case windowTypes.CONTOUR_GRAPH:
-            case windowTypes.HEATMAP_GRAPH:
                 return <TwoAxisGraphEditor activeWindowId={activeWindowId} />;
+            case windowTypes.HEATMAP_GRAPH:
+                return <TwoAxisGraphEditorWithBinSizeControls activeWindowId={activeWindowId} />;
             case windowTypes.SINGLE_X_MULTIPLE_Y:
                 return <MultiAxisGraphEditor activeWindowId={activeWindowId} />;
             default:
