@@ -28,6 +28,7 @@ import Table from "components/Table/Table";
 import Transform from "components/Transform/Transform";
 import QualityScan from "components/QualityScan/QualityScan";
 import SingleXMultipleYGraph from "components/Graphs/SingleXMultipleYGraph";
+import MapGraph from "components/Graphs/MapGraph";
 
 export function getWindowContent(win) {
     switch (win.get("windowType")) {
@@ -92,6 +93,8 @@ export function getWindowContent(win) {
             return <QualityScan data={win.get("data")} />;
         case windowTypes.SINGLE_X_MULTIPLE_Y:
             return <SingleXMultipleYGraph data={win.get("data")} />;
+        case windowTypes.MAP_GRAPH:
+            return <MapGraph data={win.get("data")} />;
         default:
             return (
                 <p>

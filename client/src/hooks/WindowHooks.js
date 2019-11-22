@@ -185,6 +185,22 @@ export function useWindowZAxis(id) {
 }
 
 /**
+ * Getter/setter for a specific graph window map type
+ * @return {tuple} value/setter function
+ */
+export function useWindowMapType(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "mapType"]),
+        mapType => dispatch(wmActions.setWindowData(id, win.get("data").set("mapType", mapType)))
+    ];
+}
+
+/**
  * Getter/setter for a specific graph window title
  * @return {tuple} value/setter function
  */
