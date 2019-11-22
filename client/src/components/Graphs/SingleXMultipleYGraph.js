@@ -54,6 +54,28 @@ function saveImageFunction(chartIds, title) {
         });
 }
 
+// export function SingleXMultipleYGraphLegend(props) {
+//     return props.features
+//         .filter(feature => feature.name !== props.xAxis)
+//         .map(feature => (
+//             <div className="line-plot" key={feature.name}>
+//                 <span>{feature.name}</span>
+//                 <div className="color-swatch" style={{ background: feature.color }} />
+//             </div>
+//         ));
+// }
+
+export function SingleXMultipleYGraphLegend(props) {
+    return props.features
+        .filter(feature => feature.name !== props.xAxis)
+        .map(feature => (
+            <div className="line-plot" key={feature.name}>
+                <div className="color-swatch" style={{ background: feature.color }} />
+                <span>{feature.name}</span>
+            </div>
+        ));
+}
+
 function SingleXMultipleYGraph(props) {
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
@@ -98,7 +120,7 @@ function SingleXMultipleYGraph(props) {
 
     function getXAxisTitle() {
         return !props.win.data.xAxis || props.win.data.xAxis === uiTypes.GRAPH_INDEX
-            ? "Index"
+            ? "Row Index"
             : props.win.data.xAxis;
     }
 
@@ -310,38 +332,50 @@ function SingleXMultipleYGraph(props) {
             saveImageFunction={_ => saveImageFunction(chartIds, props.win.title)}
         >
             <React.Fragment>
-                <Plot
-                    ref={chart}
-                    data={chartState.data}
-                    layout={chartState.layout}
-                    config={chartState.config}
-                    style={{
-                        width: "100%",
-                        height: `calc(100% - ${previousSelectionCount * 30}px)`
-                    }}
-                    onInitialized={figure => setChartState(figure)}
-                    onUpdate={figure => setChartState(figure)}
-                    onClick={e => {
-                        if (e.event.button === 2 || e.event.ctrlKey) return;
-                        props.setCurrentSelection([]);
-                    }}
-                    onSelected={e => {
-                        if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
-                    }}
-                    divId={chartId}
-                    useResizeHandler
-                />
-                {selectionChartStates.map(selectionState => (
-                    <Plot
-                        key={selectionState.id}
-                        data={selectionState.data}
-                        layout={selectionState.layout}
-                        config={selectionState.config}
-                        style={{ width: "100%", height: "20px" }}
-                        divId={selectionState.id}
-                    />
-                ))}
-                <div className="x-axis-title">{getXAxisTitle()}</div>
+                <div className="singlex-multiy-container">
+                    <div className="singlex-multiy-plot">
+                        <Plot
+                            ref={chart}
+                            data={chartState.data}
+                            layout={chartState.layout}
+                            config={chartState.config}
+                            style={{
+                                height: `calc(100% - ${previousSelectionCount * 30}px)`
+                            }}
+                            onInitialized={figure => setChartState(figure)}
+                            onUpdate={figure => setChartState(figure)}
+                            onClick={e => {
+                                if (e.event.button === 2 || e.event.ctrlKey) return;
+                                props.setCurrentSelection([]);
+                            }}
+                            onSelected={e => {
+                                if (e)
+                                    props.setCurrentSelection(
+                                        e.points.map(point => point.pointIndex)
+                                    );
+                            }}
+                            divId={chartId}
+                            useResizeHandler
+                        />
+                        {selectionChartStates.map(selectionState => (
+                            <Plot
+                                key={selectionState.id}
+                                data={selectionState.data}
+                                layout={selectionState.layout}
+                                config={selectionState.config}
+                                style={{ width: "100%", height: "20px" }}
+                                divId={selectionState.id}
+                            />
+                        ))}
+                        <div className="x-axis-title">{getXAxisTitle()}</div>
+                    </div>
+                    <div className="singlex-multiy-legend">
+                        <SingleXMultipleYGraphLegend
+                            features={featureInfo}
+                            xAxis={getXAxisTitle()}
+                        />
+                    </div>
+                </div>
             </React.Fragment>
         </GraphWrapper>
     );
