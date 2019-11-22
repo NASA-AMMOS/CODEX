@@ -54,17 +54,6 @@ function saveImageFunction(chartIds, title) {
         });
 }
 
-// export function SingleXMultipleYGraphLegend(props) {
-//     return props.features
-//         .filter(feature => feature.name !== props.xAxis)
-//         .map(feature => (
-//             <div className="line-plot" key={feature.name}>
-//                 <span>{feature.name}</span>
-//                 <div className="color-swatch" style={{ background: feature.color }} />
-//             </div>
-//         ));
-// }
-
 export function SingleXMultipleYGraphLegend(props) {
     return props.features
         .filter(feature => feature.name !== props.xAxis)

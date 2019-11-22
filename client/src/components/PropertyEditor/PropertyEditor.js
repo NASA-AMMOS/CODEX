@@ -1,5 +1,9 @@
-import React, { useState } from "react";
 import "components/PropertyEditor/PropertyEditor.scss";
+
+import Button from "@material-ui/core/Button";
+import React from "react";
+import TextField from "@material-ui/core/TextField";
+
 import {
     useActiveWindow,
     useWindowList,
@@ -8,12 +12,11 @@ import {
     useWindowXAxis,
     useWindowTitle
 } from "hooks/WindowHooks";
-import * as windowTypes from "constants/windowTypes";
-import Button from "@material-ui/core/Button";
-import CompareArrowsIcon from "@material-ui/icons/CompareArrows";
 import SwapAxesIcon from "components/Icons/SwapAxes";
 import * as uiTypes from "constants/uiTypes";
-import TextField from "@material-ui/core/TextField";
+import * as windowTypes from "constants/windowTypes";
+
+import { useWindowZAxis } from "../../hooks/WindowHooks";
 
 function MultiAxisGraphEditor(props) {
     const [featureInfo, setFeatureInfo] = useWindowFeatureInfoList(props.activeWindowId);
@@ -89,6 +92,40 @@ function TwoAxisGraphEditor(props) {
     );
 }
 
+function ThreeAxisGraphEditor(props) {
+    const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+    const [zAxis, setZAxis] = useWindowZAxis(props.activeWindowId);
+
+    if (!features) return null;
+
+    return (
+        <React.Fragment>
+            <div className="header">Graph Details</div>
+            <div className="axis">
+                <label>X-Axis</label>
+                <span className="feature-name">{features.get(0)}</span>
+            </div>
+            <div className="axis">
+                <label>Y-Axis</label>
+                <span className="feature-name">{features.get(1)}</span>
+            </div>
+            <div className="axis">
+                <label>Z-Axis (average)</label>
+                <select onChange={e => setZAxis(e.target.value)} value={zAxis}>
+                    {features.map(f => (
+                        <option value={f} key={f}>
+                            {f}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <Button className="swap-button" onClick={_ => setFeatures(features.reverse())}>
+                Swap Axes <SwapAxesIcon width="14" height="14" />
+            </Button>
+        </React.Fragment>
+    );
+}
+
 function PropertyEditor(props) {
     const [activeWindowId] = useActiveWindow();
     const windowList = useWindowList();
@@ -103,6 +140,8 @@ function PropertyEditor(props) {
             case windowTypes.CONTOUR_GRAPH:
             case windowTypes.HEATMAP_GRAPH:
                 return <TwoAxisGraphEditor activeWindowId={activeWindowId} />;
+            case windowTypes.HEATMAP_3D_GRAPH:
+                return <ThreeAxisGraphEditor activeWindowId={activeWindowId} />;
             case windowTypes.SINGLE_X_MULTIPLE_Y:
                 return <MultiAxisGraphEditor activeWindowId={activeWindowId} />;
             default:

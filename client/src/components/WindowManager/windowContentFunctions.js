@@ -7,6 +7,7 @@ import RegressionResults from "components/Regressions/RegressionResults";
 import RegressionsOverview from "components/Regressions/RegressionsOverview";
 import ScatterGraph from "components/Graphs/ScatterGraph";
 import HeatmapGraph from "components/Graphs/HeatmapGraph";
+import HeatmapGraph3d from "components/Graphs/HeatmapGraph3d";
 import BoxPlotGraph from "components/Graphs/BoxPlotGraph";
 import HistogramGraph from "components/Graphs/HistogramGraph";
 import FindMoreLikeThis from "components/FindMoreLikeThis/FindMoreLikeThis";
@@ -38,6 +39,8 @@ export function getWindowContent(win) {
             return <TimeSeriesGraph data={win.get("data")} />;
         case uiTypes.HEATMAP_GRAPH:
             return <HeatmapGraph data={win.get("data")} />;
+        case windowTypes.HEATMAP_3D_GRAPH:
+            return <HeatmapGraph3d data={win.get("data")} />;
         case uiTypes.BOX_PLOT_GRAPH:
             return <BoxPlotGraph data={win.get("data")} />;
         case uiTypes.VIOLIN_PLOT_GRAPH:
