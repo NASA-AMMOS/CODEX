@@ -279,7 +279,7 @@ export default props => {
         width: 500,
         height: 500,
         resizeable: true,
-        title: "Heat Map"
+        title: "3D Heat Map"
     });
 
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
