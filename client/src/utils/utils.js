@@ -217,6 +217,21 @@ export function removeSentinelValues(cols, fileInfo) {
     );
 }
 
+export function removeSentinelValuesRevised(data, fileInfo) {
+    const sentinelValues = [fileInfo.nan, fileInfo.inf, fileInfo.ninf];
+
+    data = data.toJS();
+
+    // If there aren't any sentinel values, avoid filtering.
+    if (sentinelValues.every(val => val === null)) return data;
+
+    return unzip(
+        zip(data.map(col => col.data)).filter(row => {
+            return row.every(val => !sentinelValues.includes(val));
+        })
+    ).map((dataCol, idx) => Object.assign(data[idx], { data: dataCol }));
+}
+
 function getWindowContainerBounds() {
     const windowContainer = document.getElementById("windowContainer");
     const bounds = windowContainer.getBoundingClientRect();

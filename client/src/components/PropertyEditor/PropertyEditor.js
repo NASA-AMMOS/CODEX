@@ -16,7 +16,12 @@ import SwapAxesIcon from "components/Icons/SwapAxes";
 import * as uiTypes from "constants/uiTypes";
 import * as windowTypes from "constants/windowTypes";
 
-import { useWindowMapType, useWindowZAxis } from "../../hooks/WindowHooks";
+import {
+    useSwapAxes,
+    useWindowMapType,
+    useWindowYAxis,
+    useWindowZAxis
+} from "../../hooks/WindowHooks";
 
 function MultiAxisGraphEditor(props) {
     const [featureInfo, setFeatureInfo] = useWindowFeatureInfoList(props.activeWindowId);
@@ -129,25 +134,74 @@ function ThreeAxisGraphEditor(props) {
 function MapGraphEditor(props) {
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [mapType, setMapType] = useWindowMapType(props.activeWindowId);
+    const [xAxis, setXAxis] = useWindowXAxis(props.activeWindowId);
+    const [yAxis, setYAxis] = useWindowYAxis(props.activeWindowId);
+    const [zAxis, setZAxis] = useWindowZAxis(props.activeWindowId);
+    const swapAxes = useSwapAxes(props.activeWindowId);
+
     if (!features) return null;
+
+    if (features.size === 2)
+        return (
+            <React.Fragment>
+                <div className="header">Graph Details</div>
+                <div className="axis">
+                    <label>Latitude</label>
+                    <span className="feature-name">{xAxis}</span>
+                </div>
+                <div className="axis">
+                    <label>Longitude</label>
+                    <span className="feature-name">{yAxis}</span>
+                </div>
+                <div className="axis">
+                    <label>Map Type</label>
+                    <select onChange={e => setMapType(e.target.value)} value={mapType}>
+                        {uiTypes.MAP_TYPES.map(f => (
+                            <option value={f} key={f}>
+                                {f}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <Button className="swap-button" onClick={swapAxes}>
+                    Swap Axes <SwapAxesIcon width="14" height="14" />
+                </Button>
+            </React.Fragment>
+        );
 
     return (
         <React.Fragment>
             <div className="header">Graph Details</div>
             <div className="axis">
                 <label>Latitude</label>
-                <span className="feature-name">{features.get(0)}</span>
+                <select onChange={e => setXAxis(e.target.value)} value={xAxis}>
+                    {features.map(f => (
+                        <option value={f} key={f}>
+                            {f}
+                        </option>
+                    ))}
+                </select>
             </div>
             <div className="axis">
                 <label>Longitude</label>
-                <span className="feature-name">{features.get(1)}</span>
+                <select onChange={e => setYAxis(e.target.value)} value={yAxis}>
+                    {features.map(f => (
+                        <option value={f} key={f}>
+                            {f}
+                        </option>
+                    ))}
+                </select>
             </div>
-            {features.size === 3 ? (
-                <div className="axis">
-                    <label>Heat</label>
-                    <span className="feature-name">{features.get(2)}</span>
-                </div>
-            ) : null}
+            <div className="axis">
+                <label>Heat</label>
+                <select onChange={e => setZAxis(e.target.value)} value={zAxis}>
+                    {features.map(f => (
+                        <option value={f} key={f}>
+                            {f}
+                        </option>
+                    ))}
+                </select>
+            </div>
             <div className="axis">
                 <label>Map Type</label>
                 <select onChange={e => setMapType(e.target.value)} value={mapType}>
@@ -158,9 +212,6 @@ function MapGraphEditor(props) {
                     ))}
                 </select>
             </div>
-            <Button className="swap-button" onClick={_ => setFeatures(features.reverse())}>
-                Swap Axes <SwapAxesIcon width="14" height="14" />
-            </Button>
         </React.Fragment>
     );
 }

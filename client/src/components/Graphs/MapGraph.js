@@ -41,8 +41,17 @@ function MapGraph(props) {
     // Changing the `key` attribute of the Plot causes React to trash it and make a new one.
     const [renderKey, setRenderKey] = useState(0);
 
-    // Set x-axis averages as the z-axis
-    useEffect(_ => props.win.setData(data => ({ ...data.toJS(), mapType: uiTypes.MAP_USGS })), []);
+    useEffect(
+        _ =>
+            props.win.setData(data => ({
+                ...data.toJS(),
+                mapType: uiTypes.MAP_USGS,
+                xAxis: props.win.data.features[0],
+                yAxis: props.win.data.features[1],
+                zAxis: props.win.data.features[2] || null
+            })),
+        []
+    );
 
     //the number of interpolation steps that you can take caps at 5?
     const interpolatedColors = graphFunctions.interpolateColors(
@@ -52,34 +61,24 @@ function MapGraph(props) {
         "linear"
     );
 
-    const cols = utils.removeSentinelValues(
-        props.win.data.features.map(colName =>
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS()
-        ),
-        props.fileInfo
-    );
+    const cols = utils.removeSentinelValuesRevised(props.data, props.fileInfo);
 
     const heatMode = props.win.data.features.length === 3;
     const dataset = heatMode
         ? {
               type: "densitymapbox",
-              lon: cols[1],
-              lat: cols[0],
-              z: cols[2],
+              lon: cols[1].data,
+              lat: cols[0].data,
+              z: cols[2].data,
               colorscale: interpolatedColors
           }
         : {
               type: "scattermapbox",
-              lon: cols[1],
-              lat: cols[0],
+              lon: cols[1].data,
+              lat: cols[0].data,
               marker: { color: "fuchsia", size: 4 }
           };
 
-    // The plotly react element only changes when the revision is incremented.
-    const [chartRevision, setChartRevision] = useState(0);
     // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState({
         data: [dataset],
@@ -101,15 +100,6 @@ function MapGraph(props) {
         }
     });
 
-    function updateChartRevision() {
-        const revision = chartRevision + 1;
-        setChartState({
-            ...chartState,
-            layout: { ...chartState.layout, datarevision: revision }
-        });
-        setChartRevision(revision);
-    }
-
     // Effect to keep map type updated if it's changed
     useEffect(
         _ => {
@@ -127,16 +117,19 @@ function MapGraph(props) {
         [props.win.data.mapType]
     );
 
-    // Effect to keep axes updated if they've been swapped
+    // Effect to keep axes updated if they've been changed
     useEffect(
         _ => {
+            if (!props.win.data.xAxis) return;
             const newData = [...chartState.data];
-            newData[0].lat = cols[0];
-            newData[0].lon = cols[1];
+            newData[0].lat = cols.find(col => col.feature === props.win.data.xAxis).data;
+            newData[0].lon = cols.find(col => col.feature === props.win.data.yAxis).data;
+            if (props.win.data.zAxis)
+                newData[0].z = cols.find(col => col.feature === props.win.data.zAxis).data;
             setChartState(state => ({ ...state, data: newData }));
             setRenderKey(renderKey + 1);
         },
-        [props.win.data.features]
+        [props.win.data]
     );
 
     return (
@@ -173,8 +166,6 @@ export default props => {
     });
 
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
-    //const [savedSelections, saveCurrentSelection] = useSavedSelections();
-    //const [globalChartState, setGlobalChartState] = useGlobalChartState();
     const fileInfo = useFileInfo();
 
     const features = usePinnedFeatures(win);
