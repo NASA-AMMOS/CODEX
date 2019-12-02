@@ -1,4 +1,43 @@
+@import "styles/theme.scss";
+
 .x-axis-title {
     margin-left: 40px;
     text-align: center;
+}
+
+.line-plot {
+    // width: 60%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: 14px;
+    line-height: 17px;
+    color: black;
+    margin-bottom: 5px;
+}
+
+.color-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.singlex-multiy-container {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    height: 100%;
+
+    .singlex-multiy-plot {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 2;
+        height: 100%;
+    }
+
+    .singlex-multiy-legend {
+        padding-left: 10px;
+        flex-basis: 100px;
+    }
 }

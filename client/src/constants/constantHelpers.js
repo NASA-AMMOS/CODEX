@@ -1,4 +1,5 @@
 import * as classificationRegressionTypes from "constants/classificationRegressionTypes";
+
 /*
     Creates a list of objects that are used to create the forms for ranges 
 */

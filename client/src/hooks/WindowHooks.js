@@ -169,6 +169,22 @@ export function useWindowXAxis(id) {
 }
 
 /**
+ * Getter/setter for a specific graph window z axis
+ * @return {tuple} value/setter function
+ */
+export function useWindowZAxis(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "zAxis"]),
+        zAxis => dispatch(wmActions.setWindowData(id, win.get("data").set("zAxis", zAxis)))
+    ];
+}
+
+/**
  * Getter/setter for a specific graph window title
  * @return {tuple} value/setter function
  */
