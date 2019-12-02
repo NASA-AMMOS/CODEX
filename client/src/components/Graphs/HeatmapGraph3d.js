@@ -162,12 +162,6 @@ function HeatmapGraph3d(props) {
     const xAxis = props.win.data.features[0];
     const yAxis = props.win.data.features[1];
 
-    const cols = squashDataIntoBuckets(
-        data,
-        DEFAULT_BUCKET_COUNT,
-        props.win.data.features,
-        props.win.data.features[0]
-    );
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
     // Initial chart settings. These need to be kept in state and updated as necessary
@@ -176,7 +170,12 @@ function HeatmapGraph3d(props) {
             {
                 x: generateDataAxis(data[0]),
                 y: generateDataAxis(data[1]),
-                z: cols,
+                z: squashDataIntoBuckets(
+                    data,
+                    DEFAULT_BUCKET_COUNT,
+                    props.win.data.features,
+                    props.win.data.features[0]
+                ),
                 type: "heatmap",
                 showscale: true,
                 colorscale: interpolatedColors
@@ -226,7 +225,7 @@ function HeatmapGraph3d(props) {
                 data,
                 DEFAULT_BUCKET_COUNT,
                 props.win.data.features,
-                props.win.data.zAxis
+                props.win.data.zAxis || props.win.data.features[0]
             );
             chartState.layout.xaxis.title = xAxis;
             chartState.layout.yaxis.title = yAxis;
@@ -238,14 +237,12 @@ function HeatmapGraph3d(props) {
     // Effect to keep z-axis updated if it's changed
     useEffect(
         _ => {
-            if (props.win.data.zAxis) {
-                chartState.data[0].z = squashDataIntoBuckets(
-                    data,
-                    DEFAULT_BUCKET_COUNT,
-                    props.win.data.features,
-                    props.win.data.zAxis
-                );
-            }
+            chartState.data[0].z = squashDataIntoBuckets(
+                data,
+                DEFAULT_BUCKET_COUNT,
+                props.win.data.features,
+                props.win.data.zAxis || props.win.data.features[0]
+            );
         },
         [props.win.data.zAxis]
     );
