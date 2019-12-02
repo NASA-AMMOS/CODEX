@@ -72,7 +72,6 @@ function MultiAxisGraphEditor(props) {
 
 function TwoAxisGraphEditor(props) {
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
-    const [binSize, setBinSize] = useWindowGraphBinSize(props.activeWindowId);
     if (!features) return null;
 
     return (
@@ -89,6 +88,55 @@ function TwoAxisGraphEditor(props) {
             <Button className="swap-button" onClick={_ => setFeatures(features.reverse())}>
                 Swap Axes <SwapAxesIcon width="14" height="14" />
             </Button>
+        </React.Fragment>
+    );
+}
+
+function HeatmapGraphEditor(props) {
+    const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+    const [binSize, setBinSize] = useWindowGraphBinSize(props.activeWindowId);
+    if (!features) return null;
+
+    function handleChangeBinSize(axis) {
+        return e => {
+            setBinSize(binSize.set(axis, parseInt(e.target.value)));
+        };
+    }
+
+    return (
+        <React.Fragment>
+            <div className="header">Graph Details</div>
+            <div className="axis">
+                <label>X-Axis</label>
+                <span className="feature-name">{features.get(0)}</span>
+            </div>
+            <div className="axis">
+                <label>Y-Axis</label>
+                <span className="feature-name">{features.get(1)}</span>
+            </div>
+            <Button className="swap-button" onClick={_ => setFeatures(features.reverse())}>
+                Swap Axes <SwapAxesIcon width="14" height="14" />
+            </Button>
+            <div className="input-field-container">
+                <TextField
+                    label="Grid-width"
+                    variant="filled"
+                    className="text-input"
+                    value={binSize && binSize.get("x")}
+                    type="number"
+                    InputLabelProps={{ shrink: true }}
+                    onChange={handleChangeBinSize("x")}
+                />
+                <TextField
+                    label="Grid-height"
+                    variant="filled"
+                    className="text-input"
+                    value={binSize && binSize.get("y")}
+                    type="number"
+                    InputLabelProps={{ shrink: true }}
+                    onChange={handleChangeBinSize("y")}
+                />
+            </div>
         </React.Fragment>
     );
 }
@@ -167,6 +215,8 @@ function PropertyEditor(props) {
             case windowTypes.SCATTER_GRAPH:
             case windowTypes.CONTOUR_GRAPH:
                 return <TwoAxisGraphEditor activeWindowId={activeWindowId} />;
+            case windowTypes.HEATMAP_GRAPH:
+                return <HeatmapGraphEditor activeWindowId={activeWindowId} />;
             case windowTypes.HEATMAP_3D_GRAPH:
                 return <ThreeAxisGraphEditor activeWindowId={activeWindowId} />;
             case windowTypes.SINGLE_X_MULTIPLE_Y:

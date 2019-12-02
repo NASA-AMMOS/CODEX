@@ -81,21 +81,21 @@ function dataRange(data) {
 function squashDataIntoBuckets(data, numBuckets) {
     const maxes = data.map(col => Math.max(...col));
     const mins = data.map(col => Math.min(...col));
-    const bucketSizes = data.map((_, idx) => (maxes[idx] - mins[idx]) / numBuckets);
+    const bucketSizes = data.map((_, idx) => (maxes[idx] - mins[idx]) / numBuckets[idx]);
 
     return utils.unzip(data).reduce(
         (acc, dataPoint) => {
             const [xIdx, yIdx] = dataPoint.map((val, idx) =>
                 val === maxes[idx]
-                    ? numBuckets - 1
+                    ? numBuckets[idx] - 1
                     : Math.floor((val - mins[idx]) / bucketSizes[idx])
             );
             acc[yIdx][xIdx] = acc[yIdx][xIdx] + 1;
             return acc;
         },
-        Array(numBuckets)
+        Array(numBuckets[1])
             .fill(0)
-            .map(_ => Array(numBuckets).fill(0))
+            .map(_ => Array(numBuckets[0]).fill(0))
     );
 }
 
@@ -116,6 +116,15 @@ function generateDataAxis(col) {
 function HeatmapGraph(props) {
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
+
+    useEffect(
+        _ =>
+            props.win.setData(data => ({
+                ...data.toJS(),
+                binSize: { x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT }
+            })),
+        []
+    );
 
     //the number of interpolation steps that you can take caps at 5?
     const interpolatedColors = interpolateColors(
@@ -142,10 +151,11 @@ function HeatmapGraph(props) {
     function getCols() {
         return squashDataIntoBuckets(
             data,
-            props.win.data.binSize ? props.win.data.binSize.x : DEFAULT_BUCKET_COUNT
+            props.win.data.binSize
+                ? Object.values(props.win.data.binSize)
+                : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT]
         );
     }
-    const cols = getCols();
 
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
@@ -155,7 +165,7 @@ function HeatmapGraph(props) {
             {
                 x: generateDataAxis(data[0]),
                 y: generateDataAxis(data[1]),
-                z: cols,
+                z: getCols(),
                 type: "heatmap",
                 showscale: true,
                 colorscale: interpolatedColors
@@ -201,21 +211,12 @@ function HeatmapGraph(props) {
         _ => {
             chartState.data[0].x = generateDataAxis(data[0]);
             chartState.data[0].y = generateDataAxis(data[1]);
-            chartState.data[0].z = squashDataIntoBuckets(data, DEFAULT_BUCKET_COUNT);
+            chartState.data[0].z = getCols();
             chartState.layout.xaxis.title = xAxis;
             chartState.layout.yaxis.title = yAxis;
             updateChartRevision();
         },
         [props.win.data.features]
-    );
-
-    useEffect(
-        _ => {
-            console.log(props.win.data.binSize);
-            chartState.data[0].z = getCols();
-            updateChartRevision();
-        },
-        [props.win.data.binSize]
     );
 
     return (
