@@ -26,7 +26,7 @@ function squashDataIntoBuckets(data, numBuckets, features, zAxis) {
     const zAxisIndex = features.findIndex(colName => colName === zAxis);
     const maxes = data.map(col => Math.max(...col));
     const mins = data.map(col => Math.min(...col));
-    const bucketSizes = data.map((_, idx) => (maxes[idx] - mins[idx]) / numBuckets);
+    const bucketSizes = data.map((_, idx) => (maxes[idx] - mins[idx]) / numBuckets[idx]);
 
     return utils
         .unzip(data)
@@ -34,16 +34,16 @@ function squashDataIntoBuckets(data, numBuckets, features, zAxis) {
             (acc, dataPoint) => {
                 const [xIdx, yIdx] = dataPoint.map((val, idx) =>
                     val === maxes[idx]
-                        ? numBuckets - 1
+                        ? numBuckets[idx] - 1
                         : Math.floor((val - mins[idx]) / bucketSizes[idx])
                 );
                 acc[yIdx][xIdx].push(dataPoint[zAxisIndex]);
                 return acc;
             },
-            Array(numBuckets)
+            Array(numBuckets[1])
                 .fill(0)
                 .map(_ =>
-                    Array(numBuckets)
+                    Array(numBuckets[0])
                         .fill(0)
                         .map(_ => [0])
                 )
@@ -136,7 +136,12 @@ function HeatmapGraph3d(props) {
 
     // Set x-axis averages as the z-axis
     useEffect(
-        _ => props.win.setData(data => ({ ...data.toJS(), zAxis: props.win.data.features[0] })),
+        _ =>
+            props.win.setData(data => ({
+                ...data.toJS(),
+                zAxis: props.win.data.features[0],
+                binSize: { x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT }
+            })),
         []
     );
 
@@ -172,7 +177,7 @@ function HeatmapGraph3d(props) {
                 y: generateDataAxis(data[1]),
                 z: squashDataIntoBuckets(
                     data,
-                    DEFAULT_BUCKET_COUNT,
+                    [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT],
                     props.win.data.features,
                     props.win.data.features[0]
                 ),
@@ -216,17 +221,25 @@ function HeatmapGraph3d(props) {
         setChartRevision(revision);
     }
 
+    function getZAxis() {
+        const binSize = props.win.data.binSize
+            ? Object.values(props.win.data.binSize)
+            : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT];
+
+        return squashDataIntoBuckets(
+            data,
+            binSize,
+            props.win.data.features,
+            props.win.data.zAxis || props.win.data.features[0]
+        );
+    }
+
     // Effect to keep axes updated if they've been swapped
     useEffect(
         _ => {
             chartState.data[0].x = generateDataAxis(data[0]);
             chartState.data[0].y = generateDataAxis(data[1]);
-            chartState.data[0].z = squashDataIntoBuckets(
-                data,
-                DEFAULT_BUCKET_COUNT,
-                props.win.data.features,
-                props.win.data.zAxis || props.win.data.features[0]
-            );
+            chartState.data[0].z = getZAxis();
             chartState.layout.xaxis.title = xAxis;
             chartState.layout.yaxis.title = yAxis;
             updateChartRevision();
@@ -237,12 +250,7 @@ function HeatmapGraph3d(props) {
     // Effect to keep z-axis updated if it's changed
     useEffect(
         _ => {
-            chartState.data[0].z = squashDataIntoBuckets(
-                data,
-                DEFAULT_BUCKET_COUNT,
-                props.win.data.features,
-                props.win.data.zAxis || props.win.data.features[0]
-            );
+            chartState.data[0].z = getZAxis();
         },
         [props.win.data.zAxis]
     );

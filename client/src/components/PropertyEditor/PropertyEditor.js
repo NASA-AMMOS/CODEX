@@ -16,7 +16,7 @@ import SwapAxesIcon from "components/Icons/SwapAxes";
 import * as uiTypes from "constants/uiTypes";
 import * as windowTypes from "constants/windowTypes";
 
-import { useWindowZAxis } from "../../hooks/WindowHooks";
+import { useWindowGraphBinSize, useWindowZAxis } from "../../hooks/WindowHooks";
 
 function MultiAxisGraphEditor(props) {
     const [featureInfo, setFeatureInfo] = useWindowFeatureInfoList(props.activeWindowId);
@@ -96,8 +96,15 @@ function TwoAxisGraphEditor(props) {
 function ThreeAxisGraphEditor(props) {
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [zAxis, setZAxis] = useWindowZAxis(props.activeWindowId);
+    const [binSize, setBinSize] = useWindowGraphBinSize(props.activeWindowId);
 
     if (!features) return null;
+
+    function handleChangeBinSize(axis) {
+        return e => {
+            setBinSize(binSize.set(axis, parseInt(e.target.value)));
+        };
+    }
 
     return (
         <React.Fragment>
@@ -123,6 +130,26 @@ function ThreeAxisGraphEditor(props) {
             <Button className="swap-button" onClick={_ => setFeatures(features.reverse())}>
                 Swap Axes <SwapAxesIcon width="14" height="14" />
             </Button>
+            <div className="input-field-container">
+                <TextField
+                    label="Grid-width"
+                    variant="filled"
+                    className="text-input"
+                    value={binSize && binSize.get("x")}
+                    type="number"
+                    InputLabelProps={{ shrink: true }}
+                    onChange={handleChangeBinSize("x")}
+                />
+                <TextField
+                    label="Grid-height"
+                    variant="filled"
+                    className="text-input"
+                    value={binSize && binSize.get("y")}
+                    type="number"
+                    InputLabelProps={{ shrink: true }}
+                    onChange={handleChangeBinSize("y")}
+                />
+            </div>
         </React.Fragment>
     );
 }
