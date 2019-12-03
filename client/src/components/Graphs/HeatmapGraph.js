@@ -12,6 +12,7 @@ import * as utils from "utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_BUCKET_COUNT = 50;
+const DEFAULT_TITLE = "Heat Map Graph";
 
 // Returns a single rgb color interpolation between given rgb color
 // based on the factor given; via https://codepen.io/njmcode/pen/axoyD?editors=0010
@@ -248,7 +249,7 @@ export default props => {
         width: 500,
         height: 500,
         resizeable: true,
-        title: "Heat Map"
+        title: DEFAULT_TITLE
     });
 
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
@@ -263,7 +264,7 @@ export default props => {
     }
 
     if (features.size === 2) {
-        win.setTitle(win.data.features.join(" vs "));
+        if (win.title === DEFAULT_TITLE) win.setTitle(win.data.features.join(" vs "));
         if (!win.data.binSize)
             win.setData(data =>
                 data.set(
