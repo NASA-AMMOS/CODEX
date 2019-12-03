@@ -1,25 +1,18 @@
 import "components/Graphs/ContourGraph.css";
 
-import React, { useRef, useState, useEffect } from "react";
-import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
+import Immutable from "immutable";
 import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
-import GraphWrapper from "components/Graphs/GraphWrapper";
+import React, { useRef, useState, useEffect } from "react";
 
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import {
-    useCurrentSelection,
-    useSavedSelections,
-    usePinnedFeatures,
-    useFileInfo
-} from "hooks/DataHooks";
+import { useCurrentSelection, usePinnedFeatures, useFileInfo } from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
-import { useGlobalChartState } from "hooks/UIHooks";
+import GraphWrapper from "components/Graphs/GraphWrapper";
+import * as utils from "utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_BUCKET_COUNT = 50;
+const DEFAULT_TITLE = "Heat Map Graph";
 
 // Returns a single rgb color interpolation between given rgb color
 // based on the factor given; via https://codepen.io/njmcode/pen/axoyD?editors=0010
@@ -89,21 +82,21 @@ function dataRange(data) {
 function squashDataIntoBuckets(data, numBuckets) {
     const maxes = data.map(col => Math.max(...col));
     const mins = data.map(col => Math.min(...col));
-    const bucketSizes = data.map((_, idx) => (maxes[idx] - mins[idx]) / numBuckets);
+    const bucketSizes = data.map((_, idx) => (maxes[idx] - mins[idx]) / numBuckets[idx]);
 
     return utils.unzip(data).reduce(
         (acc, dataPoint) => {
             const [xIdx, yIdx] = dataPoint.map((val, idx) =>
                 val === maxes[idx]
-                    ? numBuckets - 1
+                    ? numBuckets[idx] - 1
                     : Math.floor((val - mins[idx]) / bucketSizes[idx])
             );
             acc[yIdx][xIdx] = acc[yIdx][xIdx] + 1;
             return acc;
         },
-        Array(numBuckets)
+        Array(numBuckets[1])
             .fill(0)
-            .map(_ => Array(numBuckets).fill(0))
+            .map(_ => Array(numBuckets[0]).fill(0))
     );
 }
 
@@ -124,6 +117,15 @@ function generateDataAxis(col) {
 function HeatmapGraph(props) {
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
+
+    useEffect(
+        _ =>
+            props.win.setData(data => ({
+                ...data.toJS(),
+                binSize: { x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT }
+            })),
+        []
+    );
 
     //the number of interpolation steps that you can take caps at 5?
     const interpolatedColors = interpolateColors(
@@ -147,7 +149,15 @@ function HeatmapGraph(props) {
     const xAxis = props.win.data.features[0];
     const yAxis = props.win.data.features[1];
 
-    const cols = squashDataIntoBuckets(data, DEFAULT_BUCKET_COUNT);
+    function getCols() {
+        return squashDataIntoBuckets(
+            data,
+            props.win.data.binSize
+                ? Object.values(props.win.data.binSize)
+                : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT]
+        );
+    }
+
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
     // Initial chart settings. These need to be kept in state and updated as necessary
@@ -156,7 +166,7 @@ function HeatmapGraph(props) {
             {
                 x: generateDataAxis(data[0]),
                 y: generateDataAxis(data[1]),
-                z: cols,
+                z: getCols(),
                 type: "heatmap",
                 showscale: true,
                 colorscale: interpolatedColors
@@ -202,7 +212,7 @@ function HeatmapGraph(props) {
         _ => {
             chartState.data[0].x = generateDataAxis(data[0]);
             chartState.data[0].y = generateDataAxis(data[1]);
-            chartState.data[0].z = squashDataIntoBuckets(data, DEFAULT_BUCKET_COUNT);
+            chartState.data[0].z = getCols();
             chartState.layout.xaxis.title = xAxis;
             chartState.layout.yaxis.title = yAxis;
             updateChartRevision();
@@ -239,7 +249,7 @@ export default props => {
         width: 500,
         height: 500,
         resizeable: true,
-        title: "Heat Map"
+        title: DEFAULT_TITLE
     });
 
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
@@ -254,7 +264,15 @@ export default props => {
     }
 
     if (features.size === 2) {
-        win.setTitle(win.data.features.join(" vs "));
+        if (win.title === DEFAULT_TITLE) win.setTitle(win.data.features.join(" vs "));
+        if (!win.data.binSize)
+            win.setData(data =>
+                data.set(
+                    "binSize",
+                    Immutable.fromJS({ x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT })
+                )
+            );
+
         return (
             <HeatmapGraph
                 currentSelection={currentSelection}

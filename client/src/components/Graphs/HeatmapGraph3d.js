@@ -22,12 +22,13 @@ import * as graphFunctions from "components/Graphs/graphFunctions";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_BUCKET_COUNT = 50;
+const DEFAULT_TITLE = "Heat Map 3d Graph";
 
 function squashDataIntoBuckets(data, numBuckets, features, zAxis) {
     const zAxisIndex = features.findIndex(colName => colName === zAxis);
     const maxes = data.map(col => Math.max(...col));
     const mins = data.map(col => Math.min(...col));
-    const bucketSizes = data.map((_, idx) => (maxes[idx] - mins[idx]) / numBuckets);
+    const bucketSizes = data.map((_, idx) => (maxes[idx] - mins[idx]) / numBuckets[idx]);
 
     return utils
         .unzip(data)
@@ -35,16 +36,16 @@ function squashDataIntoBuckets(data, numBuckets, features, zAxis) {
             (acc, dataPoint) => {
                 const [xIdx, yIdx] = dataPoint.map((val, idx) =>
                     val === maxes[idx]
-                        ? numBuckets - 1
+                        ? numBuckets[idx] - 1
                         : Math.floor((val - mins[idx]) / bucketSizes[idx])
                 );
                 acc[yIdx][xIdx].push(dataPoint[zAxisIndex]);
                 return acc;
             },
-            Array(numBuckets)
+            Array(numBuckets[1])
                 .fill(0)
                 .map(_ =>
-                    Array(numBuckets)
+                    Array(numBuckets[0])
                         .fill(0)
                         .map(_ => [0])
                 )
@@ -83,7 +84,12 @@ function HeatmapGraph3d(props) {
 
     // Set x-axis averages as the z-axis
     useEffect(
-        _ => props.win.setData(data => ({ ...data.toJS(), zAxis: props.win.data.features[0] })),
+        _ =>
+            props.win.setData(data => ({
+                ...data.toJS(),
+                zAxis: props.win.data.features[0],
+                binSize: { x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT }
+            })),
         []
     );
 
@@ -109,12 +115,6 @@ function HeatmapGraph3d(props) {
     const xAxis = props.win.data.features[0];
     const yAxis = props.win.data.features[1];
 
-    const cols = squashDataIntoBuckets(
-        data,
-        DEFAULT_BUCKET_COUNT,
-        props.win.data.features,
-        props.win.data.features[0]
-    );
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
     // Initial chart settings. These need to be kept in state and updated as necessary
@@ -123,7 +123,12 @@ function HeatmapGraph3d(props) {
             {
                 x: generateDataAxis(data[0]),
                 y: generateDataAxis(data[1]),
-                z: cols,
+                z: squashDataIntoBuckets(
+                    data,
+                    [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT],
+                    props.win.data.features,
+                    props.win.data.features[0]
+                ),
                 type: "heatmap",
                 showscale: true,
                 colorscale: interpolatedColors
@@ -164,17 +169,25 @@ function HeatmapGraph3d(props) {
         setChartRevision(revision);
     }
 
+    function getZAxis() {
+        const binSize = props.win.data.binSize
+            ? Object.values(props.win.data.binSize)
+            : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT];
+
+        return squashDataIntoBuckets(
+            data,
+            binSize,
+            props.win.data.features,
+            props.win.data.zAxis || props.win.data.features[0]
+        );
+    }
+
     // Effect to keep axes updated if they've been swapped
     useEffect(
         _ => {
             chartState.data[0].x = generateDataAxis(data[0]);
             chartState.data[0].y = generateDataAxis(data[1]);
-            chartState.data[0].z = squashDataIntoBuckets(
-                data,
-                DEFAULT_BUCKET_COUNT,
-                props.win.data.features,
-                props.win.data.zAxis
-            );
+            chartState.data[0].z = getZAxis();
             chartState.layout.xaxis.title = xAxis;
             chartState.layout.yaxis.title = yAxis;
             updateChartRevision();
@@ -185,14 +198,7 @@ function HeatmapGraph3d(props) {
     // Effect to keep z-axis updated if it's changed
     useEffect(
         _ => {
-            if (props.win.data.zAxis) {
-                chartState.data[0].z = squashDataIntoBuckets(
-                    data,
-                    DEFAULT_BUCKET_COUNT,
-                    props.win.data.features,
-                    props.win.data.zAxis
-                );
-            }
+            chartState.data[0].z = getZAxis();
         },
         [props.win.data.zAxis]
     );
@@ -226,7 +232,7 @@ export default props => {
         width: 500,
         height: 500,
         resizeable: true,
-        title: "Heat Map"
+        title: DEFAULT_TITLE
     });
 
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
@@ -241,7 +247,7 @@ export default props => {
     }
 
     if (features.size === 2) {
-        win.setTitle(win.data.features.join(" vs "));
+        if (win.title === DEFAULT_TITLE) win.setTitle(win.data.features.join(" vs "));
         return (
             <HeatmapGraph3d
                 currentSelection={currentSelection}

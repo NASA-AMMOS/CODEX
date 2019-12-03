@@ -19,6 +19,7 @@ import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
+const DEFAULT_TITLE = "Contour Graph";
 
 /**
  * transpose a (possibly ragged) 2d array z. inspired by
@@ -436,7 +437,7 @@ export default props => {
         width: 500,
         height: 500,
         resizeable: true,
-        title: "Contour Graph"
+        title: DEFAULT_TITLE
     });
 
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
@@ -451,7 +452,7 @@ export default props => {
     }
 
     if (features.size === 2) {
-        win.setTitle(win.data.features.join(" vs "));
+        if (win.title === DEFAULT_TITLE) win.setTitle(win.data.features.join(" vs "));
         return (
             <ContourGraph
                 currentSelection={currentSelection}

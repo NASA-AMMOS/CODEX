@@ -76,5 +76,22 @@
                 background: blue;
             }
         }
+
+        svg {
+            fill: #dadada;
+        }
+    }
+
+    .bin-size-input {
+        color: white;
+    }
+
+    .input-field-container {
+        margin-left: 15px;
+        margin-top: 15px;
+        .text-input {
+            background: #e8e8e8;
+            margin-bottom: 10px;
+        }
     }
 }

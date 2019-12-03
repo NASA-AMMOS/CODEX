@@ -28,6 +28,7 @@ const DEFAULT_POINT_COLOR = "rgba(0, 0, 0 ,0.5)";
 const ANIMATION_RANGE = 15;
 const ANIMATION_SPEED = 0.75;
 const COLOR_CURRENT_SELECTION = "#FF0000";
+const DEFAULT_TITLE = "Scatter Graph";
 
 function ScatterGraph(props) {
     const chart = useRef(null);
@@ -237,7 +238,7 @@ export default props => {
         width: 500,
         height: 500,
         resizeable: true,
-        title: "Scatter Graph"
+        title: DEFAULT_TITLE
     });
 
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
@@ -253,7 +254,7 @@ export default props => {
     }
 
     if (features.size === 2) {
-        win.setTitle(win.data.features.join(" vs "));
+        if (win.title === DEFAULT_TITLE) win.setTitle(win.data.features.join(" vs "));
         return (
             <ScatterGraph
                 currentSelection={currentSelection}

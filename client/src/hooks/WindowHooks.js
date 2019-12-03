@@ -1,9 +1,10 @@
-import React, { useLayoutEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import * as wmActions from "actions/windowManagerActions";
+import { useLayoutEffect } from "react";
+import Immutable, { fromJS } from "immutable";
+
 import { defaultInitialSettings } from "constants/windowSettings";
-import { fromJS } from "immutable";
-import * as actionTypes from "constants/actionTypes";
+import * as wmActions from "actions/windowManagerActions";
+
 /*
  * Basically, this hook:
  *      1) checks if an ID was passed down from the window manager
@@ -251,6 +252,24 @@ export function useWindowTitle(id) {
         state.windowManager.get("windows").find(win => win.get("id") === id)
     );
     return [win.get("title"), title => dispatch(wmActions.setWindowTitle(id, title))];
+}
+
+/**
+ * Getter/setter for a specific graph window bin size
+ * @return {tuple} value/setter function
+ */
+export function useWindowGraphBinSize(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "binSize"]),
+        binSize =>
+            binSize.every(val => val > 0) &&
+            dispatch(wmActions.setWindowData(id, win.get("data").set("binSize", binSize)))
+    ];
 }
 
 export default useWindowManager;
