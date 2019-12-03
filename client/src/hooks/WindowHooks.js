@@ -170,6 +170,22 @@ export function useWindowXAxis(id) {
 }
 
 /**
+ * Getter/setter for a specific graph window y axis
+ * @return {tuple} value/setter function
+ */
+export function useWindowYAxis(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "yAxis"]),
+        yAxis => dispatch(wmActions.setWindowData(id, win.get("data").set("yAxis", yAxis)))
+    ];
+}
+
+/**
  * Getter/setter for a specific graph window z axis
  * @return {tuple} value/setter function
  */
@@ -182,6 +198,47 @@ export function useWindowZAxis(id) {
     return [
         win.getIn(["data", "zAxis"]),
         zAxis => dispatch(wmActions.setWindowData(id, win.get("data").set("zAxis", zAxis)))
+    ];
+}
+
+/**
+ * Hook to swap axes in one go -- avoids weird render conflicts when trying to swap
+ * @return {function} axis swap function
+ */
+export function useSwapAxes(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return _ => {
+        const newXAxis = win.getIn(["data", "yAxis"]);
+        const newYAxis = win.getIn(["data", "xAxis"]);
+        dispatch(
+            wmActions.setWindowData(
+                id,
+                win
+                    .get("data")
+                    .set("xAxis", newXAxis)
+                    .set("yAxis", newYAxis)
+            )
+        );
+    };
+}
+
+/**
+ * Getter/setter for a specific graph window map type
+ * @return {tuple} value/setter function
+ */
+export function useWindowMapType(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "mapType"]),
+        mapType => dispatch(wmActions.setWindowData(id, win.get("data").set("mapType", mapType)))
     ];
 }
 

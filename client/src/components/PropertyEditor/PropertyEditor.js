@@ -19,7 +19,13 @@ import SwapAxesIcon from "components/Icons/SwapAxes";
 import * as uiTypes from "constants/uiTypes";
 import * as windowTypes from "constants/windowTypes";
 
-import { useWindowGraphBinSize, useWindowZAxis } from "../../hooks/WindowHooks";
+import {
+    useSwapAxes,
+    useWindowGraphBinSize,
+    useWindowMapType,
+    useWindowYAxis,
+    useWindowZAxis
+} from "../../hooks/WindowHooks";
 
 function WindowRenameInput(props) {
     const [windowTitle, setWindowTitle] = useWindowTitle(props.activeWindowId);
@@ -241,6 +247,90 @@ function HistogramGraphEditor(props) {
     );
 }
 
+function MapGraphEditor(props) {
+    const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+    const [mapType, setMapType] = useWindowMapType(props.activeWindowId);
+    const [xAxis, setXAxis] = useWindowXAxis(props.activeWindowId);
+    const [yAxis, setYAxis] = useWindowYAxis(props.activeWindowId);
+    const [zAxis, setZAxis] = useWindowZAxis(props.activeWindowId);
+    const swapAxes = useSwapAxes(props.activeWindowId);
+
+    if (!features) return null;
+
+    if (features.size === 2)
+        return (
+            <React.Fragment>
+                <div className="axis">
+                    <label>Latitude</label>
+                    <span className="feature-name">{xAxis}</span>
+                </div>
+                <div className="axis">
+                    <label>Longitude</label>
+                    <span className="feature-name">{yAxis}</span>
+                </div>
+                <div className="axis">
+                    <label>Map Type</label>
+                    <select onChange={e => setMapType(e.target.value)} value={mapType}>
+                        {uiTypes.MAP_TYPES.map(f => (
+                            <option value={f} key={f}>
+                                {f}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <Button className="swap-button" onClick={swapAxes}>
+                    Swap Axes <SwapAxesIcon width="14" height="14" />
+                </Button>
+            </React.Fragment>
+        );
+
+    return (
+        <React.Fragment>
+            <div className="header">Graph Details</div>
+            <div className="axis">
+                <label>Latitude</label>
+                <select onChange={e => setXAxis(e.target.value)} value={xAxis}>
+                    {features.map(f => (
+                        <option value={f} key={f}>
+                            {f}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <div className="axis">
+                <label>Longitude</label>
+                <select onChange={e => setYAxis(e.target.value)} value={yAxis}>
+                    {features.map(f => (
+                        <option value={f} key={f}>
+                            {f}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <div className="axis">
+                <label>Heat</label>
+                <select onChange={e => setZAxis(e.target.value)} value={zAxis}>
+                    {features.map(f => (
+                        <option value={f} key={f}>
+                            {f}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <div className="axis">
+                <label>Map Type</label>
+                <select onChange={e => setMapType(e.target.value)} value={mapType}>
+                    {uiTypes.MAP_TYPES.map(f => (
+                        <option value={f} key={f}>
+                            {f}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        </React.Fragment>
+    );
+}
+
 function PropertyEditor(props) {
     const [activeWindowId] = useActiveWindow();
     const windowList = useWindowList();
@@ -260,8 +350,8 @@ function PropertyEditor(props) {
                 return <ThreeAxisGraphEditor activeWindowId={activeWindowId} />;
             case windowTypes.SINGLE_X_MULTIPLE_Y:
                 return <MultiAxisGraphEditor activeWindowId={activeWindowId} />;
-            case windowTypes.HISTOGRAM_GRAPH:
-                return <HistogramGraphEditor activeWindowId={activeWindowId} />;
+            case windowTypes.MAP_GRAPH:
+                return <MapGraphEditor activeWindowId={activeWindowId} />;
             default:
                 return null;
         }
