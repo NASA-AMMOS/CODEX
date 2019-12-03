@@ -1,6 +1,7 @@
 import "components/PropertyEditor/PropertyEditor.scss";
 
 import Button from "@material-ui/core/Button";
+import Immutable from "immutable";
 import React from "react";
 import TextField from "@material-ui/core/TextField";
 
@@ -202,6 +203,35 @@ function ThreeAxisGraphEditor(props) {
     );
 }
 
+function HistogramGraphEditor(props) {
+    const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+    const [binSize, setBinSize] = useWindowGraphBinSize(props.activeWindowId);
+    if (!features) return null;
+
+    function handleChangeBinSize(axis) {
+        return e => {
+            setBinSize(Immutable.fromJS({ x: parseInt(e.target.value) }));
+        };
+    }
+
+    return (
+        <React.Fragment>
+            <div className="header">Graph Details</div>
+            <div className="input-field-container">
+                <TextField
+                    label="Number of bins"
+                    variant="filled"
+                    className="text-input"
+                    value={binSize && binSize.get("x")}
+                    type="number"
+                    InputLabelProps={{ shrink: true }}
+                    onChange={handleChangeBinSize("x")}
+                />
+            </div>
+        </React.Fragment>
+    );
+}
+
 function PropertyEditor(props) {
     const [activeWindowId] = useActiveWindow();
     const windowList = useWindowList();
@@ -221,6 +251,8 @@ function PropertyEditor(props) {
                 return <ThreeAxisGraphEditor activeWindowId={activeWindowId} />;
             case windowTypes.SINGLE_X_MULTIPLE_Y:
                 return <MultiAxisGraphEditor activeWindowId={activeWindowId} />;
+            case windowTypes.HISTOGRAM_GRAPH:
+                return <HistogramGraphEditor activeWindowId={activeWindowId} />;
             default:
                 return null;
         }

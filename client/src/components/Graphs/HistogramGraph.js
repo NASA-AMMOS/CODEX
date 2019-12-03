@@ -100,6 +100,7 @@ function HistogramGraph(props) {
                         currentSelection={props.currentSelection}
                         savedSelections={props.savedSelections}
                         chartId={chartIds[index]}
+                        win={props.win}
                     />
                 ))}
             </ul>
@@ -151,6 +152,18 @@ function HistogramSubGraph(props) {
             displaylogo: false
         }
     });
+
+    // Effect to change the x-bin size
+    useEffect(
+        _ => {
+            if (!props.win.data || !props.win.data.binSize) return;
+            chartState.data = chartState.data.map(dataset =>
+                Object.assign(dataset, { nbinsx: props.win.data.binSize.x })
+            );
+            updateChartRevision();
+        },
+        [props.win.data]
+    );
 
     const [yRange, setYRange] = useState([0, 0]);
 
