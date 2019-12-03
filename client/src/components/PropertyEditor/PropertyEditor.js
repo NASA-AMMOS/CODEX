@@ -352,6 +352,9 @@ function PropertyEditor(props) {
                 return <MultiAxisGraphEditor activeWindowId={activeWindowId} />;
             case windowTypes.MAP_GRAPH:
                 return <MapGraphEditor activeWindowId={activeWindowId} />;
+            case windowTypes.HISTOGRAM_GRAPH:
+                return <HistogramGraphEditor activeWindowId={activeWindowId} />;
+
             default:
                 return null;
         }
