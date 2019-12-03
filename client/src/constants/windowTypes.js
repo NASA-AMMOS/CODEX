@@ -32,6 +32,7 @@ export const BOX_PLOT_GRAPH = "Box Plot";
 export const HISTOGRAM_GRAPH = "Histogram";
 export const SINGLE_X_MULTIPLE_Y = "Single X, Multiple Y";
 export const HEATMAP_3D_GRAPH = "3D Heat Map";
+export const MAP_GRAPH = "Map Graph";
 export const graphs = [
     SCATTER_GRAPH,
     CONTOUR_GRAPH,
@@ -41,7 +42,8 @@ export const graphs = [
     HEATMAP_3D_GRAPH,
     BOX_PLOT_GRAPH,
     HISTOGRAM_GRAPH,
-    SINGLE_X_MULTIPLE_Y
+    SINGLE_X_MULTIPLE_Y,
+    MAP_GRAPH
 ];
 
 export const SESSIONS_WINDOW = "SESSIONS_WINDOW";

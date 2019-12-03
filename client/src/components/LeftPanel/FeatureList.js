@@ -99,8 +99,10 @@ const reorder = (object, startIndex, endIndex) => {
 function StatsLabelRow(props) {
     return (
         <div className="label-row" hidden={props.statsHidden}>
-            <span className="mean"> mean </span>
-            <span className="median"> median </span>
+            <span className="label-field"> mean </span>
+            <span className="label-field"> median </span>
+            <span className="label-field"> min </span>
+            <span className="label-field"> max </span>
             <span className="sparkline"> sparkline </span>
         </div>
     );
@@ -195,6 +197,8 @@ function StatisticsRow(props) {
         return <div className="feature-statistics-row">Working...</div>;
     }
 
+    const min = processFloatingPointNumber(stats.get("min"));
+    const max = processFloatingPointNumber(stats.get("max"));
     let mean = processFloatingPointNumber(stats.get("mean"));
     let median = processFloatingPointNumber(stats.get("median"));
     let downsample = stats.get("downsample");
@@ -204,8 +208,10 @@ function StatisticsRow(props) {
 
     return (
         <div className="feature-statistics-row">
-            <span className="mean-span"> {mean} </span>
-            <span className="median-span"> {median} </span>
+            <span className="label-field"> {mean} </span>
+            <span className="label-field"> {median} </span>
+            <span className="label-field"> {min} </span>
+            <span className="label-field"> {max} </span>
             <span className="sparkline-span">
                 <Sparklines
                     data={downsample}

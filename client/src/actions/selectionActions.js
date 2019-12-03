@@ -60,7 +60,7 @@ export function deleteSelection(id) {
             hashType: "selection",
             sessionkey: utils.getGlobalSessionKey(),
             activity: "delete",
-            name: [getState().selections.savedSelections[id].name]
+            name: [getState().selections.savedSelections.find(sel => sel.id === id).name]
         };
 
         socketWorker.postMessage(

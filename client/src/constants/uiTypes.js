@@ -28,3 +28,6 @@ export const AUTOSAVE_INTERVAL = 1000 * 30;
 
 export const CLOSE_GRAPH_WHEN_DELETE_FEATURE = "CLOSE_GRAPH_WHEN_DELETE_FEATURE";
 export const GRAPH_INDEX = "Index";
+export const MAP_USGS = "USGS Map";
+export const MAP_OPEN_STREET_MAP = "OpenStreetMap";
+export const MAP_TYPES = [MAP_USGS, MAP_OPEN_STREET_MAP];
