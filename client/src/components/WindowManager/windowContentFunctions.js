@@ -7,6 +7,7 @@ import RegressionResults from "components/Regressions/RegressionResults";
 import RegressionsOverview from "components/Regressions/RegressionsOverview";
 import ScatterGraph from "components/Graphs/ScatterGraph";
 import HeatmapGraph from "components/Graphs/HeatmapGraph";
+import HeatmapGraph3d from "components/Graphs/HeatmapGraph3d";
 import BoxPlotGraph from "components/Graphs/BoxPlotGraph";
 import HistogramGraph from "components/Graphs/HistogramGraph";
 import FindMoreLikeThis from "components/FindMoreLikeThis/FindMoreLikeThis";
@@ -26,6 +27,8 @@ import Debugger from "components/Debug/Debug";
 import Table from "components/Table/Table";
 import Transform from "components/Transform/Transform";
 import QualityScan from "components/QualityScan/QualityScan";
+import SingleXMultipleYGraph from "components/Graphs/SingleXMultipleYGraph";
+import MapGraph from "components/Graphs/MapGraph";
 
 export function getWindowContent(win) {
     switch (win.get("windowType")) {
@@ -37,6 +40,8 @@ export function getWindowContent(win) {
             return <TimeSeriesGraph data={win.get("data")} />;
         case uiTypes.HEATMAP_GRAPH:
             return <HeatmapGraph data={win.get("data")} />;
+        case windowTypes.HEATMAP_3D_GRAPH:
+            return <HeatmapGraph3d data={win.get("data")} />;
         case uiTypes.BOX_PLOT_GRAPH:
             return <BoxPlotGraph data={win.get("data")} />;
         case uiTypes.VIOLIN_PLOT_GRAPH:
@@ -86,6 +91,10 @@ export function getWindowContent(win) {
             return <Transform />;
         case windowTypes.QUALITY_SCAN_WINDOW:
             return <QualityScan data={win.get("data")} />;
+        case windowTypes.SINGLE_X_MULTIPLE_Y:
+            return <SingleXMultipleYGraph data={win.get("data")} />;
+        case windowTypes.MAP_GRAPH:
+            return <MapGraph data={win.get("data")} />;
         default:
             return (
                 <p>

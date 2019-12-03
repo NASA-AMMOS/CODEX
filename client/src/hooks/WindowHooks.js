@@ -42,7 +42,10 @@ const wrapWindow = (win, dispatch) => {
             }
         },
         setData: data => {
-            if (fromJS(data) !== win.get("data")) {
+            if (typeof data === "function") {
+                data = data(win.get("data")); // Allow a callback function with the existing data as an argument
+            }
+            if (data && !fromJS(data).equals(win.get("data"))) {
                 dispatch(wmActions.setWindowData(win.get("id"), data));
             }
         },
@@ -130,6 +133,124 @@ export function useWindowFeatureList(id) {
         newFeatures =>
             dispatch(wmActions.setWindowData(id, win.get("data").set("features", newFeatures)))
     ];
+}
+
+/**
+ * Getter/setter for a specific graph window's feature info list
+ * @return {tuple} value/setter function
+ */
+export function useWindowFeatureInfoList(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "featureInfo"], []),
+        newInfo =>
+            dispatch(wmActions.setWindowData(id, win.get("data").set("featureInfo", newInfo)))
+    ];
+}
+
+/**
+ * Getter/setter for a specific graph window x axis
+ * @return {tuple} value/setter function
+ */
+export function useWindowXAxis(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "xAxis"]),
+        xAxis => dispatch(wmActions.setWindowData(id, win.get("data").set("xAxis", xAxis)))
+    ];
+}
+
+/**
+ * Getter/setter for a specific graph window y axis
+ * @return {tuple} value/setter function
+ */
+export function useWindowYAxis(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "yAxis"]),
+        yAxis => dispatch(wmActions.setWindowData(id, win.get("data").set("yAxis", yAxis)))
+    ];
+}
+
+/**
+ * Getter/setter for a specific graph window z axis
+ * @return {tuple} value/setter function
+ */
+export function useWindowZAxis(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "zAxis"]),
+        zAxis => dispatch(wmActions.setWindowData(id, win.get("data").set("zAxis", zAxis)))
+    ];
+}
+
+/**
+ * Hook to swap axes in one go -- avoids weird render conflicts when trying to swap
+ * @return {function} axis swap function
+ */
+export function useSwapAxes(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return _ => {
+        const newXAxis = win.getIn(["data", "yAxis"]);
+        const newYAxis = win.getIn(["data", "xAxis"]);
+        dispatch(
+            wmActions.setWindowData(
+                id,
+                win
+                    .get("data")
+                    .set("xAxis", newXAxis)
+                    .set("yAxis", newYAxis)
+            )
+        );
+    };
+}
+
+/**
+ * Getter/setter for a specific graph window map type
+ * @return {tuple} value/setter function
+ */
+export function useWindowMapType(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "mapType"]),
+        mapType => dispatch(wmActions.setWindowData(id, win.get("data").set("mapType", mapType)))
+    ];
+}
+
+/**
+ * Getter/setter for a specific graph window title
+ * @return {tuple} value/setter function
+ */
+export function useWindowTitle(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+    return [win.get("title"), title => dispatch(wmActions.setWindowTitle(id, title))];
 }
 
 export default useWindowManager;

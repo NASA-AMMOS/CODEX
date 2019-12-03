@@ -8,6 +8,7 @@ import LeftPanel from "components/LeftPanel/LeftPanel";
 import PropertyEditor from "components/PropertyEditor/PropertyEditor";
 import TopBar from "components/TopBar/TopBar";
 import WindowManager from "components/WindowManager/WindowManager";
+import { hot } from "react-hot-loader";
 
 function View(props) {
     return (
@@ -25,4 +26,4 @@ function View(props) {
     );
 }
 
-export default View;
+export default hot(module)(View);
