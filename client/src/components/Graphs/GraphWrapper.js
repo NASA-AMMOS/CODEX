@@ -139,31 +139,63 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
     return [shapes];
 };
 
+function downloadImage(image, title) {
+    image.getBase64Async("image/png").then(url => {
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = title;
+        a.click();
+        a.remove();
+    });
+}
+
+function makeTitleImage(title, width) {
+    return new Promise(resolve => {
+        new Jimp(width, 40, "#ffffff", (err, image) => {
+            Jimp.loadFont("./styles/resources/Fonts/jimp/open-sans-32-black.fnt").then(font => {
+                image.print(
+                    font,
+                    0,
+                    0,
+                    {
+                        text: title,
+                        alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER
+                    },
+                    width,
+                    40
+                );
+                resolve(image);
+            });
+        });
+    });
+}
+
 function handleSingleChartDownload(chartId, title) {
-    return _ =>
-        Plotly.downloadImage(chartId, {
+    const width = 800;
+    return async _ => {
+        const titleImage = await makeTitleImage(title, width);
+        const graphImage = await Plotly.toImage(chartId, {
             format: "png",
-            width: 800,
+            width,
             height: 800,
             filename: title
         });
+        const mergedImages = await mergeImg([titleImage, graphImage], { direction: true });
+        return downloadImage(mergedImages, title);
+    };
 }
 
-function handleMultipleChartDownload(chartIds, title) {
+function handleMultipleChartDownload(chartIds, title, stacked) {
+    const width = 800;
     return _ => {
-        Promise.all(
-            chartIds.map(id => Plotly.toImage(id, { format: "png", width: 800, height: 800 }))
-        )
+        Promise.all(chartIds.map(id => Plotly.toImage(id, { format: "png", width, height: 400 })))
             .then(urls => Promise.all(urls.map(url => Jimp.read(url))))
-            .then(images => mergeImg(images))
-            .then(img => img.getBase64Async("image/png"))
-            .then(url => {
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = title;
-                a.click();
-                a.remove();
-            });
+            .then(images => mergeImg(images, { direction: stacked }))
+            .then(chartImage =>
+                makeTitleImage(title, stacked ? width : width * chartIds.length)
+                    .then(titleImage => mergeImg([titleImage, chartImage], { direction: true }))
+                    .then(img => downloadImage(img, title))
+            );
     };
 }
 
@@ -188,7 +220,7 @@ function GraphWrapper(props) {
         ? props.saveImageFunction
         : props.chartId
         ? handleSingleChartDownload(props.chartId, props.win.title)
-        : handleMultipleChartDownload(props.chartIds, props.win.title);
+        : handleMultipleChartDownload(props.chartIds, props.win.title, props.stacked);
 
     return (
         <React.Fragment>

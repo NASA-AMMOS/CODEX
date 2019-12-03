@@ -25,6 +25,7 @@ import { useGlobalChartState } from "hooks/UIHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_SELECTION_COLOR = "#FF0000";
+const DEFAULT_TITLE = "Histogram Graph";
 
 function generatePlotData(features, fileInfo) {
     const cols = utils.removeSentinelValues(features.map(feature => feature.data), fileInfo);
@@ -88,6 +89,7 @@ function HistogramGraph(props) {
             }
             chartIds={chartIds}
             win={props.win}
+            stacked
         >
             <ul className="histogram-graph-container">
                 {data.map((dataElement, index) => (
@@ -100,6 +102,7 @@ function HistogramGraph(props) {
                         currentSelection={props.currentSelection}
                         savedSelections={props.savedSelections}
                         chartId={chartIds[index]}
+                        win={props.win}
                     />
                 ))}
             </ul>
@@ -151,6 +154,18 @@ function HistogramSubGraph(props) {
             displaylogo: false
         }
     });
+
+    // Effect to change the x-bin size
+    useEffect(
+        _ => {
+            if (!props.win.data || !props.win.data.binSize) return;
+            chartState.data = chartState.data.map(dataset =>
+                Object.assign(dataset, { nbinsx: props.win.data.binSize.x })
+            );
+            updateChartRevision();
+        },
+        [props.win.data]
+    );
 
     const [yRange, setYRange] = useState([0, 0]);
 
@@ -236,7 +251,7 @@ export default props => {
         width: 500,
         height: 500,
         resizeable: true,
-        title: "Histogram"
+        title: DEFAULT_TITLE
     });
 
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
@@ -253,12 +268,13 @@ export default props => {
         return <WindowError> Please select at least one feature to use this graph.</WindowError>;
     }
 
-    win.setTitle(
-        features
-            .map(f => f.get("feature"))
-            .toJS()
-            .join(" vs ")
-    );
+    if (win.title === DEFAULT_TITLE)
+        win.setTitle(
+            features
+                .map(f => f.get("feature"))
+                .toJS()
+                .join(" vs ")
+        );
     return (
         <HistogramGraph
             currentSelection={currentSelection}
