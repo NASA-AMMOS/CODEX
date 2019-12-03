@@ -33,6 +33,7 @@ const DEFAULT_POINT_COLOR = "rgba(0, 0, 0 ,0.5)";
 const ANIMATION_RANGE = 15;
 const ANIMATION_SPEED = 0.75;
 const COLOR_CURRENT_SELECTION = "#FF0000";
+const DEFAULT_TITLE = "Single X Multiple Y Graph";
 
 // Custom image save function to handle tick plots
 function saveImageFunction(chartIds, title) {
@@ -376,7 +377,7 @@ export default props => {
         width: 500,
         height: 500,
         resizeable: true,
-        title: "Single X Multiple Y Graph"
+        title: DEFAULT_TITLE
     });
 
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
@@ -392,7 +393,7 @@ export default props => {
     }
 
     if (features.size) {
-        if (!win.title) win.setTitle(win.data.features.join(", "));
+        if (win.title === DEFAULT_TITLE) win.setTitle(win.data.features.join(", "));
         return (
             <SingleXMultipleYGraph
                 currentSelection={currentSelection}

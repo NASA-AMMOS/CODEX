@@ -1,6 +1,8 @@
 import "components/PropertyEditor/PropertyEditor.scss";
 
+import { InputAdornment } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
+import EditIcon from "@material-ui/icons/Edit";
 import Immutable from "immutable";
 import React from "react";
 import TextField from "@material-ui/core/TextField";
@@ -25,11 +27,28 @@ import {
     useWindowZAxis
 } from "../../hooks/WindowHooks";
 
+function WindowRenameInput(props) {
+    const [windowTitle, setWindowTitle] = useWindowTitle(props.activeWindowId);
+    return (
+        <TextField
+            className="title-field"
+            value={windowTitle}
+            onChange={e => setWindowTitle(e.target.value)}
+            InputProps={{
+                endAdornment: (
+                    <InputAdornment position="end">
+                        <EditIcon />
+                    </InputAdornment>
+                )
+            }}
+        />
+    );
+}
+
 function MultiAxisGraphEditor(props) {
     const [featureInfo, setFeatureInfo] = useWindowFeatureInfoList(props.activeWindowId);
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [xAxis, setXAxis] = useWindowXAxis(props.activeWindowId);
-    const [windowTitle, setWindowTitle] = useWindowTitle(props.activeWindowId);
 
     if (!features) return null;
 
@@ -49,12 +68,6 @@ function MultiAxisGraphEditor(props) {
 
     return (
         <React.Fragment>
-            <div className="header">Graph Details</div>
-            <TextField
-                className="title-field"
-                value={windowTitle}
-                onChange={e => setWindowTitle(e.target.value)}
-            />
             <div className="axis">
                 <label>X-Axis</label>
                 {xAxisSelect}
@@ -77,28 +90,6 @@ function MultiAxisGraphEditor(props) {
     );
 }
 
-function TwoAxisGraphEditor(props) {
-    const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
-    if (!features) return null;
-
-    return (
-        <React.Fragment>
-            <div className="header">Graph Details</div>
-            <div className="axis">
-                <label>X-Axis</label>
-                <span className="feature-name">{features.get(0)}</span>
-            </div>
-            <div className="axis">
-                <label>Y-Axis</label>
-                <span className="feature-name">{features.get(1)}</span>
-            </div>
-            <Button className="swap-button" onClick={_ => setFeatures(features.reverse())}>
-                Swap Axes <SwapAxesIcon width="14" height="14" />
-            </Button>
-        </React.Fragment>
-    );
-}
-
 function HeatmapGraphEditor(props) {
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [binSize, setBinSize] = useWindowGraphBinSize(props.activeWindowId);
@@ -112,7 +103,6 @@ function HeatmapGraphEditor(props) {
 
     return (
         <React.Fragment>
-            <div className="header">Graph Details</div>
             <div className="axis">
                 <label>X-Axis</label>
                 <span className="feature-name">{features.get(0)}</span>
@@ -148,6 +138,27 @@ function HeatmapGraphEditor(props) {
     );
 }
 
+function TwoAxisGraphEditor(props) {
+    const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+    if (!features) return null;
+
+    return (
+        <React.Fragment>
+            <div className="axis">
+                <label>X-Axis</label>
+                <span className="feature-name">{features.get(0)}</span>
+            </div>
+            <div className="axis">
+                <label>Y-Axis</label>
+                <span className="feature-name">{features.get(1)}</span>
+            </div>
+            <Button className="swap-button" onClick={_ => setFeatures(features.reverse())}>
+                Swap Axes <SwapAxesIcon width="14" height="14" />
+            </Button>
+        </React.Fragment>
+    );
+}
+
 function ThreeAxisGraphEditor(props) {
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [zAxis, setZAxis] = useWindowZAxis(props.activeWindowId);
@@ -163,7 +174,6 @@ function ThreeAxisGraphEditor(props) {
 
     return (
         <React.Fragment>
-            <div className="header">Graph Details</div>
             <div className="axis">
                 <label>X-Axis</label>
                 <span className="feature-name">{features.get(0)}</span>
@@ -222,7 +232,6 @@ function HistogramGraphEditor(props) {
 
     return (
         <React.Fragment>
-            <div className="header">Graph Details</div>
             <div className="input-field-container">
                 <TextField
                     label="Number of bins"
@@ -251,7 +260,6 @@ function MapGraphEditor(props) {
     if (features.size === 2)
         return (
             <React.Fragment>
-                <div className="header">Graph Details</div>
                 <div className="axis">
                     <label>Latitude</label>
                     <span className="feature-name">{xAxis}</span>
@@ -352,7 +360,13 @@ function PropertyEditor(props) {
         }
     })();
 
-    return <div className="propertyEditorContainer">{panelContent}</div>;
+    return (
+        <div className="propertyEditorContainer">
+            <div className="header">Graph Details</div>
+            <WindowRenameInput activeWindowId={activeWindowId} />
+            {panelContent}
+        </div>
+    );
 }
 
 export default PropertyEditor;

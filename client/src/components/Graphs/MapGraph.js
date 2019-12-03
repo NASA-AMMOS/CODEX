@@ -11,8 +11,11 @@ import * as graphFunctions from "components/Graphs/graphFunctions";
 import * as uiTypes from "constants/uiTypes";
 import * as utils from "utils/utils";
 
+import { usePrevious } from "../../hooks/UtilHooks";
+
 const DEFAULT_MAP_TYPE = uiTypes.MAP_USGS;
 const DEFAULT_ZOOM = 0;
+const DEFAULT_TITLE = "Map Graph";
 
 function getMapConfig(mapType) {
     switch (mapType) {
@@ -118,8 +121,10 @@ function MapGraph(props) {
     );
 
     // Effect to keep axes updated if they've been changed
+    const oldData = usePrevious(JSON.stringify(props.win.data));
     useEffect(
         _ => {
+            if (oldData === JSON.stringify(props.win.data)) return; // Avoid unneccessary rerenders
             if (!props.win.data.xAxis) return;
             const newData = [...chartState.data];
             newData[0].lat = cols.find(col => col.feature === props.win.data.xAxis).data;
@@ -162,7 +167,7 @@ export default props => {
         width: 700,
         height: 500,
         resizeable: true,
-        title: "Map Graph"
+        title: DEFAULT_TITLE
     });
 
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
@@ -175,7 +180,7 @@ export default props => {
     }
 
     if (features.size === 2 || features.size === 3) {
-        win.setTitle(win.data.features.join(" vs "));
+        if (win.title === DEFAULT_TITLE) win.setTitle(win.data.features.join(" vs "));
         return (
             <MapGraph
                 currentSelection={currentSelection}

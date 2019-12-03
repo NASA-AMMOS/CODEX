@@ -24,6 +24,7 @@ import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
+const DEFAULT_TITLE = "Time Series Graph";
 
 function generatePlotData(features, fileInfo) {
     const cols = utils.removeSentinelValues(features.map(feature => feature.data), fileInfo);
@@ -180,7 +181,7 @@ export default props => {
         width: 500,
         height: 500,
         resizeable: true,
-        title: "Time Series Graph"
+        title: DEFAULT_TITLE
     });
 
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
@@ -197,12 +198,13 @@ export default props => {
         return <WindowError> Please select at least one feature to use this graph.</WindowError>;
     }
 
-    win.setTitle(
-        features
-            .map(f => f.get("feature"))
-            .toJS()
-            .join(" vs ")
-    );
+    if (win.title === DEFAULT_TITLE)
+        win.setTitle(
+            features
+                .map(f => f.get("feature"))
+                .toJS()
+                .join(" vs ")
+        );
     return (
         <TimeSeriesGraph
             currentSelection={currentSelection}
