@@ -89,6 +89,7 @@ function HistogramGraph(props) {
             }
             chartIds={chartIds}
             win={props.win}
+            stacked
         >
             <ul className="histogram-graph-container">
                 {data.map((dataElement, index) => (
