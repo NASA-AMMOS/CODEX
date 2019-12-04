@@ -161,6 +161,8 @@ function TwoAxisGraphEditor(props) {
 
 function ThreeAxisGraphEditor(props) {
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+    const [xAxis, setXAxis] = useWindowXAxis(props.activeWindowId);
+    const [yAxis, setYAxis] = useWindowYAxis(props.activeWindowId);
     const [zAxis, setZAxis] = useWindowZAxis(props.activeWindowId);
     const [binSize, setBinSize] = useWindowGraphBinSize(props.activeWindowId);
 
@@ -176,14 +178,26 @@ function ThreeAxisGraphEditor(props) {
         <React.Fragment>
             <div className="axis">
                 <label>X-Axis</label>
-                <span className="feature-name">{features.get(0)}</span>
+                <select onChange={e => setXAxis(e.target.value)} value={xAxis}>
+                    {features.map(f => (
+                        <option value={f} key={f}>
+                            {f}
+                        </option>
+                    ))}
+                </select>
             </div>
             <div className="axis">
                 <label>Y-Axis</label>
-                <span className="feature-name">{features.get(1)}</span>
+                <select onChange={e => setYAxis(e.target.value)} value={yAxis}>
+                    {features.map(f => (
+                        <option value={f} key={f}>
+                            {f}
+                        </option>
+                    ))}
+                </select>
             </div>
             <div className="axis">
-                <label>Z-Axis (average)</label>
+                <label>Z-Axis</label>
                 <select onChange={e => setZAxis(e.target.value)} value={zAxis}>
                     {features.map(f => (
                         <option value={f} key={f}>
@@ -192,9 +206,6 @@ function ThreeAxisGraphEditor(props) {
                     ))}
                 </select>
             </div>
-            <Button className="swap-button" onClick={_ => setFeatures(features.reverse())}>
-                Swap Axes <SwapAxesIcon width="14" height="14" />
-            </Button>
             <div className="input-field-container">
                 <TextField
                     label="Grid-width"
