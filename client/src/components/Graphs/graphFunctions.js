@@ -1,5 +1,7 @@
 // Returns a single rgb color interpolation between given rgb color
 // based on the factor given; via https://codepen.io/njmcode/pen/axoyD?editors=0010
+import { unzip, zip } from "../../utils/utils";
+
 export function interpolateColor(color1, color2, factor) {
     if (arguments.length < 3) {
         factor = 0.5;
@@ -50,4 +52,32 @@ export function interpolateColors(color1, color2, steps, scaling) {
     }
 
     return interpolatedColorArray;
+}
+
+export function filterBounds(features, cols, bounds) {
+    if (!bounds) return cols;
+
+    const filtered = zip(cols).filter((row, idx) =>
+        row.every((val, idx) => {
+            const boundsForCol = bounds[features[idx]];
+            if (!boundsForCol || (!boundsForCol.min && !boundsForCol.max)) return true;
+            return (
+                (!boundsForCol.min || boundsForCol.min <= val) &&
+                (!boundsForCol.max || boundsForCol.max >= val)
+            );
+        })
+    );
+
+    return filtered.length
+        ? unzip(filtered)
+        : Array(features.length) // Use dummy array if nothing has made it through our filters
+              .fill(0)
+              .map(_ => []);
+}
+
+export function filterSingleCol(col, bounds) {
+    if (!bounds) return col;
+    return col.filter(
+        val => (!bounds.min || bounds.min <= val) && (!bounds.max || bounds.max >= val)
+    );
 }

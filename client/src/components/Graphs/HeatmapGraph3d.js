@@ -1,24 +1,16 @@
 import "components/Graphs/HeatmapGraph3d.css";
 
-import React, { useRef, useState, useEffect } from "react";
-import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
 import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
-import GraphWrapper from "components/Graphs/GraphWrapper";
+import React, { useRef, useState, useEffect } from "react";
 
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import {
-    useCurrentSelection,
-    useSavedSelections,
-    usePinnedFeatures,
-    useFileInfo
-} from "hooks/DataHooks";
+import { useCurrentSelection, usePinnedFeatures, useFileInfo } from "hooks/DataHooks";
 import { useWindowManager } from "hooks/WindowHooks";
-import { useGlobalChartState } from "hooks/UIHooks";
-import * as uiTypes from "constants/uiTypes";
+import GraphWrapper from "components/Graphs/GraphWrapper";
 import * as graphFunctions from "components/Graphs/graphFunctions";
+import * as utils from "utils/utils";
+
+import { filterBounds } from "./graphFunctions";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_BUCKET_COUNT = 50;
@@ -88,6 +80,17 @@ function HeatmapGraph3d(props) {
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
 
+    const sanitizedCols = utils.removeSentinelValues(
+        props.win.data.features.map(colName =>
+            props.data
+                .find(col => col.get("feature") === colName)
+                .get("data")
+                .toJS()
+        ),
+        props.fileInfo
+    );
+    const cols = filterBounds(props.win.data.features, sanitizedCols, props.win.data.bounds);
+
     // Set x-axis averages as the z-axis
     useEffect(
         _ =>
@@ -96,7 +99,11 @@ function HeatmapGraph3d(props) {
                 xAxis: props.win.data.features[0],
                 yAxis: props.win.data.features[1],
                 zAxis: props.win.data.features[2],
-                binSize: { x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT }
+                binSize: { x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT },
+                bounds: props.win.data.features.reduce((acc, colName, idx) => {
+                    acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
+                    return acc;
+                }, {})
             })),
         []
     );
@@ -109,16 +116,6 @@ function HeatmapGraph3d(props) {
         "linear"
     );
 
-    const data = utils.removeSentinelValues(
-        props.win.data.features.map(colName =>
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS()
-        ),
-        props.fileInfo
-    );
-
     //calculate range of data for axis labels
     const xAxis = props.win.data.features[0];
     const yAxis = props.win.data.features[1];
@@ -129,10 +126,10 @@ function HeatmapGraph3d(props) {
     const [chartState, setChartState] = useState({
         data: [
             {
-                x: generateDataAxis(data[0], DEFAULT_BUCKET_COUNT),
-                y: generateDataAxis(data[1], DEFAULT_BUCKET_COUNT),
+                x: generateDataAxis(cols[0], DEFAULT_BUCKET_COUNT),
+                y: generateDataAxis(cols[1], DEFAULT_BUCKET_COUNT),
                 z: squashDataIntoBuckets(
-                    data,
+                    cols,
                     [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT],
                     props.win.data.features,
                     props.win.data.features[0],
@@ -185,7 +182,7 @@ function HeatmapGraph3d(props) {
             : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT];
 
         return squashDataIntoBuckets(
-            data,
+            cols,
             binSize,
             props.win.data.features,
             props.win.data.xAxis || props.win.data.features[0],
@@ -204,11 +201,11 @@ function HeatmapGraph3d(props) {
                 colName => colName === props.win.data.yAxis
             );
             chartState.data[0].x = generateDataAxis(
-                data[xAxisIndex === -1 ? 0 : xAxisIndex],
+                cols[xAxisIndex === -1 ? 0 : xAxisIndex],
                 props.win.data.binSize ? props.win.data.binSize.x : DEFAULT_BUCKET_COUNT
             );
             chartState.data[0].y = generateDataAxis(
-                data[yAxisIndex === -1 ? 0 : yAxisIndex],
+                cols[yAxisIndex === -1 ? 0 : yAxisIndex],
                 props.win.data.binSize ? props.win.data.binSize.y : DEFAULT_BUCKET_COUNT
             );
             chartState.data[0].z = getZAxis();

@@ -11,6 +11,7 @@ import * as graphFunctions from "components/Graphs/graphFunctions";
 import * as uiTypes from "constants/uiTypes";
 import * as utils from "utils/utils";
 
+import { filterBounds } from "./graphFunctions";
 import { usePrevious } from "../../hooks/UtilHooks";
 
 const DEFAULT_MAP_TYPE = uiTypes.MAP_USGS;
@@ -44,18 +45,6 @@ function MapGraph(props) {
     // Changing the `key` attribute of the Plot causes React to trash it and make a new one.
     const [renderKey, setRenderKey] = useState(0);
 
-    useEffect(
-        _ =>
-            props.win.setData(data => ({
-                ...data.toJS(),
-                mapType: uiTypes.MAP_USGS,
-                xAxis: props.win.data.features[0],
-                yAxis: props.win.data.features[1],
-                zAxis: props.win.data.features[2] || null
-            })),
-        []
-    );
-
     //the number of interpolation steps that you can take caps at 5?
     const interpolatedColors = graphFunctions.interpolateColors(
         "rgb(255, 255, 255)",
@@ -64,7 +53,28 @@ function MapGraph(props) {
         "linear"
     );
 
-    const cols = utils.removeSentinelValuesRevised(props.data, props.fileInfo);
+    const baseCols = utils.removeSentinelValuesRevised(props.data, props.fileInfo);
+    const cols = filterBounds(
+        props.win.data.features,
+        baseCols.map(col => col.data),
+        props.win.data.bounds
+    ).map((data, idx) => ({ ...baseCols[idx], data }));
+
+    useEffect(
+        _ =>
+            props.win.setData(data => ({
+                ...data.toJS(),
+                mapType: uiTypes.MAP_USGS,
+                xAxis: props.win.data.features[0],
+                yAxis: props.win.data.features[1],
+                zAxis: props.win.data.features[2] || null,
+                bounds: cols.reduce((acc, col) => {
+                    acc[col.feature] = { min: Math.min(...col.data), max: Math.max(...col.data) };
+                    return acc;
+                }, {})
+            })),
+        []
+    );
 
     const heatMode = props.win.data.features.length === 3;
     const dataset = heatMode

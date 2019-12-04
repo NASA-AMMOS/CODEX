@@ -1,17 +1,7 @@
 import "components/Graphs/TimeSeriesGraph.css";
 
-import React, { useRef, useState, useEffect, createRef } from "react";
-import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
-import Popover from "@material-ui/core/Popover";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
-import ReactResizeDetector from "react-resize-detector";
-import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
+import React, { useRef, useState, useEffect, createRef } from "react";
 
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import {
@@ -20,29 +10,15 @@ import {
     usePinnedFeatures,
     useFileInfo
 } from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
+import * as utils from "utils/utils";
+
+import { filterSingleCol } from "./graphFunctions";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_TITLE = "Time Series Graph";
-
-function generatePlotData(features, fileInfo) {
-    const cols = utils.removeSentinelValues(features.map(feature => feature.data), fileInfo);
-
-    //generate time axis list
-    const timeAxis = [...Array(cols[0].length).keys()];
-
-    return features.map((feature, idx) => {
-        return {
-            x: timeAxis,
-            y: cols[idx],
-            xaxis: "x",
-            yaxis: "y1",
-            mode: "lines",
-            type: "scatter"
-        };
-    });
-}
 
 function generateLayouts(features) {
     let layouts = [];
@@ -83,9 +59,61 @@ function TimeSeriesGraph(props) {
     const [chartIds] = useState(_ => featureNames.map(_ => utils.createNewId()));
     const chartRefs = useRef(featureNames.map(() => createRef()));
 
-    let data = generatePlotData(features, props.fileInfo);
+    function generatePlotData() {
+        const cols = props.win.data.features
+            .map(colName => [
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS(),
+                props.win.data.bounds && props.win.data.bounds[colName]
+            ])
+            .map(([col, bounds]) => [utils.removeSentinelValues([col], props.fileInfo)[0], bounds])
+            .map(([col, bounds]) => filterSingleCol(col, bounds));
+
+        //generate time axis list
+        const timeAxis = [...Array(cols[0].length).keys()];
+
+        return [
+            features.map((feature, idx) => {
+                return {
+                    x: timeAxis,
+                    y: cols[idx],
+                    xaxis: "x",
+                    yaxis: "y1",
+                    mode: "lines",
+                    type: "scatter"
+                };
+            }),
+            cols
+        ];
+    }
+
+    const [processedData, setProcessedData] = useState(_ => generatePlotData());
+    const [data, cols] = processedData;
 
     let layouts = generateLayouts(features);
+
+    // Update bound state with the calculated bounds of the data
+    useEffect(
+        _ =>
+            props.win.setData(data => ({
+                ...data.toJS(),
+                bounds: props.win.data.features.reduce((acc, colName, idx) => {
+                    acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
+                    return acc;
+                }, {})
+            })),
+        []
+    );
+
+    // Update data state when the bounds change
+    useEffect(
+        _ => {
+            setProcessedData(generatePlotData());
+        },
+        [props.win.data.bounds]
+    );
 
     return (
         <GraphWrapper
@@ -151,6 +179,15 @@ function TimeSeriesSubGraph(props) {
         [selectionShapes]
     );
 
+    // Effect to update graph when data changes
+    useEffect(
+        _ => {
+            chartState.data = [props.data];
+            updateChartRevision();
+        },
+        [props.data]
+    );
+
     return (
         <Plot
             className="time-series-subplot"
@@ -191,7 +228,7 @@ export default props => {
 
     const features = usePinnedFeatures(win);
 
-    if (features === null) {
+    if (features === null || !win.data) {
         return <WindowCircularProgress />;
     }
     if (features.size === 0) {
