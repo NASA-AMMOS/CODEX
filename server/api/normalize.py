@@ -29,9 +29,9 @@ class normalize(algorithm):
     def get_algorithm(self):
 
         if(self.algorithmName == "normalize"):
-            algorithm = "normalize"
+            algorithm = preprocessing.MinMaxScaler() 
         elif(self.algorithmName == "standardize"):
-            algorithm = "standardize"
+            algorithm = preprocessing.StandardScaler() 
         else:
             return None
 
@@ -40,21 +40,7 @@ class normalize(algorithm):
 
     def fit_algorithm(self):
 
-        if self.algorithm == "normalize":
-            print(self.X.shape)
-            normalized_X = preprocessing.normalize(self.X)
-            print(normalized_X.shape)
-        elif self.algorithm == "standardize":
-            print(self.X.shape)
-            print("Standardize")
-            scaler = preprocessing.StandardScaler()
-            scaled_X = scaler.fit_transform(self.X)
-            print(scaled_X.shape)
-        else:
-            logging.warning("Unrecognized normalize scheme:{algorithm}".format(algorithm=self.algorithm))
-        
-
-
+        self.result['scaled'] = self.algorithm.fit_transform(self.X).tolist()
 
     def check_valid(self):
         return 1
