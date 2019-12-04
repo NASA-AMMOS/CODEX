@@ -272,4 +272,16 @@ export function useWindowGraphBinSize(id) {
     ];
 }
 
+export function useWindowGraphBounds(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "bounds"]),
+        bounds => dispatch(wmActions.setWindowData(id, win.get("data").set("bounds", bounds)))
+    ];
+}
+
 export default useWindowManager;

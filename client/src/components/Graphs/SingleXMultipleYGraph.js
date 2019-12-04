@@ -1,17 +1,9 @@
 import "components/Graphs/SingleXMultipleYGraph.scss";
 
-import React, { useRef, useState, useEffect } from "react";
-import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
-import Popover from "@material-ui/core/Popover";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
-import ReactResizeDetector from "react-resize-detector";
-import GraphWrapper from "components/Graphs/GraphWrapper";
+import Plotly from "plotly.js";
+import React, { useRef, useState, useEffect } from "react";
+import mergeImg from "merge-img";
 
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import {
@@ -21,11 +13,13 @@ import {
     useHoveredSelection,
     useFileInfo
 } from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+import GraphWrapper from "components/Graphs/GraphWrapper";
 import * as uiTypes from "constants/uiTypes";
-import Plotly from "plotly.js";
-import mergeImg from "merge-img";
+import * as utils from "utils/utils";
+
+import { filterBounds } from "./graphFunctions";
 
 const Jimp = require("jimp");
 
@@ -71,10 +65,11 @@ function SingleXMultipleYGraph(props) {
     const [chartId] = useState(utils.createNewId());
 
     function getProcessedData() {
-        return utils.removeSentinelValues(
+        const sanitizedCols = utils.removeSentinelValues(
             props.data.map(col => col.get("data")).toJS(),
             props.fileInfo
         );
+        return filterBounds(props.win.data.features, sanitizedCols, props.win.data.bounds);
     }
 
     const processedData = getProcessedData();
@@ -107,6 +102,19 @@ function SingleXMultipleYGraph(props) {
         return { name: feature, color: palette[idx] };
     });
     props.win.setData(data => ({ ...data.toJS(), featureInfo }));
+
+    // Effect to assign the min and max bounds based on the data
+    useEffect(
+        _ =>
+            props.win.setData(data => ({
+                ...data.toJS(),
+                bounds: cols.reduce((acc, col) => {
+                    acc[col.name] = { min: Math.min(...col.data), max: Math.max(...col.data) };
+                    return acc;
+                }, {})
+            })),
+        []
+    );
 
     function getXAxisTitle() {
         return !props.win.data.xAxis || props.win.data.xAxis === uiTypes.GRAPH_INDEX

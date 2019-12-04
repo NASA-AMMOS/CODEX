@@ -1,12 +1,7 @@
 import "components/Graphs/ContourGraph.css";
 
-import React, { useRef, useState, useEffect } from "react";
-import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
 import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
-import GraphWrapper from "components/Graphs/GraphWrapper.js";
+import React, { useRef, useState, useEffect } from "react";
 
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import {
@@ -15,8 +10,12 @@ import {
     usePinnedFeatures,
     useFileInfo
 } from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+import GraphWrapper from "components/Graphs/GraphWrapper.js";
+import * as utils from "utils/utils";
+
+import { filterBounds } from "./graphFunctions";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_TITLE = "Contour Graph";
@@ -318,7 +317,7 @@ function ContourGraph(props) {
     const [chartId] = useState(utils.createNewId());
 
     // plug through props
-    const cols = utils.removeSentinelValues(
+    const sanitizedCols = utils.removeSentinelValues(
         props.win.data.features.map(colName =>
             props.data
                 .find(col => col.get("feature") === colName)
@@ -326,6 +325,19 @@ function ContourGraph(props) {
                 .toJS()
         ),
         props.fileInfo
+    );
+    const cols = filterBounds(props.win.data.features, sanitizedCols, props.win.data.bounds);
+
+    useEffect(
+        _ =>
+            props.win.setData(data => ({
+                ...data.toJS(),
+                bounds: props.win.data.features.reduce((acc, colName, idx) => {
+                    acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
+                    return acc;
+                }, {})
+            })),
+        []
     );
 
     const xAxis = props.win.data.features[0];

@@ -1,17 +1,7 @@
 import "components/Graphs/ViolinPlotGraph.css";
 
-import React, { useRef, useState, useEffect, createRef } from "react";
-import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
-import Popover from "@material-ui/core/Popover";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
-import ReactResizeDetector from "react-resize-detector";
-import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
+import React, { useRef, useState, useEffect, createRef } from "react";
 
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import {
@@ -20,28 +10,16 @@ import {
     usePinnedFeatures,
     useFileInfo
 } from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
+import * as utils from "utils/utils";
+
+import { filterSingleCol } from "./graphFunctions";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_SELECTION_COLOR = "#FF0000";
 const DEFAULT_TITLE = "Violin Graph";
-
-function generatePlotData(features, fileInfo) {
-    const cols = utils.removeSentinelValues(features.map(feature => feature.data), fileInfo);
-    return features.map((feature, idx) => {
-        return {
-            y: cols[idx],
-            yaxis: "y",
-            type: "violin",
-            visible: true,
-            name: feature.feature,
-            box: {
-                visible: true
-            }
-        };
-    });
-}
 
 function generateLayouts(features) {
     let layouts = [];
@@ -83,7 +61,58 @@ function ViolinPlotGraph(props) {
 
     const [chartIds] = useState(_ => featureNames.map(_ => utils.createNewId()));
 
-    let data = generatePlotData(features, props.fileInfo);
+    function generatePlotData() {
+        const cols = props.win.data.features
+            .map(colName => [
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS(),
+                props.win.data.bounds && props.win.data.bounds[colName]
+            ])
+            .map(([col, bounds]) => [utils.removeSentinelValues([col], props.fileInfo)[0], bounds])
+            .map(([col, bounds]) => filterSingleCol(col, bounds));
+
+        return [
+            features.map((feature, idx) => {
+                return {
+                    y: cols[idx],
+                    yaxis: "y",
+                    type: "violin",
+                    visible: true,
+                    name: feature.feature,
+                    box: {
+                        visible: true
+                    }
+                };
+            }),
+            cols
+        ];
+    }
+
+    const [processedData, setProcessedData] = useState(_ => generatePlotData());
+    const [data, cols] = processedData;
+
+    // Update bound state with the calculated bounds of the data
+    useEffect(
+        _ =>
+            props.win.setData(data => ({
+                ...data.toJS(),
+                bounds: props.win.data.features.reduce((acc, colName, idx) => {
+                    acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
+                    return acc;
+                }, {})
+            })),
+        []
+    );
+
+    // Update data state when the bounds change
+    useEffect(
+        _ => {
+            setProcessedData(generatePlotData());
+        },
+        [props.win.data.bounds]
+    );
 
     let layouts = generateLayouts(features);
 
@@ -151,6 +180,15 @@ function ViolinPlotSubGraph(props) {
         [selectionShapes]
     );
 
+    // Effect to update graph when data changes
+    useEffect(
+        _ => {
+            chartState.data = [props.data];
+            updateChartRevision();
+        },
+        [props.data]
+    );
+
     return (
         <Plot
             className="box-subplot"
@@ -192,7 +230,7 @@ export default props => {
 
     const features = usePinnedFeatures(win);
 
-    if (features === null) {
+    if (features === null || !win.data) {
         return <WindowCircularProgress />;
     }
     if (features.size === 0) {

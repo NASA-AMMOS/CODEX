@@ -1,17 +1,7 @@
 import "components/Graphs/ScatterGraph.css";
 
-import React, { useRef, useState, useEffect } from "react";
-import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
-import Popover from "@material-ui/core/Popover";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
-import ReactResizeDetector from "react-resize-detector";
-import GraphWrapper from "components/Graphs/GraphWrapper";
+import React, { useRef, useState, useEffect } from "react";
 
 import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import {
@@ -21,8 +11,13 @@ import {
     useHoveredSelection,
     useFileInfo
 } from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
 import { useGlobalChartState } from "hooks/UIHooks";
+import { useWindowManager } from "hooks/WindowHooks";
+import GraphWrapper from "components/Graphs/GraphWrapper";
+import * as utils from "utils/utils";
+
+import { filterBounds } from "./graphFunctions";
+import { usePrevious } from "../../hooks/UtilHooks";
 
 const DEFAULT_POINT_COLOR = "rgba(0, 0, 0 ,0.5)";
 const ANIMATION_RANGE = 15;
@@ -34,7 +29,7 @@ function ScatterGraph(props) {
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
 
-    const cols = utils.removeSentinelValues(
+    const sanitizedCols = utils.removeSentinelValues(
         props.win.data.features.map(colName =>
             props.data
                 .find(col => col.get("feature") === colName)
@@ -42,6 +37,19 @@ function ScatterGraph(props) {
                 .toJS()
         ),
         props.fileInfo
+    );
+    const cols = filterBounds(props.win.data.features, sanitizedCols, props.win.data.bounds);
+
+    useEffect(
+        _ =>
+            props.win.setData(data => ({
+                ...data.toJS(),
+                bounds: props.win.data.features.reduce((acc, colName, idx) => {
+                    acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
+                    return acc;
+                }, {})
+            })),
+        []
     );
 
     const xAxis = props.win.data.features[0];

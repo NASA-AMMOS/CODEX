@@ -22,6 +22,7 @@ import * as windowTypes from "constants/windowTypes";
 import {
     useSwapAxes,
     useWindowGraphBinSize,
+    useWindowGraphBounds,
     useWindowMapType,
     useWindowYAxis,
     useWindowZAxis
@@ -42,6 +43,118 @@ function WindowRenameInput(props) {
                 )
             }}
         />
+    );
+}
+
+function WindowGraphBounds(props) {
+    const [graphBounds, setGraphBounds] = useWindowGraphBounds(props.activeWindowId);
+    const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+
+    function handleChangeBounds(axis, bound) {
+        return e => setGraphBounds(graphBounds.setIn([axis, bound], parseFloat(e.target.value)));
+    }
+
+    if (!features) return null;
+
+    return (
+        <div className="input-field-container">
+            <TextField
+                label="X axis min"
+                variant="filled"
+                className="text-input"
+                value={graphBounds && graphBounds.getIn([features.get(0), "min"])}
+                type="number"
+                InputLabelProps={{ shrink: true }}
+                onChange={handleChangeBounds(features.get(0), "min")}
+            />
+            <TextField
+                label="X axis max"
+                variant="filled"
+                className="text-input"
+                value={graphBounds && graphBounds.getIn([features.get(0), "max"])}
+                type="number"
+                InputLabelProps={{ shrink: true }}
+                onChange={handleChangeBounds(features.get(0), "max")}
+            />
+            <TextField
+                label="Y axis min"
+                variant="filled"
+                className="text-input"
+                value={graphBounds && graphBounds.getIn([features.get(1), "min"])}
+                type="number"
+                InputLabelProps={{ shrink: true }}
+                onChange={handleChangeBounds(features.get(1), "min")}
+            />
+            <TextField
+                label="Y axis max"
+                variant="filled"
+                className="text-input"
+                value={graphBounds && graphBounds.getIn([features.get(1), "max"])}
+                type="number"
+                InputLabelProps={{ shrink: true }}
+                onChange={handleChangeBounds(features.get(1), "max")}
+            />
+            {features.size > 3 ? null : (
+                <React.Fragment>
+                    <TextField
+                        label="Z axis min"
+                        variant="filled"
+                        className="text-input"
+                        value={graphBounds && graphBounds.getIn([features.get(2), "min"])}
+                        type="number"
+                        InputLabelProps={{ shrink: true }}
+                        onChange={handleChangeBounds(features.get(2), "min")}
+                    />
+                    <TextField
+                        label="Z axis max"
+                        variant="filled"
+                        className="text-input"
+                        value={graphBounds && graphBounds.getIn([features.get(2), "max"])}
+                        type="number"
+                        InputLabelProps={{ shrink: true }}
+                        onChange={handleChangeBounds(features.get(2), "max")}
+                    />
+                </React.Fragment>
+            )}
+        </div>
+    );
+}
+
+function MultipleWindowGraphBounds(props) {
+    const [graphBounds, setGraphBounds] = useWindowGraphBounds(props.activeWindowId);
+    const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+
+    function handleChangeBounds(axis, bound) {
+        return e => setGraphBounds(graphBounds.setIn([axis, bound], parseFloat(e.target.value)));
+    }
+
+    if (!features) return null;
+
+    return (
+        <div className="input-field-container">
+            {features.map((feature, idx) => (
+                <React.Fragment key={feature}>
+                    <TextField
+                        label={`${feature} min`}
+                        variant="filled"
+                        className="text-input"
+                        value={graphBounds && graphBounds.getIn([features.get(idx), "min"])}
+                        type="number"
+                        InputLabelProps={{ shrink: true }}
+                        onChange={handleChangeBounds(features.get(idx), "min")}
+                    />
+                    <TextField
+                        label={`${feature} max`}
+                        variant="filled"
+                        className="text-input"
+                        value={graphBounds && graphBounds.getIn([features.get(idx), "max"])}
+                        type="number"
+                        InputLabelProps={{ shrink: true }}
+                        onChange={handleChangeBounds(features.get(idx), "max")}
+                    />
+                </React.Fragment>
+            ))}
+        </div>
     );
 }
 
@@ -265,8 +378,76 @@ function MapGraphEditor(props) {
     const [yAxis, setYAxis] = useWindowYAxis(props.activeWindowId);
     const [zAxis, setZAxis] = useWindowZAxis(props.activeWindowId);
     const swapAxes = useSwapAxes(props.activeWindowId);
+    const [graphBounds, setGraphBounds] = useWindowGraphBounds(props.activeWindowId);
+
+    function handleChangeBounds(axis, bound) {
+        return e => setGraphBounds(graphBounds.setIn([axis, bound], parseFloat(e.target.value)));
+    }
 
     if (!features) return null;
+
+    const axisFields = (
+        <div className="input-field-container">
+            <TextField
+                label="Latitude min"
+                variant="filled"
+                className="text-input"
+                value={graphBounds && graphBounds.getIn([features.get(0), "min"])}
+                type="number"
+                InputLabelProps={{ shrink: true }}
+                onChange={handleChangeBounds(features.get(0), "min")}
+            />
+            <TextField
+                label="Latitude max"
+                variant="filled"
+                className="text-input"
+                value={graphBounds && graphBounds.getIn([features.get(0), "max"])}
+                type="number"
+                InputLabelProps={{ shrink: true }}
+                onChange={handleChangeBounds(features.get(0), "max")}
+            />
+            <TextField
+                label="Longitude min"
+                variant="filled"
+                className="text-input"
+                value={graphBounds && graphBounds.getIn([features.get(1), "min"])}
+                type="number"
+                InputLabelProps={{ shrink: true }}
+                onChange={handleChangeBounds(features.get(1), "min")}
+            />
+            <TextField
+                label="Longitude max"
+                variant="filled"
+                className="text-input"
+                value={graphBounds && graphBounds.getIn([features.get(1), "max"])}
+                type="number"
+                InputLabelProps={{ shrink: true }}
+                onChange={handleChangeBounds(features.get(1), "max")}
+            />
+            {features.size > 3 ? null : (
+                <React.Fragment>
+                    <TextField
+                        label="Heat min"
+                        variant="filled"
+                        className="text-input"
+                        value={graphBounds && graphBounds.getIn([features.get(2), "min"])}
+                        type="number"
+                        InputLabelProps={{ shrink: true }}
+                        onChange={handleChangeBounds(features.get(2), "min")}
+                    />
+                    <TextField
+                        label="Heat max"
+                        variant="filled"
+                        className="text-input"
+                        value={graphBounds && graphBounds.getIn([features.get(2), "max"])}
+                        type="number"
+                        InputLabelProps={{ shrink: true }}
+                        onChange={handleChangeBounds(features.get(2), "max")}
+                    />
+                </React.Fragment>
+            )}
+        </div>
+    );
 
     if (features.size === 2)
         return (
@@ -292,6 +473,7 @@ function MapGraphEditor(props) {
                 <Button className="swap-button" onClick={swapAxes}>
                     Swap Axes <SwapAxesIcon width="14" height="14" />
                 </Button>
+                {axisFields}
             </React.Fragment>
         );
 
@@ -338,6 +520,7 @@ function MapGraphEditor(props) {
                     ))}
                 </select>
             </div>
+            {axisFields}
         </React.Fragment>
     );
 }
@@ -354,18 +537,46 @@ function PropertyEditor(props) {
         switch (activeWindow.get("windowType")) {
             case windowTypes.SCATTER_GRAPH:
             case windowTypes.CONTOUR_GRAPH:
-                return <TwoAxisGraphEditor activeWindowId={activeWindowId} />;
+                return (
+                    <React.Fragment>
+                        <TwoAxisGraphEditor activeWindowId={activeWindowId} />
+                        <WindowGraphBounds activeWindowId={activeWindowId} />
+                    </React.Fragment>
+                );
             case windowTypes.HEATMAP_GRAPH:
-                return <HeatmapGraphEditor activeWindowId={activeWindowId} />;
+                return (
+                    <React.Fragment>
+                        <HeatmapGraphEditor activeWindowId={activeWindowId} />
+                        <WindowGraphBounds activeWindowId={activeWindowId} />
+                    </React.Fragment>
+                );
             case windowTypes.HEATMAP_3D_GRAPH:
-                return <ThreeAxisGraphEditor activeWindowId={activeWindowId} />;
+                return (
+                    <React.Fragment>
+                        <ThreeAxisGraphEditor activeWindowId={activeWindowId} />{" "}
+                        <WindowGraphBounds activeWindowId={activeWindowId} />
+                    </React.Fragment>
+                );
             case windowTypes.SINGLE_X_MULTIPLE_Y:
-                return <MultiAxisGraphEditor activeWindowId={activeWindowId} />;
+                return (
+                    <React.Fragment>
+                        <MultiAxisGraphEditor activeWindowId={activeWindowId} />
+                        <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
+                    </React.Fragment>
+                );
             case windowTypes.MAP_GRAPH:
                 return <MapGraphEditor activeWindowId={activeWindowId} />;
             case windowTypes.HISTOGRAM_GRAPH:
-                return <HistogramGraphEditor activeWindowId={activeWindowId} />;
-
+                return (
+                    <React.Fragment>
+                        <HistogramGraphEditor activeWindowId={activeWindowId} />
+                        <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
+                    </React.Fragment>
+                );
+            case windowTypes.VIOLIN_PLOT_GRAPH:
+            case windowTypes.TIME_SERIES_GRAPH:
+            case windowTypes.BOX_PLOT_GRAPH:
+                return <MultipleWindowGraphBounds activeWindowId={activeWindowId} />;
             default:
                 return null;
         }

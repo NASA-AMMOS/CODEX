@@ -10,6 +10,8 @@ import { useWindowManager } from "hooks/WindowHooks";
 import GraphWrapper from "components/Graphs/GraphWrapper";
 import * as utils from "utils/utils";
 
+import { filterBounds } from "./graphFunctions";
+
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_BUCKET_COUNT = 50;
 const DEFAULT_TITLE = "Heat Map Graph";
@@ -118,15 +120,6 @@ function HeatmapGraph(props) {
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
 
-    useEffect(
-        _ =>
-            props.win.setData(data => ({
-                ...data.toJS(),
-                binSize: { x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT }
-            })),
-        []
-    );
-
     //the number of interpolation steps that you can take caps at 5?
     const interpolatedColors = interpolateColors(
         "rgb(255, 255, 255)",
@@ -135,7 +128,7 @@ function HeatmapGraph(props) {
         "linear"
     );
 
-    const data = utils.removeSentinelValues(
+    const sanitizedCols = utils.removeSentinelValues(
         props.win.data.features.map(colName =>
             props.data
                 .find(col => col.get("feature") === colName)
@@ -144,6 +137,20 @@ function HeatmapGraph(props) {
         ),
         props.fileInfo
     );
+    const cols = filterBounds(props.win.data.features, sanitizedCols, props.win.data.bounds);
+
+    useEffect(
+        _ =>
+            props.win.setData(data => ({
+                ...data.toJS(),
+                binSize: { x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT },
+                bounds: props.win.data.features.reduce((acc, colName, idx) => {
+                    acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
+                    return acc;
+                }, {})
+            })),
+        []
+    );
 
     //calculate range of data for axis labels
     const xAxis = props.win.data.features[0];
@@ -151,7 +158,7 @@ function HeatmapGraph(props) {
 
     function getCols() {
         return squashDataIntoBuckets(
-            data,
+            cols,
             props.win.data.binSize
                 ? Object.values(props.win.data.binSize)
                 : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT]
@@ -164,8 +171,8 @@ function HeatmapGraph(props) {
     const [chartState, setChartState] = useState({
         data: [
             {
-                x: generateDataAxis(data[0]),
-                y: generateDataAxis(data[1]),
+                x: generateDataAxis(cols[0]),
+                y: generateDataAxis(cols[1]),
                 z: getCols(),
                 type: "heatmap",
                 showscale: true,
@@ -210,8 +217,8 @@ function HeatmapGraph(props) {
     // Effect to keep axes updated if they've been swapped
     useEffect(
         _ => {
-            chartState.data[0].x = generateDataAxis(data[0]);
-            chartState.data[0].y = generateDataAxis(data[1]);
+            chartState.data[0].x = generateDataAxis(cols[0]);
+            chartState.data[0].y = generateDataAxis(cols[1]);
             chartState.data[0].z = getCols();
             chartState.layout.xaxis.title = xAxis;
             chartState.layout.yaxis.title = yAxis;
