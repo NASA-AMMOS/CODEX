@@ -43,6 +43,7 @@
         "react-d3-library": "^1.1.8",
         "react-dom": "^16.3.2",
         "react-handsontable": "^0.3.1",
+        "react-hot-loader": "^4.12.15",
         "react-immutable-proptypes": "^2.1.0",
         "react-markdown": "^3.3.0",
         "react-nestable": "^1.1.0",

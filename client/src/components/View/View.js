@@ -1,12 +1,14 @@
 import "./View.css";
 
-import React, { Component } from "react";
+import React from "react";
 
-import Container from "../Container/Container";
-import LeftPanel from "components/LeftPanel/LeftPanel";
-import TopBar from "components/TopBar/TopBar";
-import ConfirmationModal from "components/ConfirmationModal/ConfirmationModal";
 import CodexSnackbar from "components/CodexSnackbar/CodexSnackbar";
+import ConfirmationModal from "components/ConfirmationModal/ConfirmationModal";
+import LeftPanel from "components/LeftPanel/LeftPanel";
+import PropertyEditor from "components/PropertyEditor/PropertyEditor";
+import TopBar from "components/TopBar/TopBar";
+import WindowManager from "components/WindowManager/WindowManager";
+import { hot } from "react-hot-loader";
 
 function View(props) {
     return (
@@ -15,9 +17,8 @@ function View(props) {
 
             <div className="bottom-section">
                 <LeftPanel />
-                <div className="rightPanel">
-                    <Container />
-                </div>
+                <WindowManager />
+                <PropertyEditor />
             </div>
             <ConfirmationModal />
             <CodexSnackbar />
@@ -25,4 +26,4 @@ function View(props) {
     );
 }
 
-export default View;
+export default hot(module)(View);

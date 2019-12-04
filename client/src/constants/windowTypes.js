@@ -30,6 +30,7 @@ export const TIME_SERIES_GRAPH = "Time Series";
 export const HEATMAP_GRAPH = "Heat Map";
 export const BOX_PLOT_GRAPH = "Box Plot";
 export const HISTOGRAM_GRAPH = "Histogram";
+export const SINGLE_X_MULTIPLE_Y = "Single X, Multiple Y";
 export const graphs = [
     SCATTER_GRAPH,
     CONTOUR_GRAPH,
@@ -37,7 +38,8 @@ export const graphs = [
     TIME_SERIES_GRAPH,
     HEATMAP_GRAPH,
     BOX_PLOT_GRAPH,
-    HISTOGRAM_GRAPH
+    HISTOGRAM_GRAPH,
+    SINGLE_X_MULTIPLE_Y
 ];
 
 export const SESSIONS_WINDOW = "SESSIONS_WINDOW";

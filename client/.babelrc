@@ -4,6 +4,8 @@
 		"development": {
                         "plugins": ["@babel/plugin-transform-regenerator"],
 			"presets": ["react-hmre"]
+,			  "plugins": ["react-hot-loader/babel"]
+
 		}
 	}
 }

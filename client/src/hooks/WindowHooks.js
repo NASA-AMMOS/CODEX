@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import * as wmActions from "actions/windowManagerActions";
 import { defaultInitialSettings } from "constants/windowSettings";
 import { fromJS } from "immutable";
-
+import * as actionTypes from "constants/actionTypes";
 /*
  * Basically, this hook:
  *      1) checks if an ID was passed down from the window manager
@@ -42,7 +42,10 @@ const wrapWindow = (win, dispatch) => {
             }
         },
         setData: data => {
-            if (fromJS(data) !== win.get("data")) {
+            if (typeof data === "function") {
+                data = data(win.get("data")); // Allow a callback function with the existing data as an argument
+            }
+            if (data && !fromJS(data).equals(win.get("data"))) {
                 dispatch(wmActions.setWindowData(win.get("id"), data));
             }
         },
@@ -103,6 +106,78 @@ export function useActiveWindow() {
     const setActiveWindow = id => id !== activeWindow && dispatch(wmActions.setActiveWindow(id));
 
     return [activeWindow, setActiveWindow];
+}
+
+/**
+ * Getter for the window list
+ * @return {object} value
+ */
+export function useWindowList() {
+    const dispatch = useDispatch();
+    return useSelector(state => state.windowManager.get("windows"));
+}
+
+/**
+ * Getter/setter for a specific graph window's feature list
+ * @return {tuple} value/setter function
+ */
+export function useWindowFeatureList(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+    const features = win.getIn(["data", "features"]);
+
+    return [
+        features,
+        newFeatures =>
+            dispatch(wmActions.setWindowData(id, win.get("data").set("features", newFeatures)))
+    ];
+}
+
+/**
+ * Getter/setter for a specific graph window's feature info list
+ * @return {tuple} value/setter function
+ */
+export function useWindowFeatureInfoList(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "featureInfo"], []),
+        newInfo =>
+            dispatch(wmActions.setWindowData(id, win.get("data").set("featureInfo", newInfo)))
+    ];
+}
+
+/**
+ * Getter/setter for a specific graph window x axis
+ * @return {tuple} value/setter function
+ */
+export function useWindowXAxis(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "xAxis"]),
+        xAxis => dispatch(wmActions.setWindowData(id, win.get("data").set("xAxis", xAxis)))
+    ];
+}
+
+/**
+ * Getter/setter for a specific graph window title
+ * @return {tuple} value/setter function
+ */
+export function useWindowTitle(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+    return [win.get("title"), title => dispatch(wmActions.setWindowTitle(id, title))];
 }
 
 export default useWindowManager;

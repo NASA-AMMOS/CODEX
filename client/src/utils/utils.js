@@ -218,7 +218,7 @@ export function removeSentinelValues(cols, fileInfo) {
 }
 
 function getWindowContainerBounds() {
-    const windowContainer = document.getElementById("Container");
+    const windowContainer = document.getElementById("windowContainer");
     const bounds = windowContainer.getBoundingClientRect();
     bounds.width = Math.floor(bounds.width);
     bounds.height = Math.floor(bounds.height);

@@ -318,11 +318,17 @@ function ContourGraph(props) {
 
     // plug through props
     const cols = utils.removeSentinelValues(
-        props.data.map(f => f.get("data")).toJS(),
+        props.win.data.features.map(colName =>
+            props.data
+                .find(col => col.get("feature") === colName)
+                .get("data")
+                .toJS()
+        ),
         props.fileInfo
     );
-    const xAxis = props.data.getIn([0, "feature"]);
-    const yAxis = props.data.getIn([1, "feature"]);
+
+    const xAxis = props.win.data.features[0];
+    const yAxis = props.win.data.features[1];
 
     //const cols = utils.unzip(data.slice(1));
     // The plotly react element only changes when the revision is incremented.
@@ -387,6 +393,18 @@ function ContourGraph(props) {
         setChartRevision(revision);
     }
 
+    // Effect to keep axes updated if they've been swapped
+    useEffect(
+        _ => {
+            chartState.data[0].x = cols[0];
+            chartState.data[0].y = cols[1];
+            chartState.layout.xaxis.title = xAxis;
+            chartState.layout.yaxis.title = yAxis;
+            updateChartRevision();
+        },
+        [props.win.data.features]
+    );
+
     return (
         <GraphWrapper chart={chart} chartId={chartId} win={props.win}>
             <Plot
@@ -428,12 +446,12 @@ export default props => {
 
     const features = usePinnedFeatures(win);
 
-    if (features === null) {
+    if (features === null || !win.data) {
         return <WindowCircularProgress />;
     }
 
     if (features.size === 2) {
-        win.setTitle(features.map(f => f.get("feature")).join(" vs "));
+        win.setTitle(win.data.features.join(" vs "));
         return (
             <ContourGraph
                 currentSelection={currentSelection}

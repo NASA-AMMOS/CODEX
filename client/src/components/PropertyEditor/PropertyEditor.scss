@@ -1,0 +1,80 @@
+@import "styles/theme.scss";
+
+.propertyEditorContainer {
+    height: 100vh;
+    // min-width: 225px;
+    flex-basis: 225px;
+    background-color: black;
+    position: relative;
+    z-index: 150;
+
+    .header {
+        font-family: Inter;
+        font-style: normal;
+        font-weight: bold;
+        font-size: 16px;
+        line-height: 19px;
+        color: white;
+        margin-top: 10px;
+        margin-left: 14px;
+        margin-bottom: 10px;
+    }
+
+    .axis {
+        margin-left: 18px;
+        margin-bottom: 25px;
+        label {
+            display: block;
+            font-size: 11px;
+            line-height: 13px;
+            color: #f2f2f2;
+            margin-bottom: 0;
+            color: $grey5;
+        }
+
+        .feature-name {
+            font-size: 14px;
+            line-height: 17px;
+            color: #eeeeee;
+        }
+    }
+
+    .swap-button {
+        color: #eeeeee;
+        margin-left: 10px;
+
+        svg {
+            margin-left: 5px;
+            fill: white;
+        }
+    }
+
+    .color-swatch {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .line-plot {
+        width: 60%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+        line-height: 17px;
+        color: $grey9;
+        margin-bottom: 5px;
+    }
+
+    .title-field {
+        margin-left: 18px;
+        margin-bottom: 10px;
+        input {
+            color: #eeeeee;
+            user-select: text;
+            &::selection {
+                background: blue;
+            }
+        }
+    }
+}
