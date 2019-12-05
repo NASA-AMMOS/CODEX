@@ -29,25 +29,14 @@ import Transform from "components/Transform/Transform";
 import QualityScan from "components/QualityScan/QualityScan";
 import SingleXMultipleYGraph from "components/Graphs/SingleXMultipleYGraph";
 import MapGraph from "components/Graphs/MapGraph";
+import GraphWindow from "components/Graphs/GraphWindow";
 
 export function getWindowContent(win) {
+    // Graphs get handled by the separate graph handler, as the graph type isn't fixed to the window.
+    if (windowTypes.graphs.includes(win.get("windowType")))
+        return <GraphWindow data={win.get("data")} windowType={win.get("windowType")} />;
+
     switch (win.get("windowType")) {
-        case uiTypes.SCATTER_GRAPH:
-            return <ScatterGraph data={win.get("data")} />;
-        case uiTypes.CONTOUR_GRAPH:
-            return <ContourGraph data={win.get("data")} />;
-        case uiTypes.TIME_SERIES_GRAPH:
-            return <TimeSeriesGraph data={win.get("data")} />;
-        case uiTypes.HEATMAP_GRAPH:
-            return <HeatmapGraph data={win.get("data")} />;
-        case windowTypes.HEATMAP_3D_GRAPH:
-            return <HeatmapGraph3d data={win.get("data")} />;
-        case uiTypes.BOX_PLOT_GRAPH:
-            return <BoxPlotGraph data={win.get("data")} />;
-        case uiTypes.VIOLIN_PLOT_GRAPH:
-            return <ViolinPlotGraph data={win.get("data")} />;
-        case uiTypes.HISTOGRAM_GRAPH:
-            return <HistogramGraph data={win.get("data")} />;
         case algorithmTypes.CLUSTER_ALGORITHM:
             return (
                 <ClusterAlgorithm
@@ -91,10 +80,6 @@ export function getWindowContent(win) {
             return <Transform />;
         case windowTypes.QUALITY_SCAN_WINDOW:
             return <QualityScan data={win.get("data")} />;
-        case windowTypes.SINGLE_X_MULTIPLE_Y:
-            return <SingleXMultipleYGraph data={win.get("data")} />;
-        case windowTypes.MAP_GRAPH:
-            return <MapGraph data={win.get("data")} />;
         default:
             return (
                 <p>

@@ -94,17 +94,18 @@ function ViolinPlotGraph(props) {
     const [data, cols] = processedData;
 
     // Update bound state with the calculated bounds of the data
-    useEffect(
-        _ =>
-            props.win.setData(data => ({
-                ...data.toJS(),
-                bounds: props.win.data.features.reduce((acc, colName, idx) => {
+    useEffect(_ => {
+        if (!props.win.title) props.win.setTitle(props.win.data.features.join(" vs "));
+        props.win.setData(data => ({
+            ...data.toJS(),
+            bounds:
+                props.win.data.bounds ||
+                props.win.data.features.reduce((acc, colName, idx) => {
                     acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
                     return acc;
                 }, {})
-            })),
-        []
-    );
+        }));
+    }, []);
 
     // Update data state when the bounds change
     useEffect(
@@ -215,45 +216,4 @@ function ViolinPlotSubGraph(props) {
     );
 }
 
-export default props => {
-    const win = useWindowManager(props, {
-        width: 500,
-        height: 500,
-        resizeable: true,
-        title: DEFAULT_TITLE
-    });
-
-    const [currentSelection, setCurrentSelection] = useCurrentSelection();
-    const [savedSelections, saveCurrentSelection] = useSavedSelections();
-    const [globalChartState, setGlobalChartState] = useGlobalChartState();
-    const fileInfo = useFileInfo();
-
-    const features = usePinnedFeatures(win);
-
-    if (features === null || !win.data) {
-        return <WindowCircularProgress />;
-    }
-    if (features.size === 0) {
-        return <WindowError> Please select at least one feature to use this graph.</WindowError>;
-    }
-
-    if (win.title === DEFAULT_TITLE)
-        win.setTitle(
-            features
-                .map(f => f.get("feature"))
-                .toJS()
-                .join(" vs ")
-        );
-    return (
-        <ViolinPlotGraph
-            currentSelection={currentSelection}
-            setCurrentSelection={setCurrentSelection}
-            savedSelections={savedSelections}
-            saveCurrentSelection={saveCurrentSelection}
-            globalChartState={globalChartState}
-            data={features}
-            fileInfo={fileInfo}
-            win={win}
-        />
-    );
-};
+export default ViolinPlotGraph;

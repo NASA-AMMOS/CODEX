@@ -139,22 +139,28 @@ function HeatmapGraph(props) {
     );
     const cols = filterBounds(props.win.data.features, sanitizedCols, props.win.data.bounds);
 
-    useEffect(
-        _ =>
-            props.win.setData(data => ({
-                ...data.toJS(),
-                binSize: { x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT },
-                bounds: props.win.data.features.reduce((acc, colName, idx) => {
+    const xAxis = props.win.data.axisLabels
+        ? props.win.data.axisLabels.x
+        : props.win.data.features[0];
+    const yAxis = props.win.data.axisLabels
+        ? props.win.data.axisLabels.y
+        : props.win.data.features[1];
+    useEffect(_ => {
+        if (!props.win.title) props.win.setTitle(props.win.data.features.join(" vs "));
+        props.win.setData(data => ({
+            ...data.toJS(),
+            binSize: props.win.data.binSize || {
+                x: DEFAULT_BUCKET_COUNT,
+                y: DEFAULT_BUCKET_COUNT
+            },
+            bounds:
+                props.win.data.bounds ||
+                props.win.data.features.reduce((acc, colName, idx) => {
                     acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
                     return acc;
                 }, {})
-            })),
-        []
-    );
-
-    //calculate range of data for axis labels
-    const xAxis = props.win.data.features[0];
-    const yAxis = props.win.data.features[1];
+        }));
+    }, []);
 
     function getCols() {
         return squashDataIntoBuckets(
@@ -251,51 +257,4 @@ function HeatmapGraph(props) {
     );
 }
 
-export default props => {
-    const win = useWindowManager(props, {
-        width: 500,
-        height: 500,
-        resizeable: true,
-        title: DEFAULT_TITLE
-    });
-
-    const [currentSelection, setCurrentSelection] = useCurrentSelection();
-    //const [savedSelections, saveCurrentSelection] = useSavedSelections();
-    //const [globalChartState, setGlobalChartState] = useGlobalChartState();
-    const fileInfo = useFileInfo();
-
-    const features = usePinnedFeatures(win);
-
-    if (features === null || !win.data) {
-        return <WindowCircularProgress />;
-    }
-
-    if (features.size === 2) {
-        if (win.title === DEFAULT_TITLE) win.setTitle(win.data.features.join(" vs "));
-        if (!win.data.binSize)
-            win.setData(data =>
-                data.set(
-                    "binSize",
-                    Immutable.fromJS({ x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT })
-                )
-            );
-
-        return (
-            <HeatmapGraph
-                currentSelection={currentSelection}
-                setCurrentSelection={setCurrentSelection}
-                data={features}
-                fileInfo={fileInfo}
-                win={win}
-            />
-        );
-    } else {
-        return (
-            <WindowError>
-                Please select exactly two features
-                <br />
-                in the features list to use this graph.
-            </WindowError>
-        );
-    }
-};
+export default HeatmapGraph;

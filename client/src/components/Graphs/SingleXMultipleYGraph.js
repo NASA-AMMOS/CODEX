@@ -104,17 +104,18 @@ function SingleXMultipleYGraph(props) {
     props.win.setData(data => ({ ...data.toJS(), featureInfo }));
 
     // Effect to assign the min and max bounds based on the data
-    useEffect(
-        _ =>
-            props.win.setData(data => ({
-                ...data.toJS(),
-                bounds: cols.reduce((acc, col) => {
+    useEffect(_ => {
+        if (!props.win.title) props.win.setTitle(props.win.data.features.join(" vs "));
+        props.win.setData(data => ({
+            ...data.toJS(),
+            bounds:
+                props.win.data.bounds ||
+                cols.reduce((acc, col) => {
                     acc[col.name] = { min: Math.min(...col.data), max: Math.max(...col.data) };
                     return acc;
                 }, {})
-            })),
-        []
-    );
+        }));
+    }, []);
 
     function getXAxisTitle() {
         return !props.win.data.xAxis || props.win.data.xAxis === uiTypes.GRAPH_INDEX
@@ -379,49 +380,4 @@ function SingleXMultipleYGraph(props) {
     );
 }
 
-// wrapped data selector
-export default props => {
-    const win = useWindowManager(props, {
-        width: 500,
-        height: 500,
-        resizeable: true,
-        title: DEFAULT_TITLE
-    });
-
-    const [currentSelection, setCurrentSelection] = useCurrentSelection();
-    const [savedSelections, saveCurrentSelection] = useSavedSelections();
-    const [globalChartState, setGlobalChartState] = useGlobalChartState();
-    const [hoverSelection, saveHoverSelection] = useHoveredSelection();
-    const fileInfo = useFileInfo();
-
-    const features = usePinnedFeatures(win);
-
-    if (features === null || !win.data) {
-        return <WindowCircularProgress />;
-    }
-
-    if (features.size) {
-        if (win.title === DEFAULT_TITLE) win.setTitle(win.data.features.join(", "));
-        return (
-            <SingleXMultipleYGraph
-                currentSelection={currentSelection}
-                setCurrentSelection={setCurrentSelection}
-                savedSelections={savedSelections}
-                saveCurrentSelection={saveCurrentSelection}
-                hoverSelection={hoverSelection}
-                globalChartState={globalChartState}
-                data={features}
-                fileInfo={fileInfo}
-                win={win}
-            />
-        );
-    } else {
-        return (
-            <WindowError>
-                Please select exactly two features
-                <br />
-                in the features list to use this graph.
-            </WindowError>
-        );
-    }
-};
+export default SingleXMultipleYGraph;

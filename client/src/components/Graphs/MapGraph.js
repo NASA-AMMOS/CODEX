@@ -60,21 +60,22 @@ function MapGraph(props) {
         props.win.data.bounds
     ).map((data, idx) => ({ ...baseCols[idx], data }));
 
-    useEffect(
-        _ =>
-            props.win.setData(data => ({
-                ...data.toJS(),
-                mapType: uiTypes.MAP_USGS,
-                xAxis: props.win.data.features[0],
-                yAxis: props.win.data.features[1],
-                zAxis: props.win.data.features[2] || null,
-                bounds: cols.reduce((acc, col) => {
+    useEffect(_ => {
+        if (!props.win.title) props.win.setTitle(props.win.data.features.join(" vs "));
+        props.win.setData(data => ({
+            ...data.toJS(),
+            mapType: uiTypes.MAP_USGS,
+            xAxis: props.win.data.features[0],
+            yAxis: props.win.data.features[1],
+            zAxis: props.win.data.features[2] || null,
+            bounds:
+                props.win.bounds ||
+                cols.reduce((acc, col) => {
                     acc[col.feature] = { min: Math.min(...col.data), max: Math.max(...col.data) };
                     return acc;
                 }, {})
-            })),
-        []
-    );
+        }));
+    }, []);
 
     const heatMode = props.win.data.features.length === 3;
     const dataset = heatMode
@@ -137,7 +138,13 @@ function MapGraph(props) {
             if (oldData === JSON.stringify(props.win.data)) return; // Avoid unneccessary rerenders
             if (!props.win.data.xAxis) return;
             const newData = [...chartState.data];
-            newData[0].lat = cols.find(col => col.feature === props.win.data.xAxis).data;
+
+            // this is a little kludgy, but if the user switches to from the singlex multipley map,
+            // the z-index can be set to GRAPH_INDEX,
+            // which doesn't apply here
+            const xAxis = cols.find(col => col.feature === props.win.data.xAxis);
+            newData[0].lat = xAxis ? xAxis.data : props.win.data.features[0];
+
             newData[0].lon = cols.find(col => col.feature === props.win.data.yAxis).data;
             if (props.win.data.zAxis)
                 newData[0].z = cols.find(col => col.feature === props.win.data.zAxis).data;
@@ -172,41 +179,4 @@ function MapGraph(props) {
     );
 }
 
-export default props => {
-    const win = useWindowManager(props, {
-        width: 700,
-        height: 500,
-        resizeable: true,
-        title: DEFAULT_TITLE
-    });
-
-    const [currentSelection, setCurrentSelection] = useCurrentSelection();
-    const fileInfo = useFileInfo();
-
-    const features = usePinnedFeatures(win);
-
-    if (features === null || !win.data) {
-        return <WindowCircularProgress />;
-    }
-
-    if (features.size === 2 || features.size === 3) {
-        if (win.title === DEFAULT_TITLE) win.setTitle(win.data.features.join(" vs "));
-        return (
-            <MapGraph
-                currentSelection={currentSelection}
-                setCurrentSelection={setCurrentSelection}
-                data={features}
-                fileInfo={fileInfo}
-                win={win}
-            />
-        );
-    } else {
-        return (
-            <WindowError>
-                Please select no more than three features
-                <br />
-                in the features list to use this graph.
-            </WindowError>
-        );
-    }
-};
+export default MapGraph;
