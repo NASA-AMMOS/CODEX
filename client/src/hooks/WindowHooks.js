@@ -284,4 +284,26 @@ export function useWindowGraphBounds(id) {
     ];
 }
 
+export function useWindowAxisLabels(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "axisLabels"]),
+        axisLabels =>
+            dispatch(wmActions.setWindowData(id, win.get("data").set("axisLabels", axisLabels)))
+    ];
+}
+
+export function useWindowType(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [win.get("windowType"), windowType => dispatch(wmActions.setWindowType(id, windowType))];
+}
+
 export default useWindowManager;

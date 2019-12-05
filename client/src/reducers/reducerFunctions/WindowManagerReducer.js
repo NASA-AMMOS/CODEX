@@ -125,4 +125,15 @@ export default class WindowManagerReducer {
     static setWindowActive(state, action) {
         return state.set("activeWindow", action.id);
     }
+
+    static setWindowType(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id ? win.set("windowType", action.windowType) : win
+                )
+        );
+    }
 }

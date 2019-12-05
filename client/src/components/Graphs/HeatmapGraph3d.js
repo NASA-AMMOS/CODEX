@@ -91,22 +91,30 @@ function HeatmapGraph3d(props) {
     );
     const cols = filterBounds(props.win.data.features, sanitizedCols, props.win.data.bounds);
 
+    const xAxis = props.win.data.axisLabels
+        ? props.win.data.axisLabels.x
+        : props.win.data.features[0];
+    const yAxis = props.win.data.axisLabels
+        ? props.win.data.axisLabels.y
+        : props.win.data.features[1];
+
     // Set x-axis averages as the z-axis
-    useEffect(
-        _ =>
-            props.win.setData(data => ({
-                ...data.toJS(),
-                xAxis: props.win.data.features[0],
-                yAxis: props.win.data.features[1],
-                zAxis: props.win.data.features[2],
-                binSize: { x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT },
-                bounds: props.win.data.features.reduce((acc, colName, idx) => {
+    useEffect(_ => {
+        if (!props.win.title) props.win.setTitle(props.win.data.features.join(" vs "));
+        props.win.setData(data => ({
+            ...data.toJS(),
+            xAxis: props.win.data.features[0],
+            yAxis: props.win.data.features[1],
+            zAxis: props.win.data.features[2],
+            binSize: props.win.data.binSize || { x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT },
+            bounds:
+                props.win.data.bounds ||
+                props.win.data.features.reduce((acc, colName, idx) => {
                     acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
                     return acc;
                 }, {})
-            })),
-        []
-    );
+        }));
+    }, []);
 
     //the number of interpolation steps that you can take caps at 5?
     const interpolatedColors = graphFunctions.interpolateColors(
@@ -115,10 +123,6 @@ function HeatmapGraph3d(props) {
         5,
         "linear"
     );
-
-    //calculate range of data for axis labels
-    const xAxis = props.win.data.features[0];
-    const yAxis = props.win.data.features[1];
 
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
@@ -248,43 +252,4 @@ function HeatmapGraph3d(props) {
     );
 }
 
-export default props => {
-    const win = useWindowManager(props, {
-        width: 500,
-        height: 500,
-        resizeable: true,
-        title: DEFAULT_TITLE
-    });
-
-    const [currentSelection, setCurrentSelection] = useCurrentSelection();
-    //const [savedSelections, saveCurrentSelection] = useSavedSelections();
-    //const [globalChartState, setGlobalChartState] = useGlobalChartState();
-    const fileInfo = useFileInfo();
-
-    const features = usePinnedFeatures(win);
-
-    if (features === null || !win.data) {
-        return <WindowCircularProgress />;
-    }
-
-    if (features.size === 3) {
-        if (win.title === DEFAULT_TITLE) win.setTitle(win.data.features.join(" vs "));
-        return (
-            <HeatmapGraph3d
-                currentSelection={currentSelection}
-                setCurrentSelection={setCurrentSelection}
-                data={features}
-                fileInfo={fileInfo}
-                win={win}
-            />
-        );
-    } else {
-        return (
-            <WindowError>
-                Please select exactly three features
-                <br />
-                in the features list to use this graph.
-            </WindowError>
-        );
-    }
-};
+export default HeatmapGraph3d;

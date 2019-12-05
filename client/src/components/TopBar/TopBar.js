@@ -75,7 +75,11 @@ function NavigationBar(props) {
             }}
         >
             <div id="topBarMenu">
-                <Dropdown className="dropdownMain" autoOpen={false}>
+                <Dropdown
+                    className="dropdownMain"
+                    autoOpen={false}
+                    disabled={props.featureList.every(feature => !feature.get("selected"))}
+                >
                     <Dropdown.Toggle className="dropdownToggle" title="Graphs" />
                     <Dropdown.Menu>{getGraphMenuItems()}</Dropdown.Menu>
                 </Dropdown>
@@ -158,7 +162,8 @@ const mapStateToProps = state => {
     return {
         data: state.data,
         ui: state.ui,
-        filename: state.data.get("filename")
+        filename: state.data.get("filename"),
+        featureList: state.data.get("featureList")
     };
 };
 

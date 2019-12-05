@@ -21,12 +21,42 @@ import * as windowTypes from "constants/windowTypes";
 
 import {
     useSwapAxes,
+    useWindowAxisLabels,
     useWindowGraphBinSize,
     useWindowGraphBounds,
     useWindowMapType,
+    useWindowType,
     useWindowYAxis,
     useWindowZAxis
 } from "../../hooks/WindowHooks";
+import { NUM_FEATURES_REQUIRED } from "components/Graphs/GraphWindow";
+
+function ChangeGraphType(props) {
+    const [windowType, setWindowType] = useWindowType(props.activeWindowId);
+    const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+
+    const availableWindowTypes = windowTypes.graphs.filter(type => {
+        const featuresRequired = NUM_FEATURES_REQUIRED[type];
+        if (!featuresRequired || !features) return true;
+        return (
+            (typeof featuresRequired === "number" && features.size === featuresRequired) ||
+            (features.size >= featuresRequired[0] && features.size <= featuresRequired[1])
+        );
+    });
+
+    return (
+        <div className="axis">
+            <label>Graph Type</label>
+            <select value={windowType} onChange={e => setWindowType(e.target.value)}>
+                {availableWindowTypes.map(f => (
+                    <option value={f} key={f}>
+                        {f}
+                    </option>
+                ))}
+            </select>
+        </div>
+    );
+}
 
 function WindowRenameInput(props) {
     const [windowTitle, setWindowTitle] = useWindowTitle(props.activeWindowId);
@@ -46,6 +76,36 @@ function WindowRenameInput(props) {
     );
 }
 
+function XYAxisRename(props) {
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.activeWindowId);
+    function handleChangeAxisLabels(axis) {
+        return e => setAxisLabels(axisLabels.set(axis, e.target.value));
+    }
+
+    return (
+        <div className="input-field-container">
+            <TextField
+                label="X axis label"
+                variant="filled"
+                className="text-input"
+                value={axisLabels ? axisLabels.get("x") : ""}
+                type="text"
+                InputLabelProps={{ shrink: true }}
+                onChange={handleChangeAxisLabels("x")}
+            />
+            <TextField
+                label="Y axis label"
+                variant="filled"
+                className="text-input"
+                value={axisLabels ? axisLabels.get("y") : ""}
+                type="text"
+                InputLabelProps={{ shrink: true }}
+                onChange={handleChangeAxisLabels("y")}
+            />
+        </div>
+    );
+}
+
 function WindowGraphBounds(props) {
     const [graphBounds, setGraphBounds] = useWindowGraphBounds(props.activeWindowId);
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
@@ -62,7 +122,7 @@ function WindowGraphBounds(props) {
                 label="X axis min"
                 variant="filled"
                 className="text-input"
-                value={graphBounds && graphBounds.getIn([features.get(0), "min"])}
+                value={graphBounds ? graphBounds.getIn([features.get(0), "min"]) : ""}
                 type="number"
                 InputLabelProps={{ shrink: true }}
                 onChange={handleChangeBounds(features.get(0), "min")}
@@ -71,7 +131,7 @@ function WindowGraphBounds(props) {
                 label="X axis max"
                 variant="filled"
                 className="text-input"
-                value={graphBounds && graphBounds.getIn([features.get(0), "max"])}
+                value={graphBounds ? graphBounds.getIn([features.get(0), "max"]) : ""}
                 type="number"
                 InputLabelProps={{ shrink: true }}
                 onChange={handleChangeBounds(features.get(0), "max")}
@@ -80,7 +140,7 @@ function WindowGraphBounds(props) {
                 label="Y axis min"
                 variant="filled"
                 className="text-input"
-                value={graphBounds && graphBounds.getIn([features.get(1), "min"])}
+                value={graphBounds ? graphBounds.getIn([features.get(1), "min"]) : ""}
                 type="number"
                 InputLabelProps={{ shrink: true }}
                 onChange={handleChangeBounds(features.get(1), "min")}
@@ -89,18 +149,18 @@ function WindowGraphBounds(props) {
                 label="Y axis max"
                 variant="filled"
                 className="text-input"
-                value={graphBounds && graphBounds.getIn([features.get(1), "max"])}
+                value={graphBounds ? graphBounds.getIn([features.get(1), "max"]) : ""}
                 type="number"
                 InputLabelProps={{ shrink: true }}
                 onChange={handleChangeBounds(features.get(1), "max")}
             />
-            {features.size > 3 ? null : (
+            {features.size < 3 ? null : (
                 <React.Fragment>
                     <TextField
                         label="Z axis min"
                         variant="filled"
                         className="text-input"
-                        value={graphBounds && graphBounds.getIn([features.get(2), "min"])}
+                        value={graphBounds ? graphBounds.getIn([features.get(2), "min"]) : ""}
                         type="number"
                         InputLabelProps={{ shrink: true }}
                         onChange={handleChangeBounds(features.get(2), "min")}
@@ -109,7 +169,7 @@ function WindowGraphBounds(props) {
                         label="Z axis max"
                         variant="filled"
                         className="text-input"
-                        value={graphBounds && graphBounds.getIn([features.get(2), "max"])}
+                        value={graphBounds ? graphBounds.getIn([features.get(2), "max"]) : ""}
                         type="number"
                         InputLabelProps={{ shrink: true }}
                         onChange={handleChangeBounds(features.get(2), "max")}
@@ -138,7 +198,7 @@ function MultipleWindowGraphBounds(props) {
                         label={`${feature} min`}
                         variant="filled"
                         className="text-input"
-                        value={graphBounds && graphBounds.getIn([features.get(idx), "min"])}
+                        value={graphBounds ? graphBounds.getIn([features.get(idx), "min"]) : ""}
                         type="number"
                         InputLabelProps={{ shrink: true }}
                         onChange={handleChangeBounds(features.get(idx), "min")}
@@ -147,7 +207,7 @@ function MultipleWindowGraphBounds(props) {
                         label={`${feature} max`}
                         variant="filled"
                         className="text-input"
-                        value={graphBounds && graphBounds.getIn([features.get(idx), "max"])}
+                        value={graphBounds ? graphBounds.getIn([features.get(idx), "max"]) : ""}
                         type="number"
                         InputLabelProps={{ shrink: true }}
                         onChange={handleChangeBounds(features.get(idx), "max")}
@@ -162,7 +222,6 @@ function MultiAxisGraphEditor(props) {
     const [featureInfo, setFeatureInfo] = useWindowFeatureInfoList(props.activeWindowId);
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [xAxis, setXAxis] = useWindowXAxis(props.activeWindowId);
-
     if (!features) return null;
 
     const xAxisSelect =
@@ -232,7 +291,7 @@ function HeatmapGraphEditor(props) {
                     label="Grid-width"
                     variant="filled"
                     className="text-input"
-                    value={binSize && binSize.get("x")}
+                    value={binSize ? binSize.get("x") : ""}
                     type="number"
                     InputLabelProps={{ shrink: true }}
                     onChange={handleChangeBinSize("x")}
@@ -241,7 +300,7 @@ function HeatmapGraphEditor(props) {
                     label="Grid-height"
                     variant="filled"
                     className="text-input"
-                    value={binSize && binSize.get("y")}
+                    value={binSize ? binSize.get("y") : ""}
                     type="number"
                     InputLabelProps={{ shrink: true }}
                     onChange={handleChangeBinSize("y")}
@@ -553,7 +612,7 @@ function PropertyEditor(props) {
             case windowTypes.HEATMAP_3D_GRAPH:
                 return (
                     <React.Fragment>
-                        <ThreeAxisGraphEditor activeWindowId={activeWindowId} />{" "}
+                        <ThreeAxisGraphEditor activeWindowId={activeWindowId} />
                         <WindowGraphBounds activeWindowId={activeWindowId} />
                     </React.Fragment>
                 );
@@ -586,6 +645,7 @@ function PropertyEditor(props) {
         <div className="propertyEditorContainer">
             <div className="header">Graph Details</div>
             <WindowRenameInput activeWindowId={activeWindowId} />
+            <ChangeGraphType activeWindowId={activeWindowId} />
             {panelContent}
         </div>
     );

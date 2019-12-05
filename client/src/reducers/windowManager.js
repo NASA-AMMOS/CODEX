@@ -36,6 +36,8 @@ export default function windowManager(
             return opt_reducer.setWindowData(state, action);
         case actionTypes.WINDOW_SET_ACTIVE:
             return opt_reducer.setWindowActive(state, action);
+        case actionTypes.WINDOW_SET_TYPE:
+            return opt_reducer.setWindowType(state, action);
         default:
             return state;
     }
