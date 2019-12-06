@@ -1,25 +1,18 @@
 import "components/Graphs/ScatterGraph.css";
 
+import { TinyColor } from "@ctrl/tinycolor";
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";
 
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import {
-    useCurrentSelection,
-    useSavedSelections,
-    usePinnedFeatures,
-    useHoveredSelection,
-    useFileInfo
-} from "hooks/DataHooks";
-import { useGlobalChartState } from "hooks/UIHooks";
-import { useWindowManager } from "hooks/WindowHooks";
 import GraphWrapper from "components/Graphs/GraphWrapper";
 import * as utils from "utils/utils";
 
 import { filterBounds } from "./graphFunctions";
 import { usePrevious } from "../../hooks/UtilHooks";
 
-const DEFAULT_POINT_COLOR = "rgba(0, 0, 0 ,0.5)";
+const DEFAULT_POINT_COLOR = "rgba(0, 0, 0, 0.5)";
+const DEFAULT_POINT_OPACITY = 0.5;
+const DEFAULT_POINT_SHAPE = "circle";
 const ANIMATION_RANGE = 15;
 const ANIMATION_SPEED = 0.75;
 const COLOR_CURRENT_SELECTION = "#FF0000";
@@ -57,7 +50,10 @@ function ScatterGraph(props) {
                     acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
                     return acc;
                 }, {}),
-            axisLabels: props.win.data.axisLabels || { x: xAxis, y: yAxis }
+            axisLabels: props.win.data.axisLabels || { x: xAxis, y: yAxis },
+            dotSize: props.win.data.dotSize || 5,
+            dotOpacity: props.win.data.dotOpacity || DEFAULT_POINT_OPACITY,
+            dotShape: props.win.data.dotShape || DEFAULT_POINT_SHAPE
         }));
     }, []);
 
@@ -211,10 +207,33 @@ function ScatterGraph(props) {
     );
 
     // Effect to keep axes updated if they've been swapped
+    const previousData = usePrevious(props.win.data);
     useEffect(
         _ => {
             chartState.data[0].x = cols[0];
             chartState.data[0].y = cols[1];
+
+            if (!previousData || props.win.data.dotSize !== previousData.dotSize) {
+                chartState.data[0].marker.size = props.win.data.dotSize;
+                chartState.data[0].selected.marker.size = props.win.data.dotSize;
+            }
+
+            if (!previousData || props.win.data.dotOpacity !== previousData.dotOpacity) {
+                chartState.data[0].marker.color = chartState.data[0].marker.color.map(color =>
+                    new TinyColor(color).setAlpha(props.win.data.dotOpacity).toString()
+                );
+                chartState.data[0].selected.marker.color = new TinyColor(
+                    chartState.data[0].selected.marker.color
+                )
+                    .setAlpha(props.win.data.dotOpacity)
+                    .toString();
+            }
+
+            if (!previousData || props.win.data.dotShape !== previousData.dotShape) {
+                chartState.data[0].marker.symbol = props.win.data.dotShape;
+                chartState.data[0].selected.marker.symbol = props.win.data.dotShape;
+            }
+
             if (props.win.data.axisLabels) {
                 chartState.layout.xaxis.title = props.win.data.axisLabels.x;
                 chartState.layout.yaxis.title = props.win.data.axisLabels.y;

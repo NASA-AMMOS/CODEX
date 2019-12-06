@@ -306,4 +306,41 @@ export function useWindowType(id) {
     return [win.get("windowType"), windowType => dispatch(wmActions.setWindowType(id, windowType))];
 }
 
+export function useWindowDotSize(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "dotSize"]),
+        dotSize => dispatch(wmActions.setWindowData(id, win.get("data").set("dotSize", dotSize)))
+    ];
+}
+
+export function useWindowDotOpacity(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "dotOpacity"]),
+        dotOpacity =>
+            dispatch(wmActions.setWindowData(id, win.get("data").set("dotOpacity", dotOpacity)))
+    ];
+}
+
+export function useWindowDotShape(id) {
+    const dispatch = useDispatch();
+    const win = useSelector(state =>
+        state.windowManager.get("windows").find(win => win.get("id") === id)
+    );
+
+    return [
+        win.getIn(["data", "dotShape"]),
+        dotShape => dispatch(wmActions.setWindowData(id, win.get("data").set("dotShape", dotShape)))
+    ];
+}
+
 export default useWindowManager;

@@ -4,6 +4,7 @@
     "private": true,
     "homepage": ".",
     "dependencies": {
+        "@ctrl/tinycolor": "^2.5.4",
         "@mapbox/shelf-pack": "^3.2.0",
         "@material-ui/core": "^4.5.0",
         "@material-ui/icons": "^4.4.3",
