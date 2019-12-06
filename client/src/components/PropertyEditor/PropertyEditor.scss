@@ -1,12 +1,13 @@
 @import "styles/theme.scss";
 
 .propertyEditorContainer {
-    height: 100vh;
+    height: calc(100vh - 70px);
     // min-width: 225px;
     flex-basis: 225px;
     background-color: #081a33;
     position: relative;
     z-index: 150;
+    overflow: auto;
 
     .header {
         font-family: Inter;
@@ -36,6 +37,10 @@
             font-size: 14px;
             line-height: 17px;
             color: #eeeeee;
+        }
+
+        select {
+            width: 150px;
         }
     }
 
@@ -89,9 +94,22 @@
     .input-field-container {
         margin-left: 15px;
         margin-top: 15px;
+        margin-bottom: 15px;
         .text-input {
             background: #e8e8e8;
             margin-bottom: 10px;
+
+            &.with-helper-text {
+                background: none;
+                .input-box {
+                    background: #d3d3d3;
+                    border-radius: 0;
+                }
+                .helper-text {
+                    color: #eeeeee;
+                    margin-left: 5px;
+                }
+            }
         }
     }
 }

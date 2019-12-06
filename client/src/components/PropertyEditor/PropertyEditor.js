@@ -7,6 +7,7 @@ import Immutable from "immutable";
 import React from "react";
 import TextField from "@material-ui/core/TextField";
 
+import { NUM_FEATURES_REQUIRED } from "components/Graphs/GraphWindow";
 import {
     useActiveWindow,
     useWindowList,
@@ -16,12 +17,16 @@ import {
     useWindowTitle
 } from "hooks/WindowHooks";
 import SwapAxesIcon from "components/Icons/SwapAxes";
+import * as scatterGraphTypes from "constants/scatterGraphTypes";
 import * as uiTypes from "constants/uiTypes";
 import * as windowTypes from "constants/windowTypes";
 
 import {
     useSwapAxes,
     useWindowAxisLabels,
+    useWindowDotOpacity,
+    useWindowDotShape,
+    useWindowDotSize,
     useWindowGraphBinSize,
     useWindowGraphBounds,
     useWindowMapType,
@@ -29,7 +34,69 @@ import {
     useWindowYAxis,
     useWindowZAxis
 } from "../../hooks/WindowHooks";
-import { NUM_FEATURES_REQUIRED } from "components/Graphs/GraphWindow";
+
+function ScatterOptionsEditor(props) {
+    const [dotSize, setDotSize] = useWindowDotSize(props.activeWindowId);
+    const [dotOpacity, setDotOpacity] = useWindowDotOpacity(props.activeWindowId);
+    const [dotShape, setDotShape] = useWindowDotShape(props.activeWindowId);
+
+    function handleChangeDotSize(e) {
+        const val = parseInt(e.target.value);
+        if (!val) setDotSize(0);
+        if (val > 0 && val <= 10) setDotSize(val);
+    }
+
+    function handleChangeDotOpacity(e) {
+        const val = parseFloat(e.target.value);
+        if (!val) setDotOpacity(0);
+        if (val >= 0 && val <= 100) setDotOpacity(val / 100);
+    }
+
+    function handleChangeDotShape(e) {
+        setDotShape(e.target.value);
+    }
+
+    return (
+        <React.Fragment>
+            <div className="input-field-container">
+                <TextField
+                    label="Dot size"
+                    variant="filled"
+                    className="text-input with-helper-text"
+                    value={dotSize || ""}
+                    type="number"
+                    InputLabelProps={{ shrink: true }}
+                    onChange={handleChangeDotSize}
+                    helperText="1-10 pixel dot size"
+                    InputProps={{ classes: { root: "input-box" } }}
+                    FormHelperTextProps={{ classes: { root: "helper-text" } }}
+                />
+                <TextField
+                    label="Dot opacity (%)"
+                    variant="filled"
+                    className="text-input with-helper-text"
+                    value={dotOpacity ? (dotOpacity * 100) | 0 : ""}
+                    type="number"
+                    InputLabelProps={{ shrink: true }}
+                    onChange={handleChangeDotOpacity}
+                    helperText="1-100% opacity"
+                    InputProps={{ classes: { root: "input-box" } }}
+                    FormHelperTextProps={{ classes: { root: "helper-text" } }}
+                />
+            </div>
+            <div className="axis">
+                <label>Dot Shape</label>
+                <select value={dotShape} onChange={handleChangeDotShape}>
+                    {scatterGraphTypes.SYMBOLS.map(f => (
+                        <option value={f} key={f}>
+                            {f}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        </React.Fragment>
+    );
+}
 
 function ChangeGraphType(props) {
     const [windowType, setWindowType] = useWindowType(props.activeWindowId);
@@ -595,6 +662,13 @@ function PropertyEditor(props) {
     const panelContent = (function() {
         switch (activeWindow.get("windowType")) {
             case windowTypes.SCATTER_GRAPH:
+                return (
+                    <React.Fragment>
+                        <TwoAxisGraphEditor activeWindowId={activeWindowId} />
+                        <WindowGraphBounds activeWindowId={activeWindowId} />
+                        <ScatterOptionsEditor activeWindowId={activeWindowId} />
+                    </React.Fragment>
+                );
             case windowTypes.CONTOUR_GRAPH:
                 return (
                     <React.Fragment>
