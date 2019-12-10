@@ -98,12 +98,12 @@
         .text-input {
             background: #e8e8e8;
             margin-bottom: 10px;
+            border-radius: 4px 4px 0px 0px;
 
             &.with-helper-text {
                 background: none;
                 .input-box {
                     background: #d3d3d3;
-                    border-radius: 0;
                 }
                 .helper-text {
                     color: #eeeeee;
