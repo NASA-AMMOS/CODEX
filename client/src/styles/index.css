@@ -43,7 +43,7 @@ body {
     background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-    background: #335de6;
+    background: #6981a1;
 }
 
 textarea:focus,
