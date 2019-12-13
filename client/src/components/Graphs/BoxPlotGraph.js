@@ -92,7 +92,7 @@ function BoxPlotGraph(props) {
 
     // Update bound state with the calculated bounds of the data
     useEffect(_ => {
-        if (!props.win.title) props.win.setTitle(props.win.data.features.join(" vs "));
+        if (!props.win.title) props.win.setTitle(props.win.data.features.join(" and "));
         props.win.setData(data => ({
             ...data.toJS(),
             bounds:
