@@ -180,6 +180,8 @@ function WindowManager(props) {
         [props.tileActionPending]
     );
 
+    const windowContainerId = "windowContainer";
+
     const windows = props.windows
         .filter(win => !win.get("minimizedOnly"))
         .map((win, idx) => {
@@ -202,7 +204,8 @@ function WindowManager(props) {
                 x: win.get("x", 0),
                 y: win.get("y", 0),
                 style: win.get("isFullscreen") && { width: "100%", height: "100%" },
-                wrapperStyle: win.get("wrapperStyle") ? win.get("wrapperStyle").toJS() : {}
+                wrapperStyle: win.get("wrapperStyle") ? win.get("wrapperStyle").toJS() : {},
+                parentId: windowContainerId
             };
 
             // This is a bit of an odd return fragment, but we want to avoid re-rendering the window's content.
@@ -241,7 +244,7 @@ function WindowManager(props) {
         });
 
     return (
-        <div className="windowContainer" id="windowContainer">
+        <div className="windowContainer" id={windowContainerId}>
             {windows}
             {makeMinimizedBar(props)}
         </div>

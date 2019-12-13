@@ -44,6 +44,7 @@ export interface CristalProps {
     x?: number;
     y?: number;
     hidden?: boolean;
+    parentId?: string;
 }
 
 export interface CristalState {
@@ -111,9 +112,10 @@ export class Cristal extends Component<CristalProps, CristalState> {
 
     // TODO-PERF: debounce
     onWindowResize = () => {
+        const { parentId } = this.props;
         const { x, y, width, height } = this.state;
         const size = width && height ? { width, height } : undefined;
-        const { x: newX, y: newY } = getBoundaryCoords({ x, y }, size);
+        const { x: newX, y: newY } = getBoundaryCoords({ x, y }, size, parentId);
 
         this.setState({
             x: newX,
@@ -142,7 +144,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
     };
 
     setInitialPosition = (size: Size) => {
-        const { initialPosition } = this.props;
+        const { initialPosition, parentId } = this.props;
         if (!initialPosition) return;
 
         let cords;
@@ -153,7 +155,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
             cords = initialPosition;
         }
 
-        const { x, y } = getBoundaryCoords(cords, size);
+        const { x, y } = getBoundaryCoords(cords, size, parentId);
 
         this.setState({ x, y });
     };
@@ -190,6 +192,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
             width: currentWidth,
             height: currentHeight
         } = this.state;
+        const { parentId } = this.props;
         const { movementX, movementY } = e;
         const { innerWidth, innerHeight } = window;
         const newX = currentX + movementX;
@@ -200,7 +203,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
                 currentWidth && currentHeight
                     ? { width: currentWidth, height: currentHeight }
                     : undefined;
-            const { x, y } = getBoundaryCoords({ x: newX, y: newY }, size);
+            const { x, y } = getBoundaryCoords({ x: newX, y: newY }, size, parentId);
 
             this.setState({ x, y }, this.notifyMove);
 
