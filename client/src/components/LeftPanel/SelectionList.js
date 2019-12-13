@@ -571,12 +571,7 @@ function SelectionList(props) {
     return (
         <React.Fragment>
             <div className="selections">
-                <div
-                    className={
-                        "header " +
-                        (panelCollapsedState ? "stats-hidden-header" : "stats-not-hidden-header")
-                    }
-                >
+                <div className={"header stats-hidden-header"}>
                     <div className="title">Selections</div>
                     <span className="counts">
                         {activeCount}/{shownCount}/{totalCount}
