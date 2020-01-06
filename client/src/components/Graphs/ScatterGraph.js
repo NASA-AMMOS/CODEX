@@ -35,10 +35,14 @@ function ScatterGraph(props) {
 
     const xAxis = props.win.data.axisLabels
         ? props.win.data.axisLabels.x
-        : props.win.data.features[0];
+        : props.data
+              .find(feature => feature.get("feature") === props.win.data.features[0])
+              .get("displayName");
     const yAxis = props.win.data.axisLabels
         ? props.win.data.axisLabels.y
-        : props.win.data.features[1];
+        : props.data
+              .find(feature => feature.get("feature") === props.win.data.features[1])
+              .get("displayName");
 
     const featureDisplayNames = props.win.data.features.map(featureName =>
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")

@@ -199,7 +199,7 @@ export function usePinnedFeatures(windowHandle = undefined) {
 
     const [pinned, setPinned] = useState(getPinnedFeatures(windowHandle));
 
-    // If the window handle selected features have changed (i.e. a feature has been renamed),
+    // If the window handle selected features have changed
     // reload the feature data.
     useEffect(
         _ => {
@@ -505,34 +505,6 @@ export function useFeatureDelete() {
         dispatch(featureRelease(featureName));
         dispatch(featureDelete(featureName));
         dispatch(uiActions.showSnackbar(snackbarMessage));
-    };
-}
-
-/**
- * Returns a function that renames a feature.
- */
-export function useFeatureRename() {
-    const dispatch = useDispatch();
-    const openWindows = useSelector(store => store.windowManager.get("windows"));
-
-    return (oldFeatureName, newFeatureName) => {
-        // Update the store and loaded data list with the new feature name
-        dispatch(featureRename(oldFeatureName, newFeatureName));
-
-        // Now update any windows that use this feature. We want to do this after we update the store
-        // so the window doesn't try to reload the data from the server.
-        const actions = openWindows
-            .filter(win => win.getIn(["data", "features"], []).includes(oldFeatureName))
-            .map(win =>
-                win.setIn(
-                    ["data", "features"],
-                    win
-                        .getIn(["data", "features"])
-                        .map(f => (f === oldFeatureName ? newFeatureName : f))
-                )
-            )
-            .map(win => wmActions.setWindowData(win.get("id"), win.get("data")));
-        dispatch(batchActions(actions));
     };
 }
 

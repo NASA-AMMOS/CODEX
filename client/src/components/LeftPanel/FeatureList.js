@@ -23,8 +23,7 @@ import {
     useFeatureStatistics,
     useFeatureStatisticsLoader,
     useFeatureMetadata,
-    useFeatureDelete,
-    useFeatureRename
+    useFeatureDelete
 } from "hooks/DataHooks";
 import * as dataActions from "actions/data";
 
@@ -231,14 +230,14 @@ function FeatureContextMenu(props) {
     const [contextMode, setContextMode] = useState(null);
     const [renameSelectionBuffer, setRenameSelectionBuffer] = useState("");
 
-    const [featureNames] = useFeatureDisplayNames();
+    const [featureNames, setFeatureName] = useFeatureDisplayNames();
     const displayName = featureNames.get(props.featureName, props.featureName);
 
     function submitRenamedFeature(e) {
         if (!e.key || (e.key && e.key === "Enter")) {
             setVisible(false);
             setContextMode(null);
-            listContext.featureRename(props.featureName, renameSelectionBuffer);
+            setFeatureName(props.featureName, renameSelectionBuffer);
         }
     }
 
@@ -535,8 +534,7 @@ function FeatureList(props) {
 
     // Create a context to hold dispatches and state we'll need in the lower components
     const listContext = {
-        featureDelete: useFeatureDelete(),
-        featureRename: useFeatureRename()
+        featureDelete: useFeatureDelete()
     };
 
     return (
