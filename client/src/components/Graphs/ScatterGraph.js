@@ -33,16 +33,17 @@ function ScatterGraph(props) {
     );
     const cols = filterBounds(props.win.data.features, sanitizedCols, props.win.data.bounds);
 
-    const xAxis = props.win.data.axisLabels
-        ? props.win.data.axisLabels.x
-        : props.data
-              .find(feature => feature.get("feature") === props.win.data.features[0])
-              .get("displayName");
-    const yAxis = props.win.data.axisLabels
-        ? props.win.data.axisLabels.y
-        : props.data
-              .find(feature => feature.get("feature") === props.win.data.features[1])
-              .get("displayName");
+    const xAxis =
+        (props.win.data.axisLabels && props.win.data.axisLabels[props.win.data.features[0]]) ||
+        props.data
+            .find(feature => feature.get("feature") === props.win.data.features[0])
+            .get("displayName");
+
+    const yAxis =
+        (props.win.data.axisLabels && props.win.data.axisLabels[props.win.data.features[1]]) ||
+        props.data
+            .find(feature => feature.get("feature") === props.win.data.features[1])
+            .get("displayName");
 
     const featureDisplayNames = props.win.data.features.map(featureName =>
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
@@ -58,7 +59,7 @@ function ScatterGraph(props) {
                     acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
                     return acc;
                 }, {}),
-            axisLabels: props.win.data.axisLabels || { x: xAxis, y: yAxis },
+            axisLabels: props.win.data.axisLabels,
             dotSize: props.win.data.dotSize || 5,
             dotOpacity: props.win.data.dotOpacity || DEFAULT_POINT_OPACITY,
             dotShape: props.win.data.dotShape || DEFAULT_POINT_SHAPE
@@ -242,10 +243,16 @@ function ScatterGraph(props) {
                 chartState.data[0].selected.marker.symbol = props.win.data.dotShape;
             }
 
-            if (props.win.data.axisLabels) {
-                chartState.layout.xaxis.title = props.win.data.axisLabels.x;
-                chartState.layout.yaxis.title = props.win.data.axisLabels.y;
-            }
+            chartState.layout.xaxis.title =
+                props.win.data.axisLabels && props.win.data.axisLabels[props.win.data.features[0]]
+                    ? props.win.data.axisLabels[props.win.data.features[0]]
+                    : xAxis;
+
+            chartState.layout.yaxis.title =
+                props.win.data.axisLabels && props.win.data.axisLabels[props.win.data.features[1]]
+                    ? props.win.data.axisLabels[props.win.data.features[1]]
+                    : yAxis;
+
             updateChartRevision();
         },
         [props.win.data.features]

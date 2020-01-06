@@ -85,6 +85,10 @@
         svg {
             fill: #dadada;
         }
+
+        &.axis-label {
+            margin-left: 0;
+        }
     }
 
     .bin-size-input {

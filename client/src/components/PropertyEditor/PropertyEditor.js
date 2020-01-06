@@ -342,8 +342,17 @@ function HeatmapGraphEditor(props) {
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [binSize, setBinSize] = useWindowGraphBinSize(props.activeWindowId);
     const [featureNameList] = useFeatureDisplayNames();
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.activeWindowId);
 
-    if (!features) return null;
+    function handleChangeAxisLabels(axis) {
+        return e => {
+            setAxisLabels(
+                axisLabels
+                    ? axisLabels.set(axis, e.target.value)
+                    : Immutable.fromJS({ [axis]: e.target.value })
+            );
+        };
+    }
 
     function handleChangeBinSize(axis) {
         return e => {
@@ -351,19 +360,45 @@ function HeatmapGraphEditor(props) {
         };
     }
 
+    if (!features) return null;
+
     return (
         <React.Fragment>
             <div className="axis">
                 <label>X-Axis</label>
-                <span className="feature-name">
-                    {featureNameList.get(features.get(0), features.get(0))}
-                </span>
+                <TextField
+                    className="title-field axis-label"
+                    value={
+                        (axisLabels && axisLabels.get(features.get(0))) ||
+                        featureNameList.get(features.get(0), features.get(0))
+                    }
+                    onChange={handleChangeAxisLabels(features.get(0))}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <EditIcon />
+                            </InputAdornment>
+                        )
+                    }}
+                />
             </div>
             <div className="axis">
                 <label>Y-Axis</label>
-                <span className="feature-name">
-                    {featureNameList.get(features.get(1), features.get(1))}
-                </span>
+                <TextField
+                    className="title-field axis-label"
+                    value={
+                        (axisLabels && axisLabels.get(features.get(1))) ||
+                        featureNameList.get(features.get(1), features.get(1))
+                    }
+                    onChange={handleChangeAxisLabels(features.get(1))}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <EditIcon />
+                            </InputAdornment>
+                        )
+                    }}
+                />
             </div>
             <Button className="swap-button" onClick={_ => setFeatures(features.reverse())}>
                 Swap Axes <SwapAxesIcon width="14" height="14" />
@@ -395,6 +430,17 @@ function HeatmapGraphEditor(props) {
 function TwoAxisGraphEditor(props) {
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [featureNameList] = useFeatureDisplayNames();
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.activeWindowId);
+
+    function handleChangeAxisLabels(axis) {
+        return e => {
+            setAxisLabels(
+                axisLabels
+                    ? axisLabels.set(axis, e.target.value)
+                    : Immutable.fromJS({ [axis]: e.target.value })
+            );
+        };
+    }
 
     if (!features) return null;
 
@@ -402,15 +448,39 @@ function TwoAxisGraphEditor(props) {
         <React.Fragment>
             <div className="axis">
                 <label>X-Axis</label>
-                <span className="feature-name">
-                    {featureNameList.get(features.get(0), features.get(0))}
-                </span>
+                <TextField
+                    className="title-field axis-label"
+                    value={
+                        (axisLabels && axisLabels.get(features.get(0))) ||
+                        featureNameList.get(features.get(0), features.get(0))
+                    }
+                    onChange={handleChangeAxisLabels(features.get(0))}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <EditIcon />
+                            </InputAdornment>
+                        )
+                    }}
+                />
             </div>
             <div className="axis">
                 <label>Y-Axis</label>
-                <span className="feature-name">
-                    {featureNameList.get(features.get(1), features.get(1))}
-                </span>
+                <TextField
+                    className="title-field axis-label"
+                    value={
+                        (axisLabels && axisLabels.get(features.get(1))) ||
+                        featureNameList.get(features.get(1), features.get(1))
+                    }
+                    onChange={handleChangeAxisLabels(features.get(1))}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <EditIcon />
+                            </InputAdornment>
+                        )
+                    }}
+                />
             </div>
             <Button className="swap-button" onClick={_ => setFeatures(features.reverse())}>
                 Swap Axes <SwapAxesIcon width="14" height="14" />
