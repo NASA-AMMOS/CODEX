@@ -88,9 +88,8 @@ function HistogramGraph(props) {
     }
 
     const [processedData, setProcessedData] = useState(_ => generatePlotData());
+    const [layouts, setLayouts] = useState(_ => generateLayouts(features));
     const [data, cols] = processedData;
-
-    let layouts = generateLayouts(features);
 
     const featureDisplayNames = props.win.data.features.map(featureName =>
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
@@ -116,6 +115,13 @@ function HistogramGraph(props) {
             setProcessedData(generatePlotData());
         },
         [props.win.data.bounds]
+    );
+
+    useEffect(
+        _ => {
+            setLayouts(generateLayouts(features));
+        },
+        [props.data]
     );
 
     return (
@@ -207,6 +213,7 @@ function HistogramSubGraph(props) {
     useEffect(
         _ => {
             chartState.data = [props.data];
+            chartState.layout = props.layout;
             updateChartRevision();
         },
         [props.data]

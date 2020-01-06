@@ -80,7 +80,7 @@ function ViolinPlotGraph(props) {
                     yaxis: "y",
                     type: "violin",
                     visible: true,
-                    name: feature.feature,
+                    name: feature.displayName,
                     box: {
                         visible: true
                     }
