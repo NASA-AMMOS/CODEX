@@ -494,6 +494,7 @@ function ThreeAxisGraphEditor(props) {
 function HistogramGraphEditor(props) {
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [binSize, setBinSize] = useWindowGraphBinSize(props.activeWindowId);
+
     if (!features) return null;
 
     function handleChangeBinSize(axis) {

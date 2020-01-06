@@ -4,20 +4,12 @@ import { bindActionCreators } from "redux";
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect, createRef } from "react";
 
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import {
-    useCurrentSelection,
-    useSavedSelections,
-    usePinnedFeatures,
-    useFileInfo
-} from "hooks/DataHooks";
-import { useGlobalChartState } from "hooks/UIHooks";
-import { useWindowManager } from "hooks/WindowHooks";
 import GraphWrapper from "components/Graphs/GraphWrapper";
 import * as selectionActions from "actions/selectionActions";
 import * as utils from "utils/utils";
 
 import { filterSingleCol } from "./graphFunctions";
+import { usePrevious } from "../../hooks/UtilHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_SELECTION_COLOR = "#FF0000";
@@ -80,7 +72,8 @@ function HistogramGraph(props) {
                     xaxis: "x",
                     yaxis: "y",
                     type: "histogram",
-                    hoverinfo: "x+y"
+                    hoverinfo: "x+y",
+                    nbinsx: props.win.data.binSize ? props.win.data.binSize.x : null
                 };
             }),
             cols
@@ -198,6 +191,7 @@ function HistogramSubGraph(props) {
     });
 
     // Effect to change the x-bin size
+    const previousBinSize = usePrevious(props.win.data.binSize);
     useEffect(
         _ => {
             if (!props.win.data || !props.win.data.binSize) return;
@@ -206,7 +200,7 @@ function HistogramSubGraph(props) {
             );
             updateChartRevision();
         },
-        [props.win.data]
+        [props.win.data.binSize]
     );
 
     // Effect to update graph when data changes
