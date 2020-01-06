@@ -539,31 +539,9 @@ export default class DataReducer {
      * @return {Map} new state
      */
     static renameFeature(state, action) {
-        // Rename feature in loaded data store so we don't have to reload the data.
-        const newLoadedData = state
-            .get("loadedData")
-            .map(data =>
-                data.get("feature") === action.oldFeatureName
-                    ? data.set("feature", action.newFeatureName)
-                    : data
-            );
-
-        const newFeatureList = state
-            .get("featureList")
-            .map(f =>
-                f.get("name") === action.oldFeatureName ? f.set("name", action.newFeatureName) : f
-            );
-
-        // TODO: put hook to rename feature in server here
-
-        // Rename stats store so we don't have to recalculate.
-        const newStats = state
-            .get("featureStats")
-            .mapKeys(key => (key === action.oldFeatureName ? action.newFeatureName : key));
-
-        return state
-            .set("featureList", newFeatureList)
-            .set("loadedData", newLoadedData)
-            .set("featureStats", newStats);
+        return state.set(
+            "featureDisplayNames",
+            state.get("featureDisplayNames").set(action.baseName, action.newName)
+        );
     }
 }

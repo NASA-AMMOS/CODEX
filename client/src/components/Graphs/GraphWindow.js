@@ -5,6 +5,7 @@ import * as windowTypes from "constants/windowTypes";
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
 import {
     useCurrentSelection,
+    useFeatureDisplayNames,
     useFileInfo,
     useHoveredSelection,
     usePinnedFeatures,
@@ -43,11 +44,17 @@ function GraphWindow(props) {
     const [globalChartState, setGlobalChartState] = useGlobalChartState();
     const [hoverSelection, saveHoverSelection] = useHoveredSelection();
     const fileInfo = useFileInfo();
-    const features = usePinnedFeatures(win);
+    let features = usePinnedFeatures(win);
+    const [featureNameList] = useFeatureDisplayNames();
 
     if (features === null || !win.data) {
         return <WindowCircularProgress />;
     }
+
+    features = features.map(feature => {
+        const featureName = featureNameList.get(feature.get("feature"), feature.get("feature"));
+        return feature.set("displayName", featureName);
+    });
 
     const baseProps = {
         currentSelection: currentSelection,
@@ -71,7 +78,7 @@ function GraphWindow(props) {
                 <WindowError>
                     Please select
                     {typeof featuresRequired === "number"
-                        ? ` exactly ${featuresRequired}`
+                        ? ` exactly ${featuresRequired} `
                         : ` between ${featuresRequired.join(" to ")} `}
                     features
                     <br />

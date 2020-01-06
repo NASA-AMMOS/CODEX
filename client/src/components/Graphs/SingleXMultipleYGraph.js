@@ -5,21 +5,12 @@ import Plotly from "plotly.js";
 import React, { useRef, useState, useEffect } from "react";
 import mergeImg from "merge-img";
 
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import {
-    useCurrentSelection,
-    useSavedSelections,
-    usePinnedFeatures,
-    useHoveredSelection,
-    useFileInfo
-} from "hooks/DataHooks";
-import { useGlobalChartState } from "hooks/UIHooks";
-import { useWindowManager } from "hooks/WindowHooks";
 import GraphWrapper from "components/Graphs/GraphWrapper";
 import * as uiTypes from "constants/uiTypes";
 import * as utils from "utils/utils";
 
 import { filterBounds } from "./graphFunctions";
+import { useFeatureDisplayNames } from "../../hooks/DataHooks";
 
 const Jimp = require("jimp");
 
@@ -50,12 +41,13 @@ function saveImageFunction(chartIds, title) {
 }
 
 export function SingleXMultipleYGraphLegend(props) {
+    const [featureNameList] = useFeatureDisplayNames();
     return props.features
         .filter(feature => feature.name !== props.xAxis)
         .map(feature => (
             <div className="line-plot" key={feature.name}>
                 <div className="color-swatch" style={{ background: feature.color }} />
-                <span>{feature.name}</span>
+                <span>{featureNameList.get(feature.name, feature.name)}</span>
             </div>
         ));
 }
@@ -103,9 +95,13 @@ function SingleXMultipleYGraph(props) {
     });
     props.win.setData(data => ({ ...data.toJS(), featureInfo }));
 
+    const featureDisplayNames = props.win.data.features.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    );
+
     // Effect to assign the min and max bounds based on the data
     useEffect(_ => {
-        if (!props.win.title) props.win.setTitle(props.win.data.features.join(" vs "));
+        if (!props.win.title) props.win.setTitle(featureDisplayNames.join(" vs "));
         props.win.setData(data => ({
             ...data.toJS(),
             bounds:
@@ -120,13 +116,15 @@ function SingleXMultipleYGraph(props) {
     function getXAxisTitle() {
         return !props.win.data.xAxis || props.win.data.xAxis === uiTypes.GRAPH_INDEX
             ? "Row Index"
-            : props.win.data.xAxis;
+            : props.data
+                  .find(feature => feature.get("feature") === props.win.data.xAxis)
+                  .get("displayName");
     }
 
     function getYAxisTitle() {
         return props.data
             .filter(col => col.get("feature") !== props.win.data.xAxis)
-            .map(col => col.get("feature"))
+            .map(col => col.get("displayName"))
             .join(", ");
     }
 

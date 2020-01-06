@@ -21,6 +21,7 @@ import * as scatterGraphTypes from "constants/scatterGraphTypes";
 import * as uiTypes from "constants/uiTypes";
 import * as windowTypes from "constants/windowTypes";
 
+import { useFeatureDisplayNames } from "../../hooks/DataHooks";
 import {
     useSwapAxes,
     useWindowAxisLabels,
@@ -250,6 +251,7 @@ function WindowGraphBounds(props) {
 function MultipleWindowGraphBounds(props) {
     const [graphBounds, setGraphBounds] = useWindowGraphBounds(props.activeWindowId);
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+    const [featureNameList] = useFeatureDisplayNames();
 
     function handleChangeBounds(axis, bound) {
         return e => setGraphBounds(graphBounds.setIn([axis, bound], parseFloat(e.target.value)));
@@ -259,28 +261,31 @@ function MultipleWindowGraphBounds(props) {
 
     return (
         <div className="input-field-container">
-            {features.map((feature, idx) => (
-                <React.Fragment key={feature}>
-                    <TextField
-                        label={`${feature} min`}
-                        variant="filled"
-                        className="text-input"
-                        value={graphBounds ? graphBounds.getIn([features.get(idx), "min"]) : ""}
-                        type="number"
-                        InputLabelProps={{ shrink: true }}
-                        onChange={handleChangeBounds(features.get(idx), "min")}
-                    />
-                    <TextField
-                        label={`${feature} max`}
-                        variant="filled"
-                        className="text-input"
-                        value={graphBounds ? graphBounds.getIn([features.get(idx), "max"]) : ""}
-                        type="number"
-                        InputLabelProps={{ shrink: true }}
-                        onChange={handleChangeBounds(features.get(idx), "max")}
-                    />
-                </React.Fragment>
-            ))}
+            {features.map((feature, idx) => {
+                const featureName = featureNameList.get(feature, feature);
+                return (
+                    <React.Fragment key={feature}>
+                        <TextField
+                            label={`${featureName} min`}
+                            variant="filled"
+                            className="text-input"
+                            value={graphBounds ? graphBounds.getIn([features.get(idx), "min"]) : ""}
+                            type="number"
+                            InputLabelProps={{ shrink: true }}
+                            onChange={handleChangeBounds(features.get(idx), "min")}
+                        />
+                        <TextField
+                            label={`${featureName} max`}
+                            variant="filled"
+                            className="text-input"
+                            value={graphBounds ? graphBounds.getIn([features.get(idx), "max"]) : ""}
+                            type="number"
+                            InputLabelProps={{ shrink: true }}
+                            onChange={handleChangeBounds(features.get(idx), "max")}
+                        />
+                    </React.Fragment>
+                );
+            })}
         </div>
     );
 }
@@ -289,6 +294,8 @@ function MultiAxisGraphEditor(props) {
     const [featureInfo, setFeatureInfo] = useWindowFeatureInfoList(props.activeWindowId);
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [xAxis, setXAxis] = useWindowXAxis(props.activeWindowId);
+    const [featureNameList] = useFeatureDisplayNames();
+
     if (!features) return null;
 
     const xAxisSelect =
@@ -297,7 +304,7 @@ function MultiAxisGraphEditor(props) {
                 <option value={uiTypes.GRAPH_INDEX}>Index</option>
                 {features.map(f => (
                     <option value={f} key={f}>
-                        {f}
+                        {featureNameList.get(f, f)}
                     </option>
                 ))}
             </select>
@@ -317,7 +324,9 @@ function MultiAxisGraphEditor(props) {
                     .filter(feature => feature.get("name") !== xAxis)
                     .map(feature => (
                         <div className="line-plot" key={feature.get("name")}>
-                            <span>{feature.get("name")}</span>
+                            <span>
+                                {featureNameList.get(feature.get("name"), feature.get("name"))}
+                            </span>
                             <div
                                 className="color-swatch"
                                 style={{ background: feature.get("color") }}
@@ -332,6 +341,8 @@ function MultiAxisGraphEditor(props) {
 function HeatmapGraphEditor(props) {
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [binSize, setBinSize] = useWindowGraphBinSize(props.activeWindowId);
+    const [featureNameList] = useFeatureDisplayNames();
+
     if (!features) return null;
 
     function handleChangeBinSize(axis) {
@@ -344,11 +355,15 @@ function HeatmapGraphEditor(props) {
         <React.Fragment>
             <div className="axis">
                 <label>X-Axis</label>
-                <span className="feature-name">{features.get(0)}</span>
+                <span className="feature-name">
+                    {featureNameList.get(features.get(0), features.get(0))}
+                </span>
             </div>
             <div className="axis">
                 <label>Y-Axis</label>
-                <span className="feature-name">{features.get(1)}</span>
+                <span className="feature-name">
+                    {featureNameList.get(features.get(1), features.get(1))}
+                </span>
             </div>
             <Button className="swap-button" onClick={_ => setFeatures(features.reverse())}>
                 Swap Axes <SwapAxesIcon width="14" height="14" />
@@ -379,17 +394,23 @@ function HeatmapGraphEditor(props) {
 
 function TwoAxisGraphEditor(props) {
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+    const [featureNameList] = useFeatureDisplayNames();
+
     if (!features) return null;
 
     return (
         <React.Fragment>
             <div className="axis">
                 <label>X-Axis</label>
-                <span className="feature-name">{features.get(0)}</span>
+                <span className="feature-name">
+                    {featureNameList.get(features.get(0), features.get(0))}
+                </span>
             </div>
             <div className="axis">
                 <label>Y-Axis</label>
-                <span className="feature-name">{features.get(1)}</span>
+                <span className="feature-name">
+                    {featureNameList.get(features.get(1), features.get(1))}
+                </span>
             </div>
             <Button className="swap-button" onClick={_ => setFeatures(features.reverse())}>
                 Swap Axes <SwapAxesIcon width="14" height="14" />
@@ -404,6 +425,7 @@ function ThreeAxisGraphEditor(props) {
     const [yAxis, setYAxis] = useWindowYAxis(props.activeWindowId);
     const [zAxis, setZAxis] = useWindowZAxis(props.activeWindowId);
     const [binSize, setBinSize] = useWindowGraphBinSize(props.activeWindowId);
+    const [featureNameList] = useFeatureDisplayNames();
 
     if (!features) return null;
 
@@ -412,7 +434,7 @@ function ThreeAxisGraphEditor(props) {
             setBinSize(binSize.set(axis, parseInt(e.target.value)));
         };
     }
-
+    console.log([xAxis, yAxis, zAxis]);
     return (
         <React.Fragment>
             <div className="axis">
@@ -420,7 +442,7 @@ function ThreeAxisGraphEditor(props) {
                 <select onChange={e => setXAxis(e.target.value)} value={xAxis}>
                     {features.map(f => (
                         <option value={f} key={f}>
-                            {f}
+                            {featureNameList.get(f, f)}
                         </option>
                     ))}
                 </select>
@@ -430,7 +452,7 @@ function ThreeAxisGraphEditor(props) {
                 <select onChange={e => setYAxis(e.target.value)} value={yAxis}>
                     {features.map(f => (
                         <option value={f} key={f}>
-                            {f}
+                            {featureNameList.get(f, f)}
                         </option>
                     ))}
                 </select>
@@ -440,7 +462,7 @@ function ThreeAxisGraphEditor(props) {
                 <select onChange={e => setZAxis(e.target.value)} value={zAxis}>
                     {features.map(f => (
                         <option value={f} key={f}>
-                            {f}
+                            {featureNameList.get(f, f)}
                         </option>
                     ))}
                 </select>
@@ -505,6 +527,7 @@ function MapGraphEditor(props) {
     const [zAxis, setZAxis] = useWindowZAxis(props.activeWindowId);
     const swapAxes = useSwapAxes(props.activeWindowId);
     const [graphBounds, setGraphBounds] = useWindowGraphBounds(props.activeWindowId);
+    const [featureNameList] = useFeatureDisplayNames();
 
     function handleChangeBounds(axis, bound) {
         return e => setGraphBounds(graphBounds.setIn([axis, bound], parseFloat(e.target.value)));
@@ -550,7 +573,7 @@ function MapGraphEditor(props) {
                 InputLabelProps={{ shrink: true }}
                 onChange={handleChangeBounds(features.get(1), "max")}
             />
-            {features.size > 3 ? null : (
+            {features.size === 2 ? null : (
                 <React.Fragment>
                     <TextField
                         label="Heat min"
@@ -580,11 +603,11 @@ function MapGraphEditor(props) {
             <React.Fragment>
                 <div className="axis">
                     <label>Latitude</label>
-                    <span className="feature-name">{xAxis}</span>
+                    <span className="feature-name">{featureNameList.get(xAxis, xAxis)}</span>
                 </div>
                 <div className="axis">
                     <label>Longitude</label>
-                    <span className="feature-name">{yAxis}</span>
+                    <span className="feature-name">{featureNameList.get(yAxis, yAxis)}</span>
                 </div>
                 <div className="axis">
                     <label>Map Type</label>
@@ -611,7 +634,7 @@ function MapGraphEditor(props) {
                 <select onChange={e => setXAxis(e.target.value)} value={xAxis}>
                     {features.map(f => (
                         <option value={f} key={f}>
-                            {f}
+                            {featureNameList.get(f, f)}
                         </option>
                     ))}
                 </select>
@@ -621,7 +644,7 @@ function MapGraphEditor(props) {
                 <select onChange={e => setYAxis(e.target.value)} value={yAxis}>
                     {features.map(f => (
                         <option value={f} key={f}>
-                            {f}
+                            {featureNameList.get(f, f)}
                         </option>
                     ))}
                 </select>
@@ -631,7 +654,7 @@ function MapGraphEditor(props) {
                 <select onChange={e => setZAxis(e.target.value)} value={zAxis}>
                     {features.map(f => (
                         <option value={f} key={f}>
-                            {f}
+                            {featureNameList.get(f, f)}
                         </option>
                     ))}
                 </select>

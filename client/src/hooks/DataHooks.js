@@ -25,6 +25,7 @@ import * as utils from "utils/utils";
 import * as uiActions from "actions/ui";
 import * as uiTypes from "constants/uiTypes";
 import * as windowTypes from "constants/windowTypes";
+import * as dataActions from "actions/data";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -533,4 +534,11 @@ export function useFeatureRename() {
             .map(win => wmActions.setWindowData(win.get("id"), win.get("data")));
         dispatch(batchActions(actions));
     };
+}
+
+/** Returns the current feature name lookup object and provides an update function **/
+export function useFeatureDisplayNames() {
+    const dispatch = useDispatch();
+    const names = useSelector(store => store.data.get("featureDisplayNames"));
+    return [names, (baseName, newName) => dispatch(dataActions.featureRename(baseName, newName))];
 }

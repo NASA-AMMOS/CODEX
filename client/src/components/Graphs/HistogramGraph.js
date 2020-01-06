@@ -37,7 +37,7 @@ function generateLayouts(features) {
                 fixedrange: true
             },
             xaxis: {
-                title: features[index].feature
+                title: features[index].displayName
             },
             shapes: [],
             barmode: "overlay",
@@ -92,9 +92,13 @@ function HistogramGraph(props) {
 
     let layouts = generateLayouts(features);
 
+    const featureDisplayNames = props.win.data.features.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    );
+
     // Update bound state with the calculated bounds of the data
     useEffect(_ => {
-        if (!props.win.title) props.win.setTitle(props.win.data.features.join(", "));
+        if (!props.win.title) props.win.setTitle(featureDisplayNames.join(", "));
         props.win.setData(data => ({
             ...data.toJS(),
             bounds:

@@ -67,12 +67,7 @@ function SelectionContextMenu(props) {
                     Rename
                 </Button>
             </ListItem>
-        </List>
-    );
-}
-
-/*
-       <ListItem
+            <ListItem
                 button
                 onClick={_ => {
                     setContextMode("rename");
@@ -81,7 +76,10 @@ function SelectionContextMenu(props) {
                 hidden={contextMode}
             >
                 Rename Selection
-            </ListItem>*/
+            </ListItem>
+        </List>
+    );
+}
 
 function GroupDisplayItem(props) {
     return (

@@ -40,8 +40,12 @@ function ScatterGraph(props) {
         ? props.win.data.axisLabels.y
         : props.win.data.features[1];
 
+    const featureDisplayNames = props.win.data.features.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    );
+
     useEffect(_ => {
-        if (!props.win.title) props.win.setTitle(props.win.data.features.join(" vs "));
+        if (!props.win.title) props.win.setTitle(featureDisplayNames.join(" vs "));
         props.win.setData(data => ({
             ...data.toJS(),
             bounds:

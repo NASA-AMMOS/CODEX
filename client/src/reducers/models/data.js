@@ -26,7 +26,8 @@ export const dataState = Immutable.fromJS({
     nan: null,
     inf: null,
     ninf: null,
-    dataLength: null
+    dataLength: null,
+    featureDisplayNames: {}
 });
 
 export const loadedDataModel = {
