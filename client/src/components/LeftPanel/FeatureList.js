@@ -1,37 +1,33 @@
-import React, { Component, useState, useEffect, useContext } from "react";
 import "components/LeftPanel/FeatureList.scss";
-import { connect } from "react-redux";
-import classnames from "classnames";
+
+import { Sparklines, SparklinesLine } from "react-sparklines";
 import { bindActionCreators } from "redux";
-import * as dataActions from "actions/data";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import { connect } from "react-redux";
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import Button from "@material-ui/core/Button";
 import Checkbox from "@material-ui/core/Checkbox";
+import CheckboxIcon from "@material-ui/icons/CheckBox";
+import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import FormControl from "@material-ui/core/FormControl";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
-import CheckboxIcon from "@material-ui/icons/CheckBox";
-import Popover from "@material-ui/core/Popover";
-import Typography from "@material-ui/core/Typography";
-import * as utils from "utils/utils";
-import WorkerSocket from "worker-loader!workers/socket.worker";
-import * as actionFunctions from "actions/actionFunctions";
-import { Sparklines, SparklinesLine } from "react-sparklines";
-import * as actionTypes from "constants/actionTypes";
-import FormControl from "@material-ui/core/FormControl";
 import MenuItem from "@material-ui/core/MenuItem";
+import Popover from "@material-ui/core/Popover";
+import React, { useState, useEffect, useContext } from "react";
 import Select from "@material-ui/core/Select";
-import Button from "@material-ui/core/Button";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import TextField from "@material-ui/core/TextField";
 
 import {
     useFeatureStatistics,
     useFeatureStatisticsLoader,
     useFeatureMetadata,
-    useFeatureDelete,
-    useFeatureRename
+    useFeatureDelete
 } from "hooks/DataHooks";
+import * as dataActions from "actions/data";
+
+import { useFeatureDisplayNames } from "../../hooks/DataHooks";
 
 const RowContext = React.createContext({});
 const ListContext = React.createContext({});
@@ -234,11 +230,14 @@ function FeatureContextMenu(props) {
     const [contextMode, setContextMode] = useState(null);
     const [renameSelectionBuffer, setRenameSelectionBuffer] = useState("");
 
+    const [featureNames, setFeatureName] = useFeatureDisplayNames();
+    const displayName = featureNames.get(props.featureName, props.featureName);
+
     function submitRenamedFeature(e) {
         if (!e.key || (e.key && e.key === "Enter")) {
             setVisible(false);
             setContextMode(null);
-            listContext.featureRename(props.featureName, renameSelectionBuffer);
+            setFeatureName(props.featureName, renameSelectionBuffer);
         }
     }
 
@@ -294,23 +293,21 @@ function FeatureContextMenu(props) {
                             Rename
                         </Button>
                     </ListItem>
-                </List>
-            </ClickAwayListener>
-        </Popover>
-    );
-}
-
-/*                   <ListItem
+                    <ListItem
                         button
                         onClick={_ => {
                             setContextMode("rename");
-                            //     setRenameSelectionBuffer(props.contextActiveSelection.displayName);
+                            setRenameSelectionBuffer(displayName);
                         }}
                         hidden={contextMode}
                     >
                         Rename Feature
                     </ListItem>
-                    */
+                </List>
+            </ClickAwayListener>
+        </Popover>
+    );
+}
 
 /*
     A single row displaying a feature and its corresponding data
@@ -327,6 +324,8 @@ function FeatureListDNDRow(props) {
     };
 
     const [rowHover, setRowHover] = useState(false);
+    const [featureNames] = useFeatureDisplayNames();
+    const displayName = featureNames.get(props.featureName, props.featureName);
 
     return (
         <RowContext.Provider value={rowContextValue}>
@@ -362,7 +361,7 @@ function FeatureListDNDRow(props) {
                         }
                     />
                     <span className="feature-name" style={virtualStyle}>
-                        {props.featureName}
+                        {displayName}
                     </span>
                 </div>
                 {props.statsHidden || (
@@ -535,8 +534,7 @@ function FeatureList(props) {
 
     // Create a context to hold dispatches and state we'll need in the lower components
     const listContext = {
-        featureDelete: useFeatureDelete(),
-        featureRename: useFeatureRename()
+        featureDelete: useFeatureDelete()
     };
 
     return (

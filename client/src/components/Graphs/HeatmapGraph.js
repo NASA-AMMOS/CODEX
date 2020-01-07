@@ -139,14 +139,23 @@ function HeatmapGraph(props) {
     );
     const cols = filterBounds(props.win.data.features, sanitizedCols, props.win.data.bounds);
 
-    const xAxis = props.win.data.axisLabels
-        ? props.win.data.axisLabels.x
-        : props.win.data.features[0];
-    const yAxis = props.win.data.axisLabels
-        ? props.win.data.axisLabels.y
-        : props.win.data.features[1];
+    const xAxis =
+        (props.win.data.axisLabels && props.win.data.axisLabels[props.win.data.features[0]]) ||
+        props.data
+            .find(feature => feature.get("feature") === props.win.data.features[0])
+            .get("displayName");
+
+    const yAxis =
+        (props.win.data.axisLabels && props.win.data.axisLabels[props.win.data.features[1]]) ||
+        props.data
+            .find(feature => feature.get("feature") === props.win.data.features[1])
+            .get("displayName");
+
+    const featureDisplayNames = props.win.data.features.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    );
     useEffect(_ => {
-        if (!props.win.title) props.win.setTitle(props.win.data.features.join(" vs "));
+        if (!props.win.title) props.win.setTitle(featureDisplayNames.join(" vs "));
         props.win.setData(data => ({
             ...data.toJS(),
             binSize: props.win.data.binSize || {
@@ -158,7 +167,8 @@ function HeatmapGraph(props) {
                 props.win.data.features.reduce((acc, colName, idx) => {
                     acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
                     return acc;
-                }, {})
+                }, {}),
+            axisLabels: props.win.data.axisLabels
         }));
     }, []);
 
@@ -226,8 +236,17 @@ function HeatmapGraph(props) {
             chartState.data[0].x = generateDataAxis(cols[0]);
             chartState.data[0].y = generateDataAxis(cols[1]);
             chartState.data[0].z = getCols();
-            chartState.layout.xaxis.title = xAxis;
-            chartState.layout.yaxis.title = yAxis;
+
+            chartState.layout.xaxis.title =
+                props.win.data.axisLabels && props.win.data.axisLabels[props.win.data.features[0]]
+                    ? props.win.data.axisLabels[props.win.data.features[0]]
+                    : xAxis;
+
+            chartState.layout.yaxis.title =
+                props.win.data.axisLabels && props.win.data.axisLabels[props.win.data.features[1]]
+                    ? props.win.data.axisLabels[props.win.data.features[1]]
+                    : yAxis;
+
             updateChartRevision();
         },
         [props.win.data.features]

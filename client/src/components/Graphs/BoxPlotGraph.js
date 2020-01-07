@@ -3,19 +3,11 @@ import "components/Graphs/BoxPlotGraph.css";
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect, createRef } from "react";
 
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import {
-    useCurrentSelection,
-    useSavedSelections,
-    usePinnedFeatures,
-    useFileInfo
-} from "hooks/DataHooks";
-import { useGlobalChartState } from "hooks/UIHooks";
-import { useWindowManager } from "hooks/WindowHooks";
 import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
 import * as utils from "utils/utils";
 
 import { filterSingleCol } from "./graphFunctions";
+import { useFeatureDisplayNames } from "../../hooks/DataHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_TITLE = "Box Plot Graph";
@@ -78,7 +70,7 @@ function BoxPlotGraph(props) {
                     yaxis: "y",
                     type: "box",
                     visible: true,
-                    name: feature.feature
+                    name: feature.displayName
                 };
             }),
             cols
@@ -90,9 +82,13 @@ function BoxPlotGraph(props) {
 
     let layouts = generateLayouts(features);
 
+    const featureDisplayNames = props.win.data.features.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    );
+
     // Update bound state with the calculated bounds of the data
     useEffect(_ => {
-        if (!props.win.title) props.win.setTitle(props.win.data.features.join(", "));
+        if (!props.win.title) props.win.setTitle(featureDisplayNames.join(", "));
         props.win.setData(data => ({
             ...data.toJS(),
             bounds:

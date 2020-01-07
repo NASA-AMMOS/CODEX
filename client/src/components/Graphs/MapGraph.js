@@ -60,8 +60,11 @@ function MapGraph(props) {
         props.win.data.bounds
     ).map((data, idx) => ({ ...baseCols[idx], data }));
 
+    const featureDisplayNames = props.win.data.features.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    );
     useEffect(_ => {
-        if (!props.win.title) props.win.setTitle(props.win.data.features.join(" vs "));
+        if (!props.win.title) props.win.setTitle(featureDisplayNames.join(" vs "));
         props.win.setData(data => ({
             ...data.toJS(),
             mapType: uiTypes.MAP_USGS,
