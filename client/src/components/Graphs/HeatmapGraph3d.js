@@ -91,12 +91,13 @@ function HeatmapGraph3d(props) {
     );
     const cols = filterBounds(props.win.data.features, sanitizedCols, props.win.data.bounds);
 
-    const xAxis = props.win.data.axisLabels
-        ? props.win.data.axisLabels.x
-        : props.win.data.features[0];
-    const yAxis = props.win.data.axisLabels
-        ? props.win.data.axisLabels.y
-        : props.win.data.features[1];
+    const xAxis = props.data
+        .find(feature => feature.get("feature") === props.win.data.features[0])
+        .get("displayName");
+
+    const yAxis = props.data
+        .find(feature => feature.get("feature") === props.win.data.features[1])
+        .get("displayName");
 
     // Set x-axis averages as the z-axis
     useEffect(_ => {
@@ -213,8 +214,15 @@ function HeatmapGraph3d(props) {
                 props.win.data.binSize ? props.win.data.binSize.y : DEFAULT_BUCKET_COUNT
             );
             chartState.data[0].z = getZAxis();
-            chartState.layout.xaxis.title = props.win.data.xAxis;
-            chartState.layout.yaxis.title = props.win.data.yAxis;
+
+            chartState.layout.xaxis.title = props.data
+                .find(feature => feature.get("feature") === props.win.data.xAxis)
+                .get("displayName");
+
+            chartState.layout.yaxis.title = props.data
+                .find(feature => feature.get("feature") === props.win.data.yAxis)
+                .get("displayName");
+
             updateChartRevision();
         },
         [props.win.data.features]
