@@ -1,23 +1,23 @@
-import React, { Component, useState, useEffect, useRef } from "react";
 import "components/LeftPanel/SelectionList.scss";
-import { connect } from "react-redux";
-import classnames from "classnames";
+
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { bindActionCreators } from "redux";
-import * as dataActions from "actions/data";
-import * as selectionActions from "actions/selectionActions";
-import Popover from "@material-ui/core/Popover";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import TextField from "@material-ui/core/TextField";
+import { connect } from "react-redux";
 import Button from "@material-ui/core/Button";
 import Checkbox from "@material-ui/core/Checkbox";
+import CheckboxIcon from "@material-ui/icons/CheckBox";
 import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import KeyboardArrowDown from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUp from "@material-ui/icons/KeyboardArrowUp";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import Popover from "@material-ui/core/Popover";
+import React, { useState, useEffect } from "react";
 import RemoveRedEye from "@material-ui/icons/RemoveRedEye";
-import CheckboxIcon from "@material-ui/icons/CheckBox";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import TextField from "@material-ui/core/TextField";
+
+import * as selectionActions from "actions/selectionActions";
 
 function SelectionContextMenu(props) {
     const [contextMode, setContextMode] = useState(null);
@@ -25,12 +25,9 @@ function SelectionContextMenu(props) {
     const [renameSelectionBuffer, setRenameSelectionBuffer] = useState("");
 
     function submitRenamedSelection(e) {
-        if (!e.key || (e.key && e.key === "Enter")) {
-            props.setContextMenuVisible(false);
-            setContextMode(null);
-            props.setContextActiveSelection(null);
-            props.renameSelection(props.contextActiveSelection.id, renameSelectionBuffer);
-        }
+        props.setContextMenuVisible(false);
+        props.setContextActiveSelection(null);
+        props.renameSelection(props.contextActiveSelection.id, renameSelectionBuffer);
     }
 
     // To make sure the autofocus works, don't create the rename text field until we need it.
@@ -39,45 +36,49 @@ function SelectionContextMenu(props) {
             <TextField
                 value={renameSelectionBuffer}
                 onChange={e => setRenameSelectionBuffer(e.target.value)}
-                onKeyPress={submitRenamedSelection}
+                onKeyPress={e => {
+                    if (e.key && e.key === "Enter") submitRenamedSelection();
+                }}
                 autoFocus
             />
         ) : null;
 
     return (
-        <List>
-            <ListItem
-                button
-                onClick={_ => {
-                    props.setContextMenuVisible(false);
-                    props.deleteSelection(props.contextActiveSelection.id);
-                    props.setContextActiveSelection(null);
-                }}
-                hidden={contextMode}
-            >
-                Delete Selection
-            </ListItem>
-            <ListItem hidden={contextMode !== "rename"}>
-                {renameTextField}
-                <Button
-                    variant="outlined"
-                    style={{ marginLeft: "10px" }}
-                    onClick={submitRenamedSelection}
+        <ClickAwayListener onClickAway={_ => props.setContextMenuVisible(false)}>
+            <List>
+                <ListItem
+                    button
+                    onClick={_ => {
+                        props.setContextMenuVisible(false);
+                        props.deleteSelection(props.contextActiveSelection.id);
+                        props.setContextActiveSelection(null);
+                    }}
+                    hidden={contextMode}
                 >
-                    Rename
-                </Button>
-            </ListItem>
-            <ListItem
-                button
-                onClick={_ => {
-                    setContextMode("rename");
-                    setRenameSelectionBuffer(props.contextActiveSelection.displayName);
-                }}
-                hidden={contextMode}
-            >
-                Rename Selection
-            </ListItem>
-        </List>
+                    Delete Selection
+                </ListItem>
+                <ListItem hidden={contextMode !== "rename"}>
+                    {renameTextField}
+                    <Button
+                        variant="outlined"
+                        style={{ marginLeft: "10px" }}
+                        onClick={submitRenamedSelection}
+                    >
+                        Rename
+                    </Button>
+                </ListItem>
+                <ListItem
+                    button
+                    onClick={_ => {
+                        setContextMode("rename");
+                        setRenameSelectionBuffer(props.contextActiveSelection.name);
+                    }}
+                    hidden={contextMode}
+                >
+                    Rename Selection
+                </ListItem>
+            </List>
+        </ClickAwayListener>
     );
 }
 
@@ -596,16 +597,14 @@ function SelectionList(props) {
                     horizontal: "left"
                 }}
             >
-                <ClickAwayListener onClickAway={_ => setContextMenuVisible(false)}>
-                    <SelectionContextMenu
-                        deleteSelection={props.deleteSelection}
-                        setContextMenuVisible={setContextMenuVisible}
-                        contextActiveSelection={contextActiveSelection}
-                        setContextActiveSelection={setContextActiveSelection}
-                        setContextMenuPosition={setContextMenuPosition}
-                        renameSelection={props.renameSelection}
-                    />
-                </ClickAwayListener>
+                <SelectionContextMenu
+                    deleteSelection={props.deleteSelection}
+                    setContextMenuVisible={setContextMenuVisible}
+                    contextActiveSelection={contextActiveSelection}
+                    setContextActiveSelection={setContextActiveSelection}
+                    setContextMenuPosition={setContextMenuPosition}
+                    renameSelection={props.renameSelection}
+                />
             </Popover>
         </React.Fragment>
     );

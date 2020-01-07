@@ -162,6 +162,7 @@ export function useWindowXAxis(id) {
     const win = useSelector(state =>
         state.windowManager.get("windows").find(win => win.get("id") === id)
     );
+    console.log(win.toJS());
 
     return [
         win.getIn(["data", "xAxis"]),

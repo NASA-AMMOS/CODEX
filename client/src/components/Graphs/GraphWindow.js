@@ -16,6 +16,7 @@ import { useWindowManager } from "../../hooks/WindowHooks";
 import BoxPlotGraph from "./BoxPlotGraph";
 import ContourGraph from "./ContourGraph";
 import HeatmapGraph from "./HeatmapGraph";
+import HeatmapGraph3d from "./HeatmapGraph3d";
 import HistogramGraph from "./HistogramGraph";
 import MapGraph from "./MapGraph";
 import ScatterGraph from "./ScatterGraph";
@@ -99,7 +100,7 @@ function GraphWindow(props) {
         case windowTypes.HEATMAP_GRAPH:
             return <HeatmapGraph {...baseProps} />;
         case windowTypes.HEATMAP_3D_GRAPH:
-            return <HeatmapGraph {...baseProps} />;
+            return <HeatmapGraph3d {...baseProps} />;
         case windowTypes.BOX_PLOT_GRAPH:
             return <BoxPlotGraph {...baseProps} />;
         case windowTypes.HISTOGRAM_GRAPH:

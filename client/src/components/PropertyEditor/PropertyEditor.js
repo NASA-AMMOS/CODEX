@@ -504,7 +504,7 @@ function ThreeAxisGraphEditor(props) {
             setBinSize(binSize.set(axis, parseInt(e.target.value)));
         };
     }
-    console.log([xAxis, yAxis, zAxis]);
+
     return (
         <React.Fragment>
             <div className="axis">
