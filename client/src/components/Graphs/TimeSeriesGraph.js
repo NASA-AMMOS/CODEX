@@ -74,7 +74,7 @@ function TimeSeriesGraph(props) {
     const [chartState, setChartState] = useState({
         data: data,
         layout: {
-            grid: { rows: 2, columns: 1, pattern: "independent" },
+            grid: { rows: data.length, columns: 1, pattern: "independent" },
             showlegend: false,
             margin: { l: 40, r: 5, t: 5, b: 0 }, // Axis tick labels are drawn in the margin space
             dragmode: "select",
