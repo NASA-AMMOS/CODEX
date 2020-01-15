@@ -1,17 +1,8 @@
 import "components/Graphs/TimeSeriesGraph.css";
 
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect, createRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import {
-    useCurrentSelection,
-    useSavedSelections,
-    usePinnedFeatures,
-    useFileInfo
-} from "hooks/DataHooks";
-import { useGlobalChartState } from "hooks/UIHooks";
-import { useWindowManager } from "hooks/WindowHooks";
 import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
 import * as utils from "utils/utils";
 
@@ -21,33 +12,13 @@ const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_TITLE = "Time Series Graph";
 
 function generateLayouts(features) {
-    let layouts = [];
-
-    for (let index = 0; index < features.length; index++) {
-        let layout = {
-            dragmode: "select",
-            selectdirection: "h",
-            margin: { l: 40, r: 5, t: 5, b: 0 }, // Axis tick labels are drawn in the margin space
-            hovermode: "compare", // Turning off hovermode seems to screw up click handling
-            yaxis: {
-                title: features[index].displayName,
-                fixedrange: true
-            }
+    return features.reduce((acc, feature, idx) => {
+        const axisName = `yaxis${idx === 0 ? "" : idx + 1}`;
+        acc[axisName] = {
+            title: feature.feature
         };
-
-        let axisLabel = "xaxis" + (index + 1);
-        layout[axisLabel] = {};
-
-        if (index != features.length - 1) {
-            layout[axisLabel].visible = false;
-        } else {
-            layout.margin.b = 25;
-        }
-
-        layouts.push(layout);
-    }
-
-    return layouts;
+        return acc;
+    }, {});
 }
 
 function TimeSeriesGraph(props) {
@@ -56,8 +27,8 @@ function TimeSeriesGraph(props) {
         return feature.feature;
     });
 
-    const [chartIds] = useState(_ => featureNames.map(_ => utils.createNewId()));
-    const chartRefs = useRef(featureNames.map(() => createRef()));
+    const chart = useRef(null);
+    const [chartId] = useState(utils.createNewId());
 
     function generatePlotData() {
         const cols = props.win.data.features
@@ -76,14 +47,18 @@ function TimeSeriesGraph(props) {
 
         return [
             features.map((feature, idx) => {
-                return {
+                const trace = {
                     x: timeAxis,
                     y: cols[idx],
-                    xaxis: "x",
-                    yaxis: "y1",
                     mode: "lines",
-                    type: "scatter"
+                    type: "scatter",
+                    hoverinfo: "x+y"
                 };
+                if (idx > 0) {
+                    trace.xaxis = `x${idx + 1}`;
+                    trace.yaxis = `y${idx + 1}`;
+                }
+                return trace;
             }),
             cols
         ];
@@ -92,7 +67,35 @@ function TimeSeriesGraph(props) {
     const [processedData, setProcessedData] = useState(_ => generatePlotData());
     const [data, cols] = processedData;
 
-    let layouts = generateLayouts(features);
+    const layouts = generateLayouts(features);
+
+    // The plotly react element only changes when the revision is incremented.
+    const [chartRevision, setChartRevision] = useState(0);
+    const [chartState, setChartState] = useState({
+        data: data,
+        layout: {
+            grid: { rows: 2, columns: 1, pattern: "independent" },
+            showlegend: false,
+            margin: { l: 40, r: 5, t: 5, b: 0 }, // Axis tick labels are drawn in the margin space
+            dragmode: "select",
+            selectdirection: "h",
+            hovermode: "compare", // Turning off hovermode seems to screw up click handling
+            ...layouts
+        },
+        config: {
+            responsive: true,
+            displaylogo: false
+        }
+    });
+
+    function updateChartRevision() {
+        const revision = chartRevision + 1;
+        setChartState({
+            ...chartState,
+            layout: { ...chartState.layout, datarevision: revision }
+        });
+        setChartRevision(revision);
+    }
 
     const featureDisplayNames = props.win.data.features.map(featureName =>
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
@@ -120,61 +123,22 @@ function TimeSeriesGraph(props) {
         [props.win.data.bounds]
     );
 
-    return (
-        <GraphWrapper
-            resizeHandler={_ =>
-                chartRefs.current.forEach(chartRef => chartRef.current.resizeHandler())
-            }
-            win={props.win}
-            chartIds={chartIds}
-        >
-            <ul className="time-series-plot-container">
-                {data.map((dataElement, index) => (
-                    <TimeSeriesSubGraph
-                        key={index}
-                        axisKey={"x" + (index + 1)}
-                        data={data[index]}
-                        chart={chartRefs.current[index]}
-                        layout={layouts[index]}
-                        setCurrentSelection={props.setCurrentSelection}
-                        currentSelection={props.currentSelection}
-                        savedSelections={props.savedSelections}
-                        chartId={chartIds[index]}
-                    />
-                ))}
-            </ul>
-        </GraphWrapper>
+    // Effect to update graph when data changes
+    useEffect(
+        _ => {
+            chartState.data = data;
+            updateChartRevision();
+        },
+        [data]
     );
-}
 
-function TimeSeriesSubGraph(props) {
-    // The plotly react element only changes when the revision is incremented.
-    const [chartRevision, setChartRevision] = useState(0);
-    const [chartState, setChartState] = useState({
-        data: [props.data],
-        layout: props.layout,
-        config: {
-            responsive: true,
-            displaylogo: false
-        }
-    });
-
-    function updateChartRevision() {
-        const revision = chartRevision + 1;
-        setChartState({
-            ...chartState,
-            layout: { ...chartState.layout, datarevision: revision }
-        });
-        setChartRevision(revision);
-    }
-
+    // Handle selections
     const [selectionShapes] = useBoxSelection(
         "horizontal",
         props.currentSelection,
         props.savedSelections,
         chartState.data[0].x
     );
-
     useEffect(
         _ => {
             chartState.layout.shapes = selectionShapes;
@@ -184,37 +148,34 @@ function TimeSeriesSubGraph(props) {
         [selectionShapes]
     );
 
-    // Effect to update graph when data changes
-    useEffect(
-        _ => {
-            chartState.data = [props.data];
-            updateChartRevision();
-        },
-        [props.data]
-    );
-
     return (
-        <Plot
-            className="time-series-subplot"
-            ref={props.chart}
-            data={chartState.data}
-            layout={chartState.layout}
-            config={chartState.config}
-            style={{ width: "100%", height: "100%" }}
-            useResizeHandler
-            onInitialized={figure => setChartState(figure)}
-            onUpdate={figure => setChartState(figure)}
-            onClick={e => {
-                if (e.event.button === 2 || e.event.ctrlKey) return;
-                props.setCurrentSelection([]);
-            }}
-            onSelected={e => {
-                if (!e) return;
-                let points = utils.indicesInRange(chartState.data[0].x, e.range.x[0], e.range.x[1]);
-                props.setCurrentSelection(points);
-            }}
-            divId={props.chartId}
-        />
+        <GraphWrapper chart={chart} win={props.win} chartId={chartId}>
+            <Plot
+                ref={chart}
+                data={chartState.data}
+                layout={chartState.layout}
+                config={chartState.config}
+                style={{ width: "100%", height: "100%" }}
+                onInitialized={figure => setChartState(figure)}
+                onUpdate={figure => setChartState(figure)}
+                useResizeHandler
+                divId={chartId}
+                onClick={e => {
+                    if (e.event.button === 2 || e.event.ctrlKey) return;
+                    props.setCurrentSelection([]);
+                }}
+                onSelected={e => {
+                    if (!e) return;
+                    const xKey = Object.keys(e.range)[0];
+                    let points = utils.indicesInRange(
+                        chartState.data[0].x,
+                        e.range[xKey][0],
+                        e.range[xKey][1]
+                    );
+                    props.setCurrentSelection(points);
+                }}
+            />
+        </GraphWrapper>
     );
 }
 
