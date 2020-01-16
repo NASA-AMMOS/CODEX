@@ -55,7 +55,7 @@ function TimeSeriesGraph(props) {
                     hoverinfo: "x+y"
                 };
                 if (idx > 0) {
-                    trace.xaxis = `x${idx + 1}`;
+                    trace.xaxis = `x`;
                     trace.yaxis = `y${idx + 1}`;
                 }
                 return trace;
@@ -71,12 +71,17 @@ function TimeSeriesGraph(props) {
 
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
+
     const [chartState, setChartState] = useState({
         data: data,
         layout: {
-            grid: { rows: data.length, columns: 1, pattern: "independent" },
+            grid: {
+                rows: data.length,
+                columns: 1,
+                subplots: utils.range(data.length).map(idx => [`xy${idx ? idx + 1 : ""}`])
+            },
             showlegend: false,
-            margin: { l: 40, r: 5, t: 5, b: 0 }, // Axis tick labels are drawn in the margin space
+            margin: { l: 40, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space
             dragmode: "select",
             selectdirection: "h",
             hovermode: "compare", // Turning off hovermode seems to screw up click handling
