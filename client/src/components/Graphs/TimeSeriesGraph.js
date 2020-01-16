@@ -3,13 +3,14 @@ import "components/Graphs/TimeSeriesGraph.css";
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";
 
-import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
+import GraphWrapper from "components/Graphs/GraphWrapper";
 import * as utils from "utils/utils";
 
 import { filterSingleCol } from "./graphFunctions";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_TITLE = "Time Series Graph";
+const COLOR_CURRENT_SELECTION = "#FF0000";
 
 function handleGlobalChartState(state) {
     return state === "lasso" ? "select" : state;
@@ -23,6 +24,42 @@ function generateLayouts(features) {
         };
         return acc;
     }, {});
+}
+
+function makeSelectionsFromProps(props) {}
+
+function makeSelectionShapes(selection) {
+    return !selection.rowIndices.length
+        ? null
+        : selection.rowIndices
+              .reduce((acc, val) => {
+                  const lastSection = acc.length && acc[acc.length - 1];
+                  if (lastSection && lastSection[lastSection.length - 1] + 1 === val) {
+                      lastSection.push(val);
+                      return acc;
+                  }
+
+                  acc.push([val]);
+                  return acc;
+              }, [])
+              .map(section => {
+                  return {
+                      type: "rect",
+                      xref: "x",
+                      yref: "paper",
+                      x0: section[0],
+                      y0: 0,
+                      x1: section[section.length - 1],
+                      y1: 1,
+                      fillcolor: selection.color,
+                      opacity: 0.2,
+                      line: {
+                          // Draw a line when the selection is only a single point
+                          width: section.length === 1 ? 1 : 0,
+                          color: selection.color
+                      }
+                  };
+              });
 }
 
 function TimeSeriesGraph(props) {
@@ -142,20 +179,22 @@ function TimeSeriesGraph(props) {
         [data]
     );
 
-    // Handle selections
-    const [selectionShapes] = useBoxSelection(
-        "horizontal",
-        props.currentSelection,
-        props.savedSelections,
-        chartState.data[0].x
-    );
+    // Effect to handle drawing of selections
     useEffect(
         _ => {
-            chartState.layout.shapes = selectionShapes;
-
+            chartState.layout.shapes = props.savedSelections
+                .concat(
+                    props.currentSelection.length && {
+                        color: COLOR_CURRENT_SELECTION,
+                        rowIndices: props.currentSelection
+                    }
+                )
+                .filter(x => x)
+                .map(sel => makeSelectionShapes(sel))
+                .flat();
             updateChartRevision();
         },
-        [selectionShapes]
+        [props.currentSelection, props.savedSelections]
     );
 
     // Update the chart state when the global chart state changes
@@ -185,12 +224,9 @@ function TimeSeriesGraph(props) {
                 }}
                 onSelected={e => {
                     if (!e) return;
-                    let points = utils.indicesInRange(
-                        chartState.data[0].x,
-                        e.range.x[0],
-                        e.range.x[1]
+                    props.setCurrentSelection(
+                        utils.range(Math.floor(e.range.x[0]), Math.ceil(e.range.x[1]))
                     );
-                    props.setCurrentSelection(points);
                 }}
             />
         </GraphWrapper>
