@@ -11,6 +11,10 @@ import { filterSingleCol } from "./graphFunctions";
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_TITLE = "Time Series Graph";
 
+function handleGlobalChartState(state) {
+    return state === "lasso" ? "select" : state;
+}
+
 function generateLayouts(features) {
     return features.reduce((acc, feature, idx) => {
         const axisName = `yaxis${idx === 0 ? "" : idx + 1}`;
@@ -82,7 +86,7 @@ function TimeSeriesGraph(props) {
             },
             showlegend: false,
             margin: { l: 40, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space
-            dragmode: "select",
+            dragmode: handleGlobalChartState(props.globalChartState) || "select",
             selectdirection: "h",
             hovermode: "compare", // Turning off hovermode seems to screw up click handling
             ...layouts
@@ -151,6 +155,15 @@ function TimeSeriesGraph(props) {
             updateChartRevision();
         },
         [selectionShapes]
+    );
+
+    // Update the chart state when the global chart state changes
+    useEffect(
+        _ => {
+            chartState.layout.dragmode = handleGlobalChartState(props.globalChartState);
+            updateChartRevision();
+        },
+        [props.globalChartState]
     );
 
     return (
