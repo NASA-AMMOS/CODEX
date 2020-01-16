@@ -49,7 +49,6 @@ function TimeSeriesGraph(props) {
         //generate time axis list
         const timeAxis = [...Array(cols[0].length).keys()];
 
-        const palette = utils.getSelectionPalette();
         return [
             features.map((feature, idx) => {
                 const trace = {
@@ -58,7 +57,7 @@ function TimeSeriesGraph(props) {
                     mode: "lines",
                     type: "scatter",
                     hoverinfo: "x+y",
-                    marker: { color: palette[idx] }
+                    marker: { color: DEFAULT_POINT_COLOR }
                 };
                 if (idx > 0) {
                     trace.xaxis = `x`;
@@ -186,11 +185,10 @@ function TimeSeriesGraph(props) {
                 }}
                 onSelected={e => {
                     if (!e) return;
-                    const xKey = Object.keys(e.range)[0];
                     let points = utils.indicesInRange(
                         chartState.data[0].x,
-                        e.range[xKey][0],
-                        e.range[xKey][1]
+                        e.range.x[0],
+                        e.range.x[1]
                     );
                     props.setCurrentSelection(points);
                 }}
