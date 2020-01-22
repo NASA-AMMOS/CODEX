@@ -53,9 +53,10 @@ function PreviewPlot(props) {
     const [chartState, setChartState] = useState({
         data: [
             {
+                x: props.data.map((_, idx) => idx),
                 y: props.data,
                 type: "scatter",
-                mode: "markers",
+                mode: "lines",
                 marker: { color: props.data.map((val, idx) => DEFAULT_POINT_COLOR), size: 5 },
                 visible: true
             }
