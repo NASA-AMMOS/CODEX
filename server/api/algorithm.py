@@ -75,7 +75,12 @@ class algorithm():
             self.result['message'] = "failure"
             return self.result
 
-        full_samples, full_features = self.X.shape
+        if self.X.ndim == 1:
+            full_samples = self.X.shape[0]
+            full_features = 1
+        else:
+            full_samples, full_features = self.X.shape
+
         self.result['eta'] = getComputeTimeEstimate(self.__class__.__name__, self.algorithmName, full_samples, full_features)
 
         if self.subsetHashName is not False:
@@ -100,7 +105,12 @@ class algorithm():
                 self.y = labelHash_dict['data']
                 self.result['y'] = self.y.tolist()
 
-        computed_samples, computed_features = self.X.shape
+        if self.X.ndim == 1:
+            computed_samples = self.X.shape[0]
+            computed_features = 1
+        else:
+            computed_samples, computed_features = self.X.shape
+
         self.X = impute(self.X)
         self.result['data'] = self.X.tolist()
 

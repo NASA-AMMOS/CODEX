@@ -1,13 +1,12 @@
-import * as actionTypes from "constants/actionTypes";
-import theme from "styles/theme.scss";
-/* eslint import/no-webpack-loader-syntax: off */
-import WorkerSocket from "worker-loader!workers/socket.worker";
-import StreamSocket from "worker-loader!workers/stream.worker";
-
+import { generateCombination } from "gfycat-style-urls";
 import ShelfPack from "@mapbox/shelf-pack";
 
-import { generateCombination } from "gfycat-style-urls";
 import { store } from "index";
+import StreamSocket from "worker-loader!workers/stream.worker";
+import WorkerSocket from "worker-loader!workers/socket.worker";
+import * as actionTypes from "constants/actionTypes";
+import theme from "styles/theme.scss";
+import Immutable from "immutable";
 
 /**
  * Get a unique id number per idName
@@ -105,7 +104,11 @@ export function makeSimpleRequest(request) {
     return { req, cancel };
 }
 
-export function range(start, stop) {
+export function range(start, stop = null) {
+    if (stop === null) {
+        stop = start;
+        start = 0;
+    }
     const values = [];
     for (let i = start; i < stop; i++) {
         values.push(i);
@@ -220,7 +223,7 @@ export function removeSentinelValues(cols, fileInfo) {
 export function removeSentinelValuesRevised(data, fileInfo) {
     const sentinelValues = [fileInfo.nan, fileInfo.inf, fileInfo.ninf];
 
-    data = data.toJS();
+    if (Immutable.isImmutable(data)) data = data.toJS();
 
     // If there aren't any sentinel values, avoid filtering.
     if (sentinelValues.every(val => val === null)) return data;
@@ -358,4 +361,8 @@ export function getRGBFromHex(hex) {
 export function equalArrays(a, b) {
     if (a.length !== b.length) return false;
     return a.every((val, idx) => val === b[idx]);
+}
+
+export function getMean(values) {
+    return values.reduce((acc, val) => acc + val, 0) / values.length;
 }
