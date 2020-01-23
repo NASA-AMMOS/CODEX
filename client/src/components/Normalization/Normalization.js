@@ -118,7 +118,7 @@ function FeatureRow(props) {
         setSelections(sels => ({
             ...sels,
             [props.feature.get("feature")]: {
-                selection: null,
+                selection: 0,
                 normalized: null,
                 standardized: null
             }
