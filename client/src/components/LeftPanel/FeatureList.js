@@ -29,6 +29,7 @@ import * as dataActions from "actions/data";
 
 import { useFeatureDisplayNames } from "../../hooks/DataHooks";
 import { useKey } from "../../hooks/UtilHooks";
+import { useWindowList } from "../../hooks/WindowHooks";
 
 const RowContext = React.createContext({});
 const ListContext = React.createContext({});
@@ -136,6 +137,13 @@ function SelectedDropdown(props) {
     const totalCount = props.featureList.size;
     const inactive = totalCount - activeCount;
 
+    // Count features currently in use by windows
+    const windowList = useWindowList();
+    const featuresInUseCount = windowList.reduce((acc, win) => {
+        win.getIn(["data", "features"], []).forEach(feature => acc.add(feature));
+        return acc;
+    }, new Set()).size;
+
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [lastSelected, setLastSelected] = useState(0);
 
@@ -148,6 +156,9 @@ function SelectedDropdown(props) {
         },
         function(feature) {
             return !feature.selected;
+        },
+        feature => {
+            return windowList.some(win => win.getIn(["data", "features"]).contains(feature.name));
         }
     ];
 
@@ -168,6 +179,9 @@ function SelectedDropdown(props) {
                 </MenuItem>
                 <MenuItem key="not_selected" value={2}>
                     {"Not Selected (" + inactive + "/" + totalCount + ")"}
+                </MenuItem>{" "}
+                <MenuItem key="not_selected" value={3}>
+                    {`Displayed in Graphs (${featuresInUseCount}/${totalCount})`}
                 </MenuItem>
             </Select>
             <ArrowDropDownIcon color="white" />
