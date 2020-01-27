@@ -28,6 +28,7 @@ import {
 import * as dataActions from "actions/data";
 
 import { useFeatureDisplayNames } from "../../hooks/DataHooks";
+import { useKey } from "../../hooks/UtilHooks";
 
 const RowContext = React.createContext({});
 const ListContext = React.createContext({});
@@ -537,6 +538,18 @@ function FeatureList(props) {
         featureDelete: useFeatureDelete()
     };
 
+    function deselectAll() {
+        props.featureList.forEach(feature => props.featureUnselect(feature.get("name")));
+    }
+    const deselectHotkey = useKey("`");
+    useEffect(
+        _ => {
+            deselectHotkey && deselectAll();
+        },
+
+        [deselectHotkey]
+    );
+
     return (
         <ListContext.Provider value={listContext}>
             <div
@@ -559,6 +572,9 @@ function FeatureList(props) {
                     <StatsLabelRow statsHidden={statsHidden} />
                 </div>
                 <div className="features">
+                    <Button classes={{ label: "deselect-button-label" }} onClick={deselectAll}>
+                        deselect all
+                    </Button>
                     {props.featureListLoading && (
                         <div className="loading-list">
                             <CircularProgress />
