@@ -1,30 +1,22 @@
 import "./PeakDetection.scss";
 
-import { Button, IconButton, Paper } from "@material-ui/core";
+import { Button, IconButton, Slider, Switch, TextField } from "@material-ui/core";
 import { useDispatch } from "react-redux";
 import HelpIcon from "@material-ui/icons/Help";
 import Plot from "react-plotly.js";
-import React, { useState, useEffect, useContext } from "react";
-
-import classnames from "classnames";
+import React, { useState, useEffect, useRef } from "react";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
-import { getMean, makeSimpleRequest, removeSentinelValuesRevised } from "../../utils/utils";
-import {
-    useFeatureDisplayNames,
-    useFileInfo,
-    useNewFeature,
-    usePinnedFeatures
-} from "../../hooks/DataHooks";
+import { makeSimpleRequest } from "../../utils/utils";
+import { useFeatureDisplayNames, useNewFeature, usePinnedFeatures } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
 import * as wmActions from "../../actions/windowManagerActions";
 
-const DEFAULT_POINT_COLOR = "rgba(0, 0, 0, 0.5)";
+const DEFAULT_POINT_COLOR = "#3988E3";
 
 const SelectionContext = React.createContext();
 
 function makeServerRequestObj(algorithmName, feature, parameters) {
-    console.log(parameters);
     return {
         routine: "algorithm",
         algorithmName,
@@ -35,25 +27,26 @@ function makeServerRequestObj(algorithmName, feature, parameters) {
         guidance: null,
         identification: { id: "dev0" },
         parameters: parameters.reduce((acc, param) => {
-            acc[param.name] = param.value;
+            acc[param.name] = param.value !== "" ? param.value : null; // Turn empty strings to nulls
             return acc;
         }, {}),
         dataSelections: []
     };
 }
 
-function PreviewPlot(props) {
-    if (!props.data)
+function PeakPlot(props) {
+    if (!props.indexes)
         return (
-            <div className="peak-detect-plot-container">
-                <div className="peak-detect-plot-title">{props.title}</div>
-                <div className="peak-detect-plot-wrapper">
+            <div className="peak-detect-plot-wrapper">
+                <div className="peak-detect-loading">
                     <WindowCircularProgress />
                 </div>
             </div>
         );
 
-    const [hover, setHover] = useState(false);
+    const min = Math.min(...props.data);
+    const max = Math.max(...props.data);
+    const chartRevision = useRef(0);
     const [chartState, setChartState] = useState({
         data: [
             {
@@ -61,7 +54,16 @@ function PreviewPlot(props) {
                 y: props.data,
                 type: "scatter",
                 mode: "lines",
-                marker: { color: props.data.map((val, idx) => DEFAULT_POINT_COLOR), size: 5 },
+                marker: { color: DEFAULT_POINT_COLOR, size: 5 },
+                visible: true,
+                base: min - 0.1 * min
+            },
+            {
+                x: props.indexes,
+                y: props.indexes.map(idx => props.data[idx]),
+                type: "scatter",
+                mode: "markers",
+                marker: { color: "red", size: 5 },
                 visible: true
             }
         ],
@@ -69,7 +71,33 @@ function PreviewPlot(props) {
             autosize: true,
             margin: { l: 0, r: 0, t: 0, b: 0, pad: 10 }, // Axis tick labels are drawn in the margin space
             hovermode: false,
-            titlefont: { size: 5 }
+            titlefont: { size: 5 },
+            showlegend: false,
+            datarevision: chartRevision.current,
+            xaxis: { showgrid: false, zeroline: false },
+            yaxis: { showgrid: false, zeroline: false },
+            shapes: [
+                {
+                    type: "line",
+                    x0: 0 - 0.05 * props.data.length,
+                    y0: min - (max - min) * 0.25,
+                    x1: props.data.length + 0.05 * props.data.length,
+                    y1: min - (max - min) * 0.25,
+                    line: {
+                        width: 1
+                    }
+                },
+                {
+                    type: "line",
+                    x0: 0 - 0.05 * props.data.length,
+                    y0: min - (max - min) * 0.25,
+                    x1: 0 - 0.05 * props.data.length,
+                    y1: max + (max - min) * 0.25,
+                    line: {
+                        width: 1
+                    }
+                }
+            ]
         },
         config: {
             displaylogo: false,
@@ -77,143 +105,243 @@ function PreviewPlot(props) {
         }
     });
 
-    const containerClass = classnames({
-        "peak-detect-plot-container": true,
-        selected: props.selected
-    });
-    const titleClass = classnames({
-        "peak-detect-plot-title": true,
-        hover: hover || props.selected
-    });
+    function updateChartRevision() {
+        chartRevision.current++;
+        setChartState({
+            ...chartState,
+            layout: { ...chartState.layout, datarevision: chartRevision.current }
+        });
+    }
+
+    useEffect(
+        _ => {
+            chartState.data[1].x = props.indexes;
+            chartState.data[1].y = props.indexes.map(idx => props.data[idx]);
+            updateChartRevision();
+        },
+        [props.indexes]
+    );
 
     return (
-        <div
-            className={containerClass}
-            onMouseEnter={_ => setHover(true)}
-            onMouseLeave={_ => setHover(false)}
-            onClick={props.onSelect}
-        >
-            <div className={titleClass}>{props.title}</div>
+        <div className="peak-detect-plot-container">
+            <div className="peak-detect-axis-label">{props.name}</div>
             <div className="peak-detect-plot-wrapper">
+                <div className="peak-detect-algo-label">{props.algoLabel}</div>
+                {props.isUpdating ? (
+                    <div className="peak-detect-loading overlay">
+                        <WindowCircularProgress />
+                    </div>
+                ) : null}
                 <Plot
                     data={chartState.data}
                     layout={chartState.layout}
                     config={chartState.config}
-                    style={{ width: "189px", height: "170px" }}
+                    style={{ width: "100%", height: "170px" }}
                     onInitialized={figure => setChartState(figure)}
                     onUpdate={figure => setChartState(figure)}
                     className="peak-detect-plot"
                 />
-                <div className="peak-detect-plot-mean">{getMean(props.data).toFixed(2)}</div>
+                <div className="peak-detect-plot-peak-count">{`${props.indexes.length} peaks`}</div>
             </div>
         </div>
     );
 }
 
-function FeatureRow(props) {
-    const fileInfo = useFileInfo();
-    const originalData = removeSentinelValuesRevised([props.feature.get("data")], fileInfo);
+function ParamSlider(props) {
+    const param = props.paramState[0].find(param => param.name === props.paramName);
 
-    const [selections, setSelections] = useContext(SelectionContext);
-    const featureState = selections[props.feature.get("feature")];
-
-    // Seed context with empty data
-    useEffect(_ => {
-        setSelections(sels => ({
-            ...sels,
-            [props.feature.get("feature")]: {
-                selection: 0,
-                normalized: null,
-                standardized: null
-            }
-        }));
-    }, []);
-
-    // Request standardized and normalized data from server and store it in the context
-    useEffect(_ => {
-        const requestObj = makeServerRequestObj("normalize", props.feature);
-        const { req, cancel } = makeSimpleRequest(requestObj);
-        req.then(data =>
-            setSelections(sels => ({
-                ...sels,
-                [props.feature.get("feature")]: {
-                    ...sels[props.feature.get("feature")],
-                    normalized: data.scaled.flat()
-                }
-            }))
+    function changeParam(e, value) {
+        props.paramState[1](params =>
+            params.map(param => (param.name === props.paramName ? { ...param, value } : param))
         );
-        return _ => cancel();
-    }, []);
-
-    useEffect(_ => {
-        const requestObj = makeServerRequestObj("standardize", props.feature);
-        const { req, cancel } = makeSimpleRequest(requestObj);
-        req.then(data =>
-            setSelections(sels => ({
-                ...sels,
-                [props.feature.get("feature")]: {
-                    ...sels[props.feature.get("feature")],
-                    standardized: data.scaled.flat()
-                }
-            }))
-        );
-        return _ => cancel();
-    }, []);
-
-    function setSelection(val) {
-        setSelections(sels => ({
-            ...sels,
-            [props.feature.get("feature")]: { ...featureState, selection: val }
-        }));
     }
 
-    const dataRows = [
-        [originalData[0].toJS(), "original"],
-        [featureState && featureState.normalized, "normalized"],
-        [featureState && featureState.standardized, "standardized"]
-    ];
-
     return (
-        <React.Fragment>
-            <div className="peak-detect-title">{props.feature.get("displayName")}</div>
-            <div className="feature-row">
-                {dataRows.map((row, idx) => (
-                    <PreviewPlot
-                        data={row[0]}
-                        title={row[1]}
-                        key={idx}
-                        idx={idx}
-                        onSelect={_ => setSelection(idx)}
-                        selected={featureState && featureState.selection === idx}
-                    />
-                ))}
-            </div>
-        </React.Fragment>
+        <div className="peak-detect-slider-control">
+            <label>{props.paramName}</label>
+            <Slider
+                value={param.value}
+                min={param.range[0]}
+                max={param.range[1]}
+                onChange={changeParam}
+                valueLabelDisplay="auto"
+                disabled={props.disabled}
+            />
+        </div>
     );
 }
 
 function CwtAlgo(props) {
-    const [parameters, setParameters] = useState([
+    const algoLabel = "CWT";
+    const [needsUpdate, setNeedsUpdate] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const paramState = useState([
         { name: "gap_threshold", value: 2, range: [0, 5] },
         { name: "min_snr", value: 1, range: [0, 100] },
         { name: "noise_perc", value: 10, range: [0, 100] },
         { name: "peak_width", value: 10, range: [1, 100] }
     ]);
 
-    useEffect(_ => {
-        const requestObj = makeServerRequestObj("cwt", props.feature, parameters);
-        console.log("Sending request: ");
-        console.log(requestObj);
-        const { req, cancel } = makeSimpleRequest(requestObj);
-        req.then(data => {
-            console.log("Server response: ");
-            console.log(data);
-        });
-    }, []);
+    const [indexes, setIndexes] = useState();
+
+    useEffect(
+        _ => {
+            if (needsUpdate) {
+                setIsUpdating(true);
+                const requestObj = makeServerRequestObj("cwt", props.feature, paramState[0]);
+                const { req, cancel } = makeSimpleRequest(requestObj);
+                req.then(data => {
+                    setIndexes(data.indexes);
+                    setNeedsUpdate(false);
+                    setIsUpdating(false);
+                });
+            }
+        },
+        [needsUpdate]
+    );
+
+    const timeout = useRef();
+    useEffect(
+        _ => {
+            timeout.current = setTimeout(_ => setNeedsUpdate(true), 500);
+            return _ => clearTimeout(timeout.current);
+        },
+        [paramState[0]]
+    );
+
     return (
-        <Paper>
-            cwt<div className="peak-detect-control-area">Control area</div>
-        </Paper>
+        <div className="peak-detect-algo-container">
+            <PeakPlot
+                name={props.feature.get("feature")}
+                data={props.feature.get("data").toJS()}
+                indexes={indexes}
+                isUpdating={isUpdating}
+                algoLabel={algoLabel}
+            />
+            <div className="peak-detect-control-area">
+                {paramState[0].map(param => (
+                    <ParamSlider
+                        paramState={paramState}
+                        paramName={param.name}
+                        key={param.name}
+                        disabled={isUpdating}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function FindPeaksAlgo(props) {
+    const algoLabel = "Find Peaks";
+    const [needsUpdate, setNeedsUpdate] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+
+    const paramState = useState([
+        { name: "mph", value: "" },
+        { name: "mpd", value: 1, range: [1, 10] },
+        { name: "edge", value: "rising" },
+        { name: "kpsh", value: false },
+        { name: "valley", value: false },
+        { name: "peak_width", value: 10, range: [1, 100] }
+    ]);
+
+    const edgeOptions = ["rising", "falling", "both", "none"];
+
+    const [indexes, setIndexes] = useState();
+
+    useEffect(
+        _ => {
+            if (needsUpdate) {
+                setIsUpdating(true);
+                const requestObj = makeServerRequestObj(
+                    "matlab_findpeaks",
+                    props.feature,
+                    paramState[0]
+                );
+                console.log(`Sending request: `);
+                console.log(requestObj);
+                const { req, cancel } = makeSimpleRequest(requestObj);
+                req.then(data => {
+                    console.log("Server reponse: ");
+                    console.log(data);
+                    setIndexes(data.indexes);
+                    setNeedsUpdate(false);
+                    setIsUpdating(false);
+                });
+            }
+        },
+        [needsUpdate]
+    );
+
+    function updateParam(name, value) {
+        paramState[1](params =>
+            params.map(param => (param.name === name ? { ...param, value } : param))
+        );
+    }
+
+    const timeout = useRef();
+    useEffect(
+        _ => {
+            timeout.current = setTimeout(_ => setNeedsUpdate(true), 500);
+            return _ => clearTimeout(timeout.current);
+        },
+        [paramState[0]]
+    );
+
+    return (
+        <div className="peak-detect-algo-container">
+            <PeakPlot
+                name={props.feature.get("feature")}
+                data={props.feature.get("data").toJS()}
+                indexes={indexes}
+                isUpdating={isUpdating}
+                algoLabel={algoLabel}
+            />
+            <div className="peak-detect-control-area">
+                <TextField
+                    label="mph"
+                    variant="filled"
+                    className="text-input with-helper-text"
+                    value={paramState[0].find(param => param.name === "mph").value}
+                    type="number"
+                    InputProps={{ classes: { root: "input-box" } }}
+                    FormHelperTextProps={{ classes: { root: "helper-text" } }}
+                    onChange={e => e.target.value > 0 && updateParam("mph", e.target.value)}
+                />
+                <ParamSlider paramState={paramState} paramName="mpd" disabled={isUpdating} />
+                <ParamSlider paramState={paramState} paramName="peak_width" disabled={isUpdating} />
+                <div className="peak-detect-dropdown">
+                    <label>Edge</label>
+                    <select
+                        value={paramState[0].find(param => param.name === "edge").value}
+                        onChange={e => updateParam("edge", e.target.value)}
+                    >
+                        {edgeOptions.map(f => (
+                            <option value={f} key={f}>
+                                {f}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="peak-detect-dropdown">
+                    <label>kpsh</label>
+                    <Switch
+                        checked={paramState[0].find(param => param.name === "kpsh").value}
+                        onChange={e => updateParam("kpsh", e.target.checked)}
+                        color="primary"
+                    />
+                </div>
+                <div className="peak-detect-dropdown">
+                    <label>valley</label>
+                    <Switch
+                        checked={paramState[0].find(param => param.name === "valley").value}
+                        onChange={e => updateParam("valley", e.target.checked)}
+                        color="primary"
+                    />
+                </div>
+            </div>
+        </div>
     );
 }
 
@@ -272,6 +400,7 @@ function PeakDetection(props) {
                 </div>
                 <div className="peak-detect-previews">
                     <CwtAlgo feature={features.get(0)} />
+                    <FindPeaksAlgo feature={features.get(0)} />
                 </div>
                 <div className="peak-detect-action-row">
                     <div>
