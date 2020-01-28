@@ -19,8 +19,6 @@ import * as wmActions from "../../actions/windowManagerActions";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
 
-const SelectionContext = React.createContext();
-
 function makeServerRequestObj(algorithmName, feature, parameters) {
     return {
         routine: "algorithm",
@@ -393,9 +391,6 @@ function PeakDetection(props) {
     let features = usePinnedFeatures(win);
     const [featureNameList] = useFeatureDisplayNames();
 
-    const selectionContext = useState(_ => ({}));
-    const [selections, setSelections] = selectionContext;
-
     const addNewFeature = useNewFeature();
 
     if (features === null || !win.data) {
@@ -422,31 +417,29 @@ function PeakDetection(props) {
     }
 
     return (
-        <SelectionContext.Provider value={selectionContext}>
-            <div className="peak-detect-container">
-                <div className="peak-detect-top-bar">
-                    <div className="help-row">
-                        <span className="peak-detect-title">{`Feature: ${features
-                            .get(0)
-                            .get("displayName")}`}</span>
-                        <IconButton>
-                            <HelpIcon />
-                        </IconButton>
-                    </div>
-                </div>
-                <div className="peak-detect-previews">
-                    <CwtAlgo feature={features.get(0)} />
-                    <FindPeaksAlgo feature={features.get(0)} />
-                </div>
-                <div className="peak-detect-action-row">
-                    <div>
-                        <Button variant="contained" size="small" onClick={_ => closeWindow()}>
-                            Close
-                        </Button>
-                    </div>
+        <div className="peak-detect-container">
+            <div className="peak-detect-top-bar">
+                <div className="help-row">
+                    <span className="peak-detect-title">{`Feature: ${features
+                        .get(0)
+                        .get("displayName")}`}</span>
+                    <IconButton>
+                        <HelpIcon />
+                    </IconButton>
                 </div>
             </div>
-        </SelectionContext.Provider>
+            <div className="peak-detect-previews">
+                <CwtAlgo feature={features.get(0)} />
+                <FindPeaksAlgo feature={features.get(0)} />
+            </div>
+            <div className="peak-detect-action-row">
+                <div>
+                    <Button variant="contained" size="small" onClick={_ => closeWindow()}>
+                        Close
+                    </Button>
+                </div>
+            </div>
+        </div>
     );
 }
 
