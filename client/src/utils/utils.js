@@ -362,3 +362,7 @@ export function equalArrays(a, b) {
     if (a.length !== b.length) return false;
     return a.every((val, idx) => val === b[idx]);
 }
+
+export function getMean(values) {
+    return values.reduce((acc, val) => acc + val, 0) / values.length;
+}

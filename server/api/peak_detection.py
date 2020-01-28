@@ -62,7 +62,7 @@ class peak_detection(algorithm):
         elif self.algorithm == "matlab_findpeaks":
             indexes = detect_peaks(self.X, mph=self.parms['mph'], mpd=self.parms['mpd'], threshold=self.parms['threshold'], edge=self.parms['edge'], kpsh=self.parms['kpsh'], valley=self.parms['valley'])
 
-        self.result["indexes"] = indexes
+        self.result["indexes"] = indexes.tolist()
 
 
     def check_valid(self):
