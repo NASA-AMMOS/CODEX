@@ -196,7 +196,8 @@ function CwtAlgo(props) {
     const [parameters, setParameters] = useState([
         { name: "gap_threshold", value: 2, range: [0, 5] },
         { name: "min_snr", value: 1, range: [0, 100] },
-        { name: "noise_perc", value: 10, range: [0, 100] }
+        { name: "noise_perc", value: 10, range: [0, 100] },
+        { name: "peak_width", value: 10, range: [1, 100] }
     ]);
 
     useEffect(_ => {
@@ -209,7 +210,11 @@ function CwtAlgo(props) {
             console.log(data);
         });
     }, []);
-    return <Paper>cwt</Paper>;
+    return (
+        <Paper>
+            cwt<div className="peak-detect-control-area">Control area</div>
+        </Paper>
+    );
 }
 
 function PeakDetection(props) {
