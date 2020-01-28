@@ -49,12 +49,11 @@ function TemplateScan(props) {
     let features = usePinnedFeatures(win);
     const [featureNameList] = useFeatureDisplayNames();
 
-    const requestObj = makeServerRequestObj("dtw", features.get(0), features.get(1));
+    const requestObj = features && makeServerRequestObj("dtw", features.get(0), features.get(1));
     const [res, setRes] = useState();
     useEffect(
         _ => {
             if (!features || res) return;
-
             const { req, cancel } = makeSimpleRequest(requestObj);
             req.then(data => {
                 setRes(data);
