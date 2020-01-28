@@ -1,6 +1,6 @@
 import "./PeakDetection.scss";
 
-import { Button, IconButton } from "@material-ui/core";
+import { Button, IconButton, Paper } from "@material-ui/core";
 import { useDispatch } from "react-redux";
 import HelpIcon from "@material-ui/icons/Help";
 import Plot from "react-plotly.js";
@@ -23,7 +23,8 @@ const DEFAULT_POINT_COLOR = "rgba(0, 0, 0, 0.5)";
 
 const SelectionContext = React.createContext();
 
-function makeServerRequestObj(algorithmName, feature) {
+function makeServerRequestObj(algorithmName, feature, parameters) {
+    console.log(parameters);
     return {
         routine: "algorithm",
         algorithmName,
@@ -33,7 +34,10 @@ function makeServerRequestObj(algorithmName, feature) {
         file: null,
         guidance: null,
         identification: { id: "dev0" },
-        parameters: {},
+        parameters: parameters.reduce((acc, param) => {
+            acc[param.name] = param.value;
+            return acc;
+        }, {}),
         dataSelections: []
     };
 }
@@ -189,12 +193,23 @@ function FeatureRow(props) {
 }
 
 function CwtAlgo(props) {
+    const [parameters, setParameters] = useState([
+        { name: "gap_threshold", value: 2, range: [0, 5] },
+        { name: "min_snr", value: 1, range: [0, 100] },
+        { name: "noise_perc", value: 10, range: [0, 100] }
+    ]);
+
     useEffect(_ => {
-        const requestObj = makeServerRequestObj("cwt", props.feature);
+        const requestObj = makeServerRequestObj("cwt", props.feature, parameters);
+        console.log("Sending request: ");
+        console.log(requestObj);
         const { req, cancel } = makeSimpleRequest(requestObj);
-        req.then(data => console.log(data));
+        req.then(data => {
+            console.log("Server response: ");
+            console.log(data);
+        });
     }, []);
-    return <div>cwt</div>;
+    return <Paper>cwt</Paper>;
 }
 
 function PeakDetection(props) {
