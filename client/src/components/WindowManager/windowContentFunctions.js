@@ -32,6 +32,7 @@ import MapGraph from "components/Graphs/MapGraph";
 import GraphWindow from "components/Graphs/GraphWindow";
 import Normalization from "components/Normalization/Normalization";
 import PeakDetection from "components/PeakDetection/PeakDetection";
+import TemplateScan from "components/TemplateScan/TemplateScan";
 
 export function getWindowContent(win) {
     // Graphs get handled by the separate graph handler, as the graph type isn't fixed to the window.
@@ -86,6 +87,8 @@ export function getWindowContent(win) {
             return <Normalization />;
         case windowTypes.PEAK_DETECTION_WINDOW:
             return <PeakDetection />;
+        case windowTypes.TEMPLATE_SCAN_WINDOW:
+            return <TemplateScan />;
 
         default:
             return (
