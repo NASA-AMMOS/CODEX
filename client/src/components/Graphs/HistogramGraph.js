@@ -117,6 +117,8 @@ function HistogramGraph(props) {
         [props.data]
     );
 
+    const heightPercentage = 100 / data.size;
+
     return (
         <GraphWrapper
             resizeHandler={_ =>
@@ -126,7 +128,7 @@ function HistogramGraph(props) {
             win={props.win}
             stacked
         >
-            <ul className="histogram-graph-container">
+            <div className="histogram-container">
                 {data.map((dataElement, index) => (
                     <HistogramSubGraph
                         key={index}
@@ -138,9 +140,10 @@ function HistogramGraph(props) {
                         savedSelections={props.savedSelections}
                         chartId={chartIds[index]}
                         win={props.win}
+                        heightPercentage={heightPercentage}
                     />
                 ))}
-            </ul>
+            </div>
         </GraphWrapper>
     );
 }
@@ -254,7 +257,6 @@ function HistogramSubGraph(props) {
 
     return (
         <Plot
-            className="histogram-subplot"
             ref={props.chart}
             data={chartState.data}
             layout={chartState.layout}

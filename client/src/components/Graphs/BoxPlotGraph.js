@@ -31,7 +31,8 @@ function generateLayouts(features) {
                 automargin: true,
                 fixedrange: true
             },
-            shapes: []
+            shapes: [],
+            modebar: { orientation: "v" }
         };
 
         layouts.push(layout);
@@ -116,7 +117,7 @@ function BoxPlotGraph(props) {
             chartId={chartId}
             win={props.win}
         >
-            <ul className="box-plot-container">
+            <div className="box-plot-container">
                 {data.map((dataElement, index) => (
                     <BoxPlotSubGraph
                         key={index}
@@ -130,7 +131,7 @@ function BoxPlotGraph(props) {
                         chartId={chartId}
                     />
                 ))}
-            </ul>
+            </div>
         </GraphWrapper>
     );
 }
@@ -186,7 +187,6 @@ function BoxPlotSubGraph(props) {
 
     return (
         <Plot
-            className="box-subplot"
             ref={props.chart}
             data={chartState.data}
             layout={chartState.layout}
