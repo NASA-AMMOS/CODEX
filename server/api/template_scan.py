@@ -46,11 +46,6 @@ class template_scan(algorithm):
 
         return cluster_alg
 
-
-
-
-
-'''
     returnTemplateHash = ch.findHashArray("hash", templateHash, "feature")
     if(returnTemplateHash is None):
         logging.warning("Error: codex_template_scan: templateHash not found.")
@@ -98,5 +93,5 @@ class template_scan(algorithm):
 
     dictionary['message'] = 'success'
     return dictionary
-'''
+
 
