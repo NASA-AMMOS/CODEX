@@ -24,11 +24,7 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.codex_math        import impute
-from api.sub.downsample        import downsample
 from api.sub.plot              import plot_peak
-from api.sub.time_log          import getComputeTimeEstimate
-from api.sub.time_log          import logTime
 from api.sub.detect_peaks      import detect_peaks
 from api.sub.hash              import get_cache
 from api.algorithm             import algorithm
