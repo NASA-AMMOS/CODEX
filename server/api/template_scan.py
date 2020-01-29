@@ -41,9 +41,9 @@ class template_scan(algorithm):
     def fit_algorithm(self):
 
         if self.algorithm == "dtw":
-            distances, paths = fastdtw(self.X, self.y, radius=self.parms['radius'], dist=euclidean)
-            self.result["distances"] = distances.tolist()
-            self.result["paths"] = paths.tolist()
+            distance, paths = fastdtw(self.X, self.y, radius=self.parms['radius'], dist=euclidean)
+            self.result["distance"] = distance
+            self.result["paths"] = paths
 
     def check_valid(self):
         return 1

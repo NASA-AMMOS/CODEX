@@ -57,10 +57,10 @@ def algorithm_call(msg, result):
             subsetHashName = False
 
         try:
-            labelName = msg["labelName"]
+            labelName = msg["labelName"][0]
             labelHash = ch.findHashArray("name", labelName, "feature")['hash']
         except:
-            labelHash = None
+           labelHash = None
 
         try:
             cross_val = msg["cross_val"]
