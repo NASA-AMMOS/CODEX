@@ -198,7 +198,7 @@ function WindowManager(props) {
                 initialPosition: initialPos,
                 restrictToParentDiv: true,
                 initialSize,
-                minSize: win.get("minSize").toJS() || { width: 100, height: 100 },
+                minSize: win.get("minSize") || { width: 100, height: 100 },
                 width: win.get("width"),
                 height: win.get("height"),
                 x: win.get("x", 0),
