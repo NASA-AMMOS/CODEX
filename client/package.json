@@ -131,6 +131,7 @@
         "@babel/preset-env": "^7.6.3",
         "@teamsupercell/typings-for-css-modules-loader": "^2.0.0",
         "babel-eslint": "^10.0.2",
+        "babel-node": "0.0.1-security",
         "babel-polyfill": "^6.26.0",
         "babel-preset-react": "^6.24.1",
         "concurrently": "^3.5.1",
