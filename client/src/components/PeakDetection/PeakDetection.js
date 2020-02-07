@@ -29,6 +29,21 @@ import { useWindowManager } from "../../hooks/WindowHooks";
 import * as wmActions from "../../actions/windowManagerActions";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
+const CWT_PARAMS = [
+    { name: "gap_threshold", value: 2, range: [0, 5], displayName: "Gap Threshold" },
+    { name: "min_snr", value: 1, range: [0, 100], displayName: "Minimum SNR" },
+    { name: "noise_perc", value: 10, range: [0, 100], displayName: "Noise Percentage" },
+    { name: "peak_width", value: 10, range: [1, 100], displayName: "Peak Width" }
+];
+const FIND_PEAKS_PARAMS = [
+    { name: "mph", value: 5 },
+    { name: "mpd", value: 1, range: [1, 10] },
+    { name: "edge", value: "rising", displayName: "Edge" },
+    { name: "kpsh", value: false },
+    { name: "valley", value: false, displayName: "Valley" },
+    { name: "peak_width", value: 10, range: [1, 100], displayName: "Peak Width" },
+    { name: "threshold", value: 0, range: [0, 100], displayName: "Threshold" }
+];
 
 function makeServerRequestObj(algorithmName, feature, parameters) {
     return {
@@ -238,12 +253,7 @@ function CwtAlgo(props) {
     const algoLabel = "CWT";
     const [needsUpdate, setNeedsUpdate] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
-    const paramState = useState([
-        { name: "gap_threshold", value: 2, range: [0, 5], displayName: "Gap Threshold" },
-        { name: "min_snr", value: 1, range: [0, 100], displayName: "Minimum SNR" },
-        { name: "noise_perc", value: 10, range: [0, 100], displayName: "Noise Percentage" },
-        { name: "peak_width", value: 10, range: [1, 100], displayName: "Peak Width" }
-    ]);
+    const paramState = useState(CWT_PARAMS);
 
     const [indexes, setIndexes] = useState();
 
@@ -304,15 +314,7 @@ function FindPeaksAlgo(props) {
     const [needsUpdate, setNeedsUpdate] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
 
-    const paramState = useState([
-        { name: "mph", value: "" },
-        { name: "mpd", value: 1, range: [1, 10] },
-        { name: "edge", value: "rising", displayName: "Edge" },
-        { name: "kpsh", value: false },
-        { name: "valley", value: false, displayName: "Valley" },
-        { name: "peak_width", value: 10, range: [1, 100], displayName: "Peak Width" },
-        { name: "threshold", value: 0, range: [0, 100], displayName: "Threshold" }
-    ]);
+    const paramState = useState(FIND_PEAKS_PARAMS);
 
     const edgeOptions = ["rising", "falling", "both", "none"];
 
