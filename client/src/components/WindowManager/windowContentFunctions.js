@@ -31,6 +31,7 @@ import SingleXMultipleYGraph from "components/Graphs/SingleXMultipleYGraph";
 import MapGraph from "components/Graphs/MapGraph";
 import GraphWindow from "components/Graphs/GraphWindow";
 import Normalization from "components/Normalization/Normalization";
+import PeakDetection from "components/PeakDetection/PeakDetection";
 
 export function getWindowContent(win) {
     // Graphs get handled by the separate graph handler, as the graph type isn't fixed to the window.
@@ -83,6 +84,8 @@ export function getWindowContent(win) {
             return <QualityScan data={win.get("data")} />;
         case windowTypes.NORMALIZATION_WINDOW:
             return <Normalization />;
+        case windowTypes.PEAK_DETECTION_WINDOW:
+            return <PeakDetection />;
 
         default:
             return (
