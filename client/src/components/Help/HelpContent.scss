@@ -1,0 +1,25 @@
+.help-container {
+    background: #fff;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+
+    .loading-indicator {
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    .help-content {
+        height: 100%;
+        overflow: scroll;
+        margin-left: 10px;
+    }
+}
+
+.closeButton {
+    float: right;
+}

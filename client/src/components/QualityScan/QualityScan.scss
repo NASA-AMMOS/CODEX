@@ -1,0 +1,102 @@
+@import "styles/theme.scss";
+
+.qs-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    background: black;
+
+    .qs-plot {
+        width: 100%;
+    }
+
+    .qs-controls {
+        display: flex;
+        flex-direction: column;
+        width: 218px;
+        height: 100%;
+        background: $dark-grey;
+        padding-left: 24px;
+        padding-top: 15px;
+        color: $white;
+
+        .header {
+            width: 95%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            button {
+                padding: 0;
+            }
+
+            .icon {
+                fill: $white;
+                margin: 0;
+            }
+        }
+
+        .dropdown {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            font-size: 0.75rem;
+            label {
+                margin-bottom: 0;
+            }
+            select {
+                width: 90%;
+                color: $white;
+                background: none;
+                border: 1px solid rgba(255, 255, 255, 0.83);
+                border-radius: 2px;
+            }
+        }
+
+        .slider {
+            display: flex;
+            margin-top: 25px;
+            flex-direction: column;
+            &:first-of-type {
+                margin-top: 10px;
+            }
+            .title {
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                .color-swatch {
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background: $grey7;
+                    &.active {
+                        &.nan {
+                            background: $yellow;
+                        }
+                        &.inf {
+                            background: $green;
+                        }
+                        &.repeat {
+                            background: $magenta;
+                        }
+                    }
+                }
+                .title-text {
+                    color: $white;
+                    margin-left: 2px;
+                    &.no-swatch {
+                        margin-left: 10px;
+                    }
+                    &.disabled {
+                        color: $grey3;
+                    }
+                }
+            }
+            .slider-control {
+                width: 82px;
+                margin-top: 10px;
+                margin-left: 10px;
+            }
+        }
+    }
+}

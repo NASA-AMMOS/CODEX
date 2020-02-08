@@ -1,0 +1,14 @@
+
+.box-plot-container {
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin:10;
+    padding: 0;
+}
+
+.box-subplot {
+    display: flex;
+}

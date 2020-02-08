@@ -1,0 +1,119 @@
+@import "styles/theme.scss";
+
+.propertyEditorContainer {
+    height: calc(100vh - 70px);
+    // min-width: 225px;
+    flex-basis: 225px;
+    background-color: #081a33;
+    position: relative;
+    z-index: 150;
+    overflow: auto;
+
+    .header {
+        font-family: Inter;
+        font-style: normal;
+        font-weight: bold;
+        font-size: 16px;
+        line-height: 19px;
+        color: white;
+        margin-top: 10px;
+        margin-left: 14px;
+        margin-bottom: 10px;
+    }
+
+    .axis {
+        margin-left: 18px;
+        margin-bottom: 25px;
+        label {
+            display: block;
+            font-size: 11px;
+            line-height: 13px;
+            color: #f2f2f2;
+            margin-bottom: 0;
+            color: $grey5;
+        }
+
+        .feature-name {
+            font-size: 14px;
+            line-height: 17px;
+            color: #eeeeee;
+        }
+
+        select {
+            width: 150px;
+        }
+    }
+
+    .swap-button {
+        color: #eeeeee;
+        margin-left: 10px;
+
+        svg {
+            margin-left: 5px;
+            fill: white;
+        }
+    }
+
+    .color-swatch {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .line-plot {
+        width: 60%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+        line-height: 17px;
+        color: $grey9;
+        margin-bottom: 5px;
+    }
+
+    .title-field {
+        margin-left: 18px;
+        margin-bottom: 10px;
+        input {
+            color: #eeeeee;
+            user-select: text;
+            &::selection {
+                background: blue;
+            }
+        }
+
+        svg {
+            fill: #dadada;
+        }
+
+        &.axis-label {
+            margin-left: 0;
+        }
+    }
+
+    .bin-size-input {
+        color: white;
+    }
+
+    .input-field-container {
+        margin-left: 15px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        .text-input {
+            background: #e8e8e8;
+            margin-bottom: 10px;
+            border-radius: 4px 4px 0px 0px;
+
+            &.with-helper-text {
+                background: none;
+                .input-box {
+                    background: #d3d3d3;
+                }
+                .helper-text {
+                    color: #eeeeee;
+                    margin-left: 5px;
+                }
+            }
+        }
+    }
+}

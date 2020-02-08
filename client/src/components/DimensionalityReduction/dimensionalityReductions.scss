@@ -1,0 +1,200 @@
+.regressionsContainer {
+    width: 100%;
+    height: 100%;
+}
+
+.classificationRow {
+    display: flex;
+    justify-content: space-between;
+}
+
+.headerBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 10px;
+}
+
+.body {
+    width: 100%;
+    height: 65%;
+    display: flex;
+}
+
+.leftCol {
+    width: 40%;
+    flex: 1;
+}
+
+.rightCol {
+    width: 60%;
+    padding-left: 25px;
+    flex: 1;
+}
+
+.resultRow {
+    display: flex;
+    justify-content: flex-start;
+    width: 650px;
+}
+
+.buttonRow {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+}
+
+.regressionList {
+    overflow-y: scroll;
+    height: 100%;
+    flex-wrap: nowrap !important;
+    margin-top: 5px;
+}
+
+.checkboxRow {
+    display: flex;
+    align-items: center;
+    margin-top: -5px;
+    margin-bottom: -5px;
+    margin-left: -10px;
+    padding-right: 5px;
+    &:hover {
+        background-color: #eee;
+    }
+    &.active {
+        background-color: #ccc;
+        .checkboxLabel {
+            color: black;
+        }
+    }
+}
+
+.checkboxLabels {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.paramHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+}
+
+.regressionCounts {
+    span {
+        display: block;
+    }
+}
+
+.regressionParams {
+    margin-top: 10px;
+    height: 70%;
+    overflow-y: scroll;
+    padding-right: 8px;
+}
+
+.parameterInput {
+    display: block;
+}
+
+.row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropdown {
+    min-width: 200px !important;
+}
+
+.plotContainer {
+    background: #fff;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    justify-content: center;
+
+    .plot {
+        margin: 0;
+        padding: 0;
+        height: 300px;
+        width: 300px;
+    }
+
+    .chartSlider {
+        margin-left: 35px;
+        width: 250px;
+        height: 25px;
+        margin-top: 10px;
+    }
+}
+
+.drResults .resultRow {
+    width: 100%;
+    height: 500px;
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    overflow-y: scroll;
+
+    &.leftAligned {
+        justify-content: flex-start;
+    }
+}
+
+.runParams {
+    margin-left: 20px;
+}
+
+.regressionResult {
+    position: relative;
+    width: 205px;
+    margin-top: 10px;
+    &.selected {
+        background: #000;
+        .regressionHeader,
+        .bestParms {
+            color: #fff;
+        }
+    }
+}
+
+.labelDropdown {
+    min-width: 100px !important;
+}
+
+.regressionHeader {
+    width: 90%;
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    margin-left: 10px;
+}
+
+.percentage {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.bestParms {
+    margin-top: 10px;
+    list-style-type: none;
+    padding-left: 5px;
+}
+
+.chartLoading {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.saveButton {
+    margin-top: 10px !important;
+}

@@ -1,0 +1,231 @@
+.preview-title {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    margin-left: 10px;
+
+    .title {
+        font-size: 26px;
+    }
+}
+
+.algo-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    height: 90%;
+}
+
+.subalgo-container {
+    position: relative;
+    width: 205px;
+    height: 227px;
+    // margin-bottom: 10px;
+    box-shadow: 0px 5px 12px 0px rgba(0, 0, 0, 0.1);
+    &.selected {
+        background: #000;
+    }
+
+    &.preview-mode {
+        width: 100%;
+        height: 93%;
+        box-shadow: none;
+
+        .subalgo-plot {
+            width: 440px;
+            height: 430px;
+        }
+    }
+}
+
+.subalgo-title {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    &.selected {
+        color: #fff;
+    }
+}
+
+.subalgo-title-text {
+    margin-left: 5px;
+}
+
+.subalgo-chart-loading {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &.large-mode {
+        min-height: 420px;
+    }
+}
+
+.subalgo-plot {
+    background: #fff;
+    margin: 0 auto;
+    width: 200px;
+    height: 200px;
+}
+
+.subalgo-time {
+    position: absolute;
+    bottom: 15px;
+    right: 18px;
+}
+
+.subalgo-header-time {
+    display: none;
+    margin-right: 5px;
+}
+
+.subalgo-focus {
+    background: #fff;
+    // position: absolute;
+    // top: 35px;
+    // left: 0;
+    width: 100%;
+    // padding-top: 5px;
+    padding-left: 20px;
+    padding-right: 10px;
+    // height: 565px;
+}
+
+.subalgo-edit-output-params {
+    .title {
+        font-weight: bold;
+        font-size: 22px;
+        line-height: 26px;
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        font-weight: bold;
+        font-size: 18px;
+        line-height: 21px;
+        margin-bottom: 10px;
+        margin-top: 20px;
+    }
+
+    .subalgo-param-field {
+        display: flex;
+        font-size: 16px;
+        line-height: 19px;
+        align-items: baseline;
+        input {
+            margin-right: 10px;
+        }
+
+        .param-title {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+    }
+}
+
+.subalgo-edit-header {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+
+    .title {
+        font-size: 26px;
+
+        .breadcrumbs {
+            font-size: 14px;
+            color: #cdcdcd;
+
+            span {
+                margin: 0 2px;
+            }
+
+            a:link,
+            a:visited {
+                color: #cdcdcd;
+
+                &.next-step {
+                    color: #000;
+                }
+            }
+        }
+    }
+}
+
+.subalgo-detail {
+    display: flex;
+    justify-content: space-between;
+    height: 90%;
+
+    .preview {
+        height: 95%;
+        width: 50%;
+
+        .action-buttons {
+            text-align: right;
+            margin-right: 2em;
+        }
+    }
+
+    .params {
+        width: 50%;
+
+        hr {
+            margin: 5px 0;
+        }
+
+        .param-previews {
+            display: flex;
+            height: 180px;
+            width: 100%;
+            overflow-y: scroll;
+
+            .subalgo-container {
+                min-width: 140px;
+                height: 157px;
+                .subalgo-plot {
+                    width: 135px;
+                    height: 130px;
+                }
+                .subalgo-header-time {
+                    display: inline;
+                }
+                .subalgo-time {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    .output-section {
+        margin-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+    }
+}
+
+.help-container {
+    background: #fff;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 485px;
+    z-index: 1;
+
+    .loading-indicator {
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    .help-content {
+        height: 100%;
+        overflow: scroll;
+        margin-left: 10px;
+    }
+}

@@ -1,0 +1,170 @@
+@import "styles/theme.scss";
+
+.feature-list-container {
+    height: 40vh;
+    position: relative;
+    color: #bbb;
+    background-color: #051426;
+    font-family: "Inter", "Roboto", sans-serif;
+    z-index: 999; //this is to ensure it is above the window layout
+
+    &.stats-hidden {
+        width: 100%;
+        .feature-name-row {
+            width: 100%;
+        }
+    }
+
+    &.stats-not-hidden {
+        width: 670px;
+
+        .feature-name-row {
+            width: 415px;
+        }
+    }
+
+    .stats-bar-top {
+        height: 36px;
+        width: 100%;
+        background-color: #051426;
+        display: flex;
+        flex-direction: row;
+        position: relative;
+        border-bottom: none;
+
+        .label-row {
+            width: 415px;
+            padding: 0;
+            padding-left: 5px;
+            background-color: #061427;
+            z-index: 999; //this is to ensure it is above the window layout
+            line-height: 36px;
+
+            display: flex;
+            flex-direction: row;
+
+            .classification,
+            .regression {
+                width: 25px;
+            }
+
+            .label-field {
+                width: 135px;
+            }
+
+            .sparkline {
+                width: 200px;
+            }
+        }
+
+        .selected-dropdown {
+            width: 250px;
+            & > div {
+                color: white;
+                border: solid rgba(255, 255, 255, 0.5) 1px;
+                border-radius: 4px;
+                width: 95%;
+                margin: 4px;
+                height: 28px;
+                line-height: 28px;
+                padding: 0px;
+                padding-left: 10px;
+            }
+
+            svg {
+                float: right;
+                fill: white;
+            }
+        }
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 0 5px;
+        color: white;
+        background-color: $header-green;
+
+        .title {
+            font-weight: bold;
+        }
+
+        .counts {
+            color: #bbb;
+            font-size: 14px;
+        }
+    }
+
+    .features {
+        .deselect-button-label {
+            color: white;
+        }
+
+        height: calc(100% - 57px);
+        overflow-y: scroll;
+        z-index: 999;
+        position: relative;
+        background-color: #081a33;
+
+        .loading-list {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .list {
+            .featureRow {
+                height: 22px;
+                line-height: 22px;
+                display: flex;
+                flex-direction: row;
+
+                &:hover {
+                    background-color: #bbbbbb;
+                    color: #051426;
+                }
+
+                .feature-name-row {
+                    display: flex;
+                    flex-direction: row;
+                    .selected-checkbox {
+                        width: 25px;
+                    }
+
+                    .feature-name {
+                        display: inline-block;
+                        overflow: hidden;
+                        white-space: nowrap;
+                        padding-left: 5px;
+                        padding-right: 5px;
+                        text-overflow: ellipsis;
+                        width: 225px;
+                    }
+                }
+
+                .feature-statistics-row {
+                    width: 415px;
+                    display: flex;
+                    flex-direction: row;
+                    padding-left: 5px;
+                    z-index: 999;
+
+                    .class-regression-span {
+                        width: 22px;
+                    }
+
+                    .label-field {
+                        width: 135px;
+                    }
+
+                    .sparkline-span {
+                        width: 200px;
+                    }
+                }
+            }
+        }
+    }
+}

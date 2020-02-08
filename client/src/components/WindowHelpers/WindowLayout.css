@@ -1,0 +1,50 @@
+.WindowLayout__LayoutContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+.WindowLayout__LayoutContainer--fullsize {
+    width: 100%;
+    height: 100%;
+}
+
+.WindowLayout__LayoutContainer--row {
+    flex-direction: row;
+}
+
+.WindowLayout__Fixed {
+    flex-grow: 0;
+}
+
+.WindowLayout__Expanding {
+    flex-grow: 1;
+}
+
+.WindowLayout--scrollable {
+    overflow: auto;
+    min-height: 0;
+}
+
+.WindowLayout__cover {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    z-index: 100;
+    background-color: white;
+    overflow-y: auto;
+}
+
+.WindowLayout__nopad {
+    position: absolute;
+    top: -10px;
+    bottom: 0px;
+    left: -10px;
+    right: -10px;
+
+    background-color: white;
+}

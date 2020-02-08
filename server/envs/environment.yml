@@ -1,0 +1,32 @@
+name: codex
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.6
+  - coverage
+  - h5py
+  - numpy=1.14.3
+  - scipy
+  - scikit-learn=0.20.3
+  - pytest
+  - pyyaml
+  - yaml
+  - matplotlib
+  - tornado=4.5.3
+  - psutil
+  - pandas
+  - pillow
+  - psutil
+  - msgpack-python
+  - pyzmq
+  - termcolor
+  - pip
+  - pip:
+    - pysptools
+    - scikit-image==0.15.0
+    - fastdtw
+    - Pebble
+    - pytest-cov==2.7.1

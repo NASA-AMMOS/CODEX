@@ -1,0 +1,72 @@
+.Panel {
+    display: flex;
+    /*border-right: 6px solid #7d39e0;*/
+    /*z-index: 2000000000;*/
+    position: relative;
+}
+
+.Panel #border {
+    height: 100%;
+    width: 20px;
+    background: #1a1a1a;
+    cursor: pointer;
+    transition: width 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95),
+        background 0.4s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
+.Panel #border:hover {
+    width: 30px;
+    background: #383838;
+}
+
+.filter-bar {
+    width: 250px;
+    padding: 4px;
+
+    input {
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.75);
+        border: none;
+        padding: 0px 6px;
+        line-height: 23px;
+        height: 23px;
+    }
+}
+
+.Panel #content {
+    width: auto;
+    height: 100%;
+    position: relative;
+    box-sizing: border-box;
+    /*z-index: 2000000001;*/
+    background: #061427;
+}
+
+.Panel #content {
+    width: 250px;
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    position: relative;
+    box-sizing: border-box;
+    background-color: #081a33;
+    /*z-index: 10;*/
+    /*box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.11);*/
+}
+
+.Panel #left {
+    width: 0;
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    position: relative;
+    box-sizing: border-box;
+    /*z-index: 10;*/
+    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.11);
+    transition: width 0.3s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
+.Panel #left.active {
+    width: 220px;
+}
