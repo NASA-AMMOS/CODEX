@@ -164,6 +164,9 @@
         "*.{js,css,scss,json}": [
             "prettier --config .prettierrc --write",
             "git add"
+        ],
+        "ignore": [
+            "src/plotly-patched"
         ]
     },
     "husky": {
