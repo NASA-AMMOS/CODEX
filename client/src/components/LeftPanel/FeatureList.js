@@ -532,12 +532,20 @@ function FeatureList(props) {
         [features]
     );
 
-    //filters out the feautres based on the filter bar and
+    const caseSensitive = Boolean(props.filterString && props.filterString.match(/[A-Z]/g));
+    const exactMatch = props.filterString.match(/^"(.*)"$/); // Allows users to specify an exact match with quotes.
+
+    //filters out the features based on the filter bar and
     //sorts them by their indices stored in featureIndices
     const sortedFeatureNames = featureNames
-        .filter(featureName =>
-            props.filterString ? featureName.startsWith(props.filterString) : true
-        )
+        .filter(featureName => {
+            if (!props.filterString) return true;
+            return exactMatch
+                ? featureName === exactMatch[1]
+                : (caseSensitive ? featureName : featureName.toLowerCase()).includes(
+                      props.filterString
+                  );
+        })
         .concat() //this is so it operates on a copy of stuff
         .sort((a, b) => {
             const aIndex = featureIndices[a];
