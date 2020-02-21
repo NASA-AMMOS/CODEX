@@ -26,8 +26,6 @@ function generateLayouts(features) {
     }, {});
 }
 
-function makeSelectionsFromProps(props) {}
-
 function makeSelectionShapes(selection) {
     return !selection.rowIndices.length
         ? null
