@@ -809,11 +809,15 @@ function PropertyEditor(props) {
         }
     })();
 
+    const graphSelection = windowTypes.graphs.includes(activeWindow.get("windowType")) ? (
+        <ChangeGraphType activeWindowId={activeWindowId} />
+    ) : null;
+
     return (
         <div className="propertyEditorContainer">
             <div className="header">Graph Details</div>
             <WindowRenameInput activeWindowId={activeWindowId} />
-            <ChangeGraphType activeWindowId={activeWindowId} />
+            {graphSelection}
             {panelContent}
         </div>
     );

@@ -60,9 +60,12 @@ class peak_detection(algorithm):
         if self.algorithm == "cwt":
             indexes = find_peaks_cwt(self.X, width_array, gap_thresh=self.parms['gap_threshold'], min_snr=self.parms['min_snr'], noise_perc=self.parms['noise_perc'])
         elif self.algorithm == "matlab_findpeaks":
-            indexes = detect_peaks(self.X, mph=self.parms['mph'], mpd=self.parms['mpd'], threshold=self.parms['threshold'], edge=self.parms['edge'], kpsh=self.parms['kpsh'], valley=self.parms['valley'])
+            mph = self.parms['mph']
+            if mph:
+                mph = float(mph)
+            indexes = detect_peaks(self.X, mph=mph, mpd=self.parms['mpd'], threshold=self.parms['threshold'], edge=self.parms['edge'], kpsh=self.parms['kpsh'], valley=self.parms['valley'])
 
-        self.result["indexes"] = indexes
+        self.result["indexes"] = indexes.tolist()
 
 
     def check_valid(self):

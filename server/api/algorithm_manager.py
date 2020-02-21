@@ -89,7 +89,6 @@ def algorithm_call(msg, result):
         if (downsampled != False):
             downsampled = int(downsampled)
 
-
         if (algorithmType == "clustering"):
             pca = dimension_reduction(inputHash, hashList, labelHash, subsetHashName, "PCA", downsampled, {"n_components":2}, scoring, search_type, cross_val, result, ch).run()
             result =       clustering(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()

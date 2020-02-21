@@ -92,6 +92,8 @@ function NavigationBar(props) {
                             windowTypes.DIMENSIONALITY_REDUCTION_WINDOW,
                             "Dimensionality Reduction"
                         )}
+                        {createMenuItem(windowTypes.NORMALIZATION_WINDOW, "Normalization")}
+                        {createMenuItem(windowTypes.PEAK_DETECTION_WINDOW, "Peak Detection")}
                     </Dropdown.Menu>
                 </Dropdown>
 

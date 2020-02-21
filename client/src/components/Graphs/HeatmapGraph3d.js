@@ -215,13 +215,15 @@ function HeatmapGraph3d(props) {
             );
             chartState.data[0].z = getZAxis();
 
-            chartState.layout.xaxis.title = props.data
-                .find(feature => feature.get("feature") === props.win.data.xAxis)
-                .get("displayName");
+            if (props.win.data.xAxis)
+                chartState.layout.xaxis.title = props.data
+                    .find(feature => feature.get("feature") === props.win.data.xAxis)
+                    .get("displayName");
 
-            chartState.layout.yaxis.title = props.data
-                .find(feature => feature.get("feature") === props.win.data.yAxis)
-                .get("displayName");
+            if (props.win.data.yAxis)
+                chartState.layout.yaxis.title = props.data
+                    .find(feature => feature.get("feature") === props.win.data.yAxis)
+                    .get("displayName");
 
             updateChartRevision();
         },

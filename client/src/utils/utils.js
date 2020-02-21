@@ -104,6 +104,35 @@ export function makeSimpleRequest(request) {
     return { req, cancel };
 }
 
+export function makeHelpRequest(path) {
+    let cancel;
+    const req = new Promise((resolve, reject) => {
+        const socketWorker = new WorkerSocket();
+
+        socketWorker.addEventListener("message", e => {
+            resolve(JSON.parse(e.data));
+        });
+
+        socketWorker.postMessage(
+            JSON.stringify({
+                action: actionTypes.GET_HELP_TEXT,
+                path,
+                sessionkey: getGlobalSessionKey()
+            })
+        );
+
+        cancel = _ => {
+            socketWorker.postMessage(
+                JSON.stringify({
+                    action: actionTypes.CLOSE_SOCKET
+                })
+            );
+        };
+    });
+
+    return { req, cancel };
+}
+
 export function range(start, stop = null) {
     if (stop === null) {
         stop = start;
@@ -361,4 +390,8 @@ export function getRGBFromHex(hex) {
 export function equalArrays(a, b) {
     if (a.length !== b.length) return false;
     return a.every((val, idx) => val === b[idx]);
+}
+
+export function getMean(values) {
+    return values.reduce((acc, val) => acc + val, 0) / values.length;
 }
