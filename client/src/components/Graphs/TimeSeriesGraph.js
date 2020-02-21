@@ -1,6 +1,7 @@
 import "components/Graphs/TimeSeriesGraph.css";
 
-import Plot from "react-plotly.js";
+import plotComponentFactory from "react-plotly.js/factory";
+import PlotlyPatched from "plotly-patched/src/core";
 import React, { useRef, useState, useEffect } from "react";
 
 import GraphWrapper from "components/Graphs/GraphWrapper";
@@ -12,6 +13,10 @@ const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_TITLE = "Time Series Graph";
 const COLOR_CURRENT_SELECTION = "#FF0000";
 
+// Using a patched version of plotly that allows us to toggle only certain shapes to be editable,
+// and only use horizontal drag bars.
+const Plot = plotComponentFactory(PlotlyPatched);
+
 function handleGlobalChartState(state) {
     return state === "lasso" ? "select" : state;
 }
@@ -20,7 +25,8 @@ function generateLayouts(features) {
     return features.reduce((acc, feature, idx) => {
         const axisName = `yaxis${idx === 0 ? "" : idx + 1}`;
         acc[axisName] = {
-            title: feature.feature
+            title: feature.feature,
+            fixedrange: true
         };
         return acc;
     }, {});
@@ -55,7 +61,9 @@ function makeSelectionShapes(selection) {
                           // Draw a line when the selection is only a single point
                           width: section.length === 1 ? 1 : 0,
                           color: selection.color
-                      }
+                      },
+                      editable: Boolean(selection.editable),
+                      horizontalOnly: true
                   };
               });
 }
@@ -129,7 +137,20 @@ function TimeSeriesGraph(props) {
         },
         config: {
             responsive: true,
-            displaylogo: false
+            displaylogo: false,
+            editable: true,
+            edits: {
+                annotationPosition: false,
+                axisTitleText: false,
+                annotationTail: false,
+                annotationText: false,
+                colorbarPosition: false,
+                colorbarTitleText: false,
+                legendPosition: false,
+                legendText: false,
+                shapePosition: true,
+                titleText: false
+            }
         }
     });
 
@@ -180,13 +201,17 @@ function TimeSeriesGraph(props) {
     // Effect to handle drawing of selections
     useEffect(
         _ => {
-            chartState.layout.shapes = props.savedSelections
-                .concat(
-                    props.currentSelection.length && {
-                        color: COLOR_CURRENT_SELECTION,
-                        rowIndices: props.currentSelection
-                    }
-                )
+            chartState.layout.shapes = (props.currentSelection.length
+                ? [
+                      {
+                          color: COLOR_CURRENT_SELECTION,
+                          rowIndices: props.currentSelection,
+                          editable: true
+                      }
+                  ]
+                : []
+            )
+                .concat(props.savedSelections)
                 .filter(x => x)
                 .map(sel => makeSelectionShapes(sel))
                 .flat();
@@ -224,6 +249,12 @@ function TimeSeriesGraph(props) {
                     if (!e) return;
                     props.setCurrentSelection(
                         utils.range(Math.floor(e.range.x[0]), Math.ceil(e.range.x[1]))
+                    );
+                }}
+                onRelayout={e => {
+                    if (!e["shapes[0].x0"]) return;
+                    props.setCurrentSelection(
+                        utils.range(Math.floor(e["shapes[0].x0"]), Math.ceil(e["shapes[0].x1"]))
                     );
                 }}
             />
