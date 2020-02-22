@@ -10,6 +10,24 @@
     display: flex;
     justify-content: space-between;
     padding: 10px 20px;
+    flex-direction: column;
+}
+
+.peak-detect-control-row {
+    display: flex;
+    justify-content: space-between;
+
+    & > div {
+        width: 20%;
+    }
+}
+
+.peak-detect-control-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 135px;
+    width: 20%;
 }
 
 .peak-detect-slider-control {
@@ -45,6 +63,7 @@
 .peak-detect-previews {
     padding-top: 10px;
     overflow: auto;
+    min-height: calc(100% - 110px);
 }
 
 .peak-detect-algo-container {
@@ -78,7 +97,8 @@
     background: #fff;
     padding-top: 22px;
     position: relative;
-    margin-left: 35px;
+    margin-left: 25px;
+    display: flex;
 }
 
 .peak-detect-loading {
@@ -94,11 +114,8 @@
 }
 
 .peak-detect-algo-label {
-    position: absolute;
-    top: 20px;
-    left: 10px;
-    z-index: 100;
     font-weight: 500;
+    margin-left: 32px;
 }
 
 .peak-detect-axis-label {
@@ -116,6 +133,18 @@
     right: 25px;
     text-align: right;
     z-index: 100;
+}
+
+.peak-detect-plot-top-row {
+    position: absolute;
+    top: 20px;
+    right: 15px;
+    z-index: 100;
+    // width: 100%;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    padding-right: 10px;
 }
 
 .peak-detect-plot-title {

@@ -4,12 +4,12 @@ import { Button, IconButton } from "@material-ui/core";
 import { useDispatch } from "react-redux";
 import HelpIcon from "@material-ui/icons/Help";
 import Plot from "react-plotly.js";
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 
 import classnames from "classnames";
 
 import { WindowCircularProgress } from "../WindowHelpers/WindowCenter";
-import { getMean, makeSimpleRequest, removeSentinelValuesRevised } from "../../utils/utils";
+import { makeSimpleRequest, removeSentinelValuesRevised } from "../../utils/utils";
 import {
     useFeatureDisplayNames,
     useFileInfo,
@@ -19,9 +19,7 @@ import {
 import { useWindowManager } from "../../hooks/WindowHooks";
 import * as wmActions from "../../actions/windowManagerActions";
 
-const DEFAULT_POINT_COLOR = "rgba(0, 0, 0, 0.5)";
-
-const SelectionContext = React.createContext();
+const DEFAULT_POINT_COLOR = "#3988E3";
 
 function makeServerRequestObj(algorithmName, feature) {
     return {
@@ -50,20 +48,23 @@ function PreviewPlot(props) {
         );
 
     const [hover, setHover] = useState(false);
+
+    const min = Math.min(...props.data).toFixed(2);
+    const max = Math.max(...props.data).toFixed(2);
+
     const [chartState, setChartState] = useState({
         data: [
             {
-                x: props.data.map((_, idx) => idx),
-                y: props.data,
-                type: "scatter",
-                mode: "lines",
+                x: props.data,
+                type: "histogram",
+                hoverinfo: "x+y",
                 marker: { color: props.data.map((val, idx) => DEFAULT_POINT_COLOR), size: 5 },
                 visible: true
             }
         ],
         layout: {
             autosize: true,
-            margin: { l: 0, r: 0, t: 0, b: 0, pad: 10 }, // Axis tick labels are drawn in the margin space
+            margin: { l: 40, r: 10, t: 5, b: 20 },
             hovermode: false,
             titlefont: { size: 5 }
         },
@@ -100,7 +101,6 @@ function PreviewPlot(props) {
                     onUpdate={figure => setChartState(figure)}
                     className="normalize-plot"
                 />
-                <div className="normalize-plot-mean">{getMean(props.data).toFixed(2)}</div>
             </div>
         </div>
     );
@@ -110,10 +110,10 @@ function FeatureRow(props) {
     const fileInfo = useFileInfo();
     const originalData = removeSentinelValuesRevised([props.feature.get("data")], fileInfo);
 
-    const [selections, setSelections] = useContext(SelectionContext);
+    const [selections, setSelections] = props.selectionState;
     const featureState = selections[props.feature.get("feature")];
 
-    // Seed context with empty data
+    // Seed state with empty data
     useEffect(_ => {
         setSelections(sels => ({
             ...sels,
@@ -125,7 +125,7 @@ function FeatureRow(props) {
         }));
     }, []);
 
-    // Request standardized and normalized data from server and store it in the context
+    // Request standardized and normalized data from server and store it in the state
     useEffect(_ => {
         const requestObj = makeServerRequestObj("normalize", props.feature);
         const { req, cancel } = makeSimpleRequest(requestObj);
@@ -192,7 +192,7 @@ function Normalization(props) {
     // Window initialization
     const win = useWindowManager(props, {
         width: 726,
-        height: 600,
+        height: 820,
         isResizable: true,
         title: "Normalization and Standardization"
     });
@@ -200,8 +200,8 @@ function Normalization(props) {
     let features = usePinnedFeatures(win);
     const [featureNameList] = useFeatureDisplayNames();
 
-    const selectionContext = useState(_ => ({}));
-    const [selections, setSelections] = selectionContext;
+    const selectionState = useState(_ => ({}));
+    const [selections, setSelections] = selectionState;
 
     const addNewFeature = useNewFeature();
 
@@ -241,47 +241,49 @@ function Normalization(props) {
     }
 
     return (
-        <SelectionContext.Provider value={selectionContext}>
-            <div className="normalize-container">
-                <div className="normalize-top-bar">
-                    <div className="help-row">
-                        <span>
-                            Select whether you wish to normalize or standardize each feature below.
-                        </span>
-                        <IconButton>
-                            <HelpIcon />
-                        </IconButton>
-                    </div>
-                    <div className="normalize-top-button-row">
-                        <Button onClick={globalSelect(0)}>set all original</Button>
-                        <Button onClick={globalSelect(1)}>set all normalized</Button>
-                        <Button onClick={globalSelect(2)}>set all standardized</Button>
-                    </div>
+        <div className="normalize-container">
+            <div className="normalize-top-bar">
+                <div className="help-row">
+                    <span>
+                        Select whether you wish to normalize or standardize each feature below.
+                    </span>
+                    <IconButton>
+                        <HelpIcon />
+                    </IconButton>
                 </div>
-                <div className="normalize-previews">
-                    {features.map(feature => (
-                        <FeatureRow key={feature.get("feature")} feature={feature} />
-                    ))}
-                </div>
-                <div className="normalize-action-row">
-                    <div>
-                        <Button variant="contained" size="small" onClick={_ => closeWindow()}>
-                            Cancel
-                        </Button>
-                    </div>
-                    <div>
-                        <Button
-                            color="primary"
-                            variant="contained"
-                            size="small"
-                            onClick={runNormalization}
-                        >
-                            Run
-                        </Button>
-                    </div>
+                <div className="normalize-top-button-row">
+                    <Button onClick={globalSelect(0)}>set all original</Button>
+                    <Button onClick={globalSelect(1)}>set all normalized</Button>
+                    <Button onClick={globalSelect(2)}>set all standardized</Button>
                 </div>
             </div>
-        </SelectionContext.Provider>
+            <div className="normalize-previews">
+                {features.map(feature => (
+                    <FeatureRow
+                        key={feature.get("feature")}
+                        feature={feature}
+                        selectionState={selectionState}
+                    />
+                ))}
+            </div>
+            <div className="normalize-action-row">
+                <div>
+                    <Button variant="contained" size="small" onClick={_ => closeWindow()}>
+                        Cancel
+                    </Button>
+                </div>
+                <div>
+                    <Button
+                        color="primary"
+                        variant="contained"
+                        size="small"
+                        onClick={runNormalization}
+                    >
+                        Run
+                    </Button>
+                </div>
+            </div>
+        </div>
     );
 }
 

@@ -97,6 +97,10 @@
     }
 
     .features {
+        .deselect-button-label {
+            color: white;
+        }
+
         height: calc(100% - 57px);
         overflow-y: scroll;
         z-index: 999;

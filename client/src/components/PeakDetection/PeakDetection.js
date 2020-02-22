@@ -1,20 +1,49 @@
 import "./PeakDetection.scss";
 
-import { Button, IconButton, Slider, Switch, TextField } from "@material-ui/core";
+import {
+    Button,
+    CircularProgress,
+    IconButton,
+    Slider,
+    Switch,
+    TextField,
+    Tooltip
+} from "@material-ui/core";
 import { useDispatch } from "react-redux";
 import HelpIcon from "@material-ui/icons/Help";
 import Plot from "react-plotly.js";
 import React, { useState, useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import ReactResizeDetector from "react-resize-detector";
+import * as portals from "react-reverse-portal";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
-import { makeSimpleRequest } from "../../utils/utils";
-import { useFeatureDisplayNames, useNewFeature, usePinnedFeatures } from "../../hooks/DataHooks";
+import { makeHelpRequest, makeSimpleRequest } from "../../utils/utils";
+import {
+    useFeatureDisplayNames,
+    useNewFeature,
+    usePinnedFeatures,
+    useSavedSelections
+} from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
 import * as wmActions from "../../actions/windowManagerActions";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
-
-const SelectionContext = React.createContext();
+const CWT_PARAMS = [
+    { name: "gap_threshold", value: 2, range: [0, 5], displayName: "Gap Threshold" },
+    { name: "min_snr", value: 1, range: [0, 100], displayName: "Minimum SNR" },
+    { name: "noise_perc", value: 10, range: [0, 100], displayName: "Noise Percentage" },
+    { name: "peak_width", value: 10, range: [1, 100], displayName: "Peak Width" }
+];
+const FIND_PEAKS_PARAMS = [
+    { name: "mph", value: 5 },
+    { name: "mpd", value: 1, range: [1, 10] },
+    { name: "edge", value: "rising", displayName: "Edge" },
+    { name: "kpsh", value: false },
+    { name: "valley", value: false, displayName: "Valley" },
+    { name: "peak_width", value: 10, range: [1, 100], displayName: "Peak Width" },
+    { name: "threshold", value: 0, range: [0, 100], displayName: "Threshold" }
+];
 
 function makeServerRequestObj(algorithmName, feature, parameters) {
     return {
@@ -32,6 +61,23 @@ function makeServerRequestObj(algorithmName, feature, parameters) {
         }, {}),
         dataSelections: []
     };
+}
+
+function HelpContent(props) {
+    const [textContent, setTextContent] = useState("");
+    useEffect(
+        _ => {
+            if (props.hidden || textContent) return;
+            const { req, cancel } = makeHelpRequest("peak_find_page:general_peak_find");
+            req.then(({ guidance }) => setTextContent(guidance));
+            return cancel;
+        },
+        [props.hidden]
+    );
+
+    if (props.hidden) return null;
+    if (!textContent) return <CircularProgress />;
+    return <ReactMarkdown source={textContent} className="help-content" linkTarget="_blank" />;
 }
 
 function PeakPlot(props) {
@@ -69,7 +115,7 @@ function PeakPlot(props) {
         ],
         layout: {
             autosize: true,
-            margin: { l: 0, r: 0, t: 0, b: 0, pad: 10 }, // Axis tick labels are drawn in the margin space
+            margin: { l: 5, r: 0, t: 0, b: 0, pad: 10 },
             hovermode: false,
             titlefont: { size: 5 },
             showlegend: false,
@@ -122,28 +168,53 @@ function PeakPlot(props) {
         [props.indexes]
     );
 
+    const [_, saveNewSelection] = useSavedSelections();
+    function saveSelection() {
+        const selectionLabel = `${props.name}_${props.algoLabel}`;
+        saveNewSelection(selectionLabel, props.indexes);
+    }
+
+    const chart = useRef();
     return (
-        <div className="peak-detect-plot-container">
-            <div className="peak-detect-axis-label">{props.name}</div>
-            <div className="peak-detect-plot-wrapper">
+        <React.Fragment>
+            <ReactResizeDetector
+                handleWidth
+                handleHeight
+                onResize={_ => !props.hidden && chart.current.resizeHandler()}
+            />
+            <div className="peak-detect-plot-container">
                 <div className="peak-detect-algo-label">{props.algoLabel}</div>
-                {props.isUpdating ? (
-                    <div className="peak-detect-loading overlay">
-                        <WindowCircularProgress />
+                <div className="peak-detect-axis-label">{props.name}</div>
+                <div className="peak-detect-plot-wrapper">
+                    <div className="peak-detect-plot-top-row">
+                        <Button
+                            size="small"
+                            variant="contained"
+                            color="primary"
+                            onClick={saveSelection}
+                        >
+                            Save Selection
+                        </Button>
                     </div>
-                ) : null}
-                <Plot
-                    data={chartState.data}
-                    layout={chartState.layout}
-                    config={chartState.config}
-                    style={{ width: "100%", height: "170px" }}
-                    onInitialized={figure => setChartState(figure)}
-                    onUpdate={figure => setChartState(figure)}
-                    className="peak-detect-plot"
-                />
-                <div className="peak-detect-plot-peak-count">{`${props.indexes.length} peaks`}</div>
+                    {props.isUpdating ? (
+                        <div className="peak-detect-loading overlay">
+                            <WindowCircularProgress />
+                        </div>
+                    ) : null}
+                    <Plot
+                        ref={chart}
+                        data={chartState.data}
+                        layout={chartState.layout}
+                        config={chartState.config}
+                        style={{ width: "100%", height: "100%" }}
+                        onInitialized={figure => setChartState(figure)}
+                        onUpdate={figure => setChartState(figure)}
+                        useResizeHandler
+                    />
+                    <div className="peak-detect-plot-peak-count">{`${props.indexes.length} peaks`}</div>
+                </div>
             </div>
-        </div>
+        </React.Fragment>
     );
 }
 
@@ -156,9 +227,15 @@ function ParamSlider(props) {
         );
     }
 
+    const marks = [
+        { value: param.range[0], label: param.range[0] },
+        { value: param.range[1], label: param.range[1] }
+    ];
     return (
         <div className="peak-detect-slider-control">
-            <label>{props.paramName}</label>
+            <Tooltip title={param.displayName || param.name} placement="top-start">
+                <label>{param.displayName || param.name}</label>
+            </Tooltip>
             <Slider
                 value={param.value}
                 min={param.range[0]}
@@ -166,6 +243,7 @@ function ParamSlider(props) {
                 onChange={changeParam}
                 valueLabelDisplay="auto"
                 disabled={props.disabled}
+                marks={marks}
             />
         </div>
     );
@@ -175,12 +253,7 @@ function CwtAlgo(props) {
     const algoLabel = "CWT";
     const [needsUpdate, setNeedsUpdate] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
-    const paramState = useState([
-        { name: "gap_threshold", value: 2, range: [0, 5] },
-        { name: "min_snr", value: 1, range: [0, 100] },
-        { name: "noise_perc", value: 10, range: [0, 100] },
-        { name: "peak_width", value: 10, range: [1, 100] }
-    ]);
+    const paramState = useState(CWT_PARAMS);
 
     const [indexes, setIndexes] = useState();
 
@@ -195,6 +268,7 @@ function CwtAlgo(props) {
                     setNeedsUpdate(false);
                     setIsUpdating(false);
                 });
+                return cancel;
             }
         },
         [needsUpdate]
@@ -217,16 +291,19 @@ function CwtAlgo(props) {
                 indexes={indexes}
                 isUpdating={isUpdating}
                 algoLabel={algoLabel}
+                hidden={props.hidden}
             />
             <div className="peak-detect-control-area">
-                {paramState[0].map(param => (
-                    <ParamSlider
-                        paramState={paramState}
-                        paramName={param.name}
-                        key={param.name}
-                        disabled={isUpdating}
-                    />
-                ))}
+                <div className="peak-detect-control-row">
+                    {paramState[0].map(param => (
+                        <ParamSlider
+                            paramState={paramState}
+                            paramName={param.name}
+                            key={param.name}
+                            disabled={isUpdating}
+                        />
+                    ))}
+                </div>
             </div>
         </div>
     );
@@ -237,14 +314,7 @@ function FindPeaksAlgo(props) {
     const [needsUpdate, setNeedsUpdate] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
 
-    const paramState = useState([
-        { name: "mph", value: "" },
-        { name: "mpd", value: 1, range: [1, 10] },
-        { name: "edge", value: "rising" },
-        { name: "kpsh", value: false },
-        { name: "valley", value: false },
-        { name: "peak_width", value: 10, range: [1, 100] }
-    ]);
+    const paramState = useState(FIND_PEAKS_PARAMS);
 
     const edgeOptions = ["rising", "falling", "both", "none"];
 
@@ -259,16 +329,14 @@ function FindPeaksAlgo(props) {
                     props.feature,
                     paramState[0]
                 );
-                console.log(`Sending request: `);
-                console.log(requestObj);
+
                 const { req, cancel } = makeSimpleRequest(requestObj);
                 req.then(data => {
-                    console.log("Server reponse: ");
-                    console.log(data);
                     setIndexes(data.indexes);
                     setNeedsUpdate(false);
                     setIsUpdating(false);
                 });
+                return cancel;
             }
         },
         [needsUpdate]
@@ -297,48 +365,77 @@ function FindPeaksAlgo(props) {
                 indexes={indexes}
                 isUpdating={isUpdating}
                 algoLabel={algoLabel}
+                hidden={props.hidden}
             />
             <div className="peak-detect-control-area">
-                <TextField
-                    label="mph"
-                    variant="filled"
-                    className="text-input with-helper-text"
-                    value={paramState[0].find(param => param.name === "mph").value}
-                    type="number"
-                    InputProps={{ classes: { root: "input-box" } }}
-                    FormHelperTextProps={{ classes: { root: "helper-text" } }}
-                    onChange={e => e.target.value > 0 && updateParam("mph", e.target.value)}
-                />
-                <ParamSlider paramState={paramState} paramName="mpd" disabled={isUpdating} />
-                <ParamSlider paramState={paramState} paramName="peak_width" disabled={isUpdating} />
-                <div className="peak-detect-dropdown">
-                    <label>Edge</label>
-                    <select
-                        value={paramState[0].find(param => param.name === "edge").value}
-                        onChange={e => updateParam("edge", e.target.value)}
-                    >
-                        {edgeOptions.map(f => (
-                            <option value={f} key={f}>
-                                {f}
-                            </option>
-                        ))}
-                    </select>
+                <div className="peak-detect-control-row">
+                    <Tooltip title="mph" placement="top-start">
+                        <TextField
+                            label="mph"
+                            variant="filled"
+                            className="text-input with-helper-text"
+                            value={paramState[0].find(param => param.name === "mph").value}
+                            type="number"
+                            InputProps={{ classes: { root: "input-box" } }}
+                            FormHelperTextProps={{ classes: { root: "helper-text" } }}
+                            onChange={e => e.target.value > 0 && updateParam("mph", e.target.value)}
+                        />
+                    </Tooltip>
+                    <ParamSlider paramState={paramState} paramName="mpd" disabled={isUpdating} />
+                    <div className="peak-detect-dropdown">
+                        <Tooltip
+                            title={paramState[0].find(param => param.name === "valley").displayName}
+                            placement="top-start"
+                        >
+                            <label>
+                                {paramState[0].find(param => param.name === "valley").displayName}
+                            </label>
+                        </Tooltip>
+                        <Switch
+                            checked={paramState[0].find(param => param.name === "valley").value}
+                            onChange={e => updateParam("valley", e.target.checked)}
+                            color="primary"
+                        />
+                    </div>
+                    <div className="peak-detect-dropdown">
+                        <Tooltip title="Edge" placement="top-start">
+                            <label>Edge</label>
+                        </Tooltip>
+                        <select
+                            value={paramState[0].find(param => param.name === "edge").value}
+                            onChange={e => updateParam("edge", e.target.value)}
+                        >
+                            {edgeOptions.map(f => (
+                                <option value={f} key={f}>
+                                    {f}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
-                <div className="peak-detect-dropdown">
-                    <label>kpsh</label>
-                    <Switch
-                        checked={paramState[0].find(param => param.name === "kpsh").value}
-                        onChange={e => updateParam("kpsh", e.target.checked)}
-                        color="primary"
+                <div className="peak-detect-control-row">
+                    <ParamSlider
+                        paramState={paramState}
+                        paramName="threshold"
+                        disabled={isUpdating}
                     />
-                </div>
-                <div className="peak-detect-dropdown">
-                    <label>valley</label>
-                    <Switch
-                        checked={paramState[0].find(param => param.name === "valley").value}
-                        onChange={e => updateParam("valley", e.target.checked)}
-                        color="primary"
+                    <ParamSlider
+                        paramState={paramState}
+                        paramName="peak_width"
+                        disabled={isUpdating}
                     />
+
+                    <div className="peak-detect-dropdown">
+                        <Tooltip title="kpsh" placement="top-start">
+                            <label>kpsh</label>
+                        </Tooltip>
+                        <Switch
+                            checked={paramState[0].find(param => param.name === "kpsh").value}
+                            onChange={e => updateParam("kpsh", e.target.checked)}
+                            color="primary"
+                        />
+                    </div>
+                    <div />
                 </div>
             </div>
         </div>
@@ -354,11 +451,14 @@ function PeakDetection(props) {
         title: "Peak Detection"
     });
 
+    // Hooks
+    const [helpMode, setHelpMode] = useState(false);
+
+    // We store the previews in a portal so we don't have to re-render them when the user switches back from help mode
+    const previews = React.useMemo(() => portals.createPortalNode(), []);
+
     let features = usePinnedFeatures(win);
     const [featureNameList] = useFeatureDisplayNames();
-
-    const selectionContext = useState(_ => ({}));
-    const [selections, setSelections] = selectionContext;
 
     const addNewFeature = useNewFeature();
 
@@ -386,7 +486,11 @@ function PeakDetection(props) {
     }
 
     return (
-        <SelectionContext.Provider value={selectionContext}>
+        <React.Fragment>
+            <portals.InPortal node={previews}>
+                <CwtAlgo feature={features.get(0)} hidden={helpMode} />
+                <FindPeaksAlgo feature={features.get(0)} hidden={helpMode} />
+            </portals.InPortal>
             <div className="peak-detect-container">
                 <div className="peak-detect-top-bar">
                     <div className="help-row">
@@ -394,13 +498,13 @@ function PeakDetection(props) {
                             .get(0)
                             .get("displayName")}`}</span>
                         <IconButton>
-                            <HelpIcon />
+                            <HelpIcon onClick={_ => setHelpMode(mode => !mode)} />
                         </IconButton>
                     </div>
                 </div>
                 <div className="peak-detect-previews">
-                    <CwtAlgo feature={features.get(0)} />
-                    <FindPeaksAlgo feature={features.get(0)} />
+                    <HelpContent hidden={!helpMode} />
+                    {!helpMode ? <portals.OutPortal node={previews} /> : null}
                 </div>
                 <div className="peak-detect-action-row">
                     <div>
@@ -410,7 +514,7 @@ function PeakDetection(props) {
                     </div>
                 </div>
             </div>
-        </SelectionContext.Provider>
+        </React.Fragment>
     );
 }
 

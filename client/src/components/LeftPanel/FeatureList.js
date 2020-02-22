@@ -28,6 +28,8 @@ import {
 import * as dataActions from "actions/data";
 
 import { useFeatureDisplayNames } from "../../hooks/DataHooks";
+import { useKey } from "../../hooks/UtilHooks";
+import { useWindowList } from "../../hooks/WindowHooks";
 
 const RowContext = React.createContext({});
 const ListContext = React.createContext({});
@@ -135,6 +137,13 @@ function SelectedDropdown(props) {
     const totalCount = props.featureList.size;
     const inactive = totalCount - activeCount;
 
+    // Count features currently in use by windows
+    const windowList = useWindowList();
+    const featuresInUseCount = windowList.reduce((acc, win) => {
+        win.getIn(["data", "features"], []).forEach(feature => acc.add(feature));
+        return acc;
+    }, new Set()).size;
+
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [lastSelected, setLastSelected] = useState(0);
 
@@ -147,6 +156,9 @@ function SelectedDropdown(props) {
         },
         function(feature) {
             return !feature.selected;
+        },
+        feature => {
+            return windowList.some(win => win.getIn(["data", "features"]).contains(feature.name));
         }
     ];
 
@@ -167,6 +179,9 @@ function SelectedDropdown(props) {
                 </MenuItem>
                 <MenuItem key="not_selected" value={2}>
                     {"Not Selected (" + inactive + "/" + totalCount + ")"}
+                </MenuItem>{" "}
+                <MenuItem key="not_selected" value={3}>
+                    {`Displayed in Graphs (${featuresInUseCount}/${totalCount})`}
                 </MenuItem>
             </Select>
             <ArrowDropDownIcon color="white" />
@@ -517,12 +532,20 @@ function FeatureList(props) {
         [features]
     );
 
-    //filters out the feautres based on the filter bar and
+    const caseSensitive = Boolean(props.filterString && props.filterString.match(/[A-Z]/g));
+    const exactMatch = props.filterString.match(/^"(.*)"$/); // Allows users to specify an exact match with quotes.
+
+    //filters out the features based on the filter bar and
     //sorts them by their indices stored in featureIndices
     const sortedFeatureNames = featureNames
-        .filter(featureName =>
-            props.filterString ? featureName.startsWith(props.filterString) : true
-        )
+        .filter(featureName => {
+            if (!props.filterString) return true;
+            return exactMatch
+                ? featureName === exactMatch[1]
+                : (caseSensitive ? featureName : featureName.toLowerCase()).includes(
+                      props.filterString
+                  );
+        })
         .concat() //this is so it operates on a copy of stuff
         .sort((a, b) => {
             const aIndex = featureIndices[a];
@@ -536,6 +559,18 @@ function FeatureList(props) {
     const listContext = {
         featureDelete: useFeatureDelete()
     };
+
+    function deselectAll() {
+        props.featureList.forEach(feature => props.featureUnselect(feature.get("name")));
+    }
+    const deselectHotkey = useKey("`");
+    useEffect(
+        _ => {
+            deselectHotkey && deselectAll();
+        },
+
+        [deselectHotkey]
+    );
 
     return (
         <ListContext.Provider value={listContext}>
@@ -559,6 +594,9 @@ function FeatureList(props) {
                     <StatsLabelRow statsHidden={statsHidden} />
                 </div>
                 <div className="features">
+                    <Button classes={{ label: "deselect-button-label" }} onClick={deselectAll}>
+                        deselect all
+                    </Button>
                     {props.featureListLoading && (
                         <div className="loading-list">
                             <CircularProgress />
