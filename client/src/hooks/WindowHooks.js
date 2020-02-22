@@ -344,4 +344,9 @@ export function useWindowDotShape(id) {
     ];
 }
 
+export function useCloseWindow(win) {
+    const dispatch = useDispatch();
+    return id => dispatch(wmActions.closeWindow(win.id));
+}
+
 export default useWindowManager;

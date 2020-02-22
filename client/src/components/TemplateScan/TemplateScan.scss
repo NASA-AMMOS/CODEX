@@ -102,3 +102,43 @@
         margin-left: 25px;
     }
 }
+
+.template-scan-header {
+    span {
+        font-family: Inter;
+        font-style: normal;
+        font-weight: bold;
+        font-size: 16px;
+        line-height: 19px;
+    }
+}
+
+.template-scan-feature-name {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 19px;
+}
+
+.template-scan-controls {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+
+    button {
+        height: 20px;
+        opacity: 0.5;
+        border: 1px solid #000000;
+        box-sizing: border-box;
+        border-radius: 4px;
+        font-family: Inter;
+        font-style: normal;
+        font-weight: bold;
+        font-size: 14px;
+        line-height: 17px;
+        text-transform: uppercase;
+        font-feature-settings: "cpsp" on, "case" on;
+        color: #000000;
+    }
+}
