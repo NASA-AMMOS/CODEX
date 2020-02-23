@@ -1,24 +1,15 @@
 import "./PeakDetection.scss";
 
-import {
-    Button,
-    CircularProgress,
-    IconButton,
-    Slider,
-    Switch,
-    TextField,
-    Tooltip
-} from "@material-ui/core";
+import { Button, IconButton, Slider, Switch, TextField, Tooltip } from "@material-ui/core";
 import { useDispatch } from "react-redux";
 import HelpIcon from "@material-ui/icons/Help";
 import Plot from "react-plotly.js";
 import React, { useState, useEffect, useRef } from "react";
-import ReactMarkdown from "react-markdown";
 import ReactResizeDetector from "react-resize-detector";
 import * as portals from "react-reverse-portal";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
-import { makeHelpRequest, makeSimpleRequest } from "../../utils/utils";
+import { makeSimpleRequest } from "../../utils/utils";
 import {
     useFeatureDisplayNames,
     useNewFeature,
@@ -26,6 +17,7 @@ import {
     useSavedSelections
 } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
+import HelpContent from "../Help/HelpContent";
 import * as wmActions from "../../actions/windowManagerActions";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
@@ -44,6 +36,7 @@ const FIND_PEAKS_PARAMS = [
     { name: "peak_width", value: 10, range: [1, 100], displayName: "Peak Width" },
     { name: "threshold", value: 0, range: [0, 100], displayName: "Threshold" }
 ];
+const GUIDANCE_PATH = "peak_find_page:general_peak_find";
 
 function makeServerRequestObj(algorithmName, feature, parameters) {
     return {
@@ -61,23 +54,6 @@ function makeServerRequestObj(algorithmName, feature, parameters) {
         }, {}),
         dataSelections: []
     };
-}
-
-function HelpContent(props) {
-    const [textContent, setTextContent] = useState("");
-    useEffect(
-        _ => {
-            if (props.hidden || textContent) return;
-            const { req, cancel } = makeHelpRequest("peak_find_page:general_peak_find");
-            req.then(({ guidance }) => setTextContent(guidance));
-            return cancel;
-        },
-        [props.hidden]
-    );
-
-    if (props.hidden) return null;
-    if (!textContent) return <CircularProgress />;
-    return <ReactMarkdown source={textContent} className="help-content" linkTarget="_blank" />;
 }
 
 function PeakPlot(props) {
@@ -211,7 +187,9 @@ function PeakPlot(props) {
                         onUpdate={figure => setChartState(figure)}
                         useResizeHandler
                     />
-                    <div className="peak-detect-plot-peak-count">{`${props.indexes.length} peaks`}</div>
+                    <div className="peak-detect-plot-peak-count">{`${
+                        props.indexes.length
+                    } peaks`}</div>
                 </div>
             </div>
         </React.Fragment>
@@ -503,7 +481,7 @@ function PeakDetection(props) {
                     </div>
                 </div>
                 <div className="peak-detect-previews">
-                    <HelpContent hidden={!helpMode} />
+                    <HelpContent hidden={!helpMode} guidancePath={GUIDANCE_PATH} />
                     {!helpMode ? <portals.OutPortal node={previews} /> : null}
                 </div>
                 <div className="peak-detect-action-row">

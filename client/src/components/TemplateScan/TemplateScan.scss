@@ -1,93 +1,11 @@
-.normalize-container {
+.template-scan-container {
     display: flex;
     flex-direction: column;
     height: 100%;
 }
 
-.normalize-top-bar {
-    margin-left: -10px;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-    padding-left: 22px;
-    padding-right: 10px;
-    width: calc(100% + 20px);
-    padding-bottom: 10px;
-    z-index: 1;
-
-    .help-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-}
-
-.normalize-top-button-row {
-    display: flex;
-    justify-content: space-between;
-}
-
-.normalize-previews {
-    padding-top: 10px;
-    overflow: auto;
-}
-
-.normalize-title {
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 5px;
-    margin-left: 10px;
-}
-
-.feature-row {
-    display: flex;
-    justify-content: space-between;
-    margin-left: 10px;
-    margin-right: 10px;
-}
-
-.normalize-plot-container {
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-    width: 205px;
-    min-width: 205px;
-    height: 220px;
-    padding: 0;
-    margin: 0;
-    margin-bottom: 40px;
-    border: 3px solid transparent;
-
-    &:hover,
-    &.selected {
-        background: #333333;
-    }
-}
-
-.normalize-plot-wrapper {
-    width: 198px;
-    height: 192px;
-    background: #fff;
-    padding-top: 22px;
-    position: relative;
-}
-
-.normalize-plot-mean {
-    position: absolute;
-    right: 2px;
-    bottom: 0;
-    background-color: rgba(#fff, 0.75);
-}
-
-.normalize-plot-title {
-    font-size: 14px;
-    text-transform: capitalize;
-    width: 100%;
-    padding-left: 5px;
-
-    &.hover {
-        color: #fff;
-    }
-}
-
-.normalize-action-row {
-    height: 110px;
+.template-scan-action-row {
+    height: 65px;
     box-shadow: 0px -4px 4px rgba(0, 0, 0, 0.25);
     margin-left: -10px;
     margin-bottom: 5px;
@@ -104,6 +22,7 @@
 }
 
 .template-scan-header {
+    margin-bottom: 15px;
     span {
         font-family: Inter;
         font-style: normal;
@@ -127,7 +46,6 @@
     justify-content: space-between;
 
     button {
-        height: 20px;
         opacity: 0.5;
         border: 1px solid #000000;
         box-sizing: border-box;
@@ -141,4 +59,75 @@
         font-feature-settings: "cpsp" on, "case" on;
         color: #000000;
     }
+}
+
+.template-scan-control-block {
+    display: flex;
+    flex-direction: column;
+
+    label {
+        margin-bottom: 10px;
+    }
+}
+
+.template-scan-close-button {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    justify-content: space-around;
+    cursor: pointer;
+}
+
+.template-scan-block-draw-buttons {
+    display: flex;
+    justify-content: space-between;
+
+    button {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        &.active {
+            opacity: 1;
+        }
+
+        &:first-of-type {
+            margin-right: 10px;
+        }
+    }
+}
+
+.template-scan-plot-container {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.template-scan-axis-label {
+    position: absolute;
+    top: calc(280px / 2);
+    left: 0;
+    transform: rotate(-90deg);
+    z-index: 100;
+    text-align: center;
+}
+
+.template-scan-plot-wrapper {
+    width: calc(100% - 35px);
+    height: 192px;
+    background: #fff;
+    padding-top: 22px;
+    position: relative;
+    margin-left: 25px;
+    display: flex;
+}
+
+.color-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.template-scan-details {
+    padding: 0 !important;
 }
