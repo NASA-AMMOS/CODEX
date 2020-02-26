@@ -7,12 +7,18 @@ export default class SelectionsReducer {
     }
 
     static saveCurrentSelection(state, action) {
+        function getUniqueId() {
+            const id = utils.createNewId();
+            return !state.savedSelections.find(group => group.id === id) ? id : getUniqueId();
+        }
+        const id = getUniqueId();
+
         const palette = utils.getSelectionPalette();
         return {
             ...state,
             savedSelections: state.savedSelections.concat([
                 {
-                    id: state.savedSelections.length,
+                    id,
                     rowIndices: state.currentSelection,
                     color: palette[state.nextColorIndex],
                     active: false,
@@ -98,32 +104,43 @@ export default class SelectionsReducer {
             ...state,
             savedSelections: state.savedSelections.map(selection =>
                 selection.id === action.id
-                    ? Object.assign(selection, { groupID: action.groupID })
+                    ? Object.assign(selection, {
+                          groupID: action.groupID,
+                          hidden: action.groupID
+                              ? state.groups.find(group => group.id === action.groupID).hidden
+                              : selection.hidden
+                      })
                     : selection
             )
         };
     }
 
     static createSelectionGroup(state, action) {
-        const uniqueID = (function() {
-            for (let group of state.groups) {
-                if (action.id === group.id) return false;
-            }
-            return true;
-        })();
-        if (!uniqueID) return state;
+        function getUniqueId() {
+            const id = utils.createNewId();
+            return !state.groups.find(group => group.id === id) ? id : getUniqueId();
+        }
+        const id = getUniqueId();
+
+        const updatedSelections = action.selections
+            ? state.savedSelections.map(sel =>
+                  action.selections.includes(sel.id) ? { ...sel, groupID: id } : sel
+              )
+            : state.savedSelections;
 
         return {
             ...state,
             groups: [
                 ...state.groups,
                 {
-                    id: action.id,
+                    id,
                     active: true,
                     hidden: false,
-                    info: null
+                    info: null,
+                    name: action.name
                 }
-            ]
+            ],
+            savedSelections: updatedSelections
         };
     }
 
@@ -153,6 +170,55 @@ export default class SelectionsReducer {
         return {
             ...state,
             savedSelections: []
+        };
+    }
+
+    static deleteSectionGroup(state, action) {
+        return {
+            ...state,
+            groups: state.groups.filter(group => group.id !== action.id),
+            savedSelections: state.savedSelections.map(sel =>
+                sel.groupID === action.id ? { ...sel, groupID: null } : sel
+            )
+        };
+    }
+
+    static renameSectionGroup(state, action) {
+        return {
+            ...state,
+            groups: state.groups.map(group =>
+                group.id === action.id ? { ...group, name: action.name } : group
+            )
+        };
+    }
+
+    static setSelectionActive(state, action) {
+        return {
+            ...state,
+            savedSelections: state.savedSelections.map(selection =>
+                selection.id === action.id ? { ...selection, active: action.active } : selection
+            )
+        };
+    }
+
+    static setSelectionHidden(state, action) {
+        return {
+            ...state,
+            savedSelections: state.savedSelections.map(selection =>
+                selection.id === action.id ? { ...selection, hidden: action.hidden } : selection
+            )
+        };
+    }
+
+    static setGroupHidden(state, action) {
+        return {
+            ...state,
+            groups: state.groups.map(group =>
+                group.id === action.id ? { ...group, hidden: action.hidden } : group
+            ),
+            savedSelections: state.savedSelections.map(sel =>
+                sel.groupID === action.id ? { ...sel, hidden: action.hidden } : sel
+            )
         };
     }
 }

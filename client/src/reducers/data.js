@@ -58,6 +58,16 @@ export default function data(state = dataState, action, opt_reducer = DataReduce
             return opt_reducer.statSetFeatureFailed(state, action);
         case actionTypes.STAT_SET_FEATURE_RESOLVED:
             return opt_reducer.statSetFeatureResolved(state, action);
+        case actionTypes.CREATE_FEATURE_GROUP:
+            return opt_reducer.createFeatureGroup(state, action);
+        case actionTypes.CHANGE_FEATURE_GROUP:
+            return opt_reducer.changeFeatureGroup(state, action);
+        case actionTypes.SELECT_FEATURE_GROUP:
+            return opt_reducer.selectFeatureGroup(state, action);
+        case actionTypes.DELETE_FEATURE_GROUP:
+            return opt_reducer.deleteFeatureGroup(state, action);
+        case actionTypes.RENAME_FEATURE_GROUP:
+            return opt_reducer.renameFeatureGroup(state, action);
         default:
             return state;
     }
