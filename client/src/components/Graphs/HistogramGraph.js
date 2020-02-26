@@ -163,7 +163,8 @@ function HistogramGraph(props) {
         },
         config: {
             responsive: true,
-            displaylogo: false
+            displaylogo: false,
+            modeBarButtons: [["toImage", "zoomIn2d", "zoomOut2d", "autoScale2d"], ["toggleHover"]]
         }
     });
 

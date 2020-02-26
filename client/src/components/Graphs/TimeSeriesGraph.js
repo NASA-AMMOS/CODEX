@@ -150,7 +150,8 @@ function TimeSeriesGraph(props) {
                 legendText: false,
                 shapePosition: true,
                 titleText: false
-            }
+            },
+            modeBarButtons: [["toImage", "zoomIn2d", "zoomOut2d", "autoScale2d"], ["toggleHover"]]
         }
     });
 
