@@ -4,6 +4,8 @@ import * as algorithmTypes from "constants/algorithmTypes";
 import * as graphActions from "actions/graphActions";
 import * as uiTypes from "constants/uiTypes";
 import * as utils from "utils/utils";
+import * as selectionActions from "actions/selectionActions";
+
 import { usePinnedFeatures, useNewFeature } from "hooks/DataHooks";
 
 export function createAlgorithm(algoMode) {
@@ -27,7 +29,7 @@ function findOutputParam(subalgoState, paramName) {
 }
 
 // Saves the returned algorithm data to the state and spawns a new graph window if requested.
-function handleAlgorithmReturn(inMsg, subalgoState, dispatch) {
+function handleAlgorithmReturn(inMsg, subalgoState, dispatch, getState) {
     // Update data store with new feature columns
     const basename = findOutputParam(subalgoState, "name");
 
@@ -38,28 +40,29 @@ function handleAlgorithmReturn(inMsg, subalgoState, dispatch) {
         newFeature(featureName, data);
     }
 
+    function getUniqueName(baseName, idx) {
+        const name = baseName + (idx ? `_${idx}` : "");
+        if (getState().selections.groups.find(group => group.name === name))
+            return getUniqueName(baseName, idx + 1);
+        return name;
+    }
+
     // Create a new selection for each cluster if requested
     if (findOutputParam(subalgoState, "clusters")) {
-        //get unique name
-        const uniqueName = utils.getUniqueGroupID("Clustering");
+        const uniqueName = getUniqueName("Clustering", 0);
+
         //create a group with a unique name
-        dispatch({
-            type: actionTypes.CREATE_SELECTION_GROUP,
-            id: uniqueName
-        });
+        dispatch(selectionActions.createSelectionGroup(uniqueName));
+
+        const groupId = getState().selections.groups.find(group => group.name === uniqueName).id;
 
         for (let i = 0; i <= inMsg.numClusters - 1; i++) {
             const rowIndices = inMsg.clusters.reduce((acc, val, idx) => {
                 if (val === i) acc.push(idx);
                 return acc;
             }, []);
-            //create new selection with unique name as id
-            dispatch({
-                type: actionTypes.SAVE_NEW_SELECTION,
-                name: `${basename}_${i + 1}`,
-                rowIndices: rowIndices,
-                groupID: uniqueName
-            });
+            const name = `${basename}_${i + 1}`;
+            dispatch(selectionActions.saveNewSelection(name, rowIndices, groupId));
         }
     }
 
@@ -141,7 +144,7 @@ export function runAlgorithm(subalgoState, selectedFeatures, winId) {
             inMsg => {
                 clearInterval(loadingTimerInterval);
                 dispatch({ type: actionTypes.CLOSE_WINDOW, id: loadingWindowId });
-                handleAlgorithmReturn(inMsg, subalgoState, dispatch);
+                handleAlgorithmReturn(inMsg, subalgoState, dispatch, getState);
             }
         );
     };

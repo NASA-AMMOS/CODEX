@@ -50,6 +50,9 @@ export function fileLoad(fileList) {
 }
 
 // feature mgmt
+export function featureListLoading(isLoading) {
+    return { type: types.FEATURE_LIST_LOADING, isLoading };
+}
 
 /**
  * Add a feature
@@ -336,3 +339,23 @@ export const featureDelete = featureName => {
         feature: featureName
     };
 };
+
+export function createFeatureGroup(name, featureIDs, selected) {
+    return { type: types.CREATE_FEATURE_GROUP, name, featureIDs, selected };
+}
+
+export function changeFeatureGroup(featureName, id) {
+    return { type: types.CHANGE_FEATURE_GROUP, featureName, id };
+}
+
+export function selectFeatureGroup(id, selected) {
+    return { type: types.SELECT_FEATURE_GROUP, id, selected };
+}
+
+export function deleteFeatureGroup(id) {
+    return { type: types.DELETE_FEATURE_GROUP, id };
+}
+
+export function renameFeatureGroup(id, name) {
+    return { type: types.RENAME_FEATURE_GROUP, id, name };
+}

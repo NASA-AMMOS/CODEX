@@ -38,7 +38,7 @@
         "raf": "3.4.0",
         "react": "^16.3.2",
         "react-ace": "^7.0.2",
-        "react-beautiful-dnd": "^11.0.4",
+        "react-beautiful-dnd": "^12.2.0",
         "react-color": "^2.14.1",
         "react-contextmenu": "^2.9.2",
         "react-d3-library": "^1.1.8",
