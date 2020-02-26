@@ -34,7 +34,7 @@ function handleGlobalChartState(state) {
 
 function generateLayouts(features) {
     return features.reduce((acc, feature, idx) => {
-        const xAxisName = `xaxis${idx === 0 ? "" : idx + 1}`;
+        const xAxisName = `xaxis`;
         const yAxisName = `yaxis${idx === 0 ? "" : idx + 1}`;
         acc[xAxisName] = {
             title: feature.feature,
@@ -79,7 +79,7 @@ function makeSelectionShapes(selection, data, chartRef) {
                     const posIdx = data.length - idx - 1;
                     return {
                         type: "rect",
-                        xref: `x${idx > 0 ? idx + 1 : ""}`,
+                        xref: `x`,
                         yref: "paper",
                         x0: bounds[0],
                         y0: posIdx * xSize,
@@ -128,7 +128,7 @@ function HistogramGraph(props) {
                     nbinsx: props.win.data.binSize ? props.win.data.binSize.x : null
                 };
                 if (idx > 0) {
-                    trace.xaxis = `x${idx + 1}`;
+                    trace.xaxis = `x`;
                     trace.yaxis = `y${idx + 1}`;
                 }
                 return trace;
@@ -151,14 +151,13 @@ function HistogramGraph(props) {
             grid: {
                 rows: data.length,
                 columns: 1,
-                pattern: "independent"
+                subplots: utils.range(data.length).map(idx => [`xy${idx ? idx + 1 : ""}`])
             },
             showlegend: false,
             margin: { l: 40, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space
             dragmode: handleGlobalChartState(props.globalChartState) || "select",
             selectdirection: "h",
             hovermode: "compare", // Turning off hovermode seems to screw up click handling
-
             ...layouts
         },
         config: {
