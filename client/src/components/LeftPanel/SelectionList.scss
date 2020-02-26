@@ -9,6 +9,7 @@
     box-sizing: border-box;
     color: white;
     font-family: "Inter", "Roboto", sans-serif;
+    overflow-y: scroll;
 
     .header {
         display: flex;
@@ -214,4 +215,11 @@
 
 .feature-list-divider {
     margin: 5px auto;
+}
+
+.selections-container {
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    height: 80%;
 }

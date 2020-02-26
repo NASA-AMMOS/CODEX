@@ -413,7 +413,7 @@ function SelectionItems(props) {
 
     return (
         <React.Fragment>
-            <div>
+            <div className="selections-container">
                 <DragDropContext onDragEnd={onDragEnd}>
                     <Droppable droppableId="singletonList">
                         {(provided, snapshot) => (

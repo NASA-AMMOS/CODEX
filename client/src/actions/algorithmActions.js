@@ -40,10 +40,17 @@ function handleAlgorithmReturn(inMsg, subalgoState, dispatch, getState) {
         newFeature(featureName, data);
     }
 
+    function getUniqueName(baseName, idx) {
+        const name = baseName + (idx ? `_${idx}` : "");
+        if (getState().selections.groups.find(group => group.name === name))
+            return getUniqueName(baseName, idx + 1);
+        return name;
+    }
+
     // Create a new selection for each cluster if requested
     if (findOutputParam(subalgoState, "clusters")) {
-        //get unique name
-        const uniqueName = utils.getUniqueGroupID("Clustering");
+        const uniqueName = getUniqueName("Clustering", 0);
+
         //create a group with a unique name
         dispatch(selectionActions.createSelectionGroup(uniqueName));
 
