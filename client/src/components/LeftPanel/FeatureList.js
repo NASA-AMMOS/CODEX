@@ -379,6 +379,7 @@ function FeatureGroup(props) {
                         <div className="selection-group-items">
                             {props.group.features
                                 .filter(feature => featureListContext.featureFilter.func(feature))
+                                .filter(featureListContext.searchStringFilter)
                                 .map((feature, idx) => (
                                     <FeatureItem key={feature.name} feature={feature} idx={idx} />
                                 ))}
@@ -542,19 +543,6 @@ function FeatureList(props) {
               );
     }
 
-    function deselectAll() {
-        featureList.forEach(feature => selectFeature(feature.get("name"), false));
-        groups.forEach(group => selectFeatureGroup(group.get("id"), false));
-    }
-    const deselectHotkey = useKey("`");
-    useEffect(
-        _ => {
-            deselectHotkey && deselectAll();
-        },
-
-        [deselectHotkey]
-    );
-
     // Organization and ordering of features and feature groups
     const [ungroupedFeatures, setUngroupedFeatures] = useState(_ => featureList.toJS());
     const [groupedFeatures, setGroupedFeatures] = useState([]);
@@ -607,6 +595,33 @@ function FeatureList(props) {
         },
         [featureList, groups]
     );
+
+    // Mass-selection functions
+    function deselectAll() {
+        featureList.forEach(feature => selectFeature(feature.get("name"), false));
+        groups.forEach(group => selectFeatureGroup(group.get("id"), false));
+    }
+    const deselectHotkey = useKey("`");
+    useEffect(
+        _ => {
+            deselectHotkey && deselectAll();
+        },
+
+        [deselectHotkey]
+    );
+
+    function selectAll() {
+        ungroupedFeatures
+            .filter(feature => featureFilter.func(feature))
+            .filter(searchStringFilter)
+            .forEach(feature => selectFeature(feature.name, true));
+        groupedFeatures.forEach(group =>
+            group.features
+                .filter(feature => featureFilter.func(feature))
+                .filter(searchStringFilter)
+                .forEach(feature => selectFeature(feature.name, true))
+        );
+    }
 
     // Stuff for shift-selection
     const lastSelected = useState();
@@ -684,7 +699,8 @@ function FeatureList(props) {
                     baseIndex,
                     lastSelected,
                     featureFilter,
-                    statsHidden
+                    statsHidden,
+                    searchStringFilter
                 }}
             >
                 <FeaturePanelHeader
@@ -703,9 +719,20 @@ function FeatureList(props) {
                 </div>
                 <DragDropContext onDragEnd={onDragEnd}>
                     <div className="features">
-                        <Button classes={{ label: "deselect-button-label" }} onClick={deselectAll}>
-                            deselect all
-                        </Button>
+                        <div className="select-buttons">
+                            <Button
+                                classes={{ label: "deselect-button-label" }}
+                                onClick={selectAll}
+                            >
+                                select all
+                            </Button>
+                            <Button
+                                classes={{ label: "deselect-button-label" }}
+                                onClick={deselectAll}
+                            >
+                                deselect all
+                            </Button>
+                        </div>
                         {featureListLoading && (
                             <div className="loading-list">
                                 <CircularProgress />

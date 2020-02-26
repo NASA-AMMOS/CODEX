@@ -97,6 +97,11 @@
     }
 
     .features {
+        .select-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
         .selection-group {
             .expand-icon {
                 background-color: transparent;
