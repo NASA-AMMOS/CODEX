@@ -19,15 +19,15 @@ function handleGlobalChartState(state) {
 function generateLayouts(features) {
     return features.reduce((acc, feature, idx) => {
         const xAxisName = `xaxis${idx === 0 ? "" : idx + 1}`;
-        const yAxisName = `yaxis${idx === 0 ? "" : idx + 1}`;
+        const yAxisName = `yaxis`;
         acc[xAxisName] = {
             title: feature.feature,
             automargin: true,
-            showline: false
+            showline: false,
+            fixedrange: true
         };
         acc[yAxisName] = {
-            automargin: true,
-            fixedrange: true
+            automargin: true
         };
         return acc;
     }, {});
@@ -54,7 +54,7 @@ function makeSelectionShapes(selection, data) {
                           return {
                               type: "rect",
                               xref: "paper",
-                              yref: `y${dataIdx > 0 ? dataIdx + 1 : ""}`,
+                              yref: `y`,
                               x0: dataIdx * xSize,
                               y0: section[0],
                               x1: dataIdx * xSize + xSize,
@@ -98,13 +98,12 @@ function ViolinPlotGraph(props) {
                 const trace = {
                     y: cols[idx],
                     type: "violin",
-                    hoverinfo: "x+y",
                     marker: { color: DEFAULT_POINT_COLOR },
                     name: ""
                 };
                 if (idx > 0) {
                     trace.xaxis = `x${idx + 1}`;
-                    trace.yaxis = `y${idx + 1}`;
+                    trace.yaxis = `y`;
                 }
                 return trace;
             }),
@@ -126,19 +125,19 @@ function ViolinPlotGraph(props) {
             grid: {
                 rows: 1,
                 columns: data.length,
-                pattern: "independent"
+                subplots: utils.range(data.length).map(idx => `x${idx ? idx + 1 : ""}y`)
             },
             showlegend: false,
             margin: { l: 40, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space
             dragmode: handleGlobalChartState(props.globalChartState) || "select",
             selectdirection: "v",
             hovermode: "compare", // Turning off hovermode seems to screw up click handling
-
             ...layouts
         },
         config: {
             responsive: true,
-            displaylogo: false
+            displaylogo: false,
+            modeBarButtons: [["toImage", "zoomIn2d", "zoomOut2d", "autoScale2d"], ["toggleHover"]]
         }
     });
 
