@@ -450,6 +450,7 @@ function SelectionList(props) {
     const activeCount = selections.filter(sel => !sel.hidden).length;
     const shownCount = activeCount;
     const totalCount = selections.length;
+
     return (
         <React.Fragment>
             <div className="selections">

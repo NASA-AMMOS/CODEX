@@ -52,12 +52,11 @@ export default class SelectionsReducer {
 
     static saveNewSelection(state, action) {
         const palette = utils.getSelectionPalette();
-        const id = [...Array(state.savedSelections.length + 1).keys()].reduce((acc, idx) => {
-            if (acc) return acc;
-            if (state.savedSelections.every(sel => sel.id !== idx)) {
-                return idx;
-            }
-        });
+        function getUniqueId() {
+            const id = utils.createNewId();
+            return !state.savedSelections.find(group => group.id === id) ? id : getUniqueId();
+        }
+        const id = getUniqueId();
         return {
             ...state,
             savedSelections: state.savedSelections.concat([
