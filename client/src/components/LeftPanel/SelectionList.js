@@ -1,6 +1,7 @@
 import "components/LeftPanel/SelectionList.scss";
 
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { RemoveRedEye } from "@material-ui/icons";
 import { useDispatch } from "react-redux";
 import Button from "@material-ui/core/Button";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -28,8 +29,10 @@ import {
     useSaveCurrentSelection,
     useSavedSelections,
     useSelectionGroups,
-    useSetFeatureGroupHidden,
     useSetHoverSelection,
+    useSetSelectionActive,
+    useSetSelectionGroupActive,
+    useSetSelectionGroupHidden,
     useSetSelectionHidden
 } from "../../hooks/DataHooks";
 
@@ -165,6 +168,7 @@ function GroupContextMenu(props) {
 function SelectionItem(props) {
     const deleteSelection = useDeleteSelection();
     const renameSelection = useRenameSelection();
+    const setSelectionActive = useSetSelectionActive();
     const setSelectionHidden = useSetSelectionHidden();
     const [_, createSelectionGroup] = useSelectionGroups();
     const hoverSelection = useSetHoverSelection();
@@ -177,7 +181,11 @@ function SelectionItem(props) {
     }
 
     function checkboxClick(e) {
-        setSelectionHidden(props.selection.id, !e.target.checked);
+        setSelectionActive(props.selection.id, e.target.checked);
+    }
+
+    function eyeballClick(e) {
+        setSelectionHidden(props.selection.id, e.target.checked);
     }
 
     return (
@@ -194,7 +202,7 @@ function SelectionItem(props) {
                 >
                     <div>
                         <Checkbox
-                            checked={!props.selection.hidden}
+                            checked={props.selection.active}
                             value="checkedA"
                             icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
                             checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
@@ -203,7 +211,21 @@ function SelectionItem(props) {
                         />
                         <label>{props.selection.name}</label>
                     </div>
-                    <div className="swatch" style={{ backgroundColor: props.selection.color }} />
+                    <div className="selection-buttons">
+                        <Checkbox
+                            className="eye-icon-checkbox"
+                            checked={props.selection.hidden}
+                            value="checkedA"
+                            icon={<RemoveRedEye style={{ fill: "#DADADA" }} />}
+                            checkedIcon={<RemoveRedEye style={{ fill: "#061427" }} />}
+                            onClick={eyeballClick}
+                            style={{ height: "22px", padding: "0px" }}
+                        />
+                        <div
+                            className="swatch"
+                            style={{ backgroundColor: props.selection.color }}
+                        />
+                    </div>
                     <Popover
                         id="simple-popper"
                         open={Boolean(anchorEl)}
@@ -233,7 +255,8 @@ function SelectionItem(props) {
 
 function SelectionGroup(props) {
     const [anchorEl, setAnchorEl] = useState();
-    const setGroupHidden = useSetFeatureGroupHidden();
+    const setGroupActive = useSetSelectionGroupActive();
+    const setGroupHidden = useSetSelectionGroupHidden();
 
     function onContextMenu(e) {
         e.preventDefault();
@@ -241,7 +264,11 @@ function SelectionGroup(props) {
     }
 
     function checkboxClick(e) {
-        setGroupHidden(props.group.id, !e.target.checked);
+        setGroupActive(props.group.id, e.target.checked);
+    }
+
+    function eyeballClick(e) {
+        setGroupHidden(props.group.id, e.target.checked);
     }
 
     const [panelExpanded, setPanelExpanded] = useState(true);
@@ -254,18 +281,34 @@ function SelectionGroup(props) {
                     {...provided.droppableProps}
                     className="selection-group"
                 >
-                    <button className={iconClasses} onClick={_ => setPanelExpanded(!panelExpanded)}>
-                        <KeyboardArrowRightIcon />
-                    </button>
-                    <Checkbox
-                        checked={!props.group.hidden}
-                        value="checkedA"
-                        icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
-                        checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
-                        style={{ height: "22px", padding: "0px" }}
-                        onChange={checkboxClick}
-                    />
-                    <label onContextMenu={onContextMenu}>{props.group.name}</label>
+                    <div className="selection-group-header">
+                        <div>
+                            <button
+                                className={iconClasses}
+                                onClick={_ => setPanelExpanded(!panelExpanded)}
+                            >
+                                <KeyboardArrowRightIcon />
+                            </button>
+                            <Checkbox
+                                checked={props.group.active}
+                                value="checkedA"
+                                icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
+                                checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
+                                style={{ height: "22px", padding: "0px" }}
+                                onChange={checkboxClick}
+                            />
+                            <label onContextMenu={onContextMenu}>{props.group.name}</label>
+                        </div>
+                        <Checkbox
+                            className="eye-icon-checkbox"
+                            checked={props.group.hidden}
+                            value="checkedA"
+                            icon={<RemoveRedEye style={{ fill: "#DADADA" }} />}
+                            checkedIcon={<RemoveRedEye style={{ fill: "#061427" }} />}
+                            onClick={eyeballClick}
+                            style={{ height: "22px", padding: "0px" }}
+                        />
+                    </div>
                     {panelExpanded ? (
                         <div className="selection-group-items">
                             {props.group.selections.map((sel, idx) => (
@@ -313,6 +356,7 @@ function SelectionItems(props) {
                             selections.find(x => x.id === sel.id) &&
                             !selections.find(x => x.id === sel.id).groupID
                     )
+                    .map(sel => Object.assign(sel, selections.find(x => x.id === sel.id)))
                     .concat(
                         selections.filter(
                             sel => !orderedSingletons.find(x => x.id === sel.id) && !sel.groupID

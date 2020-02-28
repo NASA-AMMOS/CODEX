@@ -205,6 +205,11 @@
         padding-left: 3px;
     }
 
+    .selection-buttons {
+        display: flex;
+        align-items: center;
+    }
+
     .swatch {
         width: 15px;
         height: 15px;
@@ -222,4 +227,9 @@
     flex-direction: column;
     overflow-y: scroll;
     height: 80%;
+}
+
+.selection-group-header {
+    display: flex;
+    justify-content: space-between;
 }
