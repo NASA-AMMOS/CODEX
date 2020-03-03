@@ -114,6 +114,10 @@ export function setSelectionHidden(id, hidden) {
     return { type: actionTypes.SET_SELECTION_HIDDEN, id, hidden };
 }
 
+export function setGroupActive(id, active) {
+    return { type: actionTypes.SET_GROUP_ACTIVE, id, active };
+}
+
 export function setGroupHidden(id, hidden) {
     return { type: actionTypes.SET_GROUP_HIDDEN, id, hidden };
 }

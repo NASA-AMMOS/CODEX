@@ -562,7 +562,12 @@ export function useSetSelectionHidden() {
     return (id, hidden) => dispatch(selectionActions.setSelectionHidden(id, hidden));
 }
 
-export function useSetFeatureGroupHidden() {
+export function useSetSelectionGroupActive() {
+    const dispatch = useDispatch();
+    return (id, active) => dispatch(selectionActions.setGroupActive(id, active));
+}
+
+export function useSetSelectionGroupHidden() {
     const dispatch = useDispatch();
     return (id, hidden) => dispatch(selectionActions.setGroupHidden(id, hidden));
 }

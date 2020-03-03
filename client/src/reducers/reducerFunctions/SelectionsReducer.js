@@ -209,6 +209,18 @@ export default class SelectionsReducer {
         };
     }
 
+    static setGroupActive(state, action) {
+        return {
+            ...state,
+            groups: state.groups.map(group =>
+                group.id === action.id ? { ...group, active: action.active } : group
+            ),
+            savedSelections: state.savedSelections.map(sel =>
+                sel.groupID === action.id ? { ...sel, active: action.active } : sel
+            )
+        };
+    }
+
     static setGroupHidden(state, action) {
         return {
             ...state,

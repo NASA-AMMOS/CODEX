@@ -42,6 +42,8 @@ export default function selections(
             return opt_reducer.setSelectionGroup(state, action);
         case actionTypes.SET_SELECTION_HIDDEN:
             return opt_reducer.setSelectionHidden(state, action);
+        case actionTypes.SET_GROUP_ACTIVE:
+            return opt_reducer.setGroupActive(state, action);
         case actionTypes.SET_GROUP_HIDDEN:
             return opt_reducer.setGroupHidden(state, action);
         default:
