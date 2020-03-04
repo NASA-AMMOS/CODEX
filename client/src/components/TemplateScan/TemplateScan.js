@@ -45,7 +45,12 @@ function makeServerRequestObj(algorithmName, feature1, feature2) {
         guidance: null,
         identification: { id: "dev0" },
         parameters: { radius: 10, dist: "euclidean" },
-        dataSelections: []
+        dataSelections: [],
+        activeLabels: feature1
+            .get("data")
+            .map(_ => Math.floor(Math.random() * 3))
+            .map(val => (val === 0 ? -1 : val === 1 ? 0 : 1))
+            .toJS()
     };
 }
 
@@ -162,6 +167,8 @@ function FeaturePreview(props) {
         },
         [selections]
     );
+
+    useEffect(_ => {}, [selections]);
 
     const handleSelect = useCallback(
         e => {
@@ -294,8 +301,12 @@ function TemplateScan(props) {
     useEffect(
         _ => {
             if (!features || res) return;
+            console.log("Request:");
+            console.log(requestObj);
             const { req, cancel } = makeSimpleRequest(requestObj);
             req.then(data => {
+                console.log("Reponse:");
+                console.log(data);
                 setRes(data);
             });
         },
