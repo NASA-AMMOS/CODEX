@@ -395,3 +395,4 @@ export function equalArrays(a, b) {
 export function getMean(values) {
     return values.reduce((acc, val) => acc + val, 0) / values.length;
 }
+
