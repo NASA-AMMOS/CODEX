@@ -344,7 +344,7 @@ function OptionDropdown(props) {
     return (
         <div className="regression-dropdown">
             <Tooltip
-                title={props.param.helpText || param.displayName || param.name}
+                title={props.param.helpText || props.param.displayName || props.param.name}
                 placement="top-start"
             >
                 <div>
