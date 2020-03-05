@@ -1,0 +1,214 @@
+.regression-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.regression-control-area {
+    width: calc(100% + 10px);
+    background-color: #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    flex-direction: column;
+    margin-top: 15px;
+    margin-left: -10px;
+}
+
+.regression-control-row {
+    display: flex;
+    justify-content: space-between;
+
+    & > div {
+        width: 20%;
+    }
+}
+
+.regression-control-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 135px;
+    width: 20%;
+}
+
+.regression-slider-control {
+    min-width: 70px;
+}
+
+.regression-dropdown {
+    display: flex;
+    flex-direction: column;
+}
+
+.regression-top-bar {
+    margin-left: -10px;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    padding-left: 22px;
+    padding-right: 10px;
+    width: calc(100% + 20px);
+    padding-bottom: 10px;
+    z-index: 1;
+
+    .help-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.regression-top-button-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.regression-previews {
+    padding-top: 10px;
+    overflow: auto;
+    min-height: calc(100% - 130px);
+    background: #f2f2f2;
+    margin-left: -10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.regression-algo-container {
+    padding-top: 10px;
+    padding-left: 10px;
+    margin-left: 10px;
+    margin-bottom: 25px;
+    width: 90%;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.regression-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.feature-row {
+    display: flex;
+    justify-content: space-between;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.regression-plot-container {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.regression-plot-wrapper {
+    width: calc(100% - 35px);
+    height: 250px;
+    min-height: 250px;
+    background: #fff;
+    padding-top: 22px;
+    position: relative;
+    margin-left: 25px;
+    display: flex;
+}
+
+.regression-loading {
+    width: 100%;
+    height: 100%;
+
+    &.overlay {
+        background-color: rgba(255, 255, 255, 0.5);
+        position: absolute;
+        top: 0;
+        z-index: 100;
+    }
+}
+
+.regression-algo-label {
+    font-weight: 500;
+    margin-left: 32px;
+}
+
+.regression-axis-label {
+    position: absolute;
+    top: calc(192px / 2);
+    left: 0;
+    transform: rotate(-90deg);
+    z-index: 100;
+    text-align: center;
+}
+
+.regression-plot-peak-count {
+    position: absolute;
+    bottom: 3px;
+    right: 25px;
+    text-align: right;
+    z-index: 100;
+}
+
+.regression-plot-top-row {
+    position: absolute;
+    top: 20px;
+    right: 15px;
+    z-index: 100;
+    // width: 100%;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    padding-right: 10px;
+}
+
+.regression-plot-title {
+    font-size: 14px;
+    text-transform: capitalize;
+    width: 100%;
+    padding-left: 5px;
+
+    &.hover {
+        color: #fff;
+    }
+}
+
+.regression-action-row {
+    height: 130px;
+    box-shadow: 0px -4px 4px rgba(0, 0, 0, 0.25);
+    margin-left: -10px;
+    margin-bottom: 5px;
+    padding-right: 24px;
+    width: calc(100% + 20px);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    z-index: 1;
+
+    div {
+        margin-left: 25px;
+    }
+}
+
+//
+.regression-global-controls {
+    width: 88%;
+    margin-bottom: 30px;
+}
+
+.regression-control-block {
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+}
+
+.regression-algo-title {
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 19px;
+    color: #000000;
+}
+
+.regression-scores {
+    position: absolute;
+    top: 125px;
+    right: 35px;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}

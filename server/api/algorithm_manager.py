@@ -90,24 +90,24 @@ def algorithm_call(msg, result):
             downsampled = int(downsampled)
 
         if (algorithmType == "clustering"):
-            pca = dimension_reduction(inputHash, hashList, labelHash, subsetHashName, "PCA", downsampled, {"n_components":2}, scoring, search_type, cross_val, result, ch).run()
-            result =       clustering(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+            pca = dimension_reduction(featureList, inputHash, hashList, labelHash, subsetHashName, "PCA", downsampled, {"n_components":2}, scoring, search_type, cross_val, result, ch).run()
+            result =       clustering(featureList, inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
             result['data'] = pca['data']
 
         elif (algorithmType == "dimensionality_reduction"):
-            result = dimension_reduction(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+            result = dimension_reduction(featureList, inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         elif (algorithmType == "normalize"):
-            result = normalize(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+            result = normalize(featureList, inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         elif (algorithmType == "peak_detect"):
-            result = peak_detection(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+            result = peak_detection(featureList, inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         elif (algorithmType == "regression"):
-            result = regression(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+            result = regression(featureList, inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         elif (algorithmType == "template_scan"):
-            result = template_scan(inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+            result = template_scan(featureList, inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         else:
             result['message'] = "Cannot parse algorithmType"

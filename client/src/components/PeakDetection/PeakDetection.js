@@ -30,7 +30,13 @@ import * as wmActions from "../../actions/windowManagerActions";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
 const CWT_PARAMS = [
-    { name: "gap_threshold", value: 2, range: [0, 5], displayName: "Gap Threshold" },
+    {
+        name: "gap_threshold",
+        value: 2,
+        range: [0, 5],
+        displayName: "Gap Threshold",
+        helpText: "Help text"
+    },
     { name: "min_snr", value: 1, range: [0, 100], displayName: "Minimum SNR" },
     { name: "noise_perc", value: 10, range: [0, 100], displayName: "Noise Percentage" },
     { name: "peak_width", value: 10, range: [1, 100], displayName: "Peak Width" }
@@ -233,7 +239,10 @@ function ParamSlider(props) {
     ];
     return (
         <div className="peak-detect-slider-control">
-            <Tooltip title={param.displayName || param.name} placement="top-start">
+            <Tooltip
+                title={param.helpText || param.displayName || param.name}
+                placement="top-start"
+            >
                 <label>{param.displayName || param.name}</label>
             </Tooltip>
             <Slider
@@ -369,7 +378,13 @@ function FindPeaksAlgo(props) {
             />
             <div className="peak-detect-control-area">
                 <div className="peak-detect-control-row">
-                    <Tooltip title="mph" placement="top-start">
+                    <Tooltip
+                        title={
+                            paramState[0].find(param => param.name === "mph").helpText ||
+                            paramState[0].find(param => param.name === "mph").displayName
+                        }
+                        placement="top-start"
+                    >
                         <TextField
                             label="mph"
                             variant="filled"
@@ -384,7 +399,10 @@ function FindPeaksAlgo(props) {
                     <ParamSlider paramState={paramState} paramName="mpd" disabled={isUpdating} />
                     <div className="peak-detect-dropdown">
                         <Tooltip
-                            title={paramState[0].find(param => param.name === "valley").displayName}
+                            title={
+                                paramState[0].find(param => param.name === "valley").helpText ||
+                                paramState[0].find(param => param.name === "valley").displayName
+                            }
                             placement="top-start"
                         >
                             <label>
@@ -398,7 +416,13 @@ function FindPeaksAlgo(props) {
                         />
                     </div>
                     <div className="peak-detect-dropdown">
-                        <Tooltip title="Edge" placement="top-start">
+                        <Tooltip
+                            title={
+                                paramState[0].find(param => param.name === "edge").helpText ||
+                                paramState[0].find(param => param.name === "edge").displayName
+                            }
+                            placement="top-start"
+                        >
                             <label>Edge</label>
                         </Tooltip>
                         <select
@@ -426,7 +450,13 @@ function FindPeaksAlgo(props) {
                     />
 
                     <div className="peak-detect-dropdown">
-                        <Tooltip title="kpsh" placement="top-start">
+                        <Tooltip
+                            title={
+                                paramState[0].find(param => param.name === "kpsh").helpText ||
+                                paramState[0].find(param => param.name === "kpsh").displayName
+                            }
+                            placement="top-start"
+                        >
                             <label>kpsh</label>
                         </Tooltip>
                         <Switch
