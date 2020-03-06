@@ -19,8 +19,5 @@ def test_guidance_text_block(capsys):
     result = get_guidance_text_block('unit_tests', 'test', CODEX_ROOT)
     assert result == "This is a unit test"
 
-    result = get_guidance_text_block('classification_page', 'BernoulliNB', CODEX_ROOT)
-    assert result == "\nSample data\n"
-
     result = get_guidance_text_block('unit_tests', 'not_a_test', CODEX_ROOT)
     assert result == None
