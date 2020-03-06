@@ -21,33 +21,94 @@ const DECISION_TREE_REGRESSOR_PARAMS = [
         value: 5,
         range: [2, 25],
         displayName: "Max Depth",
-        helpText: "help text"
+        helpText: "The maximum depth of the tree."
     },
-    { name: "splitter", value: "best", options: ["default", "best"], displayName: "Splitter" },
-    { name: "max_features", value: null }
+    {
+        name: "splitter",
+        value: "best",
+        options: ["default", "best"],
+        displayName: "Splitter",
+        helpText:
+            "The strategy used to choose the split at each node. Supported strategies are “best” to choose the best split and “random” to choose the best random split."
+    },
+    {
+        name: "max_features",
+        value: null,
+        helpText: "The maximum number of features to consider when looking for the best split."
+    }
 ];
 
 const K_NEIGHBORS_REGRESSOR_PARAMS = [
-    { name: "leaf_size", value: 30, range: [1, 100], displayName: "Leaf Size" },
+    {
+        name: "leaf_size",
+        value: 30,
+        range: [1, 100],
+        displayName: "Leaf Size",
+        helpText:
+            "Leaf size passed to BallTree or KDTree. This can affect the speed of the construction and query, as well as the memory required to store the tree."
+    },
     {
         name: "algorithm",
         value: "auto",
         options: ["ball_tree", "kd_tree", "brute"],
-        displayName: "Algorithm"
+        displayName: "Algorithm",
+        helpText: "Algorithm used to compute the nearest neighbors"
     },
-    { name: "p", value: 2, range: [1, 10] }
+    {
+        name: "p",
+        value: 2,
+        range: [1, 10],
+        helpText:
+            "Power parameter for the Minkowski metric. When p = 1, this is equivalent to using manhattan_distance (l1), and euclidean_distance (l2) for p = 2. For arbitrary p, minkowski_distance (l_p) is used."
+    }
 ];
 
 const LINEAR_REGRESSOR_PARAMS = [
-    { name: "fit_intercept", value: true, displayName: "Fit Intercept" },
-    { name: "normalize", value: false, displayName: "Normalize" }
+    {
+        name: "fit_intercept",
+        value: true,
+        displayName: "Fit Intercept",
+        helpText:
+            "Whether to calculate the intercept for this model. If set to False, no intercept will be used in calculations (i.e. data is expected to be centered)."
+    },
+    {
+        name: "normalize",
+        value: false,
+        displayName: "Normalize",
+        helpText:
+            "This parameter is ignored when fit_intercept is set to False. If True, the regressors X will be normalized before regression by subtracting the mean and dividing by the l2-norm."
+    }
 ];
 
 const RANDOM_FOREST_REGRESSOR_PARAMS = [
-    { name: "max_features", value: null, displayName: "Max Features" },
-    { name: "min_samples_leaf", value: 1, displayName: "Min Samples Leaf" },
-    { name: "bootstrap", value: false, displayName: "Bootstrap" },
-    { name: "max_depth", value: 100, range: [1, 100], displayName: "Max Depth" }
+    {
+        name: "max_features",
+        value: null,
+        displayName: "Max Features",
+        helpText: "The maximum number of features to consider when looking for the best split."
+    },
+    {
+        name: "min_samples_leaf",
+        value: 1,
+        displayName: "Min Samples Leaf",
+        helpText:
+            "The minimum number of samples required to be at a leaf node. A split point at any depth will only be considered if it leaves at least min_samples_leaf training samples in each of the left and right branches. This may have the effect of smoothing the model."
+    },
+    {
+        name: "bootstrap",
+        value: false,
+        displayName: "Bootstrap",
+        helpText:
+            "Whether bootstrap samples are used when building trees. If False, the whole datset is used to build each tree."
+    },
+    {
+        name: "max_depth",
+        value: 100,
+        range: [1, 100],
+        displayName: "Max Depth",
+        helpText:
+            "The maximum depth of the tree. If max depth >= the number of features selected, then nodes are expanded until all leaves are pure or until all leaves contain less than min_samples_split samples."
+    }
 ];
 
 function makeServerRequestObj(algorithmName, features, parameters, labelName) {
