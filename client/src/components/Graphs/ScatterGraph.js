@@ -9,6 +9,7 @@ import * as utils from "utils/utils";
 
 import { filterBounds } from "./graphFunctions";
 import { usePrevious } from "../../hooks/UtilHooks";
+import { useSetWindowNeedsAutoscale } from "../../hooks/WindowHooks";
 
 const DEFAULT_POINT_COLOR = "rgba(0, 0, 0, 0.5)";
 const DEFAULT_POINT_OPACITY = 0.5;
@@ -256,6 +257,18 @@ function ScatterGraph(props) {
             updateChartRevision();
         },
         [props.win.data.features]
+    );
+
+    const setWindowNeedsAutoscale = useSetWindowNeedsAutoscale();
+    useEffect(
+        _ => {
+            if (props.win.needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                setWindowNeedsAutoscale(props.win.id, false);
+            }
+        },
+        [props.win.needsAutoscale]
     );
 
     return (

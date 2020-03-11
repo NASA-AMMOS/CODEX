@@ -1,16 +1,13 @@
 import "components/Graphs/ContourGraph.css";
 
-import Immutable from "immutable";
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";
 
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import { useCurrentSelection, usePinnedFeatures, useFileInfo } from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
 import GraphWrapper from "components/Graphs/GraphWrapper";
 import * as utils from "utils/utils";
 
 import { filterBounds } from "./graphFunctions";
+import { useSetWindowNeedsAutoscale } from "../../hooks/WindowHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_BUCKET_COUNT = 50;
@@ -250,6 +247,18 @@ function HeatmapGraph(props) {
             updateChartRevision();
         },
         [props.win.data.features]
+    );
+
+    const setWindowNeedsAutoscale = useSetWindowNeedsAutoscale();
+    useEffect(
+        _ => {
+            if (props.win.needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                setWindowNeedsAutoscale(props.win.id, false);
+            }
+        },
+        [props.win.needsAutoscale]
     );
 
     return (
