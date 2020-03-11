@@ -19,7 +19,7 @@ import classnames from "classnames";
 import plotComponentFactory from "react-plotly-patched.js/factory";
 import * as utils from "utils/utils";
 
-import { WindowCircularProgress } from "../WindowHelpers/WindowCenter";
+import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
 import { makeSimpleRequest, range } from "../../utils/utils";
 import { useCloseWindow, useWindowManager } from "../../hooks/WindowHooks";
 import {
@@ -452,6 +452,15 @@ function TemplateScan(props) {
     if (features === null || !win.data) {
         return <WindowCircularProgress />;
     }
+
+    if (features.size <= 1)
+        return (
+            <WindowError>
+                Please select 2 or more features
+                <br />
+                in the features list to use this algorithm.
+            </WindowError>
+        );
 
     features = features.map(feature => {
         const featureName = featureNameList.get(feature.get("feature"), feature.get("feature"));
