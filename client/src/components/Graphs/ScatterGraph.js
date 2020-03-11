@@ -124,7 +124,9 @@ function ScatterGraph(props) {
             .forEach(selection => {
                 if (!selection.hidden) {
                     selection.rowIndices.forEach(row => {
-                        chartState.data[0].marker.color[row] = selection.color;
+                        chartState.data[0].marker.color[row] = new TinyColor(selection.color)
+                            .setAlpha(props.win.data.dotOpacity || DEFAULT_POINT_OPACITY)
+                            .toString();
                     });
                 }
             });
