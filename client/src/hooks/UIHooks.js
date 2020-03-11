@@ -42,3 +42,11 @@ export function useSnackbarState() {
         _ => dispatch(uiActions.hideSnackbar())
     ];
 }
+
+export function useStatsPanelHidden() {
+    const dispatch = useDispatch();
+    return [
+        useSelector(state => state.ui.get("statsPanelHidden")),
+        hidden => dispatch(uiActions.setStatsPanelHidden(hidden))
+    ];
+}

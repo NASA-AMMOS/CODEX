@@ -136,4 +136,15 @@ export default class WindowManagerReducer {
                 )
         );
     }
+
+    static setWindowNeedsAutoscale(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id ? win.set("needsAutoscale", action.scale) : win
+                )
+        );
+    }
 }

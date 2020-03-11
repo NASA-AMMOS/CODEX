@@ -348,4 +348,9 @@ export function useCloseWindow(win) {
     return id => dispatch(wmActions.closeWindow(win.id));
 }
 
+export function useSetWindowNeedsAutoscale(id) {
+    const dispatch = useDispatch();
+    return (id, scale) => dispatch(wmActions.setWindowNeedsAutoscale(id, scale));
+}
+
 export default useWindowManager;

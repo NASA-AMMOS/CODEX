@@ -7,6 +7,7 @@ import GraphWrapper from "components/Graphs/GraphWrapper";
 import * as utils from "utils/utils";
 
 import { filterSingleCol } from "./graphFunctions";
+import { useSetWindowNeedsAutoscale } from "../../hooks/WindowHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_TITLE = "Violin Plot Graph";
@@ -210,6 +211,19 @@ function ViolinPlotGraph(props) {
             updateChartRevision();
         },
         [props.globalChartState]
+    );
+
+    const setWindowNeedsAutoscale = useSetWindowNeedsAutoscale();
+    useEffect(
+        _ => {
+            if (props.win.needsAutoscale) {
+                Object.keys(chartState.layout).map(key => {
+                    if (key.includes("axis")) chartState.layout[key].autorange = true;
+                });
+                setWindowNeedsAutoscale(props.win.id, false);
+            }
+        },
+        [props.win.needsAutoscale]
     );
 
     return (

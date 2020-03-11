@@ -45,4 +45,8 @@ export default class UiReducer {
         });
         return state.set("snackbar", snackbarState);
     }
+
+    static setStatsPanelHidden(state, action) {
+        return state.set("statsPanelHidden", action.hidden);
+    }
 }

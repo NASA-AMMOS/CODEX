@@ -3,9 +3,6 @@ import "components/Graphs/HeatmapGraph3d.css";
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";
 
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import { useCurrentSelection, usePinnedFeatures, useFileInfo } from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
 import GraphWrapper from "components/Graphs/GraphWrapper";
 import * as graphFunctions from "components/Graphs/graphFunctions";
 import * as uiTypes from "constants/uiTypes";
@@ -13,6 +10,7 @@ import * as utils from "utils/utils";
 
 import { filterBounds } from "./graphFunctions";
 import { usePrevious } from "../../hooks/UtilHooks";
+import { useSetWindowNeedsAutoscale } from "../../hooks/WindowHooks";
 
 const DEFAULT_MAP_TYPE = uiTypes.MAP_USGS;
 const DEFAULT_ZOOM = 0;
@@ -155,6 +153,18 @@ function MapGraph(props) {
             setRenderKey(renderKey + 1);
         },
         [props.win.data]
+    );
+
+    const setWindowNeedsAutoscale = useSetWindowNeedsAutoscale();
+    useEffect(
+        _ => {
+            if (props.win.needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                setWindowNeedsAutoscale(props.win.id, false);
+            }
+        },
+        [props.win.needsAutoscale]
     );
 
     return (
