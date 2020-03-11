@@ -14,7 +14,7 @@ import { useWindowManager, useCloseWindow } from "../../hooks/WindowHooks";
 import HelpContent from "../Help/HelpContent";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
-
+const GUIDANCE_PATH = "regression_page:general_regression";
 const DECISION_TREE_REGRESSOR_PARAMS = [
     {
         name: "max_depth",
@@ -787,7 +787,7 @@ function Regression(props) {
     // Window initialization
     const win = useWindowManager(props, {
         width: 726,
-        height: 600,
+        height: 700,
         isResizable: true,
         title: "Regression"
     });
@@ -834,35 +834,54 @@ function Regression(props) {
                         </IconButton>
                     </div>
                 </div>
-                <div className="regression-previews">
-                    <HelpContent hidden={!helpMode} />
-                    <div className="regression-global-controls">
-                        <div className="regression-control-block">
-                            <label>Regression target:</label>
-                            <select
-                                value={targetFeature}
-                                onChange={e => setTargetFeature(e.target.value)}
-                            >
-                                {features.map(feature => {
-                                    const name = feature.get("displayName");
-                                    return (
-                                        <option value={name} key={name}>
-                                            {name}
-                                        </option>
-                                    );
-                                })}
-                            </select>
+                <portals.InPortal node={previews}>
+                    <div className="regression-previews">
+                        <div className="regression-global-controls">
+                            <div className="regression-control-block">
+                                <label>Regression target:</label>
+                                <select
+                                    value={targetFeature}
+                                    onChange={e => setTargetFeature(e.target.value)}
+                                >
+                                    {features.map(feature => {
+                                        const name = feature.get("displayName");
+                                        return (
+                                            <option value={name} key={name}>
+                                                {name}
+                                            </option>
+                                        );
+                                    })}
+                                </select>
+                            </div>
                         </div>
+                        <DecisionTreeRegressorAlgo
+                            features={features}
+                            targetFeature={targetFeature}
+                        />
+                        <KNeighborsRegressorAlgo
+                            features={features}
+                            targetFeature={targetFeature}
+                        />
+                        <LinearRegressorAlgo features={features} targetFeature={targetFeature} />
+                        <RandomForestRegressorAlgo
+                            features={features}
+                            targetFeature={targetFeature}
+                        />
                     </div>
-                    <DecisionTreeRegressorAlgo features={features} targetFeature={targetFeature} />
-                    <KNeighborsRegressorAlgo features={features} targetFeature={targetFeature} />
-                    <LinearRegressorAlgo features={features} targetFeature={targetFeature} />
-                    <RandomForestRegressorAlgo features={features} targetFeature={targetFeature} />
+                </portals.InPortal>
+
+                <div className="regression-content">
+                    <HelpContent hidden={!helpMode} guidancePath={GUIDANCE_PATH} />
+                    {helpMode ? null : <portals.OutPortal node={previews} />}
                 </div>
                 <div className="regression-action-row">
                     <div>
-                        <Button variant="contained" size="small" onClick={_ => closeWindow()}>
-                            Close
+                        <Button
+                            variant="contained"
+                            size="small"
+                            onClick={_ => (helpMode ? setHelpMode(false) : closeWindow())}
+                        >
+                            {helpMode ? "Close Help" : "Cancel"}
                         </Button>
                     </div>
                 </div>

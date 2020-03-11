@@ -18,8 +18,11 @@ import {
 } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
 import * as wmActions from "../../actions/windowManagerActions";
+import * as portals from "react-reverse-portal";
+import HelpContent from "components/Help/HelpContent";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
+const GUIDANCE_PATH = "normalization_page:general_normalization";
 
 function makeServerRequestObj(algorithmName, feature) {
     return {
@@ -204,6 +207,10 @@ function Normalization(props) {
     const [selections, setSelections] = selectionState;
 
     const addNewFeature = useNewFeature();
+    const [helpMode, setHelpMode] = useState(false);
+
+    // We store the previews in a portal so we don't have to re-render them when the user switches back from help mode
+    const previews = React.useMemo(() => portals.createPortalNode(), []);
 
     if (features === null || !win.data) {
         return <WindowCircularProgress />;
@@ -247,17 +254,17 @@ function Normalization(props) {
                     <span>
                         Select whether you wish to normalize or standardize each feature below.
                     </span>
-                    <IconButton>
+                    <IconButton onClick={_ => setHelpMode(!helpMode)}>
                         <HelpIcon />
                     </IconButton>
                 </div>
-                <div className="normalize-top-button-row">
+                <div className="normalize-top-button-row" hidden={helpMode}>
                     <Button onClick={globalSelect(0)}>set all original</Button>
                     <Button onClick={globalSelect(1)}>set all normalized</Button>
                     <Button onClick={globalSelect(2)}>set all standardized</Button>
                 </div>
             </div>
-            <div className="normalize-previews">
+            <portals.InPortal node={previews}>
                 {features.map(feature => (
                     <FeatureRow
                         key={feature.get("feature")}
@@ -265,14 +272,22 @@ function Normalization(props) {
                         selectionState={selectionState}
                     />
                 ))}
+            </portals.InPortal>
+            <div className="normalize-previews">
+                <HelpContent hidden={!helpMode} guidancePath={GUIDANCE_PATH} />
+                {helpMode ? null : <portals.OutPortal node={previews} />}
             </div>
             <div className="normalize-action-row">
                 <div>
-                    <Button variant="contained" size="small" onClick={_ => closeWindow()}>
-                        Cancel
+                    <Button
+                        variant="contained"
+                        size="small"
+                        onClick={_ => (helpMode ? setHelpMode(false) : closeWindow())}
+                    >
+                        {helpMode ? "Close Help" : "Cancel"}
                     </Button>
                 </div>
-                <div>
+                <div hidden={helpMode}>
                     <Button
                         color="primary"
                         variant="contained"
