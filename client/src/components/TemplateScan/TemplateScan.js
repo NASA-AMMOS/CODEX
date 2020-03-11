@@ -34,7 +34,7 @@ const DEFAULT_POINT_COLOR = "rgba(0, 0, 0, 0.5)";
 const POSITIVE_SELECTION_COLOR = "#56CCF2";
 const NEGATIVE_SELECTION_COLOR = "#EB5757";
 const OUTPUT_SELECTION_COLOR = "#27AE60";
-const GUIDANCE_PATH = "template_scan_page:template_scan_page";
+const GUIDANCE_PATH = "template_scan_page:general_template_scan";
 
 const Plot = plotComponentFactory(PlotlyPatched);
 
@@ -647,8 +647,12 @@ function TemplateScanContent(props) {
             </div>
             <div className="template-scan-action-row">
                 <div>
-                    <Button variant="contained" size="small" onClick={_ => closeWindow()}>
-                        Cancel
+                    <Button
+                        variant="contained"
+                        size="small"
+                        onClick={_ => (helpMode ? setHelpMode(false) : closeWindow())}
+                    >
+                        {helpMode ? "Close Help" : "Cancel"}
                     </Button>
                 </div>
             </div>
