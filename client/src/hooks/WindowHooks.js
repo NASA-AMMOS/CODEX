@@ -1,9 +1,25 @@
+import { fromJS } from "immutable";
 import { useDispatch, useSelector } from "react-redux";
 import { useLayoutEffect } from "react";
-import Immutable, { fromJS } from "immutable";
 
 import { defaultInitialSettings } from "constants/windowSettings";
 import * as wmActions from "actions/windowManagerActions";
+
+import {
+    setWindowAxisFeature,
+    setWindowAxisLabels,
+    setWindowDataBinSize,
+    setWindowDataBounds,
+    setWindowDataDotOpacity,
+    setWindowDataDotShape,
+    setWindowDataDotSize,
+    setWindowDataMapType,
+    setWindowDataNeedsResetToDefault,
+    setWindowDataScale,
+    setWindowDataTrendLineVisible,
+    setWindowFeatureInfo,
+    setWindowShowGridLines
+} from "../actions/windowDataActions";
 
 /*
  * Basically, this hook:
@@ -142,14 +158,14 @@ export function useWindowFeatureList(id) {
  */
 export function useWindowFeatureInfoList(id) {
     const dispatch = useDispatch();
-    const win = useSelector(state =>
-        state.windowManager.get("windows").find(win => win.get("id") === id)
-    );
-
     return [
-        win.getIn(["data", "featureInfo"], []),
-        newInfo =>
-            dispatch(wmActions.setWindowData(id, win.get("data").set("featureInfo", newInfo)))
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "featureInfo"])
+        ),
+        newInfo => dispatch(setWindowFeatureInfo(id, newInfo))
     ];
 }
 
@@ -159,13 +175,14 @@ export function useWindowFeatureInfoList(id) {
  */
 export function useWindowXAxis(id) {
     const dispatch = useDispatch();
-    const win = useSelector(state =>
-        state.windowManager.get("windows").find(win => win.get("id") === id)
-    );
-
     return [
-        win.getIn(["data", "xAxis"]),
-        xAxis => dispatch(wmActions.setWindowData(id, win.get("data").set("xAxis", xAxis)))
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "xAxis"])
+        ),
+        featureName => dispatch(setWindowAxisFeature(id, "xAxis", featureName))
     ];
 }
 
@@ -175,13 +192,14 @@ export function useWindowXAxis(id) {
  */
 export function useWindowYAxis(id) {
     const dispatch = useDispatch();
-    const win = useSelector(state =>
-        state.windowManager.get("windows").find(win => win.get("id") === id)
-    );
-
     return [
-        win.getIn(["data", "yAxis"]),
-        yAxis => dispatch(wmActions.setWindowData(id, win.get("data").set("yAxis", yAxis)))
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "yAxis"])
+        ),
+        featureName => dispatch(setWindowAxisFeature(id, "yAxis", featureName))
     ];
 }
 
@@ -191,13 +209,16 @@ export function useWindowYAxis(id) {
  */
 export function useWindowZAxis(id) {
     const dispatch = useDispatch();
-    const win = useSelector(state =>
-        state.windowManager.get("windows").find(win => win.get("id") === id)
-    );
-
     return [
-        win.getIn(["data", "zAxis"]),
-        zAxis => dispatch(wmActions.setWindowData(id, win.get("data").set("zAxis", zAxis)))
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "zAxis"])
+        ),
+        featureName => {
+            dispatch(setWindowAxisFeature(id, "zAxis", featureName));
+        }
     ];
 }
 
@@ -232,13 +253,14 @@ export function useSwapAxes(id) {
  */
 export function useWindowMapType(id) {
     const dispatch = useDispatch();
-    const win = useSelector(state =>
-        state.windowManager.get("windows").find(win => win.get("id") === id)
-    );
-
     return [
-        win.getIn(["data", "mapType"]),
-        mapType => dispatch(wmActions.setWindowData(id, win.get("data").set("mapType", mapType)))
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "mapType"])
+        ),
+        mapType => dispatch(setWindowDataMapType(id, mapType))
     ];
 }
 
@@ -260,40 +282,43 @@ export function useWindowTitle(id) {
  */
 export function useWindowGraphBinSize(id) {
     const dispatch = useDispatch();
-    const win = useSelector(state =>
-        state.windowManager.get("windows").find(win => win.get("id") === id)
-    );
 
     return [
-        win.getIn(["data", "binSize"]),
-        binSize =>
-            binSize.every(val => val > 0) &&
-            dispatch(wmActions.setWindowData(id, win.get("data").set("binSize", binSize)))
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "binSize"])
+        ),
+        binSize => dispatch(setWindowDataBinSize(id, binSize))
     ];
 }
 
 export function useWindowGraphBounds(id) {
     const dispatch = useDispatch();
-    const win = useSelector(state =>
-        state.windowManager.get("windows").find(win => win.get("id") === id)
-    );
 
     return [
-        win.getIn(["data", "bounds"]),
-        bounds => dispatch(wmActions.setWindowData(id, win.get("data").set("bounds", bounds)))
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "bounds"])
+        ),
+        bounds => dispatch(setWindowDataBounds(id, bounds))
     ];
 }
 
 export function useWindowAxisLabels(id) {
     const dispatch = useDispatch();
-    const win = useSelector(state =>
-        state.windowManager.get("windows").find(win => win.get("id") === id)
-    );
 
     return [
-        win.getIn(["data", "axisLabels"]),
-        axisLabels =>
-            dispatch(wmActions.setWindowData(id, win.get("data").set("axisLabels", axisLabels)))
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "axisLabels"])
+        ),
+        axisLabels => dispatch(setWindowAxisLabels(id, axisLabels))
     ];
 }
 
@@ -308,44 +333,99 @@ export function useWindowType(id) {
 
 export function useWindowDotSize(id) {
     const dispatch = useDispatch();
-    const win = useSelector(state =>
-        state.windowManager.get("windows").find(win => win.get("id") === id)
-    );
-
     return [
-        win.getIn(["data", "dotSize"]),
-        dotSize => dispatch(wmActions.setWindowData(id, win.get("data").set("dotSize", dotSize)))
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "dotSize"])
+        ),
+        dotSize => dispatch(setWindowDataDotSize(id, dotSize))
     ];
 }
 
 export function useWindowDotOpacity(id) {
     const dispatch = useDispatch();
-    const win = useSelector(state =>
-        state.windowManager.get("windows").find(win => win.get("id") === id)
-    );
-
     return [
-        win.getIn(["data", "dotOpacity"]),
-        dotOpacity =>
-            dispatch(wmActions.setWindowData(id, win.get("data").set("dotOpacity", dotOpacity)))
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "dotOpacity"])
+        ),
+        dotOpacity => dispatch(setWindowDataDotOpacity(id, dotOpacity))
     ];
 }
 
 export function useWindowDotShape(id) {
     const dispatch = useDispatch();
-    const win = useSelector(state =>
-        state.windowManager.get("windows").find(win => win.get("id") === id)
-    );
-
     return [
-        win.getIn(["data", "dotShape"]),
-        dotShape => dispatch(wmActions.setWindowData(id, win.get("data").set("dotShape", dotShape)))
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "dotShape"])
+        ),
+        dotShape => dispatch(setWindowDataDotShape(id, dotShape))
     ];
 }
 
 export function useCloseWindow(win) {
     const dispatch = useDispatch();
     return id => dispatch(wmActions.closeWindow(win.id));
+}
+
+export function useWindowAxisScale(id) {
+    const dispatch = useDispatch();
+    return [
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "scaleOptions"])
+        ),
+        scaleOptions => dispatch(setWindowDataScale(id, scaleOptions))
+    ];
+}
+
+export function useWindowTrendLineVisible(id) {
+    const dispatch = useDispatch();
+    return [
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "trendLineVisible"])
+        ),
+        trendLineVisible => dispatch(setWindowDataTrendLineVisible(id, trendLineVisible))
+    ];
+}
+
+export function useWindowShowGridLines(id) {
+    const dispatch = useDispatch();
+    return [
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "showGridLines"])
+        ),
+        showGridLines => dispatch(setWindowShowGridLines(id, showGridLines))
+    ];
+}
+
+export function useWindowNeedsResetToDefault(id) {
+    const dispatch = useDispatch();
+
+    return [
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "needsResetToDefault"])
+        ),
+        needsResetToDefault => dispatch(setWindowDataNeedsResetToDefault(id, needsResetToDefault))
+    ];
 }
 
 export default useWindowManager;

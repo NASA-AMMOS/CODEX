@@ -1,28 +1,32 @@
 import "components/Graphs/HeatmapGraph3d.css";
 
-import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";
 
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import { useCurrentSelection, usePinnedFeatures, useFileInfo } from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
-import GraphWrapper from "components/Graphs/GraphWrapper";
 import * as graphFunctions from "components/Graphs/graphFunctions";
 import * as utils from "utils/utils";
 
 import { filterBounds } from "./graphFunctions";
+import { removeSentinelValues } from "../../utils/utils";
+import {
+    useWindowAxisLabels,
+    useWindowFeatureList,
+    useWindowGraphBinSize,
+    useWindowGraphBounds,
+    useWindowNeedsResetToDefault,
+    useWindowTitle,
+    useWindowXAxis,
+    useWindowYAxis,
+    useWindowZAxis
+} from "../../hooks/WindowHooks";
+import GraphWrapper from "./GraphWrapper";
+import Plot from "react-plotly.js";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_BUCKET_COUNT = 50;
 const DEFAULT_TITLE = "Heat Map 3d Graph";
 
-function squashDataIntoBuckets(data, numBuckets, features, xAxis, yAxis, zAxis) {
-    const xAxisIndex = features.findIndex(colName => colName === xAxis);
-    const yAxisIndex = features.findIndex(colName => colName === yAxis);
-    const zAxisIndex = features.findIndex(colName => colName === zAxis);
-
-    const cols = [data[xAxisIndex], data[yAxisIndex]];
-    const zCol = data[zAxisIndex];
+function squashDataIntoBuckets(numBuckets, xData, yData, zData) {
+    const cols = [xData, yData];
 
     const maxes = cols.map(col => Math.max(...col));
     const mins = cols.map(col => Math.min(...col));
@@ -37,7 +41,7 @@ function squashDataIntoBuckets(data, numBuckets, features, xAxis, yAxis, zAxis) 
                         ? numBuckets[idx] - 1
                         : Math.floor((val - mins[idx]) / bucketSizes[idx])
                 );
-                acc[yIdx][xIdx].push(zCol[idx]);
+                acc[yIdx][xIdx].push(zData[idx]);
                 return acc;
             },
             Array(numBuckets[1])
@@ -76,12 +80,33 @@ function generateDataAxis(col, bucketCount) {
     return generateRange(min, max, (max - min) / bucketCount);
 }
 
+//the number of interpolation steps that you can take caps at 5?
+const interpolatedColors = graphFunctions.interpolateColors(
+    "rgb(255, 255, 255)",
+    "rgb(255, 0, 0)",
+    5,
+    "linear"
+);
+
 function HeatmapGraph3d(props) {
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
 
-    const sanitizedCols = utils.removeSentinelValues(
-        props.win.data.features.map(colName =>
+    const [featuresImmutable] = useWindowFeatureList(props.win.id);
+    const featureList = featuresImmutable.toJS();
+    const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
+    const [binSize, setBinSize] = useWindowGraphBinSize(props.win.id);
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
+        props.win.id
+    );
+    const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
+    const [xAxis, setXAxis] = useWindowXAxis(props.win.id);
+    const [yAxis, setYAxis] = useWindowYAxis(props.win.id);
+    const [zAxis, setZAxis] = useWindowZAxis(props.win.id);
+
+    const sanitizedCols = removeSentinelValues(
+        featureList.map(colName =>
             props.data
                 .find(col => col.get("feature") === colName)
                 .get("data")
@@ -89,41 +114,65 @@ function HeatmapGraph3d(props) {
         ),
         props.fileInfo
     );
-    const cols = filterBounds(props.win.data.features, sanitizedCols, props.win.data.bounds);
 
-    const xAxis = props.data
-        .find(feature => feature.get("feature") === props.win.data.features[0])
-        .get("displayName");
+    const filteredCols = filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
 
-    const yAxis = props.data
-        .find(feature => feature.get("feature") === props.win.data.features[1])
-        .get("displayName");
+    const xData = xAxis
+        ? filteredCols[featureList.findIndex(feature => feature === xAxis)]
+        : filteredCols[0];
+    const yData = yAxis
+        ? filteredCols[featureList.findIndex(feature => feature === yAxis)]
+        : filteredCols[1];
+    const zData = zAxis
+        ? filteredCols[featureList.findIndex(feature => feature === zAxis)]
+        : filteredCols[2];
 
-    // Set x-axis averages as the z-axis
-    useEffect(_ => {
-        if (!props.win.title) props.win.setTitle(props.win.data.features.join(" vs "));
-        props.win.setData(data => ({
-            ...data.toJS(),
-            xAxis: props.win.data.features[0],
-            yAxis: props.win.data.features[1],
-            zAxis: props.win.data.features[2],
-            binSize: props.win.data.binSize || { x: DEFAULT_BUCKET_COUNT, y: DEFAULT_BUCKET_COUNT },
-            bounds:
-                props.win.data.bounds ||
-                props.win.data.features.reduce((acc, colName, idx) => {
-                    acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
-                    return acc;
-                }, {})
-        }));
-    }, []);
-
-    //the number of interpolation steps that you can take caps at 5?
-    const interpolatedColors = graphFunctions.interpolateColors(
-        "rgb(255, 255, 255)",
-        "rgb(255, 0, 0)",
-        5,
-        "linear"
+    const x = generateDataAxis(xData, binSize ? binSize.get("x") : DEFAULT_BUCKET_COUNT);
+    const y = generateDataAxis(yData, binSize ? binSize.get("y") : DEFAULT_BUCKET_COUNT);
+    const z = squashDataIntoBuckets(
+        binSize ? Object.values(binSize.toJS()) : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT],
+        xData,
+        yData,
+        zData
     );
+
+    const xAxisTitle =
+        (axisLabels && axisLabels.get(xAxis)) ||
+        props.data.find(feature => feature.get("feature") === featureList[0]).get("displayName");
+
+    const yAxisTitle =
+        (axisLabels && axisLabels.get(yAxis)) ||
+        props.data.find(feature => feature.get("feature") === featureList[1]).get("displayName");
+
+    const featureDisplayNames = featureList.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    );
+
+    function setDefaults() {
+        setBounds(
+            featureList.reduce((acc, colName, idx) => {
+                acc[colName] = {
+                    min: Math.min(...sanitizedCols[idx]),
+                    max: Math.max(...sanitizedCols[idx])
+                };
+                return acc;
+            }, {})
+        );
+        setBinSize({
+            x: DEFAULT_BUCKET_COUNT,
+            y: DEFAULT_BUCKET_COUNT
+        });
+        setAxisLabels(
+            featureList.reduce((acc, featureName) => {
+                acc[featureName] = featureName;
+                return acc;
+            }, {})
+        );
+        setWindowTitle(featureDisplayNames.join(" vs "));
+        setXAxis(featureList[0]);
+        setYAxis(featureList[1]);
+        setZAxis(featureList[2]);
+    }
 
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
@@ -131,16 +180,9 @@ function HeatmapGraph3d(props) {
     const [chartState, setChartState] = useState({
         data: [
             {
-                x: generateDataAxis(cols[0], DEFAULT_BUCKET_COUNT),
-                y: generateDataAxis(cols[1], DEFAULT_BUCKET_COUNT),
-                z: squashDataIntoBuckets(
-                    cols,
-                    [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT],
-                    props.win.data.features,
-                    props.win.data.features[0],
-                    props.win.data.features[1],
-                    props.win.data.features[2]
-                ),
+                x,
+                y,
+                z,
                 type: "heatmap",
                 showscale: true,
                 colorscale: interpolatedColors
@@ -149,13 +191,13 @@ function HeatmapGraph3d(props) {
         layout: {
             dragmode: "lasso",
             xaxis: {
-                title: xAxis,
+                title: xAxisTitle,
                 automargin: true,
                 ticklen: 0,
                 scaleratio: 1.0
             },
             yaxis: {
-                title: yAxis,
+                title: yAxisTitle,
                 automargin: true,
                 ticklen: 0,
                 anchor: "x"
@@ -181,61 +223,37 @@ function HeatmapGraph3d(props) {
         setChartRevision(revision);
     }
 
-    function getZAxis() {
-        const binSize = props.win.data.binSize
-            ? Object.values(props.win.data.binSize)
-            : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT];
+    useEffect(_ => {
+        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
+        setDefaults();
+        updateChartRevision();
+    }, []);
 
-        return squashDataIntoBuckets(
-            cols,
-            binSize,
-            props.win.data.features,
-            props.win.data.xAxis || props.win.data.features[0],
-            props.win.data.yAxis || props.win.data.features[1],
-            props.win.data.zAxis || props.win.data.features[2]
-        );
+    function updateAxes() {
+        chartState.data[0].x = x;
+        chartState.data[0].y = y;
+        chartState.data[0].z = z;
     }
 
-    // Effect to keep axes updated if they've been swapped
+    // Handles axis swap and label changes
     useEffect(
         _ => {
-            const xAxisIndex = props.win.data.features.findIndex(
-                colName => colName === props.win.data.xAxis
-            );
-            const yAxisIndex = props.win.data.features.findIndex(
-                colName => colName === props.win.data.yAxis
-            );
-            chartState.data[0].x = generateDataAxis(
-                cols[xAxisIndex === -1 ? 0 : xAxisIndex],
-                props.win.data.binSize ? props.win.data.binSize.x : DEFAULT_BUCKET_COUNT
-            );
-            chartState.data[0].y = generateDataAxis(
-                cols[yAxisIndex === -1 ? 0 : yAxisIndex],
-                props.win.data.binSize ? props.win.data.binSize.y : DEFAULT_BUCKET_COUNT
-            );
-            chartState.data[0].z = getZAxis();
-
-            if (props.win.data.xAxis)
-                chartState.layout.xaxis.title = props.data
-                    .find(feature => feature.get("feature") === props.win.data.xAxis)
-                    .get("displayName");
-
-            if (props.win.data.yAxis)
-                chartState.layout.yaxis.title = props.data
-                    .find(feature => feature.get("feature") === props.win.data.yAxis)
-                    .get("displayName");
-
+            updateAxes();
+            chartState.layout.xaxis.title = xAxisTitle;
+            chartState.layout.yaxis.title = yAxisTitle;
             updateChartRevision();
         },
-        [props.win.data.features]
+        [featuresImmutable, axisLabels, binSize, bounds, xAxis, yAxis, zAxis]
     );
 
-    // Effect to keep z-axis updated if it's changed
     useEffect(
         _ => {
-            chartState.data[0].z = getZAxis();
+            if (needsResetToDefault) {
+                setDefaults();
+                setNeedsResetToDefault(false);
+            }
         },
-        [props.win.data.zAxis]
+        [needsResetToDefault]
     );
 
     return (
