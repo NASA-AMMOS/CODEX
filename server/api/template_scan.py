@@ -64,7 +64,7 @@ class template_scan(algorithm):
                 threshold_indices = score_set > (((np.max(score_set) - np.min(score_set)) / 2) + np.min(score_set))
                 results[threshold_indices] = 1
                 
-            self.results['results'] = results
+            self.result['results'] = results.tolist()
 
 
 

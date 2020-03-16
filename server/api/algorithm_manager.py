@@ -27,6 +27,7 @@ from api.normalize               import normalize
 from api.peak_detection          import peak_detection
 from api.regression              import regression
 from api.template_scan           import template_scan
+from api.correlation             import correlation
 
 from api.sub.system              import get_featureList
 from api.sub.hash                import get_cache
@@ -114,6 +115,9 @@ def algorithm_call(msg, result):
 
         elif (algorithmType == "template_scan"):
             result = template_scan(inputHash, activeLabels, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+
+        elif (algorithmType == "correlation"):
+            result = correlation(inputHash, activeLabels, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
 
         else:
             result['message'] = "Cannot parse algorithmType"
