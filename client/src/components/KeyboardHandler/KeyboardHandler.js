@@ -9,6 +9,11 @@ import {
     useWindowList
 } from "../../hooks/WindowHooks";
 import {
+    useAllowGraphHotkeys,
+    useGlobalChartState,
+    useStatsPanelHidden
+} from "../../hooks/UIHooks";
+import {
     useCurrentSelection,
     useFeatureGroups,
     useFeatureMetadata,
@@ -20,10 +25,11 @@ import {
     useSetSelectionActive,
     useSetSelectionGroupActive
 } from "../../hooks/DataHooks";
-import { useGlobalChartState, useStatsPanelHidden } from "../../hooks/UIHooks";
 import { useKey } from "../../hooks/UtilHooks";
 
 function KeyboardHandler(props) {
+    const [allowGraphHotkeys] = useAllowGraphHotkeys();
+
     // Backtick ("`") deselects all features
     const featureList = useFeatureMetadata();
     const [groups] = useFeatureGroups();
@@ -64,6 +70,7 @@ function KeyboardHandler(props) {
     const sKey = useKey("s");
     useEffect(
         _ => {
+            if (!allowGraphHotkeys) return;
             if (sKey) {
                 if (!previousChartState) setPreviousChartState(globalChartState);
                 setGlobalChartState("lasso");
@@ -79,6 +86,7 @@ function KeyboardHandler(props) {
     const zKey = useKey("z");
     useEffect(
         _ => {
+            if (!allowGraphHotkeys) return;
             if (zKey) {
                 if (!previousChartState) setPreviousChartState(globalChartState);
                 setGlobalChartState("zoom");
@@ -94,6 +102,7 @@ function KeyboardHandler(props) {
     const spacebar = useKey(" ");
     useEffect(
         _ => {
+            if (!allowGraphHotkeys) return;
             if (spacebar) {
                 if (!previousChartState) setPreviousChartState(globalChartState);
                 setGlobalChartState("pan");
@@ -111,6 +120,7 @@ function KeyboardHandler(props) {
     const SKey = useKey("S");
     useEffect(
         _ => {
+            if (!allowGraphHotkeys) return;
             if (SKey) saveCurrentSelection();
         },
         [SKey]
@@ -126,6 +136,7 @@ function KeyboardHandler(props) {
     const ZKey = useKey("Z");
     useEffect(
         _ => {
+            if (!allowGraphHotkeys) return;
             if (ZKey && graphWindowActive) setWindowNeedsAutoscale(activeWindowId, true);
         },
         [ZKey]
@@ -136,6 +147,7 @@ function KeyboardHandler(props) {
     const tKey = useKey("t");
     useEffect(
         _ => {
+            if (!allowGraphHotkeys) return;
             if (tKey) {
                 setStatsHidden(!statsHidden);
             }

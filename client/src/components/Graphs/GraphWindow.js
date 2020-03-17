@@ -1,8 +1,10 @@
+import { ClickAwayListener } from "@material-ui/core";
 import React from "react";
 
 import * as windowTypes from "constants/windowTypes";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
+import { useAllowGraphHotkeys, useGlobalChartState } from "../../hooks/UIHooks";
 import {
     useCurrentSelection,
     useFeatureDisplayNames,
@@ -11,7 +13,6 @@ import {
     usePinnedFeatures,
     useSavedSelections
 } from "../../hooks/DataHooks";
-import { useGlobalChartState } from "../../hooks/UIHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
 import BoxPlotGraph from "./BoxPlotGraph";
 import ContourGraph from "./ContourGraph";
@@ -47,6 +48,7 @@ function GraphWindow(props) {
     const fileInfo = useFileInfo();
     let features = usePinnedFeatures(win);
     const [featureNameList] = useFeatureDisplayNames();
+    const [allowGraphHotkeys, setAllowGraphHotkeys] = useAllowGraphHotkeys();
 
     if (features === null || !win.data) {
         return <WindowCircularProgress />;
@@ -88,28 +90,41 @@ function GraphWindow(props) {
             );
     }
 
-    switch (props.windowType) {
-        case windowTypes.SCATTER_GRAPH:
-            return <ScatterGraph {...baseProps} />;
-        case windowTypes.CONTOUR_GRAPH:
-            return <ContourGraph {...baseProps} />;
-        case windowTypes.VIOLIN_PLOT_GRAPH:
-            return <ViolinPlotGraph {...baseProps} />;
-        case windowTypes.TIME_SERIES_GRAPH:
-            return <TimeSeriesGraph {...baseProps} />;
-        case windowTypes.HEATMAP_GRAPH:
-            return <HeatmapGraph {...baseProps} />;
-        case windowTypes.HEATMAP_3D_GRAPH:
-            return <HeatmapGraph3d {...baseProps} />;
-        case windowTypes.BOX_PLOT_GRAPH:
-            return <BoxPlotGraph {...baseProps} />;
-        case windowTypes.HISTOGRAM_GRAPH:
-            return <HistogramGraph {...baseProps} />;
-        case windowTypes.SINGLE_X_MULTIPLE_Y:
-            return <SingleXMultipleYGraph {...baseProps} />;
-        case windowTypes.MAP_GRAPH:
-            return <MapGraph {...baseProps} />;
-    }
+    const windowContent = (function() {
+        switch (props.windowType) {
+            case windowTypes.SCATTER_GRAPH:
+                return <ScatterGraph {...baseProps} />;
+            case windowTypes.CONTOUR_GRAPH:
+                return <ContourGraph {...baseProps} />;
+            case windowTypes.VIOLIN_PLOT_GRAPH:
+                return <ViolinPlotGraph {...baseProps} />;
+            case windowTypes.TIME_SERIES_GRAPH:
+                return <TimeSeriesGraph {...baseProps} />;
+            case windowTypes.HEATMAP_GRAPH:
+                return <HeatmapGraph {...baseProps} />;
+            case windowTypes.HEATMAP_3D_GRAPH:
+                return <HeatmapGraph3d {...baseProps} />;
+            case windowTypes.BOX_PLOT_GRAPH:
+                return <BoxPlotGraph {...baseProps} />;
+            case windowTypes.HISTOGRAM_GRAPH:
+                return <HistogramGraph {...baseProps} />;
+            case windowTypes.SINGLE_X_MULTIPLE_Y:
+                return <SingleXMultipleYGraph {...baseProps} />;
+            case windowTypes.MAP_GRAPH:
+                return <MapGraph {...baseProps} />;
+        }
+    })();
+
+    return (
+        <ClickAwayListener onClickAway={_ => setAllowGraphHotkeys(false)}>
+            <div
+                onMouseUp={_ => setAllowGraphHotkeys(true)}
+                onMouseDown={_ => setAllowGraphHotkeys(true)}
+            >
+                {windowContent}
+            </div>
+        </ClickAwayListener>
+    );
 }
 
 export default GraphWindow;

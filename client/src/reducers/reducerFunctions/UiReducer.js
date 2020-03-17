@@ -49,4 +49,12 @@ export default class UiReducer {
     static setStatsPanelHidden(state, action) {
         return state.set("statsPanelHidden", action.hidden);
     }
+
+    static setAllowGraphHotkeys(state, action) {
+        return state.set("allowGraphHotkeys", action.allow);
+    }
+
+    static setHelpMode(state, action) {
+        return state.set("helpMode", action.helpMode);
+    }
 }

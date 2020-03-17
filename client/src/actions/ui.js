@@ -143,3 +143,11 @@ export function hideSnackbar() {
 export function setStatsPanelHidden(hidden) {
     return { type: types.SET_STATS_PANEL_HIDDEN, hidden };
 }
+
+export function setAllowGraphHotkeys(allow) {
+    return { type: types.SET_ALLOW_GRAPH_HOTKEYS, allow };
+}
+
+export function setHelpMode(helpMode) {
+    return { type: types.SET_ALLOW_HELP_MODE, helpMode };
+}
