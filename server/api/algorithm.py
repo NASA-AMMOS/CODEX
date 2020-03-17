@@ -34,7 +34,7 @@ from api.sub.labels             import label_swap
 from api.sub.hash               import get_cache
 
 class algorithm():
-    def __init__(self, featureList, inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, session):
+    def __init__(self, inputHash, activeLabels, featureList, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, session):
         
         self.featureList = featureList
         self.inputHash = inputHash
@@ -49,6 +49,7 @@ class algorithm():
         self.scoring = scoring
         self.search_type = search_type
         self.cross_val = cross_val
+        self.activeLabels = activeLabels
 
     def run(self):
 
