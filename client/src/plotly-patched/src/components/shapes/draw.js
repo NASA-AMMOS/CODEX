@@ -1,27 +1,25 @@
 /**
-* Copyright 2012-2020, Plotly, Inc.
-* All rights reserved.
-*
-* This source code is licensed under the MIT license found in the
-* LICENSE file in the root directory of this source tree.
-*/
+ * Copyright 2012-2020, Plotly, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
+"use strict";
 
-'use strict';
+var Registry = require("../../registry");
+var Lib = require("../../lib");
+var Axes = require("../../plots/cartesian/axes");
+var Color = require("../color");
+var Drawing = require("../drawing");
+var arrayEditor = require("../../plot_api/plot_template").arrayEditor;
 
-var Registry = require('../../registry');
-var Lib = require('../../lib');
-var Axes = require('../../plots/cartesian/axes');
-var Color = require('../color');
-var Drawing = require('../drawing');
-var arrayEditor = require('../../plot_api/plot_template').arrayEditor;
+var dragElement = require("../dragelement");
+var setCursor = require("../../lib/setcursor");
 
-var dragElement = require('../dragelement');
-var setCursor = require('../../lib/setcursor');
-
-var constants = require('./constants');
-var helpers = require('./helpers');
-
+var constants = require("./constants");
+var helpers = require("./helpers");
 
 // Shapes are stored in gd.layout.shapes, an array of objects
 // index can point to one item in this array,
@@ -41,16 +39,16 @@ function draw(gd) {
     var fullLayout = gd._fullLayout;
 
     // Remove previous shapes before drawing new in shapes in fullLayout.shapes
-    fullLayout._shapeUpperLayer.selectAll('path').remove();
-    fullLayout._shapeLowerLayer.selectAll('path').remove();
+    fullLayout._shapeUpperLayer.selectAll("path").remove();
+    fullLayout._shapeLowerLayer.selectAll("path").remove();
 
-    for(var k in fullLayout._plots) {
+    for (var k in fullLayout._plots) {
         var shapelayer = fullLayout._plots[k].shapelayer;
-        if(shapelayer) shapelayer.selectAll('path').remove();
+        if (shapelayer) shapelayer.selectAll("path").remove();
     }
 
-    for(var i = 0; i < fullLayout.shapes.length; i++) {
-        if(fullLayout.shapes[i].visible) {
+    for (var i = 0; i < fullLayout.shapes.length; i++) {
+        if (fullLayout.shapes[i].visible) {
             drawOne(gd, i);
         }
     }
@@ -62,23 +60,21 @@ function draw(gd) {
 function drawOne(gd, index) {
     // remove the existing shape if there is one.
     // because indices can change, we need to look in all shape layers
-    gd._fullLayout._paperdiv
-        .selectAll('.shapelayer [data-index="' + index + '"]')
-        .remove();
+    gd._fullLayout._paperdiv.selectAll('.shapelayer [data-index="' + index + '"]').remove();
 
     var options = gd._fullLayout.shapes[index] || {};
 
     // this shape is gone - quit now after deleting it
     // TODO: use d3 idioms instead of deleting and redrawing every time
-    if(!options._input || options.visible === false) return;
+    if (!options._input || options.visible === false) return;
 
-    if(options.layer !== 'below') {
+    if (options.layer !== "below") {
         drawShape(gd._fullLayout._shapeUpperLayer);
-    } else if(options.xref === 'paper' || options.yref === 'paper') {
+    } else if (options.xref === "paper" || options.yref === "paper") {
         drawShape(gd._fullLayout._shapeLowerLayer);
     } else {
         var plotinfo = gd._fullLayout._plots[options.xref + options.yref];
-        if(plotinfo) {
+        if (plotinfo) {
             var mainPlot = plotinfo.mainplotinfo || plotinfo;
             drawShape(mainPlot.shapelayer);
         } else {
@@ -91,22 +87,23 @@ function drawOne(gd, index) {
 
     function drawShape(shapeLayer) {
         var attrs = {
-            'data-index': index,
-            'fill-rule': 'evenodd',
+            "data-index": index,
+            "fill-rule": "evenodd",
             d: getPathString(gd, options)
         };
-        var lineColor = options.line.width ? options.line.color : 'rgba(0,0,0,0)';
+        var lineColor = options.line.width ? options.line.color : "rgba(0,0,0,0)";
 
-        var path = shapeLayer.append('path')
+        var path = shapeLayer
+            .append("path")
             .attr(attrs)
-            .style('opacity', options.opacity)
+            .style("opacity", options.opacity)
             .call(Color.stroke, lineColor)
             .call(Color.fill, options.fillcolor)
             .call(Drawing.dashLine, options.line.dash, options.line.width);
 
         setClipPath(path, gd, options);
 
-        if(gd._context.edits.shapePosition) setupDragElement(gd, path, options, index, shapeLayer);
+        if (gd._context.edits.shapePosition) setupDragElement(gd, path, options, index, shapeLayer);
     }
 }
 
@@ -114,28 +111,24 @@ function setClipPath(shapePath, gd, shapeOptions) {
     // note that for layer="below" the clipAxes can be different from the
     // subplot we're drawing this in. This could cause problems if the shape
     // spans two subplots. See https://github.com/plotly/plotly.js/issues/1452
-    var clipAxes = (shapeOptions.xref + shapeOptions.yref).replace(/paper/g, '');
+    var clipAxes = (shapeOptions.xref + shapeOptions.yref).replace(/paper/g, "");
 
-    Drawing.setClipUrl(
-        shapePath,
-        clipAxes ? 'clip' + gd._fullLayout._uid + clipAxes : null,
-        gd
-    );
+    Drawing.setClipUrl(shapePath, clipAxes ? "clip" + gd._fullLayout._uid + clipAxes : null, gd);
 }
 
 function setupDragElement(gd, shapePath, shapeOptions, index, shapeLayer) {
     if (!shapeOptions.editable) {
-	return;
+        return;
     }
     var MINWIDTH = 10;
     var MINHEIGHT = 10;
 
-    var xPixelSized = shapeOptions.xsizemode === 'pixel';
-    var yPixelSized = shapeOptions.ysizemode === 'pixel';
-    var isLine = shapeOptions.type === 'line';
-    var isPath = shapeOptions.type === 'path';
+    var xPixelSized = shapeOptions.xsizemode === "pixel";
+    var yPixelSized = shapeOptions.ysizemode === "pixel";
+    var isLine = shapeOptions.type === "line";
+    var isPath = shapeOptions.type === "path";
 
-    var editHelpers = arrayEditor(gd.layout, 'shapes', shapeOptions);
+    var editHelpers = arrayEditor(gd.layout, "shapes", shapeOptions);
     var modifyItem = editHelpers.modifyItem;
 
     var x0, y0, x1, y1, xAnchor, yAnchor;
@@ -163,6 +156,19 @@ function setupDragElement(gd, shapePath, shapeOptions, index, shapeLayer) {
     dragElement.init(dragOptions);
 
     sensoryElement.node().onmousemove = updateDragMode;
+    sensoryElement.node().onmouseover = evt => {
+        gd.emit("plotly_shapeenter", {
+            event: evt,
+            shapeId: shapeOptions.shapeId
+        });
+    };
+
+    sensoryElement.node().onmouseout = evt => {
+        gd.emit("plotly_shapeleave", {
+            event: evt,
+            shapeId: shapeOptions.shapeId
+        });
+    };
 
     function obtainSensoryElement() {
         return isLine ? createLineDragHandles() : shapePath;
@@ -175,54 +181,63 @@ function setupDragElement(gd, shapePath, shapeOptions, index, shapeLayer) {
         // Helper shapes group
         // Note that by setting the `data-index` attr, it is ensured that
         // the helper group is purged in this modules `draw` function
-        var g = shapeLayer.append('g')
-          .attr('data-index', index);
+        var g = shapeLayer.append("g").attr("data-index", index);
 
         // Helper path for moving
-        g.append('path')
-          .attr('d', shapePath.attr('d'))
-          .style({
-              'cursor': 'move',
-              'stroke-width': sensoryWidth,
-              'stroke-opacity': '0' // ensure not visible
-          });
+        g.append("path")
+            .attr("d", shapePath.attr("d"))
+            .style({
+                cursor: "move",
+                "stroke-width": sensoryWidth,
+                "stroke-opacity": "0" // ensure not visible
+            });
 
         // Helper circles for resizing
         var circleStyle = {
-            'fill-opacity': '0' // ensure not visible
+            "fill-opacity": "0" // ensure not visible
         };
         var circleRadius = sensoryWidth / 2 > minSensoryWidth ? sensoryWidth / 2 : minSensoryWidth;
 
-        g.append('circle')
-          .attr({
-              'data-line-point': 'start-point',
-              'cx': xPixelSized ? x2p(shapeOptions.xanchor) + shapeOptions.x0 : x2p(shapeOptions.x0),
-              'cy': yPixelSized ? y2p(shapeOptions.yanchor) - shapeOptions.y0 : y2p(shapeOptions.y0),
-              'r': circleRadius
-          })
-          .style(circleStyle)
-          .classed('cursor-grab', true);
+        g.append("circle")
+            .attr({
+                "data-line-point": "start-point",
+                cx: xPixelSized
+                    ? x2p(shapeOptions.xanchor) + shapeOptions.x0
+                    : x2p(shapeOptions.x0),
+                cy: yPixelSized
+                    ? y2p(shapeOptions.yanchor) - shapeOptions.y0
+                    : y2p(shapeOptions.y0),
+                r: circleRadius
+            })
+            .style(circleStyle)
+            .classed("cursor-grab", true);
 
-        g.append('circle')
-          .attr({
-              'data-line-point': 'end-point',
-              'cx': xPixelSized ? x2p(shapeOptions.xanchor) + shapeOptions.x1 : x2p(shapeOptions.x1),
-              'cy': yPixelSized ? y2p(shapeOptions.yanchor) - shapeOptions.y1 : y2p(shapeOptions.y1),
-              'r': circleRadius
-          })
-          .style(circleStyle)
-          .classed('cursor-grab', true);
+        g.append("circle")
+            .attr({
+                "data-line-point": "end-point",
+                cx: xPixelSized
+                    ? x2p(shapeOptions.xanchor) + shapeOptions.x1
+                    : x2p(shapeOptions.x1),
+                cy: yPixelSized
+                    ? y2p(shapeOptions.yanchor) - shapeOptions.y1
+                    : y2p(shapeOptions.y1),
+                r: circleRadius
+            })
+            .style(circleStyle)
+            .classed("cursor-grab", true);
 
         return g;
     }
 
     function updateDragMode(evt) {
-        if(isLine) {
-            if(evt.target.tagName === 'path') {
-                dragMode = 'move';
+        if (isLine) {
+            if (evt.target.tagName === "path") {
+                dragMode = "move";
             } else {
-                dragMode = evt.target.attributes['data-line-point'].value === 'start-point' ?
-                  'resize-over-start-point' : 'resize-over-end-point';
+                dragMode =
+                    evt.target.attributes["data-line-point"].value === "start-point"
+                        ? "resize-over-start-point"
+                        : "resize-over-end-point";
             }
         } else {
             // element might not be on screen at time of setup,
@@ -235,27 +250,30 @@ function setupDragElement(gd, shapePath, shapeOptions, index, shapeLayer) {
             var h = dragBBox.bottom - dragBBox.top;
             var x = evt.clientX - dragBBox.left;
             var y = evt.clientY - dragBBox.top;
-            var cursor = (!isPath && w > MINWIDTH && h > MINHEIGHT && !evt.shiftKey) ?
-                shapeOptions.horizontalOnly ? dragElement.getCursor(x / w, 0.5) : dragElement.getCursor(x / w, 1 - y / h) :
-                'move';
+            var cursor =
+                !isPath && w > MINWIDTH && h > MINHEIGHT && !evt.shiftKey
+                    ? shapeOptions.horizontalOnly
+                        ? dragElement.getCursor(x / w, 0.5)
+                        : dragElement.getCursor(x / w, 1 - y / h)
+                    : "move";
 
             setCursor(shapePath, cursor);
 
             // possible values 'move', 'sw', 'w', 'se', 'e', 'ne', 'n', 'nw' and 'w'
-            dragMode = cursor.split('-')[0];
+            dragMode = cursor.split("-")[0];
         }
     }
 
     function startDrag(evt) {
         // setup update strings and initial values
-        if(xPixelSized) {
+        if (xPixelSized) {
             xAnchor = x2p(shapeOptions.xanchor);
         }
-        if(yPixelSized) {
+        if (yPixelSized) {
             yAnchor = y2p(shapeOptions.yanchor);
         }
 
-        if(shapeOptions.type === 'path') {
+        if (shapeOptions.type === "path") {
             pathIn = shapeOptions.path;
         } else {
             x0 = xPixelSized ? shapeOptions.x0 : x2p(shapeOptions.x0);
@@ -264,37 +282,37 @@ function setupDragElement(gd, shapePath, shapeOptions, index, shapeLayer) {
             y1 = yPixelSized ? shapeOptions.y1 : y2p(shapeOptions.y1);
         }
 
-        if(x0 < x1) {
+        if (x0 < x1) {
             w0 = x0;
-            optW = 'x0';
+            optW = "x0";
             e0 = x1;
-            optE = 'x1';
+            optE = "x1";
         } else {
             w0 = x1;
-            optW = 'x1';
+            optW = "x1";
             e0 = x0;
-            optE = 'x0';
+            optE = "x0";
         }
 
         // For fixed size shapes take opposing direction of y-axis into account.
         // Hint: For data sized shapes this is done by the y2p function.
-        if((!yPixelSized && y0 < y1) || (yPixelSized && y0 > y1)) {
+        if ((!yPixelSized && y0 < y1) || (yPixelSized && y0 > y1)) {
             n0 = y0;
-            optN = 'y0';
+            optN = "y0";
             s0 = y1;
-            optS = 'y1';
+            optS = "y1";
         } else {
             n0 = y1;
-            optN = 'y1';
+            optN = "y1";
             s0 = y0;
-            optS = 'y0';
+            optS = "y0";
         }
 
         // setup dragMode and the corresponding handler
         updateDragMode(evt);
         renderVisualCues(shapeLayer, shapeOptions);
         deactivateClipPathTemporarily(shapePath, shapeOptions, gd);
-        dragOptions.moveFn = (dragMode === 'move') ? moveShape : resizeShape;
+        dragOptions.moveFn = dragMode === "move" ? moveShape : resizeShape;
     }
 
     function endDrag() {
@@ -303,7 +321,7 @@ function setupDragElement(gd, shapePath, shapeOptions, index, shapeLayer) {
 
         // Don't rely on clipPath being activated during re-layout
         setClipPath(shapePath, gd, shapeOptions);
-        Registry.call('_guiRelayout', gd, editHelpers.getUpdateObj());
+        Registry.call("_guiRelayout", gd, editHelpers.getUpdateObj());
     }
 
     function abortDrag() {
@@ -311,170 +329,201 @@ function setupDragElement(gd, shapePath, shapeOptions, index, shapeLayer) {
     }
 
     function moveShape(dx, dy) {
-        if(shapeOptions.type === 'path') {
-            var noOp = function(coord) { return coord; };
+        if (shapeOptions.type === "path") {
+            var noOp = function(coord) {
+                return coord;
+            };
             var moveX = noOp;
             var moveY = noOp;
 
-            if(xPixelSized) {
-                modifyItem('xanchor', shapeOptions.xanchor = p2x(xAnchor + dx));
+            if (xPixelSized) {
+                modifyItem("xanchor", (shapeOptions.xanchor = p2x(xAnchor + dx)));
             } else {
-                moveX = function moveX(x) { return p2x(x2p(x) + dx); };
-                if(xa && xa.type === 'date') moveX = helpers.encodeDate(moveX);
+                moveX = function moveX(x) {
+                    return p2x(x2p(x) + dx);
+                };
+                if (xa && xa.type === "date") moveX = helpers.encodeDate(moveX);
             }
 
-            if(yPixelSized) {
-                modifyItem('yanchor', shapeOptions.yanchor = p2y(yAnchor + dy));
+            if (yPixelSized) {
+                modifyItem("yanchor", (shapeOptions.yanchor = p2y(yAnchor + dy)));
             } else {
-                moveY = function moveY(y) { return p2y(y2p(y) + dy); };
-                if(ya && ya.type === 'date') moveY = helpers.encodeDate(moveY);
+                moveY = function moveY(y) {
+                    return p2y(y2p(y) + dy);
+                };
+                if (ya && ya.type === "date") moveY = helpers.encodeDate(moveY);
             }
 
-            modifyItem('path', shapeOptions.path = movePath(pathIn, moveX, moveY));
+            modifyItem("path", (shapeOptions.path = movePath(pathIn, moveX, moveY)));
         } else {
-            if(xPixelSized) {
-                modifyItem('xanchor', shapeOptions.xanchor = p2x(xAnchor + dx));
+            if (xPixelSized) {
+                modifyItem("xanchor", (shapeOptions.xanchor = p2x(xAnchor + dx)));
             } else {
-                modifyItem('x0', shapeOptions.x0 = p2x(x0 + dx));
-                modifyItem('x1', shapeOptions.x1 = p2x(x1 + dx));
+                modifyItem("x0", (shapeOptions.x0 = p2x(x0 + dx)));
+                modifyItem("x1", (shapeOptions.x1 = p2x(x1 + dx)));
             }
 
-            if(yPixelSized) {
-                modifyItem('yanchor', shapeOptions.yanchor = p2y(yAnchor + dy));
-            } else {
-                modifyItem('y0', shapeOptions.y0 = p2y(y0 + dy));
-                modifyItem('y1', shapeOptions.y1 = p2y(y1 + dy));
+            if (!shapeOptions.horizontalOnly) {
+                if (yPixelSized) {
+                    modifyItem("yanchor", (shapeOptions.yanchor = p2y(yAnchor + dy)));
+                } else {
+                    modifyItem("y0", (shapeOptions.y0 = p2y(y0 + dy)));
+                    modifyItem("y1", (shapeOptions.y1 = p2y(y1 + dy)));
+                }
             }
         }
 
-        shapePath.attr('d', getPathString(gd, shapeOptions));
+        shapePath.attr("d", getPathString(gd, shapeOptions));
         renderVisualCues(shapeLayer, shapeOptions);
     }
 
     function resizeShape(dx, dy) {
-        if(isPath) {
+        if (isPath) {
             // TODO: implement path resize, don't forget to update dragMode code
-            var noOp = function(coord) { return coord; };
+            var noOp = function(coord) {
+                return coord;
+            };
             var moveX = noOp;
             var moveY = noOp;
 
-            if(xPixelSized) {
-                modifyItem('xanchor', shapeOptions.xanchor = p2x(xAnchor + dx));
+            if (xPixelSized) {
+                modifyItem("xanchor", (shapeOptions.xanchor = p2x(xAnchor + dx)));
             } else {
-                moveX = function moveX(x) { return p2x(x2p(x) + dx); };
-                if(xa && xa.type === 'date') moveX = helpers.encodeDate(moveX);
+                moveX = function moveX(x) {
+                    return p2x(x2p(x) + dx);
+                };
+                if (xa && xa.type === "date") moveX = helpers.encodeDate(moveX);
             }
 
-            if(yPixelSized) {
-                modifyItem('yanchor', shapeOptions.yanchor = p2y(yAnchor + dy));
+            if (yPixelSized) {
+                modifyItem("yanchor", (shapeOptions.yanchor = p2y(yAnchor + dy)));
             } else {
-                moveY = function moveY(y) { return p2y(y2p(y) + dy); };
-                if(ya && ya.type === 'date') moveY = helpers.encodeDate(moveY);
+                moveY = function moveY(y) {
+                    return p2y(y2p(y) + dy);
+                };
+                if (ya && ya.type === "date") moveY = helpers.encodeDate(moveY);
             }
 
-            modifyItem('path', shapeOptions.path = movePath(pathIn, moveX, moveY));
-        } else if(isLine) {
-            if(dragMode === 'resize-over-start-point') {
+            modifyItem("path", (shapeOptions.path = movePath(pathIn, moveX, moveY)));
+        } else if (isLine) {
+            if (dragMode === "resize-over-start-point") {
                 var newX0 = x0 + dx;
                 var newY0 = yPixelSized ? y0 - dy : y0 + dy;
-                modifyItem('x0', shapeOptions.x0 = xPixelSized ? newX0 : p2x(newX0));
-                modifyItem('y0', shapeOptions.y0 = yPixelSized ? newY0 : p2y(newY0));
-            } else if(dragMode === 'resize-over-end-point') {
+                modifyItem("x0", (shapeOptions.x0 = xPixelSized ? newX0 : p2x(newX0)));
+                modifyItem("y0", (shapeOptions.y0 = yPixelSized ? newY0 : p2y(newY0)));
+            } else if (dragMode === "resize-over-end-point") {
                 var newX1 = x1 + dx;
                 var newY1 = yPixelSized ? y1 - dy : y1 + dy;
-                modifyItem('x1', shapeOptions.x1 = xPixelSized ? newX1 : p2x(newX1));
-                modifyItem('y1', shapeOptions.y1 = yPixelSized ? newY1 : p2y(newY1));
+                modifyItem("x1", (shapeOptions.x1 = xPixelSized ? newX1 : p2x(newX1)));
+                modifyItem("y1", (shapeOptions.y1 = yPixelSized ? newY1 : p2y(newY1)));
             }
         } else {
-            var newN = (~dragMode.indexOf('n')) ? n0 + dy : n0;
-            var newS = (~dragMode.indexOf('s')) ? s0 + dy : s0;
-            var newW = (~dragMode.indexOf('w')) ? w0 + dx : w0;
-            var newE = (~dragMode.indexOf('e')) ? e0 + dx : e0;
+            var newN = ~dragMode.indexOf("n") ? n0 + dy : n0;
+            var newS = ~dragMode.indexOf("s") ? s0 + dy : s0;
+            var newW = ~dragMode.indexOf("w") ? w0 + dx : w0;
+            var newE = ~dragMode.indexOf("e") ? e0 + dx : e0;
 
             // Do things in opposing direction for y-axis.
             // Hint: for data-sized shapes the reversal of axis direction is done in p2y.
-            if(~dragMode.indexOf('n') && yPixelSized) newN = n0 - dy;
-            if(~dragMode.indexOf('s') && yPixelSized) newS = s0 - dy;
+            if (~dragMode.indexOf("n") && yPixelSized) newN = n0 - dy;
+            if (~dragMode.indexOf("s") && yPixelSized) newS = s0 - dy;
 
             // Update shape eventually. Again, be aware of the
             // opposing direction of the y-axis of fixed size shapes.
-            if((!yPixelSized && newS - newN > MINHEIGHT) ||
-              (yPixelSized && newN - newS > MINHEIGHT)) {
-                modifyItem(optN, shapeOptions[optN] = yPixelSized ? newN : p2y(newN));
-                modifyItem(optS, shapeOptions[optS] = yPixelSized ? newS : p2y(newS));
+            if (
+                (!yPixelSized && newS - newN > MINHEIGHT) ||
+                (yPixelSized && newN - newS > MINHEIGHT)
+            ) {
+                modifyItem(optN, (shapeOptions[optN] = yPixelSized ? newN : p2y(newN)));
+                modifyItem(optS, (shapeOptions[optS] = yPixelSized ? newS : p2y(newS)));
             }
-            if(newE - newW > MINWIDTH) {
-                modifyItem(optW, shapeOptions[optW] = xPixelSized ? newW : p2x(newW));
-                modifyItem(optE, shapeOptions[optE] = xPixelSized ? newE : p2x(newE));
+            if (newE - newW > MINWIDTH) {
+                modifyItem(optW, (shapeOptions[optW] = xPixelSized ? newW : p2x(newW)));
+                modifyItem(optE, (shapeOptions[optE] = xPixelSized ? newE : p2x(newE)));
             }
         }
 
-        shapePath.attr('d', getPathString(gd, shapeOptions));
+        shapePath.attr("d", getPathString(gd, shapeOptions));
         renderVisualCues(shapeLayer, shapeOptions);
     }
 
     function renderVisualCues(shapeLayer, shapeOptions) {
-        if(xPixelSized || yPixelSized) {
+        if (xPixelSized || yPixelSized) {
             renderAnchor();
         }
 
         function renderAnchor() {
-            var isNotPath = shapeOptions.type !== 'path';
+            var isNotPath = shapeOptions.type !== "path";
 
             // d3 join with dummy data to satisfy d3 data-binding
-            var visualCues = shapeLayer.selectAll('.visual-cue').data([0]);
+            var visualCues = shapeLayer.selectAll(".visual-cue").data([0]);
 
             // Enter
             var strokeWidth = 1;
-            visualCues.enter()
-              .append('path')
-              .attr({
-                  'fill': '#fff',
-                  'fill-rule': 'evenodd',
-                  'stroke': '#000',
-                  'stroke-width': strokeWidth
-              })
-              .classed('visual-cue', true);
+            visualCues
+                .enter()
+                .append("path")
+                .attr({
+                    fill: "#fff",
+                    "fill-rule": "evenodd",
+                    stroke: "#000",
+                    "stroke-width": strokeWidth
+                })
+                .classed("visual-cue", true);
 
             // Update
             var posX = x2p(
-              xPixelSized ?
-                shapeOptions.xanchor :
-                Lib.midRange(
-                  isNotPath ?
-                    [shapeOptions.x0, shapeOptions.x1] :
-                    helpers.extractPathCoords(shapeOptions.path, constants.paramIsX))
+                xPixelSized
+                    ? shapeOptions.xanchor
+                    : Lib.midRange(
+                          isNotPath
+                              ? [shapeOptions.x0, shapeOptions.x1]
+                              : helpers.extractPathCoords(shapeOptions.path, constants.paramIsX)
+                      )
             );
             var posY = y2p(
-              yPixelSized ?
-                shapeOptions.yanchor :
-                Lib.midRange(
-                  isNotPath ?
-                    [shapeOptions.y0, shapeOptions.y1] :
-                    helpers.extractPathCoords(shapeOptions.path, constants.paramIsY))
+                yPixelSized
+                    ? shapeOptions.yanchor
+                    : Lib.midRange(
+                          isNotPath
+                              ? [shapeOptions.y0, shapeOptions.y1]
+                              : helpers.extractPathCoords(shapeOptions.path, constants.paramIsY)
+                      )
             );
 
             posX = helpers.roundPositionForSharpStrokeRendering(posX, strokeWidth);
             posY = helpers.roundPositionForSharpStrokeRendering(posY, strokeWidth);
 
-            if(xPixelSized && yPixelSized) {
-                var crossPath = 'M' + (posX - 1 - strokeWidth) + ',' + (posY - 1 - strokeWidth) +
-                  'h-8v2h8 v8h2v-8 h8v-2h-8 v-8h-2 Z';
-                visualCues.attr('d', crossPath);
-            } else if(xPixelSized) {
-                var vBarPath = 'M' + (posX - 1 - strokeWidth) + ',' + (posY - 9 - strokeWidth) +
-                  'v18 h2 v-18 Z';
-                visualCues.attr('d', vBarPath);
+            if (xPixelSized && yPixelSized) {
+                var crossPath =
+                    "M" +
+                    (posX - 1 - strokeWidth) +
+                    "," +
+                    (posY - 1 - strokeWidth) +
+                    "h-8v2h8 v8h2v-8 h8v-2h-8 v-8h-2 Z";
+                visualCues.attr("d", crossPath);
+            } else if (xPixelSized) {
+                var vBarPath =
+                    "M" +
+                    (posX - 1 - strokeWidth) +
+                    "," +
+                    (posY - 9 - strokeWidth) +
+                    "v18 h2 v-18 Z";
+                visualCues.attr("d", vBarPath);
             } else {
-                var hBarPath = 'M' + (posX - 9 - strokeWidth) + ',' + (posY - 1 - strokeWidth) +
-                  'h18 v2 h-18 Z';
-                visualCues.attr('d', hBarPath);
+                var hBarPath =
+                    "M" +
+                    (posX - 9 - strokeWidth) +
+                    "," +
+                    (posY - 1 - strokeWidth) +
+                    "h18 v2 h-18 Z";
+                visualCues.attr("d", hBarPath);
             }
         }
     }
 
     function removeVisualCues(shapeLayer) {
-        shapeLayer.selectAll('.visual-cue').remove();
+        shapeLayer.selectAll(".visual-cue").remove();
     }
 
     function deactivateClipPathTemporarily(shapePath, shapeOptions, gd) {
@@ -483,13 +532,13 @@ function setupDragElement(gd, shapePath, shapeOptions, index, shapeLayer) {
         var xa = Axes.getFromId(gd, xref);
         var ya = Axes.getFromId(gd, yref);
 
-        var clipAxes = '';
-        if(xref !== 'paper' && !xa.autorange) clipAxes += xref;
-        if(yref !== 'paper' && !ya.autorange) clipAxes += yref;
+        var clipAxes = "";
+        if (xref !== "paper" && !xa.autorange) clipAxes += xref;
+        if (yref !== "paper" && !ya.autorange) clipAxes += yref;
 
         Drawing.setClipUrl(
             shapePath,
-            clipAxes ? 'clip' + gd._fullLayout._uid + clipAxes : null,
+            clipAxes ? "clip" + gd._fullLayout._uid + clipAxes : null,
             gd
         );
     }
@@ -503,27 +552,35 @@ function getPathString(gd, options) {
     var x2r, x2p, y2r, y2p;
     var x0, x1, y0, y1;
 
-    if(xa) {
+    if (xa) {
         x2r = helpers.shapePositionToRange(xa);
-        x2p = function(v) { return xa._offset + xa.r2p(x2r(v, true)); };
+        x2p = function(v) {
+            return xa._offset + xa.r2p(x2r(v, true));
+        };
     } else {
-        x2p = function(v) { return gs.l + gs.w * v; };
+        x2p = function(v) {
+            return gs.l + gs.w * v;
+        };
     }
 
-    if(ya) {
+    if (ya) {
         y2r = helpers.shapePositionToRange(ya);
-        y2p = function(v) { return ya._offset + ya.r2p(y2r(v, true)); };
+        y2p = function(v) {
+            return ya._offset + ya.r2p(y2r(v, true));
+        };
     } else {
-        y2p = function(v) { return gs.t + gs.h * (1 - v); };
+        y2p = function(v) {
+            return gs.t + gs.h * (1 - v);
+        };
     }
 
-    if(type === 'path') {
-        if(xa && xa.type === 'date') x2p = helpers.decodeDate(x2p);
-        if(ya && ya.type === 'date') y2p = helpers.decodeDate(y2p);
+    if (type === "path") {
+        if (xa && xa.type === "date") x2p = helpers.decodeDate(x2p);
+        if (ya && ya.type === "date") y2p = helpers.decodeDate(y2p);
         return convertPath(options, x2p, y2p);
     }
 
-    if(options.xsizemode === 'pixel') {
+    if (options.xsizemode === "pixel") {
         var xAnchorPos = x2p(options.xanchor);
         x0 = xAnchorPos + options.x0;
         x1 = xAnchorPos + options.x1;
@@ -532,7 +589,7 @@ function getPathString(gd, options) {
         x1 = x2p(options.x1);
     }
 
-    if(options.ysizemode === 'pixel') {
+    if (options.ysizemode === "pixel") {
         var yAnchorPos = y2p(options.yanchor);
         y0 = yAnchorPos - options.y0;
         y1 = yAnchorPos - options.y1;
@@ -541,21 +598,19 @@ function getPathString(gd, options) {
         y1 = y2p(options.y1);
     }
 
-    if(type === 'line') return 'M' + x0 + ',' + y0 + 'L' + x1 + ',' + y1;
-    if(type === 'rect') return 'M' + x0 + ',' + y0 + 'H' + x1 + 'V' + y1 + 'H' + x0 + 'Z';
+    if (type === "line") return "M" + x0 + "," + y0 + "L" + x1 + "," + y1;
+    if (type === "rect") return "M" + x0 + "," + y0 + "H" + x1 + "V" + y1 + "H" + x0 + "Z";
 
     // circle
     var cx = (x0 + x1) / 2;
     var cy = (y0 + y1) / 2;
     var rx = Math.abs(cx - x0);
     var ry = Math.abs(cy - y0);
-    var rArc = 'A' + rx + ',' + ry;
-    var rightPt = (cx + rx) + ',' + cy;
-    var topPt = cx + ',' + (cy - ry);
-    return 'M' + rightPt + rArc + ' 0 1,1 ' + topPt +
-        rArc + ' 0 0,1 ' + rightPt + 'Z';
+    var rArc = "A" + rx + "," + ry;
+    var rightPt = cx + rx + "," + cy;
+    var topPt = cx + "," + (cy - ry);
+    return "M" + rightPt + rArc + " 0 1,1 " + topPt + rArc + " 0 0,1 " + rightPt + "Z";
 }
-
 
 function convertPath(options, x2p, y2p) {
     var pathIn = options.path;
@@ -572,22 +627,22 @@ function convertPath(options, x2p, y2p) {
         var nParams = constants.numParams[segmentType];
 
         var paramString = segment.substr(1).replace(constants.paramRE, function(param) {
-            if(xParams[paramNumber]) {
-                if(xSizemode === 'pixel') param = x2p(xAnchor) + Number(param);
+            if (xParams[paramNumber]) {
+                if (xSizemode === "pixel") param = x2p(xAnchor) + Number(param);
                 else param = x2p(param);
-            } else if(yParams[paramNumber]) {
-                if(ySizemode === 'pixel') param = y2p(yAnchor) - Number(param);
+            } else if (yParams[paramNumber]) {
+                if (ySizemode === "pixel") param = y2p(yAnchor) - Number(param);
                 else param = y2p(param);
             }
             paramNumber++;
 
-            if(paramNumber > nParams) param = 'X';
+            if (paramNumber > nParams) param = "X";
             return param;
         });
 
-        if(paramNumber > nParams) {
-            paramString = paramString.replace(/[\s,]*X.*/, '');
-            Lib.log('Ignoring extra params in segment ' + segment);
+        if (paramNumber > nParams) {
+            paramString = paramString.replace(/[\s,]*X.*/, "");
+            Lib.log("Ignoring extra params in segment " + segment);
         }
 
         return segmentType + paramString;
@@ -603,10 +658,10 @@ function movePath(pathIn, moveX, moveY) {
         var nParams = constants.numParams[segmentType];
 
         var paramString = segment.substr(1).replace(constants.paramRE, function(param) {
-            if(paramNumber >= nParams) return param;
+            if (paramNumber >= nParams) return param;
 
-            if(xParams[paramNumber]) param = moveX(param);
-            else if(yParams[paramNumber]) param = moveY(param);
+            if (xParams[paramNumber]) param = moveX(param);
+            else if (yParams[paramNumber]) param = moveY(param);
 
             paramNumber++;
 

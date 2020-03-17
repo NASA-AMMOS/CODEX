@@ -30,6 +30,7 @@ import MapGraph from "components/Graphs/MapGraph";
 import GraphWindow from "components/Graphs/GraphWindow";
 import Normalization from "components/Normalization/Normalization";
 import PeakDetection from "components/PeakDetection/PeakDetection";
+import TemplateScan from "components/TemplateScan/TemplateScan";
 import Regression from "components/Regression/Regression";
 
 export function getWindowContent(win) {
@@ -70,9 +71,10 @@ export function getWindowContent(win) {
             return <Normalization />;
         case windowTypes.PEAK_DETECTION_WINDOW:
             return <PeakDetection />;
+        case windowTypes.TEMPLATE_SCAN_WINDOW:
+            return <TemplateScan />;
         case windowTypes.REGRESSION_WINDOW:
             return <Regression />;
-
         default:
             return (
                 <p>
