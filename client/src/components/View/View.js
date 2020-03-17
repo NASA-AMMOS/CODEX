@@ -9,6 +9,7 @@ import PropertyEditor from "components/PropertyEditor/PropertyEditor";
 import TopBar from "components/TopBar/TopBar";
 import WindowManager from "components/WindowManager/WindowManager";
 import { hot } from "react-hot-loader";
+import KeyboardHandler from "components/KeyboardHandler/KeyboardHandler";
 
 function View(props) {
     return (
@@ -22,6 +23,7 @@ function View(props) {
             </div>
             <ConfirmationModal />
             <CodexSnackbar />
+            <KeyboardHandler />
         </div>
     );
 }

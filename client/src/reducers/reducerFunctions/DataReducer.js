@@ -1,6 +1,7 @@
 import Immutable from "immutable";
 
 import * as uiTypes from "constants/uiTypes";
+import * as utils from "utils/utils";
 
 const formulas = {}; //This is just a placeholder to remove some compiler errors, we'll need to fully rebuild the forumulas
 // stuff at some point.
@@ -542,6 +543,87 @@ export default class DataReducer {
         return state.set(
             "featureDisplayNames",
             state.get("featureDisplayNames").set(action.baseName, action.newName)
+        );
+    }
+
+    static createFeatureGroup(state, action) {
+        function getUniqueId() {
+            const id = utils.createNewId();
+            return !state.get("featureGroups").find(group => group.id === id) ? id : getUniqueId();
+        }
+
+        return state.set(
+            "featureGroups",
+            state.get("featureGroups").push(
+                Immutable.fromJS({
+                    id: getUniqueId(),
+                    name: action.name,
+                    selected: action.selected,
+                    featureIDs: action.featureIDs
+                })
+            )
+        );
+    }
+
+    static changeFeatureGroup(state, action) {
+        return state.set(
+            "featureGroups",
+            state
+                .get("featureGroups")
+                .map(group =>
+                    group.set(
+                        "featureIDs",
+                        group.get("featureIDs").filter(id => id !== action.featureName)
+                    )
+                )
+                .map(group =>
+                    group.get("id") === action.id
+                        ? group.set("featureIDs", group.get("featureIDs").push(action.featureName))
+                        : group
+                )
+        );
+    }
+
+    static selectFeatureGroup(state, action) {
+        const group = state.get("featureGroups").find(group => group.get("id") === action.id);
+        return state
+            .set(
+                "featureGroups",
+                state
+                    .get("featureGroups")
+                    .map(group =>
+                        group.get("id") === action.id
+                            ? group.set("selected", action.selected)
+                            : group
+                    )
+            )
+            .set(
+                "featureList",
+                state
+                    .get("featureList")
+                    .map(feature =>
+                        group.get("featureIDs").includes(feature.get("name"))
+                            ? feature.set("selected", action.selected)
+                            : feature
+                    )
+            );
+    }
+
+    static deleteFeatureGroup(state, action) {
+        return state.set(
+            "featureGroups",
+            state.get("featureGroups").filter(group => group.get("id") !== action.id)
+        );
+    }
+
+    static renameFeatureGroup(state, action) {
+        return state.set(
+            "featureGroups",
+            state
+                .get("featureGroups")
+                .map(group =>
+                    group.get("id") === action.id ? group.set("name", action.name) : group
+                )
         );
     }
 }

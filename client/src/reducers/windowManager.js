@@ -38,6 +38,8 @@ export default function windowManager(
             return opt_reducer.setWindowActive(state, action);
         case actionTypes.WINDOW_SET_TYPE:
             return opt_reducer.setWindowType(state, action);
+        case actionTypes.WINDOW_SET_NEEDS_AUTOSCALE:
+            return opt_reducer.setWindowNeedsAutoscale(state, action);
         default:
             return state;
     }

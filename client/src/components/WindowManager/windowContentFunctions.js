@@ -3,8 +3,6 @@ import React from "react";
 import ClusterAlgorithm from "components/Algorithms/ClusterAlgorithm";
 import ContourGraph from "components/Graphs/ContourGraph";
 import ViolinPlotGraph from "components/Graphs/ViolinPlotGraph";
-import RegressionResults from "components/Regressions/RegressionResults";
-import RegressionsOverview from "components/Regressions/RegressionsOverview";
 import ScatterGraph from "components/Graphs/ScatterGraph";
 import HeatmapGraph from "components/Graphs/HeatmapGraph";
 import HeatmapGraph3d from "components/Graphs/HeatmapGraph3d";
@@ -33,6 +31,7 @@ import GraphWindow from "components/Graphs/GraphWindow";
 import Normalization from "components/Normalization/Normalization";
 import PeakDetection from "components/PeakDetection/PeakDetection";
 import TemplateScan from "components/TemplateScan/TemplateScan";
+import Regression from "components/Regression/Regression";
 
 export function getWindowContent(win) {
     // Graphs get handled by the separate graph handler, as the graph type isn't fixed to the window.
@@ -46,21 +45,6 @@ export function getWindowContent(win) {
                     filename={win.get("filename")}
                     winId={win.get("id")}
                     selectedFeatures={win.get("selectedFeatures")}
-                />
-            );
-        case classificationRegressionTypes.REGRESSION_WINDOW:
-            return (
-                <RegressionsOverview
-                    selectedFeatures={win.get("selectedFeatures")}
-                    selectedFeatureLength={win.get("selectedFeatureLength")}
-                    winId={win.get("id")}
-                />
-            );
-        case classificationRegressionTypes.REGRESSION_RESULTS_WINDOW:
-            return (
-                <RegressionResults
-                    requests={win.get("requests")}
-                    runParams={win.get("runParams")}
                 />
             );
         case uiTypes.SESSIONS_WINDOW:
@@ -89,7 +73,8 @@ export function getWindowContent(win) {
             return <PeakDetection />;
         case windowTypes.TEMPLATE_SCAN_WINDOW:
             return <TemplateScan />;
-
+        case windowTypes.REGRESSION_WINDOW:
+            return <Regression />;
         default:
             return (
                 <p>

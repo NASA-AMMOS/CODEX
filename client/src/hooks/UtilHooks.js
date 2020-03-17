@@ -51,7 +51,7 @@ export function useKey(key, options = {}) {
     const [pressed, setPressed] = useState(false);
 
     function match(event) {
-        return key.toLowerCase() == event.key.toLowerCase();
+        return key == event.key;
     }
 
     function onDown(event) {

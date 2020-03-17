@@ -43,7 +43,7 @@ const SessionBar = props => {
 
     useEffect(
         _ => {
-            props.removeAllSelections();
+            // props.removeAllSelections();
         },
         [filename]
     );

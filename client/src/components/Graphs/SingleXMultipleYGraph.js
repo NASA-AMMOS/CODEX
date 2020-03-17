@@ -11,6 +11,7 @@ import * as utils from "utils/utils";
 
 import { filterBounds } from "./graphFunctions";
 import { useFeatureDisplayNames } from "../../hooks/DataHooks";
+import { useSetWindowNeedsAutoscale } from "../../hooks/WindowHooks";
 
 const Jimp = require("jimp");
 
@@ -320,6 +321,19 @@ function SingleXMultipleYGraph(props) {
     );
 
     const chartIds = [chartId, ...selectionChartStates.map(sel => sel.id)];
+
+    const setWindowNeedsAutoscale = useSetWindowNeedsAutoscale();
+    useEffect(
+        _ => {
+            if (props.win.needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                setWindowNeedsAutoscale(props.win.id, false);
+            }
+        },
+        [props.win.needsAutoscale]
+    );
+
     return (
         <GraphWrapper
             chart={chart}

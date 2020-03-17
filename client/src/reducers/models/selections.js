@@ -3,7 +3,7 @@ export const selectionsState = {
     savedSelections: [],
     nextColorIndex: 0,
     hoverSelection: null,
-    groups: [],
+    groups: []
 };
 
 export const selectionModel = {
@@ -16,8 +16,9 @@ export const selectionModel = {
 };
 
 export const groupModel = {
-    id:null,
+    id: null,
     hidden: false,
     active: true,
-    info: null
-}
+    info: null,
+    name: null
+};

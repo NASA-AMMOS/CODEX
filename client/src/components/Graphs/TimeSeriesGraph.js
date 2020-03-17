@@ -1,13 +1,14 @@
 import "components/Graphs/TimeSeriesGraph.css";
 
-import plotComponentFactory from "react-plotly.js/factory";
-import PlotlyPatched from "plotly-patched/src/core";
 import React, { useRef, useState, useEffect } from "react";
+import plotComponentFactory from "react-plotly.js/factory";
 
 import GraphWrapper from "components/Graphs/GraphWrapper";
+import PlotlyPatched from "plotly-patched/src/core";
 import * as utils from "utils/utils";
 
 import { filterSingleCol } from "./graphFunctions";
+import { useSetWindowNeedsAutoscale } from "../../hooks/WindowHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_TITLE = "Time Series Graph";
@@ -150,7 +151,8 @@ function TimeSeriesGraph(props) {
                 legendText: false,
                 shapePosition: true,
                 titleText: false
-            }
+            },
+            modeBarButtons: [["toImage", "zoomIn2d", "zoomOut2d", "autoScale2d"], ["toggleHover"]]
         }
     });
 
@@ -227,6 +229,19 @@ function TimeSeriesGraph(props) {
             updateChartRevision();
         },
         [props.globalChartState]
+    );
+
+    const setWindowNeedsAutoscale = useSetWindowNeedsAutoscale();
+    useEffect(
+        _ => {
+            if (props.win.needsAutoscale) {
+                Object.keys(chartState.layout).map(key => {
+                    if (key.includes("axis")) chartState.layout[key].autorange = true;
+                });
+                setWindowNeedsAutoscale(props.win.id, false);
+            }
+        },
+        [props.win.needsAutoscale]
     );
 
     return (

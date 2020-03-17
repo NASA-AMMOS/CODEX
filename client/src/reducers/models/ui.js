@@ -12,5 +12,6 @@ export const uiState = Immutable.fromJS({
     snackbar: {
         visible: false,
         message: null
-    }
+    },
+    statsPanelHidden: true
 });
