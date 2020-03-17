@@ -97,6 +97,7 @@ function NavigationBar(props) {
 <<<<<<< HEAD
                         {createMenuItem(windowTypes.TEMPLATE_SCAN_WINDOW, "Template Scan")}
 =======
+                        {createMenuItem(windowTypes.REGRESSION_WINDOW, "Regression")}
 >>>>>>> develop
                     </Dropdown.Menu>
                 </Dropdown>

@@ -104,6 +104,7 @@ const FIND_PEAKS_PARAMS = [
             "Detect peaks (valleys) that are greater (smaller) than `threshold` in relation to their immediate neighbors."
     }
 ];
+const GUIDANCE_PATH = "peak_find_page:general_peak_find";
 
 function makeServerRequestObj(algorithmName, feature, parameters) {
     return {
