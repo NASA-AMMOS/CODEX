@@ -10,14 +10,7 @@ import React from "react";
 import TextField from "@material-ui/core/TextField";
 
 import { NUM_FEATURES_REQUIRED } from "components/Graphs/GraphWindow";
-import {
-    useActiveWindow,
-    useWindowList,
-    useWindowFeatureList,
-    useWindowFeatureInfoList,
-    useWindowXAxis,
-    useWindowTitle
-} from "hooks/WindowHooks";
+
 import SwapAxesIcon from "components/Icons/SwapAxes";
 import * as scatterGraphTypes from "constants/scatterGraphTypes";
 import * as uiTypes from "constants/uiTypes";
@@ -39,7 +32,13 @@ import {
     useWindowTrendLineVisible,
     useWindowType,
     useWindowYAxis,
-    useWindowZAxis
+    useWindowZAxis,
+    useActiveWindow,
+    useWindowList,
+    useWindowFeatureList,
+    useWindowFeatureInfoList,
+    useWindowXAxis,
+    useWindowTitle
 } from "../../hooks/WindowHooks";
 
 function TrendLineToggle(props) {

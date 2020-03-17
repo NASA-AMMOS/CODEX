@@ -11,6 +11,7 @@ import * as utils from "utils/utils";
 import { filterSingleCol } from "./graphFunctions";
 import { unzip } from "../../utils/utils";
 import {
+    useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
     useWindowFeatureList,
     useWindowGraphBinSize,
@@ -82,6 +83,7 @@ function TimeSeriesGraph(props) {
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
     const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
@@ -305,6 +307,18 @@ function TimeSeriesGraph(props) {
             updateChartRevision();
         },
         [showGridLines]
+    );
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                Object.keys(chartState.layout).map(key => {
+                    if (key.includes("axis")) chartState.layout[key].autorange = true;
+                });
+                setNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
     );
 
     return (

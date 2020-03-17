@@ -38,7 +38,7 @@ import {
     useSelectFeatureGroup,
     useSetFeatureSelect
 } from "../../hooks/DataHooks";
-import { useKey } from "../../hooks/UtilHooks";
+import { useStatsPanelHidden } from "../../hooks/UIHooks";
 import { useWindowList } from "../../hooks/WindowHooks";
 import featureList from "./FeatureList";
 
@@ -601,14 +601,6 @@ function FeatureList(props) {
         featureList.forEach(feature => selectFeature(feature.get("name"), false));
         groups.forEach(group => selectFeatureGroup(group.get("id"), false));
     }
-    const deselectHotkey = useKey("`");
-    useEffect(
-        _ => {
-            deselectHotkey && deselectAll();
-        },
-
-        [deselectHotkey]
-    );
 
     function selectAll() {
         ungroupedFeatures
@@ -686,7 +678,7 @@ function FeatureList(props) {
         }
     }
 
-    const [statsHidden, setStatsHidden] = props.panelCollapsed;
+    const [statsHidden, setStatsHidden] = useStatsPanelHidden();
     const containerClasses = classnames({
         ["feature-list-container"]: true,
         ["stats-hidden"]: statsHidden,

@@ -366,6 +366,22 @@ explain_this_page:
         represent the predicted class for samples flowing down the tree to that "leaf". The size of the branches 
         represents the number of samples from the entire dataset flowing down a specific branch.  
 
+general:
+
+    about: |
+      Placeholder general CODEX data
+
+    getting_started: |
+
+      Placeholder getting started data
+
+    keyboard_shortcuts: |
+
+      Placeholder keyboard shortcuts info
+
+    machine_learning_resources: |
+
+      Placeholder general machine learning resources page data
 
 # Unit tests
 unit_tests:

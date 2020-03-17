@@ -18,6 +18,7 @@ import {
     setWindowDataScale,
     setWindowDataTrendLineVisible,
     setWindowFeatureInfo,
+    setWindowNeedsAutoscale,
     setWindowShowGridLines
 } from "../actions/windowDataActions";
 
@@ -416,7 +417,6 @@ export function useWindowShowGridLines(id) {
 
 export function useWindowNeedsResetToDefault(id) {
     const dispatch = useDispatch();
-
     return [
         useSelector(state =>
             state.windowManager
@@ -425,6 +425,19 @@ export function useWindowNeedsResetToDefault(id) {
                 .getIn(["data", "needsResetToDefault"])
         ),
         needsResetToDefault => dispatch(setWindowDataNeedsResetToDefault(id, needsResetToDefault))
+    ];
+}
+
+export function useSetWindowNeedsAutoscale(id) {
+    const dispatch = useDispatch();
+    return [
+        useSelector(state =>
+            state.windowManager
+                .get("windows")
+                .find(win => win.get("id") === id)
+                .getIn(["data", "needsAutoscale"])
+        ),
+        scale => dispatch(setWindowNeedsAutoscale(id, scale))
     ];
 }
 

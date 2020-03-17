@@ -7,7 +7,9 @@ import GraphWrapper from "components/Graphs/GraphWrapper";
 import * as utils from "utils/utils";
 
 import { filterSingleCol } from "./graphFunctions";
+import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
+    useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
     useWindowFeatureList,
     useWindowGraphBinSize,
@@ -78,6 +80,7 @@ function BoxPlotGraph(props) {
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
     const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
@@ -254,6 +257,18 @@ function BoxPlotGraph(props) {
             updateChartRevision();
         },
         [axisLabels]
+    );
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                Object.keys(chartState.layout).map(key => {
+                    if (key.includes("axis")) chartState.layout[key].autorange = true;
+                });
+                setWindowNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
     );
 
     return (

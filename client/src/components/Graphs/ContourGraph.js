@@ -8,7 +8,9 @@ import * as utils from "utils/utils";
 
 import { filterBounds } from "./graphFunctions";
 import { removeSentinelValues } from "../../utils/utils";
+import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
+    useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
     useWindowFeatureList,
     useWindowGraphBounds,
@@ -327,6 +329,7 @@ function ContourGraph(props) {
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [xAxis, setXAxis] = useWindowXAxis(props.win.id);
     const [yAxis, setYAxis] = useWindowYAxis(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     const sanitizedCols = removeSentinelValues(
         featureList.map(colName =>
@@ -465,6 +468,17 @@ function ContourGraph(props) {
             }
         },
         [needsResetToDefault]
+    );
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                setWindowNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
     );
 
     return (

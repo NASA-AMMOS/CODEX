@@ -11,6 +11,7 @@ import * as utils from "utils/utils";
 import { filterBounds } from "./graphFunctions";
 import { unzip } from "../../utils/utils";
 import {
+    useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
     useWindowAxisScale,
     useWindowDotOpacity,
@@ -53,6 +54,7 @@ function ScatterGraph(props) {
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
         props.win.id
     );
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
@@ -348,6 +350,17 @@ function ScatterGraph(props) {
             }
         },
         [needsResetToDefault]
+    );
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                setNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
     );
 
     return (

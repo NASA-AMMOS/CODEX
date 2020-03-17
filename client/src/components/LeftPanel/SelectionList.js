@@ -35,6 +35,7 @@ import {
     useSetSelectionGroupHidden,
     useSetSelectionHidden
 } from "../../hooks/DataHooks";
+import { useStatsPanelHidden } from "../../hooks/UIHooks";
 
 function SelectionContextMenu(props) {
     const [contextMode, setContextMode] = useState(null);
@@ -484,7 +485,7 @@ function SelectionItems(props) {
 
 function SelectionList(props) {
     const [selections] = useSavedSelections();
-    const [panelCollapsedState] = props.panelCollapsed;
+    const [panelCollapsedState] = useStatsPanelHidden();
     const [currentSelection, setCurrentSelection] = useCurrentSelection();
 
     const dispatch = useDispatch();

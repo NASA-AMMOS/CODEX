@@ -51,3 +51,7 @@ export function setWindowDataDotOpacity(id, dotOpacity) {
 export function setWindowDataDotShape(id, dotShape) {
     return { type: types.WINDOW_SET_DATA_DOT_SHAPE, id, dotShape };
 }
+
+export function setWindowNeedsAutoscale(id, scale) {
+    return { type: types.WINDOW_SET_NEEDS_AUTOSCALE, id, scale };
+}

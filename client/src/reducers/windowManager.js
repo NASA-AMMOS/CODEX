@@ -64,7 +64,8 @@ export default function windowManager(
             return opt_reducer.setWindowDotOpacity(state, action);
         case actionTypes.WINDOW_SET_DATA_DOT_SHAPE:
             return opt_reducer.setWindowDotShape(state, action);
-
+        case actionTypes.WINDOW_SET_NEEDS_AUTOSCALE:
+            return opt_reducer.setWindowNeedsAutoscale(state, action);
         default:
             return state;
     }

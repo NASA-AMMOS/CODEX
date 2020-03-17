@@ -1,5 +1,6 @@
 import "components/Graphs/HeatmapGraph3d.css";
 
+import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";
 
 import * as graphFunctions from "components/Graphs/graphFunctions";
@@ -7,7 +8,9 @@ import * as utils from "utils/utils";
 
 import { filterBounds } from "./graphFunctions";
 import { removeSentinelValues } from "../../utils/utils";
+import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
+    useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
     useWindowFeatureList,
     useWindowGraphBinSize,
@@ -19,7 +22,6 @@ import {
     useWindowZAxis
 } from "../../hooks/WindowHooks";
 import GraphWrapper from "./GraphWrapper";
-import Plot from "react-plotly.js";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_BUCKET_COUNT = 50;
@@ -104,6 +106,7 @@ function HeatmapGraph3d(props) {
     const [xAxis, setXAxis] = useWindowXAxis(props.win.id);
     const [yAxis, setYAxis] = useWindowYAxis(props.win.id);
     const [zAxis, setZAxis] = useWindowZAxis(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     const sanitizedCols = removeSentinelValues(
         featureList.map(colName =>
@@ -254,6 +257,17 @@ function HeatmapGraph3d(props) {
             }
         },
         [needsResetToDefault]
+    );
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                setWindowNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
     );
 
     return (

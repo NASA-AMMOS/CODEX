@@ -11,6 +11,7 @@ import * as utils from "utils/utils";
 import { filterBounds } from "./graphFunctions";
 import { usePrevious } from "../../hooks/UtilHooks";
 import {
+    useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
     useWindowFeatureList,
     useWindowGraphBounds,
@@ -67,6 +68,7 @@ function MapGraph(props) {
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
         props.win.id
     );
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     //the number of interpolation steps that you can take caps at 5?
     const interpolatedColors = graphFunctions.interpolateColors(
@@ -238,6 +240,17 @@ function MapGraph(props) {
         if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
         setDefaults();
     }, []);
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                setNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
+    );
 
     return (
         <GraphWrapper chart={chart} chartId={chartId} win={props.win}>

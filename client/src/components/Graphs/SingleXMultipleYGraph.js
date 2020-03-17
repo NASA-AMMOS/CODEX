@@ -12,6 +12,7 @@ import * as utils from "utils/utils";
 import { filterBounds } from "./graphFunctions";
 import { useFeatureDisplayNames } from "../../hooks/DataHooks";
 import {
+    useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
     useWindowAxisScale,
     useWindowFeatureInfoList,
@@ -80,6 +81,7 @@ function SingleXMultipleYGraph(props) {
     const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
     const [featureNameList] = useFeatureDisplayNames();
     const [axisScales, setAxisScales] = useWindowAxisScale(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     const processedData = (function() {
         const sanitizedCols = utils.removeSentinelValues(
@@ -387,6 +389,17 @@ function SingleXMultipleYGraph(props) {
     );
 
     const chartIds = [chartId, ...selectionChartStates.map(sel => sel.id)];
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                setNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
+    );
 
     return (
         <GraphWrapper

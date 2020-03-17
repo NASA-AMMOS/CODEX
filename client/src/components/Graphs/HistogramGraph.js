@@ -8,6 +8,7 @@ import * as utils from "utils/utils";
 
 import { filterSingleCol } from "./graphFunctions";
 import {
+    useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
     useWindowFeatureList,
     useWindowGraphBinSize,
@@ -97,6 +98,7 @@ function HistogramGraph(props) {
         props.win.id
     );
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
@@ -272,10 +274,14 @@ function HistogramGraph(props) {
 
     useEffect(
         _ => {
-            chartState.layout = Object.assign(chartState.layout, layouts);
-            updateChartRevision();
+            if (needsAutoscale) {
+                Object.keys(chartState.layout).map(key => {
+                    if (key.includes("axis")) chartState.layout[key].autorange = true;
+                });
+                setNeedsAutoscale(false);
+            }
         },
-        [axisLabels]
+        [needsAutoscale]
     );
 
     return (

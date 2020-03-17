@@ -5,7 +5,9 @@ import React, { useRef, useState, useEffect } from "react";
 
 import { createNewId, removeSentinelValues, zip } from "../../utils/utils";
 import { filterBounds } from "./graphFunctions";
+import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
+    useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
     useWindowFeatureList,
     useWindowGraphBinSize,
@@ -133,6 +135,7 @@ function HeatmapGraph(props) {
         props.win.id
     );
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     //the number of interpolation steps that you can take caps at 5?
     const interpolatedColors = interpolateColors(
@@ -276,6 +279,17 @@ function HeatmapGraph(props) {
             }
         },
         [needsResetToDefault]
+    );
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                setWindowNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
     );
 
     return (

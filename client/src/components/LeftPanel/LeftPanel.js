@@ -20,8 +20,6 @@ function FilterBar(props) {
 }
 
 function LeftPanel() {
-    const panelCollapsed = useState(true);
-
     //filter string
     const [filterString, setFilterString] = useState("");
 
@@ -30,8 +28,8 @@ function LeftPanel() {
             <div className="Panel">
                 <div id="content">
                     <FilterBar setFilterString={setFilterString} />
-                    <FeatureList filterString={filterString} panelCollapsed={panelCollapsed} />
-                    <SelectionList filterString={filterString} panelCollapsed={panelCollapsed} />
+                    <FeatureList filterString={filterString} />
+                    <SelectionList filterString={filterString} />
                 </div>
             </div>
         </React.Fragment>
