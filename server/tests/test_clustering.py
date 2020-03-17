@@ -20,32 +20,32 @@ def test_clustering(capsys, testData):
 
     ch = get_cache(DOCTEST_SESSION)
 
-    result = clustering(testData['featureNames'], testData['inputHash'], testData['hashList'], None, False, "kmean",                False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
+    result = clustering(testData['inputHash'], None, testData['featureNames'], testData['hashList'], None, False, "kmean",                False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
     assert result['message'] == 'failure'
     assert result['WARNING'] == 'kmean algorithm not supported'
 
-    result = clustering(testData['featureNames'], testData['inputHash'], testData['hashList'], None, False, "kmeans",               False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
+    result = clustering(testData['inputHash'], None, testData['featureNames'], testData['hashList'], None, False, "kmeans",               False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
     assert result['message'] == 'success'
 
-    result = clustering(testData['featureNames'], testData['inputHash'], testData['hashList'], None, False, "mean_shift",           False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
+    result = clustering(testData['inputHash'], None, testData['featureNames'], testData['hashList'], None, False, "mean_shift",           False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
     assert result['message'] == 'success'
 
-    result = clustering(testData['featureNames'], testData['inputHash'], testData['hashList'], None, False, "birch",                False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
+    result = clustering(testData['inputHash'], None, testData['featureNames'], testData['hashList'], None, False, "birch",                False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
     assert result['message'] == 'success'
 
-    result = clustering(testData['featureNames'], testData['inputHash'], testData['hashList'], None, False, "ward",                 False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
+    result = clustering(testData['inputHash'], None, testData['featureNames'], testData['hashList'], None, False, "ward",                 False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
     assert result['message'] == 'success'
 
-    result = clustering(testData['featureNames'], testData['inputHash'], testData['hashList'], None, False, "spectral",             False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
+    result = clustering(testData['inputHash'], None, testData['featureNames'], testData['hashList'], None, False, "spectral",             False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
     assert result['message'] == 'success'
 
-    result = clustering(testData['featureNames'], testData['inputHash'], testData['hashList'], None, False, "dbscan",               False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
+    result = clustering(testData['inputHash'], None, testData['featureNames'], testData['hashList'], None, False, "dbscan",               False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
     assert result['message'] == 'success'
 
-    result = clustering(testData['featureNames'], testData['inputHash'], testData['hashList'], None, False, "agglomerative",        False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
+    result = clustering(testData['inputHash'], None, testData['featureNames'], testData['hashList'], None, False, "agglomerative",        False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
     assert result['message'] == 'success'
 
-    result = clustering(testData['featureNames'], testData['inputHash'], testData['hashList'], None, False, "affinity_propagation", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
+    result = clustering(testData['inputHash'], None, testData['featureNames'], testData['hashList'], None, False, "affinity_propagation", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
     assert result['message'] == 'success'
 
 
