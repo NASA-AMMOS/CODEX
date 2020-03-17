@@ -59,11 +59,14 @@ function makeServerRequestObj(algorithmName, features, labelName, activeLabels) 
 
 function AlgoReturnPreview(props) {
     if (!props.algo.data) return <WindowCircularProgress />;
-    console.log(props.algo.data);
+
     const [chartRevision, setChartRevision] = useState(0);
     const chart = useRef();
 
-    const data = props.algo.data.y;
+    const data = props.features
+        .find(feature => feature.get("feature") === props.excludedFeature)
+        .get("data")
+        .toJS();
     const min = Math.min(...data);
     const max = Math.max(...data);
 
@@ -135,6 +138,7 @@ function AlgoReturnPreview(props) {
     const [returnedSelections, setReturnedSelections] = useState([]);
     useEffect(
         _ => {
+            if (!props.algo.data.results) return;
             setReturnedSelections(
                 props.algo.data.results.reduce((acc, val, idx, ary) => {
                     const lastGroup = acc[acc.length - 1];
@@ -650,6 +654,7 @@ function TemplateScanContent(props) {
                             excludedFeature={excludedFeature}
                             key={algo.name}
                             selectionState={selectionState}
+                            features={features}
                         />
                     ))}
                 </div>
