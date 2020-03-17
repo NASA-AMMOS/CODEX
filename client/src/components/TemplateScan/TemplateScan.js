@@ -46,7 +46,7 @@ function makeServerRequestObj(algorithmName, features, labelName, activeLabels) 
         algorithmName,
         algorithmType: "template_scan",
         dataFeatures: features,
-        labelName: [labelName],
+        labelName,
         downsampled: false,
         file: null,
         guidance: null,
