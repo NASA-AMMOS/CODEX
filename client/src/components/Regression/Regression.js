@@ -814,6 +814,15 @@ function Regression(props) {
         return <WindowCircularProgress />;
     }
 
+    if (features.size < 3)
+        return (
+            <WindowError>
+                Please select 2 or more features
+                <br />
+                in the features list to use this algorithm.
+            </WindowError>
+        );
+
     features = features.map(feature => {
         const featureName = featureNameList.get(feature.get("feature"), feature.get("feature"));
         return feature.set("displayName", featureName);
