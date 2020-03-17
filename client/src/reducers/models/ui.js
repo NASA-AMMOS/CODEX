@@ -13,5 +13,6 @@ export const uiState = Immutable.fromJS({
         visible: false,
         message: null
     },
-    statsPanelHidden: true
+    statsPanelHidden: true,
+    allowGraphHotkeys: true
 });

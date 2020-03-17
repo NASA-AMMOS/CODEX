@@ -38,6 +38,8 @@ export default function ui(state = uiState, action, opt_reducer = UiReducer) {
             return opt_reducer.showSnackbar(state, action);
         case actionTypes.SET_STATS_PANEL_HIDDEN:
             return opt_reducer.setStatsPanelHidden(state, action);
+        case actionTypes.SET_ALLOW_GRAPH_HOTKEYS:
+            return opt_reducer.setAllowGraphHotkeys(state, action);
         default:
             return state;
     }
