@@ -58,3 +58,11 @@ export function useAllowGraphHotkeys() {
         allow => dispatch(uiActions.setAllowGraphHotkeys(allow))
     ];
 }
+
+export function useHelpMode() {
+    const dispatch = useDispatch();
+    return [
+        useSelector(state => state.ui.get("helpMode")),
+        helpMode => dispatch(uiActions.setHelpMode(helpMode))
+    ];
+}

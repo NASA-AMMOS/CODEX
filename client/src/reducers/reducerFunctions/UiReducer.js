@@ -53,4 +53,8 @@ export default class UiReducer {
     static setAllowGraphHotkeys(state, action) {
         return state.set("allowGraphHotkeys", action.allow);
     }
+
+    static setHelpMode(state, action) {
+        return state.set("helpMode", action.helpMode);
+    }
 }
