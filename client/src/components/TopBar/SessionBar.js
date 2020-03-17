@@ -11,7 +11,6 @@ import OpenIcon from "@material-ui/icons/FolderOpen";
 import DescriptionIcon from "@material-ui/icons/Description";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Title from "components/Title/Title";
-import classNames from "classnames";
 import * as selectionActions from "actions/selectionActions";
 import * as exportActions from "actions/exportActions";
 import "./SessionBar.css";
@@ -77,9 +76,9 @@ const SessionBar = props => {
     let loadingStyle = {};
     let loadingClasses = "";
     if (uploadStatus === null) {
-        loadingClasses = classNames("session-bar-loading-bar", "session-bar-loading-bar--hidden");
+        loadingClasses = classnames("session-bar-loading-bar", "session-bar-loading-bar--hidden");
     } else if (uploadStatus === "PROCESSING") {
-        loadingClasses = classNames(
+        loadingClasses = classnames(
             "session-bar-loading-bar",
             "session-bar-loading-bar--indeterminate"
         );

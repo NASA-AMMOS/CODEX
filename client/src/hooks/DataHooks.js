@@ -3,28 +3,37 @@ import { batchActions } from "redux-batched-actions";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useRef, useEffect } from "react";
 
-import WorkerSocket from "worker-loader!workers/socket.worker";
-import * as actionTypes from "constants/actionTypes";
-import * as dataActions from "actions/data";
 import {
     addDataset,
-    featureRetain,
+    featureAdd,
+    featureDelete,
     featureRelease,
+    featureRetain,
     featureSelect,
     featureUnselect,
-    featureAdd,
     fileLoad,
-    statSetFeatureLoading,
     statSetFeatureFailed,
-    statSetFeatureResolved,
-    featureDelete
+    statSetFeatureLoading,
+    statSetFeatureResolved
 } from "actions/data";
+import WorkerSocket from "worker-loader!workers/socket.worker";
+import * as actionTypes from "constants/actionTypes";
 import * as selectionActions from "actions/selectionActions";
 import * as uiActions from "actions/ui";
 import * as uiTypes from "constants/uiTypes";
 import * as utils from "utils/utils";
 import * as windowTypes from "constants/windowTypes";
 import * as wmActions from "actions/windowManagerActions";
+
+import {
+    changeFeatureGroup,
+    createFeatureGroup,
+    deleteFeatureGroup,
+    featureListLoading,
+    featureRename,
+    renameFeatureGroup,
+    selectFeatureGroup
+} from "../actions/data";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -524,7 +533,7 @@ export function useFeatureDelete() {
 export function useFeatureDisplayNames() {
     const dispatch = useDispatch();
     const names = useSelector(store => store.data.get("featureDisplayNames"));
-    return [names, (baseName, newName) => dispatch(dataActions.featureRename(baseName, newName))];
+    return [names, (baseName, newName) => dispatch(featureRename(baseName, newName))];
 }
 
 export function useDeleteSelection() {
@@ -577,8 +586,7 @@ export function useFeatureGroups() {
     const groupList = useSelector(state => state.data.get("featureGroups"));
     return [
         groupList,
-        (name, featureIDs, selected) =>
-            dispatch(dataActions.createFeatureGroup(name, featureIDs, selected))
+        (name, featureIDs, selected) => dispatch(createFeatureGroup(name, featureIDs, selected))
     ];
 }
 
@@ -590,26 +598,26 @@ export function useSetFeatureSelect() {
 
 export function useChangeFeatureGroup() {
     const dispatch = useDispatch();
-    return (featureName, id) => dispatch(dataActions.changeFeatureGroup(featureName, id));
+    return (featureName, id) => dispatch(changeFeatureGroup(featureName, id));
 }
 
 export function useSelectFeatureGroup() {
     const dispatch = useDispatch();
-    return (id, selected) => dispatch(dataActions.selectFeatureGroup(id, selected));
+    return (id, selected) => dispatch(selectFeatureGroup(id, selected));
 }
 
 export function useDeleteFeatureGroup() {
     const dispatch = useDispatch();
-    return id => dispatch(dataActions.deleteFeatureGroup(id));
+    return id => dispatch(deleteFeatureGroup(id));
 }
 
 export function useRenameFeatureGroup() {
     const dispatch = useDispatch();
-    return (id, name) => dispatch(dataActions.renameFeatureGroup(id, name));
+    return (id, name) => dispatch(renameFeatureGroup(id, name));
 }
 
 export function useFeatureListLoading() {
     const dispatch = useDispatch();
     const loading = useSelector(state => state.data.get("featureListLoading"));
-    return [loading, isLoading => dispatch(dataActions.featureListLoading(isLoading))];
+    return [loading, isLoading => dispatch(featureListLoading(isLoading))];
 }

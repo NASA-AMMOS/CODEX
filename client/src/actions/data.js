@@ -3,12 +3,11 @@
  * @author Patrick Kage
  */
 
-import * as types from "constants/actionTypes";
-import WorkerUpload from "worker-loader!workers/upload.worker";
 import { getGlobalSessionKey } from "utils/utils";
-import * as uiActions from "actions/ui";
 import WorkerSocket from "worker-loader!workers/socket.worker";
-import * as utils from "utils/utils";
+import WorkerUpload from "worker-loader!workers/upload.worker";
+import * as types from "constants/actionTypes";
+import * as uiActions from "actions/ui";
 
 export function fileLoad(fileList) {
     return dispatch => {
@@ -322,7 +321,7 @@ export const featureDelete = featureName => {
     const request = {
         routine: "arrange",
         hashType: "feature",
-        sessionkey: utils.getGlobalSessionKey(),
+        sessionkey: getGlobalSessionKey(),
         activity: "delete",
         name: [featureName]
     };

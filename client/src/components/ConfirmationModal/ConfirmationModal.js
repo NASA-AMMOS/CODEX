@@ -5,7 +5,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Button from "@material-ui/core/Button";
-import { useConfirmationModalState } from "hooks/uiHooks";
+import { useConfirmationModalState } from "hooks/UIHooks";
 import { useSelector, useStore, useDispatch } from "react-redux";
 import * as appStrings from "constants/appStrings";
 import * as uiActions from "actions/ui";
