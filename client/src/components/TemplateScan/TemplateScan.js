@@ -59,6 +59,7 @@ function makeServerRequestObj(algorithmName, features, labelName, activeLabels) 
 
 function AlgoReturnPreview(props) {
     if (!props.algo.data) return <WindowCircularProgress />;
+    console.log(props.algo.data);
     const [chartRevision, setChartRevision] = useState(0);
     const chart = useRef();
 
@@ -131,41 +132,56 @@ function AlgoReturnPreview(props) {
         setChartRevision(revision);
     }
 
-    const [selections, setSelections] = props.selectionState;
+    const [returnedSelections, setReturnedSelections] = useState([]);
+    useEffect(
+        _ => {
+            setReturnedSelections(
+                props.algo.data.results.reduce((acc, val, idx, ary) => {
+                    const lastGroup = acc[acc.length - 1];
+                    if (val === 1) {
+                        if (!lastGroup || lastGroup.length === 2) acc.push([idx]);
+                        if (idx === ary.length - 1 && lastGroup.length === 1) lastGroup.push(idx);
+                        return acc;
+                    }
+                    if (val === 0) {
+                        if (lastGroup && lastGroup.length === 1) lastGroup.push(idx - 1);
+                        return acc;
+                    }
+                }, [])
+            );
+        },
+        [props.algo.data.results]
+    );
+
     useEffect(
         _ => {
             chartState.layout.shapes = baseShapes.concat(
-                selections
-                    .filter(selection => selection.positive)
-                    .map(selection => {
-                        return {
-                            type: "rect",
-                            xref: "x",
-                            yref: "paper",
-                            x0: selection.range[0],
-                            y0: 0,
-                            x1: selection.range[1],
-                            y1: 1,
-                            fillcolor: OUTPUT_SELECTION_COLOR,
-                            opacity: 0.5,
-                            editable: true,
-                            horizontalOnly: true,
-                            shapeId: selection.shapeId,
-                            line: {
-                                width: 0
-                            }
-                        };
-                    })
+                returnedSelections.map(range => ({
+                    type: "rect",
+                    xref: "x",
+                    yref: "paper",
+                    x0: range[0],
+                    y0: 0,
+                    x1: range[1],
+                    y1: 1,
+                    fillcolor: OUTPUT_SELECTION_COLOR,
+                    opacity: 0.5,
+                    editable: true,
+                    horizontalOnly: true,
+                    line: {
+                        width: 0
+                    }
+                }))
             );
             updateChartRevision();
         },
-        [selections]
+        [returnedSelections]
     );
 
     const [_, createNewSelection] = useSavedSelections();
     function saveScanClick() {
-        const newSelection = selections.reduce((acc, sel) => {
-            range(sel.range[0], sel.range[1] + 1).forEach(idx => acc.add(idx));
+        const newSelection = returnedSelections.reduce((acc, sel) => {
+            range(sel[0], sel[1] + 1).forEach(idx => acc.add(idx));
             return acc;
         }, new Set());
         createNewSelection(`Template_Scan_${props.excludedFeature}`, Array.from(newSelection));
