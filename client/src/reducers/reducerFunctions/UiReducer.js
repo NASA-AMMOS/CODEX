@@ -57,4 +57,8 @@ export default class UiReducer {
     static setHelpMode(state, action) {
         return state.set("helpMode", action.helpMode);
     }
+
+    static setExportModalVisible(state, action) {
+        return state.set("exportModalVisible", action.visible);
+    }
 }

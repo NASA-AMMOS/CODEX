@@ -66,3 +66,11 @@ export function useHelpMode() {
         helpMode => dispatch(uiActions.setHelpMode(helpMode))
     ];
 }
+
+export function useExportModalVisible() {
+    const dispatch = useDispatch();
+    return [
+        useSelector(state => state.ui.get("exportModalVisible")),
+        visible => dispatch(uiActions.setExportModalVisible(visible))
+    ];
+}

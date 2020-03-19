@@ -42,6 +42,8 @@ export default function ui(state = uiState, action, opt_reducer = UiReducer) {
             return opt_reducer.setAllowGraphHotkeys(state, action);
         case actionTypes.SET_ALLOW_HELP_MODE:
             return opt_reducer.setHelpMode(state, action);
+        case actionTypes.SET_EXPORT_MODAL_VISIBLE:
+            return opt_reducer.setExportModalVisible(state, action);
         default:
             return state;
     }
