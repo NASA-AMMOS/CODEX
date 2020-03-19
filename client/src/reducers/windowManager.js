@@ -66,6 +66,8 @@ export default function windowManager(
             return opt_reducer.setWindowDotShape(state, action);
         case actionTypes.WINDOW_SET_NEEDS_AUTOSCALE:
             return opt_reducer.setWindowNeedsAutoscale(state, action);
+        case actionTypes.WINDOW_SET_NEEDS_PLOT_IMAGE:
+            return opt_reducer.setWindowNeedsPlotImage(state, action);
         default:
             return state;
     }

@@ -155,3 +155,11 @@ export function setHelpMode(helpMode) {
 export function setExportModalVisible(visible) {
     return { type: types.SET_EXPORT_MODAL_VISIBLE, visible };
 }
+
+export function setStoredPlotImage(winId, image, filename) {
+    return { type: types.SET_STORED_PLOT_IMAGE, winId, image, filename };
+}
+
+export function clearAllPlotImages() {
+    return { type: types.CLEAR_ALL_PLOT_IMAGES };
+}

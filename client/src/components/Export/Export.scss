@@ -1,0 +1,109 @@
+.export-modal-container {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    color: white;
+    width: 288px;
+    display: flex;
+    flex-direction: column;
+}
+
+.export-modal-header {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 19px;
+    background: #061427;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px;
+    height: 32px;
+}
+
+.export-modal-content {
+    background: #152f53;
+    font-family: Inter;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 17px;
+    color: #eeeeee;
+
+    ul {
+        list-style-type: none;
+        padding-left: 10px;
+        margin-bottom: 0;
+
+        .export-modal-explanation-text {
+            padding-top: 10px;
+        }
+
+        li {
+            height: 30px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+
+            .selected-checkbox {
+                margin-right: 5px;
+            }
+        }
+    }
+}
+
+.export-modal-close-icon {
+    cursor: pointer;
+}
+
+.export-modal-text-content {
+    background: #152f53;
+    padding: 10px;
+    min-height: 350px;
+
+    .loading-indicator {
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        min-height: 250px;
+    }
+}
+
+.export-modal-back-button {
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.export-modal-button-row {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px;
+
+    button {
+        height: 36px;
+        font-family: Inter;
+        font-style: normal;
+        font-weight: bold;
+        font-size: 14px;
+        line-height: 17px;
+        display: flex;
+        align-items: center;
+        text-align: center;
+        text-transform: uppercase;
+        font-feature-settings: "cpsp" on, "case" on;
+        color: #eeeeee;
+        background: #3980e3;
+        border-radius: 4px;
+    }
+}
+
+.export-modal-loading-overlay {
+    position: absolute;
+    top: 0;
+    background: rgba(0, 0, 0, 0.25);
+    height: 100%;
+    width: 100%;
+}

@@ -61,4 +61,30 @@ export default class UiReducer {
     static setExportModalVisible(state, action) {
         return state.set("exportModalVisible", action.visible);
     }
+
+    static setStoredPlotImage(state, action) {
+        const previousImage = state
+            .get("storedPlotImages")
+            .find(img => img.get("winId") === action.winId);
+        const newImages = previousImage
+            ? state
+                  .get("storedPlotImages")
+                  .map(img =>
+                      img.get("winId") === action.winId
+                          ? img.set("image", action.image).set("filename", action.filename)
+                          : img
+                  )
+            : state.get("storedPlotImages").push(
+                  Immutable.fromJS({
+                      winId: action.winId,
+                      image: action.image,
+                      filename: action.filename
+                  })
+              );
+        return state.set("storedPlotImages", newImages);
+    }
+
+    static clearAllPlotImages(state, action) {
+        return state.set("storedPlotImages", Immutable.fromJS([]));
+    }
 }

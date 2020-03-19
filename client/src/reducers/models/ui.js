@@ -16,5 +16,6 @@ export const uiState = Immutable.fromJS({
     statsPanelHidden: true,
     allowGraphHotkeys: true,
     helpMode: false,
-    exportModalVisible: false
+    exportModalVisible: false,
+    storedPlotImages: []
 });
