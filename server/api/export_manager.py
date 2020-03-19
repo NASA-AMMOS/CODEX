@@ -37,9 +37,10 @@ def export_contents(msg, result, savePath):
             lines = f.readlines()
             outString = "".join(lines)
             outStringEncoded = outString.encode('ascii')
-            result['code'] = str(base64.b64encode(outStringEncoded).decode('utf-8'))
+            result['data'] = str(base64.b64encode(outStringEncoded).decode('utf-8'))
             result['filename'] = 'codex_code.py'
             result['message'] = 'success'
+            result['content'] = True
             f.close()
 
         elif(msg["type"] == "features"):
@@ -59,7 +60,7 @@ def export_contents(msg, result, savePath):
                 lines = f.readlines()
                 outString = "".join(lines)
                 outStringEncoded = outString.encode('ascii')
-                result['features'] = str(base64.b64encode(outStringEncoded).decode('utf-8'))
+                result['data'] = str(base64.b64encode(outStringEncoded).decode('utf-8'))
                 result['filename'] = 'codex_features.csv'
                 result['content'] = True
                 f.close()
@@ -85,7 +86,7 @@ def export_contents(msg, result, savePath):
                 lines = f.readlines()
                 outString = "".join(lines)
                 outStringEncoded = outString.encode('ascii')
-                result['selections'] = str(base64.b64encode(outStringEncoded).decode('utf-8'))
+                result['data'] = str(base64.b64encode(outStringEncoded).decode('utf-8'))
                 result['filename'] = 'codex_selections.csv'
                 result['content'] = True
                 f.close()
