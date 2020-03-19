@@ -2,7 +2,7 @@ import "components/Graphs/ScatterGraph.css";
 
 import { TinyColor } from "@ctrl/tinycolor";
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import regression from "regression";
 
 import GraphWrapper from "components/Graphs/GraphWrapper";
@@ -71,10 +71,10 @@ function ScatterGraph(props) {
 
     const filteredCols = filterBounds(featureNames, sanitizedCols, bounds && bounds.toJS());
 
-    const x = xAxis
+    const baseX = xAxis
         ? filteredCols[featureNames.findIndex(feature => feature === xAxis)]
         : filteredCols[0];
-    const y = yAxis
+    const baseY = yAxis
         ? filteredCols[featureNames.findIndex(feature => feature === yAxis)]
         : filteredCols[1];
 
@@ -93,19 +93,90 @@ function ScatterGraph(props) {
     // The plotly react element only changes when the revision is incremented.
     const chartRevision = useRef(0);
 
-    // Initial chart settings. These need to be kept in state and updated as necessary
-    const [chartState, setChartState] = useState({
-        data: [
-            {
+    const baseTrace = useMemo(
+        _ => {
+            const [x, y] = unzip(
+                baseX
+                    .map((_, idx) => idx)
+                    .filter(idx =>
+                        props.savedSelections.every(sel => !sel.rowIndices.includes(idx))
+                    )
+                    .map(idx => [baseX[idx], baseY[idx]])
+            );
+            const opacity = props.hoverSelection ? 0.1 : dotOpacity;
+            return {
+                x,
+                y,
+                type: "scatter",
+                mode: "markers",
+                marker: {
+                    color: new TinyColor(DEFAULT_POINT_COLOR).setAlpha(opacity).toString(),
+                    size: dotSize,
+                    symbol: dotShape
+                },
+                visible: true
+            };
+        },
+        [baseX, baseY, props.savedSelections, props.hoverSelection, props.currentSelection]
+    );
+
+    const trendLineTrace = useMemo(
+        _ => {
+            const [x, y] = unzip(regression.linear(unzip(filteredCols)).points);
+            return {
                 x,
                 y,
                 type: "scattergl",
-                mode: "markers",
-                marker: { color: x.map((val, idx) => DEFAULT_POINT_COLOR), size: 5 },
-                selected: { marker: { color: COLOR_CURRENT_SELECTION, size: 5 } },
-                visible: true
-            }
-        ],
+                mode: "lines",
+                marker: { color: "red", size: 5 },
+                visible: trendLineVisible
+            };
+        },
+        [filteredCols, trendLineVisible]
+    );
+
+    const selectionTraces = useMemo(
+        _ => {
+            const currentSelectionTrace = props.currentSelection
+                ? { color: "red", rowIndices: props.currentSelection }
+                : [];
+            return props.savedSelections
+                .concat(props.hoverSelection ? currentSelectionTrace : [])
+                .sort((a, b) =>
+                    a.id === props.hoverSelection ? 1 : b.id === props.hoverSelection ? -1 : 0
+                )
+                .concat(!props.hoverSelection ? currentSelectionTrace : [])
+                .map(sel => {
+                    const [x, y] = unzip(
+                        baseX
+                            .map((_, idx) => idx)
+                            .filter(idx => sel.rowIndices.includes(idx))
+                            .map(idx => [baseX[idx], baseY[idx]])
+                    );
+                    const opacity =
+                        props.hoverSelection && props.hoverSelection !== sel.id ? 0.1 : dotOpacity;
+                    return {
+                        x,
+                        y,
+                        type: "scatter",
+                        mode: "markers",
+                        marker: {
+                            color: new TinyColor(sel.color).setAlpha(opacity).toString(),
+                            size: dotSize || DEFAULT_POINT_SIZE,
+                            symbol: dotShape || DEFAULT_POINT_SHAPE
+                        },
+                        visible: true
+                    };
+                });
+        },
+        [props.savedSelections, props.hoverSelection, props.currentSelection]
+    );
+
+    const traces = [baseTrace, trendLineTrace, ...selectionTraces];
+
+    // Initial chart settings. These need to be kept in state and updated as necessary
+    const [chartState, setChartState] = useState({
+        data: traces,
         layout: {
             autosize: true,
             margin: { l: 0, r: 0, t: 0, b: 0, pad: 10 }, // Axis tick labels are drawn in the margin space
@@ -176,102 +247,6 @@ function ScatterGraph(props) {
         updateChartRevision();
     }, []);
 
-    // Function to update the chart with the latest global chart selection. NOTE: The data is modified in-place.
-    useEffect(
-        _ => {
-            if (!props.currentSelection) return;
-            chartState.data[0].selectedpoints = props.currentSelection;
-            updateChartRevision();
-        },
-        [props.currentSelection]
-    );
-
-    function setSelectionColors() {
-        chartState.data[0].marker.color.forEach((row, idx) => {
-            chartState.data[0].marker.color[idx] = DEFAULT_POINT_COLOR;
-        });
-
-        props.savedSelections
-            .concat()
-            .reverse()
-            .forEach(selection => {
-                if (!selection.hidden) {
-                    selection.rowIndices.forEach(row => {
-                        chartState.data[0].marker.color[row] = new TinyColor(selection.color)
-                            .setAlpha(props.win.data.dotOpacity || DEFAULT_POINT_OPACITY)
-                            .toString();
-                    });
-                }
-            });
-    }
-
-    useEffect(
-        _ => {
-            setSelectionColors();
-            updateChartRevision();
-        },
-        [props.savedSelections]
-    );
-
-    // Functions to animate selections that are being hovered over.
-    const animationState = useRef({ index: 0, ascending: true });
-    useEffect(
-        _ => {
-            if (props.hoverSelection === null) {
-                setSelectionColors();
-                updateChartRevision();
-                return;
-            }
-
-            const activeSelection =
-                props.hoverSelection === "current_selection"
-                    ? { color: COLOR_CURRENT_SELECTION, isCurrentSelection: true }
-                    : props.savedSelections.find(sel => sel.id === props.hoverSelection);
-
-            const colorGradient = utils.createGradientStops(
-                activeSelection.color,
-                DEFAULT_POINT_COLOR,
-                ANIMATION_RANGE
-            );
-
-            const animationInterval = setInterval(_ => {
-                animationState.current.ascending =
-                    animationState.current.index === 0
-                        ? true
-                        : animationState.current.index === ANIMATION_RANGE - 1
-                        ? false
-                        : animationState.current.ascending;
-
-                // changing gradient going toward color saturation happens faster than
-                // going toward de-saturated, which makes the points more saturated for
-                // more time. I think.
-                animationState.current.index = animationState.current.ascending
-                    ? animationState.current.index + 2
-                    : animationState.current.index - 1;
-
-                const nextColor = colorGradient[animationState.current.index];
-
-                if (activeSelection.isCurrentSelection) {
-                    chartState.data[0].selected.marker.color = nextColor;
-                } else {
-                    activeSelection.rowIndices.forEach(row => {
-                        chartState.data[0].marker.color[row] = nextColor;
-                    });
-                }
-                updateChartRevision();
-            }, ANIMATION_SPEED);
-
-            return _ => {
-                clearInterval(animationInterval);
-                animationState.current = { index: 0, ascending: true };
-                chartState.data[0].selected.marker.color = COLOR_CURRENT_SELECTION;
-                setSelectionColors();
-                updateChartRevision();
-            };
-        },
-        [props.hoverSelection]
-    );
-
     useEffect(
         _ => {
             chartState.layout.dragmode = props.globalChartState;
@@ -281,8 +256,7 @@ function ScatterGraph(props) {
     );
 
     function updateAxes() {
-        chartState.data[0].x = x;
-        chartState.data[0].y = y;
+        chartState.data = traces;
     }
 
     // Handles axis swap and label changes
@@ -291,38 +265,12 @@ function ScatterGraph(props) {
             updateAxes();
             chartState.layout.xaxis.title = xAxisTitle;
             chartState.layout.yaxis.title = yAxisTitle;
-            chartState.data[0].marker.size = dotSize;
-            chartState.data[0].selected.marker.size = dotSize;
-            chartState.data[0].marker.color = chartState.data[0].marker.color.map(color =>
-                new TinyColor(color).setAlpha(dotOpacity).toString()
-            );
-            chartState.data[0].selected.marker.color = new TinyColor(
-                chartState.data[0].selected.marker.color
-            )
-                .setAlpha(dotOpacity)
-                .toString();
-            chartState.data[0].marker.symbol = dotShape;
-            chartState.data[0].selected.marker.symbol = dotShape;
             chartState.layout.xaxis.type = axisScale
                 ? axisScale.find(f => f.get("name") === featureNames[0]).get("scale")
                 : "linear";
             chartState.layout.yaxis.type = axisScale
                 ? axisScale.find(f => f.get("name") === featureNames[1]).get("scale")
                 : "linear";
-            if (trendLineVisible) {
-                const [x, y] = unzip(regression.linear(unzip(filteredCols)).points);
-                const trace = {
-                    x,
-                    y,
-                    type: "scattergl",
-                    mode: "lines",
-                    marker: { color: "red", size: 5 },
-                    visible: true
-                };
-                chartState.data.push(trace);
-            } else {
-                chartState.data.splice(1);
-            }
             chartState.layout.xaxis.showgrid = showGridLines;
             chartState.layout.yaxis.showgrid = showGridLines;
             updateChartRevision();
@@ -338,7 +286,10 @@ function ScatterGraph(props) {
             axisScale,
             showGridLines,
             xAxis,
-            yAxis
+            yAxis,
+            props.savedSelections,
+            props.hoverSelection,
+            props.currentSelection
         ]
     );
 
