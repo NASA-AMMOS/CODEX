@@ -68,7 +68,8 @@ function GraphWindow(props) {
         globalChartState: globalChartState,
         data: features,
         fileInfo: fileInfo,
-        win: win
+        winId: win.id,
+        win
     };
 
     const featuresRequired = NUM_FEATURES_REQUIRED[props.windowType];

@@ -11,7 +11,18 @@ import * as utils from "utils/utils";
 
 import { filterBounds } from "./graphFunctions";
 import { useFeatureDisplayNames } from "../../hooks/DataHooks";
-import { useSetWindowNeedsAutoscale } from "../../hooks/WindowHooks";
+import {
+    useSetWindowNeedsAutoscale,
+    useWindowAxisLabels,
+    useWindowAxisScale,
+    useWindowFeatureInfoList,
+    useWindowFeatureList,
+    useWindowGraphBounds,
+    useWindowNeedsResetToDefault,
+    useWindowShowGridLines,
+    useWindowTitle,
+    useWindowXAxis
+} from "../../hooks/WindowHooks";
 
 const Jimp = require("jimp");
 
@@ -43,12 +54,13 @@ function saveImageFunction(chartIds, title) {
 
 export function SingleXMultipleYGraphLegend(props) {
     const [featureNameList] = useFeatureDisplayNames();
+    if (!props.features) return null;
     return props.features
-        .filter(feature => feature.name !== props.xAxis)
+        .filter(feature => feature.get("name") !== props.xAxis)
         .map(feature => (
-            <div className="line-plot" key={feature.name}>
-                <div className="color-swatch" style={{ background: feature.color }} />
-                <span>{featureNameList.get(feature.name, feature.name)}</span>
+            <div className="line-plot" key={feature.get("name")}>
+                <div className="color-swatch" style={{ background: feature.get("color") }} />
+                <span>{props.axisLabels.get(feature.get("name"), feature.get("name"))}</span>
             </div>
         ));
 }
@@ -56,83 +68,72 @@ export function SingleXMultipleYGraphLegend(props) {
 function SingleXMultipleYGraph(props) {
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
+    const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
+    const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
+        props.win.id
+    );
+    const [xAxis, setXAxis] = useWindowXAxis(props.win.id);
+    const [featuresImmutable] = useWindowFeatureList(props.win.id);
+    const featureList = featuresImmutable.toJS();
+    const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
+    const [featureInfo, setFeatureInfo] = useWindowFeatureInfoList(props.win.id);
+    const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const [featureNameList] = useFeatureDisplayNames();
+    const [axisScales, setAxisScales] = useWindowAxisScale(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
-    function getProcessedData() {
+    const processedData = (function() {
         const sanitizedCols = utils.removeSentinelValues(
             props.data.map(col => col.get("data")).toJS(),
             props.fileInfo
         );
-        return filterBounds(props.win.data.features, sanitizedCols, props.win.data.bounds);
-    }
+        return filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
+    })();
 
-    const processedData = getProcessedData();
     const dataLength = processedData[0].length;
 
     // Generic index array
     const indexAry = [...Array(processedData[0].length)].map((_, idx) => idx);
 
-    // Set initial x-axis as the index
-    useEffect(_ => props.win.setData(data => ({ ...data.toJS(), xAxis: uiTypes.GRAPH_INDEX })), []);
+    const x =
+        !xAxis || xAxis === uiTypes.GRAPH_INDEX
+            ? indexAry
+            : Array.from(
+                  processedData[
+                      props.data.findIndex(col => col.get("feature") === props.win.data.xAxis)
+                  ]
+              ).sort((a, b) => b - a);
 
-    function getXAxis() {
-        if (!props.win.data.xAxis || props.win.data.xAxis === uiTypes.GRAPH_INDEX) return indexAry;
-        const colIndex = props.data.findIndex(col => col.get("feature") === props.win.data.xAxis);
-        return Array.from(processedData[colIndex]).sort((a, b) => b - a);
-    }
-    const xAxisData = getXAxis();
+    const cols = props.data
+        .filter(col => col.get("feature") !== xAxis)
+        .map((col, idx) => ({ name: col.get("feature"), data: processedData[idx] }))
+        .toJS();
 
-    function getYAxes() {
-        return props.data
-            .filter(col => col.get("feature") !== props.win.data.xAxis)
-            .map((col, idx) => ({ name: col.get("feature"), data: processedData[idx] }))
-            .toJS();
-    }
-    const cols = getYAxes();
-
-    // Here we assign colors to the seleted features and update the window state with them for use elsewhere.
-    const palette = utils.getSelectionPalette();
-    const featureInfo = props.win.data.features.map((feature, idx) => {
-        return { name: feature, color: palette[idx] };
-    });
-    props.win.setData(data => ({ ...data.toJS(), featureInfo }));
-
-    const featureDisplayNames = props.win.data.features.map(featureName =>
+    const featureDisplayNames = featureList.map(featureName =>
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
     );
 
-    // Effect to assign the min and max bounds based on the data
-    useEffect(_ => {
-        if (!props.win.title) props.win.setTitle(featureDisplayNames.join(" vs "));
-        props.win.setData(data => ({
-            ...data.toJS(),
-            bounds:
-                props.win.data.bounds ||
-                cols.reduce((acc, col) => {
-                    acc[col.name] = { min: Math.min(...col.data), max: Math.max(...col.data) };
-                    return acc;
-                }, {})
-        }));
-    }, []);
-
-    function getXAxisTitle() {
-        return !props.win.data.xAxis || props.win.data.xAxis === uiTypes.GRAPH_INDEX
+    const xAxisTitle =
+        !xAxis || xAxis === uiTypes.GRAPH_INDEX
             ? "Row Index"
-            : props.data
-                  .find(feature => feature.get("feature") === props.win.data.xAxis)
-                  .get("displayName");
-    }
+            : props.data.find(feature => feature.get("feature") === xAxis).get("displayName");
 
-    function getYAxisTitle() {
-        return props.data
-            .filter(col => col.get("feature") !== props.win.data.xAxis)
-            .map(col => col.get("displayName"))
-            .join(", ");
-    }
+    const yAxisTitle = props.data
+        .filter(col => col.get("feature") !== xAxis)
+        .map(col => (axisLabels ? axisLabels.get(col.get("feature")) : col.get("feature")))
+        .join(", ");
+
+    const palette = utils.getSelectionPalette();
+    const baseFeatureInfo = featureList.map((feature, idx) => ({
+        name: feature,
+        color: palette[idx]
+    }));
 
     function makeSelectionTrace(selection) {
-        return getYAxes().map(col => {
+        return cols.map(col => {
             return {
-                x: getXAxis(),
+                x,
                 y: selection.rowIndices.reduce((acc, idx) => {
                     acc[idx] = col.data[idx];
                     return acc;
@@ -148,20 +149,26 @@ function SingleXMultipleYGraph(props) {
         });
     }
 
+    const traces = cols.map((col, idx) => ({
+        x,
+        y: col.data,
+        type: "scatter",
+        mode: "lines",
+        marker: {
+            color: ((featureInfo && featureInfo.toJS()) || baseFeatureInfo).find(
+                f => f.name === col.name
+            ).color
+        },
+        visible: true,
+        hoverinfo: "x+y"
+    }));
+
     // The plotly react element only changes when the revision is incremented.
     const chartRevision = useRef(0);
 
     // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState({
-        data: cols.map((col, idx) => ({
-            x: xAxisData,
-            y: col.data,
-            type: "scatter",
-            mode: "lines",
-            marker: { color: featureInfo.find(f => f.name === col.name).color },
-            visible: true,
-            hoverinfo: "x+y"
-        })),
+        data: traces,
         layout: {
             autosize: true,
             margin: { l: 0, r: 0, t: 0, b: 0, pad: 10 }, // Axis tick labels are drawn in the margin space
@@ -175,7 +182,7 @@ function SingleXMultipleYGraph(props) {
             },
             yaxis: {
                 automargin: true,
-                title: getYAxisTitle()
+                title: yAxisTitle
             },
             showlegend: false
         },
@@ -299,39 +306,99 @@ function SingleXMultipleYGraph(props) {
         [props.globalChartState]
     );
 
-    // Effect to keep axes updated if they've been swapped
     useEffect(
         _ => {
-            const xAxisData = getXAxis();
-
-            chartState.data = getYAxes().map((col, idx) => ({
-                x: xAxisData,
-                y: col.data,
-                type: "scatter",
-                mode: "lines",
-                marker: { color: featureInfo.find(f => f.name === col.name).color },
-                visible: true,
-                hoverinfo: "x+y"
-            }));
-
-            chartState.layout.yaxis.title = getYAxisTitle();
+            chartState.data = traces;
+            chartState.layout.yaxis.title = yAxisTitle;
+            if (axisScales) {
+                setAxisScales(
+                    axisScales.map((scale, idx) =>
+                        scale.set("name", idx === 0 ? `X (${xAxisTitle})` : `Y (${yAxisTitle})`)
+                    )
+                );
+            }
             updateChartRevision();
         },
-        [props.win.data.features, props.win.data.xAxis]
+        [xAxis, featureInfo, bounds]
+    );
+
+    useEffect(
+        _ => {
+            chartState.layout.xaxis.showgrid = showGridLines;
+            chartState.layout.yaxis.showgrid = showGridLines;
+            updateChartRevision();
+        },
+        [showGridLines]
+    );
+
+    useEffect(
+        _ => {
+            chartState.layout.yaxis.title = yAxisTitle;
+            updateChartRevision();
+        },
+        [axisLabels]
+    );
+
+    function setDefaults() {
+        setFeatureInfo(baseFeatureInfo);
+        setBounds(
+            cols.reduce((acc, col) => {
+                acc[col.name] = { min: Math.min(...col.data), max: Math.max(...col.data) };
+                return acc;
+            }, {})
+        );
+        setAxisLabels(
+            featureList.reduce((acc, featureName) => {
+                acc[featureName] = featureNameList.get(featureName, featureName);
+                return acc;
+            }, {})
+        );
+        setShowGridLines(true);
+        setXAxis(uiTypes.GRAPH_INDEX);
+        setWindowTitle(featureDisplayNames.join(" vs "));
+        setAxisScales([
+            { name: `X (${xAxisTitle})`, scale: "linear" },
+            { name: `Y (${yAxisTitle})`, scale: "linear" }
+        ]);
+    }
+
+    useEffect(_ => {
+        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
+        setDefaults();
+        updateChartRevision();
+    }, []);
+
+    useEffect(
+        _ => {
+            if (needsResetToDefault) {
+                setDefaults();
+                setNeedsResetToDefault(false);
+            }
+        },
+        [needsResetToDefault]
+    );
+
+    useEffect(
+        _ => {
+            if (!axisScales) return;
+            chartState.layout.xaxis.type = axisScales.get(0).get("scale");
+            chartState.layout.yaxis.type = axisScales.get(1).get("scale");
+            updateChartRevision();
+        },
+        [axisScales]
     );
 
     const chartIds = [chartId, ...selectionChartStates.map(sel => sel.id)];
 
-    const setWindowNeedsAutoscale = useSetWindowNeedsAutoscale();
     useEffect(
         _ => {
-            if (props.win.needsAutoscale) {
+            if (needsAutoscale) {
                 chartState.layout.xaxis.autorange = true;
                 chartState.layout.yaxis.autorange = true;
-                setWindowNeedsAutoscale(props.win.id, false);
+                setNeedsAutoscale(false);
             }
         },
-        [props.win.needsAutoscale]
+        [needsAutoscale]
     );
 
     return (
@@ -378,12 +445,13 @@ function SingleXMultipleYGraph(props) {
                                 divId={selectionState.id}
                             />
                         ))}
-                        <div className="x-axis-title">{getXAxisTitle()}</div>
+                        <div className="x-axis-title">{xAxisTitle}</div>
                     </div>
                     <div className="singlex-multiy-legend">
                         <SingleXMultipleYGraphLegend
                             features={featureInfo}
-                            xAxis={getXAxisTitle()}
+                            xAxis={xAxisTitle}
+                            axisLabels={axisLabels}
                         />
                     </div>
                 </div>

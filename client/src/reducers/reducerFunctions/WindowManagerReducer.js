@@ -137,13 +137,184 @@ export default class WindowManagerReducer {
         );
     }
 
+    static setWindowDataBounds(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.setIn(["data", "bounds"], Immutable.fromJS(action.bounds))
+                        : win
+                )
+        );
+    }
+
+    static setWindowBinSize(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.setIn(["data", "binSize"], Immutable.fromJS(action.binSize))
+                        : win
+                )
+        );
+    }
+
+    static setWindowAxisLabels(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.setIn(["data", "axisLabels"], Immutable.fromJS(action.axisLabels))
+                        : win
+                )
+        );
+    }
+
+    static setWindowNeedsResetToDefault(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.setIn(["data", "needsResetToDefault"], action.needsResetToDefault)
+                        : win
+                )
+        );
+    }
+
+    static setWindowAxisFeature(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.setIn(["data", action.axis], action.featureName)
+                        : win
+                )
+        );
+    }
+
+    static setWindowFeatureInfo(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.setIn(["data", "featureInfo"], Immutable.fromJS(action.featureInfo))
+                        : win
+                )
+        );
+    }
+
+    static setWindowShowGridLines(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.setIn(["data", "showGridLines"], action.showGridLines)
+                        : win
+                )
+        );
+    }
+
+    static setWindowDataScale(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.setIn(["data", "scaleOptions"], Immutable.fromJS(action.scaleOptions))
+                        : win
+                )
+        );
+    }
+
+    static setWindowDataMapType(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.setIn(["data", "mapType"], action.mapType)
+                        : win
+                )
+        );
+    }
+
+    static setWindowTrendLineVisible(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.setIn(["data", "trendLineVisible"], action.trendLineVisible)
+                        : win
+                )
+        );
+    }
+
+    static setWindowDotSize(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.setIn(["data", "dotSize"], action.dotSize)
+                        : win
+                )
+        );
+    }
+
+    static setWindowDotOpacity(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.setIn(["data", "dotOpacity"], action.dotOpacity)
+                        : win
+                )
+        );
+    }
+
+    static setWindowDotShape(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.setIn(["data", "dotShape"], action.dotShape)
+                        : win
+                )
+        );
+    }
+
     static setWindowNeedsAutoscale(state, action) {
         return state.set(
             "windows",
             state
                 .get("windows")
                 .map(win =>
-                    win.get("id") === action.id ? win.set("needsAutoscale", action.scale) : win
+                    win.get("id") === action.id
+                        ? win.setIn(["data", "needsAutoscale"], action.needsAutoscale)
+                        : win
                 )
         );
     }

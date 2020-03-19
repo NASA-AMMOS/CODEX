@@ -7,7 +7,18 @@ import GraphWrapper from "components/Graphs/GraphWrapper";
 import * as utils from "utils/utils";
 
 import { filterSingleCol } from "./graphFunctions";
-import { useSetWindowNeedsAutoscale } from "../../hooks/WindowHooks";
+import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
+import {
+    useSetWindowNeedsAutoscale,
+    useWindowAxisLabels,
+    useWindowFeatureList,
+    useWindowGraphBinSize,
+    useWindowGraphBounds,
+    useWindowNeedsResetToDefault,
+    useWindowShowGridLines,
+    useWindowTitle,
+    useWindowTrendLineVisible
+} from "../../hooks/WindowHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_TITLE = "Violin Plot Graph";
@@ -15,23 +26,6 @@ const COLOR_CURRENT_SELECTION = "#FF0000";
 
 function handleGlobalChartState(state) {
     return state === "lasso" ? "select" : state;
-}
-
-function generateLayouts(features) {
-    return features.reduce((acc, feature, idx) => {
-        const xAxisName = `xaxis${idx === 0 ? "" : idx + 1}`;
-        const yAxisName = `yaxis`;
-        acc[xAxisName] = {
-            title: feature.feature,
-            automargin: true,
-            showline: false,
-            fixedrange: true
-        };
-        acc[yAxisName] = {
-            automargin: true
-        };
-        return acc;
-    }, {});
 }
 
 function makeSelectionShapes(selection, data) {
@@ -75,58 +69,73 @@ function makeSelectionShapes(selection, data) {
 
 function ViolinPlotGraph(props) {
     const features = props.data.toJS();
-    const featureNames = features.map(feature => {
-        return feature.feature;
-    });
+    const [featuresImmutable] = useWindowFeatureList(props.win.id);
+    const featureNames = featuresImmutable.toJS();
+    const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
+    const [binSize, setBinSize] = useWindowGraphBinSize(props.win.id);
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
+        props.win.id
+    );
+    const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
+    const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
+    const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
 
-    function generatePlotData() {
-        const cols = props.win.data.features
-            .map(colName => [
-                props.data
-                    .find(col => col.get("feature") === colName)
-                    .get("data")
-                    .toJS(),
-                props.win.data.bounds && props.win.data.bounds[colName]
-            ])
-            .map(([col, bounds]) => [utils.removeSentinelValues([col], props.fileInfo)[0], bounds])
-            .map(([col, bounds]) => filterSingleCol(col, bounds));
+    const layouts = features.reduce((acc, feature, idx) => {
+        const xAxisName = `xaxis${idx === 0 ? "" : idx + 1}`;
+        const yAxisName = `yaxis`;
+        acc[xAxisName] = {
+            title: axisLabels && axisLabels.get(feature.feature, feature.feature),
+            automargin: true,
+            showline: false,
+            fixedrange: true
+        };
+        acc[yAxisName] = {
+            automargin: true
+        };
+        return acc;
+    }, {});
 
-        return [
-            features.map((feature, idx) => {
-                const trace = {
-                    y: cols[idx],
-                    type: "violin",
-                    marker: { color: DEFAULT_POINT_COLOR },
-                    name: ""
-                };
-                if (idx > 0) {
-                    trace.xaxis = `x${idx + 1}`;
-                    trace.yaxis = `y`;
-                }
-                return trace;
-            }),
-            cols
-        ];
-    }
+    const baseCols = featureNames
+        .map(colName => [
+            props.data
+                .find(col => col.get("feature") === colName)
+                .get("data")
+                .toJS(),
+            bounds && bounds.get(colName).toJS()
+        ])
+        .map(([col, bound]) => [utils.removeSentinelValues([col], props.fileInfo)[0], bound]);
 
-    const [processedData, setProcessedData] = useState(_ => generatePlotData());
-    const [data, cols] = processedData;
+    const filteredCols = baseCols.map(([col, bound]) => filterSingleCol(col, bound));
 
-    const layouts = generateLayouts(features);
+    const traces = features.map((feature, idx) => {
+        const trace = {
+            y: filteredCols[idx],
+            type: "violin",
+            marker: { color: DEFAULT_POINT_COLOR },
+            name: ""
+        };
+        if (idx > 0) {
+            trace.xaxis = `x${idx + 1}`;
+            trace.yaxis = `y`;
+        }
+        return trace;
+    });
 
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
 
     const [chartState, setChartState] = useState({
-        data: data,
+        data: traces,
         layout: {
             grid: {
                 rows: 1,
-                columns: data.length,
-                subplots: utils.range(data.length).map(idx => `x${idx ? idx + 1 : ""}y`)
+                columns: traces.length,
+                subplots: utils.range(traces.length).map(idx => `x${idx ? idx + 1 : ""}y`)
             },
             showlegend: false,
             margin: { l: 40, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space
@@ -155,35 +164,55 @@ function ViolinPlotGraph(props) {
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
     );
 
-    // Update bound state with the calculated bounds of the data
+    const defaultTitle = featureDisplayNames.join(" , ");
+
+    function setDefaults() {
+        setBounds(
+            featureNames.reduce((acc, colName, idx) => {
+                acc[colName] = {
+                    min: Math.min(...baseCols[idx][0]),
+                    max: Math.max(...baseCols[idx][0])
+                };
+                return acc;
+            }, {})
+        );
+        setAxisLabels(
+            featureNames.reduce((acc, featureName) => {
+                acc[featureName] = featureName;
+                return acc;
+            }, {})
+        );
+        setWindowTitle(featureDisplayNames.join(" , "));
+        setShowGridLines(true);
+        setTrendLineVisible(false);
+    }
+
     useEffect(_ => {
-        if (!props.win.title) props.win.setTitle(featureDisplayNames.join(" , "));
-        props.win.setData(data => ({
-            ...data.toJS(),
-            bounds:
-                props.win.data.bounds ||
-                props.win.data.features.reduce((acc, colName, idx) => {
-                    acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
-                    return acc;
-                }, {})
-        }));
+        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
+        setDefaults();
+        updateChartRevision();
     }, []);
 
-    // Update data state when the bounds change
     useEffect(
         _ => {
-            setProcessedData(generatePlotData());
+            if (needsResetToDefault) {
+                setDefaults();
+                setNeedsResetToDefault(false);
+            }
         },
-        [props.win.data.bounds]
+        [needsResetToDefault]
     );
 
-    // Effect to update graph when data changes
+    function updateData() {
+        chartState.data = traces;
+    }
+
     useEffect(
         _ => {
-            chartState.data = data;
+            updateData();
             updateChartRevision();
         },
-        [data]
+        [bounds]
     );
 
     // Effect to handle drawing of selections
@@ -197,7 +226,7 @@ function ViolinPlotGraph(props) {
                     }
                 )
                 .filter(x => x)
-                .map(sel => makeSelectionShapes(sel, data))
+                .map(sel => makeSelectionShapes(sel, traces))
                 .flat();
             updateChartRevision();
         },
@@ -213,17 +242,24 @@ function ViolinPlotGraph(props) {
         [props.globalChartState]
     );
 
-    const setWindowNeedsAutoscale = useSetWindowNeedsAutoscale();
     useEffect(
         _ => {
-            if (props.win.needsAutoscale) {
+            chartState.layout = Object.assign(chartState.layout, layouts);
+            updateChartRevision();
+        },
+        [axisLabels]
+    );
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
                 Object.keys(chartState.layout).map(key => {
                     if (key.includes("axis")) chartState.layout[key].autorange = true;
                 });
-                setWindowNeedsAutoscale(props.win.id, false);
+                setWindowNeedsAutoscale(false);
             }
         },
-        [props.win.needsAutoscale]
+        [needsAutoscale]
     );
 
     return (
