@@ -1,21 +1,16 @@
 import "components/PropertyEditor/PropertyEditor.scss";
 
-import { InputAdornment } from "@material-ui/core";
+import { Checkbox, InputAdornment } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
+import CheckboxIcon from "@material-ui/icons/CheckBox";
+import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
 import EditIcon from "@material-ui/icons/Edit";
 import Immutable from "immutable";
 import React from "react";
 import TextField from "@material-ui/core/TextField";
 
 import { NUM_FEATURES_REQUIRED } from "components/Graphs/GraphWindow";
-import {
-    useActiveWindow,
-    useWindowList,
-    useWindowFeatureList,
-    useWindowFeatureInfoList,
-    useWindowXAxis,
-    useWindowTitle
-} from "hooks/WindowHooks";
+
 import SwapAxesIcon from "components/Icons/SwapAxes";
 import * as scatterGraphTypes from "constants/scatterGraphTypes";
 import * as uiTypes from "constants/uiTypes";
@@ -25,16 +20,119 @@ import { useFeatureDisplayNames } from "../../hooks/DataHooks";
 import {
     useSwapAxes,
     useWindowAxisLabels,
+    useWindowAxisScale,
     useWindowDotOpacity,
     useWindowDotShape,
     useWindowDotSize,
     useWindowGraphBinSize,
     useWindowGraphBounds,
     useWindowMapType,
+    useWindowNeedsResetToDefault,
+    useWindowShowGridLines,
+    useWindowTrendLineVisible,
     useWindowType,
     useWindowYAxis,
-    useWindowZAxis
+    useWindowZAxis,
+    useActiveWindow,
+    useWindowList,
+    useWindowFeatureList,
+    useWindowFeatureInfoList,
+    useWindowXAxis,
+    useWindowTitle
 } from "../../hooks/WindowHooks";
+
+function TrendLineToggle(props) {
+    const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.activeWindowId);
+
+    function handleClickTrendLine(e) {
+        setTrendLineVisible(e.target.checked);
+    }
+
+    return (
+        <div className="axis">
+            <label>Show Trend Line</label>
+            <Checkbox
+                checked={Boolean(trendLineVisible)}
+                className="selected-checkbox"
+                value="trendLine"
+                style={{ height: "22px", padding: "0px" }}
+                icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
+                checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
+                onClick={handleClickTrendLine}
+            />
+        </div>
+    );
+}
+
+function GridLinesVisibleToggle(props) {
+    const [gridLinesVisible, setGridLinesVisible] = useWindowShowGridLines(props.activeWindowId);
+
+    function handleClickGridLines(e) {
+        setGridLinesVisible(e.target.checked);
+    }
+
+    return (
+        <div className="axis">
+            <label>Show Grid Lines</label>
+            <Checkbox
+                checked={Boolean(gridLinesVisible)}
+                className="selected-checkbox"
+                value="trendLine"
+                style={{ height: "22px", padding: "0px" }}
+                icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
+                checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
+                onClick={handleClickGridLines}
+            />
+        </div>
+    );
+}
+
+function ResetToDefaultsButton(props) {
+    const [_, setNeedsResetToDefault] = useWindowNeedsResetToDefault(props.activeWindowId);
+
+    function handleResetToDefault() {
+        setNeedsResetToDefault(true);
+    }
+
+    return (
+        <button className="resetToDefaultButton" onClick={handleResetToDefault}>
+            Reset to defaults
+        </button>
+    );
+}
+
+function AxisScalesPicker(props) {
+    const [axisScales, setAxisScales] = useWindowAxisScale(props.activeWindowId);
+    function handleAxisScaleChange(e) {
+        setAxisScales(
+            axisScales.map(axis =>
+                axis.get("name") === e.target.value
+                    ? axis.set("scale", e.target.checked ? "log" : "linear")
+                    : axis
+            )
+        );
+    }
+
+    return axisScales ? (
+        <div className="axis">
+            <label>Log Scale</label>
+            {axisScales.map(axis => (
+                <div key={axis.get("name")}>
+                    <Checkbox
+                        checked={axis.get("scale") === "log"}
+                        className="selected-checkbox"
+                        value={axis.get("name")}
+                        style={{ height: "22px", padding: "0px" }}
+                        icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
+                        checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
+                        onClick={handleAxisScaleChange}
+                    />
+                    <span>{axis.get("name")}</span>
+                </div>
+            ))}
+        </div>
+    ) : null;
+}
 
 function ScatterOptionsEditor(props) {
     const [dotSize, setDotSize] = useWindowDotSize(props.activeWindowId);
@@ -59,6 +157,7 @@ function ScatterOptionsEditor(props) {
 
     return (
         <React.Fragment>
+            <AxisScalesPicker activeWindowId={props.activeWindowId} />
             <div className="input-field-container">
                 <TextField
                     label="Dot size"
@@ -95,6 +194,9 @@ function ScatterOptionsEditor(props) {
                     ))}
                 </select>
             </div>
+            <TrendLineToggle activeWindowId={props.activeWindowId} />
+            <GridLinesVisibleToggle activeWindowId={props.activeWindowId} />
+            <ResetToDefaultsButton activeWindowId={props.activeWindowId} />
         </React.Fragment>
     );
 }
@@ -177,9 +279,23 @@ function XYAxisRename(props) {
 function WindowGraphBounds(props) {
     const [graphBounds, setGraphBounds] = useWindowGraphBounds(props.activeWindowId);
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.activeWindowId);
+    const [xAxis, setXAxis] = useWindowXAxis(props.activeWindowId);
+    const [yAxis, setYAxis] = useWindowYAxis(props.activeWindowId);
+    const [zAxis, setZAxis] = useWindowZAxis(props.activeWindowId);
 
     function handleChangeBounds(axis, bound) {
         return e => setGraphBounds(graphBounds.setIn([axis, bound], parseFloat(e.target.value)));
+    }
+
+    function handleChangeAxisLabels(axis) {
+        return e => {
+            setAxisLabels(
+                axisLabels
+                    ? axisLabels.set(axis, e.target.value)
+                    : Immutable.fromJS({ [axis]: e.target.value })
+            );
+        };
     }
 
     if (!features) return null;
@@ -187,60 +303,84 @@ function WindowGraphBounds(props) {
     return (
         <div className="input-field-container">
             <TextField
+                label={"X axis label"}
+                variant="filled"
+                className="text-input"
+                value={axisLabels ? axisLabels.get(xAxis) : xAxis}
+                InputLabelProps={{ shrink: true }}
+                onChange={handleChangeAxisLabels(xAxis)}
+            />
+            <TextField
                 label="X axis min"
                 variant="filled"
                 className="text-input"
-                value={graphBounds ? graphBounds.getIn([features.get(0), "min"]) : ""}
+                value={graphBounds ? graphBounds.getIn([xAxis, "min"]) : ""}
                 type="number"
                 InputLabelProps={{ shrink: true }}
-                onChange={handleChangeBounds(features.get(0), "min")}
+                onChange={handleChangeBounds(xAxis, "min")}
             />
             <TextField
                 label="X axis max"
                 variant="filled"
                 className="text-input"
-                value={graphBounds ? graphBounds.getIn([features.get(0), "max"]) : ""}
+                value={graphBounds ? graphBounds.getIn([xAxis, "max"]) : ""}
                 type="number"
                 InputLabelProps={{ shrink: true }}
-                onChange={handleChangeBounds(features.get(0), "max")}
+                onChange={handleChangeBounds(xAxis, "max")}
+            />
+            <TextField
+                label={"Y axis label"}
+                variant="filled"
+                className="text-input"
+                value={axisLabels ? axisLabels.get(yAxis) : yAxis}
+                InputLabelProps={{ shrink: true }}
+                onChange={handleChangeAxisLabels(yAxis)}
             />
             <TextField
                 label="Y axis min"
                 variant="filled"
                 className="text-input"
-                value={graphBounds ? graphBounds.getIn([features.get(1), "min"]) : ""}
+                value={graphBounds ? graphBounds.getIn([yAxis, "min"]) : ""}
                 type="number"
                 InputLabelProps={{ shrink: true }}
-                onChange={handleChangeBounds(features.get(1), "min")}
+                onChange={handleChangeBounds(yAxis, "min")}
             />
             <TextField
                 label="Y axis max"
                 variant="filled"
                 className="text-input"
-                value={graphBounds ? graphBounds.getIn([features.get(1), "max"]) : ""}
+                value={graphBounds ? graphBounds.getIn([yAxis, "max"]) : ""}
                 type="number"
                 InputLabelProps={{ shrink: true }}
-                onChange={handleChangeBounds(features.get(1), "max")}
+                onChange={handleChangeBounds(yAxis, "max")}
             />
             {features.size < 3 ? null : (
                 <React.Fragment>
                     <TextField
+                        label={"Z axis label"}
+                        variant="filled"
+                        className="text-input"
+                        value={axisLabels ? axisLabels.get(zAxis) : zAxis}
+                        InputLabelProps={{ shrink: true }}
+                        onChange={handleChangeAxisLabels(zAxis)}
+                    />
+                    <TextField
                         label="Z axis min"
                         variant="filled"
                         className="text-input"
-                        value={graphBounds ? graphBounds.getIn([features.get(2), "min"]) : ""}
+                        value={graphBounds ? graphBounds.getIn([zAxis, "min"]) : ""}
                         type="number"
                         InputLabelProps={{ shrink: true }}
-                        onChange={handleChangeBounds(features.get(2), "min")}
+                        onChange={handleChangeBounds(zAxis, "min")}
                     />
                     <TextField
                         label="Z axis max"
                         variant="filled"
                         className="text-input"
-                        value={graphBounds ? graphBounds.getIn([features.get(2), "max"]) : ""}
+                        value={graphBounds ? graphBounds.getIn([zAxis, "max"]) : ""}
                         type="number"
                         InputLabelProps={{ shrink: true }}
-                        onChange={handleChangeBounds(features.get(2), "max")}
+                        onChange={handleChangeBounds(zAxis, "max")}
                     />
                 </React.Fragment>
             )}
@@ -252,9 +392,20 @@ function MultipleWindowGraphBounds(props) {
     const [graphBounds, setGraphBounds] = useWindowGraphBounds(props.activeWindowId);
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [featureNameList] = useFeatureDisplayNames();
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.activeWindowId);
 
     function handleChangeBounds(axis, bound) {
         return e => setGraphBounds(graphBounds.setIn([axis, bound], parseFloat(e.target.value)));
+    }
+
+    function handleChangeAxisLabels(axis) {
+        return e => {
+            setAxisLabels(
+                axisLabels
+                    ? axisLabels.set(axis, e.target.value)
+                    : Immutable.fromJS({ [axis]: e.target.value })
+            );
+        };
     }
 
     if (!features) return null;
@@ -265,6 +416,14 @@ function MultipleWindowGraphBounds(props) {
                 const featureName = featureNameList.get(feature, feature);
                 return (
                     <React.Fragment key={feature}>
+                        <TextField
+                            label={`${featureName} title`}
+                            variant="filled"
+                            className="text-input"
+                            value={axisLabels ? axisLabels.get(feature) : feature}
+                            InputLabelProps={{ shrink: true }}
+                            onChange={handleChangeAxisLabels(feature)}
+                        />
                         <TextField
                             label={`${featureName} min`}
                             variant="filled"
@@ -295,6 +454,7 @@ function MultiAxisGraphEditor(props) {
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [xAxis, setXAxis] = useWindowXAxis(props.activeWindowId);
     const [featureNameList] = useFeatureDisplayNames();
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.activeWindowId);
 
     if (!features) return null;
 
@@ -320,19 +480,22 @@ function MultiAxisGraphEditor(props) {
             </div>
             <div className="axis">
                 <label>Line Plots</label>
-                {featureInfo
-                    .filter(feature => feature.get("name") !== xAxis)
-                    .map(feature => (
-                        <div className="line-plot" key={feature.get("name")}>
-                            <span>
-                                {featureNameList.get(feature.get("name"), feature.get("name"))}
-                            </span>
-                            <div
-                                className="color-swatch"
-                                style={{ background: feature.get("color") }}
-                            />
-                        </div>
-                    ))}
+                {featureInfo &&
+                    featureInfo
+                        .filter(feature => feature.get("name") !== xAxis)
+                        .map(feature => (
+                            <div className="line-plot" key={feature.get("name")}>
+                                <span>
+                                    {axisLabels
+                                        ? axisLabels.get(feature.get("name"))
+                                        : feature.get("name")}
+                                </span>
+                                <div
+                                    className="color-swatch"
+                                    style={{ background: feature.get("color") }}
+                                />
+                            </div>
+                        ))}
             </div>
         </React.Fragment>
     );
@@ -356,6 +519,7 @@ function HeatmapGraphEditor(props) {
 
     function handleChangeBinSize(axis) {
         return e => {
+            if (parseInt(e.target.value) <= 0) return;
             setBinSize(binSize.set(axis, parseInt(e.target.value)));
         };
     }
@@ -431,6 +595,8 @@ function TwoAxisGraphEditor(props) {
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
     const [featureNameList] = useFeatureDisplayNames();
     const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.activeWindowId);
+    const [xAxis, setXAxis] = useWindowXAxis(props.activeWindowId);
+    const [yAxis, setYAxis] = useWindowYAxis(props.activeWindowId);
 
     function handleChangeAxisLabels(axis) {
         return e => {
@@ -442,47 +608,18 @@ function TwoAxisGraphEditor(props) {
         };
     }
 
+    function handleSwapAxes() {
+        const x = xAxis;
+        const y = yAxis;
+        setXAxis(y);
+        setYAxis(x);
+    }
+
     if (!features) return null;
 
     return (
         <React.Fragment>
-            <div className="axis">
-                <label>X-Axis</label>
-                <TextField
-                    className="title-field axis-label"
-                    value={
-                        (axisLabels && axisLabels.get(features.get(0))) ||
-                        featureNameList.get(features.get(0), features.get(0))
-                    }
-                    onChange={handleChangeAxisLabels(features.get(0))}
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <EditIcon />
-                            </InputAdornment>
-                        )
-                    }}
-                />
-            </div>
-            <div className="axis">
-                <label>Y-Axis</label>
-                <TextField
-                    className="title-field axis-label"
-                    value={
-                        (axisLabels && axisLabels.get(features.get(1))) ||
-                        featureNameList.get(features.get(1), features.get(1))
-                    }
-                    onChange={handleChangeAxisLabels(features.get(1))}
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <EditIcon />
-                            </InputAdornment>
-                        )
-                    }}
-                />
-            </div>
-            <Button className="swap-button" onClick={_ => setFeatures(features.reverse())}>
+            <Button className="swap-button" onClick={handleSwapAxes}>
                 Swap Axes <SwapAxesIcon width="14" height="14" />
             </Button>
         </React.Fragment>
@@ -604,6 +741,13 @@ function MapGraphEditor(props) {
         return e => setGraphBounds(graphBounds.setIn([axis, bound], parseFloat(e.target.value)));
     }
 
+    function handleSwapAxes() {
+        const x = xAxis;
+        const y = yAxis;
+        setXAxis(y);
+        setYAxis(x);
+    }
+
     if (!features) return null;
 
     const axisFields = (
@@ -690,10 +834,13 @@ function MapGraphEditor(props) {
                         ))}
                     </select>
                 </div>
-                <Button className="swap-button" onClick={swapAxes}>
+                <Button className="swap-button" onClick={handleSwapAxes}>
                     Swap Axes <SwapAxesIcon width="14" height="14" />
                 </Button>
                 {axisFields}
+                {mapType === uiTypes.MAP_OUTLINES ? (
+                    <GridLinesVisibleToggle activeWindowId={props.activeWindowId} />
+                ) : null}
             </React.Fragment>
         );
 
@@ -733,7 +880,7 @@ function MapGraphEditor(props) {
             <div className="axis">
                 <label>Map Type</label>
                 <select onChange={e => setMapType(e.target.value)} value={mapType}>
-                    {uiTypes.MAP_TYPES.map(f => (
+                    {uiTypes.MAP_TYPES.filter(f => f !== uiTypes.MAP_OUTLINES).map(f => (
                         <option value={f} key={f}>
                             {f}
                         </option>
@@ -768,6 +915,7 @@ function PropertyEditor(props) {
                     <React.Fragment>
                         <TwoAxisGraphEditor activeWindowId={activeWindowId} />
                         <WindowGraphBounds activeWindowId={activeWindowId} />
+                        <ResetToDefaultsButton activeWindowId={activeWindowId} />
                     </React.Fragment>
                 );
             case windowTypes.HEATMAP_GRAPH:
@@ -775,6 +923,7 @@ function PropertyEditor(props) {
                     <React.Fragment>
                         <HeatmapGraphEditor activeWindowId={activeWindowId} />
                         <WindowGraphBounds activeWindowId={activeWindowId} />
+                        <ResetToDefaultsButton activeWindowId={activeWindowId} />
                     </React.Fragment>
                 );
             case windowTypes.HEATMAP_3D_GRAPH:
@@ -782,6 +931,7 @@ function PropertyEditor(props) {
                     <React.Fragment>
                         <ThreeAxisGraphEditor activeWindowId={activeWindowId} />
                         <WindowGraphBounds activeWindowId={activeWindowId} />
+                        <ResetToDefaultsButton activeWindowId={activeWindowId} />
                     </React.Fragment>
                 );
             case windowTypes.SINGLE_X_MULTIPLE_Y:
@@ -789,21 +939,43 @@ function PropertyEditor(props) {
                     <React.Fragment>
                         <MultiAxisGraphEditor activeWindowId={activeWindowId} />
                         <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
+                        <GridLinesVisibleToggle activeWindowId={activeWindowId} />
+                        <AxisScalesPicker activeWindowId={activeWindowId} />
+                        <ResetToDefaultsButton activeWindowId={activeWindowId} />
                     </React.Fragment>
                 );
             case windowTypes.MAP_GRAPH:
-                return <MapGraphEditor activeWindowId={activeWindowId} />;
+                return (
+                    <React.Fragment>
+                        <MapGraphEditor activeWindowId={activeWindowId} />
+                        <ResetToDefaultsButton activeWindowId={activeWindowId} />
+                    </React.Fragment>
+                );
             case windowTypes.HISTOGRAM_GRAPH:
                 return (
                     <React.Fragment>
                         <HistogramGraphEditor activeWindowId={activeWindowId} />
                         <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
+                        <ResetToDefaultsButton activeWindowId={activeWindowId} />
+                    </React.Fragment>
+                );
+            case windowTypes.TIME_SERIES_GRAPH:
+                return (
+                    <React.Fragment>
+                        <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
+                        <TrendLineToggle activeWindowId={activeWindowId} />
+                        <GridLinesVisibleToggle activeWindowId={activeWindowId} />
+                        <ResetToDefaultsButton activeWindowId={activeWindowId} />
                     </React.Fragment>
                 );
             case windowTypes.VIOLIN_PLOT_GRAPH:
-            case windowTypes.TIME_SERIES_GRAPH:
             case windowTypes.BOX_PLOT_GRAPH:
-                return <MultipleWindowGraphBounds activeWindowId={activeWindowId} />;
+                return (
+                    <React.Fragment>
+                        <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
+                        <ResetToDefaultsButton activeWindowId={activeWindowId} />
+                    </React.Fragment>
+                );
             default:
                 return null;
         }

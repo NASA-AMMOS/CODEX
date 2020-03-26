@@ -53,7 +53,3 @@ export function moveWindow(id, position) {
 export function setWindowType(id, windowType) {
     return { type: actionTypes.WINDOW_SET_TYPE, id, windowType };
 }
-
-export function setWindowNeedsAutoscale(id, scale) {
-    return { type: actionTypes.WINDOW_SET_NEEDS_AUTOSCALE, id, scale };
-}
