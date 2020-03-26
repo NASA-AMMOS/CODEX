@@ -431,12 +431,13 @@ export function useWindowNeedsResetToDefault(id) {
 export function useSetWindowNeedsAutoscale(id) {
     const dispatch = useDispatch();
     return [
-        useSelector(state =>
-            state.windowManager
-                .get("windows")
-                .find(win => win.get("id") === id)
-                .getIn(["data", "needsAutoscale"])
-        ),
+        id &&
+            useSelector(state =>
+                state.windowManager
+                    .get("windows")
+                    .find(win => win.get("id") === id)
+                    .getIn(["data", "needsAutoscale"])
+            ),
         scale => dispatch(setWindowNeedsAutoscale(id, scale))
     ];
 }
