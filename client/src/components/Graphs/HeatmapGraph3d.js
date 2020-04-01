@@ -130,10 +130,12 @@ function HeatmapGraph3d(props) {
         ? filteredCols[featureList.findIndex(feature => feature === zAxis)]
         : filteredCols[2];
 
-    const x = generateDataAxis(xData, binSize ? binSize.get("x") : DEFAULT_BUCKET_COUNT);
-    const y = generateDataAxis(yData, binSize ? binSize.get("y") : DEFAULT_BUCKET_COUNT);
+    const x = generateDataAxis(xData, (binSize && binSize.get("x")) || DEFAULT_BUCKET_COUNT);
+    const y = generateDataAxis(yData, (binSize && binSize.get("y")) || DEFAULT_BUCKET_COUNT);
     const z = squashDataIntoBuckets(
-        binSize ? Object.values(binSize.toJS()) : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT],
+        binSize
+            ? Object.values(binSize.toJS()).map(val => val || 1)
+            : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT],
         xData,
         yData,
         zData
