@@ -1,4 +1,3 @@
-import { ClickAwayListener } from "@material-ui/core";
 import React from "react";
 
 import * as windowTypes from "constants/windowTypes";
@@ -117,14 +116,14 @@ function GraphWindow(props) {
     })();
 
     return (
-        <ClickAwayListener onClickAway={_ => setAllowGraphHotkeys(false)}>
-            <div
-                onMouseUp={_ => setAllowGraphHotkeys(true)}
-                onMouseDown={_ => setAllowGraphHotkeys(true)}
-            >
-                {windowContent}
-            </div>
-        </ClickAwayListener>
+        <div
+            onClick={e => {
+                document.activeElement.blur(); // For some reason, right-panel stuff isn't defocusing on Plotly clicks
+                setAllowGraphHotkeys(true);
+            }}
+        >
+            {windowContent}
+        </div>
     );
 }
 

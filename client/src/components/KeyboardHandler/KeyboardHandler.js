@@ -75,7 +75,7 @@ function KeyboardHandler(props) {
                 if (!previousChartState) setPreviousChartState(globalChartState);
                 setGlobalChartState("lasso");
             } else {
-                setGlobalChartState(previousChartState);
+                if (previousChartState) setGlobalChartState(previousChartState);
                 setPreviousChartState(null);
             }
         },
@@ -91,7 +91,7 @@ function KeyboardHandler(props) {
                 if (!previousChartState) setPreviousChartState(globalChartState);
                 setGlobalChartState("zoom");
             } else {
-                setGlobalChartState(previousChartState);
+                if (previousChartState) setGlobalChartState(previousChartState);
                 setPreviousChartState(null);
             }
         },
@@ -107,7 +107,7 @@ function KeyboardHandler(props) {
                 if (!previousChartState) setPreviousChartState(globalChartState);
                 setGlobalChartState("pan");
             } else {
-                setGlobalChartState(previousChartState);
+                if (previousChartState) setGlobalChartState(previousChartState);
                 setPreviousChartState(null);
             }
         },
