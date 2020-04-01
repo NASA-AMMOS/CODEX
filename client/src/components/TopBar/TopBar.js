@@ -1,6 +1,7 @@
 import "components/TopBar/TopBar.css";
 
 import { ButtonGroup } from "reactstrap";
+import { Tooltip } from "@material-ui/core";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
@@ -13,13 +14,16 @@ import SessionBar from "components/TopBar/SessionBar";
 import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as dataActions from "actions/data";
-import * as sessionsActions from "actions/sessionsActions";
 import * as windowManagerActions from "actions/windowManagerActions";
 import * as windowTypes from "constants/windowTypes";
 import * as workflowActions from "actions/workflowActions";
 import * as workflowTypes from "constants/workflowTypes";
 
+import { NUM_FEATURES_REQUIRED } from "../Graphs/GraphWindow";
+import { useSelectedFeatureNames } from "../../hooks/DataHooks";
+
 function NavigationBar(props) {
+    const [features] = useSelectedFeatureNames();
     const defaultBackground = "#05101f";
 
     const ref = useRef(null);
@@ -29,10 +33,40 @@ function NavigationBar(props) {
     let timeout = null;
 
     function createMenuItem(window_type, title) {
+        const [disabled, errMsg] = (function() {
+            const requiredNumFeatures = NUM_FEATURES_REQUIRED[window_type];
+            if (requiredNumFeatures === undefined) return [false, null];
+            if (typeof requiredNumFeatures === "number") {
+                if (features.size !== requiredNumFeatures) {
+                    return [true, `Requires ${requiredNumFeatures} selected features`];
+                }
+                return [false, null];
+            }
+            if (features.size < requiredNumFeatures[0] || features.size > requiredNumFeatures[1]) {
+                return [
+                    true,
+                    `Requires between ${requiredNumFeatures[0]} and ${
+                        requiredNumFeatures[1]
+                    } selected features`
+                ];
+            }
+            return [false, null];
+        })();
+
         return (
-            <MenuItem key={window_type} onSelect={() => props.openWindow(window_type)}>
-                {title || window_type}
-            </MenuItem>
+            <Tooltip
+                title={errMsg}
+                disableFocusListener={!disabled}
+                disableHoverListener={!disabled}
+            >
+                <MenuItem
+                    key={window_type}
+                    onSelect={() => props.openWindow(window_type)}
+                    disabled={disabled}
+                >
+                    {title || window_type}
+                </MenuItem>
+            </Tooltip>
         );
     }
 
