@@ -13,11 +13,12 @@ import SessionBar from "components/TopBar/SessionBar";
 import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as dataActions from "actions/data";
-import * as sessionsActions from "actions/sessionsActions";
 import * as windowManagerActions from "actions/windowManagerActions";
 import * as windowTypes from "constants/windowTypes";
 import * as workflowActions from "actions/workflowActions";
 import * as workflowTypes from "constants/workflowTypes";
+
+import { useExportModalVisible } from "../../hooks/UIHooks";
 
 function NavigationBar(props) {
     const defaultBackground = "#05101f";
@@ -25,6 +26,8 @@ function NavigationBar(props) {
     const ref = useRef(null);
     const ref_loading = useRef(null);
     const ref_message = useRef(null);
+
+    const [exportModalVisible, setExportModalVisible] = useExportModalVisible();
 
     let timeout = null;
 
@@ -128,6 +131,12 @@ function NavigationBar(props) {
             */}
             <ControlBar />
             <div id="topBarTools">
+                <button
+                    className="export-button"
+                    onClick={_ => setExportModalVisible(!exportModalVisible)}
+                >
+                    Export
+                </button>
                 <ButtonGroup>
                     <Dropdown>
                         <Dropdown.Toggle className="dropdownToggle" title="Windows" />
