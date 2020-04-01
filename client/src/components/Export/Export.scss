@@ -49,6 +49,16 @@
             .selected-checkbox {
                 margin-right: 5px;
             }
+
+            &.disabled {
+                color: black;
+
+                .selected-checkbox {
+                    svg {
+                        fill: black !important;
+                    }
+                }
+            }
         }
     }
 }
@@ -97,6 +107,11 @@
         color: #eeeeee;
         background: #3980e3;
         border-radius: 4px;
+
+        &:disabled {
+            color: #ffffff;
+            background: #eeeeee;
+        }
     }
 }
 
