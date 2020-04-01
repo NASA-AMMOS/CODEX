@@ -284,7 +284,6 @@ export function useSaveCurrentSelection() {
  */
 export function useFeatureNames() {
     const features = useSelector(state => state.data.get("featureList")).map(f => f.get("name"));
-
     return features;
 }
 
