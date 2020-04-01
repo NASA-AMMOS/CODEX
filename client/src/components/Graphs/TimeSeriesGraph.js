@@ -315,6 +315,7 @@ function TimeSeriesGraph(props) {
                 Object.keys(chartState.layout).map(key => {
                     if (key.includes("axis")) chartState.layout[key].autorange = true;
                 });
+                updateChartRevision();
                 setNeedsAutoscale(false);
             }
         },

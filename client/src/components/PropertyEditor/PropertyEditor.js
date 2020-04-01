@@ -96,7 +96,7 @@ function ResetToDefaultsButton(props) {
 
     return (
         <button className="resetToDefaultButton" onClick={handleResetToDefault}>
-            Reset to default
+            Reset to defaults
         </button>
     );
 }

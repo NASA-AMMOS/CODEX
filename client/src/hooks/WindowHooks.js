@@ -443,6 +443,11 @@ export function useSetWindowNeedsAutoscale(id) {
     ];
 }
 
+export function useSetWindowNeedsAutoscaleById() {
+    const dispatch = useDispatch();
+    return (id, scale) => dispatch(setWindowNeedsAutoscale(id, scale));
+}
+
 export function useSetWindowNeedsPlotImage(id) {
     const dispatch = useDispatch();
     return [

@@ -5,7 +5,7 @@ import * as windowTypes from "constants/windowTypes";
 import { selectFeatureGroup } from "../../actions/data";
 import {
     useActiveWindow,
-    useSetWindowNeedsAutoscale,
+    useSetWindowNeedsAutoscaleById,
     useWindowList
 } from "../../hooks/WindowHooks";
 import {
@@ -132,7 +132,7 @@ function KeyboardHandler(props) {
     const activeWindow = windowList.find(win => win.get("id") === activeWindowId);
     const graphWindowActive =
         activeWindow && windowTypes.graphs.includes(activeWindow.get("windowType"));
-    const setWindowNeedsAutoscale = useSetWindowNeedsAutoscale();
+    const setWindowNeedsAutoscale = useSetWindowNeedsAutoscaleById();
     const ZKey = useKey("Z");
     useEffect(
         _ => {

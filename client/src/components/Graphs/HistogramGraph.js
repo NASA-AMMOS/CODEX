@@ -16,6 +16,7 @@ import {
     useWindowNeedsResetToDefault,
     useWindowTitle
 } from "../../hooks/WindowHooks";
+import { scaleLinear } from "d3-scale";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const COLOR_CURRENT_SELECTION = "#FF0000";
@@ -107,12 +108,14 @@ function HistogramGraph(props) {
         const xAxisName = `xaxis`;
         const yAxisName = `yaxis${idx === 0 ? "" : idx + 1}`;
         acc[xAxisName] = {
-            title: axisLabels && axisLabels.get(feature.feature, feature.feature),
+            title: "",
             automargin: true,
-            showline: false
+            showline: false,
+            showticklabels: false
         };
         acc[yAxisName] = {
-            title: "Counts",
+            title:
+                (axisLabels && axisLabels.get(feature.feature, feature.feature)) || feature.feature,
             automargin: true,
             fixedrange: true
         };
@@ -132,13 +135,25 @@ function HistogramGraph(props) {
     const filteredCols = baseCols.map(([col, bound]) => filterSingleCol(col, bound));
 
     const traces = features.map((feature, idx) => {
+        const min = Math.min(...filteredCols[idx]);
+        const max = Math.max(...filteredCols[idx]);
+        const scale = scaleLinear()
+            .domain([min, max])
+            .range([0, 1000000]);
+        const x = filteredCols[idx].map(scale);
+        const scaledMin = Math.min(...x);
+        const scaledMax = Math.max(...x);
         const trace = {
-            x: filteredCols[idx],
+            x,
             type: "histogram",
-            hoverinfo: "x+y",
+            hoverinfo: "y",
             marker: { color: DEFAULT_POINT_COLOR },
             name: "",
-            nbinsx: binSize ? binSize.get("x") : null
+            xbins: {
+                start: scaledMin,
+                end: scaledMax,
+                size: (scaledMax - scaledMin) / ((binSize && binSize.get("x")) || DEFAULT_BINS)
+            }
         };
         if (idx > 0) {
             trace.xaxis = `x`;
@@ -150,21 +165,23 @@ function HistogramGraph(props) {
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
 
+    const layout = {
+        grid: {
+            rows: traces.length,
+            columns: 1,
+            subplots: utils.range(traces.length).map(idx => [`xy${idx ? idx + 1 : ""}`])
+        },
+        showlegend: false,
+        margin: { l: 40, r: 5, t: 5, b: 5 }, // Axis tick labels are drawn in the margin space
+        dragmode: handleGlobalChartState(props.globalChartState) || "select",
+        selectdirection: "h",
+        hovermode: "compare", // Turning off hovermode seems to screw up click handling
+        ...layouts
+    };
+
     const [chartState, setChartState] = useState({
         data: traces,
-        layout: {
-            grid: {
-                rows: traces.length,
-                columns: 1,
-                subplots: utils.range(traces.length).map(idx => [`xy${idx ? idx + 1 : ""}`])
-            },
-            showlegend: false,
-            margin: { l: 40, r: 5, t: 5, b: 5 }, // Axis tick labels are drawn in the margin space
-            dragmode: handleGlobalChartState(props.globalChartState) || "select",
-            selectdirection: "h",
-            hovermode: "compare", // Turning off hovermode seems to screw up click handling
-            ...layouts
-        },
+        layout,
         config: {
             responsive: true,
             displaylogo: false,
@@ -225,6 +242,7 @@ function HistogramGraph(props) {
 
     function updateData() {
         chartState.data = traces;
+        chartState.layout = layout;
     }
 
     useEffect(
@@ -242,7 +260,7 @@ function HistogramGraph(props) {
             updateData();
             updateChartRevision();
         },
-        [bounds, binSize]
+        [bounds, binSize, axisLabels]
     );
 
     // Effect to handle drawing of selections
@@ -278,6 +296,7 @@ function HistogramGraph(props) {
                 Object.keys(chartState.layout).map(key => {
                     if (key.includes("axis")) chartState.layout[key].autorange = true;
                 });
+                updateChartRevision();
                 setNeedsAutoscale(false);
             }
         },

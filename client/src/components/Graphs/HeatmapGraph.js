@@ -286,6 +286,7 @@ function HeatmapGraph(props) {
             if (needsAutoscale) {
                 chartState.layout.xaxis.autorange = true;
                 chartState.layout.yaxis.autorange = true;
+                updateChartRevision();
                 setWindowNeedsAutoscale(false);
             }
         },

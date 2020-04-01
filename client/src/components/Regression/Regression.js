@@ -7,7 +7,7 @@ import React, { useState, useEffect, useRef } from "react";
 import ReactResizeDetector from "react-resize-detector";
 import * as portals from "react-reverse-portal";
 
-import { WindowCircularProgress } from "../WindowHelpers/WindowCenter";
+import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
 import { makeSimpleRequest, zip } from "../../utils/utils";
 import { useFeatureDisplayNames, usePinnedFeatures } from "../../hooks/DataHooks";
 import { useWindowManager, useCloseWindow } from "../../hooks/WindowHooks";
@@ -813,6 +813,15 @@ function Regression(props) {
     if (features === null || !win.data) {
         return <WindowCircularProgress />;
     }
+
+    if (features.size < 3)
+        return (
+            <WindowError>
+                Please select 3 or more features
+                <br />
+                in the features list to use this algorithm.
+            </WindowError>
+        );
 
     features = features.map(feature => {
         const featureName = featureNameList.get(feature.get("feature"), feature.get("feature"));
