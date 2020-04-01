@@ -157,11 +157,19 @@ function HeatmapGraph(props) {
 
     const filteredCols = filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
 
-    const x = generateDataAxis(filteredCols[0], binSize ? binSize.get("x") : DEFAULT_BUCKET_COUNT);
-    const y = generateDataAxis(filteredCols[1], binSize ? binSize.get("y") : DEFAULT_BUCKET_COUNT);
+    const x = generateDataAxis(
+        filteredCols[0],
+        (binSize && binSize.get("x")) || DEFAULT_BUCKET_COUNT
+    );
+    const y = generateDataAxis(
+        filteredCols[1],
+        (binSize && binSize.get("y")) || DEFAULT_BUCKET_COUNT
+    );
     const z = squashDataIntoBuckets(
         filteredCols,
-        binSize ? Object.values(binSize.toJS()) : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT]
+        binSize
+            ? Object.values(binSize.toJS()).map(val => val || 1)
+            : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT]
     );
 
     const xAxisTitle =
