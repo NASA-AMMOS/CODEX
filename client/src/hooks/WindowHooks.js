@@ -5,6 +5,7 @@ import { useLayoutEffect } from "react";
 import { defaultInitialSettings } from "constants/windowSettings";
 import * as wmActions from "actions/windowManagerActions";
 
+import { graphs } from "../constants/windowTypes";
 import {
     setWindowAxisFeature,
     setWindowAxisLabels,
@@ -19,8 +20,10 @@ import {
     setWindowDataTrendLineVisible,
     setWindowFeatureInfo,
     setWindowNeedsAutoscale,
+    setWindowNeedsPlotImage,
     setWindowShowGridLines
 } from "../actions/windowDataActions";
+import { useAllowGraphHotkeys } from "./UIHooks";
 
 /*
  * Basically, this hook:
@@ -119,11 +122,17 @@ export function useWindowManager(props, initialSettings) {
  */
 export function useActiveWindow() {
     const dispatch = useDispatch();
-    const activeWindow = useSelector(state => state.windowManager.get("activeWindow"));
+    const activeWindowId = useSelector(state => state.windowManager.get("activeWindow"));
+    const windowList = useWindowList();
+    const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
 
-    const setActiveWindow = id => id !== activeWindow && dispatch(wmActions.setActiveWindow(id));
+    const setActiveWindow = id => {
+        if (id !== activeWindowId) dispatch(wmActions.setActiveWindow(id));
+        const activeWindow = windowList.find(win => win.get("id") === id);
+        if (graphs.includes(activeWindow.get("windowType"))) setAllowGraphHotkeys(true);
+    };
 
-    return [activeWindow, setActiveWindow];
+    return [activeWindowId, setActiveWindow];
 }
 
 /**
@@ -445,6 +454,25 @@ export function useSetWindowNeedsAutoscale(id) {
 export function useSetWindowNeedsAutoscaleById() {
     const dispatch = useDispatch();
     return (id, scale) => dispatch(setWindowNeedsAutoscale(id, scale));
+}
+
+export function useSetWindowNeedsPlotImage(id) {
+    const dispatch = useDispatch();
+    return [
+        id &&
+            useSelector(state =>
+                state.windowManager
+                    .get("windows")
+                    .find(win => win.get("id") === id)
+                    .getIn(["data", "needsPlotImage"])
+            ),
+        needs => dispatch(setWindowNeedsPlotImage(id, needs))
+    ];
+}
+
+export function useSetWindowNeedsPlotImageById() {
+    const dispatch = useDispatch();
+    return (id, needs) => dispatch(setWindowNeedsPlotImage(id, needs));
 }
 
 export default useWindowManager;

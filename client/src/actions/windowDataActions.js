@@ -55,3 +55,7 @@ export function setWindowDataDotShape(id, dotShape) {
 export function setWindowNeedsAutoscale(id, needsAutoscale) {
     return { type: types.WINDOW_SET_NEEDS_AUTOSCALE, id, needsAutoscale };
 }
+
+export function setWindowNeedsPlotImage(id, needs) {
+    return { type: types.WINDOW_SET_NEEDS_PLOT_IMAGE, id, needs };
+}

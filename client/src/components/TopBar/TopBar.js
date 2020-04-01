@@ -20,6 +20,7 @@ import * as workflowActions from "actions/workflowActions";
 import * as workflowTypes from "constants/workflowTypes";
 
 import { NUM_FEATURES_REQUIRED } from "../Graphs/GraphWindow";
+import { useExportModalVisible } from "../../hooks/UIHooks";
 import { useSelectedFeatureNames } from "../../hooks/DataHooks";
 
 function NavigationBar(props) {
@@ -29,6 +30,8 @@ function NavigationBar(props) {
     const ref = useRef(null);
     const ref_loading = useRef(null);
     const ref_message = useRef(null);
+
+    const [exportModalVisible, setExportModalVisible] = useExportModalVisible();
 
     let timeout = null;
 
@@ -162,6 +165,12 @@ function NavigationBar(props) {
             */}
             <ControlBar />
             <div id="topBarTools">
+                <button
+                    className="export-button"
+                    onClick={_ => setExportModalVisible(!exportModalVisible)}
+                >
+                    Export
+                </button>
                 <ButtonGroup>
                     <Dropdown>
                         <Dropdown.Toggle className="dropdownToggle" title="Windows" />

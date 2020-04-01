@@ -151,3 +151,15 @@ export function setAllowGraphHotkeys(allow) {
 export function setHelpMode(helpMode) {
     return { type: types.SET_ALLOW_HELP_MODE, helpMode };
 }
+
+export function setExportModalVisible(visible) {
+    return { type: types.SET_EXPORT_MODAL_VISIBLE, visible };
+}
+
+export function setStoredPlotImage(winId, image, filename) {
+    return { type: types.SET_STORED_PLOT_IMAGE, winId, image, filename };
+}
+
+export function clearAllPlotImages() {
+    return { type: types.CLEAR_ALL_PLOT_IMAGES };
+}

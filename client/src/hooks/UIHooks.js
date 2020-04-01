@@ -2,6 +2,8 @@ import { useSelector, useDispatch } from "react-redux";
 
 import * as uiActions from "actions/ui";
 
+import { clearAllPlotImages } from "../actions/ui";
+
 /**
  * Get current global graph state
  * @return tuple of getter/setter for global chart state
@@ -65,4 +67,25 @@ export function useHelpMode() {
         useSelector(state => state.ui.get("helpMode")),
         helpMode => dispatch(uiActions.setHelpMode(helpMode))
     ];
+}
+
+export function useExportModalVisible() {
+    const dispatch = useDispatch();
+    return [
+        useSelector(state => state.ui.get("exportModalVisible")),
+        visible => dispatch(uiActions.setExportModalVisible(visible))
+    ];
+}
+
+export function useSetStoredPlotImage() {
+    const dispatch = useDispatch();
+    return [
+        useSelector(state => state.ui.get("storedPlotImages")),
+        (id, image, filename) => dispatch(uiActions.setStoredPlotImage(id, image, filename))
+    ];
+}
+
+export function useClearAllPlotImages() {
+    const dispatch = useDispatch();
+    return _ => dispatch(clearAllPlotImages());
 }
