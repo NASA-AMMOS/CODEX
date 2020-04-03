@@ -75,9 +75,13 @@ export function filterBounds(features, cols, bounds) {
               .map(_ => []);
 }
 
-export function filterSingleCol(col, bounds) {
+export function filterSingleCol(col, bounds, leaveNull = false) {
     if (!bounds) return col;
-    return col.filter(
-        val => (!bounds.min || bounds.min <= val) && (!bounds.max || bounds.max >= val)
-    );
+    return leaveNull
+        ? col.map(val =>
+              (!bounds.min || bounds.min <= val) && (!bounds.max || bounds.max >= val) ? val : null
+          )
+        : col.filter(
+              val => (!bounds.min || bounds.min <= val) && (!bounds.max || bounds.max >= val)
+          );
 }
