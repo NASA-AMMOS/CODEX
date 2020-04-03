@@ -204,7 +204,7 @@ function HeatmapGraph(props) {
             }
         ],
         layout: {
-            dragmode: "lasso",
+            dragmode: props.globalChartState !== "lasso" && props.globalChartState,
             xaxis: {
                 title: xAxisTitle,
                 automargin: true,
@@ -269,6 +269,15 @@ function HeatmapGraph(props) {
         setDefaults();
         updateChartRevision();
     }, []);
+
+    useEffect(
+        _ => {
+            chartState.layout.dragmode =
+                props.globalChartState !== "lasso" && props.globalChartState;
+            updateChartRevision();
+        },
+        [props.globalChartState]
+    );
 
     function updateAxes() {
         chartState.data[0].x = x;

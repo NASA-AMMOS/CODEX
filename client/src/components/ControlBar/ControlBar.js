@@ -6,8 +6,8 @@ import Lasso from "styles/resources/Icons/lasso.svg";
 import Pan from "styles/resources/Icons/pan.svg";
 import Zoom from "styles/resources/Icons/zoom.svg";
 import classnames from "classnames";
-import * as uiTypes from "constants/uiTypes";
 
+import { graphs } from "../../constants/windowTypes";
 import { useGlobalChartState } from "../../hooks/UIHooks";
 import { useWindowList } from "../../hooks/WindowHooks";
 
@@ -22,7 +22,7 @@ function ControlBar(props) {
     return (
         <div
             className="controlBar"
-            hidden={windowList.every(win => !uiTypes.GRAPH_TYPES.includes(win.get("windowType")))}
+            hidden={windowList.every(win => !graphs.includes(win.get("windowType")))}
         >
             <Lasso className={lassoClass} onClick={_ => changeGlobalChartState("lasso")} />
             <Zoom className={zoomClass} onClick={_ => changeGlobalChartState("zoom")} />
