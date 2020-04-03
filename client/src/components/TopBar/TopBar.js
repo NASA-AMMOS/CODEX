@@ -57,19 +57,19 @@ function NavigationBar(props) {
         })();
 
         return (
-            <Tooltip
-                title={errMsg}
-                disableFocusListener={!disabled}
-                disableHoverListener={!disabled}
+            <MenuItem
+                key={window_type}
+                onSelect={() => props.openWindow(window_type)}
+                disabled={disabled}
             >
-                <MenuItem
-                    key={window_type}
-                    onSelect={() => props.openWindow(window_type)}
-                    disabled={disabled}
+                <Tooltip
+                    title={errMsg}
+                    disableFocusListener={!disabled}
+                    disableHoverListener={!disabled}
                 >
-                    {title || window_type}
-                </MenuItem>
-            </Tooltip>
+                    <span>{title || window_type}</span>
+                </Tooltip>
+            </MenuItem>
         );
     }
 
