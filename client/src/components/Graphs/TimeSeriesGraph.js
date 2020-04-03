@@ -121,7 +121,7 @@ function TimeSeriesGraph(props) {
             visible: Boolean(trendLineVisible)
         };
         if (idx > 0) {
-            trace.xaxis = `x`;
+            trace.xaxis = `x${idx + 1}`;
             trace.yaxis = `y${idx + 1}`;
         }
         return trace;
@@ -138,7 +138,7 @@ function TimeSeriesGraph(props) {
                 marker: { color: DEFAULT_POINT_COLOR }
             };
             if (idx > 0) {
-                trace.xaxis = `x`;
+                trace.xaxis = `x${idx + 1}`;
                 trace.yaxis = `y${idx + 1}`;
             }
             return trace;
@@ -154,7 +154,7 @@ function TimeSeriesGraph(props) {
             grid: {
                 rows: traces.length,
                 columns: 1,
-                subplots: utils.range(traces.length).map(idx => [`xy${idx ? idx + 1 : ""}`])
+                pattern: "independent"
             },
             showlegend: false,
             margin: { l: 40, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space
