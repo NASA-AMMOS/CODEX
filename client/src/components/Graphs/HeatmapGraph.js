@@ -13,7 +13,9 @@ import {
     useWindowGraphBinSize,
     useWindowGraphBounds,
     useWindowNeedsResetToDefault,
-    useWindowTitle
+    useWindowTitle,
+    useWindowXAxis,
+    useWindowYAxis
 } from "../../hooks/WindowHooks";
 import GraphWrapper from "./GraphWrapper";
 
@@ -136,6 +138,8 @@ function HeatmapGraph(props) {
     );
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
+    const [xAxis, setXAxis] = useWindowXAxis(props.win.id);
+    const [yAxis, setYAxis] = useWindowYAxis(props.win.id);
 
     //the number of interpolation steps that you can take caps at 5?
     const interpolatedColors = interpolateColors(
@@ -157,14 +161,15 @@ function HeatmapGraph(props) {
 
     const filteredCols = filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
 
-    const x = generateDataAxis(
-        filteredCols[0],
-        (binSize && binSize.get("x")) || DEFAULT_BUCKET_COUNT
-    );
-    const y = generateDataAxis(
-        filteredCols[1],
-        (binSize && binSize.get("y")) || DEFAULT_BUCKET_COUNT
-    );
+    const baseX = xAxis
+        ? filteredCols[featureList.findIndex(feature => feature === xAxis)]
+        : filteredCols[0];
+    const baseY = yAxis
+        ? filteredCols[featureList.findIndex(feature => feature === yAxis)]
+        : filteredCols[1];
+
+    const x = generateDataAxis(baseX, (binSize && binSize.get("x")) || DEFAULT_BUCKET_COUNT);
+    const y = generateDataAxis(baseY, (binSize && binSize.get("y")) || DEFAULT_BUCKET_COUNT);
     const z = squashDataIntoBuckets(
         filteredCols,
         binSize
@@ -173,11 +178,11 @@ function HeatmapGraph(props) {
     );
 
     const xAxisTitle =
-        (axisLabels && axisLabels.get(featureList[0])) ||
+        (axisLabels && axisLabels.get(xAxis)) ||
         props.data.find(feature => feature.get("feature") === featureList[0]).get("displayName");
 
     const yAxisTitle =
-        (axisLabels && axisLabels.get(featureList[1])) ||
+        (axisLabels && axisLabels.get(yAxis)) ||
         props.data.find(feature => feature.get("feature") === featureList[1]).get("displayName");
 
     const featureDisplayNames = featureList.map(featureName =>
@@ -254,6 +259,8 @@ function HeatmapGraph(props) {
             }, {})
         );
         setWindowTitle(featureDisplayNames.join(" vs "));
+        setXAxis(featureList[0]);
+        setYAxis(featureList[1]);
     }
 
     useEffect(_ => {

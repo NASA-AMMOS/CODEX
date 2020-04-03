@@ -113,7 +113,6 @@ function AxisScalesPicker(props) {
         );
     }
 
-    console.log(axisScales);
     return axisScales ? (
         <div className="axis">
             <label>Log Scale</label>
@@ -529,42 +528,6 @@ function HeatmapGraphEditor(props) {
 
     return (
         <React.Fragment>
-            <div className="axis">
-                <label>X-Axis</label>
-                <TextField
-                    className="title-field axis-label"
-                    value={
-                        (axisLabels && axisLabels.get(features.get(0))) ||
-                        featureNameList.get(features.get(0), features.get(0))
-                    }
-                    onChange={handleChangeAxisLabels(features.get(0))}
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <EditIcon />
-                            </InputAdornment>
-                        )
-                    }}
-                />
-            </div>
-            <div className="axis">
-                <label>Y-Axis</label>
-                <TextField
-                    className="title-field axis-label"
-                    value={
-                        (axisLabels && axisLabels.get(features.get(1))) ||
-                        featureNameList.get(features.get(1), features.get(1))
-                    }
-                    onChange={handleChangeAxisLabels(features.get(1))}
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <EditIcon />
-                            </InputAdornment>
-                        )
-                    }}
-                />
-            </div>
             <Button className="swap-button" onClick={_ => setFeatures(features.reverse())}>
                 Swap Axes <SwapAxesIcon width="14" height="14" />
             </Button>
