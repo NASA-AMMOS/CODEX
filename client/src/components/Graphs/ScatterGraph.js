@@ -74,8 +74,8 @@ function ScatterGraph(props) {
         const baseData = filterBounds(featureNames, sanitizedCols, bounds && bounds.toJS());
         if (!axisScale) return baseData;
         return baseData.map((col, idx) => {
-            const scale =
-                axisScale.find(f => f.get("name") === featureNames[idx]).get("scale") || "linear";
+            const scaleData = axisScale.find(f => f.get("name") === featureNames[idx]);
+            const scale = scaleData || "linear";
             if (scale === "linear") return col;
             const scaleFunc = scaleLog()
                 .clamp(true)
@@ -249,13 +249,12 @@ function ScatterGraph(props) {
         if (!dotSize) setDotSize(DEFAULT_POINT_SIZE);
         if (!dotOpacity) setDotOpacity(DEFAULT_POINT_OPACITY);
         if (!dotShape) setDotShape(DEFAULT_POINT_SHAPE);
-        if (!axisScale)
-            setAxisScale(
-                featureNames.map(featureName => ({
-                    name: featureName,
-                    scale: "linear"
-                }))
-            );
+        setAxisScale(
+            featureNames.map(featureName => ({
+                name: featureName,
+                scale: "linear"
+            }))
+        );
         setTrendLineVisible(false);
         setShowGridLines(true);
         if (!xAxis) setXAxis(featureNames[0]);

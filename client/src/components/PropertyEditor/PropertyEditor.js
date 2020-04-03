@@ -6,7 +6,7 @@ import CheckboxIcon from "@material-ui/icons/CheckBox";
 import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
 import EditIcon from "@material-ui/icons/Edit";
 import Immutable from "immutable";
-import React from "react";
+import React, { useRef } from "react";
 import TextField from "@material-ui/core/TextField";
 
 import { NUM_FEATURES_REQUIRED } from "components/Graphs/GraphWindow";
@@ -204,6 +204,8 @@ function ScatterOptionsEditor(props) {
 function ChangeGraphType(props) {
     const [windowType, setWindowType] = useWindowType(props.activeWindowId);
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
+    const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
+    const [activeWindowId] = useActiveWindow();
 
     const availableWindowTypes = windowTypes.graphs.filter(type => {
         const featuresRequired = NUM_FEATURES_REQUIRED[type];
@@ -214,10 +216,17 @@ function ChangeGraphType(props) {
         );
     });
 
+    const menuRef = useRef();
+    function handleDropdown(e) {
+        setWindowType(e.target.value);
+        menuRef.current.blur();
+        setAllowGraphHotkeys(true);
+    }
+
     return (
         <div className="axis">
             <label>Graph Type</label>
-            <select value={windowType} onChange={e => setWindowType(e.target.value)}>
+            <select value={windowType} onChange={handleDropdown} ref={menuRef}>
                 {availableWindowTypes.map(f => (
                     <option value={f} key={f}>
                         {f}
