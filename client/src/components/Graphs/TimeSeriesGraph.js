@@ -107,7 +107,7 @@ function TimeSeriesGraph(props) {
         ])
         .map(([col, bound]) => [utils.removeSentinelValues([col], props.fileInfo)[0], bound]);
 
-    const filteredCols = baseCols.map(([col, bound]) => filterSingleCol(col, bound));
+    const filteredCols = baseCols.map(([col, bound]) => filterSingleCol(col, bound, true));
 
     const trendLineTraces = filteredCols.map((col, idx) => {
         const timeAxis = [...Array(col.length).keys()];
@@ -117,11 +117,12 @@ function TimeSeriesGraph(props) {
             y,
             type: "scatter",
             mode: "lines",
+            hoverinfo: "x+y",
             marker: { color: "red", size: 5 },
             visible: Boolean(trendLineVisible)
         };
         if (idx > 0) {
-            trace.xaxis = `x${idx + 1}`;
+            trace.xaxis = `x`;
             trace.yaxis = `y${idx + 1}`;
         }
         return trace;
@@ -138,7 +139,7 @@ function TimeSeriesGraph(props) {
                 marker: { color: DEFAULT_POINT_COLOR }
             };
             if (idx > 0) {
-                trace.xaxis = `x${idx + 1}`;
+                trace.xaxis = `x`;
                 trace.yaxis = `y${idx + 1}`;
             }
             return trace;
@@ -154,7 +155,7 @@ function TimeSeriesGraph(props) {
             grid: {
                 rows: traces.length,
                 columns: 1,
-                pattern: "independent"
+                subplots: utils.range(traces.length).map(idx => [`xy${idx ? idx + 1 : ""}`])
             },
             showlegend: false,
             margin: { l: 40, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space

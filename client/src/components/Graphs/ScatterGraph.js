@@ -109,6 +109,7 @@ function ScatterGraph(props) {
                 y,
                 type: "scatter",
                 mode: "markers",
+                hoverinfo: "x+y",
                 marker: {
                     color: new TinyColor(DEFAULT_POINT_COLOR).setAlpha(opacity).toString(),
                     size: dotSize,
@@ -128,6 +129,7 @@ function ScatterGraph(props) {
                 y,
                 type: "scattergl",
                 mode: "lines",
+                hoverinfo: "x+y",
                 marker: { color: "red", size: 5 },
                 visible: trendLineVisible
             };
