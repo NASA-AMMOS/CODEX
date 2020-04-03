@@ -71,7 +71,7 @@ function makeSelectionShapes(selection, data, chartRef) {
                     const posIdx = data.length - idx - 1;
                     return {
                         type: "rect",
-                        xref: `x`,
+                        xref: `x${idx === 0 ? "" : idx + 1}`,
                         yref: "paper",
                         x0: bounds[0],
                         y0: posIdx * xSize,
@@ -100,27 +100,10 @@ function HistogramGraph(props) {
     );
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
+    const [zoom, setZoom] = useState([0, 100]);
 
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
-
-    const layouts = features.reduce((acc, feature, idx) => {
-        const xAxisName = `xaxis`;
-        const yAxisName = `yaxis${idx === 0 ? "" : idx + 1}`;
-        acc[xAxisName] = {
-            title: "",
-            automargin: true,
-            showline: false,
-            showticklabels: false
-        };
-        acc[yAxisName] = {
-            title:
-                (axisLabels && axisLabels.get(feature.feature, feature.feature)) || feature.feature,
-            automargin: true,
-            fixedrange: true
-        };
-        return acc;
-    }, {});
 
     const baseCols = featureNames
         .map(colName => [
@@ -134,15 +117,34 @@ function HistogramGraph(props) {
 
     const filteredCols = baseCols.map(([col, bound]) => filterSingleCol(col, bound));
 
-    const traces = features.map((feature, idx) => {
-        const min = Math.min(...filteredCols[idx]);
-        const max = Math.max(...filteredCols[idx]);
+    const layouts = features.reduce((acc, feature, idx) => {
+        const xAxisName = `xaxis${idx === 0 ? "" : idx + 1}`;
+        const yAxisName = `yaxis${idx === 0 ? "" : idx + 1}`;
+        const x = filteredCols[idx];
         const scale = scaleLinear()
-            .domain([min, max])
-            .range([0, 1000000]);
-        const x = filteredCols[idx].map(scale);
-        const scaledMin = Math.min(...x);
-        const scaledMax = Math.max(...x);
+            .domain([0, 100])
+            .range([Math.min(...x), Math.max(...x)]);
+        const range = zoom.map(scale);
+        acc[xAxisName] = {
+            title: "",
+            automargin: true,
+            showline: true,
+            showticklabels: true,
+            range
+        };
+        acc[yAxisName] = {
+            title:
+                (axisLabels && axisLabels.get(feature.feature, feature.feature)) || feature.feature,
+            automargin: true,
+            fixedrange: true
+        };
+        return acc;
+    }, {});
+
+    const traces = features.map((feature, idx) => {
+        const x = filteredCols[idx];
+        const min = Math.min(...x);
+        const max = Math.max(...x);
         const trace = {
             x,
             type: "histogram",
@@ -150,13 +152,14 @@ function HistogramGraph(props) {
             marker: { color: DEFAULT_POINT_COLOR },
             name: "",
             xbins: {
-                start: scaledMin,
-                end: scaledMax,
-                size: (scaledMax - scaledMin) / ((binSize && binSize.get("x")) || DEFAULT_BINS)
-            }
+                start: min,
+                end: max,
+                size: (max - min) / ((binSize && binSize.get("x")) || DEFAULT_BINS)
+            },
+            selected: { marker: { color: DEFAULT_POINT_COLOR } }
         };
         if (idx > 0) {
-            trace.xaxis = `x`;
+            trace.xaxis = `x${idx + 1}`;
             trace.yaxis = `y${idx + 1}`;
         }
         return trace;
@@ -169,7 +172,7 @@ function HistogramGraph(props) {
         grid: {
             rows: traces.length,
             columns: 1,
-            subplots: utils.range(traces.length).map(idx => [`xy${idx ? idx + 1 : ""}`])
+            pattern: "independent"
         },
         showlegend: false,
         margin: { l: 40, r: 5, t: 5, b: 5 }, // Axis tick labels are drawn in the margin space
@@ -260,7 +263,7 @@ function HistogramGraph(props) {
             updateData();
             updateChartRevision();
         },
-        [bounds, binSize, axisLabels]
+        [bounds, binSize, axisLabels, zoom]
     );
 
     // Effect to handle drawing of selections
@@ -303,6 +306,33 @@ function HistogramGraph(props) {
         [needsAutoscale]
     );
 
+    // Synchronizes zoom/pan actions
+    function handleRelayout(e) {
+        const selKey = Object.keys(e).find(key => key.startsWith("xaxis"));
+        if (!selKey) return;
+        const parsedKey = selKey.match(/xaxis(\d)/) ? selKey.match(/xaxis(\d)/) : ["xaxis", 1];
+        const dataIndex = parseInt(parsedKey[1]) - 1;
+        const zoomMin = e[`${parsedKey[0]}.range[0]`];
+        const zoomMax = e[`${parsedKey[0]}.range[1]`];
+        const dataset = filteredCols[dataIndex];
+        const scale = scaleLinear()
+            .domain([Math.min(...dataset), Math.max(...dataset)])
+            .range([0, 100]);
+        setZoom([zoomMin, zoomMax].map(scale));
+    }
+
+    function handleSelection(e) {
+        if (!e) return;
+        const selKey = Object.keys(e.range).find(key => key.startsWith("x"));
+        const dataIndex = selKey.substr(1).length ? parseInt(selKey.substr(1)) - 1 : 0;
+        const points = utils.indicesInRange(
+            filteredCols[dataIndex],
+            e.range[selKey][0],
+            e.range[selKey][1]
+        );
+        props.setCurrentSelection(points);
+    }
+
     return (
         <GraphWrapper chart={chart} win={props.win} chartId={chartId}>
             <Plot
@@ -319,17 +349,8 @@ function HistogramGraph(props) {
                     if (e.event.button === 2 || e.event.ctrlKey) return;
                     props.setCurrentSelection([]);
                 }}
-                onSelected={e => {
-                    if (!e) return;
-                    const selKey = Object.keys(e.range).find(key => key.startsWith("x"));
-                    const dataIndex = selKey.substr(1).length ? parseInt(selKey.substr(1)) - 1 : 0;
-                    const points = utils.indicesInRange(
-                        chartState.data[dataIndex].x,
-                        e.range[selKey][0],
-                        e.range[selKey][1]
-                    );
-                    props.setCurrentSelection(points);
-                }}
+                onSelected={handleSelection}
+                onRelayout={handleRelayout}
             />
         </GraphWrapper>
     );
