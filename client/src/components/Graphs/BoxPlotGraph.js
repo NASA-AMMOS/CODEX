@@ -89,7 +89,7 @@ function BoxPlotGraph(props) {
         const xAxisName = `xaxis${idx === 0 ? "" : idx + 1}`;
         const yAxisName = `yaxis`;
         acc[xAxisName] = {
-            title: axisLabels && axisLabels.get(feature.feature, feature.feature),
+            title: axisLabels ? axisLabels.get(feature.feature, feature.feature) : feature.feature,
             automargin: true,
             showline: false,
             fixedrange: true

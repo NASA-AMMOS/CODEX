@@ -91,7 +91,7 @@ function TimeSeriesGraph(props) {
     const layouts = features.reduce((acc, feature, idx) => {
         const axisName = `yaxis${idx === 0 ? "" : idx + 1}`;
         acc[axisName] = {
-            title: axisLabels && axisLabels.get(feature.feature, feature.feature),
+            title: axisLabels ? axisLabels.get(feature.feature, feature.feature) : feature.feature,
             fixedrange: true
         };
         return acc;
