@@ -69,6 +69,7 @@ function MapGraph(props) {
         props.win.id
     );
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
+    const chartRevision = useRef(0);
 
     //the number of interpolation steps that you can take caps at 5?
     const interpolatedColors = graphFunctions.interpolateColors(
@@ -88,6 +89,10 @@ function MapGraph(props) {
     const featureDisplayNames = featureList.map(featureName =>
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
     );
+
+    const zAxisTitle =
+        (axisLabels && axisLabels.get(zAxis)) ||
+        props.data.find(feature => feature.get("feature") === featureList[2]).get("displayName");
 
     function setDefaults() {
         setBounds(
@@ -117,7 +122,8 @@ function MapGraph(props) {
               lon: cols[1].data,
               lat: cols[0].data,
               z: cols[2].data,
-              colorscale: interpolatedColors
+              colorscale: interpolatedColors,
+              colorbar: { title: zAxisTitle }
           }
         : {
               type: "scattermapbox",
@@ -131,6 +137,7 @@ function MapGraph(props) {
         data: [dataset],
         layout: {
             dragmode: "zoom",
+            datarevision: chartRevision.current,
             mapbox: {
                 ...getMapConfig(DEFAULT_MAP_TYPE),
                 zoom: DEFAULT_ZOOM
@@ -159,6 +166,14 @@ function MapGraph(props) {
             displayModeBar: false
         }
     });
+
+    function updateChartRevision() {
+        chartRevision.current++;
+        setChartState({
+            ...chartState,
+            layout: { ...chartState.layout, datarevision: chartRevision.current }
+        });
+    }
 
     // Effect to keep map type updated if it's changed
     useEffect(
@@ -202,10 +217,19 @@ function MapGraph(props) {
 
             newData[0].lon = cols.find(col => col.feature === yAxis).data;
             if (zAxis) newData[0].z = cols.find(col => col.feature === zAxis).data;
+            newData[0].colorbar.title = zAxisTitle;
             setChartState(state => ({ ...state, data: newData }));
             setRenderKey(renderKey + 1);
         },
         [bounds, xAxis, yAxis, zAxis]
+    );
+
+    useEffect(
+        _ => {
+            chartState.data = [dataset];
+            updateChartRevision();
+        },
+        [axisLabels]
     );
 
     useEffect(
