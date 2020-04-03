@@ -26,6 +26,7 @@ import {
     useWindowXAxis,
     useWindowYAxis
 } from "../../hooks/WindowHooks";
+import { scaleLog } from "d3-scale";
 
 const DEFAULT_POINT_COLOR = "rgba(0, 0, 0, 0.5)";
 const DEFAULT_POINT_OPACITY = 0.5;
@@ -69,7 +70,20 @@ function ScatterGraph(props) {
         props.fileInfo
     );
 
-    const filteredCols = filterBounds(featureNames, sanitizedCols, bounds && bounds.toJS());
+    const filteredCols = (function() {
+        const baseData = filterBounds(featureNames, sanitizedCols, bounds && bounds.toJS());
+        if (!axisScale) return baseData;
+        return baseData.map((col, idx) => {
+            const scale =
+                axisScale.find(f => f.get("name") === featureNames[idx]).get("scale") || "linear";
+            if (scale === "linear") return col;
+            const scaleFunc = scaleLog()
+                .clamp(true)
+                .domain([0.1, Math.max(...col)])
+                .nice();
+            return col.map(val => scaleFunc(val));
+        });
+    })();
 
     const baseX = xAxis
         ? filteredCols[featureNames.findIndex(feature => feature === xAxis)]
@@ -128,7 +142,10 @@ function ScatterGraph(props) {
                 x,
                 y,
                 type: "scattergl",
-                mode: "lines",
+                mode:
+                    axisScale && axisScale.every(x => x.get("scale") === "log")
+                        ? "markers"
+                        : "lines",
                 hoverinfo: "x+y",
                 marker: { color: "red", size: 5 },
                 visible: trendLineVisible
@@ -267,12 +284,6 @@ function ScatterGraph(props) {
             updateAxes();
             chartState.layout.xaxis.title = xAxisTitle;
             chartState.layout.yaxis.title = yAxisTitle;
-            chartState.layout.xaxis.type = axisScale
-                ? axisScale.find(f => f.get("name") === featureNames[0]).get("scale")
-                : "linear";
-            chartState.layout.yaxis.type = axisScale
-                ? axisScale.find(f => f.get("name") === featureNames[1]).get("scale")
-                : "linear";
             chartState.layout.xaxis.showgrid = showGridLines;
             chartState.layout.yaxis.showgrid = showGridLines;
             updateChartRevision();
