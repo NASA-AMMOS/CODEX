@@ -1,4 +1,4 @@
-import "components/TopBar/TopBar.css";
+import "components/TopBar/TopBar.scss";
 
 import { ButtonGroup } from "reactstrap";
 import { Tooltip } from "@material-ui/core";
@@ -169,7 +169,7 @@ function NavigationBar(props) {
                     className="export-button"
                     onClick={_ => setExportModalVisible(!exportModalVisible)}
                 >
-                    Export
+                    <span>Export</span>
                 </button>
                 <ButtonGroup>
                     <Dropdown>

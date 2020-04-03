@@ -114,3 +114,21 @@
     border-width: 0px 0px 30px 150px;
     border-color: transparent transparent #05101f transparent;
 }
+
+.export-button {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 17px;
+    text-transform: uppercase;
+    font-feature-settings: "cpsp" on, "case" on;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    color: #eeeeee;
+    background: rgba(229, 229, 229, 0.4);
+
+    span {
+        vertical-align: middle;
+    }
+}
