@@ -149,6 +149,10 @@ function HeatmapGraph3d(props) {
         (axisLabels && axisLabels.get(yAxis)) ||
         props.data.find(feature => feature.get("feature") === featureList[1]).get("displayName");
 
+    const zAxisTitle =
+        (axisLabels && axisLabels.get(zAxis)) ||
+        props.data.find(feature => feature.get("feature") === featureList[2]).get("displayName");
+
     const featureDisplayNames = featureList.map(featureName =>
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
     );
@@ -190,7 +194,8 @@ function HeatmapGraph3d(props) {
                 z,
                 type: "heatmap",
                 showscale: true,
-                colorscale: interpolatedColors
+                colorscale: interpolatedColors,
+                colorbar: { title: zAxisTitle }
             }
         ],
         layout: {
@@ -208,7 +213,7 @@ function HeatmapGraph3d(props) {
                 anchor: "x"
             },
             autosize: true,
-            margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
+            margin: { l: 0, r: 30, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
             hovermode: false, // Turning off hovermode seems to screw up click handling
             titlefont: { size: 5 },
             annotations: []
@@ -246,6 +251,7 @@ function HeatmapGraph3d(props) {
             updateAxes();
             chartState.layout.xaxis.title = xAxisTitle;
             chartState.layout.yaxis.title = yAxisTitle;
+            chartState.data[0].colorbar.title = zAxisTitle;
             updateChartRevision();
         },
         [featuresImmutable, axisLabels, binSize, bounds, xAxis, yAxis, zAxis]

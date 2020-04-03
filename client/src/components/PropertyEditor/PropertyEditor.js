@@ -113,7 +113,6 @@ function AxisScalesPicker(props) {
         );
     }
 
-    console.log(axisScales);
     return axisScales ? (
         <div className="axis">
             <label>Log Scale</label>
@@ -737,6 +736,7 @@ function MapGraphEditor(props) {
     const swapAxes = useSwapAxes(props.activeWindowId);
     const [graphBounds, setGraphBounds] = useWindowGraphBounds(props.activeWindowId);
     const [featureNameList] = useFeatureDisplayNames();
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.activeWindowId);
 
     function handleChangeBounds(axis, bound) {
         return e => setGraphBounds(graphBounds.setIn([axis, bound], parseFloat(e.target.value)));
@@ -747,6 +747,10 @@ function MapGraphEditor(props) {
         const y = yAxis;
         setXAxis(y);
         setYAxis(x);
+    }
+
+    function handleChangeAxisLabels(axis) {
+        return e => setAxisLabels(axisLabels.set(axis, e.target.value));
     }
 
     if (!features) return null;
@@ -791,6 +795,14 @@ function MapGraphEditor(props) {
             />
             {features.size === 2 ? null : (
                 <React.Fragment>
+                    <TextField
+                        label={"Heat label"}
+                        variant="filled"
+                        className="text-input"
+                        value={axisLabels ? axisLabels.get(zAxis) : zAxis}
+                        InputLabelProps={{ shrink: true }}
+                        onChange={handleChangeAxisLabels(zAxis)}
+                    />
                     <TextField
                         label="Heat min"
                         variant="filled"
