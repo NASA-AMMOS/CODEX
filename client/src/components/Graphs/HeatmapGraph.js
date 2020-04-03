@@ -239,32 +239,33 @@ function HeatmapGraph(props) {
     }
 
     function setDefaults() {
-        setBounds(
-            featureList.reduce((acc, colName, idx) => {
-                acc[colName] = {
-                    min: Math.min(...sanitizedCols[idx]),
-                    max: Math.max(...sanitizedCols[idx])
-                };
-                return acc;
-            }, {})
-        );
+        if (!bounds)
+            setBounds(
+                featureList.reduce((acc, colName, idx) => {
+                    acc[colName] = {
+                        min: Math.min(...sanitizedCols[idx]),
+                        max: Math.max(...sanitizedCols[idx])
+                    };
+                    return acc;
+                }, {})
+            );
         setBinSize({
             x: DEFAULT_BUCKET_COUNT,
             y: DEFAULT_BUCKET_COUNT
         });
-        setAxisLabels(
-            featureList.reduce((acc, featureName) => {
-                acc[featureName] = featureName;
-                return acc;
-            }, {})
-        );
-        setWindowTitle(featureDisplayNames.join(" vs "));
-        setXAxis(featureList[0]);
-        setYAxis(featureList[1]);
+        if (!axisLabels)
+            setAxisLabels(
+                featureList.reduce((acc, featureName) => {
+                    acc[featureName] = featureName;
+                    return acc;
+                }, {})
+            );
+        if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        if (!xAxis) setXAxis(featureList[0]);
+        if (!yAxis) setYAxis(featureList[1]);
     }
 
     useEffect(_ => {
-        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
         setDefaults();
         updateChartRevision();
     }, []);

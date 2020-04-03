@@ -99,7 +99,7 @@ function KeyboardHandler(props) {
     );
 
     // spacebar toggles pan
-    const spacebar = useKey(" ");
+    const spacebar = useKey(" ", { preventDefault: true });
     useEffect(
         _ => {
             if (!allowGraphHotkeys) return;
