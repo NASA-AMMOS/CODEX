@@ -113,6 +113,7 @@ function AxisScalesPicker(props) {
         );
     }
 
+    console.log(axisScales);
     return axisScales ? (
         <div className="axis">
             <label>Log Scale</label>

@@ -340,30 +340,32 @@ function SingleXMultipleYGraph(props) {
     );
 
     function setDefaults() {
-        setFeatureInfo(baseFeatureInfo);
-        setBounds(
-            cols.reduce((acc, col) => {
-                acc[col.name] = { min: Math.min(...col.data), max: Math.max(...col.data) };
-                return acc;
-            }, {})
-        );
-        setAxisLabels(
-            featureList.reduce((acc, featureName) => {
-                acc[featureName] = featureNameList.get(featureName, featureName);
-                return acc;
-            }, {})
-        );
-        setShowGridLines(true);
-        setXAxis(uiTypes.GRAPH_INDEX);
-        setWindowTitle(featureDisplayNames.join(" vs "));
-        setAxisScales([
-            { name: `X (${xAxisTitle})`, scale: "linear" },
-            { name: `Y (${yAxisTitle})`, scale: "linear" }
-        ]);
+        if (!featureInfo) setFeatureInfo(baseFeatureInfo);
+        if (!bounds)
+            setBounds(
+                cols.reduce((acc, col) => {
+                    acc[col.name] = { min: Math.min(...col.data), max: Math.max(...col.data) };
+                    return acc;
+                }, {})
+            );
+        if (!axisLabels)
+            setAxisLabels(
+                featureList.reduce((acc, featureName) => {
+                    acc[featureName] = featureNameList.get(featureName, featureName);
+                    return acc;
+                }, {})
+            );
+        if (showGridLines === undefined) setShowGridLines(true);
+        if (!xAxis) setXAxis(uiTypes.GRAPH_INDEX);
+        if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        if (!axisScales)
+            setAxisScales([
+                { name: `X (${xAxisTitle})`, scale: "linear" },
+                { name: `Y (${yAxisTitle})`, scale: "linear" }
+            ]);
     }
 
     useEffect(_ => {
-        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
         setDefaults();
         updateChartRevision();
     }, []);

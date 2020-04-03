@@ -123,6 +123,7 @@ function ScatterGraph(props) {
                 y,
                 type: "scatter",
                 mode: "markers",
+                hoverinfo: "x+y",
                 marker: {
                     color: new TinyColor(DEFAULT_POINT_COLOR).setAlpha(opacity).toString(),
                     size: dotSize,
@@ -145,6 +146,7 @@ function ScatterGraph(props) {
                     axisScale && axisScale.every(x => x.get("scale") === "log")
                         ? "markers"
                         : "lines",
+                hoverinfo: "x+y",
                 marker: { color: "red", size: 5 },
                 visible: trendLineVisible
             };
@@ -282,12 +284,6 @@ function ScatterGraph(props) {
             updateAxes();
             chartState.layout.xaxis.title = xAxisTitle;
             chartState.layout.yaxis.title = yAxisTitle;
-            // chartState.layout.xaxis.type = axisScale
-            //     ? axisScale.find(f => f.get("name") === featureNames[0]).get("scale")
-            //     : "linear";
-            // chartState.layout.yaxis.type = axisScale
-            //     ? axisScale.find(f => f.get("name") === featureNames[1]).get("scale")
-            //     : "linear";
             chartState.layout.xaxis.showgrid = showGridLines;
             chartState.layout.yaxis.showgrid = showGridLines;
             updateChartRevision();
