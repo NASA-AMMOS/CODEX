@@ -148,7 +148,7 @@ function ScatterGraph(props) {
                         : "lines",
                 hoverinfo: "x+y",
                 marker: { color: "red", size: 5 },
-                visible: trendLineVisible
+                visible: Boolean(trendLineVisible)
             };
         },
         [filteredCols, trendLineVisible]
@@ -229,39 +229,41 @@ function ScatterGraph(props) {
     }
 
     function setDefaults() {
-        setBounds(
-            featureNames.reduce((acc, colName, idx) => {
-                acc[colName] = {
-                    min: Math.min(...sanitizedCols[idx]),
-                    max: Math.max(...sanitizedCols[idx])
-                };
-                return acc;
-            }, {})
-        );
-        setAxisLabels(
-            featureNames.reduce((acc, featureName) => {
-                acc[featureName] = featureName;
-                return acc;
-            }, {})
-        );
-        setDotSize(DEFAULT_POINT_SIZE);
-        setDotOpacity(DEFAULT_POINT_OPACITY);
-        setDotShape(DEFAULT_POINT_SHAPE);
-        setAxisScale(
-            featureNames.map(featureName => ({
-                name: featureName,
-                scale: "linear"
-            }))
-        );
+        if (!bounds)
+            setBounds(
+                featureNames.reduce((acc, colName, idx) => {
+                    acc[colName] = {
+                        min: Math.min(...sanitizedCols[idx]),
+                        max: Math.max(...sanitizedCols[idx])
+                    };
+                    return acc;
+                }, {})
+            );
+        if (!axisLabels)
+            setAxisLabels(
+                featureNames.reduce((acc, featureName) => {
+                    acc[featureName] = featureName;
+                    return acc;
+                }, {})
+            );
+        if (!dotSize) setDotSize(DEFAULT_POINT_SIZE);
+        if (!dotOpacity) setDotOpacity(DEFAULT_POINT_OPACITY);
+        if (!dotShape) setDotShape(DEFAULT_POINT_SHAPE);
+        if (!axisScale)
+            setAxisScale(
+                featureNames.map(featureName => ({
+                    name: featureName,
+                    scale: "linear"
+                }))
+            );
         setTrendLineVisible(false);
         setShowGridLines(true);
-        setXAxis(featureNames[0]);
-        setYAxis(featureNames[1]);
-        setWindowTitle(featureDisplayNames.join(" vs "));
+        if (!xAxis) setXAxis(featureNames[0]);
+        if (!yAxis) setYAxis(featureNames[1]);
+        if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
     }
 
     useEffect(_ => {
-        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
         setDefaults();
         updateChartRevision();
     }, []);
