@@ -378,7 +378,7 @@ function ContourGraph(props) {
         layout: {
             autosize: true,
             margin: { l: 35, r: 0, t: 0, b: 25 }, // Axis tick labels are drawn in the margin space
-            dragmode: "lasso",
+            dragmode: props.globalChartState || "lasso",
             datarevision: chartRevision,
             hovermode: "closest",
             xaxis: {
@@ -443,6 +443,14 @@ function ContourGraph(props) {
         setDefaults();
         updateChartRevision();
     }, []);
+
+    useEffect(
+        _ => {
+            chartState.layout.dragmode = props.globalChartState;
+            updateChartRevision();
+        },
+        [props.globalChartState]
+    );
 
     function updateAxes() {
         chartState.data[0].x = x;
