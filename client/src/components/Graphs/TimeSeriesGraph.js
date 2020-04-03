@@ -109,15 +109,16 @@ function TimeSeriesGraph(props) {
 
     const filteredCols = baseCols.map(([col, bound]) => filterSingleCol(col, bound));
 
-    const timeAxis = [...Array(filteredCols[0].length).keys()];
-    const traces = features.map((feature, idx) => {
+    const trendLineTraces = filteredCols.map((col, idx) => {
+        const timeAxis = [...Array(col.length).keys()];
+        const [x, y] = unzip(regression.linear(unzip([timeAxis, col])).points);
         const trace = {
-            x: timeAxis,
-            y: filteredCols[idx],
-            mode: "lines",
+            x,
+            y,
             type: "scatter",
-            hoverinfo: "x+y",
-            marker: { color: DEFAULT_POINT_COLOR }
+            mode: "lines",
+            marker: { color: "red", size: 5 },
+            visible: Boolean(trendLineVisible)
         };
         if (idx > 0) {
             trace.xaxis = `x`;
@@ -125,6 +126,24 @@ function TimeSeriesGraph(props) {
         }
         return trace;
     });
+
+    const traces = filteredCols
+        .map((col, idx) => {
+            const trace = {
+                x: [...Array(col.length).keys()],
+                y: col,
+                mode: "lines",
+                type: "scatter",
+                hoverinfo: "x+y",
+                marker: { color: DEFAULT_POINT_COLOR }
+            };
+            if (idx > 0) {
+                trace.xaxis = `x`;
+                trace.yaxis = `y${idx + 1}`;
+            }
+            return trace;
+        })
+        .concat(trendLineTraces);
 
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
@@ -223,7 +242,7 @@ function TimeSeriesGraph(props) {
             updateData();
             updateChartRevision();
         },
-        [bounds]
+        [bounds, trendLineVisible]
     );
 
     // Effect to handle drawing of selections
@@ -261,49 +280,12 @@ function TimeSeriesGraph(props) {
         [axisLabels]
     );
 
-    function drawTrendLines() {
-        if (trendLineVisible) {
-            const timeAxis = [...Array(filteredCols[0].length).keys()];
-            features.forEach((feature, idx) => {
-                const [x, y] = unzip(
-                    regression.linear(unzip([timeAxis, filteredCols[idx]])).points
-                );
-                const trace = {
-                    x,
-                    y,
-                    type: "scatter",
-                    mode: "lines",
-                    marker: { color: "red", size: 5 },
-                    visible: true,
-                    isTrendLine: true
-                };
-                if (idx > 0) {
-                    trace.xaxis = `x`;
-                    trace.yaxis = `y${idx + 1}`;
-                }
-                chartState.data.push(trace);
-            });
-        } else {
-            chartState.data = chartState.data.filter(trace => !trace.isTrendLine);
-        }
-    }
-
-    useEffect(
-        _ => {
-            drawTrendLines();
-            updateChartRevision();
-        },
-        [trendLineVisible]
-    );
-
     useEffect(
         _ => {
             Object.keys(chartState.layout).forEach(key => {
                 if (!key.includes("axis")) return;
                 chartState.layout[key].showgrid = showGridLines;
             });
-            updateChartRevision();
-            drawTrendLines();
             updateChartRevision();
         },
         [showGridLines]
