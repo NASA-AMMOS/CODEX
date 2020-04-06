@@ -9,12 +9,12 @@ import Immutable from "immutable";
 import React, { useRef } from "react";
 import TextField from "@material-ui/core/TextField";
 
-import { NUM_FEATURES_REQUIRED } from "components/Graphs/GraphWindow";
 import SwapAxesIcon from "components/Icons/SwapAxes";
 import * as scatterGraphTypes from "constants/scatterGraphTypes";
 import * as uiTypes from "constants/uiTypes";
 import * as windowTypes from "constants/windowTypes";
 
+import { NUM_FEATURES_REQUIRED } from "../../constants/windowTypes";
 import { useAllowGraphHotkeys } from "../../hooks/UIHooks";
 import { useFeatureDisplayNames } from "../../hooks/DataHooks";
 import {

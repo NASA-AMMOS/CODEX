@@ -19,13 +19,13 @@ import * as windowTypes from "constants/windowTypes";
 import * as workflowActions from "actions/workflowActions";
 import * as workflowTypes from "constants/workflowTypes";
 
-import { NUM_FEATURES_REQUIRED } from "../Graphs/GraphWindow";
 import { useExportModalVisible } from "../../hooks/UIHooks";
-import { useSelectedFeatureNames } from "../../hooks/DataHooks";
+import { useSavedSelections, useSelectedFeatureNames } from "../../hooks/DataHooks";
 
 function NavigationBar(props) {
     const [features] = useSelectedFeatureNames();
     const defaultBackground = "#05101f";
+    const [savedSelections] = useSavedSelections();
 
     const ref = useRef(null);
     const ref_loading = useRef(null);
@@ -37,7 +37,7 @@ function NavigationBar(props) {
 
     function createMenuItem(window_type, title) {
         const [disabled, errMsg] = (function() {
-            const requiredNumFeatures = NUM_FEATURES_REQUIRED[window_type];
+            const requiredNumFeatures = windowTypes.NUM_FEATURES_REQUIRED[window_type];
             if (requiredNumFeatures === undefined) return [false, null];
             if (typeof requiredNumFeatures === "number") {
                 if (features.size !== requiredNumFeatures) {
@@ -45,15 +45,40 @@ function NavigationBar(props) {
                 }
                 return [false, null];
             }
-            if (features.size < requiredNumFeatures[0] || features.size > requiredNumFeatures[1]) {
-                return [
-                    true,
-                    `Requires between ${requiredNumFeatures[0]} and ${
-                        requiredNumFeatures[1]
-                    } selected features`
-                ];
-            }
-            return [false, null];
+
+            const [featuresErr, featuresErrMsg] = (function() {
+                if (requiredNumFeatures[1])
+                    return features.size < requiredNumFeatures[0] ||
+                        features.size > requiredNumFeatures[1]
+                        ? [
+                              true,
+                              `Requires between ${requiredNumFeatures[0]} and ${
+                                  requiredNumFeatures[1]
+                              } selected features`
+                          ]
+                        : [false, null];
+                return features.size < requiredNumFeatures[0]
+                    ? [true, `Requires at least ${requiredNumFeatures[0]} selected features`]
+                    : [false, null];
+            })();
+
+            const [selErr, selErrMsg] =
+                requiredNumFeatures[2] && savedSelections.length < requiredNumFeatures[2]
+                    ? [
+                          true,
+                          featuresErr
+                              ? ` and at least ${requiredNumFeatures[2]} selection${
+                                    requiredNumFeatures > 1 ? "s" : ""
+                                }`
+                              : `At least ${requiredNumFeatures[2]} selection${
+                                    requiredNumFeatures > 1 ? "s" : ""
+                                } required`
+                      ]
+                    : [false, null];
+
+            const err = featuresErr || selErr;
+            const errMsg = (featuresErr ? featuresErrMsg : "") + (selErr ? selErrMsg : "");
+            return [err, errMsg];
         })();
 
         return (

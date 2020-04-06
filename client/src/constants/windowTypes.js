@@ -69,3 +69,13 @@ export const workflows = [
 export const NORMALIZATION_WINDOW = "NORMALIZATION_WINDOW";
 export const PEAK_DETECTION_WINDOW = "PEAK_DETECTION_WINDOW";
 export const TEMPLATE_SCAN_WINDOW = "TEMPLATE_SCAN_WINDOW";
+
+export const NUM_FEATURES_REQUIRED = {
+    [SCATTER_GRAPH]: 2,
+    [CONTOUR_GRAPH]: 2,
+    [HEATMAP_GRAPH]: 2,
+    [HEATMAP_3D_GRAPH]: 3,
+    [MAP_GRAPH]: [2, 3],
+    [EXPLAIN_THIS_WINDOW]: [2, false, 1],
+    [TABLE_WINDOW]: [1]
+};
