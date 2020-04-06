@@ -153,7 +153,7 @@ function TimeSeriesGraph(props) {
         data: traces,
         layout: {
             grid: {
-                rows: traces.length,
+                rows: traces.length / 2,
                 columns: 1,
                 subplots: utils.range(traces.length).map(idx => [`xy${idx ? idx + 1 : ""}`])
             },
