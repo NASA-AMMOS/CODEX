@@ -90,9 +90,11 @@ function MapGraph(props) {
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
     );
 
-    const zAxisTitle =
-        (axisLabels && axisLabels.get(zAxis)) ||
-        props.data.find(feature => feature.get("feature") === featureList[2]).get("displayName");
+    const heatMode = featureList.length === 3;
+    const zAxisTitle = heatMode
+        ? (axisLabels && axisLabels.get(zAxis)) ||
+          props.data.find(feature => feature.get("feature") === featureList[2]).get("displayName")
+        : null;
 
     function setDefaults() {
         setBounds(
@@ -115,7 +117,6 @@ function MapGraph(props) {
         setShowGridLines(true);
     }
 
-    const heatMode = featureList.length === 3;
     const dataset = heatMode
         ? {
               type: "densitymapbox",
@@ -217,7 +218,7 @@ function MapGraph(props) {
 
             newData[0].lon = cols.find(col => col.feature === yAxis).data;
             if (zAxis) newData[0].z = cols.find(col => col.feature === zAxis).data;
-            newData[0].colorbar.title = zAxisTitle;
+            if (heatMode) newData[0].colorbar.title = zAxisTitle;
             setChartState(state => ({ ...state, data: newData }));
             setRenderKey(renderKey + 1);
         },
