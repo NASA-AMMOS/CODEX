@@ -24,14 +24,6 @@ import SingleXMultipleYGraph from "./SingleXMultipleYGraph";
 import TimeSeriesGraph from "./TimeSeriesGraph";
 import ViolinPlotGraph from "./ViolinPlotGraph";
 
-export const NUM_FEATURES_REQUIRED = {
-    [windowTypes.SCATTER_GRAPH]: 2,
-    [windowTypes.CONTOUR_GRAPH]: 2,
-    [windowTypes.HEATMAP_GRAPH]: 2,
-    [windowTypes.HEATMAP_3D_GRAPH]: 3,
-    [windowTypes.MAP_GRAPH]: [2, 3]
-};
-
 function GraphWindow(props) {
     const win = useWindowManager(props, {
         width: 500,
@@ -71,7 +63,7 @@ function GraphWindow(props) {
         win
     };
 
-    const featuresRequired = NUM_FEATURES_REQUIRED[props.windowType];
+    const featuresRequired = windowTypes.NUM_FEATURES_REQUIRED[props.windowType];
     if (featuresRequired) {
         if (
             (typeof featuresRequired === "number" && features.size !== featuresRequired) ||
