@@ -10,7 +10,8 @@ import {
     useFileInfo,
     useHoveredSelection,
     usePinnedFeatures,
-    useSavedSelections
+    useSavedSelections,
+    useSelectedFeatureNames
 } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
 import BoxPlotGraph from "./BoxPlotGraph";
@@ -40,6 +41,7 @@ function GraphWindow(props) {
     let features = usePinnedFeatures(win);
     const [featureNameList] = useFeatureDisplayNames();
     const [allowGraphHotkeys, setAllowGraphHotkeys] = useAllowGraphHotkeys();
+    const [selectedFeatures] = useSelectedFeatureNames();
 
     if (features === null || !win.data) {
         return <WindowCircularProgress />;
@@ -49,6 +51,12 @@ function GraphWindow(props) {
         const featureName = featureNameList.get(feature.get("feature"), feature.get("feature"));
         return feature.set("displayName", featureName);
     });
+    console.log(features.toJS());
+
+    features = selectedFeatures.map(featureName =>
+        features.find(feature => feature.get("feature") === featureName)
+    );
+    console.log(features.toJS());
 
     const baseProps = {
         currentSelection: currentSelection,

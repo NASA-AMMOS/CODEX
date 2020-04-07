@@ -559,7 +559,8 @@ export default class DataReducer {
                     id: getUniqueId(),
                     name: action.name,
                     selected: action.selected,
-                    featureIDs: action.featureIDs
+                    featureIDs: action.featureIDs,
+                    selectedFeatures: Immutable.fromJS([])
                 })
             )
         );
@@ -585,28 +586,19 @@ export default class DataReducer {
     }
 
     static selectFeatureGroup(state, action) {
-        const group = state.get("featureGroups").find(group => group.get("id") === action.id);
-        return state
+        const oldGroup = state.get("featureGroups").find(group => group.get("id") === action.id);
+        const newGroup = oldGroup
+            .set("selected", action.selected)
             .set(
-                "featureGroups",
-                state
-                    .get("featureGroups")
-                    .map(group =>
-                        group.get("id") === action.id
-                            ? group.set("selected", action.selected)
-                            : group
-                    )
-            )
-            .set(
-                "featureList",
-                state
-                    .get("featureList")
-                    .map(feature =>
-                        group.get("featureIDs").includes(feature.get("name"))
-                            ? feature.set("selected", action.selected)
-                            : feature
-                    )
+                "selectedFeatures",
+                action.selected ? oldGroup.get("featureIDs") : Immutable.fromJS([])
             );
+        return state.set(
+            "featureGroups",
+            state
+                .get("featureGroups")
+                .map(group => (group.get("id") === action.id ? newGroup : group))
+        );
     }
 
     static deleteFeatureGroup(state, action) {
@@ -624,6 +616,28 @@ export default class DataReducer {
                 .map(group =>
                     group.get("id") === action.id ? group.set("name", action.name) : group
                 )
+        );
+    }
+
+    static selectFeatureInGroup(state, action) {
+        const oldGroup = state.get("featureGroups").find(group => group.get("id") === action.id);
+        const newGroup = oldGroup.set(
+            "selectedFeatures",
+            action.remove
+                ? oldGroup
+                      .get("selectedFeatures")
+                      .filter(featureName =>
+                          action.remove
+                              ? featureName !== action.featureName
+                              : featureName === action.featureName
+                      )
+                : oldGroup.get("selectedFeatures").push(action.featureName)
+        );
+        return state.set(
+            "featureGroups",
+            state
+                .get("featureGroups")
+                .map(group => (group.get("id") === action.id ? newGroup : group))
         );
     }
 }

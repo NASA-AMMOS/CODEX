@@ -37,6 +37,7 @@ import {
     useFeatureListLoading,
     useRenameFeatureGroup,
     useSelectFeatureGroup,
+    useSelectFeatureInGroup,
     useSetFeatureSelect
 } from "../../hooks/DataHooks";
 import { useWindowList } from "../../hooks/WindowHooks";
@@ -213,6 +214,7 @@ function FeatureContextMenu(props) {
     const displayName = featureNames.get(props.featureName, props.featureName);
 
     const [_, createNewFeatureGroup] = useFeatureGroups();
+    const changeFeatureGroup = useChangeFeatureGroup();
 
     function submitRenamedFeature(e) {
         if (!e.key || (e.key && e.key === "Enter")) {
@@ -225,6 +227,10 @@ function FeatureContextMenu(props) {
     function submitNewFeatureGroup() {
         createNewFeatureGroup("New Group", [props.featureName]);
         props.setContextMenuVisible(false);
+    }
+
+    function removeFeatureFromGroup() {
+        changeFeatureGroup(props.featureName, null);
     }
 
     // To make sure the autofocus works, don't create the rename text field until we need it.
@@ -241,17 +247,20 @@ function FeatureContextMenu(props) {
     return (
         <ClickAwayListener onClickAway={_ => props.setContextMenuVisible(false)}>
             <List>
+                <ListItem button onClick={removeFeatureFromGroup} hidden={!props.groupMode}>
+                    Remove from group
+                </ListItem>
                 <ListItem
                     button
                     onClick={_ => {
                         props.setContextMenuVisible(false);
                         featureDelete(props.featureName);
                     }}
-                    hidden={contextMode}
+                    hidden={props.groupMode || contextMode}
                 >
                     Delete Feature
                 </ListItem>
-                <ListItem hidden={contextMode !== "rename"}>
+                <ListItem hidden={props.groupMode || contextMode !== "rename"}>
                     {renameTextField}
                     <Button
                         variant="outlined"
@@ -267,11 +276,15 @@ function FeatureContextMenu(props) {
                         setContextMode("rename");
                         setRenameSelectionBuffer(displayName);
                     }}
-                    hidden={contextMode}
+                    hidden={props.groupMode || contextMode}
                 >
                     Rename Feature
                 </ListItem>
-                <ListItem button onClick={submitNewFeatureGroup} hidden={contextMode}>
+                <ListItem
+                    button
+                    onClick={submitNewFeatureGroup}
+                    hidden={props.groupMode || contextMode}
+                >
                     Create New Feature Group
                 </ListItem>
             </List>
@@ -383,7 +396,12 @@ function FeatureGroup(props) {
                                 .filter(feature => featureListContext.featureFilter.func(feature))
                                 .filter(featureListContext.searchStringFilter)
                                 .map((feature, idx) => (
-                                    <FeatureItem key={feature.name} feature={feature} idx={idx} />
+                                    <FeatureItem
+                                        key={feature.name}
+                                        feature={feature}
+                                        idx={idx}
+                                        group={props.group}
+                                    />
                                 ))}
                         </div>
                     ) : null}
@@ -417,6 +435,13 @@ function FeatureItem(props) {
     const displayName = featureNames.get(props.feature.name, props.feature.name);
     const [rowHover, setRowHover] = useState(false);
     const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
+    const [groupSelections, setGroupSelection] = props.group
+        ? useSelectFeatureInGroup(props.group.id)
+        : [];
+
+    const isSelected = props.group
+        ? groupSelections.some(feature => props.feature.name)
+        : props.feature.selected;
 
     const featureListContext = useContext(FeatureListContext);
 
@@ -435,6 +460,10 @@ function FeatureItem(props) {
     }
 
     function onSelectClick(e) {
+        if (props.group) {
+            return setGroupSelection(props.feature.name, !e.target.checked);
+        }
+
         featureListContext.lastSelected[1](e.target.checked ? props.feature.name : null);
         const featuresToSelect =
             e.shiftKey && featureListContext.lastSelected[0]
@@ -466,7 +495,7 @@ function FeatureItem(props) {
                     >
                         <div className="feature-name-row">
                             <Checkbox
-                                checked={props.feature.selected}
+                                checked={isSelected}
                                 className="selected-checkbox"
                                 value="checkedA"
                                 style={{ height: "22px", padding: "0px" }}
@@ -500,6 +529,7 @@ function FeatureItem(props) {
                         <FeatureContextMenu
                             featureName={props.feature.name}
                             setContextMenuVisible={setAnchorEl}
+                            groupMode={Boolean(props.group)}
                         />
                     </Popover>
                 </div>
@@ -550,17 +580,12 @@ function FeatureList(props) {
     const [groupedFeatures, setGroupedFeatures] = useState([]);
     useEffect(
         _ => {
-            const ungrouped = featureList.filter(feature =>
-                groups.every(group =>
-                    group.get("featureIDs").every(id => id !== feature.get("name"))
-                )
-            );
             setUngroupedFeatures(
                 ungroupedFeatures
-                    .filter(feature => ungrouped.find(x => x.get("name") === feature.name))
+                    .filter(feature => featureList.find(x => x.get("name") === feature.name))
                     .map(feature => featureList.find(x => x.get("name") === feature.name).toJS())
                     .concat(
-                        ungrouped
+                        featureList
                             .filter(
                                 feature =>
                                     !ungroupedFeatures.find(x => x.name === feature.get("name"))
@@ -686,6 +711,7 @@ function FeatureList(props) {
         ["stats-hidden"]: statsHidden,
         ["stats-not-hidden"]: !statsHidden
     });
+
     return (
         <div className={containerClasses}>
             <FeatureListContext.Provider
