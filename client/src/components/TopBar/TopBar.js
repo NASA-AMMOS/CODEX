@@ -47,7 +47,16 @@ function NavigationBar(props) {
             }
 
             const [featuresErr, featuresErrMsg] = (function() {
-                if (requiredNumFeatures[1])
+                if (requiredNumFeatures[1]) {
+                    if (requiredNumFeatures[0] === requiredNumFeatures[1])
+                        return features.size !== requiredNumFeatures[0]
+                            ? [
+                                  true,
+                                  `Requires selection of ${requiredNumFeatures[0]} feature${
+                                      requiredNumFeatures[0] > 1 ? "s" : ""
+                                  }`
+                              ]
+                            : [false, ""];
                     return features.size < requiredNumFeatures[0] ||
                         features.size > requiredNumFeatures[1]
                         ? [
@@ -57,8 +66,14 @@ function NavigationBar(props) {
                               } selected features`
                           ]
                         : [false, null];
+                }
                 return features.size < requiredNumFeatures[0]
-                    ? [true, `Requires at least ${requiredNumFeatures[0]} selected features`]
+                    ? [
+                          true,
+                          `Requires at least ${requiredNumFeatures[0]} selected feature${
+                              requiredNumFeatures[0] > 1 ? "s" : ""
+                          }`
+                      ]
                     : [false, null];
             })();
 
