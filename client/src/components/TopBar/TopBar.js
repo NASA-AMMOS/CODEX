@@ -173,6 +173,7 @@ function NavigationBar(props) {
                         {createMenuItem(windowTypes.PEAK_DETECTION_WINDOW, "Peak Detection")}
                         {createMenuItem(windowTypes.REGRESSION_WINDOW, "Regression")}
                         {createMenuItem(windowTypes.TEMPLATE_SCAN_WINDOW, "Template Scan")}
+                        {createMenuItem(windowTypes.CORRELATION_WINDOW, "Correlation")}
                     </Dropdown.Menu>
                 </Dropdown>
 
