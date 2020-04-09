@@ -1,85 +1,83 @@
 /**
-* Copyright 2012-2020, Plotly, Inc.
-* All rights reserved.
-*
-* This source code is licensed under the MIT license found in the
-* LICENSE file in the root directory of this source tree.
-*/
+ * Copyright 2012-2020, Plotly, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
-'use strict';
+"use strict";
 
 // package version injected by `npm run preprocess`
-exports.version = '1.52.2';
+exports.version = "1.52.2";
 
 // inject promise polyfill
-require('es6-promise').polyfill();
+require("es6-promise").polyfill();
 
 // inject plot css
-require('../build/plotcss');
+require("../build/plotcss");
 
 // inject default MathJax config
-require('./fonts/mathjax_config')();
+require("./fonts/mathjax_config")();
 
 // include registry module and expose register method
-var Registry = require('./registry');
-var register = exports.register = Registry.register;
+var Registry = require("./registry");
+var register = (exports.register = Registry.register);
 
 // expose plot api methods
-var plotApi = require('./plot_api');
+var plotApi = require("./plot_api");
 var methodNames = Object.keys(plotApi);
-for(var i = 0; i < methodNames.length; i++) {
+for (var i = 0; i < methodNames.length; i++) {
     var name = methodNames[i];
     // _ -> private API methods, but still registered for internal use
-    if(name.charAt(0) !== '_') exports[name] = plotApi[name];
+    if (name.charAt(0) !== "_") exports[name] = plotApi[name];
     register({
-        moduleType: 'apiMethod',
+        moduleType: "apiMethod",
         name: name,
         fn: plotApi[name]
     });
 }
 
 // scatter is the only trace included by default
-register(require('./traces/scatter'));
+register(require("./traces/scatter"));
+register(require("./traces/heatmap"));
 
 // register all registrable components modules
 register([
-    require('./components/fx'),
-    require('./components/legend'),
-    require('./components/annotations'),
-    require('./components/annotations3d'),
-    require('./components/shapes'),
-    require('./components/images'),
-    require('./components/updatemenus'),
-    require('./components/sliders'),
-    require('./components/rangeslider'),
-    require('./components/rangeselector'),
-    require('./components/grid'),
-    require('./components/errorbars'),
-    require('./components/colorscale'),
-    require('./components/colorbar')
+    require("./components/fx"),
+    require("./components/legend"),
+    require("./components/annotations"),
+    require("./components/annotations3d"),
+    require("./components/shapes"),
+    require("./components/images"),
+    require("./components/updatemenus"),
+    require("./components/sliders"),
+    require("./components/rangeslider"),
+    require("./components/rangeselector"),
+    require("./components/grid"),
+    require("./components/errorbars"),
+    require("./components/colorscale"),
+    require("./components/colorbar")
 ]);
 
 // locales en and en-US are required for default behavior
-register([
-    require('./locale-en'),
-    require('./locale-en-us')
-]);
+register([require("./locale-en"), require("./locale-en-us")]);
 
 // locales that are present in the window should be loaded
-if(window.PlotlyLocales && Array.isArray(window.PlotlyLocales)) {
+if (window.PlotlyLocales && Array.isArray(window.PlotlyLocales)) {
     register(window.PlotlyLocales);
     delete window.PlotlyLocales;
 }
 
 // plot icons
-exports.Icons = require('./fonts/ploticon');
+exports.Icons = require("./fonts/ploticon");
 
 // unofficial 'beta' plot methods, use at your own risk
-exports.Plots = require('./plots/plots');
-exports.Fx = require('./components/fx');
-exports.Snapshot = require('./snapshot');
-exports.PlotSchema = require('./plot_api/plot_schema');
-exports.Queue = require('./lib/queue');
+exports.Plots = require("./plots/plots");
+exports.Fx = require("./components/fx");
+exports.Snapshot = require("./snapshot");
+exports.PlotSchema = require("./plot_api/plot_schema");
+exports.Queue = require("./lib/queue");
 
 // export d3 used in the bundle
-exports.d3 = require('d3');
+exports.d3 = require("d3");

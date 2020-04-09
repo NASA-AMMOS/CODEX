@@ -321,6 +321,11 @@ dimensionality_reduction_page:
 
       #ICA
 
+correlation_page:
+
+    general_correlation: |
+      # Correlation
+
 quality_scan_page:
 
     general_quality_scan: |

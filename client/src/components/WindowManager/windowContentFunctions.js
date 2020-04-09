@@ -32,6 +32,7 @@ import Normalization from "components/Normalization/Normalization";
 import PeakDetection from "components/PeakDetection/PeakDetection";
 import TemplateScan from "components/TemplateScan/TemplateScan";
 import Regression from "components/Regression/Regression";
+import Correlation from "components/Correlation/Correlation";
 
 export function getWindowContent(win) {
     // Graphs get handled by the separate graph handler, as the graph type isn't fixed to the window.
@@ -75,6 +76,8 @@ export function getWindowContent(win) {
             return <TemplateScan />;
         case windowTypes.REGRESSION_WINDOW:
             return <Regression />;
+        case windowTypes.CORRELATION_WINDOW:
+            return <Correlation />;
         default:
             return (
                 <p>

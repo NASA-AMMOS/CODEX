@@ -63,6 +63,7 @@ class algorithm():
         returnHash = self.cache.findHashArray("hash", self.inputHash, "feature")
         if returnHash is None:
             logging.warning("Input hash not found: {inputHash}".format(inputHash=self.inputHash))
+            self.result["WARNING"] = "Input hash not found: {inputHash}".format(inputHash=self.inputHash)
             self.result['message'] = "failure"
             return self.result
 
