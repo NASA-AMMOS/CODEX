@@ -479,6 +479,8 @@ function FeatureItem(props) {
         setAnchorEl(e.currentTarget);
     }
 
+    const featureNameClasses = classnames({ ["feature-name"]: true, alias: props.group });
+
     return (
         <Draggable draggableId={props.feature.name} index={props.idx}>
             {provided => (
@@ -503,7 +505,7 @@ function FeatureItem(props) {
                                 checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
                                 onClick={onSelectClick}
                             />
-                            <span className="feature-name">{displayName}</span>
+                            <span className={featureNameClasses}>{displayName}</span>
                         </div>
                         {featureListContext.statsHidden ? null : (
                             <StatisticsRow
