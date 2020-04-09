@@ -24,6 +24,11 @@
     margin-bottom: 20px;
     padding-left: 32px;
     padding-right: 64px;
+
+    .correlation-controls-buttons {
+        display: flex;
+        flex-direction: column;
+    }
 }
 
 .deselect-button {
@@ -40,6 +45,7 @@
     color: #181818;
     height: 22px;
     vertical-align: bottom;
+    margin-top: 10px;
 }
 
 .correlation-sort-select {
@@ -59,26 +65,23 @@
     padding-right: 64px;
 }
 
-.select-button-row {
-    padding-left: 32px;
-    .select-button {
-        border: 1px solid #3980e3;
-        box-sizing: border-box;
-        border-radius: 4px;
-        font-family: Inter;
-        font-style: normal;
-        font-weight: bold;
-        font-size: 14px;
-        line-height: 17px;
-        text-transform: uppercase;
-        font-feature-settings: "cpsp" on, "case" on;
-        color: #ffffff;
-        background: #3980e3;
-        vertical-align: bottom;
+.select-button {
+    border: 1px solid #3980e3;
+    box-sizing: border-box;
+    border-radius: 4px;
+    font-family: Inter;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 17px;
+    text-transform: uppercase;
+    font-feature-settings: "cpsp" on, "case" on;
+    color: #ffffff;
+    background: #3980e3;
+    vertical-align: bottom;
 
-        &.disabled {
-            color: #ebebeb;
-        }
+    &.disabled {
+        color: #ebebeb;
     }
 }
 

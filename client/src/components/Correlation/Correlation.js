@@ -33,7 +33,7 @@ import HelpContent from "../Help/HelpContent";
 
 const GUIDANCE_PATH = "correlation_page:general_correlation";
 const CORRELATION_OPTIONS = [
-    { name: "sorted", displayName: "Correlation (default)" },
+    { name: "sorted", displayName: "Correlation" },
     { name: "alphabetical", displayName: "Alphabetical" }
 ];
 
@@ -295,9 +295,18 @@ function CorrelationContent(props) {
                 ) : (
                     <React.Fragment>
                         <div className="correlation-controls">
-                            <button className="deselect-button" onClick={handleDeselectAll}>
-                                de-select all
-                            </button>
+                            <div className="correlation-controls-buttons">
+                                <button
+                                    className={selectButtonClasses}
+                                    onClick={handleAddSelectedToGroup}
+                                    disabled={!selectedFeatures.length}
+                                >
+                                    add selected to group
+                                </button>
+                                <button className="deselect-button" onClick={handleDeselectAll}>
+                                    de-select all
+                                </button>
+                            </div>
                             <div className="correlation-sort-select">
                                 <label>Sort Features by</label>
                                 <select onChange={handleChangeSorting} value={currentSortOption}>
@@ -325,15 +334,6 @@ function CorrelationContent(props) {
                                 divId={chartId}
                                 onClickAnnotation={handleClickAnnotation}
                             />
-                        </div>
-                        <div className="select-button-row">
-                            <button
-                                className={selectButtonClasses}
-                                onClick={handleAddSelectedToGroup}
-                                disabled={!selectedFeatures.length}
-                            >
-                                add selected to group
-                            </button>
                         </div>
                         <div className="correlation-cancel-button-row">
                             <button onClick={closeWindow}>done</button>
