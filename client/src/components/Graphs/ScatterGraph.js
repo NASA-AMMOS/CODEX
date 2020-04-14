@@ -137,7 +137,7 @@ function ScatterGraph(props) {
 
     const trendLineTrace = useMemo(
         _ => {
-            const [x, y] = unzip(regression.linear(unzip(filteredCols)).points);
+            const [x, y] = unzip(regression.linear(unzip([baseX, baseY])).points);
             return {
                 x,
                 y,

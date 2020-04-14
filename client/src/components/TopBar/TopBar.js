@@ -23,7 +23,8 @@ import { useExportModalVisible } from "../../hooks/UIHooks";
 import { useSavedSelections, useSelectedFeatureNames } from "../../hooks/DataHooks";
 
 function NavigationBar(props) {
-    const [features] = useSelectedFeatureNames();
+    const [featureNames] = useSelectedFeatureNames();
+    const features = new Set(featureNames);
     const defaultBackground = "#05101f";
     const [savedSelections] = useSavedSelections();
 
