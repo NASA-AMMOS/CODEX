@@ -1,24 +1,15 @@
 import "./PeakDetection.scss";
 
-import {
-    Button,
-    CircularProgress,
-    IconButton,
-    Slider,
-    Switch,
-    TextField,
-    Tooltip
-} from "@material-ui/core";
+import { Button, IconButton, Slider, Switch, TextField, Tooltip } from "@material-ui/core";
 import { useDispatch } from "react-redux";
 import HelpIcon from "@material-ui/icons/Help";
 import Plot from "react-plotly.js";
 import React, { useState, useEffect, useRef } from "react";
-import ReactMarkdown from "react-markdown";
 import ReactResizeDetector from "react-resize-detector";
 import * as portals from "react-reverse-portal";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
-import { makeHelpRequest, makeSimpleRequest } from "../../utils/utils";
+import { makeSimpleRequest } from "../../utils/utils";
 import {
     useFeatureDisplayNames,
     useNewFeature,
@@ -26,23 +17,92 @@ import {
     useSavedSelections
 } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
+import HelpContent from "../Help/HelpContent";
 import * as wmActions from "../../actions/windowManagerActions";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
+const GUIDANCE_PATH = "peak_detection_page:general_peak_detection";
 const CWT_PARAMS = [
-    { name: "gap_threshold", value: 2, range: [0, 5], displayName: "Gap Threshold" },
-    { name: "min_snr", value: 1, range: [0, 100], displayName: "Minimum SNR" },
-    { name: "noise_perc", value: 10, range: [0, 100], displayName: "Noise Percentage" },
-    { name: "peak_width", value: 10, range: [1, 100], displayName: "Peak Width" }
+    {
+        name: "gap_threshold",
+        value: 2,
+        range: [0, 5],
+        displayName: "Gap Threshold",
+        helpText:
+            "If a relative maximum is not found within max_distances, there will be a gap. A ridge line is discontinued if there are more than gap_thresh points without connecting a new relative maximum."
+    },
+    {
+        name: "min_snr",
+        value: 1,
+        range: [0, 100],
+        displayName: "Minimum SNR",
+        helpText:
+            "Minimum signal to noise ratio.The signal is the value of the cwt matrix at the shortest length scale, the noise is the 'noise percentage'`th percentile of datapoints contained within a window of 'window size'."
+    },
+    {
+        name: "noise_perc",
+        value: 10,
+        range: [0, 100],
+        displayName: "Noise Percentage",
+        helpText:
+            "When calculating the noise floor, percentile of data points examined below which to consider noise."
+    },
+    {
+        name: "peak_width",
+        value: 10,
+        range: [1, 100],
+        displayName: "Peak Width",
+        helpText:
+            "Maximum width to consider for a peak. This range should cover the expected width of peaks of interest."
+    }
 ];
 const FIND_PEAKS_PARAMS = [
-    { name: "mph", value: 5 },
-    { name: "mpd", value: 1, range: [1, 10] },
-    { name: "edge", value: "rising", displayName: "Edge" },
-    { name: "kpsh", value: false },
-    { name: "valley", value: false, displayName: "Valley" },
-    { name: "peak_width", value: 10, range: [1, 100], displayName: "Peak Width" },
-    { name: "threshold", value: 0, range: [0, 100], displayName: "Threshold" }
+    {
+        name: "mph",
+        value: 5,
+        helpText: "Detect peaks that are greater than minimum peak height."
+    },
+    {
+        name: "mpd",
+        value: 1,
+        range: [1, 10],
+        helpText:
+            "Detect peaks that are at least separated by minimum peak distance, in number of data."
+    },
+    {
+        name: "edge",
+        value: "rising",
+        displayName: "Edge",
+        helpText:
+            "For a flat peak, keep only the rising edge ('rising'), only the falling edge ('falling'), both edges ('both'), or don't detect a flat peak (None)."
+    },
+    {
+        name: "kpsh",
+        value: false,
+        helpText: "Keep peaks with same height even if they are closer than `mpd`."
+    },
+    {
+        name: "valley",
+        value: false,
+        displayName: "Valley",
+        helpText: "If True, detect valleys (local minima) instead of peaks."
+    },
+    {
+        name: "peak_width",
+        value: 10,
+        range: [1, 100],
+        displayName: "Peak Width",
+        helpText:
+            "Maximum width to consider for a peak. This range should cover the expected width of peaks of interest."
+    },
+    {
+        name: "threshold",
+        value: 0,
+        range: [0, 100],
+        displayName: "Threshold",
+        helpText:
+            "Detect peaks (valleys) that are greater (smaller) than `threshold` in relation to their immediate neighbors."
+    }
 ];
 
 function makeServerRequestObj(algorithmName, feature, parameters) {
@@ -61,23 +121,6 @@ function makeServerRequestObj(algorithmName, feature, parameters) {
         }, {}),
         dataSelections: []
     };
-}
-
-function HelpContent(props) {
-    const [textContent, setTextContent] = useState("");
-    useEffect(
-        _ => {
-            if (props.hidden || textContent) return;
-            const { req, cancel } = makeHelpRequest("peak_find_page:general_peak_find");
-            req.then(({ guidance }) => setTextContent(guidance));
-            return cancel;
-        },
-        [props.hidden]
-    );
-
-    if (props.hidden) return null;
-    if (!textContent) return <CircularProgress />;
-    return <ReactMarkdown source={textContent} className="help-content" linkTarget="_blank" />;
 }
 
 function PeakPlot(props) {
@@ -233,7 +276,10 @@ function ParamSlider(props) {
     ];
     return (
         <div className="peak-detect-slider-control">
-            <Tooltip title={param.displayName || param.name} placement="top-start">
+            <Tooltip
+                title={param.helpText || param.displayName || param.name}
+                placement="top-start"
+            >
                 <label>{param.displayName || param.name}</label>
             </Tooltip>
             <Slider
@@ -369,7 +415,13 @@ function FindPeaksAlgo(props) {
             />
             <div className="peak-detect-control-area">
                 <div className="peak-detect-control-row">
-                    <Tooltip title="mph" placement="top-start">
+                    <Tooltip
+                        title={
+                            paramState[0].find(param => param.name === "mph").helpText ||
+                            paramState[0].find(param => param.name === "mph").displayName
+                        }
+                        placement="top-start"
+                    >
                         <TextField
                             label="mph"
                             variant="filled"
@@ -384,7 +436,10 @@ function FindPeaksAlgo(props) {
                     <ParamSlider paramState={paramState} paramName="mpd" disabled={isUpdating} />
                     <div className="peak-detect-dropdown">
                         <Tooltip
-                            title={paramState[0].find(param => param.name === "valley").displayName}
+                            title={
+                                paramState[0].find(param => param.name === "valley").helpText ||
+                                paramState[0].find(param => param.name === "valley").displayName
+                            }
                             placement="top-start"
                         >
                             <label>
@@ -398,7 +453,13 @@ function FindPeaksAlgo(props) {
                         />
                     </div>
                     <div className="peak-detect-dropdown">
-                        <Tooltip title="Edge" placement="top-start">
+                        <Tooltip
+                            title={
+                                paramState[0].find(param => param.name === "edge").helpText ||
+                                paramState[0].find(param => param.name === "edge").displayName
+                            }
+                            placement="top-start"
+                        >
                             <label>Edge</label>
                         </Tooltip>
                         <select
@@ -426,7 +487,13 @@ function FindPeaksAlgo(props) {
                     />
 
                     <div className="peak-detect-dropdown">
-                        <Tooltip title="kpsh" placement="top-start">
+                        <Tooltip
+                            title={
+                                paramState[0].find(param => param.name === "kpsh").helpText ||
+                                paramState[0].find(param => param.name === "kpsh").displayName
+                            }
+                            placement="top-start"
+                        >
                             <label>kpsh</label>
                         </Tooltip>
                         <Switch
@@ -503,13 +570,17 @@ function PeakDetection(props) {
                     </div>
                 </div>
                 <div className="peak-detect-previews">
-                    <HelpContent hidden={!helpMode} />
+                    <HelpContent hidden={!helpMode} guidancePath={GUIDANCE_PATH} />
                     {!helpMode ? <portals.OutPortal node={previews} /> : null}
                 </div>
                 <div className="peak-detect-action-row">
                     <div>
-                        <Button variant="contained" size="small" onClick={_ => closeWindow()}>
-                            Close
+                        <Button
+                            variant="contained"
+                            size="small"
+                            onClick={_ => (helpMode ? setHelpMode(false) : closeWindow())}
+                        >
+                            {helpMode ? "Close Help" : "Close"}
                         </Button>
                     </div>
                 </div>

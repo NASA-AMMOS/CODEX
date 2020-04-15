@@ -1,31 +1,39 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useSelector, useStore, useDispatch } from "react-redux";
-import WorkerSocket from "worker-loader!workers/socket.worker";
-import * as actionTypes from "constants/actionTypes";
+import { Set } from "immutable";
+import { batchActions } from "redux-batched-actions";
+import { useSelector, useDispatch } from "react-redux";
+import { useState, useRef, useEffect } from "react";
+
 import {
     addDataset,
-    featureRetain,
+    featureAdd,
+    featureDelete,
     featureRelease,
+    featureRetain,
     featureSelect,
     featureUnselect,
-    featureAdd,
     fileLoad,
-    statSetFeatureLoading,
     statSetFeatureFailed,
-    statSetFeatureResolved,
-    featureDelete,
-    featureRename,
-    removeColumnFromServer
+    statSetFeatureLoading,
+    statSetFeatureResolved
 } from "actions/data";
-import { fromJS, Set } from "immutable";
-import { batchActions } from "redux-batched-actions";
+import WorkerSocket from "worker-loader!workers/socket.worker";
+import * as actionTypes from "constants/actionTypes";
 import * as selectionActions from "actions/selectionActions";
-import * as wmActions from "actions/windowManagerActions";
-import * as utils from "utils/utils";
 import * as uiActions from "actions/ui";
 import * as uiTypes from "constants/uiTypes";
+import * as utils from "utils/utils";
 import * as windowTypes from "constants/windowTypes";
-import * as dataActions from "actions/data";
+import * as wmActions from "actions/windowManagerActions";
+
+import {
+    changeFeatureGroup,
+    createFeatureGroup,
+    deleteFeatureGroup,
+    featureListLoading,
+    featureRename,
+    renameFeatureGroup,
+    selectFeatureGroup
+} from "../actions/data";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -249,7 +257,10 @@ export function useSelectionGroups() {
         return state.selections.groups;
     });
 
-    return [groups, groupID => dispatch(selectionActions.createSelectionGroup(groupID))];
+    return [
+        groups,
+        (name, selections) => dispatch(selectionActions.createSelectionGroup(name, selections))
+    ];
 }
 
 /**
@@ -263,12 +274,16 @@ export function useCurrentSelection() {
     return [currentSelection, indices => dispatch(selectionActions.setCurrentSelection(indices))];
 }
 
+export function useSaveCurrentSelection() {
+    const dispatch = useDispatch();
+    return _ => dispatch(selectionActions.saveCurrentSelection());
+}
+
 /**
  * Get all feature names.
  */
 export function useFeatureNames() {
     const features = useSelector(state => state.data.get("featureList")).map(f => f.get("name"));
-
     return features;
 }
 
@@ -329,6 +344,11 @@ export function useHoveredSelection() {
     const currentHover = useSelector(state => state.selections.hoverSelection);
 
     return [currentHover, indices => dispatch(selectionActions.setHoverSelection(indices))];
+}
+
+export function useSetHoverSelection() {
+    const dispatch = useDispatch();
+    return sel => dispatch(selectionActions.hoverSelection(sel));
 }
 
 /**
@@ -512,5 +532,91 @@ export function useFeatureDelete() {
 export function useFeatureDisplayNames() {
     const dispatch = useDispatch();
     const names = useSelector(store => store.data.get("featureDisplayNames"));
-    return [names, (baseName, newName) => dispatch(dataActions.featureRename(baseName, newName))];
+    return [names, (baseName, newName) => dispatch(featureRename(baseName, newName))];
+}
+
+export function useDeleteSelection() {
+    const dispatch = useDispatch();
+    return id => dispatch(selectionActions.deleteSelection(id));
+}
+
+export function useRenameSelection() {
+    const dispatch = useDispatch();
+    return (id, name) => dispatch(selectionActions.renameSelection(id, name));
+}
+
+export function useChangeSelectionGroup() {
+    const dispatch = useDispatch();
+    return (id, groupID) => dispatch(selectionActions.setSelectionGroup(id, groupID));
+}
+
+export function useDeleteSelectionGroup() {
+    const dispatch = useDispatch();
+    return id => dispatch(selectionActions.deleteSelectionGroup(id));
+}
+
+export function useRenameSelectionGroup() {
+    const dispatch = useDispatch();
+    return (id, name) => dispatch(selectionActions.renameSelectionGroup(id, name));
+}
+
+export function useSetSelectionActive() {
+    const dispatch = useDispatch();
+    return (id, active) => dispatch(selectionActions.setSelectionActive(id, active));
+}
+
+export function useSetSelectionHidden() {
+    const dispatch = useDispatch();
+    return (id, hidden) => dispatch(selectionActions.setSelectionHidden(id, hidden));
+}
+
+export function useSetSelectionGroupActive() {
+    const dispatch = useDispatch();
+    return (id, active) => dispatch(selectionActions.setGroupActive(id, active));
+}
+
+export function useSetSelectionGroupHidden() {
+    const dispatch = useDispatch();
+    return (id, hidden) => dispatch(selectionActions.setGroupHidden(id, hidden));
+}
+
+export function useFeatureGroups() {
+    const dispatch = useDispatch();
+    const groupList = useSelector(state => state.data.get("featureGroups"));
+    return [
+        groupList,
+        (name, featureIDs, selected) => dispatch(createFeatureGroup(name, featureIDs, selected))
+    ];
+}
+
+export function useSetFeatureSelect() {
+    const dispatch = useDispatch();
+    return (featureName, select, shift) =>
+        dispatch(select ? featureSelect(featureName, shift) : featureUnselect(featureName, shift));
+}
+
+export function useChangeFeatureGroup() {
+    const dispatch = useDispatch();
+    return (featureName, id) => dispatch(changeFeatureGroup(featureName, id));
+}
+
+export function useSelectFeatureGroup() {
+    const dispatch = useDispatch();
+    return (id, selected) => dispatch(selectFeatureGroup(id, selected));
+}
+
+export function useDeleteFeatureGroup() {
+    const dispatch = useDispatch();
+    return id => dispatch(deleteFeatureGroup(id));
+}
+
+export function useRenameFeatureGroup() {
+    const dispatch = useDispatch();
+    return (id, name) => dispatch(renameFeatureGroup(id, name));
+}
+
+export function useFeatureListLoading() {
+    const dispatch = useDispatch();
+    const loading = useSelector(state => state.data.get("featureListLoading"));
+    return [loading, isLoading => dispatch(featureListLoading(isLoading))];
 }

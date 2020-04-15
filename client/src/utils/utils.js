@@ -395,3 +395,17 @@ export function equalArrays(a, b) {
 export function getMean(values) {
     return values.reduce((acc, val) => acc + val, 0) / values.length;
 }
+
+export function reorderList(list, startIndex, endIndex) {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
+}
+
+export function addNewItem(list, item, index) {
+    const result = Array.from(list);
+    const [removed] = result.splice(index);
+    result.push(item);
+    return result.concat(removed ? removed : []);
+}

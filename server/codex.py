@@ -50,7 +50,7 @@ from api.data_manager       import get_data
 from api.data_manager       import delete_data
 from api.data_manager       import update_data
 from api.data_manager       import get_data_metrics
-from api.analysis_manager   import download_code
+from api.export_manager     import export_contents
 from api.eta_manager        import get_time_estimate
 from api.sub.system         import codex_server_memory_check
 from api.sub.time_log       import getTimeLogDict
@@ -176,9 +176,8 @@ def route_request(msg, result):
         elif (activity == "metrics"):
             for metric in get_data_metrics(msg, result):
                 yield metric
-                
-    elif (routine == 'download_code'):
-        yield download_code(msg, result, CODEX_ROOT)
+    elif (routine == 'export'):
+        yield export_contents(msg, result, CODEX_ROOT)
     else:
         result['message'] = 'Unknown Routine'
         yield result

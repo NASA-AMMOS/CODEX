@@ -12,5 +12,10 @@ export const uiState = Immutable.fromJS({
     snackbar: {
         visible: false,
         message: null
-    }
+    },
+    statsPanelHidden: true,
+    allowGraphHotkeys: true,
+    helpMode: false,
+    exportModalVisible: false,
+    storedPlotImages: []
 });

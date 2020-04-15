@@ -34,8 +34,9 @@ from api.sub.labels             import label_swap
 from api.sub.hash               import get_cache
 
 class algorithm():
-    def __init__(self, inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, session):
+    def __init__(self, inputHash, activeLabels, featureList, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, session):
         
+        self.featureList = featureList
         self.inputHash = inputHash
         self.hashList = hashList
         self.subsetHashName = subsetHashName
@@ -48,6 +49,7 @@ class algorithm():
         self.scoring = scoring
         self.search_type = search_type
         self.cross_val = cross_val
+        self.activeLabels = activeLabels
 
     def run(self):
 
@@ -61,6 +63,7 @@ class algorithm():
         returnHash = self.cache.findHashArray("hash", self.inputHash, "feature")
         if returnHash is None:
             logging.warning("Input hash not found: {inputHash}".format(inputHash=self.inputHash))
+            self.result["WARNING"] = "Input hash not found: {inputHash}".format(inputHash=self.inputHash)
             self.result['message'] = "failure"
             return self.result
 

@@ -97,6 +97,33 @@
     }
 
     .features {
+        .select-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .selection-group {
+            .expand-icon {
+                background-color: transparent;
+                border: none;
+                color: #bbb;
+                padding: 0;
+                transition: 200ms ease-out;
+
+                &.expanded {
+                    transform: rotate(90deg);
+                }
+            }
+
+            .selection-group-items {
+                margin-left: 35px;
+            }
+        }
+
+        .feature-list-divider {
+            margin: 5px auto;
+        }
+
         .deselect-button-label {
             color: white;
         }

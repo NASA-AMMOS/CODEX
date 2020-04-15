@@ -9,5 +9,6 @@ export const windowManagerState = Immutable.fromJS({
 export const windowModel = {
     id: null,
     minimized: false,
-    hover: false
+    hover: false,
+    needsAutoscale: false
 };

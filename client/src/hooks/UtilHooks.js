@@ -56,6 +56,7 @@ export function useKey(key, options = {}) {
 
     function onDown(event) {
         if (!match(event)) return setPressed(false);
+        if (options.preventDefault) event.preventDefault();
         if (!options.withMeta) return setPressed(true);
         if (event.metaKey) {
             if (!options.disabled) event.preventDefault();
@@ -64,7 +65,10 @@ export function useKey(key, options = {}) {
     }
 
     function onUp(event) {
-        if (match(event)) return setPressed(false);
+        if (match(event)) {
+            if (options.preventDefault) event.preventDefault();
+            return setPressed(false);
+        }
     }
 
     // Bind and unbind events

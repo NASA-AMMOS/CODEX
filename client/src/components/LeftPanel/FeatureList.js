@@ -1,16 +1,16 @@
 import "components/LeftPanel/FeatureList.scss";
 
+import { CircularProgress } from "@material-ui/core";
+import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { Sparklines, SparklinesLine } from "react-sparklines";
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import Button from "@material-ui/core/Button";
 import Checkbox from "@material-ui/core/Checkbox";
 import CheckboxIcon from "@material-ui/icons/CheckBox";
 import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import FormControl from "@material-ui/core/FormControl";
+import KeyboardArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -25,14 +25,24 @@ import {
     useFeatureMetadata,
     useFeatureDelete
 } from "hooks/DataHooks";
-import * as dataActions from "actions/data";
+import classnames from "classnames";
 
-import { useFeatureDisplayNames } from "../../hooks/DataHooks";
-import { useKey } from "../../hooks/UtilHooks";
+import { reorderList, addNewItem } from "../../utils/utils";
+import { useAllowGraphHotkeys, useStatsPanelHidden } from "../../hooks/UIHooks";
+import {
+    useChangeFeatureGroup,
+    useDeleteFeatureGroup,
+    useFeatureDisplayNames,
+    useFeatureGroups,
+    useFeatureListLoading,
+    useRenameFeatureGroup,
+    useSelectFeatureGroup,
+    useSetFeatureSelect
+} from "../../hooks/DataHooks";
 import { useWindowList } from "../../hooks/WindowHooks";
+import featureList from "./FeatureList";
 
-const RowContext = React.createContext({});
-const ListContext = React.createContext({});
+const FeatureListContext = React.createContext({});
 
 /*
     A function used to process a floating point number
@@ -50,45 +60,6 @@ function processFloatingPointNumber(number) {
 
     return newNumber;
 }
-
-/*
-    Function to help reorder an object used to persist the
-    order of features
-*/
-const reorder = (object, startIndex, endIndex) => {
-    //shift everything with an index after up one
-    function findNameOfIndex(index) {
-        for (let name of Object.keys(object)) {
-            if (object[name] === index) return name;
-        }
-    }
-
-    let newObject = { ...object };
-    //set the element at startIndex's index to endIndex
-    //add one to everything inbetween startIndex and endIndex including startIndex
-
-    const realStartName = findNameOfIndex(startIndex);
-
-    if (endIndex < startIndex) {
-        //swapping back the list
-        for (let name of Object.keys(newObject)) {
-            if (newObject[name] >= endIndex && newObject[name] < startIndex) {
-                newObject[name]++;
-            }
-        }
-    } else if (startIndex < endIndex) {
-        //swapping forward in the list
-        for (let name of Object.keys(newObject)) {
-            if (newObject[name] <= endIndex && newObject[name] > startIndex) {
-                newObject[name]--;
-            }
-        }
-    }
-
-    newObject[realStartName] = endIndex;
-
-    return newObject;
-};
 
 /*
     The section of the header that shows the labels for the
@@ -194,10 +165,7 @@ function SelectedDropdown(props) {
     data like mean, median, and sparkline
 */
 function StatisticsRow(props) {
-    //handles the failure cases of when stats are not yet loaded
-    //or there was an actual failure in the backend
-
-    const [loading, failed, stats] = useFeatureStatistics(props.featureName);
+    const [loading, failed, stats] = useFeatureStatistics(props.feature.name);
     let [featureTypeData, setFeatureTypeData] = useState({ c: false, r: false });
 
     if (loading) {
@@ -237,26 +205,27 @@ function StatisticsRow(props) {
 }
 
 function FeatureContextMenu(props) {
-    const rowContext = useContext(RowContext);
-    const listContext = useContext(ListContext);
-
-    const [visible, setVisible] = rowContext.visible;
-    const [position] = rowContext.position;
     const [contextMode, setContextMode] = useState(null);
     const [renameSelectionBuffer, setRenameSelectionBuffer] = useState("");
+    const featureDelete = useFeatureDelete();
 
     const [featureNames, setFeatureName] = useFeatureDisplayNames();
     const displayName = featureNames.get(props.featureName, props.featureName);
 
+    const [_, createNewFeatureGroup] = useFeatureGroups();
+
     function submitRenamedFeature(e) {
         if (!e.key || (e.key && e.key === "Enter")) {
-            setVisible(false);
+            props.setContextMenuVisible(false);
             setContextMode(null);
             setFeatureName(props.featureName, renameSelectionBuffer);
         }
     }
 
-    if (!visible) return null;
+    function submitNewFeatureGroup() {
+        createNewFeatureGroup("New Group", [props.featureName]);
+        props.setContextMenuVisible(false);
+    }
 
     // To make sure the autofocus works, don't create the rename text field until we need it.
     const renameTextField =
@@ -270,170 +239,272 @@ function FeatureContextMenu(props) {
         ) : null;
 
     return (
-        <Popover
-            id="simple-popper"
-            open={visible}
-            anchorReference="anchorPosition"
-            anchorPosition={{ top: position.top, left: position.left }}
-            anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left"
-            }}
-            transformOrigin={{
-                vertical: "top",
-                horizontal: "left"
-            }}
-        >
-            <ClickAwayListener onClickAway={_ => setVisible(false)}>
-                <List>
-                    <ListItem
-                        button
-                        onClick={_ => {
-                            setVisible(false);
-                            listContext.featureDelete(props.featureName);
-                            //     props.deleteSelection(props.contextActiveSelection.id);
-                            //     props.setContextActiveSelection(null);
-                        }}
-                        hidden={contextMode}
+        <ClickAwayListener onClickAway={_ => props.setContextMenuVisible(false)}>
+            <List>
+                <ListItem
+                    button
+                    onClick={_ => {
+                        props.setContextMenuVisible(false);
+                        featureDelete(props.featureName);
+                    }}
+                    hidden={contextMode}
+                >
+                    Delete Feature
+                </ListItem>
+                <ListItem hidden={contextMode !== "rename"}>
+                    {renameTextField}
+                    <Button
+                        variant="outlined"
+                        style={{ marginLeft: "10px" }}
+                        onClick={submitRenamedFeature}
                     >
-                        Delete Feature
-                    </ListItem>
-                    <ListItem hidden={contextMode !== "rename"}>
-                        {renameTextField}
-                        <Button
-                            variant="outlined"
-                            style={{ marginLeft: "10px" }}
-                            onClick={submitRenamedFeature}
-                        >
-                            Rename
-                        </Button>
-                    </ListItem>
-                    <ListItem
-                        button
-                        onClick={_ => {
-                            setContextMode("rename");
-                            setRenameSelectionBuffer(displayName);
-                        }}
-                        hidden={contextMode}
-                    >
-                        Rename Feature
-                    </ListItem>
-                </List>
-            </ClickAwayListener>
-        </Popover>
+                        Rename
+                    </Button>
+                </ListItem>
+                <ListItem
+                    button
+                    onClick={_ => {
+                        setContextMode("rename");
+                        setRenameSelectionBuffer(displayName);
+                    }}
+                    hidden={contextMode}
+                >
+                    Rename Feature
+                </ListItem>
+                <ListItem button onClick={submitNewFeatureGroup} hidden={contextMode}>
+                    Create New Feature Group
+                </ListItem>
+            </List>
+        </ClickAwayListener>
     );
 }
 
-/*
-    A single row displaying a feature and its corresponding data
-    for the drag and drop menu
-*/
-function FeatureListDNDRow(props) {
-    const virtual = props.featureInfo.virtual;
-    const selected = props.featureInfo.selected;
-    const virtualStyle = { fontStyle: virtual ? "italic" : "normal" };
+function GroupContextMenu(props) {
+    const [contextMode, setContextMode] = useState(null);
 
-    const rowContextValue = {
-        visible: useState(false),
-        position: useState({ top: 0, left: 0 })
-    };
+    const [renameGroupBuffer, setRenameGroupBuffer] = useState(props.group.name);
+    const deleteFeatureGroup = useDeleteFeatureGroup();
+    const renameFeatureGroup = useRenameFeatureGroup();
 
-    const [rowHover, setRowHover] = useState(false);
-    const [featureNames] = useFeatureDisplayNames();
-    const displayName = featureNames.get(props.featureName, props.featureName);
+    function clickDeleteGroup() {
+        props.setContextMenuVisible(false);
+        deleteFeatureGroup(props.group.id);
+    }
+
+    function submitRenamedGroup(e) {
+        props.setContextMenuVisible(false);
+        renameFeatureGroup(props.group.id, renameGroupBuffer);
+    }
+
+    const renameTextField =
+        contextMode === "rename" ? (
+            <TextField
+                value={renameGroupBuffer}
+                onChange={e => setRenameGroupBuffer(e.target.value)}
+                onKeyPress={e => {
+                    if (e.key && e.key === "Enter") submitRenamedGroup();
+                }}
+                autoFocus
+            />
+        ) : null;
 
     return (
-        <RowContext.Provider value={rowContextValue}>
-            <div
-                className="featureRow"
-                onMouseEnter={function() {
-                    setRowHover(true);
-                }}
-                onMouseLeave={function() {
-                    if (!rowContextValue.visible[0]) setRowHover(false);
-                }}
-            >
-                <div
-                    className="feature-name-row"
-                    onContextMenu={e => {
-                        e.preventDefault();
-
-                        rowContextValue.visible[1](true);
-                        rowContextValue.position[1]({ top: e.clientY, left: e.clientX });
+        <ClickAwayListener onClickAway={_ => props.setContextMenuVisible(false)}>
+            <List>
+                <ListItem button onClick={clickDeleteGroup} hidden={contextMode}>
+                    Delete
+                </ListItem>
+                <ListItem hidden={contextMode !== "rename"}>
+                    {renameTextField}
+                    <Button
+                        variant="outlined"
+                        style={{ marginLeft: "10px" }}
+                        onClick={submitRenamedGroup}
+                    >
+                        Rename
+                    </Button>
+                </ListItem>
+                <ListItem
+                    button
+                    onClick={_ => {
+                        setContextMode("rename");
                     }}
+                    hidden={contextMode}
                 >
+                    Rename
+                </ListItem>
+            </List>
+        </ClickAwayListener>
+    );
+}
+
+function FeatureGroup(props) {
+    const featureListContext = useContext(FeatureListContext);
+    const selectGroup = useSelectFeatureGroup();
+    const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
+
+    function groupSelectClick(e) {
+        selectGroup(props.group.id, e.target.checked);
+        setAllowGraphHotkeys(true);
+    }
+
+    const [anchorEl, setAnchorEl] = useState();
+    function onContextMenu(e) {
+        e.preventDefault();
+        setAnchorEl(e.currentTarget);
+    }
+
+    const [panelExpanded, setPanelExpanded] = useState(true);
+    const iconClasses = classnames({ ["expand-icon"]: true, expanded: panelExpanded });
+    return (
+        <Droppable droppableId={props.group.id}>
+            {(provided, snapshot) => (
+                <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="selection-group"
+                >
+                    <button className={iconClasses} onClick={_ => setPanelExpanded(!panelExpanded)}>
+                        <KeyboardArrowRightIcon />
+                    </button>
                     <Checkbox
-                        checked={selected}
+                        checked={Boolean(props.group.selected)}
                         className="selected-checkbox"
                         value="checkedA"
                         style={{ height: "22px", padding: "0px" }}
                         icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
                         checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
-                        onClick={e =>
-                            selected
-                                ? props.featureUnselect(props.featureName, e.shiftKey)
-                                : props.featureSelect(props.featureName, e.shiftKey)
-                        }
+                        onClick={groupSelectClick}
                     />
-                    <span className="feature-name" style={virtualStyle}>
-                        {displayName}
-                    </span>
+                    <label onContextMenu={onContextMenu}>{props.group.name}</label>
+                    {panelExpanded ? (
+                        <div className="selection-group-items">
+                            {props.group.features
+                                .filter(feature => featureListContext.featureFilter.func(feature))
+                                .filter(featureListContext.searchStringFilter)
+                                .map((feature, idx) => (
+                                    <FeatureItem key={feature.name} feature={feature} idx={idx} />
+                                ))}
+                        </div>
+                    ) : null}
+                    <Popover
+                        id="simple-popper"
+                        open={Boolean(anchorEl)}
+                        anchorEl={anchorEl}
+                        anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "left"
+                        }}
+                        transformOrigin={{
+                            vertical: "top",
+                            horizontal: "left"
+                        }}
+                    >
+                        <GroupContextMenu group={props.group} setContextMenuVisible={setAnchorEl} />
+                    </Popover>
+                    {provided.placeholder}
                 </div>
-                {props.statsHidden || (
-                    <StatisticsRow
-                        featureName={props.featureName}
-                        featureListLoading={props.featureListLoading}
-                        rowHover={rowHover}
-                    />
-                )}
-            </div>
-            <FeatureContextMenu featureName={props.featureName} />
-        </RowContext.Provider>
+            )}
+        </Droppable>
     );
 }
 
-/*
-    A component that manages the drag and drop component for the features
-    and their corresponding statistics
-*/
-function FeatureListDND(props) {
-    if (Object.keys(props.featureIndices).length == 0 || props.featureIndices == undefined)
-        return <div />;
+function FeatureItem(props) {
+    const selectFeature = useSetFeatureSelect();
+    const [featureListLoading] = useFeatureListLoading();
 
-    function onDragEnd(result) {
-        if (!result.destination) {
-            return;
-        }
+    const [featureNames, setFeatureName] = useFeatureDisplayNames();
+    const displayName = featureNames.get(props.feature.name, props.feature.name);
+    const [rowHover, setRowHover] = useState(false);
+    const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
 
-        let reorderedObject = reorder(
-            props.featureIndices,
-            result.source.index,
-            result.destination.index
-        );
+    const featureListContext = useContext(FeatureListContext);
 
-        props.setFeatureIndices(reorderedObject);
+    function getShiftSelectedFeatures() {
+        const range = [
+            featureListContext.baseIndex.findIndex(
+                feature => feature.name === featureListContext.lastSelected[0]
+            ),
+            featureListContext.baseIndex.findIndex(feature => feature.name == props.feature.name)
+        ];
+
+        return featureListContext.baseIndex.reduce((acc, feature, idx) => {
+            if (idx >= Math.min(...range) && idx <= Math.max(...range)) acc.push(feature.name);
+            return acc;
+        }, []);
+    }
+
+    function onSelectClick(e) {
+        featureListContext.lastSelected[1](e.target.checked ? props.feature.name : null);
+        const featuresToSelect =
+            e.shiftKey && featureListContext.lastSelected[0]
+                ? getShiftSelectedFeatures()
+                : [props.feature.name];
+        featuresToSelect.forEach(feature => selectFeature(feature, e.target.checked));
+        setAllowGraphHotkeys(true);
+    }
+
+    const [anchorEl, setAnchorEl] = useState();
+    function onContextMenu(e) {
+        e.preventDefault();
+        setAnchorEl(e.currentTarget);
     }
 
     return (
-        <div className="drag-drop-div">
-            {props.featureNames.map(featureName => {
-                if (featureName === undefined || props.featureIndices[featureName] === undefined) {
-                    return <div key={featureName}> </div>;
-                }
-                return (
-                    <FeatureListDNDRow
-                        featureName={featureName}
-                        featureInfo={props.featureMapping[featureName]}
-                        stats={props.stats[featureName]}
-                        data={props.data[featureName]}
-                        statsHidden={props.statsHidden}
-                        featureListLoading={props.featureListLoading}
-                        featureUnselect={props.featureUnselect}
-                        featureSelect={props.featureSelect}
-                    />
-                );
-            })}
-        </div>
+        <Draggable draggableId={props.feature.name} index={props.idx}>
+            {provided => (
+                <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                >
+                    <div
+                        className="featureRow"
+                        onContextMenu={onContextMenu}
+                        onMouseEnter={_ => setRowHover(true)}
+                        onMouseLeave={_ => setRowHover(false)}
+                    >
+                        <div className="feature-name-row">
+                            <Checkbox
+                                checked={props.feature.selected}
+                                className="selected-checkbox"
+                                value="checkedA"
+                                style={{ height: "22px", padding: "0px" }}
+                                icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
+                                checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
+                                onClick={onSelectClick}
+                            />
+                            <span className="feature-name">{displayName}</span>
+                        </div>
+                        {featureListContext.statsHidden ? null : (
+                            <StatisticsRow
+                                feature={props.feature}
+                                featureListLoading={featureListLoading}
+                                rowHover={rowHover}
+                            />
+                        )}
+                    </div>
+                    <Popover
+                        id="simple-popper"
+                        open={Boolean(anchorEl)}
+                        anchorEl={anchorEl}
+                        anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "left"
+                        }}
+                        transformOrigin={{
+                            vertical: "top",
+                            horizontal: "left"
+                        }}
+                    >
+                        <FeatureContextMenu
+                            featureName={props.feature.name}
+                            setContextMenuVisible={setAnchorEl}
+                        />
+                    </Popover>
+                </div>
+            )}
+        </Draggable>
     );
 }
 
@@ -442,134 +513,189 @@ function FeatureListDND(props) {
     data for the features section on the left side panel of the page
 */
 function FeatureList(props) {
-    const activeCount = props.featureList.filter(f => f.get("selected")).size;
+    const featureList = useFeatureMetadata();
+    const activeCount = featureList.filter(f => f.get("selected")).size;
     const shownCount = activeCount;
-    const totalCount = props.featureList.size;
+    const totalCount = featureList.size;
+    const selectFeature = useSetFeatureSelect();
 
     const stats = useFeatureStatisticsLoader();
-    const features = useFeatureMetadata();
-    //manages the hidden state of the statistics panel
-    const [statsHidden, setStatsHidden] = props.panelCollapsed;
-    //a map from feature names to their current list indices
-    const [featureIndices, setFeatureIndices] = useState({});
-    //the holder of feature data for sparklines
-    const [featureData, setFeatureData] = useState({});
-    //the holder of the stats data
-    const [featureStats, setFeatureStats] = useState({});
+    const selectFeatureGroup = useSelectFeatureGroup();
 
-    const [filterString, setFilterString] = useState("");
-    //limit to the number of feature stats to load on page start
-    const lazyLimit = 12;
-    const [statsLoading, setStatsLoading] = useState(false);
+    const [featureListLoading] = useFeatureListLoading();
+
+    const [groups] = useFeatureGroups();
+    const changeFeatureGroup = useChangeFeatureGroup();
+
     const [featureFilter, setFeatureFilter] = useState({
         func: function(feature) {
             return true;
         }
     });
 
-    //translate featureList into interpretable js list of names
-    const featureNames = props.featureList
-        .toJS()
-        .filter(feature => {
-            return featureFilter.func(feature);
-        })
-        .map(feature => {
-            return feature.name;
-        });
-
-    const loadData = (a, b) => {};
-
-    function createFeatureMapping(featureList) {
-        return featureList.reduce((acc, feature) => {
-            acc[feature.get("name")] = {
-                selected: feature.get("selected"),
-                virtual: feature.get("virtual")
-            };
-            return acc;
-        }, {});
+    // Text filter stuff
+    const caseSensitive = Boolean(props.filterString && props.filterString.match(/[A-Z]/g));
+    const exactMatch = props.filterString.match(/^"(.*)"$/); // Allows users to specify an exact match with quotes.
+    function searchStringFilter(feature) {
+        if (!props.filterString) return true;
+        return exactMatch
+            ? feature.name === exactMatch[1]
+            : (caseSensitive ? feature.name : feature.name.toLowerCase()).includes(
+                  props.filterString
+              );
     }
 
-    //holds other data about features
-    const [featureMapping, setFeatureMapping] = useState(_ =>
-        createFeatureMapping(props.featureList)
-    );
-
-    useEffect(_ => setFeatureMapping(createFeatureMapping(props.featureList)), [props.featureList]);
-
-    //runs on file change
-    //it handles clearing the current data
-    //and also starting the loading of the new data up to the lazy limit
+    // Organization and ordering of features and feature groups
+    const [ungroupedFeatures, setUngroupedFeatures] = useState(_ => featureList.toJS());
+    const [groupedFeatures, setGroupedFeatures] = useState([]);
     useEffect(
         _ => {
-            let newFeatureIndices = {};
-            featureNames.forEach((name, index) => {
-                newFeatureIndices[name] = index;
-            });
-
-            setFeatureIndices(newFeatureIndices);
-            setFeatureStats({});
-            setFeatureData({});
+            const ungrouped = featureList.filter(feature =>
+                groups.every(group =>
+                    group.get("featureIDs").every(id => id !== feature.get("name"))
+                )
+            );
+            setUngroupedFeatures(
+                ungroupedFeatures
+                    .filter(feature => ungrouped.find(x => x.get("name") === feature.name))
+                    .map(feature => featureList.find(x => x.get("name") === feature.name).toJS())
+                    .concat(
+                        ungrouped
+                            .filter(
+                                feature =>
+                                    !ungroupedFeatures.find(x => x.name === feature.get("name"))
+                            )
+                            .toJS()
+                    )
+            );
+            setGroupedFeatures(
+                groups
+                    .map(group => {
+                        const oldGroup = groupedFeatures.find(g => g.id === group.get("id"));
+                        const newGroup = group.toJS();
+                        const previousGroupFeatures = oldGroup ? oldGroup.features : [];
+                        const currentGroupFeatures = newGroup.featureIDs.map(id =>
+                            featureList.toJS().find(feature => feature.name === id)
+                        );
+                        const newFeatureOrder = previousGroupFeatures
+                            .filter(feature =>
+                                currentGroupFeatures.find(x => x.name === feature.name)
+                            )
+                            .map(feature =>
+                                featureList.find(x => x.get("name") === feature.name).toJS()
+                            )
+                            .concat(
+                                currentGroupFeatures.filter(
+                                    feature =>
+                                        !previousGroupFeatures.find(x => x.name === feature.name)
+                                )
+                            );
+                        return Object.assign(group.toJS(), { features: newFeatureOrder });
+                    })
+                    .toJS()
+            );
         },
-        [props.featureList]
+        [featureList, groups]
     );
 
-    useEffect(
-        _ => {
-            let beforeLength = Object.keys(featureIndices).length;
-            let newFeatureIndices = { ...featureIndices };
-
-            featureNames
-                .filter(name => {
-                    return featureIndices[name] == undefined;
-                })
-                .forEach(name => {
-                    newFeatureIndices[name] = beforeLength;
-                    beforeLength++;
-                });
-
-            setFeatureIndices(newFeatureIndices);
-        },
-        [features]
-    );
-
-    //filters out the feautres based on the filter bar and
-    //sorts them by their indices stored in featureIndices
-    const sortedFeatureNames = featureNames
-        .filter(featureName =>
-            props.filterString ? featureName.startsWith(props.filterString) : true
-        )
-        .concat() //this is so it operates on a copy of stuff
-        .sort((a, b) => {
-            const aIndex = featureIndices[a];
-            const bIndex = featureIndices[b];
-            if (aIndex < bIndex) return -1;
-            else if (aIndex > bIndex) return 1;
-            else return 0;
-        });
-
-    // Create a context to hold dispatches and state we'll need in the lower components
-    const listContext = {
-        featureDelete: useFeatureDelete()
-    };
-
+    // Mass-selection functions
     function deselectAll() {
-        props.featureList.forEach(feature => props.featureUnselect(feature.get("name")));
+        featureList.forEach(feature => selectFeature(feature.get("name"), false));
+        groups.forEach(group => selectFeatureGroup(group.get("id"), false));
     }
-    const deselectHotkey = useKey("`");
-    useEffect(
-        _ => {
-            deselectHotkey && deselectAll();
-        },
 
-        [deselectHotkey]
+    function selectAll() {
+        ungroupedFeatures
+            .filter(feature => featureFilter.func(feature))
+            .filter(searchStringFilter)
+            .forEach(feature => selectFeature(feature.name, true));
+        groupedFeatures.forEach(group =>
+            group.features
+                .filter(feature => featureFilter.func(feature))
+                .filter(searchStringFilter)
+                .forEach(feature => selectFeature(feature.name, true))
+        );
+    }
+
+    // Stuff for shift-selection
+    const lastSelected = useState();
+    const baseIndex = ungroupedFeatures.concat(
+        groupedFeatures
+            .map(group =>
+                group.featureIDs.map(feature =>
+                    featureList.find(x => x.get("name") === feature).toJS()
+                )
+            )
+            .flat()
     );
 
+    function onDragEnd(e) {
+        lastSelected[1](null);
+        if (!e.source.droppableId && !e.destination.droppableId) return;
+        if (e.source.droppableId === e.destination.droppableId) {
+            if (e.destination.droppableId === "ungroupedFeatures") {
+                return setUngroupedFeatures(ungroupedFeatures =>
+                    reorderList(ungroupedFeatures, e.source.index, e.destination.index)
+                );
+            }
+            return setGroupedFeatures(orderedGroups =>
+                orderedGroups.map(group =>
+                    group.id === e.destination.droppableId
+                        ? Object.assign(group, {
+                              features: reorderList(
+                                  group.features,
+                                  e.source.index,
+                                  e.destination.index
+                              )
+                          })
+                        : group
+                )
+            );
+        }
+
+        if (e.source.droppableId !== e.destination.droppableId) {
+            const item = featureList.find(feature => feature.get("name") === e.draggableId).toJS();
+
+            // This effect smooths out the animation by updating our local state before the global one is updated
+            if (e.destination.droppableId === "ungroupedFeatures") {
+                setUngroupedFeatures(ungroupedFeatures =>
+                    addNewItem(ungroupedFeatures, item, e.destination.index)
+                );
+            } else {
+                setGroupedFeatures(orderedGroups =>
+                    orderedGroups.map(group =>
+                        group.id === e.destination.droppableId
+                            ? Object.assign(group, {
+                                  features: addNewItem(group.features, item, e.destination.index)
+                              })
+                            : group
+                    )
+                );
+            }
+
+            changeFeatureGroup(
+                e.draggableId,
+                e.destination.droppableId === "ungroupedFeatures" ? null : e.destination.droppableId
+            );
+        }
+    }
+
+    const [statsHidden, setStatsHidden] = useStatsPanelHidden();
+    const containerClasses = classnames({
+        ["feature-list-container"]: true,
+        ["stats-hidden"]: statsHidden,
+        ["stats-not-hidden"]: !statsHidden
+    });
     return (
-        <ListContext.Provider value={listContext}>
-            <div
-                className={
-                    "feature-list-container " + (statsHidden ? "stats-hidden" : "stats-not-hidden")
-                }
+        <div className={containerClasses}>
+            <FeatureListContext.Provider
+                value={{
+                    baseIndex,
+                    lastSelected,
+                    featureFilter,
+                    statsHidden,
+                    searchStringFilter
+                }}
             >
                 <FeaturePanelHeader
                     statsHidden={statsHidden}
@@ -580,55 +706,65 @@ function FeatureList(props) {
                 />
                 <div className="stats-bar-top">
                     <SelectedDropdown
-                        featureList={props.featureList}
+                        featureList={featureList}
                         setFeatureFilter={setFeatureFilter}
                     />
                     <StatsLabelRow statsHidden={statsHidden} />
                 </div>
-                <div className="features">
-                    <Button classes={{ label: "deselect-button-label" }} onClick={deselectAll}>
-                        deselect all
-                    </Button>
-                    {props.featureListLoading && (
-                        <div className="loading-list">
-                            <CircularProgress />
+                <DragDropContext onDragEnd={onDragEnd}>
+                    <div className="features">
+                        <div className="select-buttons">
+                            <Button
+                                classes={{ label: "deselect-button-label" }}
+                                onClick={selectAll}
+                            >
+                                select all
+                            </Button>
+                            <Button
+                                classes={{ label: "deselect-button-label" }}
+                                onClick={deselectAll}
+                            >
+                                deselect all
+                            </Button>
                         </div>
-                    )}
-                    <div className="list" hidden={props.featureListLoading}>
-                        <FeatureListDND
-                            featureIndices={featureIndices}
-                            setFeatureIndices={setFeatureIndices}
-                            data={featureData}
-                            stats={featureStats}
-                            statsHidden={statsHidden}
-                            featureNames={sortedFeatureNames}
-                            featureSelect={props.featureSelect}
-                            featureUnselect={props.featureUnselect}
-                            featureMapping={featureMapping}
-                        />
+                        {featureListLoading && (
+                            <div className="loading-list">
+                                <CircularProgress />
+                            </div>
+                        )}
+                        <Droppable droppableId="ungroupedFeatures">
+                            {(provided, snapshot) => (
+                                <div
+                                    ref={provided.innerRef}
+                                    {...provided.droppableProps}
+                                    className="list"
+                                >
+                                    {ungroupedFeatures
+                                        .filter(feature => featureFilter.func(feature))
+                                        .filter(searchStringFilter)
+                                        .map((feature, idx) => (
+                                            <FeatureItem
+                                                feature={feature}
+                                                key={feature.name}
+                                                idx={idx}
+                                            />
+                                        ))}
+                                    {!ungroupedFeatures.length && featureList.size ? (
+                                        <span>No ungrouped features</span>
+                                    ) : null}
+                                    {provided.placeholder}
+                                </div>
+                            )}
+                        </Droppable>
+                        <hr className="feature-list-divider" />
+                        {groupedFeatures.map(group => (
+                            <FeatureGroup key={group.name} group={group} />
+                        ))}
                     </div>
-                </div>
-            </div>
-        </ListContext.Provider>
+                </DragDropContext>
+            </FeatureListContext.Provider>
+        </div>
     );
 }
 
-function mapStateToProps(state) {
-    return {
-        featureList: state.data.get("featureList"),
-        featureListLoading: state.data.get("featureListLoading"),
-        filename: state.data.get("filename")
-    };
-}
-
-function mapDispatchToProps(dispatch) {
-    return {
-        featureSelect: bindActionCreators(dataActions.featureSelect, dispatch),
-        featureUnselect: bindActionCreators(dataActions.featureUnselect, dispatch)
-    };
-}
-
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(FeatureList);
+export default FeatureList;

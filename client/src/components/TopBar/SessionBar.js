@@ -1,29 +1,31 @@
-import React, { useEffect, useRef, useState } from "react";
+import "./SessionBar.css";
+
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import { useFilename, useFileUpload } from "hooks/DataHooks";
-import { useUploadStatus } from "hooks/UIHooks";
-import MaterialButton from "@material-ui/core/Button";
-import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import CodeIcon from "@material-ui/icons/Code";
-import SaveIcon from "@material-ui/icons/Save";
-import OpenIcon from "@material-ui/icons/FolderOpen";
-import DescriptionIcon from "@material-ui/icons/Description";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload";
+import DescriptionIcon from "@material-ui/icons/Description";
+import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
+import MaterialButton from "@material-ui/core/Button";
+import React, { useEffect, useState } from "react";
+
+import { useFilename, useFileUpload } from "hooks/DataHooks";
+import { useInterval, useTimeout } from "hooks/UtilHooks";
+import { useUploadStatus } from "hooks/UIHooks";
 import Title from "components/Title/Title";
-import classNames from "classnames";
-import * as selectionActions from "actions/selectionActions";
+import classnames from "classnames";
 import * as exportActions from "actions/exportActions";
-import "./SessionBar.css";
+import * as selectionActions from "actions/selectionActions";
 import * as sessionsActions from "actions/sessionsActions";
 import * as uiTypes from "constants/uiTypes";
-import classnames from "classnames";
-import { useInterval, useTimeout } from "hooks/UtilHooks";
+
+import { useHelpMode } from "../../hooks/UIHooks";
 
 const SessionBar = props => {
     const filename = useFilename();
     const fileLoad = useFileUpload();
     const uploadStatus = useUploadStatus();
+    const [helpMode, setHelpMode] = useHelpMode();
 
     const [flashSaveButton, setFlashSaveButton] = useState();
 
@@ -43,7 +45,7 @@ const SessionBar = props => {
 
     useEffect(
         _ => {
-            props.removeAllSelections();
+            // props.removeAllSelections();
         },
         [filename]
     );
@@ -77,9 +79,9 @@ const SessionBar = props => {
     let loadingStyle = {};
     let loadingClasses = "";
     if (uploadStatus === null) {
-        loadingClasses = classNames("session-bar-loading-bar", "session-bar-loading-bar--hidden");
+        loadingClasses = classnames("session-bar-loading-bar", "session-bar-loading-bar--hidden");
     } else if (uploadStatus === "PROCESSING") {
-        loadingClasses = classNames(
+        loadingClasses = classnames(
             "session-bar-loading-bar",
             "session-bar-loading-bar--indeterminate"
         );
@@ -122,6 +124,7 @@ const SessionBar = props => {
                     </label>
                 </li>
             </ul>
+            <HelpOutlineIcon onClick={_ => setHelpMode(!helpMode)} className="help-icon" />
         </div>
     );
 };

@@ -4,7 +4,7 @@ import { Button, IconButton } from "@material-ui/core";
 import { useDispatch } from "react-redux";
 import HelpIcon from "@material-ui/icons/Help";
 import Plot from "react-plotly.js";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import classnames from "classnames";
 
@@ -18,8 +18,11 @@ import {
 } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
 import * as wmActions from "../../actions/windowManagerActions";
+import * as portals from "react-reverse-portal";
+import HelpContent from "components/Help/HelpContent";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
+const GUIDANCE_PATH = "normalization_page:general_normalization";
 
 function makeServerRequestObj(algorithmName, feature) {
     return {
@@ -52,6 +55,7 @@ function PreviewPlot(props) {
     const min = Math.min(...props.data).toFixed(2);
     const max = Math.max(...props.data).toFixed(2);
 
+    const chartRevision = useRef(0);
     const [chartState, setChartState] = useState({
         data: [
             {
@@ -66,13 +70,47 @@ function PreviewPlot(props) {
             autosize: true,
             margin: { l: 40, r: 10, t: 5, b: 20 },
             hovermode: false,
-            titlefont: { size: 5 }
+            titlefont: { size: 5 },
+            datarevision: chartRevision.current
         },
         config: {
             displaylogo: false,
             displayModeBar: false
         }
     });
+
+    function updateChartRevision() {
+        chartRevision.current++;
+        setChartState({
+            ...chartState,
+            layout: { ...chartState.layout, datarevision: chartRevision.current }
+        });
+    }
+
+    /* We let plotly figure out the ymax for this graph, then let the parent component figure out
+    which of the individual algo graphs has the greatest max value. Then the parent pushes that
+    back down where we make it the ymax value for all the sub-graphs. */
+    const [yMax, setYMax] = useState();
+    useEffect(
+        _ => {
+            if (yMax || !chartState.layout.yaxis) return;
+            const newYMax = chartState.layout.yaxis.range[1];
+            props.maxState[1](maxState => maxState.concat([newYMax]));
+            setYMax(newYMax);
+        },
+        [chartState]
+    );
+
+    // Once the max is calculated, we set this chart's range to the one passed down from the parent
+    useEffect(
+        _ => {
+            if (!props.maxYValue) return;
+            chartState.layout.yaxis.autorange = false;
+            chartState.layout.yaxis.range[1] = props.maxYValue;
+            updateChartRevision();
+        },
+        [props.maxYValue]
+    );
 
     const containerClass = classnames({
         "normalize-plot-container": true,
@@ -169,6 +207,16 @@ function FeatureRow(props) {
         [featureState && featureState.standardized, "standardized"]
     ];
 
+    const [maxYValue, setMaxYValue] = useState();
+    const maxState = useState([]);
+    useEffect(
+        _ => {
+            if (maxState[0].length !== dataRows.length) return;
+            setMaxYValue(Math.max(...maxState[0]));
+        },
+        [maxState]
+    );
+
     return (
         <React.Fragment>
             <div className="normalize-title">{props.feature.get("displayName")}</div>
@@ -181,6 +229,8 @@ function FeatureRow(props) {
                         idx={idx}
                         onSelect={_ => setSelection(idx)}
                         selected={featureState && featureState.selection === idx}
+                        maxState={maxState}
+                        maxYValue={maxYValue}
                     />
                 ))}
             </div>
@@ -204,6 +254,10 @@ function Normalization(props) {
     const [selections, setSelections] = selectionState;
 
     const addNewFeature = useNewFeature();
+    const [helpMode, setHelpMode] = useState(false);
+
+    // We store the previews in a portal so we don't have to re-render them when the user switches back from help mode
+    const previews = React.useMemo(() => portals.createPortalNode(), []);
 
     if (features === null || !win.data) {
         return <WindowCircularProgress />;
@@ -247,17 +301,17 @@ function Normalization(props) {
                     <span>
                         Select whether you wish to normalize or standardize each feature below.
                     </span>
-                    <IconButton>
+                    <IconButton onClick={_ => setHelpMode(!helpMode)}>
                         <HelpIcon />
                     </IconButton>
                 </div>
-                <div className="normalize-top-button-row">
+                <div className="normalize-top-button-row" hidden={helpMode}>
                     <Button onClick={globalSelect(0)}>set all original</Button>
                     <Button onClick={globalSelect(1)}>set all normalized</Button>
                     <Button onClick={globalSelect(2)}>set all standardized</Button>
                 </div>
             </div>
-            <div className="normalize-previews">
+            <portals.InPortal node={previews}>
                 {features.map(feature => (
                     <FeatureRow
                         key={feature.get("feature")}
@@ -265,14 +319,22 @@ function Normalization(props) {
                         selectionState={selectionState}
                     />
                 ))}
+            </portals.InPortal>
+            <div className="normalize-previews">
+                <HelpContent hidden={!helpMode} guidancePath={GUIDANCE_PATH} />
+                {helpMode ? null : <portals.OutPortal node={previews} />}
             </div>
             <div className="normalize-action-row">
                 <div>
-                    <Button variant="contained" size="small" onClick={_ => closeWindow()}>
-                        Cancel
+                    <Button
+                        variant="contained"
+                        size="small"
+                        onClick={_ => (helpMode ? setHelpMode(false) : closeWindow())}
+                    >
+                        {helpMode ? "Close Help" : "Cancel"}
                     </Button>
                 </div>
-                <div>
+                <div hidden={helpMode}>
                     <Button
                         color="primary"
                         variant="contained"

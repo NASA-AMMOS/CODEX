@@ -685,6 +685,41 @@ class CodexHash:
         pickle_path = os.path.join(session_path, "client_state")
         pickle.dump(front_end_state, open(pickle_path, 'wb'))
 
+    @expose('return_data')
+    def return_data(self, session=None):
+        '''
+        Inputs:
+
+        Outputs:
+
+        '''
+        session = self.__set_session(session)
+
+        ## Save classifier models
+        classifiers = self.sessions[session]["classifierList"]
+
+        # Save regression models
+        regressors = self.sessions[session]["regressorList"]
+
+        # Save labels
+        labels = self.sessions[session]["labelList"]
+
+        # Save features
+        features = self.sessions[session]["featureList"]
+
+        # Save subsets
+        subsets = self.sessions[session]["subsetList"]
+
+        # Save downsampled features
+        downsamples = self.sessions[session]["downsampleList"]
+
+        return {'classifiers': classifiers,
+                'regressors': regressors,
+                'labels': labels,
+                'features': features,
+                'subsets': subsets,
+                'downsamples': downsamples}
+
     @expose('unpickle_data')
     def unpickle_data(self, session_name, loadPath, session=None):
         '''

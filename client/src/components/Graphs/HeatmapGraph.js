@@ -1,16 +1,23 @@
 import "components/Graphs/ContourGraph.css";
 
-import Immutable from "immutable";
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";
 
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import { useCurrentSelection, usePinnedFeatures, useFileInfo } from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
-import GraphWrapper from "components/Graphs/GraphWrapper";
-import * as utils from "utils/utils";
-
+import { createNewId, removeSentinelValues, zip } from "../../utils/utils";
 import { filterBounds } from "./graphFunctions";
+import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
+import {
+    useSetWindowNeedsAutoscale,
+    useWindowAxisLabels,
+    useWindowFeatureList,
+    useWindowGraphBinSize,
+    useWindowGraphBounds,
+    useWindowNeedsResetToDefault,
+    useWindowTitle,
+    useWindowXAxis,
+    useWindowYAxis
+} from "../../hooks/WindowHooks";
+import GraphWrapper from "./GraphWrapper";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_BUCKET_COUNT = 50;
@@ -84,9 +91,10 @@ function dataRange(data) {
 function squashDataIntoBuckets(data, numBuckets) {
     const maxes = data.map(col => Math.max(...col));
     const mins = data.map(col => Math.min(...col));
+
     const bucketSizes = data.map((_, idx) => (maxes[idx] - mins[idx]) / numBuckets[idx]);
 
-    return utils.unzip(data).reduce(
+    return zip(data).reduce(
         (acc, dataPoint) => {
             const [xIdx, yIdx] = dataPoint.map((val, idx) =>
                 val === maxes[idx]
@@ -111,14 +119,27 @@ function generateRange(low, high, increment) {
     return range;
 }
 
-function generateDataAxis(col) {
+function generateDataAxis(col, bucketCount) {
     const [min, max] = dataRange(col);
-    return generateRange(min, max, (max - min) / DEFAULT_BUCKET_COUNT);
+    return generateRange(min, max, (max - min) / bucketCount);
 }
 
 function HeatmapGraph(props) {
     const chart = useRef(null);
-    const [chartId] = useState(utils.createNewId());
+    const [chartId] = useState(createNewId());
+
+    const [featuresImmutable] = useWindowFeatureList(props.win.id);
+    const featureList = featuresImmutable.toJS();
+    const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
+    const [binSize, setBinSize] = useWindowGraphBinSize(props.win.id);
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
+        props.win.id
+    );
+    const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
+    const [xAxis, setXAxis] = useWindowXAxis(props.win.id);
+    const [yAxis, setYAxis] = useWindowYAxis(props.win.id);
 
     //the number of interpolation steps that you can take caps at 5?
     const interpolatedColors = interpolateColors(
@@ -128,8 +149,8 @@ function HeatmapGraph(props) {
         "linear"
     );
 
-    const sanitizedCols = utils.removeSentinelValues(
-        props.win.data.features.map(colName =>
+    const sanitizedCols = removeSentinelValues(
+        featureList.map(colName =>
             props.data
                 .find(col => col.get("feature") === colName)
                 .get("data")
@@ -137,74 +158,61 @@ function HeatmapGraph(props) {
         ),
         props.fileInfo
     );
-    const cols = filterBounds(props.win.data.features, sanitizedCols, props.win.data.bounds);
 
-    const xAxis =
-        (props.win.data.axisLabels && props.win.data.axisLabels[props.win.data.features[0]]) ||
-        props.data
-            .find(feature => feature.get("feature") === props.win.data.features[0])
-            .get("displayName");
+    const filteredCols = filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
 
-    const yAxis =
-        (props.win.data.axisLabels && props.win.data.axisLabels[props.win.data.features[1]]) ||
-        props.data
-            .find(feature => feature.get("feature") === props.win.data.features[1])
-            .get("displayName");
+    const baseX = xAxis
+        ? filteredCols[featureList.findIndex(feature => feature === xAxis)]
+        : filteredCols[0];
+    const baseY = yAxis
+        ? filteredCols[featureList.findIndex(feature => feature === yAxis)]
+        : filteredCols[1];
 
-    const featureDisplayNames = props.win.data.features.map(featureName =>
+    const x = generateDataAxis(baseX, (binSize && binSize.get("x")) || DEFAULT_BUCKET_COUNT);
+    const y = generateDataAxis(baseY, (binSize && binSize.get("y")) || DEFAULT_BUCKET_COUNT);
+    const z = squashDataIntoBuckets(
+        filteredCols,
+        binSize
+            ? Object.values(binSize.toJS()).map(val => val || 1)
+            : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT]
+    );
+
+    const xAxisTitle =
+        (axisLabels && axisLabels.get(xAxis)) ||
+        props.data.find(feature => feature.get("feature") === featureList[0]).get("displayName");
+
+    const yAxisTitle =
+        (axisLabels && axisLabels.get(yAxis)) ||
+        props.data.find(feature => feature.get("feature") === featureList[1]).get("displayName");
+
+    const featureDisplayNames = featureList.map(featureName =>
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
     );
-    useEffect(_ => {
-        if (!props.win.title) props.win.setTitle(featureDisplayNames.join(" vs "));
-        props.win.setData(data => ({
-            ...data.toJS(),
-            binSize: props.win.data.binSize || {
-                x: DEFAULT_BUCKET_COUNT,
-                y: DEFAULT_BUCKET_COUNT
-            },
-            bounds:
-                props.win.data.bounds ||
-                props.win.data.features.reduce((acc, colName, idx) => {
-                    acc[colName] = { min: Math.min(...cols[idx]), max: Math.max(...cols[idx]) };
-                    return acc;
-                }, {}),
-            axisLabels: props.win.data.axisLabels
-        }));
-    }, []);
 
-    function getCols() {
-        return squashDataIntoBuckets(
-            cols,
-            props.win.data.binSize
-                ? Object.values(props.win.data.binSize)
-                : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT]
-        );
-    }
-
-    // The plotly react element only changes when the revision is incremented.
+    // // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
     // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState({
         data: [
             {
-                x: generateDataAxis(cols[0]),
-                y: generateDataAxis(cols[1]),
-                z: getCols(),
+                x,
+                y,
+                z,
                 type: "heatmap",
                 showscale: true,
                 colorscale: interpolatedColors
             }
         ],
         layout: {
-            dragmode: "lasso",
+            dragmode: props.globalChartState !== "lasso" && props.globalChartState,
             xaxis: {
-                title: xAxis,
+                title: xAxisTitle,
                 automargin: true,
                 ticklen: 0,
                 scaleratio: 1.0
             },
             yaxis: {
-                title: yAxis,
+                title: yAxisTitle,
                 automargin: true,
                 ticklen: 0,
                 anchor: "x"
@@ -230,26 +238,84 @@ function HeatmapGraph(props) {
         setChartRevision(revision);
     }
 
-    // Effect to keep axes updated if they've been swapped
+    function setDefaults() {
+        if (!bounds)
+            setBounds(
+                featureList.reduce((acc, colName, idx) => {
+                    acc[colName] = {
+                        min: Math.min(...sanitizedCols[idx]),
+                        max: Math.max(...sanitizedCols[idx])
+                    };
+                    return acc;
+                }, {})
+            );
+        setBinSize({
+            x: DEFAULT_BUCKET_COUNT,
+            y: DEFAULT_BUCKET_COUNT
+        });
+        if (!axisLabels)
+            setAxisLabels(
+                featureList.reduce((acc, featureName) => {
+                    acc[featureName] = featureName;
+                    return acc;
+                }, {})
+            );
+        if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        if (!xAxis) setXAxis(featureList[0]);
+        if (!yAxis) setYAxis(featureList[1]);
+    }
+
+    useEffect(_ => {
+        setDefaults();
+        updateChartRevision();
+    }, []);
+
     useEffect(
         _ => {
-            chartState.data[0].x = generateDataAxis(cols[0]);
-            chartState.data[0].y = generateDataAxis(cols[1]);
-            chartState.data[0].z = getCols();
-
-            chartState.layout.xaxis.title =
-                props.win.data.axisLabels && props.win.data.axisLabels[props.win.data.features[0]]
-                    ? props.win.data.axisLabels[props.win.data.features[0]]
-                    : xAxis;
-
-            chartState.layout.yaxis.title =
-                props.win.data.axisLabels && props.win.data.axisLabels[props.win.data.features[1]]
-                    ? props.win.data.axisLabels[props.win.data.features[1]]
-                    : yAxis;
-
+            chartState.layout.dragmode =
+                props.globalChartState !== "lasso" && props.globalChartState;
             updateChartRevision();
         },
-        [props.win.data.features]
+        [props.globalChartState]
+    );
+
+    function updateAxes() {
+        chartState.data[0].x = x;
+        chartState.data[0].y = y;
+        chartState.data[0].z = z;
+    }
+
+    // Handles axis swap and label changes
+    useEffect(
+        _ => {
+            updateAxes();
+            chartState.layout.xaxis.title = xAxisTitle;
+            chartState.layout.yaxis.title = yAxisTitle;
+            updateChartRevision();
+        },
+        [featuresImmutable, axisLabels, binSize, bounds]
+    );
+
+    useEffect(
+        _ => {
+            if (needsResetToDefault) {
+                setDefaults();
+                setNeedsResetToDefault(false);
+            }
+        },
+        [needsResetToDefault]
+    );
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                updateChartRevision();
+                setWindowNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
     );
 
     return (
