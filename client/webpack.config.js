@@ -20,6 +20,10 @@ module.exports = {
         port: 3000,
         hot: true
     },
+    watchOptions: {
+        poll: 1000,
+        ignored: ["node_modules"]
+    },
     devtool: "cheap-module-source-map",
     module: {
         rules: [
@@ -45,7 +49,7 @@ module.exports = {
                 use: ["style-loader", "css-loader", "sass-loader"]
             },
             {
-                test: /\.(png|jpg|gif|eot|ttf|woff|woff2)$/,
+                test: /\.(png|jpg|gif|eot|ttf|woff|woff2|fnt)$/,
                 loader: "file-loader"
             },
             {
@@ -81,6 +85,7 @@ module.exports = {
             path.resolve("./node_modules"),
             path.resolve("./src/react-cristal/src")
         ],
-        extensions: [".ts", ".tsx", ".js", ".json"]
+        extensions: [".ts", ".tsx", ".js", ".json"],
+        alias: { "react-dom": "@hot-loader/react-dom" }
     }
 };

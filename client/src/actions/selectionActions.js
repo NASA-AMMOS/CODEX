@@ -60,7 +60,7 @@ export function deleteSelection(id) {
             hashType: "selection",
             sessionkey: utils.getGlobalSessionKey(),
             activity: "delete",
-            name: [getState().selections.savedSelections[id].name]
+            name: [getState().selections.savedSelections.find(sel => sel.id === id).name]
         };
 
         socketWorker.postMessage(
@@ -86,8 +86,8 @@ export function setSelectionGroup(id, groupID) {
     return { type: actionTypes.SET_SELECTION_GROUP, id, groupID };
 }
 
-export function createSelectionGroup(id) {
-    return { type: actionTypes.CREATE_SELECTION_GROUP, id };
+export function createSelectionGroup(name, selections) {
+    return { type: actionTypes.CREATE_SELECTION_GROUP, name, selections };
 }
 
 export function toggleGroupActive(id) {
@@ -96,4 +96,28 @@ export function toggleGroupActive(id) {
 
 export function toggleGroupHidden(id) {
     return { type: actionTypes.TOGGLE_GROUP_HIDDEN, id };
+}
+
+export function deleteSelectionGroup(id) {
+    return { type: actionTypes.DELETE_SELECTION_GROUP, id };
+}
+
+export function renameSelectionGroup(id, name) {
+    return { type: actionTypes.RENAME_SELECTION_GROUP, id, name };
+}
+
+export function setSelectionActive(id, active) {
+    return { type: actionTypes.SET_SELECTION_ACTIVE, id, active };
+}
+
+export function setSelectionHidden(id, hidden) {
+    return { type: actionTypes.SET_SELECTION_HIDDEN, id, hidden };
+}
+
+export function setGroupActive(id, active) {
+    return { type: actionTypes.SET_GROUP_ACTIVE, id, active };
+}
+
+export function setGroupHidden(id, hidden) {
+    return { type: actionTypes.SET_GROUP_HIDDEN, id, hidden };
 }

@@ -36,6 +36,38 @@ export default function windowManager(
             return opt_reducer.setWindowData(state, action);
         case actionTypes.WINDOW_SET_ACTIVE:
             return opt_reducer.setWindowActive(state, action);
+        case actionTypes.WINDOW_SET_TYPE:
+            return opt_reducer.setWindowType(state, action);
+        case actionTypes.WINDOW_SET_DATA_BOUNDS:
+            return opt_reducer.setWindowDataBounds(state, action);
+        case actionTypes.WINDOW_SET_BIN_SIZE:
+            return opt_reducer.setWindowBinSize(state, action);
+        case actionTypes.WINDOW_SET_NEEDS_RESET_TO_DEFAULT:
+            return opt_reducer.setWindowNeedsResetToDefault(state, action);
+        case actionTypes.WINDOW_SET_AXIS_LABELS:
+            return opt_reducer.setWindowAxisLabels(state, action);
+        case actionTypes.WINDOW_SET_AXIS_FEATURE:
+            return opt_reducer.setWindowAxisFeature(state, action);
+        case actionTypes.WINDOW_SET_FEATURE_INFO:
+            return opt_reducer.setWindowFeatureInfo(state, action);
+        case actionTypes.WINDOW_SHOW_GRID_LINES:
+            return opt_reducer.setWindowShowGridLines(state, action);
+        case actionTypes.WINDOW_SET_DATA_SCALE:
+            return opt_reducer.setWindowDataScale(state, action);
+        case actionTypes.WINDOW_SET_DATA_MAP_TYPE:
+            return opt_reducer.setWindowDataMapType(state, action);
+        case actionTypes.WINDOW_SET_DATA_TREND_LINE_VISIBLE:
+            return opt_reducer.setWindowTrendLineVisible(state, action);
+        case actionTypes.WINDOW_SET_DATA_DOT_SIZE:
+            return opt_reducer.setWindowDotSize(state, action);
+        case actionTypes.WINDOW_SET_DATA_DOT_OPACITY:
+            return opt_reducer.setWindowDotOpacity(state, action);
+        case actionTypes.WINDOW_SET_DATA_DOT_SHAPE:
+            return opt_reducer.setWindowDotShape(state, action);
+        case actionTypes.WINDOW_SET_NEEDS_AUTOSCALE:
+            return opt_reducer.setWindowNeedsAutoscale(state, action);
+        case actionTypes.WINDOW_SET_NEEDS_PLOT_IMAGE:
+            return opt_reducer.setWindowNeedsPlotImage(state, action);
         default:
             return state;
     }

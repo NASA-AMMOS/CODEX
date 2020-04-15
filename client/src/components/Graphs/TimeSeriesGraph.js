@@ -1,127 +1,186 @@
 import "components/Graphs/TimeSeriesGraph.css";
 
-import React, { useRef, useState, useEffect, createRef } from "react";
-import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
-import Popover from "@material-ui/core/Popover";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
-import ReactResizeDetector from "react-resize-detector";
-import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
+import React, { useRef, useState, useEffect } from "react";
+import plotComponentFactory from "react-plotly.js/factory";
+import regression from "regression";
 
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import GraphWrapper from "components/Graphs/GraphWrapper";
+import PlotlyPatched from "plotly-patched/src/core";
+import * as utils from "utils/utils";
+
+import { filterSingleCol } from "./graphFunctions";
+import { unzip } from "../../utils/utils";
 import {
-    useCurrentSelection,
-    useSavedSelections,
-    usePinnedFeatures,
-    useFileInfo
-} from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
-import { useGlobalChartState } from "hooks/UIHooks";
+    useSetWindowNeedsAutoscale,
+    useWindowAxisLabels,
+    useWindowFeatureList,
+    useWindowGraphBinSize,
+    useWindowGraphBounds,
+    useWindowNeedsResetToDefault,
+    useWindowShowGridLines,
+    useWindowTitle,
+    useWindowTrendLineVisible
+} from "../../hooks/WindowHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
+const DEFAULT_TITLE = "Time Series Graph";
+const COLOR_CURRENT_SELECTION = "#FF0000";
 
-function generatePlotData(features, fileInfo) {
-    const cols = utils.removeSentinelValues(features.map(feature => feature.data), fileInfo);
+// Using a patched version of plotly that allows us to toggle only certain shapes to be editable,
+// and only use horizontal drag bars.
+const Plot = plotComponentFactory(PlotlyPatched);
 
-    //generate time axis list
-    const timeAxis = [...Array(cols[0].length).keys()];
-
-    return features.map((feature, idx) => {
-        return {
-            x: timeAxis,
-            y: cols[idx],
-            xaxis: "x",
-            yaxis: "y1",
-            mode: "lines",
-            type: "scatter"
-        };
-    });
+function handleGlobalChartState(state) {
+    return state === "lasso" ? "select" : state;
 }
 
-function generateLayouts(features) {
-    let layouts = [];
+function makeSelectionShapes(selection) {
+    return !selection.rowIndices.length
+        ? null
+        : selection.rowIndices
+              .reduce((acc, val) => {
+                  const lastSection = acc.length && acc[acc.length - 1];
+                  if (lastSection && lastSection[lastSection.length - 1] + 1 === val) {
+                      lastSection.push(val);
+                      return acc;
+                  }
 
-    for (let index = 0; index < features.length; index++) {
-        let layout = {
-            dragmode: "select",
-            selectdirection: "h",
-            margin: { l: 40, r: 5, t: 5, b: 0 }, // Axis tick labels are drawn in the margin space
-            hovermode: "compare", // Turning off hovermode seems to screw up click handling
-            yaxis: {
-                title: features[index].feature,
-                fixedrange: true
-            }
-        };
-
-        let axisLabel = "xaxis" + (index + 1);
-        layout[axisLabel] = {};
-
-        if (index != features.length - 1) {
-            layout[axisLabel].visible = false;
-        } else {
-            layout.margin.b = 25;
-        }
-
-        layouts.push(layout);
-    }
-
-    return layouts;
+                  acc.push([val]);
+                  return acc;
+              }, [])
+              .map(section => {
+                  return {
+                      type: "rect",
+                      xref: "x",
+                      yref: "paper",
+                      x0: section[0],
+                      y0: 0,
+                      x1: section[section.length - 1],
+                      y1: 1,
+                      fillcolor: selection.color,
+                      opacity: 0.2,
+                      line: {
+                          // Draw a line when the selection is only a single point
+                          width: section.length === 1 ? 1 : 0,
+                          color: selection.color
+                      },
+                      editable: Boolean(selection.editable),
+                      horizontalOnly: true
+                  };
+              });
 }
 
 function TimeSeriesGraph(props) {
     const features = props.data.toJS();
-    const featureNames = features.map(feature => {
-        return feature.feature;
+    const [featuresImmutable] = useWindowFeatureList(props.win.id);
+    const featureNames = featuresImmutable.toJS();
+    const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
+    const [binSize, setBinSize] = useWindowGraphBinSize(props.win.id);
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
+        props.win.id
+    );
+    const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
+    const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
+    const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
+
+    const chart = useRef(null);
+    const [chartId] = useState(utils.createNewId());
+
+    const layouts = features.reduce((acc, feature, idx) => {
+        const axisName = `yaxis${idx === 0 ? "" : idx + 1}`;
+        acc[axisName] = {
+            title: axisLabels ? axisLabels.get(feature.feature, feature.feature) : feature.feature,
+            fixedrange: true
+        };
+        return acc;
+    }, {});
+
+    const baseCols = featureNames
+        .map(colName => [
+            props.data
+                .find(col => col.get("feature") === colName)
+                .get("data")
+                .toJS(),
+            bounds && bounds.get(colName).toJS()
+        ])
+        .map(([col, bound]) => [utils.removeSentinelValues([col], props.fileInfo)[0], bound]);
+
+    const filteredCols = baseCols.map(([col, bound]) => filterSingleCol(col, bound, true));
+
+    const trendLineTraces = filteredCols.map((col, idx) => {
+        const timeAxis = [...Array(col.length).keys()];
+        const [x, y] = unzip(regression.linear(unzip([timeAxis, col])).points);
+        const trace = {
+            x,
+            y,
+            type: "scatter",
+            mode: "lines",
+            hoverinfo: "x+y",
+            marker: { color: "red", size: 5 },
+            visible: Boolean(trendLineVisible)
+        };
+        if (idx > 0) {
+            trace.xaxis = `x`;
+            trace.yaxis = `y${idx + 1}`;
+        }
+        return trace;
     });
 
-    const [chartIds] = useState(_ => featureNames.map(_ => utils.createNewId()));
-    const chartRefs = useRef(featureNames.map(() => createRef()));
-
-    let data = generatePlotData(features, props.fileInfo);
-
-    let layouts = generateLayouts(features);
-
-    return (
-        <GraphWrapper
-            resizeHandler={_ =>
-                chartRefs.current.forEach(chartRef => chartRef.current.resizeHandler())
+    const traces = filteredCols
+        .map((col, idx) => {
+            const trace = {
+                x: [...Array(col.length).keys()],
+                y: col,
+                mode: "lines",
+                type: "scatter",
+                hoverinfo: "x+y",
+                marker: { color: DEFAULT_POINT_COLOR }
+            };
+            if (idx > 0) {
+                trace.xaxis = `x`;
+                trace.yaxis = `y${idx + 1}`;
             }
-            win={props.win}
-            chartIds={chartIds}
-        >
-            <ul className="time-series-plot-container">
-                {data.map((dataElement, index) => (
-                    <TimeSeriesSubGraph
-                        key={index}
-                        axisKey={"x" + (index + 1)}
-                        data={data[index]}
-                        chart={chartRefs.current[index]}
-                        layout={layouts[index]}
-                        setCurrentSelection={props.setCurrentSelection}
-                        currentSelection={props.currentSelection}
-                        savedSelections={props.savedSelections}
-                        chartId={chartIds[index]}
-                    />
-                ))}
-            </ul>
-        </GraphWrapper>
-    );
-}
+            return trace;
+        })
+        .concat(trendLineTraces);
 
-function TimeSeriesSubGraph(props) {
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
+
     const [chartState, setChartState] = useState({
-        data: [props.data],
-        layout: props.layout,
+        data: traces,
+        layout: {
+            grid: {
+                rows: traces.length / 2,
+                columns: 1,
+                subplots: utils.range(traces.length).map(idx => [`xy${idx ? idx + 1 : ""}`])
+            },
+            showlegend: false,
+            margin: { l: 40, r: 5, t: 5, b: 20 }, // Axis tick labels are drawn in the margin space
+            dragmode: handleGlobalChartState(props.globalChartState) || "select",
+            selectdirection: "h",
+            hovermode: "compare", // Turning off hovermode seems to screw up click handling
+            ...layouts
+        },
         config: {
             responsive: true,
-            displaylogo: false
+            displaylogo: false,
+            editable: true,
+            edits: {
+                annotationPosition: false,
+                axisTitleText: false,
+                annotationTail: false,
+                annotationText: false,
+                colorbarPosition: false,
+                colorbarTitleText: false,
+                legendPosition: false,
+                legendText: false,
+                shapePosition: true,
+                titleText: false
+            },
+            modeBarButtons: [["toImage", "zoomIn2d", "zoomOut2d", "autoScale2d"], ["toggleHover"]]
         }
     });
 
@@ -134,85 +193,149 @@ function TimeSeriesSubGraph(props) {
         setChartRevision(revision);
     }
 
-    const [selectionShapes] = useBoxSelection(
-        "horizontal",
-        props.currentSelection,
-        props.savedSelections,
-        chartState.data[0].x
+    const featureDisplayNames = featureNames.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    );
+
+    function setDefaults() {
+        setBounds(
+            featureNames.reduce((acc, colName, idx) => {
+                acc[colName] = {
+                    min: Math.min(...baseCols[idx][0]),
+                    max: Math.max(...baseCols[idx][0])
+                };
+                return acc;
+            }, {})
+        );
+        setAxisLabels(
+            featureNames.reduce((acc, featureName) => {
+                acc[featureName] = featureName;
+                return acc;
+            }, {})
+        );
+        setWindowTitle(featureDisplayNames.join(" , "));
+        setShowGridLines(true);
+        setTrendLineVisible(false);
+    }
+
+    useEffect(_ => {
+        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
+        setDefaults();
+        updateChartRevision();
+    }, []);
+
+    useEffect(
+        _ => {
+            if (needsResetToDefault) {
+                setDefaults();
+                setNeedsResetToDefault(false);
+            }
+        },
+        [needsResetToDefault]
+    );
+
+    function updateData() {
+        chartState.data = traces;
+    }
+
+    useEffect(
+        _ => {
+            updateData();
+            updateChartRevision();
+        },
+        [bounds, trendLineVisible]
+    );
+
+    // Effect to handle drawing of selections
+    useEffect(
+        _ => {
+            chartState.layout.shapes = props.savedSelections
+                .concat(
+                    props.currentSelection.length && {
+                        color: COLOR_CURRENT_SELECTION,
+                        rowIndices: props.currentSelection
+                    }
+                )
+                .filter(x => x)
+                .map(sel => makeSelectionShapes(sel, traces, chart))
+                .flat();
+            updateChartRevision();
+        },
+        [props.currentSelection, props.savedSelections]
+    );
+
+    // Update the chart state when the global chart state changes
+    useEffect(
+        _ => {
+            chartState.layout.dragmode = handleGlobalChartState(props.globalChartState);
+            updateChartRevision();
+        },
+        [props.globalChartState]
     );
 
     useEffect(
         _ => {
-            chartState.layout.shapes = selectionShapes;
-
+            chartState.layout = Object.assign(chartState.layout, layouts);
             updateChartRevision();
         },
-        [selectionShapes]
+        [axisLabels]
+    );
+
+    useEffect(
+        _ => {
+            Object.keys(chartState.layout).forEach(key => {
+                if (!key.includes("axis")) return;
+                chartState.layout[key].showgrid = showGridLines;
+            });
+            updateChartRevision();
+        },
+        [showGridLines]
+    );
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                Object.keys(chartState.layout).map(key => {
+                    if (key.includes("axis")) chartState.layout[key].autorange = true;
+                });
+                updateChartRevision();
+                setNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
     );
 
     return (
-        <Plot
-            className="time-series-subplot"
-            ref={props.chart}
-            data={chartState.data}
-            layout={chartState.layout}
-            config={chartState.config}
-            style={{ width: "100%", height: "100%" }}
-            useResizeHandler
-            onInitialized={figure => setChartState(figure)}
-            onUpdate={figure => setChartState(figure)}
-            onClick={e => {
-                if (e.event.button === 2 || e.event.ctrlKey) return;
-                props.setCurrentSelection([]);
-            }}
-            onSelected={e => {
-                if (!e) return;
-                let points = utils.indicesInRange(chartState.data[0].x, e.range.x[0], e.range.x[1]);
-                props.setCurrentSelection(points);
-            }}
-            divId={props.chartId}
-        />
+        <GraphWrapper chart={chart} win={props.win} chartId={chartId}>
+            <Plot
+                ref={chart}
+                data={chartState.data}
+                layout={chartState.layout}
+                config={chartState.config}
+                style={{ width: "100%", height: "100%" }}
+                onInitialized={figure => setChartState(figure)}
+                onUpdate={figure => setChartState(figure)}
+                useResizeHandler
+                divId={chartId}
+                onClick={e => {
+                    if (e.event.button === 2 || e.event.ctrlKey) return;
+                    props.setCurrentSelection([]);
+                }}
+                onSelected={e => {
+                    if (!e) return;
+                    props.setCurrentSelection(
+                        utils.range(Math.floor(e.range.x[0]), Math.ceil(e.range.x[1]))
+                    );
+                }}
+                onRelayout={e => {
+                    if (!e["shapes[0].x0"]) return;
+                    props.setCurrentSelection(
+                        utils.range(Math.floor(e["shapes[0].x0"]), Math.ceil(e["shapes[0].x1"]))
+                    );
+                }}
+            />
+        </GraphWrapper>
     );
 }
 
-export default props => {
-    const win = useWindowManager(props, {
-        width: 500,
-        height: 500,
-        resizeable: true,
-        title: "Time Series Graph"
-    });
-
-    const [currentSelection, setCurrentSelection] = useCurrentSelection();
-    const [savedSelections, saveCurrentSelection] = useSavedSelections();
-    const [globalChartState, setGlobalChartState] = useGlobalChartState();
-    const fileInfo = useFileInfo();
-
-    const features = usePinnedFeatures(win);
-
-    if (features === null) {
-        return <WindowCircularProgress />;
-    }
-    if (features.size === 0) {
-        return <WindowError> Please select at least one feature to use this graph.</WindowError>;
-    }
-
-    win.setTitle(
-        features
-            .map(f => f.get("feature"))
-            .toJS()
-            .join(" vs ")
-    );
-    return (
-        <TimeSeriesGraph
-            currentSelection={currentSelection}
-            setCurrentSelection={setCurrentSelection}
-            savedSelections={savedSelections}
-            saveCurrentSelection={saveCurrentSelection}
-            globalChartState={globalChartState}
-            data={features}
-            fileInfo={fileInfo}
-            win={win}
-        />
-    );
-};
+export default TimeSeriesGraph;

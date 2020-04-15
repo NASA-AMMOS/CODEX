@@ -1,6 +1,7 @@
-import "components/TopBar/TopBar.css";
+import "components/TopBar/TopBar.scss";
 
 import { ButtonGroup } from "reactstrap";
+import { Tooltip } from "@material-ui/core";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
@@ -13,25 +14,101 @@ import SessionBar from "components/TopBar/SessionBar";
 import * as algorithmActions from "actions/algorithmActions";
 import * as algorithmTypes from "constants/algorithmTypes";
 import * as dataActions from "actions/data";
-import * as sessionsActions from "actions/sessionsActions";
 import * as windowManagerActions from "actions/windowManagerActions";
 import * as windowTypes from "constants/windowTypes";
 import * as workflowActions from "actions/workflowActions";
 import * as workflowTypes from "constants/workflowTypes";
 
+import { useExportModalVisible } from "../../hooks/UIHooks";
+import { useSavedSelections, useSelectedFeatureNames } from "../../hooks/DataHooks";
+
 function NavigationBar(props) {
+    const [features] = useSelectedFeatureNames();
     const defaultBackground = "#05101f";
+    const [savedSelections] = useSavedSelections();
 
     const ref = useRef(null);
     const ref_loading = useRef(null);
     const ref_message = useRef(null);
 
+    const [exportModalVisible, setExportModalVisible] = useExportModalVisible();
+
     let timeout = null;
 
     function createMenuItem(window_type, title) {
+        const [disabled, errMsg] = (function() {
+            const requiredNumFeatures = windowTypes.NUM_FEATURES_REQUIRED[window_type];
+            if (requiredNumFeatures === undefined) return [false, null];
+            if (typeof requiredNumFeatures === "number") {
+                if (features.size !== requiredNumFeatures) {
+                    return [true, `Requires ${requiredNumFeatures} selected features`];
+                }
+                return [false, null];
+            }
+
+            const [featuresErr, featuresErrMsg] = (function() {
+                if (requiredNumFeatures[1]) {
+                    if (requiredNumFeatures[0] === requiredNumFeatures[1])
+                        return features.size !== requiredNumFeatures[0]
+                            ? [
+                                  true,
+                                  `Requires selection of ${requiredNumFeatures[0]} feature${
+                                      requiredNumFeatures[0] > 1 ? "s" : ""
+                                  }`
+                              ]
+                            : [false, ""];
+                    return features.size < requiredNumFeatures[0] ||
+                        features.size > requiredNumFeatures[1]
+                        ? [
+                              true,
+                              `Requires between ${requiredNumFeatures[0]} and ${
+                                  requiredNumFeatures[1]
+                              } selected features`
+                          ]
+                        : [false, null];
+                }
+                return features.size < requiredNumFeatures[0]
+                    ? [
+                          true,
+                          `Requires at least ${requiredNumFeatures[0]} selected feature${
+                              requiredNumFeatures[0] > 1 ? "s" : ""
+                          }`
+                      ]
+                    : [false, null];
+            })();
+
+            const [selErr, selErrMsg] =
+                requiredNumFeatures[2] && savedSelections.length < requiredNumFeatures[2]
+                    ? [
+                          true,
+                          featuresErr
+                              ? ` and at least ${requiredNumFeatures[2]} selection${
+                                    requiredNumFeatures > 1 ? "s" : ""
+                                }`
+                              : `At least ${requiredNumFeatures[2]} selection${
+                                    requiredNumFeatures > 1 ? "s" : ""
+                                } required`
+                      ]
+                    : [false, null];
+
+            const err = featuresErr || selErr;
+            const errMsg = (featuresErr ? featuresErrMsg : "") + (selErr ? selErrMsg : "");
+            return [err, errMsg];
+        })();
+
         return (
-            <MenuItem key={window_type} onSelect={() => props.openWindow(window_type)}>
-                {title || window_type}
+            <MenuItem
+                key={window_type}
+                onSelect={() => props.openWindow(window_type)}
+                disabled={disabled}
+            >
+                <Tooltip
+                    title={errMsg}
+                    disableFocusListener={!disabled}
+                    disableHoverListener={!disabled}
+                >
+                    <span>{title || window_type}</span>
+                </Tooltip>
             </MenuItem>
         );
     }
@@ -75,7 +152,11 @@ function NavigationBar(props) {
             }}
         >
             <div id="topBarMenu">
-                <Dropdown className="dropdownMain" autoOpen={false}>
+                <Dropdown
+                    className="dropdownMain"
+                    autoOpen={false}
+                    disabled={props.featureList.every(feature => !feature.get("selected"))}
+                >
                     <Dropdown.Toggle className="dropdownToggle" title="Graphs" />
                     <Dropdown.Menu>{getGraphMenuItems()}</Dropdown.Menu>
                 </Dropdown>
@@ -88,6 +169,11 @@ function NavigationBar(props) {
                             windowTypes.DIMENSIONALITY_REDUCTION_WINDOW,
                             "Dimensionality Reduction"
                         )}
+                        {createMenuItem(windowTypes.NORMALIZATION_WINDOW, "Normalization")}
+                        {createMenuItem(windowTypes.PEAK_DETECTION_WINDOW, "Peak Detection")}
+                        {createMenuItem(windowTypes.REGRESSION_WINDOW, "Regression")}
+                        {createMenuItem(windowTypes.TEMPLATE_SCAN_WINDOW, "Template Scan")}
+                        {createMenuItem(windowTypes.CORRELATION_WINDOW, "Correlation")}
                     </Dropdown.Menu>
                 </Dropdown>
 
@@ -120,6 +206,12 @@ function NavigationBar(props) {
             */}
             <ControlBar />
             <div id="topBarTools">
+                <button
+                    className="export-button"
+                    onClick={_ => setExportModalVisible(!exportModalVisible)}
+                >
+                    <span>Export</span>
+                </button>
                 <ButtonGroup>
                     <Dropdown>
                         <Dropdown.Toggle className="dropdownToggle" title="Windows" />
@@ -158,7 +250,8 @@ const mapStateToProps = state => {
     return {
         data: state.data,
         ui: state.ui,
-        filename: state.data.get("filename")
+        filename: state.data.get("filename"),
+        featureList: state.data.get("featureList")
     };
 };
 

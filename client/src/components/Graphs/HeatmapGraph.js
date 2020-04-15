@@ -1,25 +1,27 @@
 import "components/Graphs/ContourGraph.css";
 
-import React, { useRef, useState, useEffect } from "react";
-import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
 import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
-import GraphWrapper from "components/Graphs/GraphWrapper";
+import React, { useRef, useState, useEffect } from "react";
 
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import { createNewId, removeSentinelValues, zip } from "../../utils/utils";
+import { filterBounds } from "./graphFunctions";
+import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
-    useCurrentSelection,
-    useSavedSelections,
-    usePinnedFeatures,
-    useFileInfo
-} from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
-import { useGlobalChartState } from "hooks/UIHooks";
+    useSetWindowNeedsAutoscale,
+    useWindowAxisLabels,
+    useWindowFeatureList,
+    useWindowGraphBinSize,
+    useWindowGraphBounds,
+    useWindowNeedsResetToDefault,
+    useWindowTitle,
+    useWindowXAxis,
+    useWindowYAxis
+} from "../../hooks/WindowHooks";
+import GraphWrapper from "./GraphWrapper";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_BUCKET_COUNT = 50;
+const DEFAULT_TITLE = "Heat Map Graph";
 
 // Returns a single rgb color interpolation between given rgb color
 // based on the factor given; via https://codepen.io/njmcode/pen/axoyD?editors=0010
@@ -87,26 +89,25 @@ function dataRange(data) {
 }
 
 function squashDataIntoBuckets(data, numBuckets) {
-    const columnLength = data[0].length;
-    const cols = utils.unzip(data);
+    const maxes = data.map(col => Math.max(...col));
+    const mins = data.map(col => Math.min(...col));
 
-    let ret = new Array(numBuckets).fill(0).map(() => new Array(numBuckets).fill(0));
+    const bucketSizes = data.map((_, idx) => (maxes[idx] - mins[idx]) / numBuckets[idx]);
 
-    const [xMin, xMax] = dataRange(data[0]);
-    const [yMin, yMax] = dataRange(data[1]);
-
-    const xDivisor = (xMax - xMin) / numBuckets;
-    const yDivisor = (yMax - yMin) / numBuckets;
-
-    for (let i = 0; i < cols.length; i++) {
-        let xValue = Math.floor((cols[i][0] - xMin) / xDivisor);
-        xValue = xValue > 0 && xValue < numBuckets ? xValue : 0;
-        let yValue = Math.floor((cols[i][1] - yMin) / yDivisor);
-        yValue = yValue > 0 && yValue < numBuckets ? yValue : 0;
-
-        ret[yValue][xValue]++;
-    }
-    return ret;
+    return zip(data).reduce(
+        (acc, dataPoint) => {
+            const [xIdx, yIdx] = dataPoint.map((val, idx) =>
+                val === maxes[idx]
+                    ? numBuckets[idx] - 1
+                    : Math.floor((val - mins[idx]) / bucketSizes[idx])
+            );
+            acc[yIdx][xIdx] = acc[yIdx][xIdx] + 1;
+            return acc;
+        },
+        Array(numBuckets[1])
+            .fill(0)
+            .map(_ => Array(numBuckets[0]).fill(0))
+    );
 }
 
 function generateRange(low, high, increment) {
@@ -118,14 +119,27 @@ function generateRange(low, high, increment) {
     return range;
 }
 
-function generateDataAxis(col) {
+function generateDataAxis(col, bucketCount) {
     const [min, max] = dataRange(col);
-    return generateRange(min, max, (max - min) / DEFAULT_BUCKET_COUNT);
+    return generateRange(min, max, (max - min) / bucketCount);
 }
 
 function HeatmapGraph(props) {
     const chart = useRef(null);
-    const [chartId] = useState(utils.createNewId());
+    const [chartId] = useState(createNewId());
+
+    const [featuresImmutable] = useWindowFeatureList(props.win.id);
+    const featureList = featuresImmutable.toJS();
+    const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
+    const [binSize, setBinSize] = useWindowGraphBinSize(props.win.id);
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
+        props.win.id
+    );
+    const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
+    const [xAxis, setXAxis] = useWindowXAxis(props.win.id);
+    const [yAxis, setYAxis] = useWindowYAxis(props.win.id);
 
     //the number of interpolation steps that you can take caps at 5?
     const interpolatedColors = interpolateColors(
@@ -135,8 +149,8 @@ function HeatmapGraph(props) {
         "linear"
     );
 
-    const data = utils.removeSentinelValues(
-        props.win.data.features.map(colName =>
+    const sanitizedCols = removeSentinelValues(
+        featureList.map(colName =>
             props.data
                 .find(col => col.get("feature") === colName)
                 .get("data")
@@ -145,35 +159,60 @@ function HeatmapGraph(props) {
         props.fileInfo
     );
 
-    //calculate range of data for axis labels
-    const xAxis = props.win.data.features[0];
-    const yAxis = props.win.data.features[1];
+    const filteredCols = filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
 
-    const cols = squashDataIntoBuckets(data, DEFAULT_BUCKET_COUNT);
-    // The plotly react element only changes when the revision is incremented.
+    const baseX = xAxis
+        ? filteredCols[featureList.findIndex(feature => feature === xAxis)]
+        : filteredCols[0];
+    const baseY = yAxis
+        ? filteredCols[featureList.findIndex(feature => feature === yAxis)]
+        : filteredCols[1];
+
+    const x = generateDataAxis(baseX, (binSize && binSize.get("x")) || DEFAULT_BUCKET_COUNT);
+    const y = generateDataAxis(baseY, (binSize && binSize.get("y")) || DEFAULT_BUCKET_COUNT);
+    const z = squashDataIntoBuckets(
+        filteredCols,
+        binSize
+            ? Object.values(binSize.toJS()).map(val => val || 1)
+            : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT]
+    );
+
+    const xAxisTitle =
+        (axisLabels && axisLabels.get(xAxis)) ||
+        props.data.find(feature => feature.get("feature") === featureList[0]).get("displayName");
+
+    const yAxisTitle =
+        (axisLabels && axisLabels.get(yAxis)) ||
+        props.data.find(feature => feature.get("feature") === featureList[1]).get("displayName");
+
+    const featureDisplayNames = featureList.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    );
+
+    // // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
     // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState({
         data: [
             {
-                x: generateDataAxis(data[0]),
-                y: generateDataAxis(data[1]),
-                z: cols,
+                x,
+                y,
+                z,
                 type: "heatmap",
                 showscale: true,
                 colorscale: interpolatedColors
             }
         ],
         layout: {
-            dragmode: "lasso",
+            dragmode: props.globalChartState !== "lasso" && props.globalChartState,
             xaxis: {
-                title: xAxis,
+                title: xAxisTitle,
                 automargin: true,
                 ticklen: 0,
                 scaleratio: 1.0
             },
             yaxis: {
-                title: yAxis,
+                title: yAxisTitle,
                 automargin: true,
                 ticklen: 0,
                 anchor: "x"
@@ -199,17 +238,84 @@ function HeatmapGraph(props) {
         setChartRevision(revision);
     }
 
-    // Effect to keep axes updated if they've been swapped
+    function setDefaults() {
+        if (!bounds)
+            setBounds(
+                featureList.reduce((acc, colName, idx) => {
+                    acc[colName] = {
+                        min: Math.min(...sanitizedCols[idx]),
+                        max: Math.max(...sanitizedCols[idx])
+                    };
+                    return acc;
+                }, {})
+            );
+        setBinSize({
+            x: DEFAULT_BUCKET_COUNT,
+            y: DEFAULT_BUCKET_COUNT
+        });
+        if (!axisLabels)
+            setAxisLabels(
+                featureList.reduce((acc, featureName) => {
+                    acc[featureName] = featureName;
+                    return acc;
+                }, {})
+            );
+        if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        if (!xAxis) setXAxis(featureList[0]);
+        if (!yAxis) setYAxis(featureList[1]);
+    }
+
+    useEffect(_ => {
+        setDefaults();
+        updateChartRevision();
+    }, []);
+
     useEffect(
         _ => {
-            chartState.data[0].x = generateDataAxis(data[0]);
-            chartState.data[0].y = generateDataAxis(data[1]);
-            chartState.data[0].z = squashDataIntoBuckets(data, DEFAULT_BUCKET_COUNT);
-            chartState.layout.xaxis.title = xAxis;
-            chartState.layout.yaxis.title = yAxis;
+            chartState.layout.dragmode =
+                props.globalChartState !== "lasso" && props.globalChartState;
             updateChartRevision();
         },
-        [props.win.data.features]
+        [props.globalChartState]
+    );
+
+    function updateAxes() {
+        chartState.data[0].x = x;
+        chartState.data[0].y = y;
+        chartState.data[0].z = z;
+    }
+
+    // Handles axis swap and label changes
+    useEffect(
+        _ => {
+            updateAxes();
+            chartState.layout.xaxis.title = xAxisTitle;
+            chartState.layout.yaxis.title = yAxisTitle;
+            updateChartRevision();
+        },
+        [featuresImmutable, axisLabels, binSize, bounds]
+    );
+
+    useEffect(
+        _ => {
+            if (needsResetToDefault) {
+                setDefaults();
+                setNeedsResetToDefault(false);
+            }
+        },
+        [needsResetToDefault]
+    );
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                updateChartRevision();
+                setWindowNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
     );
 
     return (
@@ -236,43 +342,4 @@ function HeatmapGraph(props) {
     );
 }
 
-export default props => {
-    const win = useWindowManager(props, {
-        width: 500,
-        height: 500,
-        resizeable: true,
-        title: "Heat Map"
-    });
-
-    const [currentSelection, setCurrentSelection] = useCurrentSelection();
-    //const [savedSelections, saveCurrentSelection] = useSavedSelections();
-    //const [globalChartState, setGlobalChartState] = useGlobalChartState();
-    const fileInfo = useFileInfo();
-
-    const features = usePinnedFeatures(win);
-
-    if (features === null || !win.data) {
-        return <WindowCircularProgress />;
-    }
-
-    if (features.size === 2) {
-        win.setTitle(win.data.features.join(" vs "));
-        return (
-            <HeatmapGraph
-                currentSelection={currentSelection}
-                setCurrentSelection={setCurrentSelection}
-                data={features}
-                fileInfo={fileInfo}
-                win={win}
-            />
-        );
-    } else {
-        return (
-            <WindowError>
-                Please select exactly two features
-                <br />
-                in the features list to use this graph.
-            </WindowError>
-        );
-    }
-};
+export default HeatmapGraph;

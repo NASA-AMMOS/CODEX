@@ -1,24 +1,27 @@
 import "components/Graphs/ContourGraph.css";
 
-import React, { useRef, useState, useEffect } from "react";
-import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
 import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
-import GraphWrapper from "components/Graphs/GraphWrapper.js";
+import React, { useRef, useState, useEffect } from "react";
 
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import GraphWrapper from "components/Graphs/GraphWrapper.js";
+import * as utils from "utils/utils";
+
+import { filterBounds } from "./graphFunctions";
+import { removeSentinelValues } from "../../utils/utils";
+import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
-    useCurrentSelection,
-    useSavedSelections,
-    usePinnedFeatures,
-    useFileInfo
-} from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
-import { useGlobalChartState } from "hooks/UIHooks";
+    useSetWindowNeedsAutoscale,
+    useWindowAxisLabels,
+    useWindowFeatureList,
+    useWindowGraphBounds,
+    useWindowNeedsResetToDefault,
+    useWindowTitle,
+    useWindowXAxis,
+    useWindowYAxis
+} from "../../hooks/WindowHooks";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
+const DEFAULT_TITLE = "Contour Graph";
 
 /**
  * transpose a (possibly ragged) 2d array z. inspired by
@@ -316,9 +319,20 @@ function ContourGraph(props) {
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
 
-    // plug through props
-    const cols = utils.removeSentinelValues(
-        props.win.data.features.map(colName =>
+    const [featuresImmutable] = useWindowFeatureList(props.win.id);
+    const featureList = featuresImmutable.toJS();
+    const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
+        props.win.id
+    );
+    const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
+    const [xAxis, setXAxis] = useWindowXAxis(props.win.id);
+    const [yAxis, setYAxis] = useWindowYAxis(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
+
+    const sanitizedCols = removeSentinelValues(
+        featureList.map(colName =>
             props.data
                 .find(col => col.get("feature") === colName)
                 .get("data")
@@ -327,47 +341,57 @@ function ContourGraph(props) {
         props.fileInfo
     );
 
-    const xAxis = props.win.data.features[0];
-    const yAxis = props.win.data.features[1];
+    const filteredCols = filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
 
-    //const cols = utils.unzip(data.slice(1));
-    // The plotly react element only changes when the revision is incremented.
+    const x = xAxis
+        ? filteredCols[featureList.findIndex(feature => feature === xAxis)]
+        : filteredCols[0];
+    const y = yAxis
+        ? filteredCols[featureList.findIndex(feature => feature === yAxis)]
+        : filteredCols[1];
+
+    const xAxisTitle =
+        (axisLabels && axisLabels.get(xAxis)) ||
+        props.data.find(feature => feature.get("feature") === featureList[0]).get("displayName");
+
+    const yAxisTitle =
+        (axisLabels && axisLabels.get(yAxis)) ||
+        props.data.find(feature => feature.get("feature") === featureList[1]).get("displayName");
+
+    const featureDisplayNames = props.win.data.features.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    );
+
     const [chartRevision, setChartRevision] = useState(0);
-
-    // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState({
         data: [
             {
-                x: cols[0],
-                y: cols[1],
+                x,
+                y,
                 ncontours: 20,
                 colorscale: "Hot",
                 reversescale: true,
                 showscale: false,
                 type: "histogram2dcontour"
-                // mode: "markers",
-                // marker: { color: cols[0].map((val, idx) => DEFAULT_POINT_COLOR), size: 2 },
-                // selected: { marker: { color: "#FF0000", size: 2 } },
-                // visible: true
             }
         ],
         layout: {
             autosize: true,
             margin: { l: 35, r: 0, t: 0, b: 25 }, // Axis tick labels are drawn in the margin space
-            dragmode: "lasso",
+            dragmode: props.globalChartState || "lasso",
             datarevision: chartRevision,
             hovermode: "closest",
             xaxis: {
                 autotick: true,
                 automargin: true,
                 ticks: "outside",
-                title: xAxis
+                title: xAxisTitle
             },
             yaxis: {
                 autotick: true,
                 automargin: true,
                 ticks: "outside",
-                title: yAxis
+                title: yAxisTitle
             }
         },
         config: {
@@ -393,16 +417,77 @@ function ContourGraph(props) {
         setChartRevision(revision);
     }
 
-    // Effect to keep axes updated if they've been swapped
+    function setDefaults() {
+        setBounds(
+            featureList.reduce((acc, colName, idx) => {
+                acc[colName] = {
+                    min: Math.min(...sanitizedCols[idx]),
+                    max: Math.max(...sanitizedCols[idx])
+                };
+                return acc;
+            }, {})
+        );
+        setAxisLabels(
+            featureList.reduce((acc, featureName) => {
+                acc[featureName] = featureName;
+                return acc;
+            }, {})
+        );
+        setXAxis(featureList[0]);
+        setYAxis(featureList[1]);
+        setWindowTitle(featureDisplayNames.join(" vs "));
+    }
+
+    useEffect(_ => {
+        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
+        setDefaults();
+        updateChartRevision();
+    }, []);
+
     useEffect(
         _ => {
-            chartState.data[0].x = cols[0];
-            chartState.data[0].y = cols[1];
-            chartState.layout.xaxis.title = xAxis;
-            chartState.layout.yaxis.title = yAxis;
+            chartState.layout.dragmode = props.globalChartState;
             updateChartRevision();
         },
-        [props.win.data.features]
+        [props.globalChartState]
+    );
+
+    function updateAxes() {
+        chartState.data[0].x = x;
+        chartState.data[0].y = y;
+    }
+
+    // Handles axis swap and label changes
+    useEffect(
+        _ => {
+            updateAxes();
+            chartState.layout.xaxis.title = xAxisTitle;
+            chartState.layout.yaxis.title = yAxisTitle;
+            updateChartRevision();
+        },
+        [featuresImmutable, axisLabels, bounds, xAxis, yAxis]
+    );
+
+    useEffect(
+        _ => {
+            if (needsResetToDefault) {
+                setDefaults();
+                setNeedsResetToDefault(false);
+            }
+        },
+        [needsResetToDefault]
+    );
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                updateChartRevision();
+                setWindowNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
     );
 
     return (
@@ -431,46 +516,4 @@ function ContourGraph(props) {
     );
 }
 
-export default props => {
-    const win = useWindowManager(props, {
-        width: 500,
-        height: 500,
-        resizeable: true,
-        title: "Contour Graph"
-    });
-
-    const [currentSelection, setCurrentSelection] = useCurrentSelection();
-    const [savedSelections, saveCurrentSelection] = useSavedSelections();
-    const [globalChartState, setGlobalChartState] = useGlobalChartState();
-    const fileInfo = useFileInfo();
-
-    const features = usePinnedFeatures(win);
-
-    if (features === null || !win.data) {
-        return <WindowCircularProgress />;
-    }
-
-    if (features.size === 2) {
-        win.setTitle(win.data.features.join(" vs "));
-        return (
-            <ContourGraph
-                currentSelection={currentSelection}
-                setCurrentSelection={setCurrentSelection}
-                savedSelections={savedSelections}
-                saveCurrentSelection={saveCurrentSelection}
-                globalChartState={globalChartState}
-                data={features}
-                fileInfo={fileInfo}
-                win={win}
-            />
-        );
-    } else {
-        return (
-            <WindowError>
-                Please select exactly two features
-                <br />
-                in the features list to use this graph.
-            </WindowError>
-        );
-    }
-};
+export default ContourGraph;

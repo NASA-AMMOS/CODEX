@@ -36,6 +36,18 @@ export default function ui(state = uiState, action, opt_reducer = UiReducer) {
             return opt_reducer.hideConfirmationModal(state, action);
         case actionTypes.SHOW_SNACKBAR:
             return opt_reducer.showSnackbar(state, action);
+        case actionTypes.SET_STATS_PANEL_HIDDEN:
+            return opt_reducer.setStatsPanelHidden(state, action);
+        case actionTypes.SET_ALLOW_GRAPH_HOTKEYS:
+            return opt_reducer.setAllowGraphHotkeys(state, action);
+        case actionTypes.SET_ALLOW_HELP_MODE:
+            return opt_reducer.setHelpMode(state, action);
+        case actionTypes.SET_EXPORT_MODAL_VISIBLE:
+            return opt_reducer.setExportModalVisible(state, action);
+        case actionTypes.SET_STORED_PLOT_IMAGE:
+            return opt_reducer.setStoredPlotImage(state, action);
+        case actionTypes.CLEAR_ALL_PLOT_IMAGES:
+            return opt_reducer.clearAllPlotImages(state, action);
         default:
             return state;
     }

@@ -167,7 +167,7 @@ function GeneralClassifier(props) {
                     selectionNames.push("GC-" + randomString + " " + activeSelections[i].name);
                 }
                 //add a saved selections called gc_output with the returned data
-                for (var i = 0; i < data.like_this.length; i++) {
+                for (let i = 0; i < data.like_this.length; i++) {
                     props.saveSelection(selectionNames[i], data.like_this[i]);
                 }
                 setOutputMessage(makeOutputMessage(selectionNames));

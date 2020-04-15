@@ -21,6 +21,7 @@ import logging
 import numpy                       as np
 import numpy.polynomial.polynomial as poly
 
+from sklearn.metrics               import explained_variance_score
 from sklearn.metrics               import log_loss
 from sklearn                       import model_selection
 from sklearn.model_selection       import GridSearchCV
@@ -153,28 +154,29 @@ class regression(algorithm):
 
         if self.search_type == "random":
             self.algorithm = RandomizedSearchCV(self.algorithm, self.parms, cv=self.cross_val, scoring=self.scoring)
-        else:
+        elif self.search_type == "grid":
             self.algorithm = GridSearchCV(self.algorithm, self.parms, cv=self.cross_val, scoring=self.scoring)
+        else:
+            self.algorithm = self.algorithm
 
         self.algorithm.fit(self.X, self.y)
         y_pred = self.algorithm.predict(self.X)
 
         self.result["y_pred"] = y_pred.tolist()
-        self.result["best_parms"] = self.algorithm.best_params_
-        self.result["best_score"] = self.algorithm.best_score_
+        self.result["score"] = self.algorithm.score(self.X, self.y) * 100
+        self.result["explained_variance"] = explained_variance_score(self.y, y_pred) * 100
+
+        try:
+            self.result["importances"] = list(zip(self.featureList, 100*self.algorithm.feature_importances_))
+        except:
+            pass
+
+        if not self.search_type == "direct":
+            self.result["best_parms"] = self.algorithm.best_params_
+            self.result["best_score"] = self.algorithm.best_score_
 
 
     def check_valid(self):
-
-        # TODO - parms come as dictionary in list when should be direct dictionary.  Get client to remove list layer and then remove line below.
-        self.parms = self.parms[0]
-
-
-        for parm, value in self.parms.items():
-            if value == []:
-                logging.warning("Please set max_depth parameters")
-                self.result["WARNING"] = "Please set max_depth parameters"
-                return None
 
         if self.X.ndim < 2:
             logging.warning("Insufficient data dimmensions: {dims}".format(dims=self.X.ndim))

@@ -1,12 +1,13 @@
 @import "styles/theme.scss";
 
 .propertyEditorContainer {
-    height: 100vh;
+    height: calc(100vh - 70px);
     // min-width: 225px;
     flex-basis: 225px;
-    background-color: black;
+    background-color: #081a33;
     position: relative;
     z-index: 150;
+    overflow: auto;
 
     .header {
         font-family: Inter;
@@ -35,6 +36,14 @@
         .feature-name {
             font-size: 14px;
             line-height: 17px;
+            color: #eeeeee;
+        }
+
+        select {
+            width: 150px;
+        }
+
+        span {
             color: #eeeeee;
         }
     }
@@ -76,5 +85,45 @@
                 background: blue;
             }
         }
+
+        svg {
+            fill: #dadada;
+        }
+
+        &.axis-label {
+            margin-left: 0;
+        }
     }
+
+    .bin-size-input {
+        color: white;
+    }
+
+    .input-field-container {
+        margin-left: 15px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        .text-input {
+            background: #e8e8e8;
+            margin-bottom: 10px;
+            border-radius: 4px 4px 0px 0px;
+
+            &.with-helper-text {
+                background: none;
+                .input-box {
+                    background: #d3d3d3;
+                }
+                .helper-text {
+                    color: #eeeeee;
+                    margin-left: 5px;
+                }
+            }
+        }
+    }
+}
+
+.resetToDefaultButton {
+    border-radius: 4px;
+    margin-left: 18px;
+    margin-bottom: 24px;
 }

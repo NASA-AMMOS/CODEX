@@ -1,158 +1,196 @@
 import "components/Graphs/HistogramGraph.css";
 
-import React, { useRef, useState, useEffect, createRef } from "react";
-import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
-import Popover from "@material-ui/core/Popover";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
-import ReactResizeDetector from "react-resize-detector";
-import GraphWrapper, { useBoxSelection } from "components/Graphs/GraphWrapper";
+import React, { useRef, useState, useEffect } from "react";
 
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
+import GraphWrapper from "components/Graphs/GraphWrapper";
+import * as utils from "utils/utils";
+
+import { filterSingleCol } from "./graphFunctions";
 import {
-    useCurrentSelection,
-    useSavedSelections,
-    usePinnedFeatures,
-    useFileInfo
-} from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
-import { useGlobalChartState } from "hooks/UIHooks";
+    useSetWindowNeedsAutoscale,
+    useWindowAxisLabels,
+    useWindowFeatureList,
+    useWindowGraphBinSize,
+    useWindowGraphBounds,
+    useWindowNeedsResetToDefault,
+    useWindowTitle
+} from "../../hooks/WindowHooks";
+import { scaleLinear } from "d3-scale";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
-const DEFAULT_SELECTION_COLOR = "#FF0000";
+const COLOR_CURRENT_SELECTION = "#FF0000";
+const DEFAULT_TITLE = "Histogram Graph";
+const DEFAULT_BINS = 25;
 
-function generatePlotData(features, fileInfo) {
-    const cols = utils.removeSentinelValues(features.map(feature => feature.data), fileInfo);
-    return features.map((feature, idx) => {
-        return {
-            x: cols[idx],
-            xaxis: "x",
-            yaxis: "y",
-            type: "histogram",
-            hoverinfo: "x+y"
-        };
-    });
+function snapValueToBin(value, binInfo) {
+    for (let i = binInfo.start; i <= binInfo.end; i += binInfo.size) {
+        if (value >= i && value < i + binInfo.size) {
+            return Math.floor(i / binInfo.size) + 1;
+        }
+    }
 }
 
-function generateLayouts(features) {
-    let layouts = [];
+function getBinBounds(binIndex, binInfo) {
+    return [
+        binInfo.start + binInfo.size * binIndex,
+        binInfo.start + binInfo.size * binIndex + binInfo.size
+    ];
+}
 
-    for (let index = 0; index < features.length; index++) {
-        let layout = {
-            dragmode: "select",
-            selectdirection: "h",
-            margin: { l: 50, r: 5, t: 20, b: 40 }, // Axis tick labels are drawn in the margin space
-            hovermode: "compare", // Turning off hovermode seems to screw up click handling
-            yaxis: {
-                title: "Counts",
-                fixedrange: true
-            },
-            xaxis: {
-                title: features[index].feature
-            },
-            shapes: [],
-            barmode: "overlay",
-            showlegend: false,
-            hoverinfo: "x+y"
-        };
+function handleGlobalChartState(state) {
+    return state === "lasso" ? "select" : state;
+}
 
-        layouts.push(layout);
-    }
-
-    return layouts;
+function makeSelectionShapes(selection, data, chartRef) {
+    return data
+        .map((col, idx) => {
+            const binInfo = chartRef.current.el._fullData[idx].xbins;
+            return Array.from(
+                selection.rowIndices.reduce((acc, rowIndex) => {
+                    acc.add(snapValueToBin(col.x[rowIndex], binInfo));
+                    return acc;
+                }, new Set())
+            )
+                .sort((a, b) => a - b)
+                .reduce((acc, val) => {
+                    const lastSection = acc.length && acc[acc.length - 1];
+                    if (lastSection && lastSection[lastSection.length - 1] + 1 === val) {
+                        lastSection.push(val);
+                        return acc;
+                    }
+                    acc.push([val]);
+                    return acc;
+                }, [])
+                .map(bin => {
+                    const bounds = [
+                        getBinBounds(bin[0], binInfo)[0],
+                        getBinBounds(bin[bin.length - 1], binInfo)[1]
+                    ];
+                    const xSize = 1 / data.length;
+                    const posIdx = data.length - idx - 1;
+                    return {
+                        type: "rect",
+                        xref: `x${idx === 0 ? "" : idx + 1}`,
+                        yref: "paper",
+                        x0: bounds[0],
+                        y0: posIdx * xSize,
+                        x1: bounds[1],
+                        y1: posIdx * xSize + xSize,
+                        fillcolor: selection.color,
+                        opacity: 0.2,
+                        line: {
+                            color: selection.color
+                        }
+                    };
+                });
+        })
+        .flat();
 }
 
 function HistogramGraph(props) {
     const features = props.data.toJS();
+    const [featuresImmutable] = useWindowFeatureList(props.win.id);
+    const featureNames = featuresImmutable.toJS();
+    const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
+    const [binSize, setBinSize] = useWindowGraphBinSize(props.win.id);
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
+        props.win.id
+    );
+    const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
+    const [zoom, setZoom] = useState([0, 100]);
 
-    const featureNames = features.map(feature => {
-        return feature.feature;
+    const chart = useRef(null);
+    const [chartId] = useState(utils.createNewId());
+
+    const baseCols = featureNames
+        .map(colName => [
+            props.data
+                .find(col => col.get("feature") === colName)
+                .get("data")
+                .toJS(),
+            bounds && bounds.get(colName).toJS()
+        ])
+        .map(([col, bound]) => [utils.removeSentinelValues([col], props.fileInfo)[0], bound]);
+
+    const filteredCols = baseCols.map(([col, bound]) => filterSingleCol(col, bound));
+
+    const layouts = features.reduce((acc, feature, idx) => {
+        const xAxisName = `xaxis${idx === 0 ? "" : idx + 1}`;
+        const yAxisName = `yaxis${idx === 0 ? "" : idx + 1}`;
+        const x = filteredCols[idx];
+        const scale = scaleLinear()
+            .domain([0, 100])
+            .range([Math.min(...x), Math.max(...x)]);
+        const range = zoom.map(scale);
+        acc[xAxisName] = {
+            title: "",
+            automargin: true,
+            showline: true,
+            showticklabels: true,
+            range
+        };
+        acc[yAxisName] = {
+            title:
+                (axisLabels && axisLabels.get(feature.feature, feature.feature)) || feature.feature,
+            automargin: true,
+            fixedrange: true
+        };
+        return acc;
+    }, {});
+
+    const traces = features.map((feature, idx) => {
+        const x = filteredCols[idx];
+        const min = Math.min(...x);
+        const max = Math.max(...x);
+        const trace = {
+            x,
+            type: "histogram",
+            hoverinfo: "y",
+            marker: { color: DEFAULT_POINT_COLOR },
+            name: "",
+            xbins: {
+                start: min,
+                end: max,
+                size: (max - min) / ((binSize && binSize.get("x")) || DEFAULT_BINS)
+            },
+            selected: { marker: { color: DEFAULT_POINT_COLOR } }
+        };
+        if (idx > 0) {
+            trace.xaxis = `x${idx + 1}`;
+            trace.yaxis = `y${idx + 1}`;
+        }
+        return trace;
     });
 
-    const [chartIds] = useState(_ => featureNames.map(_ => utils.createNewId()));
-    const chartRefs = useRef(featureNames.map(() => createRef()));
-
-    let data = generatePlotData(features, props.fileInfo);
-
-    let layouts = generateLayouts(features);
-
-    return (
-        <GraphWrapper
-            resizeHandler={_ =>
-                chartRefs.current.forEach(chartRef => chartRef.current.resizeHandler())
-            }
-            chartIds={chartIds}
-            win={props.win}
-        >
-            <ul className="histogram-graph-container">
-                {data.map((dataElement, index) => (
-                    <HistogramSubGraph
-                        key={index}
-                        data={data[index]}
-                        chart={chartRefs.current[index]}
-                        layout={layouts[index]}
-                        setCurrentSelection={props.setCurrentSelection}
-                        currentSelection={props.currentSelection}
-                        savedSelections={props.savedSelections}
-                        chartId={chartIds[index]}
-                    />
-                ))}
-            </ul>
-        </GraphWrapper>
-    );
-}
-
-function getSelectionBins(chartRef, data, selection, color) {
-    if (!chartRef.current) return null;
-    try {
-        const binInfo = chartRef.current.el._fullData[0].xbins;
-
-        const bins = [];
-        for (let i = binInfo.start; i < binInfo.end; i += binInfo.size) {
-            bins.push([i, i + binInfo.size]);
-        }
-
-        const x = selection.reduce((acc, sel) => {
-            const value = data.x[sel];
-            const binIndex = bins.findIndex(bin => bin[0] <= value && bin[1] >= value);
-            acc.push(binIndex);
-            return acc;
-        }, []);
-
-        return {
-            type: "histogram",
-            x: selection.map(sel => data.x[sel]),
-            marker: {
-                color
-            },
-            xbins: binInfo,
-            hoverinfo: "x+y"
-        };
-    } catch (e) {
-        // We can't overlay other selections until we know the base bin size,
-        // so we have to wait until the chart renders
-        return null;
-    }
-}
-
-function HistogramSubGraph(props) {
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
+
+    const layout = {
+        grid: {
+            rows: traces.length,
+            columns: 1,
+            pattern: "independent"
+        },
+        showlegend: false,
+        margin: { l: 40, r: 5, t: 5, b: 5 }, // Axis tick labels are drawn in the margin space
+        dragmode: handleGlobalChartState(props.globalChartState) || "select",
+        selectdirection: "h",
+        hovermode: "compare", // Turning off hovermode seems to screw up click handling
+        ...layouts
+    };
+
     const [chartState, setChartState] = useState({
-        data: [props.data],
-        layout: props.layout,
+        data: traces,
+        layout,
         config: {
             responsive: true,
-            displaylogo: false
+            displaylogo: false,
+            modeBarButtons: [["toImage", "zoomIn2d", "zoomOut2d", "autoScale2d"], ["toggleHover"]]
         }
     });
-
-    const [yRange, setYRange] = useState([0, 0]);
 
     function updateChartRevision() {
         const revision = chartRevision + 1;
@@ -163,112 +201,159 @@ function HistogramSubGraph(props) {
         setChartRevision(revision);
     }
 
-    // Hook to handle drawing selections
+    const featureDisplayNames = props.win.data.features.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    );
+
+    function setDefaults() {
+        setBounds(
+            featureNames.reduce((acc, colName, idx) => {
+                acc[colName] = {
+                    min: Math.min(...baseCols[idx][0]),
+                    max: Math.max(...baseCols[idx][0])
+                };
+                return acc;
+            }, {})
+        );
+        setBinSize({
+            x: DEFAULT_BINS
+        });
+        setAxisLabels(
+            featureNames.reduce((acc, featureName) => {
+                acc[featureName] = featureName;
+                return acc;
+            }, {})
+        );
+        setWindowTitle(featureDisplayNames.join(" , "));
+    }
+
+    useEffect(_ => {
+        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
+        setDefaults();
+        updateChartRevision();
+    }, []);
+
     useEffect(
         _ => {
-            const currentSelection = getSelectionBins(
-                props.chart,
-                props.data,
-                props.currentSelection,
-                "red"
-            );
-            const currentSelectionList = currentSelection ? [currentSelection] : [];
+            if (needsResetToDefault) {
+                setDefaults();
+                setNeedsResetToDefault(false);
+            }
+        },
+        [needsResetToDefault]
+    );
 
-            const savedSelections = props.savedSelections.reduce((acc, sel) => {
-                const selection = getSelectionBins(
-                    props.chart,
-                    props.data,
-                    sel.rowIndices,
-                    sel.color
-                );
-                if (selection) acc.push(selection);
-                return acc;
-            }, []);
+    function updateData() {
+        chartState.data = traces;
+        chartState.layout = layout;
+    }
 
-            chartState.data = [chartState.data[0], ...savedSelections, ...currentSelectionList];
+    useEffect(
+        _ => {
+            chartState.layout.shapes = props.savedSelections
+                .concat(
+                    props.currentSelection.length && {
+                        color: COLOR_CURRENT_SELECTION,
+                        rowIndices: props.currentSelection
+                    }
+                )
+                .filter(x => x)
+                .map(sel => makeSelectionShapes(sel, traces, chart))
+                .flat();
+            updateData();
+            updateChartRevision();
+        },
+        [bounds, binSize, axisLabels, zoom]
+    );
+
+    // Effect to handle drawing of selections
+    useEffect(
+        _ => {
+            chartState.layout.shapes = props.savedSelections
+                .concat(
+                    props.currentSelection.length && {
+                        color: COLOR_CURRENT_SELECTION,
+                        rowIndices: props.currentSelection
+                    }
+                )
+                .filter(x => x)
+                .map(sel => makeSelectionShapes(sel, traces, chart))
+                .flat();
             updateChartRevision();
         },
         [props.currentSelection, props.savedSelections]
     );
 
-    return (
-        <Plot
-            className="histogram-subplot"
-            ref={props.chart}
-            data={chartState.data}
-            layout={chartState.layout}
-            config={chartState.config}
-            style={{ width: "100%", height: "100%" }}
-            useResizeHandler
-            onInitialized={figure => setChartState(figure)}
-            onUpdate={figure => setChartState(figure)}
-            onClick={e => {
-                if (e.event.button === 2 || e.event.ctrlKey) return;
-                props.setCurrentSelection([]);
-            }}
-            onSelected={e => {
-                if (!e) return;
-                //fix range
-                let points = utils.indicesInRange(chartState.data[0].x, e.range.x[0], e.range.x[1]);
-                props.setCurrentSelection(points);
-            }}
-            divId={props.chartId}
-        />
+    // Update the chart state when the global chart state changes
+    useEffect(
+        _ => {
+            chartState.layout.dragmode = handleGlobalChartState(props.globalChartState);
+            updateChartRevision();
+        },
+        [props.globalChartState]
     );
-}
 
-function mapStateToProps(state) {
-    return {
-        currentSelection: state.selections.currentSelection,
-        savedSelections: state.selections.savedSelections
-    };
-}
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                Object.keys(chartState.layout).map(key => {
+                    if (key.includes("axis")) chartState.layout[key].autorange = true;
+                });
+                updateChartRevision();
+                setNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
+    );
 
-function mapDispatchToProps(dispatch) {
-    return {
-        setCurrentSelection: bindActionCreators(selectionActions.setCurrentSelection, dispatch),
-        saveCurrentSelection: bindActionCreators(selectionActions.saveCurrentSelection, dispatch)
-    };
-}
-
-export default props => {
-    const win = useWindowManager(props, {
-        width: 500,
-        height: 500,
-        resizeable: true,
-        title: "Histogram"
-    });
-
-    const [currentSelection, setCurrentSelection] = useCurrentSelection();
-    const [savedSelections, saveCurrentSelection] = useSavedSelections();
-    const [globalChartState, setGlobalChartState] = useGlobalChartState();
-    const fileInfo = useFileInfo();
-
-    const features = usePinnedFeatures(win);
-
-    if (features === null) {
-        return <WindowCircularProgress />;
-    }
-    if (features.size === 0) {
-        return <WindowError> Please select at least one feature to use this graph.</WindowError>;
+    // Synchronizes zoom/pan actions
+    function handleRelayout(e) {
+        const selKey = Object.keys(e).find(key => key.startsWith("xaxis"));
+        if (!selKey) return;
+        const parsedKey = selKey.match(/xaxis(\d)/) ? selKey.match(/xaxis(\d)/) : ["xaxis", 1];
+        const dataIndex = parseInt(parsedKey[1]) - 1;
+        const zoomMin = e[`${parsedKey[0]}.range[0]`];
+        const zoomMax = e[`${parsedKey[0]}.range[1]`];
+        const dataset = filteredCols[dataIndex];
+        const scale = scaleLinear()
+            .domain([Math.min(...dataset), Math.max(...dataset)])
+            .range([0, 100]);
+        setZoom([zoomMin, zoomMax].map(scale));
     }
 
-    win.setTitle(
-        features
-            .map(f => f.get("feature"))
-            .toJS()
-            .join(" vs ")
-    );
+    function handleSelection(e) {
+        if (!e) return;
+        const selKey = Object.keys(e.range).find(key => key.startsWith("x"));
+        const dataIndex = selKey.substr(1).length ? parseInt(selKey.substr(1)) - 1 : 0;
+        const points = utils.indicesInRange(
+            filteredCols[dataIndex],
+            e.range[selKey][0],
+            e.range[selKey][1]
+        );
+        props.setCurrentSelection(points);
+    }
+
     return (
-        <HistogramGraph
-            currentSelection={currentSelection}
-            setCurrentSelection={setCurrentSelection}
-            savedSelections={savedSelections}
-            saveCurrentSelection={saveCurrentSelection}
-            globalChartState={globalChartState}
-            data={features}
-            fileInfo={fileInfo}
-            win={win}
-        />
+        <GraphWrapper chart={chart} win={props.win} chartId={chartId}>
+            <Plot
+                ref={chart}
+                data={chartState.data}
+                layout={chartState.layout}
+                config={chartState.config}
+                style={{ width: "100%", height: "100%" }}
+                onInitialized={figure => setChartState(figure)}
+                onUpdate={figure => setChartState(figure)}
+                useResizeHandler
+                divId={chartId}
+                onClick={e => {
+                    if (e.event.button === 2 || e.event.ctrlKey) return;
+                    props.setCurrentSelection([]);
+                }}
+                onSelected={handleSelection}
+                onRelayout={handleRelayout}
+            />
+        </GraphWrapper>
     );
-};
+}
+
+export default HistogramGraph;

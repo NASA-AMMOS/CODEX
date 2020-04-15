@@ -24,11 +24,7 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.codex_math        import impute
-from api.sub.downsample        import downsample
 from api.sub.plot              import plot_peak
-from api.sub.time_log          import getComputeTimeEstimate
-from api.sub.time_log          import logTime
 from api.sub.detect_peaks      import detect_peaks
 from api.sub.hash              import get_cache
 from api.algorithm             import algorithm
@@ -60,9 +56,12 @@ class peak_detection(algorithm):
         if self.algorithm == "cwt":
             indexes = find_peaks_cwt(self.X, width_array, gap_thresh=self.parms['gap_threshold'], min_snr=self.parms['min_snr'], noise_perc=self.parms['noise_perc'])
         elif self.algorithm == "matlab_findpeaks":
-            indexes = detect_peaks(self.X, mph=self.parms['mph'], mpd=self.parms['mpd'], threshold=self.parms['threshold'], edge=self.parms['edge'], kpsh=self.parms['kpsh'], valley=self.parms['valley'])
+            mph = self.parms['mph']
+            if mph:
+                mph = float(mph)
+            indexes = detect_peaks(self.X, mph=mph, mpd=self.parms['mpd'], threshold=self.parms['threshold'], edge=self.parms['edge'], kpsh=self.parms['kpsh'], valley=self.parms['valley'])
 
-        self.result["indexes"] = indexes
+        self.result["indexes"] = indexes.tolist()
 
 
     def check_valid(self):

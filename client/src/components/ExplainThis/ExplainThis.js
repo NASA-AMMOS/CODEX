@@ -32,7 +32,6 @@ import {
     WindowTogglableCover
 } from "components/WindowHelpers/WindowLayout";
 
-
 // this section of code is mostly d3 and stuff that directly facilitates the tree rendering
 
 //general helper functions go here
@@ -307,12 +306,13 @@ function generateTree(treeData, selectionNames, svgRef) {
         let featureName = split[0];
         let name =
             featureName.length > 12
-                ? featureName.substring(0, 4) + "..." + featureName.substring(featureName.length - 4)
+                ? featureName.substring(0, 4) +
+                  "..." +
+                  featureName.substring(featureName.length - 4)
                 : featureName;
 
         return name + split[1] + float;
     }
-
 
     let tree = d3.layout.tree().size([height - 140, width]);
     //.nodeSize(nodeSize);
@@ -549,7 +549,6 @@ function generateTree(treeData, selectionNames, svgRef) {
     load_dataset(treeData);
 }
 
-
 // ------------ this is where actual components start ------------
 
 /*
@@ -703,7 +702,7 @@ function FeatureImportanceGraph(props) {
         return (
             <React.Fragment>
                 <div className="feature-importance-graph-title">Feature Importances</div>
-                <div className="feature-importance-graph"></div>
+                <div className="feature-importance-graph" />
             </React.Fragment>
         );
     }
@@ -718,7 +717,7 @@ function FeatureImportanceGraph(props) {
                 type: "bar",
                 orientation: "h",
                 hoverinfo: "x",
-                textposition:"auto"
+                textposition: "auto"
             }
         ],
         config: {
@@ -795,40 +794,41 @@ function LeftSidePanel(props) {
 
 function TreeSummary(props) {
     if (props.treeData == undefined) {
-        return (
-            <div className="tree-summary">
-                No tree is defined
-            </div>
-        );
+        return <div className="tree-summary">No tree is defined</div>;
     }
 
     function generateSummaryFromData(data, depth) {
         //recursively construct a python esque description of the tree
 
         let description = "";
-        if (data.children != undefined) {    
-
-            const left = data.children[0] != undefined ? generateSummaryFromData(data.children[0], depth+1) : "";
-            const right = data.children[1] != undefined ? generateSummaryFromData(data.children[1], depth+1) : "";
+        if (data.children != undefined) {
+            const left =
+                data.children[0] != undefined
+                    ? generateSummaryFromData(data.children[0], depth + 1)
+                    : "";
+            const right =
+                data.children[1] != undefined
+                    ? generateSummaryFromData(data.children[1], depth + 1)
+                    : "";
 
             return (
                 <React.Fragment>
-                    <div style={{marginLeft: 10*depth}}> {"if " + data.name + " :"} </div>
-                    <div style={{marginLeft: 10*depth}}> {left} </div>
-                    <div style={{marginLeft: 10*depth}}> {"else:"} </div> 
-                    <div style={{marginLeft: 10*depth}}> {right} </div>
+                    <div style={{ marginLeft: 10 * depth }}> {"if " + data.name + " :"} </div>
+                    <div style={{ marginLeft: 10 * depth }}> {left} </div>
+                    <div style={{ marginLeft: 10 * depth }}> {"else:"} </div>
+                    <div style={{ marginLeft: 10 * depth }}> {right} </div>
                 </React.Fragment>
-            )
+            );
         } else {
             //leaf node
-            return <div style={{marginLeft: 10*depth}}> {props.selectionNames[data.class]} </div>;
+            return (
+                <div style={{ marginLeft: 10 * depth }}> {props.selectionNames[data.class]} </div>
+            );
         }
     }
 
     return (
-        <div className="tree-summary">
-            {generateSummaryFromData(props.treeData.json_tree, 0)}
-        </div>
+        <div className="tree-summary">{generateSummaryFromData(props.treeData.json_tree, 0)}</div>
     );
 }
 
@@ -1008,38 +1008,42 @@ function ExplainThis(props) {
             >
                 Summary
             </Button>
-            {
-                (function(){
-                    /*
+            {(function() {
+                /*
                         Code to render the cover for either the help screen or the summary screen
                         selectively
                     */
-                    if (helpActive) {
-                        return (
-                            <WindowTogglableCover
-                                open={helpActive}
-                                onClose={() => setHelpActive(false)}
-                                title={"Explain This"}
-                            >
-                                <HelpContent guidancePath={"explain_this_page:general_explain_this"} />
-                            </WindowTogglableCover>
-                        );
-                    } else if (summaryActive) {
-                        return (
-                            <WindowTogglableCover
-                                open={summaryActive}
-                                onClose={() => setSummaryActive(false)}
-                                title={"Explain This Summary"}
-                            >
-                                <TreeSummary
-                                    treeData={dataState != undefined ? dataState.tree_sweep[treeIndex] : undefined}
-                                    selectionNames={dataState != undefined ? dataState.selectionNames : undefined}
-                                />
-                            </WindowTogglableCover>
-                        );
-                    }
-                })()
-            }
+                if (helpActive) {
+                    return (
+                        <WindowTogglableCover
+                            open={helpActive}
+                            onClose={() => setHelpActive(false)}
+                            title={"Explain This"}
+                        >
+                            <HelpContent guidancePath={"explain_this_page:general_explain_this"} />
+                        </WindowTogglableCover>
+                    );
+                } else if (summaryActive) {
+                    return (
+                        <WindowTogglableCover
+                            open={summaryActive}
+                            onClose={() => setSummaryActive(false)}
+                            title={"Explain This Summary"}
+                        >
+                            <TreeSummary
+                                treeData={
+                                    dataState != undefined
+                                        ? dataState.tree_sweep[treeIndex]
+                                        : undefined
+                                }
+                                selectionNames={
+                                    dataState != undefined ? dataState.selectionNames : undefined
+                                }
+                            />
+                        </WindowTogglableCover>
+                    );
+                }
+            })()}
         </div>
     );
 }

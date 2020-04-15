@@ -3,10 +3,22 @@ import { Coords, Size, InitialPosition } from "./domain";
 
 const defaultSize = { width: defaultWidth, height: defaultHeight };
 
-export const getBoundaryCoords = (coords: Coords, size: Size = defaultSize): Coords => {
+export const getBoundaryCoords = (
+    coords: Coords,
+    size: Size = defaultSize,
+    parentId?: string
+): Coords => {
     const { x, y } = coords;
     const { width, height } = size;
-    const { innerWidth, innerHeight } = window;
+    let { innerWidth, innerHeight } = window;
+
+    const parentDiv = document.getElementById(parentId || "");
+    if (parentDiv) {
+        const bbox = parentDiv.getBoundingClientRect();
+        innerWidth = bbox.width;
+        innerHeight = bbox.height;
+    }
+
     const maxX = innerWidth - (width || 0) - padding;
     const maxY = innerHeight - (height || 0) - padding;
 

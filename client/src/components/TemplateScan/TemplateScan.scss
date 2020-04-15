@@ -1,0 +1,184 @@
+.template-scan-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.template-scan-action-row {
+    height: 65px;
+    box-shadow: 0px -4px 4px rgba(0, 0, 0, 0.25);
+    margin-left: -10px;
+    margin-bottom: 5px;
+    padding-right: 24px;
+    width: calc(100% + 20px);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    z-index: 1;
+
+    div {
+        margin-left: 25px;
+    }
+}
+
+.template-scan-header {
+    margin-bottom: 15px;
+    span {
+        font-family: Inter;
+        font-style: normal;
+        font-weight: bold;
+        font-size: 16px;
+        line-height: 19px;
+    }
+}
+
+.template-scan-feature-name {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 19px;
+}
+
+.template-scan-controls {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+
+    button {
+        opacity: 0.5;
+        border: 1px solid #000000;
+        box-sizing: border-box;
+        border-radius: 4px;
+        font-family: Inter;
+        font-style: normal;
+        font-weight: bold;
+        font-size: 14px;
+        line-height: 17px;
+        text-transform: uppercase;
+        font-feature-settings: "cpsp" on, "case" on;
+        color: #000000;
+    }
+}
+
+.template-scan-control-block {
+    display: flex;
+    flex-direction: column;
+
+    label {
+        margin-bottom: 10px;
+    }
+}
+
+.template-scan-close-button {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    justify-content: space-around;
+    cursor: pointer;
+}
+
+.template-scan-block-draw-buttons {
+    display: flex;
+    justify-content: space-between;
+
+    button {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        &.active {
+            opacity: 1;
+        }
+
+        &:first-of-type {
+            margin-right: 10px;
+        }
+    }
+}
+
+.template-scan-plot-container {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.template-scan-axis-label {
+    position: absolute;
+    top: calc(280px / 2);
+    left: 0;
+    transform: rotate(-90deg);
+    z-index: 9;
+    text-align: center;
+}
+
+.template-scan-plot-wrapper {
+    width: calc(100% - 35px);
+    height: 192px;
+    background: #fff;
+    padding-top: 22px;
+    position: relative;
+    margin-left: 25px;
+    display: flex;
+}
+
+.color-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.template-scan-details {
+    padding: 0 !important;
+}
+
+.template-scan-loading-overlay {
+    position: absolute;
+    width: 100%;
+    height: 200px;
+    left: 0;
+    top: 45px;
+    display: flex;
+    z-index: 10;
+    justify-content: space-around;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.template-scan-save-selection-button {
+    position: absolute;
+    top: 46px;
+    right: 10px;
+    opacity: 0.5;
+    border: 1px solid #3988e3;
+    box-sizing: border-box;
+    border-radius: 4px;
+    font-family: Inter;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 17px;
+    text-transform: uppercase;
+    font-feature-settings: "cpsp" on, "case" on;
+    color: #000000;
+    z-index: 8;
+    background: #3988e3;
+    color: #e5e5e5;
+    opacity: 1;
+}
+
+.template-scan-previews {
+    background: #f2f2f2;
+    padding-top: 10px;
+    overflow: auto;
+    margin-left: -10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: calc(100% + 20px);
+    min-height: calc(100% - 130px);
+}
+
+.template-scan-content {
+    background: white;
+    padding: 10px;
+    margin-bottom: 35px;
+}

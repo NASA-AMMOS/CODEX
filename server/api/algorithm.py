@@ -34,8 +34,9 @@ from api.sub.labels             import label_swap
 from api.sub.hash               import get_cache
 
 class algorithm():
-    def __init__(self, inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, session):
+    def __init__(self, inputHash, activeLabels, featureList, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, session):
         
+        self.featureList = featureList
         self.inputHash = inputHash
         self.hashList = hashList
         self.subsetHashName = subsetHashName
@@ -48,6 +49,7 @@ class algorithm():
         self.scoring = scoring
         self.search_type = search_type
         self.cross_val = cross_val
+        self.activeLabels = activeLabels
 
     def run(self):
 
@@ -61,6 +63,7 @@ class algorithm():
         returnHash = self.cache.findHashArray("hash", self.inputHash, "feature")
         if returnHash is None:
             logging.warning("Input hash not found: {inputHash}".format(inputHash=self.inputHash))
+            self.result["WARNING"] = "Input hash not found: {inputHash}".format(inputHash=self.inputHash)
             self.result['message'] = "failure"
             return self.result
 
@@ -75,7 +78,12 @@ class algorithm():
             self.result['message'] = "failure"
             return self.result
 
-        full_samples, full_features = self.X.shape
+        if self.X.ndim == 1:
+            full_samples = self.X.shape[0]
+            full_features = 1
+        else:
+            full_samples, full_features = self.X.shape
+
         self.result['eta'] = getComputeTimeEstimate(self.__class__.__name__, self.algorithmName, full_samples, full_features)
 
         if self.subsetHashName is not False:
@@ -100,7 +108,12 @@ class algorithm():
                 self.y = labelHash_dict['data']
                 self.result['y'] = self.y.tolist()
 
-        computed_samples, computed_features = self.X.shape
+        if self.X.ndim == 1:
+            computed_samples = self.X.shape[0]
+            computed_features = 1
+        else:
+            computed_samples, computed_features = self.X.shape
+
         self.X = impute(self.X)
         self.result['data'] = self.X.tolist()
 

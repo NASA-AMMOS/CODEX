@@ -26,11 +26,18 @@ export const dataState = Immutable.fromJS({
     nan: null,
     inf: null,
     ninf: null,
-    dataLength: null
+    dataLength: null,
+    featureDisplayNames: {},
+    featureGroups: []
 });
 
 export const loadedDataModel = {
     feature: "",
     data: [],
     clusters: []
+};
+
+export const featureGroupModel = {
+    name: "",
+    selected: false
 };

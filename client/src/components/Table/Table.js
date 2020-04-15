@@ -1,29 +1,30 @@
-import React, { useMemo, useState } from "react";
-import { useWindowManager } from "hooks/WindowHooks";
-import { useLiveFeatures, useFileInfo } from "hooks/DataHooks";
+import "./Table.css";
 
+import FirstPageIcon from "@material-ui/icons/FirstPage";
+import IconButton from "@material-ui/core/IconButton";
+import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
+import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
+import LastPageIcon from "@material-ui/icons/LastPage";
+import React, { useMemo, useState } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
 import TablePagination from "@material-ui/core/TablePagination";
-import IconButton from "@material-ui/core/IconButton";
-import FirstPageIcon from "@material-ui/icons/FirstPage";
-import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
-import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
-import LastPageIcon from "@material-ui/icons/LastPage";
+import TableRow from "@material-ui/core/TableRow";
+import styled from "styled-components";
 
+import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
 import {
     WindowLayout,
     FixedContainer,
     ExpandingContainer
 } from "components/WindowHelpers/WindowLayout";
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import styled from "styled-components";
+import { useLiveFeatures, useFileInfo } from "hooks/DataHooks";
+import { useWindowManager } from "hooks/WindowHooks";
 import * as dataTypes from "constants/dataTypes";
 
-import "./Table.css";
+import { useFeatureDisplayNames } from "../../hooks/DataHooks";
 
 // data table implementation based on https://material-ui.com/components/tables/#custom-table-pagination-action
 
@@ -83,6 +84,8 @@ const DataTable = props => {
         title: "Data Table",
         minSize: { width: 400, height: 100 }
     });
+
+    const [featureNameList] = useFeatureDisplayNames();
 
     // by default, this will render as a row per feature
     const features = useLiveFeatures();
@@ -150,7 +153,7 @@ const DataTable = props => {
     // compute the table headers + visible rows
     const headers = indices.map(n => (
         <TableCell key={n} align="right" style={fixedHeadStyle}>
-            {n}
+            {featureNameList.get(n, n)}
         </TableCell>
     ));
     const rows = transposed

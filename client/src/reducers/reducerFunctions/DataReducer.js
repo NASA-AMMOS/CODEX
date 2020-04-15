@@ -1,6 +1,7 @@
 import Immutable from "immutable";
 
 import * as uiTypes from "constants/uiTypes";
+import * as utils from "utils/utils";
 
 const formulas = {}; //This is just a placeholder to remove some compiler errors, we'll need to fully rebuild the forumulas
 // stuff at some point.
@@ -539,31 +540,90 @@ export default class DataReducer {
      * @return {Map} new state
      */
     static renameFeature(state, action) {
-        // Rename feature in loaded data store so we don't have to reload the data.
-        const newLoadedData = state
-            .get("loadedData")
-            .map(data =>
-                data.get("feature") === action.oldFeatureName
-                    ? data.set("feature", action.newFeatureName)
-                    : data
-            );
+        return state.set(
+            "featureDisplayNames",
+            state.get("featureDisplayNames").set(action.baseName, action.newName)
+        );
+    }
 
-        const newFeatureList = state
-            .get("featureList")
-            .map(f =>
-                f.get("name") === action.oldFeatureName ? f.set("name", action.newFeatureName) : f
-            );
+    static createFeatureGroup(state, action) {
+        function getUniqueId() {
+            const id = utils.createNewId();
+            return !state.get("featureGroups").find(group => group.id === id) ? id : getUniqueId();
+        }
 
-        // TODO: put hook to rename feature in server here
+        return state.set(
+            "featureGroups",
+            state.get("featureGroups").push(
+                Immutable.fromJS({
+                    id: getUniqueId(),
+                    name: action.name,
+                    selected: action.selected,
+                    featureIDs: action.featureIDs
+                })
+            )
+        );
+    }
 
-        // Rename stats store so we don't have to recalculate.
-        const newStats = state
-            .get("featureStats")
-            .mapKeys(key => (key === action.oldFeatureName ? action.newFeatureName : key));
+    static changeFeatureGroup(state, action) {
+        return state.set(
+            "featureGroups",
+            state
+                .get("featureGroups")
+                .map(group =>
+                    group.set(
+                        "featureIDs",
+                        group.get("featureIDs").filter(id => id !== action.featureName)
+                    )
+                )
+                .map(group =>
+                    group.get("id") === action.id
+                        ? group.set("featureIDs", group.get("featureIDs").push(action.featureName))
+                        : group
+                )
+        );
+    }
 
+    static selectFeatureGroup(state, action) {
+        const group = state.get("featureGroups").find(group => group.get("id") === action.id);
         return state
-            .set("featureList", newFeatureList)
-            .set("loadedData", newLoadedData)
-            .set("featureStats", newStats);
+            .set(
+                "featureGroups",
+                state
+                    .get("featureGroups")
+                    .map(group =>
+                        group.get("id") === action.id
+                            ? group.set("selected", action.selected)
+                            : group
+                    )
+            )
+            .set(
+                "featureList",
+                state
+                    .get("featureList")
+                    .map(feature =>
+                        group.get("featureIDs").includes(feature.get("name"))
+                            ? feature.set("selected", action.selected)
+                            : feature
+                    )
+            );
+    }
+
+    static deleteFeatureGroup(state, action) {
+        return state.set(
+            "featureGroups",
+            state.get("featureGroups").filter(group => group.get("id") !== action.id)
+        );
+    }
+
+    static renameFeatureGroup(state, action) {
+        return state.set(
+            "featureGroups",
+            state
+                .get("featureGroups")
+                .map(group =>
+                    group.get("id") === action.id ? group.set("name", action.name) : group
+                )
+        );
     }
 }

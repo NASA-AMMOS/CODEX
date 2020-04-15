@@ -1,16 +1,20 @@
 import "components/Graphs/GraphWrapper.css";
-import React, { useRef, useState, useEffect } from "react";
-import * as utils from "utils/utils";
+
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import * as selectionActions from "actions/selectionActions";
-import Popover from "@material-ui/core/Popover";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import ReactResizeDetector from "react-resize-detector";
 import Plotly from "plotly.js";
+import Popover from "@material-ui/core/Popover";
+import React, { useState, useEffect } from "react";
+import ReactResizeDetector from "react-resize-detector";
 import mergeImg from "merge-img";
+
+import * as selectionActions from "actions/selectionActions";
+
+import { useSetStoredPlotImage } from "../../hooks/UIHooks";
+import { useSetWindowNeedsPlotImage } from "../../hooks/WindowHooks";
 
 const Jimp = require("jimp");
 
@@ -139,37 +143,74 @@ export const useBoxSelection = (type, currentSelection, savedSelections, data) =
     return [shapes];
 };
 
+function downloadImage(image, title) {
+    image.getBase64Async("image/png").then(url => {
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = title;
+        a.click();
+        a.remove();
+    });
+}
+
+function makeTitleImage(title, width) {
+    return new Promise(resolve => {
+        new Jimp(width, 40, "#ffffff", (err, image) => {
+            Jimp.loadFont("./styles/resources/Fonts/jimp/open-sans-32-black.fnt").then(font => {
+                image.print(
+                    font,
+                    0,
+                    0,
+                    {
+                        text: title,
+                        alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER
+                    },
+                    width,
+                    40
+                );
+                resolve(image);
+            });
+        });
+    });
+}
+
 function handleSingleChartDownload(chartId, title) {
-    return _ =>
-        Plotly.downloadImage(chartId, {
+    const width = 800;
+    return async returnImage => {
+        const titleImage = await makeTitleImage(title, width);
+        const graphImage = await Plotly.toImage(chartId, {
             format: "png",
-            width: 800,
+            width,
             height: 800,
             filename: title
         });
+        const mergedImages = await mergeImg([titleImage, graphImage], { direction: true });
+        return returnImage ? mergedImages : downloadImage(mergedImages, title);
+    };
 }
 
-function handleMultipleChartDownload(chartIds, title) {
-    return _ => {
-        Promise.all(
-            chartIds.map(id => Plotly.toImage(id, { format: "png", width: 800, height: 800 }))
+function handleMultipleChartDownload(chartIds, title, stacked) {
+    const width = 800;
+    return async returnImage => {
+        const img = Promise.all(
+            chartIds.map(id => Plotly.toImage(id, { format: "png", width, height: 400 }))
         )
             .then(urls => Promise.all(urls.map(url => Jimp.read(url))))
-            .then(images => mergeImg(images))
-            .then(img => img.getBase64Async("image/png"))
-            .then(url => {
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = title;
-                a.click();
-                a.remove();
-            });
+            .then(images => mergeImg(images, { direction: stacked }))
+            .then(chartImage =>
+                makeTitleImage(title, stacked ? width : width * chartIds.length).then(titleImage =>
+                    mergeImg([titleImage, chartImage], { direction: true })
+                )
+            );
+        return returnImage ? img : downloadImage(img, title);
     };
 }
 
 function GraphWrapper(props) {
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
     const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
+    const [needsPlotImage, setNeedsPlotImage] = useSetWindowNeedsPlotImage(props.win.id);
+    const [_, setStoredPlotImage] = useSetStoredPlotImage();
 
     //you either need a custom resize handler or to give GraphWrapper chart
     const resizeHandler =
@@ -188,7 +229,19 @@ function GraphWrapper(props) {
         ? props.saveImageFunction
         : props.chartId
         ? handleSingleChartDownload(props.chartId, props.win.title)
-        : handleMultipleChartDownload(props.chartIds, props.win.title);
+        : handleMultipleChartDownload(props.chartIds, props.win.title, props.stacked);
+
+    useEffect(
+        _ => {
+            if (needsPlotImage) {
+                saveImageFunction(true).then(image => {
+                    setStoredPlotImage(props.win.id, image, props.win.title);
+                    setNeedsPlotImage(false);
+                });
+            }
+        },
+        [needsPlotImage]
+    );
 
     return (
         <React.Fragment>

@@ -1,31 +1,28 @@
 import "components/Graphs/SingleXMultipleYGraph.scss";
 
-import React, { useRef, useState, useEffect } from "react";
-import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
-import Popover from "@material-ui/core/Popover";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
-import ReactResizeDetector from "react-resize-detector";
-import GraphWrapper from "components/Graphs/GraphWrapper";
-
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import {
-    useCurrentSelection,
-    useSavedSelections,
-    usePinnedFeatures,
-    useHoveredSelection,
-    useFileInfo
-} from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
-import { useGlobalChartState } from "hooks/UIHooks";
-import * as uiTypes from "constants/uiTypes";
 import Plotly from "plotly.js";
+import React, { useRef, useState, useEffect } from "react";
 import mergeImg from "merge-img";
+
+import GraphWrapper from "components/Graphs/GraphWrapper";
+import * as uiTypes from "constants/uiTypes";
+import * as utils from "utils/utils";
+
+import { filterBounds } from "./graphFunctions";
+import { useFeatureDisplayNames } from "../../hooks/DataHooks";
+import {
+    useSetWindowNeedsAutoscale,
+    useWindowAxisLabels,
+    useWindowAxisScale,
+    useWindowFeatureInfoList,
+    useWindowFeatureList,
+    useWindowGraphBounds,
+    useWindowNeedsResetToDefault,
+    useWindowShowGridLines,
+    useWindowTitle,
+    useWindowXAxis
+} from "../../hooks/WindowHooks";
 
 const Jimp = require("jimp");
 
@@ -33,6 +30,7 @@ const DEFAULT_POINT_COLOR = "rgba(0, 0, 0 ,0.5)";
 const ANIMATION_RANGE = 15;
 const ANIMATION_SPEED = 0.75;
 const COLOR_CURRENT_SELECTION = "#FF0000";
+const DEFAULT_TITLE = "Single X Multiple Y Graph";
 
 // Custom image save function to handle tick plots
 function saveImageFunction(chartIds, title) {
@@ -54,24 +52,15 @@ function saveImageFunction(chartIds, title) {
         });
 }
 
-// export function SingleXMultipleYGraphLegend(props) {
-//     return props.features
-//         .filter(feature => feature.name !== props.xAxis)
-//         .map(feature => (
-//             <div className="line-plot" key={feature.name}>
-//                 <span>{feature.name}</span>
-//                 <div className="color-swatch" style={{ background: feature.color }} />
-//             </div>
-//         ));
-// }
-
 export function SingleXMultipleYGraphLegend(props) {
+    const [featureNameList] = useFeatureDisplayNames();
+    if (!props.features) return null;
     return props.features
-        .filter(feature => feature.name !== props.xAxis)
+        .filter(feature => feature.get("name") !== props.xAxis)
         .map(feature => (
-            <div className="line-plot" key={feature.name}>
-                <div className="color-swatch" style={{ background: feature.color }} />
-                <span>{feature.name}</span>
+            <div className="line-plot" key={feature.get("name")}>
+                <div className="color-swatch" style={{ background: feature.get("color") }} />
+                <span>{props.axisLabels.get(feature.get("name"), feature.get("name"))}</span>
             </div>
         ));
 }
@@ -79,62 +68,72 @@ export function SingleXMultipleYGraphLegend(props) {
 function SingleXMultipleYGraph(props) {
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
+    const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
+    const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
+        props.win.id
+    );
+    const [xAxis, setXAxis] = useWindowXAxis(props.win.id);
+    const [featuresImmutable] = useWindowFeatureList(props.win.id);
+    const featureList = featuresImmutable.toJS();
+    const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
+    const [featureInfo, setFeatureInfo] = useWindowFeatureInfoList(props.win.id);
+    const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
+    const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const [featureNameList] = useFeatureDisplayNames();
+    const [axisScales, setAxisScales] = useWindowAxisScale(props.win.id);
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
-    function getProcessedData() {
-        return utils.removeSentinelValues(
+    const processedData = (function() {
+        const sanitizedCols = utils.removeSentinelValues(
             props.data.map(col => col.get("data")).toJS(),
             props.fileInfo
         );
-    }
+        return filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
+    })();
 
-    const processedData = getProcessedData();
     const dataLength = processedData[0].length;
 
     // Generic index array
     const indexAry = [...Array(processedData[0].length)].map((_, idx) => idx);
 
-    // Set initial x-axis as the index
-    useEffect(_ => props.win.setData(data => ({ ...data.toJS(), xAxis: uiTypes.GRAPH_INDEX })), []);
+    const x =
+        !xAxis || xAxis === uiTypes.GRAPH_INDEX
+            ? indexAry
+            : Array.from(
+                  processedData[
+                      props.data.findIndex(col => col.get("feature") === props.win.data.xAxis)
+                  ]
+              ).sort((a, b) => b - a);
 
-    function getXAxis() {
-        if (!props.win.data.xAxis || props.win.data.xAxis === uiTypes.GRAPH_INDEX) return indexAry;
-        const colIndex = props.data.findIndex(col => col.get("feature") === props.win.data.xAxis);
-        return Array.from(processedData[colIndex]).sort((a, b) => b - a);
-    }
-    const xAxisData = getXAxis();
+    const cols = props.data
+        .filter(col => col.get("feature") !== xAxis)
+        .map((col, idx) => ({ name: col.get("feature"), data: processedData[idx] }))
+        .toJS();
 
-    function getYAxes() {
-        return props.data
-            .filter(col => col.get("feature") !== props.win.data.xAxis)
-            .map((col, idx) => ({ name: col.get("feature"), data: processedData[idx] }))
-            .toJS();
-    }
-    const cols = getYAxes();
+    const featureDisplayNames = featureList.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    );
 
-    // Here we assign colors to the seleted features and update the window state with them for use elsewhere.
-    const palette = utils.getSelectionPalette();
-    const featureInfo = props.win.data.features.map((feature, idx) => {
-        return { name: feature, color: palette[idx] };
-    });
-    props.win.setData(data => ({ ...data.toJS(), featureInfo }));
-
-    function getXAxisTitle() {
-        return !props.win.data.xAxis || props.win.data.xAxis === uiTypes.GRAPH_INDEX
+    const xAxisTitle =
+        !xAxis || xAxis === uiTypes.GRAPH_INDEX
             ? "Row Index"
-            : props.win.data.xAxis;
-    }
+            : props.data.find(feature => feature.get("feature") === xAxis).get("displayName");
 
-    function getYAxisTitle() {
-        return props.data
-            .filter(col => col.get("feature") !== props.win.data.xAxis)
-            .map(col => col.get("feature"))
-            .join(", ");
-    }
+    const yAxisTitle = props.data
+        .filter(col => col.get("feature") !== xAxis)
+        .map(col => (axisLabels ? axisLabels.get(col.get("feature")) : col.get("feature")))
+        .join(", ");
+
+    const palette = utils.getSelectionPalette();
+    const baseFeatureInfo = featureList.map((feature, idx) => ({
+        name: feature,
+        color: palette[idx]
+    }));
 
     function makeSelectionTrace(selection) {
-        return getYAxes().map(col => {
+        return cols.map(col => {
             return {
-                x: getXAxis(),
+                x,
                 y: selection.rowIndices.reduce((acc, idx) => {
                     acc[idx] = col.data[idx];
                     return acc;
@@ -150,20 +149,26 @@ function SingleXMultipleYGraph(props) {
         });
     }
 
+    const traces = cols.map((col, idx) => ({
+        x,
+        y: col.data,
+        type: "scatter",
+        mode: "lines",
+        marker: {
+            color: ((featureInfo && featureInfo.toJS()) || baseFeatureInfo).find(
+                f => f.name === col.name
+            ).color
+        },
+        visible: true,
+        hoverinfo: "x+y"
+    }));
+
     // The plotly react element only changes when the revision is incremented.
     const chartRevision = useRef(0);
 
     // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState({
-        data: cols.map((col, idx) => ({
-            x: xAxisData,
-            y: col.data,
-            type: "scatter",
-            mode: "lines",
-            marker: { color: featureInfo.find(f => f.name === col.name).color },
-            visible: true,
-            hoverinfo: "x+y"
-        })),
+        data: traces,
         layout: {
             autosize: true,
             margin: { l: 0, r: 0, t: 0, b: 0, pad: 10 }, // Axis tick labels are drawn in the margin space
@@ -177,7 +182,7 @@ function SingleXMultipleYGraph(props) {
             },
             yaxis: {
                 automargin: true,
-                title: getYAxisTitle()
+                title: yAxisTitle
             },
             showlegend: false
         },
@@ -301,28 +306,104 @@ function SingleXMultipleYGraph(props) {
         [props.globalChartState]
     );
 
-    // Effect to keep axes updated if they've been swapped
     useEffect(
         _ => {
-            const xAxisData = getXAxis();
-
-            chartState.data = getYAxes().map((col, idx) => ({
-                x: xAxisData,
-                y: col.data,
-                type: "scatter",
-                mode: "lines",
-                marker: { color: featureInfo.find(f => f.name === col.name).color },
-                visible: true,
-                hoverinfo: "x+y"
-            }));
-
-            chartState.layout.yaxis.title = getYAxisTitle();
+            chartState.data = traces;
+            chartState.layout.yaxis.title = yAxisTitle;
+            if (axisScales) {
+                setAxisScales(
+                    axisScales.map((scale, idx) =>
+                        scale.set("name", idx === 0 ? `X (${xAxisTitle})` : `Y (${yAxisTitle})`)
+                    )
+                );
+            }
             updateChartRevision();
         },
-        [props.win.data.features, props.win.data.xAxis]
+        [xAxis, featureInfo, bounds]
+    );
+
+    useEffect(
+        _ => {
+            chartState.layout.xaxis.showgrid = showGridLines;
+            chartState.layout.yaxis.showgrid = showGridLines;
+            updateChartRevision();
+        },
+        [showGridLines]
+    );
+
+    useEffect(
+        _ => {
+            chartState.layout.yaxis.title = yAxisTitle;
+            updateChartRevision();
+        },
+        [axisLabels]
+    );
+
+    function setDefaults() {
+        if (!featureInfo) setFeatureInfo(baseFeatureInfo);
+        if (!bounds)
+            setBounds(
+                cols.reduce((acc, col) => {
+                    acc[col.name] = { min: Math.min(...col.data), max: Math.max(...col.data) };
+                    return acc;
+                }, {})
+            );
+        if (!axisLabels)
+            setAxisLabels(
+                featureList.reduce((acc, featureName) => {
+                    acc[featureName] = featureNameList.get(featureName, featureName);
+                    return acc;
+                }, {})
+            );
+        if (showGridLines === undefined) setShowGridLines(true);
+        if (!xAxis) setXAxis(uiTypes.GRAPH_INDEX);
+        if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        if (!axisScales)
+            setAxisScales([
+                { name: `X (${xAxisTitle})`, scale: "linear" },
+                { name: `Y (${yAxisTitle})`, scale: "linear" }
+            ]);
+    }
+
+    useEffect(_ => {
+        setDefaults();
+        updateChartRevision();
+    }, []);
+
+    useEffect(
+        _ => {
+            if (needsResetToDefault) {
+                setDefaults();
+                setNeedsResetToDefault(false);
+            }
+        },
+        [needsResetToDefault]
+    );
+
+    useEffect(
+        _ => {
+            if (!axisScales) return;
+            chartState.layout.xaxis.type = axisScales.get(0).get("scale");
+            chartState.layout.yaxis.type = axisScales.get(1).get("scale");
+            updateChartRevision();
+        },
+        [axisScales]
     );
 
     const chartIds = [chartId, ...selectionChartStates.map(sel => sel.id)];
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                updateChartRevision();
+                setNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
+    );
+
     return (
         <GraphWrapper
             chart={chart}
@@ -367,12 +448,13 @@ function SingleXMultipleYGraph(props) {
                                 divId={selectionState.id}
                             />
                         ))}
-                        <div className="x-axis-title">{getXAxisTitle()}</div>
+                        <div className="x-axis-title">{xAxisTitle}</div>
                     </div>
                     <div className="singlex-multiy-legend">
                         <SingleXMultipleYGraphLegend
                             features={featureInfo}
-                            xAxis={getXAxisTitle()}
+                            xAxis={xAxisTitle}
+                            axisLabels={axisLabels}
                         />
                     </div>
                 </div>
@@ -381,49 +463,4 @@ function SingleXMultipleYGraph(props) {
     );
 }
 
-// wrapped data selector
-export default props => {
-    const win = useWindowManager(props, {
-        width: 500,
-        height: 500,
-        resizeable: true,
-        title: "Single X Multiple Y Graph"
-    });
-
-    const [currentSelection, setCurrentSelection] = useCurrentSelection();
-    const [savedSelections, saveCurrentSelection] = useSavedSelections();
-    const [globalChartState, setGlobalChartState] = useGlobalChartState();
-    const [hoverSelection, saveHoverSelection] = useHoveredSelection();
-    const fileInfo = useFileInfo();
-
-    const features = usePinnedFeatures(win);
-
-    if (features === null || !win.data) {
-        return <WindowCircularProgress />;
-    }
-
-    if (features.size) {
-        if (!win.title) win.setTitle(win.data.features.join(", "));
-        return (
-            <SingleXMultipleYGraph
-                currentSelection={currentSelection}
-                setCurrentSelection={setCurrentSelection}
-                savedSelections={savedSelections}
-                saveCurrentSelection={saveCurrentSelection}
-                hoverSelection={hoverSelection}
-                globalChartState={globalChartState}
-                data={features}
-                fileInfo={fileInfo}
-                win={win}
-            />
-        );
-    } else {
-        return (
-            <WindowError>
-                Please select exactly two features
-                <br />
-                in the features list to use this graph.
-            </WindowError>
-        );
-    }
-};
+export default SingleXMultipleYGraph;

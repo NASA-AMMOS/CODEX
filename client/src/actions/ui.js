@@ -139,3 +139,27 @@ export function showSnackbar(message) {
 export function hideSnackbar() {
     return { type: types.SHOW_SNACKBAR, visible: false };
 }
+
+export function setStatsPanelHidden(hidden) {
+    return { type: types.SET_STATS_PANEL_HIDDEN, hidden };
+}
+
+export function setAllowGraphHotkeys(allow) {
+    return { type: types.SET_ALLOW_GRAPH_HOTKEYS, allow };
+}
+
+export function setHelpMode(helpMode) {
+    return { type: types.SET_ALLOW_HELP_MODE, helpMode };
+}
+
+export function setExportModalVisible(visible) {
+    return { type: types.SET_EXPORT_MODAL_VISIBLE, visible };
+}
+
+export function setStoredPlotImage(winId, image, filename) {
+    return { type: types.SET_STORED_PLOT_IMAGE, winId, image, filename };
+}
+
+export function clearAllPlotImages() {
+    return { type: types.CLEAR_ALL_PLOT_IMAGES };
+}

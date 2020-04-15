@@ -1,13 +1,12 @@
-import * as actionTypes from "constants/actionTypes";
-import theme from "styles/theme.scss";
-/* eslint import/no-webpack-loader-syntax: off */
-import WorkerSocket from "worker-loader!workers/socket.worker";
-import StreamSocket from "worker-loader!workers/stream.worker";
-
+import { generateCombination } from "gfycat-style-urls";
 import ShelfPack from "@mapbox/shelf-pack";
 
-import { generateCombination } from "gfycat-style-urls";
 import { store } from "index";
+import StreamSocket from "worker-loader!workers/stream.worker";
+import WorkerSocket from "worker-loader!workers/socket.worker";
+import * as actionTypes from "constants/actionTypes";
+import theme from "styles/theme.scss";
+import Immutable from "immutable";
 
 /**
  * Get a unique id number per idName
@@ -105,7 +104,40 @@ export function makeSimpleRequest(request) {
     return { req, cancel };
 }
 
-export function range(start, stop) {
+export function makeHelpRequest(path) {
+    let cancel;
+    const req = new Promise((resolve, reject) => {
+        const socketWorker = new WorkerSocket();
+
+        socketWorker.addEventListener("message", e => {
+            resolve(JSON.parse(e.data));
+        });
+
+        socketWorker.postMessage(
+            JSON.stringify({
+                action: actionTypes.GET_HELP_TEXT,
+                path,
+                sessionkey: getGlobalSessionKey()
+            })
+        );
+
+        cancel = _ => {
+            socketWorker.postMessage(
+                JSON.stringify({
+                    action: actionTypes.CLOSE_SOCKET
+                })
+            );
+        };
+    });
+
+    return { req, cancel };
+}
+
+export function range(start, stop = null) {
+    if (stop === null) {
+        stop = start;
+        start = 0;
+    }
     const values = [];
     for (let i = start; i < stop; i++) {
         values.push(i);
@@ -215,6 +247,21 @@ export function removeSentinelValues(cols, fileInfo) {
             return row.every(val => !sentinelValues.includes(val));
         })
     );
+}
+
+export function removeSentinelValuesRevised(data, fileInfo) {
+    const sentinelValues = [fileInfo.nan, fileInfo.inf, fileInfo.ninf];
+
+    if (Immutable.isImmutable(data)) data = data.toJS();
+
+    // If there aren't any sentinel values, avoid filtering.
+    if (sentinelValues.every(val => val === null)) return data;
+
+    return unzip(
+        zip(data.map(col => col.data)).filter(row => {
+            return row.every(val => !sentinelValues.includes(val));
+        })
+    ).map((dataCol, idx) => Object.assign(data[idx], { data: dataCol }));
 }
 
 function getWindowContainerBounds() {
@@ -343,4 +390,22 @@ export function getRGBFromHex(hex) {
 export function equalArrays(a, b) {
     if (a.length !== b.length) return false;
     return a.every((val, idx) => val === b[idx]);
+}
+
+export function getMean(values) {
+    return values.reduce((acc, val) => acc + val, 0) / values.length;
+}
+
+export function reorderList(list, startIndex, endIndex) {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
+}
+
+export function addNewItem(list, item, index) {
+    const result = Array.from(list);
+    const [removed] = result.splice(index);
+    result.push(item);
+    return result.concat(removed ? removed : []);
 }

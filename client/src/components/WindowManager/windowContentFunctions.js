@@ -3,10 +3,9 @@ import React from "react";
 import ClusterAlgorithm from "components/Algorithms/ClusterAlgorithm";
 import ContourGraph from "components/Graphs/ContourGraph";
 import ViolinPlotGraph from "components/Graphs/ViolinPlotGraph";
-import RegressionResults from "components/Regressions/RegressionResults";
-import RegressionsOverview from "components/Regressions/RegressionsOverview";
 import ScatterGraph from "components/Graphs/ScatterGraph";
 import HeatmapGraph from "components/Graphs/HeatmapGraph";
+import HeatmapGraph3d from "components/Graphs/HeatmapGraph3d";
 import BoxPlotGraph from "components/Graphs/BoxPlotGraph";
 import HistogramGraph from "components/Graphs/HistogramGraph";
 import FindMoreLikeThis from "components/FindMoreLikeThis/FindMoreLikeThis";
@@ -27,44 +26,26 @@ import Table from "components/Table/Table";
 import Transform from "components/Transform/Transform";
 import QualityScan from "components/QualityScan/QualityScan";
 import SingleXMultipleYGraph from "components/Graphs/SingleXMultipleYGraph";
+import MapGraph from "components/Graphs/MapGraph";
+import GraphWindow from "components/Graphs/GraphWindow";
+import Normalization from "components/Normalization/Normalization";
+import PeakDetection from "components/PeakDetection/PeakDetection";
+import TemplateScan from "components/TemplateScan/TemplateScan";
+import Regression from "components/Regression/Regression";
+import Correlation from "components/Correlation/Correlation";
 
 export function getWindowContent(win) {
+    // Graphs get handled by the separate graph handler, as the graph type isn't fixed to the window.
+    if (windowTypes.graphs.includes(win.get("windowType")))
+        return <GraphWindow data={win.get("data")} windowType={win.get("windowType")} />;
+
     switch (win.get("windowType")) {
-        case uiTypes.SCATTER_GRAPH:
-            return <ScatterGraph data={win.get("data")} />;
-        case uiTypes.CONTOUR_GRAPH:
-            return <ContourGraph data={win.get("data")} />;
-        case uiTypes.TIME_SERIES_GRAPH:
-            return <TimeSeriesGraph data={win.get("data")} />;
-        case uiTypes.HEATMAP_GRAPH:
-            return <HeatmapGraph data={win.get("data")} />;
-        case uiTypes.BOX_PLOT_GRAPH:
-            return <BoxPlotGraph data={win.get("data")} />;
-        case uiTypes.VIOLIN_PLOT_GRAPH:
-            return <ViolinPlotGraph data={win.get("data")} />;
-        case uiTypes.HISTOGRAM_GRAPH:
-            return <HistogramGraph data={win.get("data")} />;
         case algorithmTypes.CLUSTER_ALGORITHM:
             return (
                 <ClusterAlgorithm
                     filename={win.get("filename")}
                     winId={win.get("id")}
                     selectedFeatures={win.get("selectedFeatures")}
-                />
-            );
-        case classificationRegressionTypes.REGRESSION_WINDOW:
-            return (
-                <RegressionsOverview
-                    selectedFeatures={win.get("selectedFeatures")}
-                    selectedFeatureLength={win.get("selectedFeatureLength")}
-                    winId={win.get("id")}
-                />
-            );
-        case classificationRegressionTypes.REGRESSION_RESULTS_WINDOW:
-            return (
-                <RegressionResults
-                    requests={win.get("requests")}
-                    runParams={win.get("runParams")}
                 />
             );
         case uiTypes.SESSIONS_WINDOW:
@@ -87,8 +68,16 @@ export function getWindowContent(win) {
             return <Transform />;
         case windowTypes.QUALITY_SCAN_WINDOW:
             return <QualityScan data={win.get("data")} />;
-        case windowTypes.SINGLE_X_MULTIPLE_Y:
-            return <SingleXMultipleYGraph data={win.get("data")} />;
+        case windowTypes.NORMALIZATION_WINDOW:
+            return <Normalization />;
+        case windowTypes.PEAK_DETECTION_WINDOW:
+            return <PeakDetection />;
+        case windowTypes.TEMPLATE_SCAN_WINDOW:
+            return <TemplateScan />;
+        case windowTypes.REGRESSION_WINDOW:
+            return <Regression />;
+        case windowTypes.CORRELATION_WINDOW:
+            return <Correlation />;
         default:
             return (
                 <p>
