@@ -246,9 +246,9 @@ function ScatterGraph(props) {
                     return acc;
                 }, {})
             );
-        if (!dotSize) setDotSize(DEFAULT_POINT_SIZE);
-        if (!dotOpacity) setDotOpacity(DEFAULT_POINT_OPACITY);
-        if (!dotShape) setDotShape(DEFAULT_POINT_SHAPE);
+        setDotSize(DEFAULT_POINT_SIZE);
+        setDotOpacity(DEFAULT_POINT_OPACITY);
+        setDotShape(DEFAULT_POINT_SHAPE);
         setAxisScale(
             featureNames.map(featureName => ({
                 name: featureName,
