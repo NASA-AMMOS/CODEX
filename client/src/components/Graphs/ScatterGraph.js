@@ -75,7 +75,7 @@ function ScatterGraph(props) {
         if (!axisScale) return baseData;
         return baseData.map((col, idx) => {
             const scaleData = axisScale.find(f => f.get("name") === featureNames[idx]);
-            const scale = scaleData || "linear";
+            const scale = scaleData ? scaleData.get("scale") : "linear";
             if (scale === "linear") return col;
             const scaleFunc = scaleLog()
                 .clamp(true)
@@ -141,7 +141,7 @@ function ScatterGraph(props) {
             return {
                 x,
                 y,
-                type: "scattergl",
+                type: "scatter",
                 mode:
                     axisScale && axisScale.every(x => x.get("scale") === "log")
                         ? "markers"
