@@ -113,6 +113,7 @@ function GraphWindow(props) {
                 document.activeElement.blur(); // For some reason, right-panel stuff isn't defocusing on Plotly clicks
                 setAllowGraphHotkeys(true);
             }}
+            style={{ height: "100%", width: "100%" }}
         >
             {windowContent}
         </div>
