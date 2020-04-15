@@ -77,9 +77,10 @@ function ScatterGraph(props) {
             const scaleData = axisScale.find(f => f.get("name") === featureNames[idx]);
             const scale = scaleData || "linear";
             if (scale === "linear") return col;
+            const [_, max] = utils.getMinMax(col);
             const scaleFunc = scaleLog()
                 .clamp(true)
-                .domain([0.1, Math.max(...col)])
+                .domain([0.1, max])
                 .nice();
             return col.map(val => scaleFunc(val));
         });
@@ -109,30 +110,45 @@ function ScatterGraph(props) {
 
     const baseTrace = useMemo(
         _ => {
-            const [x, y] = unzip(
-                baseX
-                    .map((_, idx) => idx)
-                    .filter(idx =>
-                        props.savedSelections.every(sel => !sel.rowIndices.includes(idx))
+            const [x, y, colors] = unzip(
+                baseX.map((_, idx) => {
+                    const opacity = props.savedSelections.some(
+                        sel => !sel.hidden && sel.rowIndices.includes(idx)
                     )
-                    .map(idx => [baseX[idx], baseY[idx]])
+                        ? 0
+                        : props.hoverSelection
+                        ? 0.1
+                        : dotOpacity;
+                    const color = new TinyColor(DEFAULT_POINT_COLOR).setAlpha(opacity).toString();
+                    return [baseX[idx], baseY[idx], color];
+                })
             );
-            const opacity = props.hoverSelection ? 0.1 : dotOpacity;
+
             return {
                 x,
                 y,
-                type: "scatter",
+                type: "scattergl",
                 mode: "markers",
                 hoverinfo: "x+y",
                 marker: {
-                    color: new TinyColor(DEFAULT_POINT_COLOR).setAlpha(opacity).toString(),
-                    size: dotSize,
-                    symbol: dotShape
+                    color: colors,
+                    size: dotSize || DEFAULT_POINT_SIZE,
+                    symbol: dotShape || DEFAULT_POINT_SHAPE
                 },
-                visible: true
+                visible: true,
+                name: "baseData"
             };
         },
-        [baseX, baseY, props.savedSelections, props.hoverSelection, props.currentSelection]
+        [
+            baseX,
+            baseY,
+            props.savedSelections,
+            props.hoverSelection,
+            props.currentSelection,
+            dotOpacity,
+            dotSize,
+            dotShape
+        ]
     );
 
     const trendLineTrace = useMemo(
@@ -160,24 +176,21 @@ function ScatterGraph(props) {
                 ? { color: "red", rowIndices: props.currentSelection }
                 : [];
             return props.savedSelections
+                .filter(sel => !sel.hidden)
                 .concat(props.hoverSelection ? currentSelectionTrace : [])
                 .sort((a, b) =>
                     a.id === props.hoverSelection ? 1 : b.id === props.hoverSelection ? -1 : 0
                 )
                 .concat(!props.hoverSelection ? currentSelectionTrace : [])
-                .map(sel => {
-                    const [x, y] = unzip(
-                        baseX
-                            .map((_, idx) => idx)
-                            .filter(idx => sel.rowIndices.includes(idx))
-                            .map(idx => [baseX[idx], baseY[idx]])
-                    );
+                .filter(sel => sel.rowIndices.length)
+                .map((sel, _, ary) => {
+                    const [x, y] = unzip(sel.rowIndices.map(idx => [baseX[idx], baseY[idx]]));
                     const opacity =
                         props.hoverSelection && props.hoverSelection !== sel.id ? 0.1 : dotOpacity;
                     return {
                         x,
                         y,
-                        type: "scatter",
+                        type: "scattergl",
                         mode: "markers",
                         marker: {
                             color: new TinyColor(sel.color).setAlpha(opacity).toString(),
@@ -188,7 +201,16 @@ function ScatterGraph(props) {
                     };
                 });
         },
-        [props.savedSelections, props.hoverSelection, props.currentSelection]
+        [
+            baseX,
+            baseY,
+            props.savedSelections,
+            props.hoverSelection,
+            props.currentSelection,
+            dotOpacity,
+            dotSize,
+            dotShape
+        ]
     );
 
     const traces = [baseTrace, trendLineTrace, ...selectionTraces];
@@ -232,9 +254,10 @@ function ScatterGraph(props) {
         if (!bounds)
             setBounds(
                 featureNames.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(sanitizedCols[idx]);
                     acc[colName] = {
-                        min: Math.min(...sanitizedCols[idx]),
-                        max: Math.max(...sanitizedCols[idx])
+                        min,
+                        max
                     };
                     return acc;
                 }, {})
@@ -345,7 +368,12 @@ function ScatterGraph(props) {
                     props.setCurrentSelection([]);
                 }}
                 onSelected={e => {
-                    if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
+                    if (e)
+                        props.setCurrentSelection(
+                            e.points
+                                .filter(point => point.data.name === "baseData")
+                                .map(point => point.pointIndex)
+                        );
                 }}
                 divId={chartId}
             />
