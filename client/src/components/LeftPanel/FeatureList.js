@@ -440,7 +440,7 @@ function FeatureItem(props) {
         : [];
 
     const isSelected = props.group
-        ? groupSelections.some(feature => props.feature.name)
+        ? groupSelections.some(feature => feature === props.feature.name)
         : props.feature.selected;
 
     const featureListContext = useContext(FeatureListContext);
