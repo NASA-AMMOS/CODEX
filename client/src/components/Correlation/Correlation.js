@@ -101,8 +101,10 @@ function GroupSelectDialog(props) {
             </DialogTitle>
             <DialogContent className="group-select-dialog-content">
                 <TextField
+                    autoFocus
                     variant="filled"
                     className="group-select-text-input"
+                    label="Group name"
                     value={groupNameInputBuffer}
                     type="text"
                     InputLabelProps={{ shrink: true }}
