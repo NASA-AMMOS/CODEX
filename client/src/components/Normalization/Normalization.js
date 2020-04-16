@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import HelpIcon from "@material-ui/icons/Help";
 import Plot from "react-plotly.js";
 import React, { useState, useEffect } from "react";
+import * as portals from "react-reverse-portal";
 
 import classnames from "classnames";
 
@@ -17,9 +18,8 @@ import {
     usePinnedFeatures
 } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
+import HelpContent from "../Help/HelpContent";
 import * as wmActions from "../../actions/windowManagerActions";
-import * as portals from "react-reverse-portal";
-import HelpContent from "components/Help/HelpContent";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
 const GUIDANCE_PATH = "normalization_page:general_normalization";

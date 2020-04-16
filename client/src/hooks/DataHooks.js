@@ -3,37 +3,35 @@ import { batchActions } from "redux-batched-actions";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useRef, useEffect } from "react";
 
+import WorkerSocket from "worker-loader!../workers/socket.worker";
+
 import {
     addDataset,
+    changeFeatureGroup,
+    createFeatureGroup,
+    deleteFeatureGroup,
     featureAdd,
     featureDelete,
+    featureListLoading,
     featureRelease,
+    featureRename,
     featureRetain,
     featureSelect,
     featureUnselect,
     fileLoad,
+    renameFeatureGroup,
+    selectFeatureGroup,
     statSetFeatureFailed,
     statSetFeatureLoading,
     statSetFeatureResolved
-} from "actions/data";
-import WorkerSocket from "worker-loader!workers/socket.worker";
-import * as actionTypes from "constants/actionTypes";
-import * as selectionActions from "actions/selectionActions";
-import * as uiActions from "actions/ui";
-import * as uiTypes from "constants/uiTypes";
-import * as utils from "utils/utils";
-import * as windowTypes from "constants/windowTypes";
-import * as wmActions from "actions/windowManagerActions";
-
-import {
-    changeFeatureGroup,
-    createFeatureGroup,
-    deleteFeatureGroup,
-    featureListLoading,
-    featureRename,
-    renameFeatureGroup,
-    selectFeatureGroup
 } from "../actions/data";
+import * as actionTypes from "../constants/actionTypes";
+import * as selectionActions from "../actions/selectionActions";
+import * as uiActions from "../actions/ui";
+import * as uiTypes from "../constants/uiTypes";
+import * as utils from "../utils/utils";
+import * as windowTypes from "../constants/windowTypes";
+import * as wmActions from "../actions/windowManagerActions";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -343,7 +341,7 @@ export function useHoveredSelection() {
     const dispatch = useDispatch();
     const currentHover = useSelector(state => state.selections.hoverSelection);
 
-    return [currentHover, indices => dispatch(selectionActions.setHoverSelection(indices))];
+    return [currentHover, indices => dispatch(selectionActions.hoverSelection(indices))];
 }
 
 export function useSetHoverSelection() {

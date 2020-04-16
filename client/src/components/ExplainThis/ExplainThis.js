@@ -1,36 +1,25 @@
-import React, { useRef, useState, useEffect } from "react";
-import { bindActionCreators } from "redux";
-import * as selectionActions from "actions/selectionActions";
-import { connect } from "react-redux";
-import Popover from "@material-ui/core/Popover";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import * as utils from "utils/utils";
-import ReactResizeDetector from "react-resize-detector";
-import * as d3 from "d3";
-import * as d3SC from "d3-scale-chromatic";
-import Plot from "react-plotly.js";
+import "./ExplainThis.scss";
+
 import Button from "@material-ui/core/Button";
-import "components/ExplainThis/ExplainThis.scss";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import InputLabel from "@material-ui/core/InputLabel";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import FormControl from "@material-ui/core/FormControl";
+import HelpOutline from "@material-ui/icons/HelpOutline";
+import IconButton from "@material-ui/core/IconButton";
 import MenuItem from "@material-ui/core/MenuItem";
+import Plot from "react-plotly.js";
+import React, { useRef, useState, useEffect } from "react";
 import Select from "@material-ui/core/Select";
 import Slider from "@material-ui/lab/Slider";
-import { useSelectedFeatureNames, useFilename, useSavedSelections } from "hooks/DataHooks";
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import { useWindowManager } from "hooks/WindowHooks";
-import HelpOutline from "@material-ui/icons/HelpOutline";
-import HelpContent from "components/Help/HelpContent";
-import IconButton from "@material-ui/core/IconButton";
-import {
-    WindowLayout,
-    FixedContainer,
-    ExpandingContainer,
-    WindowTogglableCover
-} from "components/WindowHelpers/WindowLayout";
+import * as d3SC from "d3-scale-chromatic";
+
+import * as d3 from "d3";
+
+import { WindowError } from "..//WindowHelpers/WindowCenter";
+import { WindowTogglableCover } from "..//WindowHelpers/WindowLayout";
+import { useSelectedFeatureNames, useFilename, useSavedSelections } from "../../hooks/DataHooks";
+import { useWindowManager } from "../../hooks/WindowHooks";
+import HelpContent from "../Help/HelpContent";
+import * as utils from "../../utils/utils";
 
 // this section of code is mostly d3 and stuff that directly facilitates the tree rendering
 

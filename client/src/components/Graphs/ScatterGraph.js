@@ -1,15 +1,12 @@
-import "components/Graphs/ScatterGraph.css";
+import "./ScatterGraph.css";
 
 import { TinyColor } from "@ctrl/tinycolor";
+import { scaleLog } from "d3-scale";
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import regression from "regression";
 
-import GraphWrapper from "components/Graphs/GraphWrapper";
-import * as utils from "utils/utils";
-
 import { filterBounds } from "./graphFunctions";
-import { unzip } from "../../utils/utils";
 import {
     useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
@@ -26,7 +23,8 @@ import {
     useWindowXAxis,
     useWindowYAxis
 } from "../../hooks/WindowHooks";
-import { scaleLog } from "d3-scale";
+import GraphWrapper from "./GraphWrapper";
+import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "rgba(0, 0, 0, 0.5)";
 const DEFAULT_POINT_OPACITY = 0.5;
@@ -109,7 +107,7 @@ function ScatterGraph(props) {
 
     const baseTrace = useMemo(
         _ => {
-            const [x, y] = unzip(
+            const [x, y] = utils.unzip(
                 baseX
                     .map((_, idx) => idx)
                     .filter(idx =>
@@ -137,7 +135,7 @@ function ScatterGraph(props) {
 
     const trendLineTrace = useMemo(
         _ => {
-            const [x, y] = unzip(regression.linear(unzip(filteredCols)).points);
+            const [x, y] = utils.unzip(regression.linear(utils.unzip(filteredCols)).points);
             return {
                 x,
                 y,
@@ -166,7 +164,7 @@ function ScatterGraph(props) {
                 )
                 .concat(!props.hoverSelection ? currentSelectionTrace : [])
                 .map(sel => {
-                    const [x, y] = unzip(
+                    const [x, y] = utils.unzip(
                         baseX
                             .map((_, idx) => idx)
                             .filter(idx => sel.rowIndices.includes(idx))

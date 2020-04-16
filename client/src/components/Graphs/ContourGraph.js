@@ -1,13 +1,9 @@
-import "components/Graphs/ContourGraph.css";
+import "./ContourGraph.css";
 
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";
 
-import GraphWrapper from "components/Graphs/GraphWrapper.js";
-import * as utils from "utils/utils";
-
 import { filterBounds } from "./graphFunctions";
-import { removeSentinelValues } from "../../utils/utils";
 import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
     useSetWindowNeedsAutoscale,
@@ -19,6 +15,8 @@ import {
     useWindowXAxis,
     useWindowYAxis
 } from "../../hooks/WindowHooks";
+import GraphWrapper from "./GraphWrapper.js";
+import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_TITLE = "Contour Graph";
@@ -331,7 +329,7 @@ function ContourGraph(props) {
     const [yAxis, setYAxis] = useWindowYAxis(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
-    const sanitizedCols = removeSentinelValues(
+    const sanitizedCols = utils.removeSentinelValues(
         featureList.map(colName =>
             props.data
                 .find(col => col.get("feature") === colName)

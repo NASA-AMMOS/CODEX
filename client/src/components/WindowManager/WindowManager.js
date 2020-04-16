@@ -1,18 +1,16 @@
-import "components/WindowManager/WindowManagerStyles.scss";
+import "./WindowManagerStyles.scss";
 
+import { batchActions } from "redux-batched-actions";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import React, { useState, useLayoutEffect, useEffect, useRef } from "react";
-import ShelfPack from "@mapbox/shelf-pack";
-import { useActiveWindow } from "hooks/WindowHooks";
-import { batchActions } from "redux-batched-actions";
+import React, { useLayoutEffect, useEffect, useRef } from "react";
 
-import Cristal from "react-cristal/src";
-import * as windowContentFunctions from "components/WindowManager/windowContentFunctions";
-import * as windowManagerActions from "actions/windowManagerActions";
-import * as selectionActions from "actions/selectionActions";
-import * as windowSettings from "constants/windowSettings";
-import WindowErrorBoundary from "components/WindowHelpers/WindowErrorBoundary";
+import { useActiveWindow } from "../../hooks/WindowHooks";
+import Cristal from "../../react-cristal/src";
+import WindowErrorBoundary from "../WindowHelpers/WindowErrorBoundary";
+import * as selectionActions from "../../actions/selectionActions";
+import * as windowContentFunctions from "./windowContentFunctions";
+import * as windowManagerActions from "../../actions/windowManagerActions";
 
 /**
  * Binary space partition

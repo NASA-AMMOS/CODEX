@@ -1,13 +1,9 @@
-import "components/Graphs/SingleXMultipleYGraph.scss";
+import "./SingleXMultipleYGraph.scss";
 
 import Plot from "react-plotly.js";
 import Plotly from "plotly.js";
 import React, { useRef, useState, useEffect } from "react";
 import mergeImg from "merge-img";
-
-import GraphWrapper from "components/Graphs/GraphWrapper";
-import * as uiTypes from "constants/uiTypes";
-import * as utils from "utils/utils";
 
 import { filterBounds } from "./graphFunctions";
 import { useFeatureDisplayNames } from "../../hooks/DataHooks";
@@ -23,6 +19,9 @@ import {
     useWindowTitle,
     useWindowXAxis
 } from "../../hooks/WindowHooks";
+import GraphWrapper from "./GraphWrapper";
+import * as uiTypes from "../../constants/uiTypes";
+import * as utils from "../../utils/utils";
 
 const Jimp = require("jimp");
 

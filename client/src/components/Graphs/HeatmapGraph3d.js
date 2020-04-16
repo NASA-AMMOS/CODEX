@@ -1,13 +1,8 @@
-import "components/Graphs/HeatmapGraph3d.css";
+import "./HeatmapGraph3d.css";
 
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";
 
-import * as graphFunctions from "components/Graphs/graphFunctions";
-import * as utils from "utils/utils";
-
-import { filterBounds } from "./graphFunctions";
-import { removeSentinelValues } from "../../utils/utils";
 import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
     useSetWindowNeedsAutoscale,
@@ -22,6 +17,8 @@ import {
     useWindowZAxis
 } from "../../hooks/WindowHooks";
 import GraphWrapper from "./GraphWrapper";
+import * as graphFunctions from "./graphFunctions";
+import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_BUCKET_COUNT = 50;
@@ -108,7 +105,7 @@ function HeatmapGraph3d(props) {
     const [zAxis, setZAxis] = useWindowZAxis(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
-    const sanitizedCols = removeSentinelValues(
+    const sanitizedCols = utils.removeSentinelValues(
         featureList.map(colName =>
             props.data
                 .find(col => col.get("feature") === colName)
@@ -118,7 +115,11 @@ function HeatmapGraph3d(props) {
         props.fileInfo
     );
 
-    const filteredCols = filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
+    const filteredCols = graphFunctions.filterBounds(
+        featureList,
+        sanitizedCols,
+        bounds && bounds.toJS()
+    );
 
     const xData = xAxis
         ? filteredCols[featureList.findIndex(feature => feature === xAxis)]

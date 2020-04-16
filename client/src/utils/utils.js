@@ -1,12 +1,13 @@
 import { generateCombination } from "gfycat-style-urls";
+import Immutable from "immutable";
 import ShelfPack from "@mapbox/shelf-pack";
 
-import { store } from "index";
-import StreamSocket from "worker-loader!workers/stream.worker";
-import WorkerSocket from "worker-loader!workers/socket.worker";
-import * as actionTypes from "constants/actionTypes";
-import theme from "styles/theme.scss";
-import Immutable from "immutable";
+import StreamSocket from "worker-loader!../workers/stream.worker";
+import WorkerSocket from "worker-loader!../workers/socket.worker";
+
+import { store } from "../index";
+import * as actionTypes from "../constants/actionTypes";
+import theme from "../styles/theme.scss";
 
 /**
  * Get a unique id number per idName

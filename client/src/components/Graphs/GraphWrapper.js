@@ -1,4 +1,4 @@
-import "components/Graphs/GraphWrapper.css";
+import "./GraphWrapper.css";
 
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
@@ -11,10 +11,9 @@ import React, { useState, useEffect } from "react";
 import ReactResizeDetector from "react-resize-detector";
 import mergeImg from "merge-img";
 
-import * as selectionActions from "actions/selectionActions";
-
 import { useSetStoredPlotImage } from "../../hooks/UIHooks";
 import { useSetWindowNeedsPlotImage } from "../../hooks/WindowHooks";
+import * as selectionActions from "../../actions/selectionActions";
 
 const Jimp = require("jimp");
 

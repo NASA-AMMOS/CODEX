@@ -1,8 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 
-import * as uiActions from "actions/ui";
-
-import { clearAllPlotImages } from "../actions/ui";
+import * as uiActions from "../actions/ui";
 
 /**
  * Get current global graph state
@@ -87,5 +85,5 @@ export function useSetStoredPlotImage() {
 
 export function useClearAllPlotImages() {
     const dispatch = useDispatch();
-    return _ => dispatch(clearAllPlotImages());
+    return _ => dispatch(uiActions.clearAllPlotImages());
 }

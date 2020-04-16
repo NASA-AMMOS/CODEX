@@ -14,13 +14,9 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import ReactResizeDetector from "react-resize-detector";
 import * as portals from "react-reverse-portal";
 
-import PlotlyPatched from "plotly-patched/src/core";
 import classnames from "classnames";
-import plotComponentFactory from "react-plotly-patched.js/factory";
-import * as utils from "utils/utils";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
-import { makeSimpleRequest, range } from "../../utils/utils";
 import { useCloseWindow, useWindowManager } from "../../hooks/WindowHooks";
 import {
     useFeatureDisplayNames,
@@ -28,6 +24,9 @@ import {
     useSavedSelections
 } from "../../hooks/DataHooks";
 import HelpContent from "../Help/HelpContent";
+import PlotlyPatched from "../../plotly-patched/src/core";
+import plotComponentFactory from "../../react-plotly-patched.js/factory";
+import * as utils from "../../utils/utils";
 
 const DEFAULT_LINE_COLOR = "#3988E3";
 const DEFAULT_POINT_COLOR = "rgba(0, 0, 0, 0.5)";
@@ -185,7 +184,7 @@ function AlgoReturnPreview(props) {
     const [_, createNewSelection] = useSavedSelections();
     function saveScanClick() {
         const newSelection = returnedSelections.reduce((acc, sel) => {
-            range(sel[0], sel[1] + 1).forEach(idx => acc.add(idx));
+            utils.range(sel[0], sel[1] + 1).forEach(idx => acc.add(idx));
             return acc;
         }, new Set());
         createNewSelection(`Template_Scan_${props.excludedFeature}`, Array.from(newSelection));
@@ -529,9 +528,9 @@ function TemplateScanContent(props) {
                 .get("feature");
             const activeLabels = selectionState[0].reduce(
                 (acc, sel) => {
-                    range(sel.range[0], sel.range[1] + 1).forEach(
-                        idx => (acc[idx] = sel.positive ? 1 : -1)
-                    );
+                    utils
+                        .range(sel.range[0], sel.range[1] + 1)
+                        .forEach(idx => (acc[idx] = sel.positive ? 1 : -1));
                     return acc;
                 },
                 features
@@ -547,7 +546,7 @@ function TemplateScanContent(props) {
                     labelName,
                     activeLabels
                 );
-                const { req, cancel } = makeSimpleRequest(reqObj);
+                const { req, cancel } = utils.makeSimpleRequest(reqObj);
                 req.then(data => {
                     setAlgoData(
                         algoData.map(algo =>

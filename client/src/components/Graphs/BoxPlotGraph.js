@@ -1,10 +1,9 @@
-import "components/Graphs/BoxPlotGraph.css";
+import "./BoxPlotGraph.css";
 
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";
 
-import GraphWrapper from "components/Graphs/GraphWrapper";
-import * as utils from "utils/utils";
+import GraphWrapper from "./GraphWrapper";
 
 import { filterSingleCol } from "./graphFunctions";
 import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
@@ -19,6 +18,7 @@ import {
     useWindowTitle,
     useWindowTrendLineVisible
 } from "../../hooks/WindowHooks";
+import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const COLOR_CURRENT_SELECTION = "#FF0000";

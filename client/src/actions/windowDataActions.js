@@ -1,4 +1,4 @@
-import * as types from "constants/actionTypes";
+import * as types from "../constants/actionTypes";
 
 export function setWindowDataBounds(id, bounds) {
     return { type: types.WINDOW_SET_DATA_BOUNDS, id, bounds };

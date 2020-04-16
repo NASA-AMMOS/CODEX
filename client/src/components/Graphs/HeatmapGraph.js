@@ -1,4 +1,4 @@
-import "components/Graphs/ContourGraph.css";
+import "./ContourGraph.css";
 
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";

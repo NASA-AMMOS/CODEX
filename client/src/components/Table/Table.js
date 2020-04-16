@@ -14,17 +14,11 @@ import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
 import styled from "styled-components";
 
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import {
-    WindowLayout,
-    FixedContainer,
-    ExpandingContainer
-} from "components/WindowHelpers/WindowLayout";
-import { useLiveFeatures, useFileInfo } from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
-import * as dataTypes from "constants/dataTypes";
-
-import { useFeatureDisplayNames } from "../../hooks/DataHooks";
+import { WindowError, WindowCircularProgress } from "../WindowHelpers/WindowCenter";
+import { WindowLayout, FixedContainer, ExpandingContainer } from "../WindowHelpers/WindowLayout";
+import { useFeatureDisplayNames, useFileInfo, useLiveFeatures } from "../../hooks/DataHooks";
+import { useWindowManager } from "../../hooks/WindowHooks";
+import * as dataTypes from "../../constants/dataTypes";
 
 // data table implementation based on https://material-ui.com/components/tables/#custom-table-pagination-action
 

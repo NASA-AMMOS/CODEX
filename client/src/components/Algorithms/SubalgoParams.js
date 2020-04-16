@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useReducer } from "react";
-import * as algorithmTypes from "constants/algorithmTypes";
-import SubalgoChart from "components/Algorithms/SubalgoChart";
-import { getSubAlgorithmData } from "components/Algorithms/algorithmFunctions";
-import "components/Algorithms/algorithmStyles.scss";
+import "./algorithmStyles.scss";
+
+import React, { useEffect, useReducer } from "react";
+
+import { getSubAlgorithmData } from "./algorithmFunctions";
+import SubalgoChart from "./SubalgoChart";
+import * as algorithmTypes from "../../constants/algorithmTypes";
 
 function subalgoPreviewReducer(params, action) {
     switch (action.type) {
