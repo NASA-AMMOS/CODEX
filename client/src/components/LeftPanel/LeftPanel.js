@@ -1,8 +1,9 @@
-import React, { Component, useState } from "react";
-import "components/LeftPanel/LeftPanel.css";
+import "./LeftPanel.css";
 
-import FeatureList from "components/LeftPanel/FeatureList";
-import SelectionList from "components/LeftPanel/SelectionList";
+import React, { useState } from "react";
+
+import FeatureList from "./FeatureList";
+import SelectionList from "./SelectionList";
 
 /*
     Bar that handles the form for the feature filtering

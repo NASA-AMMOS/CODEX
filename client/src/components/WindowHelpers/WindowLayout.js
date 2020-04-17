@@ -1,11 +1,11 @@
-import styled from "styled-components";
-import classNames from "classnames";
-import React from "react";
 import "./WindowLayout.css";
 
-import Typography from "@material-ui/core/Typography";
 import Close from "@material-ui/icons/Close";
 import IconButton from "@material-ui/core/IconButton";
+import React from "react";
+import Typography from "@material-ui/core/Typography";
+
+import classNames from "classnames";
 
 export const WindowLayout = props => {
     const classes = classNames("WindowLayout__LayoutContainer", {

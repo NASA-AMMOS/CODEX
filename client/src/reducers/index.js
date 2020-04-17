@@ -1,8 +1,9 @@
 import { combineReducers } from "redux";
-import data from "reducers/data";
-import ui from "reducers/ui";
-import windowManager from "reducers/windowManager";
-import selections from "reducers/selections";
+
+import data from "./data";
+import selections from "./selections";
+import ui from "./ui";
+import windowManager from "./windowManager";
 
 const rootReducer = combineReducers({
     data,

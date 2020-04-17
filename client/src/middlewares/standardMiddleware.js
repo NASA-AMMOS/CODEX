@@ -1,5 +1,5 @@
-import * as actionTypes from "constants/actionTypes";
-import { getGlobalSessionKey } from "utils/utils";
+import { getGlobalSessionKey } from "../utils/utils";
+import * as actionTypes from "../constants/actionTypes";
 
 export const selectionMiddleware = store => next => action => {
     //todo get this middleware to upload the selections to the backend

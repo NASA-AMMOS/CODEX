@@ -1,5 +1,6 @@
 import React from "react";
-import { WindowError } from "components/WindowHelpers/WindowCenter";
+
+import { WindowError } from "./WindowCenter";
 
 class WindowErrorBoundary extends React.Component {
     static getDerivedStateFromError(error) {

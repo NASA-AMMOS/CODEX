@@ -1,6 +1,9 @@
 import Immutable from "immutable";
-import { defaultInitialSettings, initialSettingsByWindowType } from "constants/windowSettings";
-import * as utils from "utils/utils";
+import {
+    defaultInitialSettings,
+    initialSettingsByWindowType
+} from "../../constants/windowSettings";
+import * as utils from "../../utils/utils";
 
 export default class WindowManagerReducer {
     static openNewWindow(state, action) {

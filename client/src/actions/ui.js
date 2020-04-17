@@ -2,7 +2,7 @@
  * Interface action creators
  */
 
-import * as types from "constants/actionTypes";
+import * as types from "../constants/actionTypes";
 
 /**
  * Handle an OPEN_GRAPH

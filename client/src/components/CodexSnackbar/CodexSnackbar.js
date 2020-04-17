@@ -1,10 +1,11 @@
+import "./CodexSnackbar.scss";
+
+import CloseIcon from "@material-ui/icons/Close";
+import IconButton from "@material-ui/core/IconButton";
 import React from "react";
 import Snackbar from "@material-ui/core/Snackbar";
-import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
-import { useSnackbarState } from "hooks/UIHooks";
-import CloseIcon from "@material-ui/icons/Close";
-import "components/CodexSnackbar/CodexSnackbar.scss";
+
+import { useSnackbarState } from "../../hooks/UIHooks";
 
 function formatMessage(message) {
     if (!message) return "";

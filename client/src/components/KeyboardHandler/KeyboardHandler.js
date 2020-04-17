@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 
-import * as windowTypes from "constants/windowTypes";
-
 import { selectFeatureGroup } from "../../actions/data";
 import {
     useActiveWindow,
@@ -26,6 +24,7 @@ import {
     useSetSelectionGroupActive
 } from "../../hooks/DataHooks";
 import { useKey } from "../../hooks/UtilHooks";
+import * as windowTypes from "../../constants/windowTypes";
 
 function KeyboardHandler(props) {
     const [allowGraphHotkeys] = useAllowGraphHotkeys();

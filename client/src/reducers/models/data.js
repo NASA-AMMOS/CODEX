@@ -5,7 +5,8 @@
  */
 
 import Immutable from "immutable";
-import { createMemorableId } from "utils/utils";
+
+import { createMemorableId } from "../../utils/utils";
 
 export const dataState = Immutable.fromJS({
     data: [],

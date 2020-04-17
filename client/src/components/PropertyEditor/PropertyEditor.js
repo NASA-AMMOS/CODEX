@@ -1,4 +1,4 @@
-import "components/PropertyEditor/PropertyEditor.scss";
+import "./PropertyEditor.scss";
 
 import { Checkbox, InputAdornment } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
@@ -9,12 +9,6 @@ import Immutable from "immutable";
 import React, { useRef } from "react";
 import TextField from "@material-ui/core/TextField";
 
-import SwapAxesIcon from "components/Icons/SwapAxes";
-import * as scatterGraphTypes from "constants/scatterGraphTypes";
-import * as uiTypes from "constants/uiTypes";
-import * as windowTypes from "constants/windowTypes";
-
-import { NUM_FEATURES_REQUIRED } from "../../constants/windowTypes";
 import { useAllowGraphHotkeys } from "../../hooks/UIHooks";
 import { useFeatureDisplayNames } from "../../hooks/DataHooks";
 import {
@@ -40,6 +34,10 @@ import {
     useWindowXAxis,
     useWindowTitle
 } from "../../hooks/WindowHooks";
+import SwapAxesIcon from "../Icons/SwapAxes";
+import * as scatterGraphTypes from "../../constants/scatterGraphTypes";
+import * as uiTypes from "../../constants/uiTypes";
+import * as windowTypes from "../../constants/windowTypes";
 
 function TrendLineToggle(props) {
     const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.activeWindowId);
@@ -208,7 +206,7 @@ function ChangeGraphType(props) {
     const [activeWindowId] = useActiveWindow();
 
     const availableWindowTypes = windowTypes.graphs.filter(type => {
-        const featuresRequired = NUM_FEATURES_REQUIRED[type];
+        const featuresRequired = windowTypes.NUM_FEATURES_REQUIRED[type];
         if (!featuresRequired || !features) return true;
         return (
             (typeof featuresRequired === "number" && features.size === featuresRequired) ||

@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import classnames from "classnames";
-import Plot from "react-plotly.js";
-import * as utils from "utils/utils";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import * as uiTypes from "constants/uiTypes";
+import Plot from "react-plotly.js";
+import React, { useState } from "react";
+
+import classnames from "classnames";
+
+import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 

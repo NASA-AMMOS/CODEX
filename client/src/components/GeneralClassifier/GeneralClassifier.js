@@ -1,21 +1,16 @@
-import "components/GeneralClassifier/GeneralClassifier.scss";
-import React, { useRef, useState, useEffect } from "react";
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import { useSavedSelections, useFilename, useSelectedFeatureNames } from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
-import { useGlobalChartState } from "hooks/UIHooks";
-import * as utils from "utils/utils";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import "./GeneralClassifier.scss";
+
 import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
-import * as uiTypes from "constants/uiTypes";
-import DeleteIcon from "@material-ui/icons/Delete";
-import IconButton from "@material-ui/core/IconButton";
-import FormControl from "@material-ui/core/FormControl";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
+import React, { useState, useEffect } from "react";
 import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
+
+import { WindowError, WindowCircularProgress } from "../WindowHelpers/WindowCenter";
+import { useSavedSelections, useFilename, useSelectedFeatureNames } from "../../hooks/DataHooks";
+import { useWindowManager } from "../../hooks/WindowHooks";
+import * as utils from "../../utils/utils";
 
 /*
     Function that returns an array of arrays containing 
