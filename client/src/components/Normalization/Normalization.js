@@ -4,8 +4,7 @@ import { Button, IconButton } from "@material-ui/core";
 import { useDispatch } from "react-redux";
 import HelpIcon from "@material-ui/icons/Help";
 import Plot from "react-plotly.js";
-import React, { useState, useEffect } from "react";
-import * as portals from "react-reverse-portal";
+import React, { useState, useEffect, useRef } from "react";
 
 import classnames from "classnames";
 
@@ -20,6 +19,7 @@ import {
 import { useWindowManager } from "../../hooks/WindowHooks";
 import HelpContent from "../Help/HelpContent";
 import * as wmActions from "../../actions/windowManagerActions";
+import * as portals from "react-reverse-portal";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
 const GUIDANCE_PATH = "normalization_page:general_normalization";
@@ -55,6 +55,7 @@ function PreviewPlot(props) {
     const min = Math.min(...props.data).toFixed(2);
     const max = Math.max(...props.data).toFixed(2);
 
+    const chartRevision = useRef(0);
     const [chartState, setChartState] = useState({
         data: [
             {
@@ -69,13 +70,47 @@ function PreviewPlot(props) {
             autosize: true,
             margin: { l: 40, r: 10, t: 5, b: 20 },
             hovermode: false,
-            titlefont: { size: 5 }
+            titlefont: { size: 5 },
+            datarevision: chartRevision.current
         },
         config: {
             displaylogo: false,
             displayModeBar: false
         }
     });
+
+    function updateChartRevision() {
+        chartRevision.current++;
+        setChartState({
+            ...chartState,
+            layout: { ...chartState.layout, datarevision: chartRevision.current }
+        });
+    }
+
+    /* We let plotly figure out the ymax for this graph, then let the parent component figure out
+    which of the individual algo graphs has the greatest max value. Then the parent pushes that
+    back down where we make it the ymax value for all the sub-graphs. */
+    const [yMax, setYMax] = useState();
+    useEffect(
+        _ => {
+            if (yMax || !chartState.layout.yaxis) return;
+            const newYMax = chartState.layout.yaxis.range[1];
+            props.maxState[1](maxState => maxState.concat([newYMax]));
+            setYMax(newYMax);
+        },
+        [chartState]
+    );
+
+    // Once the max is calculated, we set this chart's range to the one passed down from the parent
+    useEffect(
+        _ => {
+            if (!props.maxYValue) return;
+            chartState.layout.yaxis.autorange = false;
+            chartState.layout.yaxis.range[1] = props.maxYValue;
+            updateChartRevision();
+        },
+        [props.maxYValue]
+    );
 
     const containerClass = classnames({
         "normalize-plot-container": true,
@@ -172,6 +207,16 @@ function FeatureRow(props) {
         [featureState && featureState.standardized, "standardized"]
     ];
 
+    const [maxYValue, setMaxYValue] = useState();
+    const maxState = useState([]);
+    useEffect(
+        _ => {
+            if (maxState[0].length !== dataRows.length) return;
+            setMaxYValue(Math.max(...maxState[0]));
+        },
+        [maxState]
+    );
+
     return (
         <React.Fragment>
             <div className="normalize-title">{props.feature.get("displayName")}</div>
@@ -184,6 +229,8 @@ function FeatureRow(props) {
                         idx={idx}
                         onSelect={_ => setSelection(idx)}
                         selected={featureState && featureState.selection === idx}
+                        maxState={maxState}
+                        maxYValue={maxYValue}
                     />
                 ))}
             </div>

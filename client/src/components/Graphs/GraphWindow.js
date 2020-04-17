@@ -66,7 +66,7 @@ function GraphWindow(props) {
     if (featuresRequired) {
         if (
             (typeof featuresRequired === "number" && features.size !== featuresRequired) ||
-            (features.size < featuresRequired[0] || features.size > featuresRequired[1])
+            features.size < featuresRequired[0] || features.size > featuresRequired[1]
         )
             return (
                 <WindowError>
@@ -112,6 +112,7 @@ function GraphWindow(props) {
                 document.activeElement.blur(); // For some reason, right-panel stuff isn't defocusing on Plotly clicks
                 setAllowGraphHotkeys(true);
             }}
+            style={{ height: "100%", width: "100%" }}
         >
             {windowContent}
         </div>

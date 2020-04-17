@@ -100,8 +100,10 @@ function GroupSelectDialog(props) {
             </DialogTitle>
             <DialogContent className="group-select-dialog-content">
                 <TextField
+                    autoFocus
                     variant="filled"
                     className="group-select-text-input"
+                    label="Group name"
                     value={groupNameInputBuffer}
                     type="text"
                     InputLabelProps={{ shrink: true }}
@@ -174,7 +176,10 @@ function CorrelationContent(props) {
                 z: utils.unzip(data.corr_matrix),
                 type: "heatmap",
                 showscale: true,
-                colorscale: [[0, "rgb(255,255,255)"], [1, "rgb(8,48,107)"]]
+                colorscale: [
+                    [0, "rgb(255,255,255)"],
+                    [1, "rgb(8,48,107)"]
+                ]
             }
         ],
         layout: {

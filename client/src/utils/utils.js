@@ -410,3 +410,18 @@ export function addNewItem(list, item, index) {
     result.push(item);
     return result.concat(removed ? removed : []);
 }
+
+/*  Function that returns the min and max of a data array as an array.
+    Whenever working with raw CODEX data, this function should be used instead of 
+    the Math library because CODEX data columns may be longer than those functions can handle.
+*/
+export function getMinMax(col) {
+    return col.reduce(
+        (acc, val) => {
+            if (val < acc[0]) acc[0] = val;
+            else if (val > acc[1]) acc[1] = val;
+            return acc;
+        },
+        [col[0], col[0]]
+    );
+}
