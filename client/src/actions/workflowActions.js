@@ -1,10 +1,5 @@
-import * as actionTypes from "constants/actionTypes";
-import * as workflowTypes from "constants/workflowTypes";
-import * as uiActions from "actions/ui";
-import * as uiTypes from "constants/uiTypes";
-import * as utils from "utils/utils";
-import * as windowManagerActions from "actions/windowManagerActions";
-import * as actionFunctions from "actions/actionFunctions";
+import * as actionTypes from "../constants/actionTypes";
+import * as workflowTypes from "../constants/workflowTypes";
 
 export function getExplainThisWindowAction() {
     return {
@@ -32,7 +27,6 @@ export function getFindMoreLikeThisWindowAction() {
         }
     };
 }
-
 
 export const getFilterWindowAction = request => ({
     type: actionTypes.OPEN_NEW_WINDOW,

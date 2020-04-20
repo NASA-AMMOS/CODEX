@@ -1,6 +1,6 @@
-import { dataState } from "reducers/models/data";
-import DataReducer from "reducers/reducerFunctions/DataReducer";
-import * as actionTypes from "constants/actionTypes";
+import { dataState } from "./models/data";
+import DataReducer from "./reducerFunctions/DataReducer";
+import * as actionTypes from "../constants/actionTypes";
 
 export default function data(state = dataState, action, opt_reducer = DataReducer) {
     switch (action.type) {

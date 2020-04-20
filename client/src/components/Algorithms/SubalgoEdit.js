@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from "react";
-import * as algorithmTypes from "constants/algorithmTypes";
-import "components/Algorithms/algorithmStyles.scss";
-import AlgorithmHelpContent from "components/Algorithms/AlgorithmHelpContent";
-import classnames from "classnames";
-import SubalgoChart from "components/Algorithms/SubalgoChart";
-import { getSubAlgorithmData } from "components/Algorithms/algorithmFunctions";
-import SubalgoParams from "components/Algorithms/SubalgoParams";
-import SubalgoOutputParams from "components/Algorithms/SubalgoOutputParams";
-import HelpOutline from "@material-ui/icons/HelpOutline";
-import Close from "@material-ui/icons/Close";
-import IconButton from "@material-ui/core/IconButton";
-import Button from "@material-ui/core/Button";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import * as algorithmActions from "actions/algorithmActions";
+import "./algorithmStyles.scss";
+
 import { bindActionCreators } from "redux";
-import { connect, useDispatch } from "react-redux";
-import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import Button from "@material-ui/core/Button";
+import Close from "@material-ui/icons/Close";
+import HelpOutline from "@material-ui/icons/HelpOutline";
+import IconButton from "@material-ui/core/IconButton";
+import React, { useState } from "react";
+
+import classnames from "classnames";
+
+import AlgorithmHelpContent from "./AlgorithmHelpContent";
+import SubalgoChart from "./SubalgoChart";
+import SubalgoOutputParams from "./SubalgoOutputParams";
+import SubalgoParams from "./SubalgoParams";
+import * as algorithmActions from "../../actions/algorithmActions";
+import * as algorithmTypes from "../../constants/algorithmTypes";
 
 function handleRunAlgorithm(props) {
     // todo: re-enable when we need this

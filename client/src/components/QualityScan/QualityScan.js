@@ -1,22 +1,21 @@
-import React, { useState, useEffect, useContext, useRef, useMemo } from "react";
-import { useQualityScanActive } from "hooks/UIHooks";
+import "./QualityScan.scss";
+
+import { useDispatch } from "react-redux";
+import CloseIcon from "@material-ui/icons/Close";
+import IconButton from "@material-ui/core/IconButton";
 import Plot from "react-plotly.js";
-import { useFeatureNames, useFeatures, usePinnedFeatures, useFileInfo } from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import * as utils from "utils/utils";
+import React, { useState, useEffect, useContext, useRef, useMemo } from "react";
 import Slider from "@material-ui/lab/Slider";
 import Typography from "@material-ui/core/Typography";
-import "components/QualityScan/QualityScan.scss";
-import theme from "styles/theme.scss";
+
 import classnames from "classnames";
-import InputLabel from "@material-ui/core/InputLabel";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import FormControl from "@material-ui/core/FormControl";
-import CloseIcon from "@material-ui/icons/Close";
-import { useSelector, useStore, useDispatch } from "react-redux";
-import IconButton from "@material-ui/core/IconButton";
-import * as windowManagerActions from "actions/windowManagerActions";
+
+import { WindowCircularProgress } from "..//WindowHelpers/WindowCenter";
+import { useFeatureNames, useFeatures, useFileInfo } from "../../hooks/DataHooks";
+import { useWindowManager } from "../../hooks/WindowHooks";
+import theme from "../../styles/theme.scss";
+import * as utils from "../../utils/utils";
+import * as windowManagerActions from "../../actions/windowManagerActions";
 
 const SORT_ORIGINAL = { val: "SORT_ORIGINAL", name: "Sort Original" };
 const TOTAL_ERRORS = { val: "TOTAL_ERRORS", name: "Total Errors" };

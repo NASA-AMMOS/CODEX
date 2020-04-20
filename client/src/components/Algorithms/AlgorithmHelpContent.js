@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react";
-import "components/Algorithms/algorithmStyles.scss";
-import WorkerSocket from "worker-loader!workers/socket.worker";
-import * as actionTypes from "constants/actionTypes";
-import ReactMarkdown from "react-markdown";
+import "./algorithmStyles.scss";
+
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { getGlobalSessionKey } from "utils/utils";
+import React, { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+
+import WorkerSocket from "worker-loader!../../workers/socket.worker";
+
+import { getGlobalSessionKey } from "../../utils/utils";
+import * as actionTypes from "../../constants/actionTypes";
 
 function AlgorithmHelpContent(props) {
     const [textContent, setTextContent] = useState(null);

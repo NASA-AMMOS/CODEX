@@ -1,6 +1,6 @@
-import { windowManagerState } from "reducers/models/windowManager";
-import WindowManagerReducer from "reducers/reducerFunctions/WindowManagerReducer";
-import * as actionTypes from "constants/actionTypes";
+import { windowManagerState } from "./models/windowManager";
+import WindowManagerReducer from "./reducerFunctions/WindowManagerReducer";
+import * as actionTypes from "../constants/actionTypes";
 
 export default function windowManager(
     state = windowManagerState,

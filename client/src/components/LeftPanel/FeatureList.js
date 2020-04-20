@@ -1,4 +1,4 @@
-import "components/LeftPanel/FeatureList.scss";
+import "./FeatureList.scss";
 
 import { CircularProgress } from "@material-ui/core";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
@@ -19,12 +19,6 @@ import React, { useState, useEffect, useContext } from "react";
 import Select from "@material-ui/core/Select";
 import TextField from "@material-ui/core/TextField";
 
-import {
-    useFeatureStatistics,
-    useFeatureStatisticsLoader,
-    useFeatureMetadata,
-    useFeatureDelete
-} from "hooks/DataHooks";
 import classnames from "classnames";
 
 import { reorderList, addNewItem } from "../../utils/utils";
@@ -32,9 +26,13 @@ import { useAllowGraphHotkeys, useStatsPanelHidden } from "../../hooks/UIHooks";
 import {
     useChangeFeatureGroup,
     useDeleteFeatureGroup,
+    useFeatureDelete,
     useFeatureDisplayNames,
     useFeatureGroups,
     useFeatureListLoading,
+    useFeatureMetadata,
+    useFeatureStatistics,
+    useFeatureStatisticsLoader,
     useRenameFeatureGroup,
     useSelectFeatureGroup,
     useSetFeatureSelect

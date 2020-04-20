@@ -1,12 +1,9 @@
-import * as actionTypes from "constants/actionTypes";
-import { getSubAlgorithmData } from "components/Algorithms/algorithmFunctions";
-import * as algorithmTypes from "constants/algorithmTypes";
-import * as graphActions from "actions/graphActions";
-import * as uiTypes from "constants/uiTypes";
-import * as utils from "utils/utils";
-import * as selectionActions from "actions/selectionActions";
-
-import { usePinnedFeatures, useNewFeature } from "hooks/DataHooks";
+import { SCATTER_GRAPH } from "../constants/windowTypes";
+import { getSubAlgorithmData } from "../components/Algorithms/algorithmFunctions";
+import { useNewFeature } from "../hooks/DataHooks";
+import * as actionTypes from "../constants/actionTypes";
+import * as algorithmTypes from "../constants/algorithmTypes";
+import * as selectionActions from "./selectionActions";
 
 export function createAlgorithm(algoMode) {
     return (dispatch, getState) => {
@@ -95,7 +92,7 @@ function handleAlgorithmReturn(inMsg, subalgoState, dispatch, getState) {
         });
         dispatch({
             type: actionTypes.OPEN_NEW_WINDOW,
-            info: { windowType: uiTypes.SCATTER_GRAPH, data: { features } }
+            info: { windowType: SCATTER_GRAPH, data: { features } }
         });
     }
 }

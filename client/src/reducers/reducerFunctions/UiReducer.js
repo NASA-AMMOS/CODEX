@@ -1,5 +1,5 @@
 import Immutable from "immutable";
-import * as uiActions from "actions/ui";
+import * as uiActions from "../../actions/ui";
 
 export default class UiReducer {
     static changeGlobalChartState(state, action) {

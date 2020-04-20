@@ -1,16 +1,17 @@
-import React, { useState, useEffect, useReducer, useMemo } from "react";
-import { getSubAlgorithmData } from "components/Algorithms/algorithmFunctions";
-import * as algorithmTypes from "constants/algorithmTypes";
-import SubalgoChart from "components/Algorithms/SubalgoChart";
-import "components/Algorithms/algorithmStyles.scss";
-import SubalgoEdit from "components/Algorithms/SubalgoEdit";
-import AlgorithmHelpContent from "components/Algorithms/AlgorithmHelpContent";
-import HelpOutline from "@material-ui/icons/HelpOutline";
-import Close from "@material-ui/icons/Close";
-import IconButton from "@material-ui/core/IconButton";
+import "./algorithmStyles.scss";
 
-import { useSelectedFeatureNames, useFilename } from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
+import Close from "@material-ui/icons/Close";
+import HelpOutline from "@material-ui/icons/HelpOutline";
+import IconButton from "@material-ui/core/IconButton";
+import React, { useState, useEffect, useReducer } from "react";
+
+import { getSubAlgorithmData } from "./algorithmFunctions";
+import { useSelectedFeatureNames, useFilename } from "../../hooks/DataHooks";
+import { useWindowManager } from "../../hooks/WindowHooks";
+import AlgorithmHelpContent from "./AlgorithmHelpContent";
+import SubalgoChart from "./SubalgoChart";
+import SubalgoEdit from "./SubalgoEdit";
+import * as algorithmTypes from "../../constants/algorithmTypes";
 
 // Creates intial states from the subalgo request presets in algorithmTypes
 function createSubalgoStates(subalgos) {

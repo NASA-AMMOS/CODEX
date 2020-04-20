@@ -6,29 +6,13 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 
 module.exports = {
-    mode: "development",
-    entry: ["webpack-hot-middleware/client?reload=true", "babel-polyfill", "./src/index.js"],
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "bundle.js",
-        globalObject: "this" //hack to make hot reloading work (https://github.com/webpack/webpack-dev-server/issues/628)
+        filename: "bundle.js"
     },
-    devServer: {
-        contentBase: "./src",
-        watchContentBase: true,
-        inline: true,
-        port: 3000,
-        hot: true
-    },
-    watchOptions: {
-        poll: 1000,
-        ignored: ["node_modules"]
-    },
-    devtool: "cheap-module-source-map",
     module: {
         rules: [
             { test: /\.ts(x?)$/, loader: "ts-loader" },
-
             {
                 test: /\.js$/,
                 exclude: /node_modules/,
@@ -73,19 +57,22 @@ module.exports = {
             inject: true,
             template: paths.appHtml
         }),
-        new webpack.HotModuleReplacementPlugin(),
-        new webpack.WatchIgnorePlugin([/css\.d\.ts$/]),
         new webpack.DefinePlugin({
             "process.browser": "true"
-        })
+        }),
+        new webpack.EnvironmentPlugin({ CODEX_SERVER_URL: "ws://localhost:8888" })
     ],
     resolve: {
-        modules: [
-            path.resolve("./src"),
-            path.resolve("./node_modules"),
-            path.resolve("./src/react-cristal/src")
-        ],
-        extensions: [".ts", ".tsx", ".js", ".json"],
-        alias: { "react-dom": "@hot-loader/react-dom" }
+        // modules: [
+        //     path.resolve("./src"),
+        //     path.resolve("./node_modules"),
+        //     path.resolve("./src/react-cristal/src")
+        // ],
+        extensions: [".ts", ".tsx", ".js", ".json"]
+    },
+    node: {
+        fs: "empty",
+        net: "empty",
+        tls: "empty"
     }
 };

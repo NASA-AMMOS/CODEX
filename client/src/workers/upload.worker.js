@@ -12,7 +12,7 @@ function blobToBase64(blob, callback) {
 }
 
 //Send pieces of each files over the socket synchronously
-function process(files, sessionkey) {
+function processFile(files, sessionkey) {
     //for( let j = 0; j < files.length; j++ ) {
 
     let blob = files[0];
@@ -98,10 +98,9 @@ self.addEventListener("message", function(e) {
     for (let j = 0; j < e.data.files.length; j++) {
         files.push(e.data.files[j]);
     }
-    if (files.length > 0) {
-        let socketString = "ws://localhost:8888/upload";
 
-        if (e.data.NODE_ENV === "production") socketString = "wss://codex.jpl.nasa.gov/upload";
+    if (files.length > 0) {
+        let socketString = `${process.env.CODEX_SERVER_URL}/upload`;
 
         sock = new WebSocket(socketString);
 
@@ -110,7 +109,7 @@ self.addEventListener("message", function(e) {
         };
         sock.onopen = function() {
             console.log("Opened Upload Socket");
-            process(files, e.data.sessionkey);
+            processFile(files, e.data.sessionkey);
         };
     }
 });

@@ -1,11 +1,12 @@
-import React, { useReducer, useEffect } from "react";
-import { connect } from "react-redux";
-import * as utils from "utils/utils";
+import "./Sessions.scss";
+
 import { bindActionCreators } from "redux";
-import * as sessionsActions from "actions/sessionsActions";
-import "components/Sessions/Sessions.scss";
-import { useWindowManager } from "hooks/WindowHooks";
-import * as uiTypes from "constants/uiTypes";
+import { connect } from "react-redux";
+import React, { useReducer, useEffect } from "react";
+
+import { useWindowManager } from "../../hooks/WindowHooks";
+import * as sessionsActions from "../../actions/sessionsActions";
+import * as utils from "../../utils/utils";
 
 function sessionsStateReducer(sessionsState, action) {
     switch (action.type) {

@@ -1,11 +1,6 @@
-import * as actionTypes from "constants/actionTypes";
-import * as classificationTypes from "constants/classificationRegressionTypes";
-import * as actionFunctions from "actions/actionFunctions";
-import * as utils from "utils/utils";
-import * as regressionFunctions from "components/Regressions/regressionFunctions";
-
-/* eslint import/no-webpack-loader-syntax: off */
-import WorkerSocket from "worker-loader!workers/socket.worker";
+import * as actionTypes from "../constants/actionTypes";
+import * as regressionFunctions from "../components/Regressions/regressionFunctions";
+import * as utils from "../utils/utils";
 
 function formatClassificationParam(param) {
     switch (param.mode) {
