@@ -3,11 +3,11 @@
  * @author Patrick Kage
  */
 
-import { getGlobalSessionKey } from "utils/utils";
-import WorkerSocket from "worker-loader!workers/socket.worker";
-import WorkerUpload from "worker-loader!workers/upload.worker";
-import * as types from "constants/actionTypes";
-import * as uiActions from "actions/ui";
+import { getGlobalSessionKey } from "../utils/utils";
+import WorkerSocket from "worker-loader!../workers/socket.worker";
+import WorkerUpload from "worker-loader!../workers/upload.worker";
+import * as types from "../constants/actionTypes";
+import * as uiActions from "./ui";
 
 export function fileLoad(fileList) {
     return dispatch => {

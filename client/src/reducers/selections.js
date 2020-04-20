@@ -1,6 +1,6 @@
-import { selectionsState } from "reducers/models/selections";
-import SelectionsReducer from "reducers/reducerFunctions/SelectionsReducer";
-import * as actionTypes from "constants/actionTypes";
+import { selectionsState } from "./models/selections";
+import SelectionsReducer from "./reducerFunctions/SelectionsReducer";
+import * as actionTypes from "../constants/actionTypes";
 
 export default function selections(
     state = selectionsState,

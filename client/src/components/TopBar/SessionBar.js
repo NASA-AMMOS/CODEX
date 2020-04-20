@@ -9,17 +9,16 @@ import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import MaterialButton from "@material-ui/core/Button";
 import React, { useEffect, useState } from "react";
 
-import { useFilename, useFileUpload } from "hooks/DataHooks";
-import { useInterval, useTimeout } from "hooks/UtilHooks";
-import { useUploadStatus } from "hooks/UIHooks";
-import Title from "components/Title/Title";
 import classnames from "classnames";
-import * as exportActions from "actions/exportActions";
-import * as selectionActions from "actions/selectionActions";
-import * as sessionsActions from "actions/sessionsActions";
-import * as uiTypes from "constants/uiTypes";
 
-import { useHelpMode } from "../../hooks/UIHooks";
+import { useFilename, useFileUpload } from "../../hooks/DataHooks";
+import { useHelpMode, useUploadStatus } from "../../hooks/UIHooks";
+import { useInterval, useTimeout } from "../../hooks/UtilHooks";
+import Title from "../Title/Title";
+import * as exportActions from "../../actions/exportActions";
+import * as selectionActions from "../../actions/selectionActions";
+import * as sessionsActions from "../../actions/sessionsActions";
+import * as uiTypes from "../../constants/uiTypes";
 
 const SessionBar = props => {
     const filename = useFilename();

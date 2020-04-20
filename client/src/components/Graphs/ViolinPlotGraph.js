@@ -1,10 +1,7 @@
-import "components/Graphs/ViolinPlotGraph.css";
+import "./ViolinPlotGraph.css";
 
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";
-
-import GraphWrapper from "components/Graphs/GraphWrapper";
-import * as utils from "utils/utils";
 
 import { filterSingleCol } from "./graphFunctions";
 import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
@@ -19,6 +16,8 @@ import {
     useWindowTitle,
     useWindowTrendLineVisible
 } from "../../hooks/WindowHooks";
+import GraphWrapper from "./GraphWrapper";
+import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_TITLE = "Violin Plot Graph";

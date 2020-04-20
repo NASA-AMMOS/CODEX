@@ -1,4 +1,4 @@
-import "components/TopBar/TopBar.scss";
+import "./TopBar.scss";
 
 import { ButtonGroup } from "reactstrap";
 import { Tooltip } from "@material-ui/core";
@@ -8,19 +8,30 @@ import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
 import PropTypes from "prop-types";
 import React, { useRef } from "react";
 
-import { openAlgorithm, openDevelopment, openWorkflow } from "actions/ui";
-import ControlBar from "components/ControlBar/ControlBar";
-import SessionBar from "components/TopBar/SessionBar";
-import * as algorithmActions from "actions/algorithmActions";
-import * as algorithmTypes from "constants/algorithmTypes";
-import * as dataActions from "actions/data";
-import * as windowManagerActions from "actions/windowManagerActions";
-import * as windowTypes from "constants/windowTypes";
-import * as workflowActions from "actions/workflowActions";
-import * as workflowTypes from "constants/workflowTypes";
-
+import { ALGORITHM_TYPES } from "../../constants/algorithmTypes";
+import {
+    CLUSTER_ALGORITHM,
+    CORRELATION_WINDOW,
+    DIMENSIONALITY_REDUCTION_WINDOW,
+    EXPLAIN_THIS_WINDOW,
+    NORMALIZATION_WINDOW,
+    NUM_FEATURES_REQUIRED,
+    PEAK_DETECTION_WINDOW,
+    REGRESSION_WINDOW,
+    TABLE_WINDOW,
+    TEMPLATE_SCAN_WINDOW,
+    graphs
+} from "../../constants/windowTypes";
+import { WORKFLOW_TYPES } from "../../constants/workflowTypes";
+import { createAlgorithm } from "../../actions/algorithmActions";
+import { createWorkflow } from "../../actions/workflowActions";
+import { fileLoad } from "../../actions/data";
+import { openAlgorithm, openDevelopment, openWorkflow } from "../../actions/ui";
+import { openNewWindow, setWindowTileAction } from "../../actions/windowManagerActions";
 import { useExportModalVisible } from "../../hooks/UIHooks";
 import { useSavedSelections, useSelectedFeatureNames } from "../../hooks/DataHooks";
+import ControlBar from "../ControlBar/ControlBar";
+import SessionBar from "./SessionBar";
 
 function NavigationBar(props) {
     const [features] = useSelectedFeatureNames();
@@ -37,7 +48,7 @@ function NavigationBar(props) {
 
     function createMenuItem(window_type, title) {
         const [disabled, errMsg] = (function() {
-            const requiredNumFeatures = windowTypes.NUM_FEATURES_REQUIRED[window_type];
+            const requiredNumFeatures = NUM_FEATURES_REQUIRED[window_type];
             if (requiredNumFeatures === undefined) return [false, null];
             if (typeof requiredNumFeatures === "number") {
                 if (features.size !== requiredNumFeatures) {
@@ -114,7 +125,7 @@ function NavigationBar(props) {
     }
 
     function getWorkflowMenuItems() {
-        return workflowTypes.WORKFLOW_TYPES.map(workflow => (
+        return WORKFLOW_TYPES.map(workflow => (
             <MenuItem
                 key={workflow}
                 onSelect={() => {
@@ -128,11 +139,11 @@ function NavigationBar(props) {
 
     function getGraphMenuItems() {
         // WINDOW TYPES
-        return windowTypes.graphs.map(graph => createMenuItem(graph));
+        return graphs.map(graph => createMenuItem(graph));
     }
 
     function getAlgorithmsMenuItems() {
-        return algorithmTypes.ALGORITHM_TYPES.map(algo => (
+        return ALGORITHM_TYPES.map(algo => (
             <MenuItem
                 key={algo}
                 onSelect={() => {
@@ -164,23 +175,23 @@ function NavigationBar(props) {
                 <Dropdown className="dropdownMain" autoOpen={false}>
                     <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
                     <Dropdown.Menu>
-                        {createMenuItem(windowTypes.CLUSTER_ALGORITHM, "Clustering")}
+                        {createMenuItem(CLUSTER_ALGORITHM, "Clustering")}
                         {createMenuItem(
-                            windowTypes.DIMENSIONALITY_REDUCTION_WINDOW,
+                            DIMENSIONALITY_REDUCTION_WINDOW,
                             "Dimensionality Reduction"
                         )}
-                        {createMenuItem(windowTypes.NORMALIZATION_WINDOW, "Normalization")}
-                        {createMenuItem(windowTypes.PEAK_DETECTION_WINDOW, "Peak Detection")}
-                        {createMenuItem(windowTypes.REGRESSION_WINDOW, "Regression")}
-                        {createMenuItem(windowTypes.TEMPLATE_SCAN_WINDOW, "Template Scan")}
-                        {createMenuItem(windowTypes.CORRELATION_WINDOW, "Correlation")}
+                        {createMenuItem(NORMALIZATION_WINDOW, "Normalization")}
+                        {createMenuItem(PEAK_DETECTION_WINDOW, "Peak Detection")}
+                        {createMenuItem(REGRESSION_WINDOW, "Regression")}
+                        {createMenuItem(TEMPLATE_SCAN_WINDOW, "Template Scan")}
+                        {createMenuItem(CORRELATION_WINDOW, "Correlation")}
                     </Dropdown.Menu>
                 </Dropdown>
 
                 {/** <Dropdown className="dropdownMain" autoOpen={false}>
                     <Dropdown.Toggle className="dropdownToggle" title="Development" />
                     <Dropdown.Menu>
-                        <MenuItem onSelect={() => props.openWindow(windowTypes.DEBUG_WINDOW)}>
+                        <MenuItem onSelect={() => props.openWindow(DEBUG_WINDOW)}>
                             Open debug window
                         </MenuItem>
                     </Dropdown.Menu>
@@ -189,8 +200,8 @@ function NavigationBar(props) {
                 <Dropdown className="dropdownMain" autoOpen={false}>
                     <Dropdown.Toggle className="dropdownToggle" title="Workflows" />
                     <Dropdown.Menu>
-                        {createMenuItem(windowTypes.EXPLAIN_THIS_WINDOW, "Explain This")}
-                        {createMenuItem(windowTypes.TABLE_WINDOW, "Table")}
+                        {createMenuItem(EXPLAIN_THIS_WINDOW, "Explain This")}
+                        {createMenuItem(TABLE_WINDOW, "Table")}
                     </Dropdown.Menu>
                 </Dropdown>
 
@@ -260,11 +271,11 @@ function mapDispatchToProps(dispatch) {
         openAlgorithm: (d, n, w, h) => dispatch(openAlgorithm(d, n, w, h)),
         openDevelopment: (d, n) => dispatch(openDevelopment(d, n)),
         openWorkflow: (d, n) => dispatch(openWorkflow(d, n)),
-        openWindow: n => dispatch(windowManagerActions.openNewWindow({ windowType: n })),
-        createAlgorithm: name => dispatch(algorithmActions.createAlgorithm(name)),
-        createWorkflow: name => dispatch(workflowActions.createWorkflow(name)),
-        setWindowTileAction: bindActionCreators(windowManagerActions.setWindowTileAction, dispatch),
-        fileLoad: bindActionCreators(dataActions.fileLoad, dispatch)
+        openWindow: n => dispatch(openNewWindow({ windowType: n })),
+        createAlgorithm: name => dispatch(createAlgorithm(name)),
+        createWorkflow: name => dispatch(createWorkflow(name)),
+        setWindowTileAction: bindActionCreators(setWindowTileAction, dispatch),
+        fileLoad: bindActionCreators(fileLoad, dispatch)
     };
 }
 

@@ -1,14 +1,8 @@
-import "components/Graphs/HeatmapGraph3d.css";
+import "./HeatmapGraph3d.css";
 
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";
 
-import GraphWrapper from "components/Graphs/GraphWrapper";
-import * as graphFunctions from "components/Graphs/graphFunctions";
-import * as uiTypes from "constants/uiTypes";
-import * as utils from "utils/utils";
-
-import { filterBounds } from "./graphFunctions";
 import { usePrevious } from "../../hooks/UtilHooks";
 import {
     useSetWindowNeedsAutoscale,
@@ -23,6 +17,10 @@ import {
     useWindowYAxis,
     useWindowZAxis
 } from "../../hooks/WindowHooks";
+import GraphWrapper from "./GraphWrapper";
+import * as graphFunctions from "./graphFunctions";
+import * as uiTypes from "../../constants/uiTypes";
+import * as utils from "../../utils/utils";
 
 const DEFAULT_MAP_TYPE = uiTypes.MAP_USGS;
 const DEFAULT_ZOOM = 0;
@@ -80,11 +78,9 @@ function MapGraph(props) {
     );
 
     const baseCols = utils.removeSentinelValuesRevised(props.data, props.fileInfo);
-    const cols = filterBounds(
-        featureList,
-        baseCols.map(col => col.data),
-        bounds && bounds.toJS()
-    ).map((data, idx) => ({ ...baseCols[idx], data }));
+    const cols = graphFunctions
+        .filterBounds(featureList, baseCols.map(col => col.data), bounds && bounds.toJS())
+        .map((data, idx) => ({ ...baseCols[idx], data }));
 
     const featureDisplayNames = featureList.map(featureName =>
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")

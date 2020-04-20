@@ -1,14 +1,15 @@
-import React from "react";
+import { useDispatch } from "react-redux";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import Button from "@material-ui/core/Button";
-import { useConfirmationModalState } from "hooks/UIHooks";
-import { useSelector, useStore, useDispatch } from "react-redux";
-import * as appStrings from "constants/appStrings";
-import * as uiActions from "actions/ui";
+import React from "react";
+
+import { useConfirmationModalState } from "../../hooks/UIHooks";
+import * as appStrings from "../../constants/appStrings";
+import * as uiActions from "../../actions/ui";
 
 function ConfirmationModal(props) {
     const confirmationModalState = useConfirmationModalState();

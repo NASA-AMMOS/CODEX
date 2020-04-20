@@ -1,18 +1,9 @@
+import HelpOutline from "@material-ui/icons/HelpOutline";
+import IconButton from "@material-ui/core/IconButton";
 import React, { useState } from "react";
 
-import HelpContent from "components/Help/HelpContent";
-
-import {
-    WindowLayout,
-    FixedContainer,
-    ExpandingContainer,
-    WindowTogglableCover
-} from "components/WindowHelpers/WindowLayout";
-import Typography from "@material-ui/core/Typography";
-import HelpOutline from "@material-ui/icons/HelpOutline";
-import Close from "@material-ui/icons/Close";
-import IconButton from "@material-ui/core/IconButton";
-import { WindowYScroller } from "components/WindowHelpers/WindowScroller";
+import { WindowTogglableCover } from "./WindowLayout";
+import HelpContent from "../Help/HelpContent";
 
 /**
  * Shows a help button, that when clicked, draws the help over the window

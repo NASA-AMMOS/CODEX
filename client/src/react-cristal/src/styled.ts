@@ -20,7 +20,7 @@ export interface HeaderProps {
     isActive?: boolean;
 }
 
-const theme = require("styles/theme.scss");
+const theme = require("../../styles/theme.scss");
 
 export const defaultWidth = 200;
 export const defaultHeight = 200;

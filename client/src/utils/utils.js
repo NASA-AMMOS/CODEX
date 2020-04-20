@@ -1,12 +1,13 @@
 import { generateCombination } from "gfycat-style-urls";
+import Immutable from "immutable";
 import ShelfPack from "@mapbox/shelf-pack";
 
-import { store } from "index";
-import StreamSocket from "worker-loader!workers/stream.worker";
-import WorkerSocket from "worker-loader!workers/socket.worker";
-import * as actionTypes from "constants/actionTypes";
-import theme from "styles/theme.scss";
-import Immutable from "immutable";
+import StreamSocket from "worker-loader!../workers/stream.worker";
+import WorkerSocket from "worker-loader!../workers/socket.worker";
+
+import { store } from "../index";
+import * as actionTypes from "../constants/actionTypes";
+import theme from "../styles/theme.scss";
 
 /**
  * Get a unique id number per idName
@@ -408,4 +409,19 @@ export function addNewItem(list, item, index) {
     const [removed] = result.splice(index);
     result.push(item);
     return result.concat(removed ? removed : []);
+}
+
+/*  Function that returns the min and max of a data array as an array.
+    Whenever working with raw CODEX data, this function should be used instead of 
+    the Math library because CODEX data columns may be longer than those functions can handle.
+*/
+export function getMinMax(col) {
+    return col.reduce(
+        (acc, val) => {
+            if (val < acc[0]) acc[0] = val;
+            else if (val > acc[1]) acc[1] = val;
+            return acc;
+        },
+        [col[0], col[0]]
+    );
 }

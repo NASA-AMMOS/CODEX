@@ -1,7 +1,5 @@
 import React from "react";
 
-import * as windowTypes from "constants/windowTypes";
-
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
 import { useAllowGraphHotkeys, useGlobalChartState } from "../../hooks/UIHooks";
 import {
@@ -23,6 +21,7 @@ import ScatterGraph from "./ScatterGraph";
 import SingleXMultipleYGraph from "./SingleXMultipleYGraph";
 import TimeSeriesGraph from "./TimeSeriesGraph";
 import ViolinPlotGraph from "./ViolinPlotGraph";
+import * as windowTypes from "../../constants/windowTypes";
 
 function GraphWindow(props) {
     const win = useWindowManager(props, {
@@ -67,7 +66,7 @@ function GraphWindow(props) {
     if (featuresRequired) {
         if (
             (typeof featuresRequired === "number" && features.size !== featuresRequired) ||
-            (features.size < featuresRequired[0] || features.size > featuresRequired[1])
+            features.size < featuresRequired[0] || features.size > featuresRequired[1]
         )
             return (
                 <WindowError>

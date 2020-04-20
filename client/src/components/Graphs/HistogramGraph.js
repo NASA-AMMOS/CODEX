@@ -1,10 +1,8 @@
-import "components/Graphs/HistogramGraph.css";
+import "./HistogramGraph.css";
 
+import { scaleLinear } from "d3-scale";
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";
-
-import GraphWrapper from "components/Graphs/GraphWrapper";
-import * as utils from "utils/utils";
 
 import { filterSingleCol } from "./graphFunctions";
 import {
@@ -16,7 +14,8 @@ import {
     useWindowNeedsResetToDefault,
     useWindowTitle
 } from "../../hooks/WindowHooks";
-import { scaleLinear } from "d3-scale";
+import GraphWrapper from "./GraphWrapper";
+import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const COLOR_CURRENT_SELECTION = "#FF0000";

@@ -1,9 +1,9 @@
-import * as types from "constants/actionTypes";
+import * as types from "../constants/actionTypes";
 
 let socket;
 
 function handleSimpleRequest(msg) {
-    const socketString = "ws://localhost:8888/codex";
+    const socketString = `${process.env.CODEX_SERVER_URL}/codex`;
     socket = new WebSocket(socketString);
 
     socket.onclose = function() {

@@ -1,16 +1,16 @@
 import "./HelpModal.scss";
 
 import { CircularProgress, Modal } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import CloseIcon from "@material-ui/icons/Close";
 import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 
-import WorkerSocket from "worker-loader!workers/socket.worker";
-import * as actionTypes from "constants/actionTypes";
+import WorkerSocket from "worker-loader!../../workers/socket.worker";
 
 import { getGlobalSessionKey } from "../../utils/utils";
 import { useHelpMode } from "../../hooks/UIHooks";
+import * as actionTypes from "../../constants/actionTypes";
 
 const MAIN_MENU = "MAIN_MENU";
 const ABOUT = "ABOUT";

@@ -5,9 +5,10 @@ import MenuItem from "@material-ui/core/MenuItem";
 import React from "react";
 import Select from "@material-ui/core/Select";
 import TextField from "@material-ui/core/TextField";
+
 import classnames from "classnames";
 
-import * as classificationRegressionTypes from "constants/classificationRegressionTypes";
+import * as classificationRegressionTypes from "../constants/classificationRegressionTypes";
 
 // Uses the Classification Types constants file to generate state objects for each classification.
 export function getInitialParamState(algos) {

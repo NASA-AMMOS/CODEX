@@ -1,8 +1,8 @@
 import React from "react";
-import useWindowManager from "hooks/WindowHooks";
-import { getGlobalSessionKey } from "utils/utils";
+import useWindowManager from "../../hooks/WindowHooks";
+import { getGlobalSessionKey } from "../../utils/utils";
 
-import WindowCenter from "components/WindowHelpers/WindowCenter";
+import WindowCenter from "../WindowHelpers/WindowCenter";
 
 const Debugger = props => {
     const win = useWindowManager(props, {

@@ -1,22 +1,23 @@
+import "./FindMoreLikeThis.scss";
+
+import Button from "@material-ui/core/Button";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import React, { useState, useEffect } from "react";
+import Select from "@material-ui/core/Select";
+import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
+
 import {
     useSavedSelections,
     useFilename,
     useSelectedFeatureNames,
     useSelectionGroups
-} from "hooks/DataHooks";
-import { WindowError, WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import { useWindowManager } from "hooks/WindowHooks";
-import * as utils from "utils/utils";
-import React, { useRef, useState, useEffect } from "react";
-import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
-import FormControl from "@material-ui/core/FormControl";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
-import TextField from "@material-ui/core/TextField";
-import InputLabel from "@material-ui/core/InputLabel";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import "components/FindMoreLikeThis/FindMoreLikeThis.scss";
+} from "../../hooks/DataHooks";
+import { useWindowManager } from "../../hooks/WindowHooks";
+import * as utils from "../../utils/utils";
 
 /*
     Function that creates the json object for requesting

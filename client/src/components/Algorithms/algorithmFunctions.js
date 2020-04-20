@@ -1,9 +1,7 @@
-import * as algorithmTypes from "constants/algorithmTypes";
-import * as actionTypes from "constants/actionTypes";
-import { getGlobalSessionKey } from "utils/utils";
+import WorkerSocket from "worker-loader!../../workers/socket.worker";
 
-/* eslint import/no-webpack-loader-syntax: off */
-import WorkerSocket from "worker-loader!workers/socket.worker";
+import { getGlobalSessionKey } from "../../utils/utils";
+import * as actionTypes from "../../constants/actionTypes";
 
 // Creates an object (that will later be turned into JSON) for requesting subalgo data from the server
 function buildSubalgoServerRequest(
