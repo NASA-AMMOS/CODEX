@@ -40,10 +40,12 @@ function loadColumnFromServer(feature) {
         socketWorker.addEventListener("message", e => {
             //console.log("server column");
             //console.log(JSON.parse(e.data));
+            console.log(`Received column: ${feature}`);
             const data = JSON.parse(e.data).data.map(ary => ary[0]);
             resolve(data);
         });
 
+        console.log(`Requesting column: ${feature}`);
         socketWorker.postMessage(
             JSON.stringify({
                 action: actionTypes.GET_GRAPH_DATA,
@@ -191,29 +193,20 @@ export function usePinnedFeatures(windowHandle = undefined) {
         .filter(f => f.get("selected"))
         .map(f => f.get("name"));
 
-    function getPinnedFeatures(windowHandle) {
+    // pin the selected features to the state on the first run
+    const [pinned, setPinned] = useState(null);
+
+    useEffect(() => {
         if (
             windowHandle !== undefined &&
             windowHandle.data !== undefined &&
             windowHandle.data.features !== undefined
         ) {
-            return windowHandle.data.features;
+            setPinned(windowHandle.data.features);
         } else {
-            return selectedFeatures;
+            setPinned(selectedFeatures);
         }
-    }
-
-    const [pinned, setPinned] = useState(getPinnedFeatures(windowHandle));
-
-    // If the window handle selected features have changed
-    // reload the feature data.
-    useEffect(
-        _ => {
-            const currentlyPinned = getPinnedFeatures(windowHandle);
-            if (!utils.equalArrays(currentlyPinned, pinned)) setPinned(currentlyPinned);
-        },
-        [windowHandle]
-    );
+    }, []); // run once
 
     return useFeatures(pinned, windowHandle);
 }

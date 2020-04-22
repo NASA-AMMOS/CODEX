@@ -6,6 +6,7 @@ import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import regression from "regression";
 
+import { WindowCircularProgress } from "../WindowHelpers/WindowCenter";
 import { filterBounds } from "./graphFunctions";
 import {
     useSetWindowNeedsAutoscale,
@@ -155,7 +156,7 @@ function ScatterGraph(props) {
             return {
                 x,
                 y,
-                type: "scatter",
+                type: "scattergl",
                 mode:
                     axisScale && axisScale.every(x => x.get("scale") === "log")
                         ? "markers"
@@ -350,8 +351,11 @@ function ScatterGraph(props) {
         [needsAutoscale]
     );
 
+    const [loading, setLoading] = useState(true);
+
     return (
         <GraphWrapper chart={chart} chartId={chartId} win={props.win}>
+            {loading ? <WindowCircularProgress /> : null}
             <Plot
                 ref={chart}
                 data={chartState.data}
@@ -373,6 +377,7 @@ function ScatterGraph(props) {
                                 .map(point => point.pointIndex)
                         );
                 }}
+                onAfterPlot={_ => setLoading(false)}
                 divId={chartId}
             />
         </GraphWrapper>
