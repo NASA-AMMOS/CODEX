@@ -2,9 +2,7 @@ import { fromJS } from "immutable";
 import { useDispatch, useSelector } from "react-redux";
 import { useLayoutEffect } from "react";
 
-import { defaultInitialSettings } from "constants/windowSettings";
-import * as wmActions from "actions/windowManagerActions";
-
+import { defaultInitialSettings } from "../constants/windowSettings";
 import { graphs } from "../constants/windowTypes";
 import {
     setWindowAxisFeature,
@@ -24,6 +22,7 @@ import {
     setWindowShowGridLines
 } from "../actions/windowDataActions";
 import { useAllowGraphHotkeys } from "./UIHooks";
+import * as wmActions from "../actions/windowManagerActions";
 
 /*
  * Basically, this hook:

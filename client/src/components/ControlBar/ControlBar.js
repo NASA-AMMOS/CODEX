@@ -1,15 +1,15 @@
-import "components/ControlBar/ControlBar.scss";
+import "./ControlBar.scss";
 
 import React from "react";
 
-import Lasso from "styles/resources/Icons/lasso.svg";
-import Pan from "styles/resources/Icons/pan.svg";
-import Zoom from "styles/resources/Icons/zoom.svg";
 import classnames from "classnames";
 
 import { graphs } from "../../constants/windowTypes";
 import { useGlobalChartState } from "../../hooks/UIHooks";
 import { useWindowList } from "../../hooks/WindowHooks";
+import Lasso from "../../styles/resources/Icons/lasso.svg";
+import Pan from "../../styles/resources/Icons/pan.svg";
+import Zoom from "../../styles/resources/Icons/zoom.svg";
 
 function ControlBar(props) {
     const [globalChartState, changeGlobalChartState] = useGlobalChartState();

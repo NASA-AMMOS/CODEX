@@ -1,10 +1,12 @@
-import React from "react";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import { connect } from "react-redux";
-import WorkerSocket from "worker-loader!workers/socket.worker";
-import * as actionTypes from "constants/actionTypes";
-import { addDataset, featureRetain, featureRelease } from "actions/data";
-import { getGlobalSessionKey } from "utils/utils";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import React from "react";
+
+import WorkerSocket from "worker-loader!../../workers/socket.worker";
+
+import { addDataset, featureRetain, featureRelease } from "../../actions/data";
+import { getGlobalSessionKey } from "../../utils/utils";
+import * as actionTypes from "../../constants/actionTypes";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {

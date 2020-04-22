@@ -1,14 +1,16 @@
-import * as classificationRegressionTypes from "constants/classificationRegressionTypes";
-
 /*
     Creates a list of objects that are used to create the forms for ranges 
 */
 
+export const LARGER_OR_EQUAL_TO_ZERO = "LARGER_OR_EQUAL_TO_ZERO";
+export const LARGER_THAN_ZERO = "LARGER_THAN_ZERO";
+
 function formatHelperText(value) {
+    console.log(LARGER_THAN_ZERO);
     switch (value) {
-        case classificationRegressionTypes.LARGER_THAN_ZERO:
+        case LARGER_THAN_ZERO:
             return "Greater than 0";
-        case classificationRegressionTypes.LARGER_OR_EQUAL_TO_ZERO:
+        case LARGER_OR_EQUAL_TO_ZERO:
             return "0 or larger";
     }
     return null;

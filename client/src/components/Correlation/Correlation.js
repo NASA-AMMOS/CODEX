@@ -17,10 +17,8 @@ import React, { useState, useEffect, useRef } from "react";
 import ReactResizeDetector from "react-resize-detector";
 
 import classnames from "classnames";
-import * as utils from "utils/utils";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
-import { makeSimpleRequest, unzip } from "../../utils/utils";
 import { useAllowGraphHotkeys } from "../../hooks/UIHooks";
 import {
     useChangeFeatureGroup,
@@ -30,6 +28,7 @@ import {
 } from "../../hooks/DataHooks";
 import { useCloseWindow, useWindowManager } from "../../hooks/WindowHooks";
 import HelpContent from "../Help/HelpContent";
+import * as utils from "../../utils/utils";
 
 const GUIDANCE_PATH = "correlation_page:general_correlation";
 const CORRELATION_OPTIONS = [
@@ -101,8 +100,10 @@ function GroupSelectDialog(props) {
             </DialogTitle>
             <DialogContent className="group-select-dialog-content">
                 <TextField
+                    autoFocus
                     variant="filled"
                     className="group-select-text-input"
+                    label="Group name"
                     value={groupNameInputBuffer}
                     type="text"
                     InputLabelProps={{ shrink: true }}
@@ -154,7 +155,7 @@ function CorrelationContent(props) {
             if (!needsUpdate || !features) return;
             const requestObj = makeServerRequestObj(currentSortOption, features);
             setLastReq(requestObj);
-            const { req, cancel } = makeSimpleRequest(requestObj);
+            const { req, cancel } = utils.makeSimpleRequest(requestObj);
             req.then(data => {
                 setData(data);
                 setNeedsUpdate(false);
@@ -172,7 +173,7 @@ function CorrelationContent(props) {
             {
                 x: data.ordering,
                 y: data.ordering,
-                z: unzip(data.corr_matrix),
+                z: utils.unzip(data.corr_matrix),
                 type: "heatmap",
                 showscale: true,
                 colorscale: [[0, "rgb(255,255,255)"], [1, "rgb(8,48,107)"]]

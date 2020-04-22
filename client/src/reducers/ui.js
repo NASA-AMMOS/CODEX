@@ -1,6 +1,6 @@
-import { uiState } from "reducers/models/ui";
-import UiReducer from "reducers/reducerFunctions/UiReducer";
-import * as actionTypes from "constants/actionTypes";
+import { uiState } from "./models/ui";
+import UiReducer from "./reducerFunctions/UiReducer";
+import * as actionTypes from "../constants/actionTypes";
 
 export default function ui(state = uiState, action, opt_reducer = UiReducer) {
     switch (action.type) {

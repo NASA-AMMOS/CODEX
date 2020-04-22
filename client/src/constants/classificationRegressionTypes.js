@@ -1,12 +1,11 @@
-import * as constantHelpers from "constants/constantHelpers";
+import { LARGER_OR_EQUAL_TO_ZERO, LARGER_THAN_ZERO } from "./classificationRegressionTypes";
+import * as constantHelpers from "./constantHelpers";
 
 export const CLASSIFICATION_ALGO = "classification";
 export const REGRESSION_ALGO = "regression";
 
 export const NUM_OF_FEATURES = "NUM_OF_FEATURES";
 export const NUM_OF_FEATURES_MINUS_ONE = "NUM_OF_FEATURES_MINUS_ONE";
-export const LARGER_OR_EQUAL_TO_ZERO = "LARGER_OR_EQUAL_TO_ZERO";
-export const LARGER_THAN_ZERO = "LARGER_THAN_ZERO";
 
 export const CLASSIFICATION_WINDOW = "CLASSIFICATION_WINDOW";
 export const CLASSIFICATION_LOADING_WINDOW = "CLASSIFICATION_LOADING_WINDOW";

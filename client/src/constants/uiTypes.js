@@ -1,5 +1,6 @@
 export const SELECTIONS_MASTER_COLOR = "#335ce4";
 export const SELECTIONS_BRUSH_COLOR = "#ff4500";
+export const SELECTIONS_COLOR_PALETTE = "SELECTIONS_COLOR_PALETTE";
 
 export const AUTOSAVE_KEY = "AUTOSAVE";
 export const AUTOSAVE_ENABLED = false;

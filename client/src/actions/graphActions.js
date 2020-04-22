@@ -1,8 +1,6 @@
-import * as actionTypes from "constants/actionTypes";
-import * as uiActions from "actions/ui";
-import * as uiTypes from "constants/uiTypes";
-import * as windowManagerActions from "actions/windowManagerActions";
-import * as actionFunctions from "actions/actionFunctions";
+import * as actionFunctions from "./actionFunctions";
+import * as actionTypes from "../constants/actionTypes";
+import * as uiTypes from "../constants/uiTypes";
 
 function alertNotRightNumberOfFeatures() {
     alert("Please select exactly 2 features in the features list to create this graph.");

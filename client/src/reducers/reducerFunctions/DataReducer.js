@@ -1,7 +1,11 @@
 import Immutable from "immutable";
 
-import * as uiTypes from "constants/uiTypes";
-import * as utils from "utils/utils";
+import {
+    SELECTIONS_BRUSH_COLOR,
+    SELECTIONS_COLOR_PALETTE,
+    SELECTIONS_MASTER_COLOR
+} from "../../constants/uiTypes";
+import * as utils from "../../utils/utils";
 
 const formulas = {}; //This is just a placeholder to remove some compiler errors, we'll need to fully rebuild the forumulas
 // stuff at some point.
@@ -156,8 +160,8 @@ export default class DataReducer {
         if (computedColor === "") {
             // then select from our list of selection colors
             computedColor =
-                uiTypes.SELECTIONS_COLOR_PALETTE[
-                    state.get("selections").size % uiTypes.SELECTIONS_COLOR_PALETTE.length
+                SELECTIONS_COLOR_PALETTE[
+                    state.get("selections").size % SELECTIONS_COLOR_PALETTE.length
                 ];
         }
 
@@ -345,7 +349,7 @@ export default class DataReducer {
                 Immutable.fromJS({
                     name: "Master",
                     mask: Array.from(Array(action.data.length - 1), () => true),
-                    color: uiTypes.SELECTIONS_MASTER_COLOR,
+                    color: SELECTIONS_MASTER_COLOR,
                     visible: true,
                     emphasize: false
                 })
@@ -355,7 +359,7 @@ export default class DataReducer {
                 Immutable.fromJS({
                     name: "Brush",
                     mask: Array.from(Array(action.data.length - 1), () => false),
-                    color: uiTypes.SELECTIONS_BRUSH_COLOR,
+                    color: SELECTIONS_BRUSH_COLOR,
                     visible: true,
                     emphasize: false
                 })

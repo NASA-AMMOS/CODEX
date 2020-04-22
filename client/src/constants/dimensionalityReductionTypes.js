@@ -1,4 +1,4 @@
-import * as constantHelpers from "constants/constantHelpers";
+import * as constantHelpers from "./constantHelpers";
 
 export const DIMENSIONALITY_REDUCTION_RESULTS_WINDOW = "DIMENSIONALITY_REDUCTION_RESULTS_WINDOW";
 

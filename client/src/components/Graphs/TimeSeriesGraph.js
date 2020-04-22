@@ -1,15 +1,10 @@
-import "components/Graphs/TimeSeriesGraph.css";
+import "./TimeSeriesGraph.css";
 
 import React, { useRef, useState, useEffect } from "react";
 import plotComponentFactory from "react-plotly.js/factory";
 import regression from "regression";
 
-import GraphWrapper from "components/Graphs/GraphWrapper";
-import PlotlyPatched from "plotly-patched/src/core";
-import * as utils from "utils/utils";
-
 import { filterSingleCol } from "./graphFunctions";
-import { unzip } from "../../utils/utils";
 import {
     useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
@@ -21,6 +16,9 @@ import {
     useWindowTitle,
     useWindowTrendLineVisible
 } from "../../hooks/WindowHooks";
+import GraphWrapper from "./GraphWrapper";
+import PlotlyPatched from "../../plotly-patched/src/core";
+import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_TITLE = "Time Series Graph";
@@ -111,7 +109,7 @@ function TimeSeriesGraph(props) {
 
     const trendLineTraces = filteredCols.map((col, idx) => {
         const timeAxis = [...Array(col.length).keys()];
-        const [x, y] = unzip(regression.linear(unzip([timeAxis, col])).points);
+        const [x, y] = utils.unzip(regression.linear(utils.unzip([timeAxis, col])).points);
         const trace = {
             x,
             y,

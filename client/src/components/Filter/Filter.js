@@ -1,17 +1,16 @@
-import React, { Component } from "react";
 import "./Filter.css";
-import jsep from "jsep";
-import classNames from "classnames";
-import PropTypes from "prop-types";
-import IPropTypes from "react-immutable-proptypes";
-import { evaluateExpression } from "tevale";
-
-import { useWindowManager } from "hooks/WindowHooks";
-import { useLiveFeatures, useCurrentSelection } from "hooks/DataHooks";
-import { WindowCircularProgress } from "components/WindowHelpers/WindowCenter";
-import Debugger from "components/Debug/Debug";
 
 import { Sparklines, SparklinesLine } from "react-sparklines";
+import { evaluateExpression } from "tevale";
+import React, { Component } from "react";
+import jsep from "jsep";
+
+import classNames from "classnames";
+
+import { WindowCircularProgress } from "..//WindowHelpers/WindowCenter";
+import { useLiveFeatures, useCurrentSelection } from "../../hooks/DataHooks";
+import { useWindowManager } from "../../hooks/WindowHooks";
+import Debugger from "..//Debug/Debug";
 
 class Filter extends Component {
     constructor(props) {
