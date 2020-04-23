@@ -83,13 +83,12 @@ function SingleXMultipleYGraph(props) {
     const [axisScales, setAxisScales] = useWindowAxisScale(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
-    const processedData = (function() {
-        const sanitizedCols = utils.removeSentinelValues(
-            props.data.map(col => col.get("data")).toJS(),
-            props.fileInfo
-        );
-        return filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
-    })();
+    const sanitizedCols = utils.removeSentinelValues(
+        props.data.map(col => col.get("data")).toJS(),
+        props.fileInfo
+    );
+
+    const processedData = filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
 
     const dataLength = processedData[0].length;
 
@@ -339,26 +338,31 @@ function SingleXMultipleYGraph(props) {
         [axisLabels]
     );
 
-    function setDefaults() {
+    function setDefaults(init) {
         if (!featureInfo) setFeatureInfo(baseFeatureInfo);
-        if (!bounds)
+        if (!init || !bounds)
             setBounds(
-                cols.reduce((acc, col) => {
-                    acc[col.name] = { min: Math.min(...col.data), max: Math.max(...col.data) };
+                featureList.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(sanitizedCols[idx]);
+                    acc[colName] = {
+                        min,
+                        max
+                    };
                     return acc;
                 }, {})
             );
-        if (!axisLabels)
+
+        if (!init || !axisLabels)
             setAxisLabels(
                 featureList.reduce((acc, featureName) => {
                     acc[featureName] = featureNameList.get(featureName, featureName);
                     return acc;
                 }, {})
             );
-        if (showGridLines === undefined) setShowGridLines(true);
-        if (!xAxis) setXAxis(uiTypes.GRAPH_INDEX);
-        if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
-        if (!axisScales)
+        if (!init || showGridLines === undefined) setShowGridLines(true);
+        if (!init || !xAxis) setXAxis(uiTypes.GRAPH_INDEX);
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        if (!init || !axisScales)
             setAxisScales([
                 { name: `X (${xAxisTitle})`, scale: "linear" },
                 { name: `Y (${yAxisTitle})`, scale: "linear" }
@@ -366,7 +370,7 @@ function SingleXMultipleYGraph(props) {
     }
 
     useEffect(_ => {
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 

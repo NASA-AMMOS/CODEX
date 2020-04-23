@@ -92,25 +92,27 @@ function MapGraph(props) {
           props.data.find(feature => feature.get("feature") === featureList[2]).get("displayName")
         : null;
 
-    function setDefaults() {
-        setBounds(
-            baseCols.reduce((acc, col) => {
-                acc[col.feature] = { min: Math.min(...col.data), max: Math.max(...col.data) };
-                return acc;
-            }, {})
-        );
-        setAxisLabels(
-            featureList.reduce((acc, featureName) => {
-                acc[featureName] = featureName;
-                return acc;
-            }, {})
-        );
-        setWindowTitle(featureDisplayNames.join(" vs "));
+    function setDefaults(init) {
+        if (!init || !bounds)
+            setBounds(
+                baseCols.reduce((acc, col) => {
+                    acc[col.feature] = { min: Math.min(...col.data), max: Math.max(...col.data) };
+                    return acc;
+                }, {})
+            );
+        if (!init || !axisLabels)
+            setAxisLabels(
+                featureList.reduce((acc, featureName) => {
+                    acc[featureName] = featureName;
+                    return acc;
+                }, {})
+            );
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
         setXAxis(featureList[0]);
         setYAxis(featureList[1]);
         setZAxis(featureList[2]);
         setMapType(uiTypes.MAP_USGS);
-        setShowGridLines(true);
+        if (!init || showGridLines === undefined) setShowGridLines(true);
     }
 
     const dataset = heatMode
@@ -258,8 +260,7 @@ function MapGraph(props) {
     );
 
     useEffect(_ => {
-        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
-        setDefaults();
+        setDefaults(true);
     }, []);
 
     useEffect(

@@ -204,31 +204,32 @@ function HistogramGraph(props) {
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
     );
 
-    function setDefaults() {
-        setBounds(
-            featureNames.reduce((acc, colName, idx) => {
-                acc[colName] = {
-                    min: Math.min(...baseCols[idx][0]),
-                    max: Math.max(...baseCols[idx][0])
-                };
-                return acc;
-            }, {})
-        );
+    function setDefaults(init) {
+        if (!init || !bounds)
+            setBounds(
+                featureNames.reduce((acc, colName, idx) => {
+                    acc[colName] = {
+                        min: Math.min(...baseCols[idx][0]),
+                        max: Math.max(...baseCols[idx][0])
+                    };
+                    return acc;
+                }, {})
+            );
         setBinSize({
             x: DEFAULT_BINS
         });
-        setAxisLabels(
-            featureNames.reduce((acc, featureName) => {
-                acc[featureName] = featureName;
-                return acc;
-            }, {})
-        );
-        setWindowTitle(featureDisplayNames.join(" , "));
+        if (!init || !axisLabels)
+            setAxisLabels(
+                featureNames.reduce((acc, featureName) => {
+                    acc[featureName] = featureName;
+                    return acc;
+                }, {})
+            );
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" , "));
     }
 
     useEffect(_ => {
-        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 

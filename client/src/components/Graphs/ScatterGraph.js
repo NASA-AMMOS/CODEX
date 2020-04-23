@@ -6,6 +6,7 @@ import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import regression from "regression";
 
+import { GRAPH_INDEX } from "../../constants/uiTypes";
 import { filterBounds } from "./graphFunctions";
 import {
     useSetWindowNeedsAutoscale,
@@ -84,9 +85,10 @@ function ScatterGraph(props) {
         });
     })();
 
-    const baseX = xAxis
-        ? filteredCols[featureNames.findIndex(feature => feature === xAxis)]
-        : filteredCols[0];
+    const baseX =
+        xAxis && xAxis !== GRAPH_INDEX
+            ? filteredCols[featureNames.findIndex(feature => feature === xAxis)]
+            : filteredCols[0];
     const baseY = yAxis
         ? filteredCols[featureNames.findIndex(feature => feature === yAxis)]
         : filteredCols[1];
@@ -248,8 +250,8 @@ function ScatterGraph(props) {
         });
     }
 
-    function setDefaults() {
-        if (!bounds)
+    function setDefaults(init) {
+        if (!init || !bounds)
             setBounds(
                 featureNames.reduce((acc, colName, idx) => {
                     const [min, max] = utils.getMinMax(sanitizedCols[idx]);
@@ -260,7 +262,7 @@ function ScatterGraph(props) {
                     return acc;
                 }, {})
             );
-        if (!axisLabels)
+        if (!init || !axisLabels)
             setAxisLabels(
                 featureNames.reduce((acc, featureName) => {
                     acc[featureName] = featureName;
@@ -277,14 +279,14 @@ function ScatterGraph(props) {
             }))
         );
         setTrendLineVisible(false);
-        setShowGridLines(true);
-        if (!xAxis) setXAxis(featureNames[0]);
-        if (!yAxis) setYAxis(featureNames[1]);
-        if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        if (!init || showGridLines === undefined) setShowGridLines(true);
+        if (!init || !xAxis || xAxis === GRAPH_INDEX) setXAxis(featureNames[0]);
+        if (!init || !yAxis) setYAxis(featureNames[1]);
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
     }
 
     useEffect(_ => {
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 

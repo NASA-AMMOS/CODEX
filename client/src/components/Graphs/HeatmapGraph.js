@@ -238,8 +238,8 @@ function HeatmapGraph(props) {
         setChartRevision(revision);
     }
 
-    function setDefaults() {
-        if (!bounds)
+    function setDefaults(init) {
+        if (!init || !bounds)
             setBounds(
                 featureList.reduce((acc, colName, idx) => {
                     acc[colName] = {
@@ -253,20 +253,20 @@ function HeatmapGraph(props) {
             x: DEFAULT_BUCKET_COUNT,
             y: DEFAULT_BUCKET_COUNT
         });
-        if (!axisLabels)
+        if (!init || !axisLabels)
             setAxisLabels(
                 featureList.reduce((acc, featureName) => {
                     acc[featureName] = featureName;
                     return acc;
                 }, {})
             );
-        if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
-        if (!xAxis) setXAxis(featureList[0]);
-        if (!yAxis) setYAxis(featureList[1]);
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        if (!init || !xAxis) setXAxis(featureList[0]);
+        if (!init || !yAxis) setYAxis(featureList[1]);
     }
 
     useEffect(_ => {
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 

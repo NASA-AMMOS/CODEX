@@ -158,27 +158,29 @@ function HeatmapGraph3d(props) {
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
     );
 
-    function setDefaults() {
-        setBounds(
-            featureList.reduce((acc, colName, idx) => {
-                acc[colName] = {
-                    min: Math.min(...sanitizedCols[idx]),
-                    max: Math.max(...sanitizedCols[idx])
-                };
-                return acc;
-            }, {})
-        );
+    function setDefaults(init) {
+        if (!init || !bounds)
+            setBounds(
+                featureList.reduce((acc, colName, idx) => {
+                    acc[colName] = {
+                        min: Math.min(...sanitizedCols[idx]),
+                        max: Math.max(...sanitizedCols[idx])
+                    };
+                    return acc;
+                }, {})
+            );
         setBinSize({
             x: DEFAULT_BUCKET_COUNT,
             y: DEFAULT_BUCKET_COUNT
         });
-        setAxisLabels(
-            featureList.reduce((acc, featureName) => {
-                acc[featureName] = featureName;
-                return acc;
-            }, {})
-        );
-        setWindowTitle(featureDisplayNames.join(" vs "));
+        if (!init || !axisLabels)
+            setAxisLabels(
+                featureList.reduce((acc, featureName) => {
+                    acc[featureName] = featureName;
+                    return acc;
+                }, {})
+            );
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
         setXAxis(featureList[0]);
         setYAxis(featureList[1]);
         setZAxis(featureList[2]);
@@ -235,8 +237,7 @@ function HeatmapGraph3d(props) {
     }
 
     useEffect(_ => {
-        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 
