@@ -223,7 +223,7 @@ function ScatterGraph(props) {
             margin: { l: 0, r: 0, t: 0, b: 0, pad: 10 }, // Axis tick labels are drawn in the margin space
             dragmode: props.globalChartState || "lasso",
             datarevision: chartRevision.current,
-            hovermode: "closest", // Turning off hovermode seems to screw up click handling
+            hovermode: "closest",
             titlefont: { size: 5 },
             xaxis: {
                 automargin: true,

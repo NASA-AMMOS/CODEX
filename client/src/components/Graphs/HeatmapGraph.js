@@ -218,14 +218,15 @@ function HeatmapGraph(props) {
                 anchor: "x"
             },
             autosize: true,
-            margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
-            hovermode: false, // Turning off hovermode seems to screw up click handling
+            margin: { l: 0, r: 0, t: 0, b: 0 },
+            hovermode: "closest",
             titlefont: { size: 5 },
             annotations: []
         },
         config: {
+            responsive: true,
             displaylogo: false,
-            displayModeBar: false
+            modeBarButtons: [["zoomIn2d", "zoomOut2d", "autoScale2d"], ["toggleHover"]]
         }
     });
 
