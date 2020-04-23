@@ -385,7 +385,7 @@ export function useFeatureStatisticsLoader() {
     // get the features and the existing statistics
     const features = useSelector(store => store.data.get("featureList"));
     const existing = useSelector(store => store.data.get("featureStats"));
-
+    return;
     // hold the socket's close method
     const socket = useRef(null);
 

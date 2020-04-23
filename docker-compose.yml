@@ -2,8 +2,8 @@ version: "3"
 services:
     backend:
         build: "./server"
-        volumes:
-            - "./server:/home/codex/server"
+        # volumes:
+        #     - "./server:/home/codex/server"
         ports:
             - "8888:8888"
     frontend:
