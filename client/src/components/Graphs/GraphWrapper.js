@@ -215,7 +215,11 @@ function GraphWrapper(props) {
     const resizeHandler =
         props.resizeHandler !== undefined
             ? props.resizeHandler
-            : _ => props.chart.current.resizeHandler();
+            : _ => {
+                  if (Array.isArray(props.chart))
+                      return props.chart.forEach(chart => chart.current.resizeHandler());
+                  props.chart.current.resizeHandler();
+              };
 
     function handleContextMenu(e) {
         e.preventDefault();
