@@ -1,7 +1,8 @@
 import "./HeatmapGraph3d.css";
 
+import { TinyColor } from "@ctrl/tinycolor";
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 
 import { usePrevious } from "../../hooks/UtilHooks";
 import {
@@ -25,6 +26,7 @@ import * as utils from "../../utils/utils";
 const DEFAULT_MAP_TYPE = uiTypes.MAP_USGS;
 const DEFAULT_ZOOM = 0;
 const DEFAULT_TITLE = "Map Graph";
+const DEFAULT_POINT_SIZE = 4;
 
 function getMapConfig(mapType) {
     switch (mapType) {
@@ -92,6 +94,12 @@ function MapGraph(props) {
           props.data.find(feature => feature.get("feature") === featureList[2]).get("displayName")
         : null;
 
+    const baseX =
+        xAxis && xAxis !== uiTypes.GRAPH_INDEX
+            ? cols[featureList.findIndex(feature => feature === xAxis)]
+            : cols[0];
+    const baseY = yAxis ? cols[featureList.findIndex(feature => feature === yAxis)] : cols[1];
+
     function setDefaults(init) {
         if (!init || !bounds)
             setBounds(
@@ -115,35 +123,85 @@ function MapGraph(props) {
         if (!init || showGridLines === undefined) setShowGridLines(true);
     }
 
-    const dataset = heatMode
-        ? {
-              type: "densitymapbox",
-              lon: cols[1].data,
-              lat: cols[0].data,
-              z: cols[2].data,
-              colorscale: interpolatedColors,
-              colorbar: { title: zAxisTitle }
-          }
-        : {
-              type: "scattermapbox",
-              lon: cols[1].data,
-              lat: cols[0].data,
-              marker: { color: "fuchsia", size: 4 }
-          };
+    const baseTrace = (function() {
+        if (heatMode)
+            return {
+                type: "densitymapbox",
+                lon: cols[1].data,
+                lat: cols[0].data,
+                z: cols[2].data,
+                colorscale: interpolatedColors,
+                colorbar: { title: zAxisTitle }
+            };
 
+        const opacity = props.savedSelections.reduce((acc, sel) => {
+            if (!sel.hidden) sel.rowIndices.forEach(idx => (acc[idx] = 0));
+            return acc;
+        }, cols[0].data.map((val, idx) => (props.currentSelection.includes(idx) ? 0 : props.hoverSelection ? 0.1 : 1)));
+        return {
+            type: "scattermapbox",
+            lon: cols[1].data,
+            lat: cols[0].data,
+            marker: { color: "fuchsia", size: DEFAULT_POINT_SIZE, opacity }
+        };
+    })();
+
+    const selectionTraces = useMemo(
+        _ => {
+            const currentSelectionTrace = props.currentSelection
+                ? { color: "red", rowIndices: props.currentSelection }
+                : [];
+            return props.savedSelections
+                .filter(sel => !sel.hidden)
+                .concat(props.hoverSelection ? currentSelectionTrace : [])
+                .sort((a, b) =>
+                    a.id === props.hoverSelection ? 1 : b.id === props.hoverSelection ? -1 : 0
+                )
+                .concat(!props.hoverSelection ? currentSelectionTrace : [])
+                .filter(sel => sel.rowIndices.length)
+                .map((sel, _, ary) => {
+                    const [lat, lon] = utils.unzip(
+                        sel.rowIndices.map(idx => [baseX.data[idx], baseY.data[idx]])
+                    );
+                    const opacity =
+                        props.hoverSelection && props.hoverSelection !== sel.id ? 0.1 : 1;
+                    return {
+                        lat,
+                        lon,
+                        type: "scattermapbox",
+                        mode: "markers",
+                        marker: {
+                            color: new TinyColor(sel.color).setAlpha(opacity).toString(),
+                            size: DEFAULT_POINT_SIZE
+                        }
+                    };
+                });
+        },
+        [baseX, baseY, props.savedSelections, props.hoverSelection, props.currentSelection]
+    );
+
+    const dataset = [baseTrace, ...selectionTraces];
+
+    // Some weird memory stuff happening where Plotly clears this whenever we change chart type,
+    // so keeping this static.
+    const baseConfig = {
+        responsive: true,
+        displaylogo: false,
+        modeBarButtons: [["zoomInMapbox", "zoomOutMapbox", "resetViewMapbox"], ["hoverClosestGeo"]]
+    };
     // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState({
-        data: [dataset],
+        data: dataset,
         layout: {
-            dragmode: "zoom",
+            showlegend: false,
+            dragmode: props.globalChartState || "lasso",
             datarevision: chartRevision.current,
             mapbox: {
-                ...getMapConfig(DEFAULT_MAP_TYPE),
-                zoom: DEFAULT_ZOOM
+                ...getMapConfig(DEFAULT_MAP_TYPE)
             },
             autosize: true,
             margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
-            hovermode: false, // Turning off hovermode seems to screw up click handling
+            hovermode: "closest",
             titlefont: { size: 5 },
             annotations: [],
             geo: {
@@ -160,10 +218,7 @@ function MapGraph(props) {
                 countrycolor: "rgb(204,204,204)"
             }
         },
-        config: {
-            displaylogo: false,
-            displayModeBar: false
-        }
+        config: baseConfig
     });
 
     function updateChartRevision() {
@@ -187,13 +242,15 @@ function MapGraph(props) {
                         ...state.layout,
                         mapbox: { ...getMapConfig(mapType), zoom: DEFAULT_ZOOM }
                     },
-                    data: state.data.map(trace => ({ ...trace, type: traceType }))
+                    data: state.data.map(trace => ({ ...trace, type: traceType })),
+                    config: baseConfig
                 }));
             } else {
                 traceType = "scattergeo";
                 setChartState(state => ({
                     ...state,
-                    data: state.data.map(trace => ({ ...trace, type: traceType }))
+                    data: state.data.map(trace => ({ ...trace, type: traceType })),
+                    config: baseConfig
                 }));
             }
             setRenderKey(renderKey + 1);
@@ -225,10 +282,10 @@ function MapGraph(props) {
 
     useEffect(
         _ => {
-            chartState.data = [dataset];
+            chartState.data = dataset;
             updateChartRevision();
         },
-        [axisLabels]
+        [axisLabels, props.currentSelection, props.savedSelections, props.hoverSelection]
     );
 
     useEffect(
@@ -266,13 +323,20 @@ function MapGraph(props) {
     useEffect(
         _ => {
             if (needsAutoscale) {
-                chartState.layout.xaxis.autorange = true;
-                chartState.layout.yaxis.autorange = true;
-                setRenderKey(renderKey + 1);
+                chartState.layout.mapbox.zoom = DEFAULT_ZOOM;
+                updateChartRevision();
                 setNeedsAutoscale(false);
             }
         },
         [needsAutoscale]
+    );
+
+    useEffect(
+        _ => {
+            chartState.layout.dragmode = props.globalChartState;
+            updateChartRevision();
+        },
+        [props.globalChartState]
     );
 
     return (
@@ -282,7 +346,7 @@ function MapGraph(props) {
                 ref={chart}
                 data={chartState.data}
                 layout={chartState.layout}
-                config={chartState.config}
+                config={baseConfig}
                 style={{ width: "100%", height: "100%" }}
                 useResizeHandler
                 onInitialized={figure => setChartState(figure)}
