@@ -1,3 +1,6 @@
+@import "../../styles/theme.scss";
+@import "../../styles/fonts.css";
+
 .top-bar {
     color: white;
     width: 100%;
@@ -42,6 +45,21 @@
     border: none;
     background: transparent;
 }
+
+.navigation-bar .dropdownToggle:focus {
+    color: white !important;
+    background-color: $light-blue-black !important;
+}
+
+.navigation-bar .dropdownToggle:hover {
+    background-color: $primary-blue !important;
+}
+
+.navigation-bar .dropdownToggle > .div {
+    color: white !important;
+    background-color: $light-blue-black !important;
+}
+
 .navigation-bar .dropdownToggle.thin {
     padding-left: 2px;
     padding-right: 2px;
