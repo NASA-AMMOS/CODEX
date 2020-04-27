@@ -54,6 +54,31 @@
     border-top: 4px dashed #fff;
 }
 
+.navigation-bar .actionMenuLabel {
+    color: white;
+}
+
+.navigation-bar .actionMenuLabel:hover {
+    color: $grey9;
+    background-color: $light-blue-black;
+}
+
+.navigation-bar .actionMenuLabel:focus {
+    color: $grey9;
+    background-color: $light-blue-black;
+}
+
+.navigation-bar .actionMenuItem {
+    color: $grey9;
+    background-color: $light-blue-black;
+}
+
+.navigation-bar .actionMenuLabel:hover {
+    color: $grey9;
+    background-color: $primary-blue;
+
+}
+
 .navigation-bar .triTopLeft {
     display: none;
     position: absolute;
