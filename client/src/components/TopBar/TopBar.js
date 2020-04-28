@@ -252,9 +252,9 @@ function NavigationBar(props) {
                 <ButtonGroup>
                     <Dropdown>
                         <Dropdown.Toggle className="dropdownToggle actionMenuLabel" title="Windows" />
-                        <Dropdown.Menu>
-                            <MenuItem header>Arrange</MenuItem>
-                            <MenuItem onSelect={() => dispatch(setWindowTileAction(true))}>
+                        <Dropdown.Menu className="actionMenu">
+                            <MenuItem header className="actionMenuItem">Arrange</MenuItem>
+                            <MenuItem  className="actionMenuItem" onSelect={() => props.setWindowTileAction(true)}>
                                 Tile
                             </MenuItem>
                             <MenuItem divider />

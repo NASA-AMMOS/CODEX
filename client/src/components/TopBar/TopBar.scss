@@ -34,6 +34,7 @@
 
 .navigation-bar .dropdownMain {
     color: $grey9 !important;
+        
     margin-left: 0px;
 }
 
@@ -68,39 +69,39 @@
 
 .navigation-bar .dropdownToggle:hover {
     color: $grey9 !important;
-
+    background-color: $light-blue-black !important;
     border: none;
 }
 
 .navigation-bar .dropdownToggle:focus {
     color: $grey9 !important;
-
+    background-color: $light-blue-black !important;
     border: none;
 }
 
 .navigation-bar .dropdownToggle:active {
     color: $grey9 !important;
-
-    border: none;
-}
-
-.navigation-bar .actionMenu {
     background-color: $light-blue-black !important;
     border: none;
 }
 
-.navigation-bar .actionMenuItem {
+.dropdownMain .actionMenu {
+    background-color: $light-blue-black !important;
+    border: none;
+}
+
+.dropdown .actionMenuItem {
     color: $grey9 !important;
     background-color: $light-blue-black !important;
 }
 
-.navigation-bar .actionMenuItem:hover {
+.dropdown .actionMenuItem:hover {
     color: $grey9 !important;
     background-color: $primary-blue !important;
 
 }
 
-.navigation-bar .actionMenuItem:disabled {
+.dropdown .actionMenuItem:disabled {
     color: $grey3 !important;
     background-color: $light-blue-black !important;
 }
