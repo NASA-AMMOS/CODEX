@@ -1,7 +1,7 @@
 import "./ContourGraph.css";
 
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 
 import { filterBounds } from "./graphFunctions";
 import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
@@ -329,17 +329,22 @@ function ContourGraph(props) {
     const [yAxis, setYAxis] = useWindowYAxis(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
-    const sanitizedCols = utils.removeSentinelValues(
-        featureList.map(colName =>
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS()
-        ),
-        props.fileInfo
+    const [sanitizedCols] = useState(_ =>
+        utils.removeSentinelValues(
+            featureList.map(colName =>
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS()
+            ),
+            props.fileInfo
+        )
     );
 
-    const filteredCols = filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
+    const filteredCols = useMemo(
+        _ => filterBounds(featureList, sanitizedCols, bounds && bounds.toJS()),
+        [bounds]
+    );
 
     const x = xAxis
         ? filteredCols[featureList.findIndex(feature => feature === xAxis)]
@@ -418,9 +423,10 @@ function ContourGraph(props) {
     function setDefaults() {
         setBounds(
             featureList.reduce((acc, colName, idx) => {
+                const [min, max] = utils.getMinMax(sanitizedCols[idx]);
                 acc[colName] = {
-                    min: Math.min(...sanitizedCols[idx]),
-                    max: Math.max(...sanitizedCols[idx])
+                    min,
+                    max
                 };
                 return acc;
             }, {})

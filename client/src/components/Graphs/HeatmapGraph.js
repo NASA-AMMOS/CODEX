@@ -1,7 +1,7 @@
 import "./ContourGraph.css";
 
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 
 import { createNewId, removeSentinelValues, zip } from "../../utils/utils";
 import { filterBounds } from "./graphFunctions";
@@ -18,6 +18,7 @@ import {
     useWindowYAxis
 } from "../../hooks/WindowHooks";
 import GraphWrapper from "./GraphWrapper";
+import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_BUCKET_COUNT = 50;
@@ -89,8 +90,15 @@ function dataRange(data) {
 }
 
 function squashDataIntoBuckets(data, numBuckets) {
-    const maxes = data.map(col => Math.max(...col));
-    const mins = data.map(col => Math.min(...col));
+    const [mins, maxes] = data.reduce(
+        (acc, col) => {
+            const [min, max] = utils.getMinMax(col);
+            acc[0].push(min);
+            acc[1].push(max);
+            return acc;
+        },
+        [[], []]
+    );
 
     const bucketSizes = data.map((_, idx) => (maxes[idx] - mins[idx]) / numBuckets[idx]);
 
@@ -149,17 +157,22 @@ function HeatmapGraph(props) {
         "linear"
     );
 
-    const sanitizedCols = removeSentinelValues(
-        featureList.map(colName =>
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS()
-        ),
-        props.fileInfo
+    const [sanitizedCols] = useState(_ =>
+        removeSentinelValues(
+            featureList.map(colName =>
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS()
+            ),
+            props.fileInfo
+        )
     );
 
-    const filteredCols = filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
+    const filteredCols = useMemo(
+        _ => filterBounds(featureList, sanitizedCols, bounds && bounds.toJS()),
+        [bounds]
+    );
 
     const baseX = xAxis
         ? filteredCols[featureList.findIndex(feature => feature === xAxis)]
@@ -168,13 +181,23 @@ function HeatmapGraph(props) {
         ? filteredCols[featureList.findIndex(feature => feature === yAxis)]
         : filteredCols[1];
 
-    const x = generateDataAxis(baseX, (binSize && binSize.get("x")) || DEFAULT_BUCKET_COUNT);
-    const y = generateDataAxis(baseY, (binSize && binSize.get("y")) || DEFAULT_BUCKET_COUNT);
-    const z = squashDataIntoBuckets(
-        filteredCols,
-        binSize
-            ? Object.values(binSize.toJS()).map(val => val || 1)
-            : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT]
+    const x = useMemo(
+        _ => generateDataAxis(baseX, (binSize && binSize.get("x")) || DEFAULT_BUCKET_COUNT),
+        [baseX, binSize]
+    );
+    const y = useMemo(
+        _ => generateDataAxis(baseY, (binSize && binSize.get("y")) || DEFAULT_BUCKET_COUNT),
+        [baseY, binSize]
+    );
+    const z = useMemo(
+        _ =>
+            squashDataIntoBuckets(
+                filteredCols,
+                binSize
+                    ? Object.values(binSize.toJS()).map(val => val || 1)
+                    : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT]
+            ),
+        [filteredCols, binSize]
     );
 
     const xAxisTitle =
@@ -242,9 +265,10 @@ function HeatmapGraph(props) {
         if (!bounds)
             setBounds(
                 featureList.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(sanitizedCols[idx]);
                     acc[colName] = {
-                        min: Math.min(...sanitizedCols[idx]),
-                        max: Math.max(...sanitizedCols[idx])
+                        min,
+                        max
                     };
                     return acc;
                 }, {})
