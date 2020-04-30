@@ -33,7 +33,7 @@ def label_swap(labels, dataHash, session=None):
 
     '''
     from api.sub.hash import get_cache
-    cache = get_cache(session)
+    cache = get_cache(session, timeout=None)
 
     test_uniq_labels = np.unique(labels)
     num_labels = labels.size

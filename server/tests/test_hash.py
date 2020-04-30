@@ -242,13 +242,13 @@ def test_wrappedCache(capsys):
 def test_get_cache(capsys):
 
     assert 1 == 1
-    #>>> get_cache('SomeSessionKey')
+    #>>> get_cache('SomeSessionKey', timeout=None)
     #Traceback (most recent call last):
     #    ...
     #OSError: Connection to codex_hash dropped
 
-    #>>> cache = get_cache(DOCTEST_SESSION)
-    #>>> get_cache(cache)
+    #>>> cache = get_cache(DOCTEST_SESSION, timeout=None)
+    #>>> get_cache(cache, timeout=None)
     #<__main__.WrappedCache object at 0x...>
 
 

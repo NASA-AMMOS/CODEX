@@ -18,7 +18,7 @@ from fixtures                 import testData
 
 def test_dimension_reduction(capsys, testData):
 
-    ch = get_cache(DOCTEST_SESSION)
+    ch = get_cache(DOCTEST_SESSION, timeout=None)
 
     result = dimension_reduction(testData['inputHash'], None, testData['featureNames'], testData['hashList'], None, False, "PCA", False, {"n_components":2}, None, "direct", None, {}, ch).run()
     assert result['message'] == 'success'
