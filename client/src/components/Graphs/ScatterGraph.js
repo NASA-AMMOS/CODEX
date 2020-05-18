@@ -124,7 +124,7 @@ function ScatterGraph(props) {
         JSON.stringify(props.savedSelections.map(sel => [sel.id, sel.hidden]));
     const baseTrace = useMemo(
         _ => {
-            if (!defaultsInitialized) return [];
+            if (!defaultsInitialized) return {};
             const x = baseX;
             const y = baseY;
             const colors = Array(baseX.length).fill(
@@ -170,7 +170,7 @@ function ScatterGraph(props) {
 
     const trendLineTrace = useMemo(
         _ => {
-            if (!trendLineVisible) return [];
+            if (!trendLineVisible) return {};
             const [x, y] = utils.unzip(regression.linear(utils.unzip(filteredCols)).points);
             return {
                 x,
