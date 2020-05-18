@@ -51,14 +51,6 @@ export function useStatsPanelHidden() {
     ];
 }
 
-export function useAllowGraphHotkeys() {
-    const dispatch = useDispatch();
-    return [
-        useSelector(state => state.ui.get("allowGraphHotkeys")),
-        allow => dispatch(uiActions.setAllowGraphHotkeys(allow))
-    ];
-}
-
 export function useHelpMode() {
     const dispatch = useDispatch();
     return [

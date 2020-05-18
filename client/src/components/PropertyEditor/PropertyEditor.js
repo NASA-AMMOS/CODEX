@@ -9,7 +9,6 @@ import Immutable from "immutable";
 import React, { useRef } from "react";
 import TextField from "@material-ui/core/TextField";
 
-import { useAllowGraphHotkeys } from "../../hooks/UIHooks";
 import { useFeatureDisplayNames } from "../../hooks/DataHooks";
 import {
     useSwapAxes,
@@ -202,7 +201,6 @@ function ScatterOptionsEditor(props) {
 function ChangeGraphType(props) {
     const [windowType, setWindowType] = useWindowType(props.activeWindowId);
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
-    const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
     const [activeWindowId] = useActiveWindow();
 
     const availableWindowTypes = windowTypes.graphs.filter(type => {
@@ -218,7 +216,6 @@ function ChangeGraphType(props) {
     function handleDropdown(e) {
         setWindowType(e.target.value);
         menuRef.current.blur();
-        setAllowGraphHotkeys(true);
     }
 
     return (
@@ -879,7 +876,6 @@ function MapGraphEditor(props) {
 function PropertyEditor(props) {
     const [activeWindowId] = useActiveWindow();
     const windowList = useWindowList();
-    const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
 
     const activeWindow = windowList.find(win => win.get("id") === activeWindowId);
 
@@ -971,7 +967,7 @@ function PropertyEditor(props) {
     ) : null;
 
     return (
-        <div className="propertyEditorContainer" onClick={_ => setAllowGraphHotkeys(false)}>
+        <div className="propertyEditorContainer">
             <div className="header">Graph Details</div>
             <WindowRenameInput activeWindowId={activeWindowId} />
             {graphSelection}
