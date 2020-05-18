@@ -245,12 +245,6 @@ function NavigationBar(props) {
             */}
             <ControlBar />
             <div id="topBarTools">
-                <button
-                    className="export-button"
-                    onClick={_ => setExportModalVisible(!exportModalVisible)}
-                >
-                    <span>Export</span>
-                </button>
                 <ButtonGroup>
                     <Dropdown>
                         <Dropdown.Toggle className="dropdownToggle" title="Windows" />
@@ -272,6 +266,12 @@ function NavigationBar(props) {
                         </Dropdown.Menu>
                     </Dropdown>
                 </ButtonGroup>
+                <button
+                    className="export-button"
+                    onClick={_ => setExportModalVisible(!exportModalVisible)}
+                >
+                    <span>Export</span>
+                </button>
                 <div className="triTopRight" />
             </div>
         </div>
