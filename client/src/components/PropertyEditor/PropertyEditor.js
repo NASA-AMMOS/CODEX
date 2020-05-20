@@ -540,7 +540,7 @@ function HeatmapGraphEditor(props) {
             </Button>
             <div className="input-field-container">
                 <TextField
-                    label="Grid-width"
+                    label="Number of X-axis bins"
                     variant="filled"
                     className="text-input"
                     value={binSize ? binSize.get("x") : ""}
@@ -549,7 +549,7 @@ function HeatmapGraphEditor(props) {
                     onChange={handleChangeBinSize("x")}
                 />
                 <TextField
-                    label="Grid-height"
+                    label="Number of Y-axis bins"
                     variant="filled"
                     className="text-input"
                     value={binSize ? binSize.get("y") : ""}
@@ -647,7 +647,7 @@ function ThreeAxisGraphEditor(props) {
             </div>
             <div className="input-field-container">
                 <TextField
-                    label="Grid-width"
+                    label="Number of X-axis bins"
                     variant="filled"
                     className="text-input"
                     value={binSize && binSize.get("x")}
@@ -656,7 +656,7 @@ function ThreeAxisGraphEditor(props) {
                     onChange={handleChangeBinSize("x")}
                 />
                 <TextField
-                    label="Grid-height"
+                    label="Number of Y-axis bins"
                     variant="filled"
                     className="text-input"
                     value={binSize && binSize.get("y")}
