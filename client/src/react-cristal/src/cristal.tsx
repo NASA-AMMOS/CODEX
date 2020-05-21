@@ -12,7 +12,7 @@ import {
     CloseIcon,
     Title,
     MinimizeIcon,
-    ButtonContainer
+    ButtonContainer,
 } from "./styled";
 import { InitialPosition, Size, Coords, isSmartPosition } from "./domain";
 import { getCordsFromInitialPosition, getBoundaryCoords } from "./utils";
@@ -57,6 +57,7 @@ export interface CristalState {
     width?: number;
     height?: number;
     isMounted: boolean;
+    wasActive: boolean;
 }
 
 export class Cristal extends Component<CristalProps, CristalState> {
@@ -66,7 +67,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
     static defaultProps: CristalProps = {
         children: null,
         isResizable: true,
-        isDraggable: true
+        isDraggable: true,
     };
 
     state: CristalState = {
@@ -78,7 +79,8 @@ export class Cristal extends Component<CristalProps, CristalState> {
         zIndex: Stacker.getNextIndex(),
         isMounted: false,
         width: this.props.width,
-        height: this.props.height
+        height: this.props.height,
+        wasActive: false,
     };
 
     componentDidMount() {
@@ -108,6 +110,10 @@ export class Cristal extends Component<CristalProps, CristalState> {
         if (props.y !== undefined && this.state.y !== props.y) {
             this.setState({ y: props.y });
         }
+        if (props.isActive && !this.state.wasActive) {
+            this.changeZIndex();
+        }
+        this.setState({ wasActive: Boolean(props.isActive) });
     }
 
     // TODO-PERF: debounce
@@ -119,7 +125,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
 
         this.setState({
             x: newX,
-            y: newY
+            y: newY,
         });
     };
 
@@ -175,7 +181,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
         if (!isDraggable) return;
 
         this.setState({
-            isDragging: true
+            isDragging: true,
         });
 
         if (this.props.onClick) {
@@ -190,7 +196,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
             x: currentX,
             y: currentY,
             width: currentWidth,
-            height: currentHeight
+            height: currentHeight,
         } = this.state;
         const { parentId } = this.props;
         const { movementX, movementY } = e;
@@ -272,7 +278,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
         this.setState({
             isDragging: false,
             isResizingX: false,
-            isResizingY: false
+            isResizingY: false,
         });
     };
 
@@ -283,7 +289,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
 
         this.setState({
             isResizingX: true,
-            isResizingY: true
+            isResizingY: true,
         });
     };
 
@@ -326,14 +332,14 @@ export class Cristal extends Component<CristalProps, CristalState> {
                 key="bottom-right-resize"
                 onMouseDown={this.startFullResize}
             />,
-            <BottomResizeHandle key="bottom-resize" onMouseDown={this.startYResize} />
+            <BottomResizeHandle key="bottom-resize" onMouseDown={this.startYResize} />,
         ];
     };
 
     changeZIndex = () => {
         const { zIndex } = this.state;
         this.setState({
-            zIndex: Stacker.getNextIndex(zIndex)
+            zIndex: Stacker.getNextIndex(zIndex),
         });
 
         if (this.props.onClick) {
@@ -351,7 +357,7 @@ export class Cristal extends Component<CristalProps, CristalState> {
             top: y,
             width,
             height,
-            zIndex
+            zIndex,
         };
         const HeaderComponent = this.header;
         const ContentComponent = this.content;

@@ -19,7 +19,7 @@ from fixtures           import testData
 #inputHash, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, session
 def test_regression(capsys, testData):
 
-    ch = get_cache(DOCTEST_SESSION)
+    ch = get_cache(DOCTEST_SESSION, timeout=None)
 
     #result = regression(testData['inputHash'], testData['hashList'], testData['regrLabelHash'], False, "ARDRegression",               False, {}, 'fake_score', "grid", 3, {}, ch).run()
 

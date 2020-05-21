@@ -19,7 +19,7 @@ from api.sub.downsample import downsample
 
 def test_downsample(capsys):
 
-    ch = get_cache(DOCTEST_SESSION)
+    ch = get_cache(DOCTEST_SESSION, timeout=None)
     array = np.random.rand(200)
 
     result = downsample(array,percentage=10, session=ch)

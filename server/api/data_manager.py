@@ -31,7 +31,7 @@ def get_data_metrics(msg, result):
 
     '''
     try:
-        ch = get_cache(msg['sessionkey'])
+        ch = get_cache(msg['sessionkey'], timeout=None)
 
         for feature_name in msg['name']:
 
@@ -84,7 +84,7 @@ def add_data(msg, result):
 
     '''
     try:
-        ch = get_cache(msg['sessionkey'])
+        ch = get_cache(msg['sessionkey'], timeout=None)
 
         hashType = msg['hashType']
 
@@ -123,7 +123,7 @@ def get_data(msg, result):
 
     '''
     try:
-        ch = get_cache(msg['sessionkey'])
+        ch = get_cache(msg['sessionkey'], timeout=None)
 
         hashType = msg['hashType']
         names = msg["name"]
@@ -182,7 +182,7 @@ def delete_data(msg, result):
 
     '''
     try:
-        ch = get_cache(msg['sessionkey'])
+        ch = get_cache(msg['sessionkey'], timeout=None)
 
         hashType = msg['hashType']
         name = msg["name"]
@@ -217,7 +217,7 @@ def update_data(msg, result):
 
     '''
     try:
-        ch = get_cache(msg['sessionkey'])
+        ch = get_cache(msg['sessionkey'], timeout=None)
 
         hashType = msg['hashType']
         field = msg["field"]
