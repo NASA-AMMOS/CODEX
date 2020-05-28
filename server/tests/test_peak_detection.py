@@ -18,7 +18,7 @@ from fixtures           import testData
 
 def test_peak_detection(capsys, testData):
 	
-    ch = get_cache(DOCTEST_SESSION)
+    ch = get_cache(DOCTEST_SESSION, timeout=None)
 
     result = peak_detection(testData['inputHash'], None, testData['featureNames'], testData['hashList'], None, False, "cwt", False, {"peak_width":5, "gap_threshold":2, "min_snr":1, "noise_perc":3}, None, "direct", None, {}, ch).run()
     assert result['message'] == 'success'

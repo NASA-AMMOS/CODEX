@@ -19,6 +19,7 @@ import {
 import { useWindowManager } from "../../hooks/WindowHooks";
 import HelpContent from "../Help/HelpContent";
 import * as wmActions from "../../actions/windowManagerActions";
+import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
 const GUIDANCE_PATH = "peak_detection_page:general_peak_detection";
@@ -133,8 +134,7 @@ function PeakPlot(props) {
             </div>
         );
 
-    const min = Math.min(...props.data);
-    const max = Math.max(...props.data);
+    const [min, max] = utils.getMinMax(props.data.y_pred);
     const chartRevision = useRef(0);
     const [chartState, setChartState] = useState({
         data: [

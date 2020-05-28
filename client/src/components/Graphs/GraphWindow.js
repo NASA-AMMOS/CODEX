@@ -1,7 +1,7 @@
 import React from "react";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
-import { useAllowGraphHotkeys, useGlobalChartState } from "../../hooks/UIHooks";
+import { useGlobalChartState } from "../../hooks/UIHooks";
 import {
     useCurrentSelection,
     useFeatureDisplayNames,
@@ -38,7 +38,6 @@ function GraphWindow(props) {
     const fileInfo = useFileInfo();
     let features = usePinnedFeatures(win);
     const [featureNameList] = useFeatureDisplayNames();
-    const [allowGraphHotkeys, setAllowGraphHotkeys] = useAllowGraphHotkeys();
 
     if (features === null || !win.data) {
         return <WindowCircularProgress />;
@@ -66,7 +65,8 @@ function GraphWindow(props) {
     if (featuresRequired) {
         if (
             (typeof featuresRequired === "number" && features.size !== featuresRequired) ||
-            features.size < featuresRequired[0] || features.size > featuresRequired[1]
+            features.size < featuresRequired[0] ||
+            features.size > featuresRequired[1]
         )
             return (
                 <WindowError>
@@ -110,7 +110,6 @@ function GraphWindow(props) {
         <div
             onClick={e => {
                 document.activeElement.blur(); // For some reason, right-panel stuff isn't defocusing on Plotly clicks
-                setAllowGraphHotkeys(true);
             }}
             style={{ height: "100%", width: "100%" }}
         >

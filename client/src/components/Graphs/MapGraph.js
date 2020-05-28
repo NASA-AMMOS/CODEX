@@ -79,10 +79,15 @@ function MapGraph(props) {
         "linear"
     );
 
-    const baseCols = utils.removeSentinelValuesRevised(props.data, props.fileInfo);
-    const cols = graphFunctions
-        .filterBounds(featureList, baseCols.map(col => col.data), bounds && bounds.toJS())
-        .map((data, idx) => ({ ...baseCols[idx], data }));
+    const [baseCols] = useState(_ => utils.removeSentinelValuesRevised(props.data, props.fileInfo));
+
+    const cols = useMemo(
+        _ =>
+            graphFunctions
+                .filterBounds(featureList, baseCols.map(col => col.data), bounds && bounds.toJS())
+                .map((data, idx) => ({ ...baseCols[idx], data })),
+        [baseCols, bounds]
+    );
 
     const featureDisplayNames = featureList.map(featureName =>
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
@@ -116,6 +121,7 @@ function MapGraph(props) {
                 }, {})
             );
         if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+
         setXAxis(featureList[0]);
         setYAxis(featureList[1]);
         setZAxis(featureList[2]);

@@ -1,7 +1,7 @@
 import "./ContourGraph.css";
 
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 
 import { GRAPH_INDEX } from "../../constants/uiTypes";
 import { filterBounds } from "./graphFunctions";
@@ -330,17 +330,22 @@ function ContourGraph(props) {
     const [yAxis, setYAxis] = useWindowYAxis(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
-    const sanitizedCols = utils.removeSentinelValues(
-        featureList.map(colName =>
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS()
-        ),
-        props.fileInfo
+    const [sanitizedCols] = useState(_ =>
+        utils.removeSentinelValues(
+            featureList.map(colName =>
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS()
+            ),
+            props.fileInfo
+        )
     );
 
-    const filteredCols = filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
+    const filteredCols = useMemo(
+        _ => filterBounds(featureList, sanitizedCols, bounds && bounds.toJS()),
+        [bounds]
+    );
 
     const x = xAxis
         ? filteredCols[featureList.findIndex(feature => feature === xAxis)]

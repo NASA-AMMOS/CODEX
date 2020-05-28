@@ -40,10 +40,12 @@ function loadColumnFromServer(feature) {
         socketWorker.addEventListener("message", e => {
             //console.log("server column");
             //console.log(JSON.parse(e.data));
+            console.log(`Received column: ${feature}`);
             const data = JSON.parse(e.data).data.map(ary => ary[0]);
             resolve(data);
         });
 
+        console.log(`Requesting column: ${feature}`);
         socketWorker.postMessage(
             JSON.stringify({
                 action: actionTypes.GET_GRAPH_DATA,
@@ -191,29 +193,20 @@ export function usePinnedFeatures(windowHandle = undefined) {
         .filter(f => f.get("selected"))
         .map(f => f.get("name"));
 
-    function getPinnedFeatures(windowHandle) {
+    // pin the selected features to the state on the first run
+    const [pinned, setPinned] = useState(null);
+
+    useEffect(() => {
         if (
             windowHandle !== undefined &&
             windowHandle.data !== undefined &&
             windowHandle.data.features !== undefined
         ) {
-            return windowHandle.data.features;
+            setPinned(windowHandle.data.features);
         } else {
-            return selectedFeatures;
+            setPinned(selectedFeatures);
         }
-    }
-
-    const [pinned, setPinned] = useState(getPinnedFeatures(windowHandle));
-
-    // If the window handle selected features have changed
-    // reload the feature data.
-    useEffect(
-        _ => {
-            const currentlyPinned = getPinnedFeatures(windowHandle);
-            if (!utils.equalArrays(currentlyPinned, pinned)) setPinned(currentlyPinned);
-        },
-        [windowHandle]
-    );
+    }, []); // run once
 
     return useFeatures(pinned, windowHandle);
 }
@@ -393,55 +386,37 @@ export function useFeatureStatisticsLoader() {
     const features = useSelector(store => store.data.get("featureList"));
     const existing = useSelector(store => store.data.get("featureStats"));
 
-    // hold the socket's close method
-    const socket = useRef(null);
+    const [socketCloseHandles, setSocketCloseHandles] = useState([]);
+    useEffect(
+        _ => {
+            features
+                .map(f => f.get("name"))
+                .filter(n => !existing.has(n))
+                .toJS()
+                .forEach(feature => {
+                    const request = {
+                        routine: "arrange",
+                        hashType: "feature",
+                        activity: "metrics",
+                        name: [feature],
+                        sessionkey: utils.getGlobalSessionKey()
+                    };
+                    dispatch(statSetFeatureLoading(feature));
+                    const { req, cancel } = utils.makeSimpleRequest(request);
+                    setSocketCloseHandles(handles => handles.concat([cancel]));
+                    req.then(msg => {
+                        if (msg.status !== "success" || msg.message !== "success") {
+                            dispatch(statSetFeatureFailed(msg.name));
+                        }
+                        dispatch(statSetFeatureResolved(msg.name, msg));
+                    });
+                });
+        },
+        [features]
+    );
 
-    // callback for when the socket gives us data
-    const sock_cb = msg => {
-        if (msg.message !== "success" || msg.status !== "success") {
-            dispatch(statSetFeatureFailed(msg.name));
-        }
-        dispatch(statSetFeatureResolved(msg.name, msg));
-    };
-
-    // figure out the diff between the features that we need
-    // and the ones we have
-    useEffect(() => {
-        const fnames = features.map(f => f.get("name"));
-
-        let actions = fnames.filter(n => !existing.has(n)).toJS();
-
-        if (actions.length > 0) {
-            if (socket.current !== null) {
-                socket.current(); // call the cancel function
-                socket.current = null;
-            }
-
-            // create the request
-            const request = {
-                routine: "arrange",
-                hashType: "feature",
-                activity: "metrics",
-                name: actions,
-                sessionkey: utils.getGlobalSessionKey()
-            };
-
-            // dispatch, save the cancel function
-            socket.current = utils.makeStreamRequest(request, sock_cb);
-
-            // dispatch onto the store
-            actions = actions.map(n => statSetFeatureLoading(n));
-            dispatch(batchActions(actions));
-        }
-    }, [features]);
-
-    // Clean up the socket if this gets unmounted
-    useEffect(() => {
-        return () => {
-            if (socket.current !== null) {
-                socket.current(); // call the cancel function
-            }
-        };
+    useEffect(_ => {
+        return _ => socketCloseHandles.forEach(close => close());
     }, []);
 }
 

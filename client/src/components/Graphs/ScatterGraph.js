@@ -8,6 +8,7 @@ import regression from "regression";
 
 import { GRAPH_INDEX } from "../../constants/uiTypes";
 import { filterBounds } from "./graphFunctions";
+import { usePrevious } from "../../hooks/UtilHooks";
 import {
     useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
@@ -27,7 +28,7 @@ import {
 import GraphWrapper from "./GraphWrapper";
 import * as utils from "../../utils/utils";
 
-const DEFAULT_POINT_COLOR = "rgba(0, 0, 0, 0.5)";
+const DEFAULT_POINT_COLOR = [0, 0, 0, 0.5];
 const DEFAULT_POINT_OPACITY = 0.5;
 const DEFAULT_POINT_SHAPE = "circle";
 const DEFAULT_POINT_SIZE = 5;
@@ -56,34 +57,41 @@ function ScatterGraph(props) {
     );
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
+    // To avoid needless rerenders, we only start rendering traces once all defaults have been set.
+    const [defaultsInitialized, setDefaultsInitialized] = useState(false);
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
 
-    const sanitizedCols = utils.removeSentinelValues(
-        featureNames.map(colName =>
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS()
-        ),
-        props.fileInfo
+    const [sanitizedCols] = useState(_ =>
+        utils.removeSentinelValues(
+            featureNames.map(colName =>
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS()
+            ),
+            props.fileInfo
+        )
     );
 
-    const filteredCols = (function() {
-        const baseData = filterBounds(featureNames, sanitizedCols, bounds && bounds.toJS());
-        if (!axisScale) return baseData;
-        return baseData.map((col, idx) => {
-            const scaleData = axisScale.find(f => f.get("name") === featureNames[idx]);
-            const scale = scaleData ? scaleData.get("scale") : "linear";
-            if (scale === "linear") return col;
-            const [_, max] = utils.getMinMax(col);
-            const scaleFunc = scaleLog()
-                .clamp(true)
-                .domain([0.1, max])
-                .nice();
-            return col.map(val => scaleFunc(val));
-        });
-    })();
+    const filteredCols = useMemo(
+        _ => {
+            const baseData = filterBounds(featureNames, sanitizedCols, bounds && bounds.toJS());
+            if (!axisScale) return baseData;
+            return baseData.map((col, idx) => {
+                const scaleData = axisScale.find(f => f.get("name") === featureNames[idx]);
+                const scale = scaleData ? scaleData.get("scale") : "linear";
+                if (scale === "linear") return col;
+                const [_, max] = utils.getMinMax(col);
+                const scaleFunc = scaleLog()
+                    .clamp(true)
+                    .domain([0.1, max])
+                    .nice();
+                return col.map(val => scaleFunc(val));
+            });
+        },
+        [bounds]
+    );
 
     const baseX =
         xAxis && xAxis !== GRAPH_INDEX
@@ -108,22 +116,32 @@ function ScatterGraph(props) {
     // The plotly react element only changes when the revision is incremented.
     const chartRevision = useRef(0);
 
+    // Want to avoid redrawing the selections unless we know that something visual has changed
+    const previousSelectionIds = usePrevious(
+        props.savedSelections.map(sel => [sel.id, sel.hidden])
+    );
+    const newSelections =
+        JSON.stringify(previousSelectionIds) !==
+        JSON.stringify(props.savedSelections.map(sel => [sel.id, sel.hidden]));
     const baseTrace = useMemo(
         _ => {
-            const [x, y, colors] = utils.unzip(
-                baseX.map((_, idx) => {
-                    const opacity = props.savedSelections.some(
-                        sel => !sel.hidden && sel.rowIndices.includes(idx)
-                    )
-                        ? 0
-                        : props.hoverSelection
-                        ? 0.1
-                        : dotOpacity;
-                    const color = new TinyColor(DEFAULT_POINT_COLOR).setAlpha(opacity).toString();
-                    return [baseX[idx], baseY[idx], color];
-                })
+            if (!defaultsInitialized) return [];
+            const x = baseX;
+            const y = baseY;
+            const colors = Array(baseX.length).fill(
+                props.hoverSelection
+                    ? `rgba(${DEFAULT_POINT_COLOR.slice(0, -1)
+                          .concat([0.1])
+                          .join(",")})`
+                    : `rgba(${DEFAULT_POINT_COLOR.join(",")})`
             );
-
+            props.savedSelections.forEach(sel => {
+                if (sel.hidden) return;
+                sel.rowIndices.forEach(idx => {
+                    colors[idx] = "rgba(0,0,0,0)";
+                });
+            });
+            props.currentSelection.forEach(idx => (colors[idx] = "rgba(0,0,0,0)"));
             return {
                 x,
                 y,
@@ -142,7 +160,7 @@ function ScatterGraph(props) {
         [
             baseX,
             baseY,
-            props.savedSelections,
+            newSelections,
             props.hoverSelection,
             props.currentSelection,
             dotOpacity,
@@ -153,18 +171,18 @@ function ScatterGraph(props) {
 
     const trendLineTrace = useMemo(
         _ => {
+            if (!trendLineVisible) return [];
             const [x, y] = utils.unzip(regression.linear(utils.unzip(filteredCols)).points);
             return {
                 x,
                 y,
-                type: "scatter",
+                type: "scattergl",
                 mode:
                     axisScale && axisScale.every(x => x.get("scale") === "log")
                         ? "markers"
                         : "lines",
                 hoverinfo: "x+y",
-                marker: { color: "red", size: 5 },
-                visible: Boolean(trendLineVisible)
+                marker: { color: "red", size: 5 }
             };
         },
         [filteredCols, trendLineVisible]
@@ -172,6 +190,7 @@ function ScatterGraph(props) {
 
     const selectionTraces = useMemo(
         _ => {
+            if (!defaultsInitialized) return [];
             const currentSelectionTrace = props.currentSelection
                 ? { color: "red", rowIndices: props.currentSelection }
                 : [];
@@ -204,7 +223,7 @@ function ScatterGraph(props) {
         [
             baseX,
             baseY,
-            props.savedSelections,
+            newSelections,
             props.hoverSelection,
             props.currentSelection,
             dotOpacity,
@@ -279,10 +298,11 @@ function ScatterGraph(props) {
             }))
         );
         setTrendLineVisible(false);
-        if (!init || showGridLines === undefined) setShowGridLines(true);
-        if (!init || !xAxis || xAxis === GRAPH_INDEX) setXAxis(featureNames[0]);
-        if (!init || !yAxis) setYAxis(featureNames[1]);
-        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        setShowGridLines(true);
+        if (!xAxis) setXAxis(featureNames[0]);
+        if (!yAxis) setYAxis(featureNames[1]);
+        if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        setDefaultsInitialized(true);
     }
 
     useEffect(_ => {
@@ -352,8 +372,11 @@ function ScatterGraph(props) {
         [needsAutoscale]
     );
 
+    const [loading, setLoading] = useState(true);
+
     return (
         <GraphWrapper chart={chart} chartId={chartId} win={props.win}>
+            {loading ? <WindowCircularProgress /> : null}
             <Plot
                 ref={chart}
                 data={chartState.data}
@@ -375,6 +398,7 @@ function ScatterGraph(props) {
                                 .map(point => point.pointIndex)
                         );
                 }}
+                onAfterPlot={_ => setLoading(false)}
                 divId={chartId}
             />
         </GraphWrapper>

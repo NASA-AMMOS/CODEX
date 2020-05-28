@@ -20,6 +20,7 @@ import { useWindowManager } from "../../hooks/WindowHooks";
 import HelpContent from "../Help/HelpContent";
 import * as wmActions from "../../actions/windowManagerActions";
 import * as portals from "react-reverse-portal";
+import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
 const GUIDANCE_PATH = "normalization_page:general_normalization";
@@ -52,8 +53,7 @@ function PreviewPlot(props) {
 
     const [hover, setHover] = useState(false);
 
-    const min = Math.min(...props.data).toFixed(2);
-    const max = Math.max(...props.data).toFixed(2);
+    const [min, max] = utils.getMinMax(props.data).map(val => val.toFixed(2));
 
     const chartRevision = useRef(0);
     const [chartState, setChartState] = useState({
@@ -62,7 +62,10 @@ function PreviewPlot(props) {
                 x: props.data,
                 type: "histogram",
                 hoverinfo: "x+y",
-                marker: { color: props.data.map((val, idx) => DEFAULT_POINT_COLOR), size: 5 },
+                marker: {
+                    color: props.data.map((val, idx) => DEFAULT_POINT_COLOR),
+                    size: 5
+                },
                 visible: true
             }
         ],
@@ -271,7 +274,10 @@ function Normalization(props) {
     function globalSelect(idx) {
         return _ => {
             Object.keys(selections).forEach(key => {
-                setSelections(sels => ({ ...sels, [key]: { ...sels[key], selection: idx } }));
+                setSelections(sels => ({
+                    ...sels,
+                    [key]: { ...sels[key], selection: idx }
+                }));
             });
         };
     }

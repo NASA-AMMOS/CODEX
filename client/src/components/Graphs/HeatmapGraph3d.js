@@ -1,7 +1,7 @@
 import "./HeatmapGraph3d.css";
 
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 
 import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
@@ -26,9 +26,15 @@ const DEFAULT_TITLE = "Heat Map 3d Graph";
 
 function squashDataIntoBuckets(numBuckets, xData, yData, zData) {
     const cols = [xData, yData];
-
-    const maxes = cols.map(col => Math.max(...col));
-    const mins = cols.map(col => Math.min(...col));
+    const [mins, maxes] = cols.reduce(
+        (acc, col) => {
+            const [min, max] = utils.getMinMax(col);
+            acc[0].push(min);
+            acc[1].push(max);
+            return acc;
+        },
+        [[], []]
+    );
     const bucketSizes = cols.map((_, idx) => (maxes[idx] - mins[idx]) / numBuckets[idx]);
 
     return utils
@@ -105,20 +111,21 @@ function HeatmapGraph3d(props) {
     const [zAxis, setZAxis] = useWindowZAxis(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
-    const sanitizedCols = utils.removeSentinelValues(
-        featureList.map(colName =>
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS()
-        ),
-        props.fileInfo
+    const [sanitizedCols] = useState(_ =>
+        utils.removeSentinelValues(
+            featureList.map(colName =>
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS()
+            ),
+            props.fileInfo
+        )
     );
 
-    const filteredCols = graphFunctions.filterBounds(
-        featureList,
-        sanitizedCols,
-        bounds && bounds.toJS()
+    const filteredCols = useMemo(
+        _ => graphFunctions.filterBounds(featureList, sanitizedCols, bounds && bounds.toJS()),
+        [bounds]
     );
 
     const xData = xAxis
@@ -131,15 +138,25 @@ function HeatmapGraph3d(props) {
         ? filteredCols[featureList.findIndex(feature => feature === zAxis)]
         : filteredCols[2];
 
-    const x = generateDataAxis(xData, (binSize && binSize.get("x")) || DEFAULT_BUCKET_COUNT);
-    const y = generateDataAxis(yData, (binSize && binSize.get("y")) || DEFAULT_BUCKET_COUNT);
-    const z = squashDataIntoBuckets(
-        binSize
-            ? Object.values(binSize.toJS()).map(val => val || 1)
-            : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT],
-        xData,
-        yData,
-        zData
+    const x = useMemo(
+        _ => generateDataAxis(xData, (binSize && binSize.get("x")) || DEFAULT_BUCKET_COUNT),
+        [xData, binSize]
+    );
+    const y = useMemo(
+        _ => generateDataAxis(yData, (binSize && binSize.get("y")) || DEFAULT_BUCKET_COUNT),
+        [yData, binSize]
+    );
+    const z = useMemo(
+        _ =>
+            squashDataIntoBuckets(
+                binSize
+                    ? Object.values(binSize.toJS()).map(val => val || 1)
+                    : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT],
+                xData,
+                yData,
+                zData
+            ),
+        [xData, yData, zData, binSize]
     );
 
     const xAxisTitle =
@@ -169,10 +186,11 @@ function HeatmapGraph3d(props) {
                     return acc;
                 }, {})
             );
-        setBinSize({
-            x: DEFAULT_BUCKET_COUNT,
-            y: DEFAULT_BUCKET_COUNT
-        });
+        if (!init || !binSize)
+            setBinSize({
+                x: DEFAULT_BUCKET_COUNT,
+                y: DEFAULT_BUCKET_COUNT
+            });
         if (!init || !axisLabels)
             setAxisLabels(
                 featureList.reduce((acc, featureName) => {
@@ -181,6 +199,7 @@ function HeatmapGraph3d(props) {
                 }, {})
             );
         if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+
         setXAxis(featureList[0]);
         setYAxis(featureList[1]);
         setZAxis(featureList[2]);
