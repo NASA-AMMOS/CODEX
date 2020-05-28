@@ -33,5 +33,5 @@ def test_get_codex_memory_usage(capsys):
 
 def test_codex_server_memory_check(capsys):
 
-    ch = get_cache(DOCTEST_SESSION)
+    ch = get_cache(DOCTEST_SESSION, timeout=None)
     codex_server_memory_check(session=ch)

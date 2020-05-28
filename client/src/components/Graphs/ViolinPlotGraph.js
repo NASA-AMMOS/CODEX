@@ -1,7 +1,7 @@
 import "./ViolinPlotGraph.css";
 
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 
 import { filterSingleCol } from "./graphFunctions";
 import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
@@ -13,8 +13,7 @@ import {
     useWindowGraphBounds,
     useWindowNeedsResetToDefault,
     useWindowShowGridLines,
-    useWindowTitle,
-    useWindowTrendLineVisible
+    useWindowTitle
 } from "../../hooks/WindowHooks";
 import GraphWrapper from "./GraphWrapper";
 import * as utils from "../../utils/utils";
@@ -78,9 +77,9 @@ function ViolinPlotGraph(props) {
     );
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
-    const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
+    const [defaultsInitialized, setDefaultsInitialized] = useState(false);
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
 
@@ -99,31 +98,45 @@ function ViolinPlotGraph(props) {
         return acc;
     }, {});
 
-    const baseCols = featureNames
-        .map(colName => [
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS(),
-            bounds && bounds.get(colName).toJS()
-        ])
-        .map(([col, bound]) => [utils.removeSentinelValues([col], props.fileInfo)[0], bound]);
+    const [baseCols] = useState(_ =>
+        featureNames
+            .map(colName => [
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS(),
+                colName
+            ])
+            .map(([col, name]) => [utils.removeSentinelValues([col], props.fileInfo)[0], name])
+    );
 
-    const filteredCols = baseCols.map(([col, bound]) => filterSingleCol(col, bound));
+    const filteredCols = useMemo(
+        _ =>
+            baseCols.map(([col, name]) => {
+                const bound = bounds && bounds.get(name);
+                return filterSingleCol(col, bound && bound.toJS());
+            }),
+        [bounds, baseCols]
+    );
 
-    const traces = features.map((feature, idx) => {
-        const trace = {
-            y: filteredCols[idx],
-            type: "violin",
-            marker: { color: DEFAULT_POINT_COLOR },
-            name: ""
-        };
-        if (idx > 0) {
-            trace.xaxis = `x${idx + 1}`;
-            trace.yaxis = `y`;
-        }
-        return trace;
-    });
+    const traces = useMemo(
+        _ =>
+            features.map((feature, idx) => {
+                if (!defaultsInitialized) return {};
+                const trace = {
+                    y: filteredCols[idx],
+                    type: "violin",
+                    marker: { color: DEFAULT_POINT_COLOR },
+                    name: ""
+                };
+                if (idx > 0) {
+                    trace.xaxis = `x${idx + 1}`;
+                    trace.yaxis = `y`;
+                }
+                return trace;
+            }),
+        [filteredCols]
+    );
 
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
@@ -168,9 +181,10 @@ function ViolinPlotGraph(props) {
     function setDefaults() {
         setBounds(
             featureNames.reduce((acc, colName, idx) => {
+                const [min, max] = utils.getMinMax(baseCols[idx][0]);
                 acc[colName] = {
-                    min: Math.min(...baseCols[idx][0]),
-                    max: Math.max(...baseCols[idx][0])
+                    min,
+                    max
                 };
                 return acc;
             }, {})
@@ -183,7 +197,7 @@ function ViolinPlotGraph(props) {
         );
         setWindowTitle(featureDisplayNames.join(" , "));
         setShowGridLines(true);
-        setTrendLineVisible(false);
+        setDefaultsInitialized(true);
     }
 
     useEffect(_ => {

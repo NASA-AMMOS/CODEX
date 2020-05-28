@@ -1,7 +1,7 @@
+import { Set } from "immutable";
 import { batchActions } from "redux-batched-actions";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useRef, useEffect } from "react";
-import Immutable, { Set, List } from "immutable";
 
 import WorkerSocket from "worker-loader!../workers/socket.worker";
 
@@ -21,6 +21,7 @@ import {
     fileLoad,
     renameFeatureGroup,
     selectFeatureGroup,
+    selectFeatureInGroup,
     statSetFeatureFailed,
     statSetFeatureLoading,
     statSetFeatureResolved
@@ -40,10 +41,12 @@ function loadColumnFromServer(feature) {
         socketWorker.addEventListener("message", e => {
             //console.log("server column");
             //console.log(JSON.parse(e.data));
+            console.log(`Received column: ${feature}`);
             const data = JSON.parse(e.data).data.map(ary => ary[0]);
             resolve(data);
         });
 
+        console.log(`Requesting column: ${feature}`);
         socketWorker.postMessage(
             JSON.stringify({
                 action: actionTypes.GET_GRAPH_DATA,
@@ -186,42 +189,25 @@ export function useLiveFeatures(windowHandle = undefined) {
  */
 export function usePinnedFeatures(windowHandle = undefined) {
     const domain = useSelector(state => state.data);
-
-    const ungroupedFeatures = useSelector(state => state.data.get("featureList"))
+    const selectedFeatures = domain
+        .get("featureList")
         .filter(f => f.get("selected"))
         .map(f => f.get("name"));
 
-    const featuresInGroups = useSelector(state =>
-        state.data.get("featureGroups").reduce((acc, group) => {
-            return acc.concat(group.get("selectedFeatures"));
-        }, List())
-    );
+    // pin the selected features to the state on the first run
+    const [pinned, setPinned] = useState(null);
 
-    const selectedFeatures = ungroupedFeatures.concat(featuresInGroups);
-
-    function getPinnedFeatures(windowHandle) {
+    useEffect(() => {
         if (
             windowHandle !== undefined &&
             windowHandle.data !== undefined &&
             windowHandle.data.features !== undefined
         ) {
-            return windowHandle.data.features;
+            setPinned(windowHandle.data.features);
         } else {
-            return selectedFeatures;
+            setPinned(selectedFeatures);
         }
-    }
-
-    const [pinned, setPinned] = useState(getPinnedFeatures(windowHandle));
-
-    // If the window handle selected features have changed
-    // reload the feature data.
-    useEffect(
-        _ => {
-            const currentlyPinned = getPinnedFeatures(windowHandle);
-            if (!utils.equalArrays(currentlyPinned, pinned)) setPinned(currentlyPinned);
-        },
-        [windowHandle]
-    );
+    }, []); // run once
 
     return useFeatures(pinned, windowHandle);
 }
@@ -308,18 +294,9 @@ export function useFeatureMetadata() {
  */
 export function useSelectedFeatureNames() {
     const dispatch = useDispatch();
-
-    const ungroupedFeatures = useSelector(state => state.data.get("featureList"))
+    const currentFeatures = useSelector(state => state.data.get("featureList"))
         .filter(f => f.get("selected"))
         .map(f => f.get("name"));
-
-    const featuresInGroups = useSelector(state =>
-        state.data.get("featureGroups").reduce((acc, group) => {
-            return acc.concat(group.get("selectedFeatures"));
-        }, List())
-    );
-
-    const currentFeatures = ungroupedFeatures.concat(featuresInGroups);
 
     const setCurrentFeatures = sels => {
         // Here, perform a diff to figure out the minimum number of switches we need

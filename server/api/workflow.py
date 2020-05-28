@@ -133,7 +133,7 @@ def explain_this(inputHash, featureNames, dataSelections, result, session=None):
     Notes: Only works for binary classification.  0 class should be main data, 1 class should be isolated data to explain.
 
     '''
-    ch = get_cache(session)
+    ch = get_cache(session, timeout=None)
 
     startTime = time.time()
     result = {"WARNING":None}
@@ -352,7 +352,7 @@ def general_classifier(inputHash, featureList, dataSelections, similarityThresho
 
 def find_more_like_this(inputHash, featureList, dataSelections, similarityThreshold, result, session=None):
     
-    ch = get_cache(session)
+    ch = get_cache(session, timeout=None)
 
     startTime = time.time()
     result = {"WARNING":None}

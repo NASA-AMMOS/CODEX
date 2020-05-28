@@ -37,7 +37,7 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None, algorithm="s
         If one wishes to do a percentage, do the
         percentage to samples calculation in the calling function
     '''
-    cache = get_cache(session)
+    cache = get_cache(session, timeout=None)
 
     # first, create a hash of the input array, don't save
     inputHash = cache.hashArray("NOSAVE", inputArray, "NOSAVE")

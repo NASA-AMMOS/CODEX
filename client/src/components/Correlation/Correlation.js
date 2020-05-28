@@ -19,7 +19,6 @@ import ReactResizeDetector from "react-resize-detector";
 import classnames from "classnames";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
-import { useAllowGraphHotkeys } from "../../hooks/UIHooks";
 import {
     useChangeFeatureGroup,
     useFeatureDisplayNames,
@@ -55,7 +54,6 @@ function GroupSelectDialog(props) {
     const [groups, createFeatureGroup] = useFeatureGroups();
     const changeGroup = useChangeFeatureGroup();
     const [groupNameInputBuffer, setGroupNameInputBuffer] = useState("");
-    const [_, setAllowHotkeys] = useAllowGraphHotkeys();
 
     function onClose() {
         setGroupNameInputBuffer("");
@@ -110,8 +108,6 @@ function GroupSelectDialog(props) {
                     onChange={onGroupNameInput}
                     InputProps={{ classes: { root: "input-box" } }}
                     FormHelperTextProps={{ classes: { root: "helper-text" } }}
-                    onFocus={_ => setAllowHotkeys(false)}
-                    onBlur={_ => setAllowHotkeys(true)}
                 />
                 <List className="group-select-dialog-group-list">
                     {canCreateNewGroup ? (

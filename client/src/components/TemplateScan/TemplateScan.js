@@ -66,8 +66,7 @@ function AlgoReturnPreview(props) {
         .find(feature => feature.get("feature") === props.excludedFeature)
         .get("data")
         .toJS();
-    const min = Math.min(...data);
-    const max = Math.max(...data);
+    const [min, max] = utils.getMinMax(data);
 
     const baseShapes = [
         {
@@ -239,8 +238,7 @@ function FeaturePreview(props) {
     const chart = useRef();
 
     const data = props.feature.get("data").toJS();
-    const min = Math.min(...data);
-    const max = Math.max(...data);
+    const [min, max] = utils.getMinMax(data);
 
     const baseShapes = [
         {
@@ -399,7 +397,9 @@ function FeaturePreview(props) {
             const shape = chartState.layout.shapes.find(
                 shape => shape.shapeId === selection.shapeId
             );
-            return Object.assign(selection, { range: [shape.x0, shape.x1].map(Math.floor) });
+            return Object.assign(selection, {
+                range: [shape.x0, shape.x1].map(Math.floor)
+            });
         });
         if (JSON.stringify(selections) !== JSON.stringify(newSelections))
             setSelections(newSelections);

@@ -19,7 +19,7 @@ from api.session_manager   import *
 
 def test_save_session(capsys, testData):
 
-    cache = get_cache(DOCTEST_SESSION)
+    cache = get_cache(DOCTEST_SESSION, timeout=None)
 
     message =  {'session_name': 'AUTOSAVE', 'state': {'windows': [{'data': {'features': ['SiO2', 'TiO2']}, 'height': 500, 'width': 500, 'x': 0, 'y': 0, 'windowType': 'Scatter'}]}, 'sessionkey': DOCTEST_SESSION}
     result = save_session(message, {}, CODEX_ROOT)
@@ -32,7 +32,7 @@ def test_save_session(capsys, testData):
 
 def test_load_session(capsys, testData):
 
-    cache = get_cache(DOCTEST_SESSION)
+    cache = get_cache(DOCTEST_SESSION, timeout=None)
 
     message =  {'session_name': 'AUTOSAVE', 'state': {'windows': [{'data': {'features': ['SiO2', 'TiO2']}, 'height': 500, 'width': 500, 'x': 0, 'y': 0, 'windowType': 'Scatter'}]}, 'sessionkey': DOCTEST_SESSION}
     result = load_session(message, {}, CODEX_ROOT)
@@ -44,7 +44,7 @@ def test_load_session(capsys, testData):
     
 def test_get_sessions(capsys, testData):
 
-    cache = get_cache(DOCTEST_SESSION)
+    cache = get_cache(DOCTEST_SESSION, timeout=None)
 
     message =  {'session_name': 'AUTOSAVE', 'state': {'windows': [{'data': {'features': ['SiO2', 'TiO2']}, 'height': 500, 'width': 500, 'x': 0, 'y': 0, 'windowType': 'Scatter'}]}, 'sessionkey': DOCTEST_SESSION}
     result = get_sessions({}, {}, CODEX_ROOT)

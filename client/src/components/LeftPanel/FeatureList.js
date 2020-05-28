@@ -22,7 +22,6 @@ import TextField from "@material-ui/core/TextField";
 import classnames from "classnames";
 
 import { reorderList, addNewItem } from "../../utils/utils";
-import { useAllowGraphHotkeys, useStatsPanelHidden } from "../../hooks/UIHooks";
 import {
     useChangeFeatureGroup,
     useDeleteFeatureGroup,
@@ -38,6 +37,7 @@ import {
     useSelectFeatureInGroup,
     useSetFeatureSelect
 } from "../../hooks/DataHooks";
+import { useStatsPanelHidden } from "../../hooks/UIHooks";
 import { useWindowList } from "../../hooks/WindowHooks";
 import featureList from "./FeatureList";
 
@@ -352,11 +352,9 @@ function GroupContextMenu(props) {
 function FeatureGroup(props) {
     const featureListContext = useContext(FeatureListContext);
     const selectGroup = useSelectFeatureGroup();
-    const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
 
     function groupSelectClick(e) {
         selectGroup(props.group.id, e.target.checked);
-        setAllowGraphHotkeys(true);
     }
 
     const [anchorEl, setAnchorEl] = useState();
@@ -432,7 +430,7 @@ function FeatureItem(props) {
     const [featureNames, setFeatureName] = useFeatureDisplayNames();
     const displayName = featureNames.get(props.feature.name, props.feature.name);
     const [rowHover, setRowHover] = useState(false);
-    const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
+
     const [groupSelections, setGroupSelection] = props.group
         ? useSelectFeatureInGroup(props.group.id)
         : [];
@@ -468,7 +466,6 @@ function FeatureItem(props) {
                 ? getShiftSelectedFeatures()
                 : [props.feature.name];
         featuresToSelect.forEach(feature => selectFeature(feature, e.target.checked));
-        setAllowGraphHotkeys(true);
     }
 
     const [anchorEl, setAnchorEl] = useState();

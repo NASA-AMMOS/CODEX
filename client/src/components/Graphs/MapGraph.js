@@ -1,7 +1,7 @@
 import "./HeatmapGraph3d.css";
 
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 
 import { usePrevious } from "../../hooks/UtilHooks";
 import {
@@ -77,10 +77,15 @@ function MapGraph(props) {
         "linear"
     );
 
-    const baseCols = utils.removeSentinelValuesRevised(props.data, props.fileInfo);
-    const cols = graphFunctions
-        .filterBounds(featureList, baseCols.map(col => col.data), bounds && bounds.toJS())
-        .map((data, idx) => ({ ...baseCols[idx], data }));
+    const [baseCols] = useState(_ => utils.removeSentinelValuesRevised(props.data, props.fileInfo));
+
+    const cols = useMemo(
+        _ =>
+            graphFunctions
+                .filterBounds(featureList, baseCols.map(col => col.data), bounds && bounds.toJS())
+                .map((data, idx) => ({ ...baseCols[idx], data })),
+        [baseCols, bounds]
+    );
 
     const featureDisplayNames = featureList.map(featureName =>
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
@@ -95,7 +100,8 @@ function MapGraph(props) {
     function setDefaults() {
         setBounds(
             baseCols.reduce((acc, col) => {
-                acc[col.feature] = { min: Math.min(...col.data), max: Math.max(...col.data) };
+                const [min, max] = utils.getMinMax(col.data);
+                acc[col.feature] = { min, max };
                 return acc;
             }, {})
         );
