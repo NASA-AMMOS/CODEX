@@ -217,7 +217,9 @@ function GraphWrapper(props) {
             ? props.resizeHandler
             : _ => {
                   if (Array.isArray(props.chart))
-                      return props.chart.forEach(chart => chart.current.resizeHandler());
+                      return props.chart.forEach(chart => {
+                          if (chart.resizeHandler) chart.resizeHandler();
+                      });
                   props.chart.current.resizeHandler();
               };
 

@@ -66,7 +66,7 @@ export function SingleXMultipleYGraphLegend(props) {
 
 function SingleXMultipleYGraph(props) {
     const chart = useRef(null);
-    const selectionChart = useRef(null);
+    const selectionCharts = useRef([]);
     const [chartId] = useState(utils.createNewId());
     const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
@@ -408,9 +408,10 @@ function SingleXMultipleYGraph(props) {
         [needsAutoscale]
     );
 
+    selectionCharts.current = selectionCharts.current.filter(sel => sel);
     return (
         <GraphWrapper
-            chart={[chart, selectionChart]}
+            chart={[chart.current, ...selectionCharts.current]}
             chartIds={chartIds}
             win={props.win}
             saveOptions={{ type: "singleXMultipleY" }}
@@ -442,9 +443,9 @@ function SingleXMultipleYGraph(props) {
                             divId={chartId}
                             useResizeHandler
                         />
-                        {selectionChartStates.map(selectionState => (
+                        {selectionChartStates.map((selectionState, idx) => (
                             <Plot
-                                ref={selectionChart}
+                                ref={ref => (selectionCharts.current[idx] = ref)}
                                 key={selectionState.id}
                                 data={selectionState.data}
                                 layout={selectionState.layout}
