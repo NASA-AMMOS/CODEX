@@ -34,7 +34,7 @@ def codex_read_csv(file, featureList, hashType, session=None):
     Outputs:
 
     '''
-    cache = get_cache(session)
+    cache = get_cache(session, timeout=None)
     #cache.logReturnCode(inspect.currentframe())
 
     hashList = []
@@ -108,7 +108,7 @@ def codex_read_hd5(file, featureList, hashType, session=None):
     Notes:
 
     '''
-    cache = get_cache(session)
+    cache = get_cache(session, timeout=None)
 
     hashList = []
 
@@ -150,7 +150,7 @@ def codex_read_npy(file, featureList, hashType, session=None):
     Notes:
 
     '''
-    cache = get_cache(session)
+    cache = get_cache(session, timeout=None)
 
     hashList = []
 
@@ -185,7 +185,7 @@ def save_subset(inputHash, subsetHash, saveFilePath, session=None):
     Outputs:
 
     '''
-    cache = get_cache(session)
+    cache = get_cache(session, timeout=None)
     returnHash = cache.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         logging.warning("Hash not found. Returning!")

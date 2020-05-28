@@ -3,7 +3,7 @@ import "./Regression.scss";
 import { Button, IconButton, Paper, Slider, Switch, Tooltip } from "@material-ui/core";
 import HelpIcon from "@material-ui/icons/Help";
 import Plot from "react-plotly.js";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import ReactResizeDetector from "react-resize-detector";
 import * as portals from "react-reverse-portal";
 
@@ -12,6 +12,7 @@ import { makeSimpleRequest, zip } from "../../utils/utils";
 import { useFeatureDisplayNames, usePinnedFeatures } from "../../hooks/DataHooks";
 import { useWindowManager, useCloseWindow } from "../../hooks/WindowHooks";
 import HelpContent from "../Help/HelpContent";
+import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
 const GUIDANCE_PATH = "regression_page:general_regression";
@@ -151,8 +152,9 @@ function TrendPlot(props) {
 
     const [showFeatureImportance, setShowFeatureImportance] = useState(false);
     const chartRevision = useRef(0);
-    const [x, y] = zip(props.data.data);
-    const [chartState, setChartState] = useState({
+    const [x, y] = useMemo(_ => zip(props.data.data), [props.data.data]);
+    const [_, max] = useMemo(_ => utils.getMinMax(props.data.y_pred), [props.data.y_pred]);
+    const [chartState, setChartState] = useState(_ => ({
         data: [
             {
                 x: props.data.y_pred,
@@ -182,9 +184,9 @@ function TrendPlot(props) {
                     xref: "x",
                     yref: "y",
                     x0: 0,
-                    x1: Math.max(...props.data.y_pred),
+                    x1: max,
                     y0: 0,
-                    y1: Math.max(...props.data.y_pred),
+                    y1: max,
                     line: {
                         color: "red",
                         width: 1
@@ -196,7 +198,7 @@ function TrendPlot(props) {
             displaylogo: false,
             modeBarButtons: [["zoom2d", "pan2d", "zoomIn2d", "zoomOut2d", "autoScale2d"]]
         }
-    });
+    }));
 
     function updateChartRevision() {
         chartRevision.current++;
@@ -277,9 +279,11 @@ function TrendPlot(props) {
 }
 
 function ImportanceChart(props) {
-    const sortedData = props.data.importances.sort((a, b) => a[1] - b[1]);
+    const sortedData = useMemo(_ => props.data.importances.sort((a, b) => a[1] - b[1]), [
+        props.data
+    ]);
     const chartRevision = useRef(0);
-    const [chartState, setChartState] = useState({
+    const [chartState, setChartState] = useState(_ => ({
         data: [
             {
                 x: sortedData.map(val => val[1]),
@@ -305,7 +309,7 @@ function ImportanceChart(props) {
             displaylogo: false,
             displayModeBar: false
         }
-    });
+    }));
 
     function updateChartRevision() {
         chartRevision.current++;
@@ -805,7 +809,8 @@ function Regression(props) {
     const [targetFeature, setTargetFeature] = useState();
     useEffect(
         _ => {
-            if (features && !targetFeature) setTargetFeature(features.get(0).get("displayName"));
+            if (features && features.size && !targetFeature)
+                setTargetFeature(features.get(0).get("displayName"));
         },
         [features]
     );
@@ -838,8 +843,8 @@ function Regression(props) {
                             Features will be used in each Algorithm to estimate that target value,
                             and root-mean-square plots shown for each Algorithm.
                         </span>
-                        <IconButton>
-                            <HelpIcon onClick={_ => setHelpMode(mode => !mode)} />
+                        <IconButton onClick={_ => setHelpMode(mode => !mode)}>
+                            <HelpIcon />
                         </IconButton>
                     </div>
                 </div>

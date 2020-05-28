@@ -7,11 +7,6 @@ import {
     useWindowList
 } from "../../hooks/WindowHooks";
 import {
-    useAllowGraphHotkeys,
-    useGlobalChartState,
-    useStatsPanelHidden
-} from "../../hooks/UIHooks";
-import {
     useCurrentSelection,
     useFeatureGroups,
     useFeatureMetadata,
@@ -23,11 +18,32 @@ import {
     useSetSelectionActive,
     useSetSelectionGroupActive
 } from "../../hooks/DataHooks";
+import { useGlobalChartState, useStatsPanelHidden } from "../../hooks/UIHooks";
 import { useKey } from "../../hooks/UtilHooks";
 import * as windowTypes from "../../constants/windowTypes";
 
 function KeyboardHandler(props) {
-    const [allowGraphHotkeys] = useAllowGraphHotkeys();
+    const [disableHotkeys, setDisableHotkeys] = useState(false);
+
+    useEffect(_ => {
+        function isKeyboardInput(e) {
+            if (e.target.tagName !== "INPUT") return false;
+            const inputType = e.target.getAttribute("type");
+            return inputType === "text" || inputType === "number";
+        }
+
+        function handleTextFocus(focus) {
+            return e => {
+                if (isKeyboardInput(e)) setDisableHotkeys(focus);
+            };
+        }
+        window.addEventListener("focusin", handleTextFocus(true));
+        window.addEventListener("focusout", handleTextFocus());
+        return _ => {
+            window.removeEventListener("focusin", handleTextFocus);
+            window.removeEventListener("focusout", handleTextFocus);
+        };
+    }, []);
 
     // Backtick ("`") deselects all features
     const featureList = useFeatureMetadata();
@@ -37,6 +53,7 @@ function KeyboardHandler(props) {
     const backtick = useKey("`");
     useEffect(
         _ => {
+            if (disableHotkeys) return;
             if (backtick) {
                 featureList.forEach(feature => selectFeature(feature.get("name"), false));
                 groups.forEach(group => selectFeatureGroup(group.get("id"), false));
@@ -53,6 +70,7 @@ function KeyboardHandler(props) {
     const tilde = useKey("~");
     useEffect(
         _ => {
+            if (disableHotkeys) return;
             if (tilde) {
                 selections.forEach(sel => setSelectionActive(sel.id, false));
                 selectionGroups.forEach(group => setGroupActive(group.id, false));
@@ -69,7 +87,7 @@ function KeyboardHandler(props) {
     const sKey = useKey("s");
     useEffect(
         _ => {
-            if (!allowGraphHotkeys) return;
+            if (disableHotkeys) return;
             if (sKey) {
                 if (!previousChartState) setPreviousChartState(globalChartState);
                 setGlobalChartState("lasso");
@@ -85,7 +103,7 @@ function KeyboardHandler(props) {
     const zKey = useKey("z");
     useEffect(
         _ => {
-            if (!allowGraphHotkeys) return;
+            if (disableHotkeys) return;
             if (zKey) {
                 if (!previousChartState) setPreviousChartState(globalChartState);
                 setGlobalChartState("zoom");
@@ -101,7 +119,7 @@ function KeyboardHandler(props) {
     const spacebar = useKey(" ", { preventDefault: true });
     useEffect(
         _ => {
-            if (!allowGraphHotkeys) return;
+            if (disableHotkeys) return;
             if (spacebar) {
                 if (!previousChartState) setPreviousChartState(globalChartState);
                 setGlobalChartState("pan");
@@ -119,7 +137,7 @@ function KeyboardHandler(props) {
     const SKey = useKey("S");
     useEffect(
         _ => {
-            if (!allowGraphHotkeys) return;
+            if (disableHotkeys) return;
             if (SKey) saveCurrentSelection();
         },
         [SKey]
@@ -135,7 +153,7 @@ function KeyboardHandler(props) {
     const ZKey = useKey("Z");
     useEffect(
         _ => {
-            if (!allowGraphHotkeys) return;
+            if (disableHotkeys) return;
             if (ZKey && graphWindowActive) setWindowNeedsAutoscale(activeWindowId, true);
         },
         [ZKey]
@@ -146,7 +164,7 @@ function KeyboardHandler(props) {
     const tKey = useKey("t");
     useEffect(
         _ => {
-            if (!allowGraphHotkeys) return;
+            if (disableHotkeys) return;
             if (tKey) {
                 setStatsHidden(!statsHidden);
             }
