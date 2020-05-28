@@ -385,56 +385,38 @@ export function useFeatureStatisticsLoader() {
     // get the features and the existing statistics
     const features = useSelector(store => store.data.get("featureList"));
     const existing = useSelector(store => store.data.get("featureStats"));
-    return;
-    // hold the socket's close method
-    const socket = useRef(null);
 
-    // callback for when the socket gives us data
-    const sock_cb = msg => {
-        if (msg.message !== "success" || msg.status !== "success") {
-            dispatch(statSetFeatureFailed(msg.name));
-        }
-        dispatch(statSetFeatureResolved(msg.name, msg));
-    };
+    const [socketCloseHandles, setSocketCloseHandles] = useState([]);
+    useEffect(
+        _ => {
+            features
+                .map(f => f.get("name"))
+                .filter(n => !existing.has(n))
+                .toJS()
+                .forEach(feature => {
+                    const request = {
+                        routine: "arrange",
+                        hashType: "feature",
+                        activity: "metrics",
+                        name: [feature],
+                        sessionkey: utils.getGlobalSessionKey()
+                    };
+                    dispatch(statSetFeatureLoading(feature));
+                    const { req, cancel } = utils.makeSimpleRequest(request);
+                    setSocketCloseHandles(handles => handles.concat([cancel]));
+                    req.then(msg => {
+                        if (msg.status !== "success" || msg.message !== "success") {
+                            dispatch(statSetFeatureFailed(msg.name));
+                        }
+                        dispatch(statSetFeatureResolved(msg.name, msg));
+                    });
+                });
+        },
+        [features]
+    );
 
-    // figure out the diff between the features that we need
-    // and the ones we have
-    useEffect(() => {
-        const fnames = features.map(f => f.get("name"));
-
-        let actions = fnames.filter(n => !existing.has(n)).toJS();
-
-        if (actions.length > 0) {
-            if (socket.current !== null) {
-                socket.current(); // call the cancel function
-                socket.current = null;
-            }
-
-            // create the request
-            const request = {
-                routine: "arrange",
-                hashType: "feature",
-                activity: "metrics",
-                name: actions,
-                sessionkey: utils.getGlobalSessionKey()
-            };
-
-            // dispatch, save the cancel function
-            socket.current = utils.makeStreamRequest(request, sock_cb);
-
-            // dispatch onto the store
-            actions = actions.map(n => statSetFeatureLoading(n));
-            dispatch(batchActions(actions));
-        }
-    }, [features]);
-
-    // Clean up the socket if this gets unmounted
-    useEffect(() => {
-        return () => {
-            if (socket.current !== null) {
-                socket.current(); // call the cancel function
-            }
-        };
+    useEffect(_ => {
+        return _ => socketCloseHandles.forEach(close => close());
     }, []);
 }
 
