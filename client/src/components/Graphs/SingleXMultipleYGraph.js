@@ -67,6 +67,7 @@ export function SingleXMultipleYGraphLegend(props) {
 function SingleXMultipleYGraph(props) {
     const [defaultsInitialized, setDefaultsInitialized] = useState(false);
     const chart = useRef(null);
+    const selectionCharts = useRef([]);
     const [chartId] = useState(utils.createNewId());
     const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
@@ -351,9 +352,9 @@ function SingleXMultipleYGraph(props) {
         [axisLabels]
     );
 
-    function setDefaults() {
+    function setDefaults(init) {
         if (!featureInfo) setFeatureInfo(baseFeatureInfo);
-        if (!bounds)
+        if (!init || !bounds)
             setBounds(
                 cols.reduce((acc, col) => {
                     const [min, max] = utils.getMinMax(col.data);
@@ -361,17 +362,18 @@ function SingleXMultipleYGraph(props) {
                     return acc;
                 }, {})
             );
-        if (!axisLabels)
+
+        if (!init || !axisLabels)
             setAxisLabels(
                 featureList.reduce((acc, featureName) => {
                     acc[featureName] = featureNameList.get(featureName, featureName);
                     return acc;
                 }, {})
             );
-        if (showGridLines === undefined) setShowGridLines(true);
-        if (!xAxis) setXAxis(uiTypes.GRAPH_INDEX);
-        if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
-        if (!axisScales)
+        if (!init || showGridLines === undefined) setShowGridLines(true);
+        if (!init || !xAxis) setXAxis(uiTypes.GRAPH_INDEX);
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        if (!init || !axisScales)
             setAxisScales([
                 { name: `X (${xAxisTitle})`, scale: "linear" },
                 { name: `Y (${yAxisTitle})`, scale: "linear" }
@@ -380,7 +382,7 @@ function SingleXMultipleYGraph(props) {
     }
 
     useEffect(_ => {
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 
@@ -418,9 +420,10 @@ function SingleXMultipleYGraph(props) {
         [needsAutoscale]
     );
 
+    selectionCharts.current = selectionCharts.current.filter(sel => sel);
     return (
         <GraphWrapper
-            chart={chart}
+            chart={[chart.current, ...selectionCharts.current]}
             chartIds={chartIds}
             win={props.win}
             saveOptions={{ type: "singleXMultipleY" }}
@@ -452,14 +455,16 @@ function SingleXMultipleYGraph(props) {
                             divId={chartId}
                             useResizeHandler
                         />
-                        {selectionChartStates.map(selectionState => (
+                        {selectionChartStates.map((selectionState, idx) => (
                             <Plot
+                                ref={ref => (selectionCharts.current[idx] = ref)}
                                 key={selectionState.id}
                                 data={selectionState.data}
                                 layout={selectionState.layout}
                                 config={selectionState.config}
                                 style={{ width: "100%", height: "20px" }}
                                 divId={selectionState.id}
+                                useResizeHandler
                             />
                         ))}
                         <div className="x-axis-title">{xAxisTitle}</div>

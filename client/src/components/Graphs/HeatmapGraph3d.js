@@ -175,28 +175,31 @@ function HeatmapGraph3d(props) {
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
     );
 
-    function setDefaults() {
-        setBounds(
-            featureList.reduce((acc, colName, idx) => {
-                const [min, max] = utils.getMinMax(sanitizedCols[idx]);
-                acc[colName] = {
-                    min,
-                    max
-                };
-                return acc;
-            }, {})
-        );
-        setBinSize({
-            x: DEFAULT_BUCKET_COUNT,
-            y: DEFAULT_BUCKET_COUNT
-        });
-        setAxisLabels(
-            featureList.reduce((acc, featureName) => {
-                acc[featureName] = featureName;
-                return acc;
-            }, {})
-        );
-        setWindowTitle(featureDisplayNames.join(" vs "));
+    function setDefaults(init) {
+        if (!init || !bounds)
+            setBounds(
+                featureList.reduce((acc, colName, idx) => {
+                    acc[colName] = {
+                        min: Math.min(...sanitizedCols[idx]),
+                        max: Math.max(...sanitizedCols[idx])
+                    };
+                    return acc;
+                }, {})
+            );
+        if (!init || !binSize)
+            setBinSize({
+                x: DEFAULT_BUCKET_COUNT,
+                y: DEFAULT_BUCKET_COUNT
+            });
+        if (!init || !axisLabels)
+            setAxisLabels(
+                featureList.reduce((acc, featureName) => {
+                    acc[featureName] = featureName;
+                    return acc;
+                }, {})
+            );
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+
         setXAxis(featureList[0]);
         setYAxis(featureList[1]);
         setZAxis(featureList[2]);
@@ -232,14 +235,15 @@ function HeatmapGraph3d(props) {
                 anchor: "x"
             },
             autosize: true,
-            margin: { l: 0, r: 30, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
-            hovermode: false, // Turning off hovermode seems to screw up click handling
+            margin: { l: 0, r: 30, t: 0, b: 0 },
+            hovermode: "closest",
             titlefont: { size: 5 },
             annotations: []
         },
         config: {
+            responsive: true,
             displaylogo: false,
-            displayModeBar: false
+            modeBarButtons: [["zoomIn2d", "zoomOut2d", "autoScale2d"], ["toggleHover"]]
         }
     });
 
@@ -253,8 +257,7 @@ function HeatmapGraph3d(props) {
     }
 
     useEffect(_ => {
-        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 

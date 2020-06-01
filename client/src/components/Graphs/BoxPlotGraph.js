@@ -3,8 +3,6 @@ import "./BoxPlotGraph.css";
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect, useMemo } from "react";
 
-import GraphWrapper from "./GraphWrapper";
-
 import { filterSingleCol } from "./graphFunctions";
 import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
@@ -14,10 +12,9 @@ import {
     useWindowGraphBinSize,
     useWindowGraphBounds,
     useWindowNeedsResetToDefault,
-    useWindowShowGridLines,
-    useWindowTitle,
-    useWindowTrendLineVisible
+    useWindowTitle
 } from "../../hooks/WindowHooks";
+import GraphWrapper from "./GraphWrapper";
 import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
@@ -179,30 +176,30 @@ function BoxPlotGraph(props) {
         props.data.find(feature => feature.get("feature") === featureName).get("displayName")
     );
 
-    function setDefaults() {
-        setBounds(
-            featureNames.reduce((acc, colName, idx) => {
-                const [min, max] = utils.getMinMax(baseCols[idx][0]);
-                acc[colName] = {
-                    min,
-                    max
-                };
-                return acc;
-            }, {})
-        );
-        setAxisLabels(
-            featureNames.reduce((acc, featureName) => {
-                acc[featureName] = featureName;
-                return acc;
-            }, {})
-        );
-        setWindowTitle(featureDisplayNames.join(" , "));
-        setDefaultsInitialized(true);
+    function setDefaults(init) {
+        if (!init || !bounds)
+            setBounds(
+                featureNames.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(baseCols[idx][0]);
+                    acc[colName] = {
+                        min,
+                        max
+                    };
+                    return acc;
+                }, {})
+            );
+        if (!init || !axisLabels)
+            setAxisLabels(
+                featureNames.reduce((acc, featureName) => {
+                    acc[featureName] = featureName;
+                    return acc;
+                }, {})
+            );
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" , "));
     }
 
     useEffect(_ => {
-        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 

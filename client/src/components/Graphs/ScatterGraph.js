@@ -6,7 +6,7 @@ import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import regression from "regression";
 
-import { WindowCircularProgress } from "../WindowHelpers/WindowCenter";
+import { GRAPH_INDEX } from "../../constants/uiTypes";
 import { filterBounds } from "./graphFunctions";
 import { usePrevious } from "../../hooks/UtilHooks";
 import {
@@ -93,9 +93,10 @@ function ScatterGraph(props) {
         [bounds]
     );
 
-    const baseX = xAxis
-        ? filteredCols[featureNames.findIndex(feature => feature === xAxis)]
-        : filteredCols[0];
+    const baseX =
+        xAxis && xAxis !== GRAPH_INDEX
+            ? filteredCols[featureNames.findIndex(feature => feature === xAxis)]
+            : filteredCols[0];
     const baseY = yAxis
         ? filteredCols[featureNames.findIndex(feature => feature === yAxis)]
         : filteredCols[1];
@@ -124,7 +125,7 @@ function ScatterGraph(props) {
         JSON.stringify(props.savedSelections.map(sel => [sel.id, sel.hidden]));
     const baseTrace = useMemo(
         _ => {
-            if (!defaultsInitialized) return [];
+            if (!defaultsInitialized) return {};
             const x = baseX;
             const y = baseY;
             const colors = Array(baseX.length).fill(
@@ -170,7 +171,7 @@ function ScatterGraph(props) {
 
     const trendLineTrace = useMemo(
         _ => {
-            if (!trendLineVisible) return [];
+            if (!trendLineVisible) return {};
             const [x, y] = utils.unzip(regression.linear(utils.unzip(filteredCols)).points);
             return {
                 x,
@@ -241,7 +242,7 @@ function ScatterGraph(props) {
             margin: { l: 0, r: 0, t: 0, b: 0, pad: 10 }, // Axis tick labels are drawn in the margin space
             dragmode: props.globalChartState || "lasso",
             datarevision: chartRevision.current,
-            hovermode: "closest", // Turning off hovermode seems to screw up click handling
+            hovermode: "closest",
             titlefont: { size: 5 },
             xaxis: {
                 automargin: true,
@@ -268,8 +269,8 @@ function ScatterGraph(props) {
         });
     }
 
-    function setDefaults() {
-        if (!bounds)
+    function setDefaults(init) {
+        if (!init || !bounds)
             setBounds(
                 featureNames.reduce((acc, colName, idx) => {
                     const [min, max] = utils.getMinMax(sanitizedCols[idx]);
@@ -280,7 +281,7 @@ function ScatterGraph(props) {
                     return acc;
                 }, {})
             );
-        if (!axisLabels)
+        if (!init || !axisLabels)
             setAxisLabels(
                 featureNames.reduce((acc, featureName) => {
                     acc[featureName] = featureName;
@@ -305,7 +306,7 @@ function ScatterGraph(props) {
     }
 
     useEffect(_ => {
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 

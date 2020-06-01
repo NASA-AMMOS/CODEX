@@ -241,14 +241,15 @@ function HeatmapGraph(props) {
                 anchor: "x"
             },
             autosize: true,
-            margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
-            hovermode: false, // Turning off hovermode seems to screw up click handling
+            margin: { l: 0, r: 0, t: 0, b: 0 },
+            hovermode: "closest",
             titlefont: { size: 5 },
             annotations: []
         },
         config: {
+            responsive: true,
             displaylogo: false,
-            displayModeBar: false
+            modeBarButtons: [["zoomIn2d", "zoomOut2d", "autoScale2d"], ["toggleHover"]]
         }
     });
 
@@ -261,8 +262,8 @@ function HeatmapGraph(props) {
         setChartRevision(revision);
     }
 
-    function setDefaults() {
-        if (!bounds)
+    function setDefaults(init) {
+        if (!init || !bounds)
             setBounds(
                 featureList.reduce((acc, colName, idx) => {
                     const [min, max] = utils.getMinMax(sanitizedCols[idx]);
@@ -277,20 +278,20 @@ function HeatmapGraph(props) {
             x: DEFAULT_BUCKET_COUNT,
             y: DEFAULT_BUCKET_COUNT
         });
-        if (!axisLabels)
+        if (!init || !axisLabels)
             setAxisLabels(
                 featureList.reduce((acc, featureName) => {
                     acc[featureName] = featureName;
                     return acc;
                 }, {})
             );
-        if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
-        if (!xAxis) setXAxis(featureList[0]);
-        if (!yAxis) setYAxis(featureList[1]);
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        if (!init || !xAxis) setXAxis(featureList[0]);
+        if (!init || !yAxis) setYAxis(featureList[1]);
     }
 
     useEffect(_ => {
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 
