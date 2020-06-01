@@ -40,5 +40,7 @@ export const loadedDataModel = {
 
 export const featureGroupModel = {
     name: "",
-    selected: false
+    featureIDs: [],
+    selected: false,
+    selectedFeatures: []
 };

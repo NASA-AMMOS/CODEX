@@ -35,7 +35,8 @@ import ControlBar from "../ControlBar/ControlBar";
 import SessionBar from "./SessionBar";
 
 function NavigationBar(props) {
-    const [features] = useSelectedFeatureNames();
+    const [featureNames] = useSelectedFeatureNames();
+    const features = new Set(featureNames);
     const defaultBackground = "#05101f";
     const [savedSelections] = useSavedSelections();
     const dispatch = useDispatch();

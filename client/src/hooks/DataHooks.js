@@ -21,6 +21,7 @@ import {
     fileLoad,
     renameFeatureGroup,
     selectFeatureGroup,
+    selectFeatureInGroup,
     statSetFeatureFailed,
     statSetFeatureLoading,
     statSetFeatureResolved
@@ -592,4 +593,20 @@ export function useFeatureListLoading() {
     const dispatch = useDispatch();
     const loading = useSelector(state => state.data.get("featureListLoading"));
     return [loading, isLoading => dispatch(featureListLoading(isLoading))];
+}
+
+export function useSelectFeatureInGroup(id) {
+    const dispatch = useDispatch();
+    const groupSelections = useSelector(state => {
+        const group = state.data.get("featureGroups").find(group => group.get("id") === id);
+        if (!group) {
+            console.warn(`Error in "useSelectFeatureInGroup": Group with id ${id} not found`);
+            return null;
+        }
+        return group.get("selectedFeatures");
+    });
+    return [
+        groupSelections,
+        (featureName, remove) => dispatch(selectFeatureInGroup(id, featureName, remove))
+    ];
 }
