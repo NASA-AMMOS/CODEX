@@ -358,3 +358,7 @@ export function deleteFeatureGroup(id) {
 export function renameFeatureGroup(id, name) {
     return { type: types.RENAME_FEATURE_GROUP, id, name };
 }
+
+export function selectFeatureInGroup(id, featureName, remove) {
+    return { type: types.SELECT_FEATURE_IN_GROUP, id, featureName, remove };
+}
