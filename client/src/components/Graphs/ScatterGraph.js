@@ -7,6 +7,7 @@ import React, { useRef, useState, useEffect, useMemo } from "react";
 import regression from "regression";
 
 import { GRAPH_INDEX } from "../../constants/uiTypes";
+import { WindowCircularProgress } from "../WindowHelpers/WindowCenter";
 import { filterBounds } from "./graphFunctions";
 import { usePrevious } from "../../hooks/UtilHooks";
 import {
