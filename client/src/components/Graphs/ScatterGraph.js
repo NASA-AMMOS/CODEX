@@ -173,7 +173,7 @@ function ScatterGraph(props) {
     const trendLineTrace = useMemo(
         _ => {
             if (!trendLineVisible) return {};
-            const [x, y] = utils.unzip(regression.linear(utils.unzip(filteredCols)).points);
+            const [x, y] = utils.unzip(regression.linear(utils.unzip([baseX, baseY])).points);
             return {
                 x,
                 y,
@@ -186,7 +186,7 @@ function ScatterGraph(props) {
                 marker: { color: "red", size: 5 }
             };
         },
-        [filteredCols, trendLineVisible]
+        [baseX, baseY, trendLineVisible]
     );
 
     const selectionTraces = useMemo(
