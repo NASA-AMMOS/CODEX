@@ -371,7 +371,7 @@ function FeatureGroup(props) {
                 <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="selection-group"
+                    className="selection-group list"
                 >
                     <button className={iconClasses} onClick={_ => setPanelExpanded(!panelExpanded)}>
                         <KeyboardArrowRightIcon />
@@ -474,8 +474,7 @@ function FeatureItem(props) {
         setAnchorEl(e.currentTarget);
     }
 
-    const featureNameClasses = classnames({ ["feature-name"]: true, alias: props.group });
-
+    const featureNameRowClasses = classnames({ ["feature-name-row"]: true, alias: props.group });
     return (
         <Draggable draggableId={props.feature.name} index={props.idx}>
             {provided => (
@@ -490,7 +489,7 @@ function FeatureItem(props) {
                         onMouseEnter={_ => setRowHover(true)}
                         onMouseLeave={_ => setRowHover(false)}
                     >
-                        <div className="feature-name-row">
+                        <div className={featureNameRowClasses}>
                             <Checkbox
                                 checked={isSelected}
                                 className="selected-checkbox"
@@ -500,7 +499,7 @@ function FeatureItem(props) {
                                 checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
                                 onClick={onSelectClick}
                             />
-                            <span className={featureNameClasses}>{displayName}</span>
+                            <span className="feature-name">{displayName}</span>
                         </div>
                         {featureListContext.statsHidden ? null : (
                             <StatisticsRow
