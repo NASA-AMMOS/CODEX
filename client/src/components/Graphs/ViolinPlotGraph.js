@@ -179,16 +179,18 @@ function ViolinPlotGraph(props) {
     const defaultTitle = featureDisplayNames.join(" , ");
 
     function setDefaults(init) {
-        if (!init || !bounds)
+        if (!init || !bounds) {
             setBounds(
                 featureNames.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(baseCols[idx][0]);
                     acc[colName] = {
-                        min: Math.min(...baseCols[idx][0]),
-                        max: Math.max(...baseCols[idx][0])
+                        min,
+                        max
                     };
                     return acc;
                 }, {})
             );
+        }
 
         if (!init || !axisLabels)
             setAxisLabels(
