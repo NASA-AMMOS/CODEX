@@ -11,4 +11,4 @@ export const GRAPH_INDEX = "Index";
 export const MAP_USGS = "USGS Map";
 export const MAP_OPEN_STREET_MAP = "OpenStreetMap";
 export const MAP_OUTLINES = "Outlines";
-export const MAP_TYPES = [MAP_USGS, MAP_OPEN_STREET_MAP, MAP_OUTLINES];
+export const MAP_TYPES = [MAP_USGS];

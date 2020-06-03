@@ -805,16 +805,6 @@ function MapGraphEditor(props) {
                     <label>Longitude</label>
                     <span className="feature-name">{featureNameList.get(yAxis, yAxis)}</span>
                 </div>
-                <div className="axis">
-                    <label>Map Type</label>
-                    <select onChange={e => setMapType(e.target.value)} value={mapType}>
-                        {uiTypes.MAP_TYPES.map(f => (
-                            <option value={f} key={f}>
-                                {f}
-                            </option>
-                        ))}
-                    </select>
-                </div>
                 <Button className="swap-button" onClick={handleSwapAxes}>
                     Swap Axes <SwapAxesIcon width="14" height="14" />
                 </Button>
