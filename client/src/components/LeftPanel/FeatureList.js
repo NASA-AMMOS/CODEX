@@ -152,7 +152,7 @@ function SelectedDropdown(props) {
                 <MenuItem key="not_selected" value={2}>
                     {"Not Selected (" + inactive + "/" + totalCount + ")"}
                 </MenuItem>{" "}
-                <MenuItem key="not_selected" value={3}>
+                <MenuItem key="not_selected_2" value={3}>
                     {`Displayed in Graphs (${featuresInUseCount}/${totalCount})`}
                 </MenuItem>
             </Select>
