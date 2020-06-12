@@ -425,9 +425,10 @@ function ContourGraph(props) {
         if (!init || !bounds)
             setBounds(
                 featureList.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(sanitizedCols[idx]);
                     acc[colName] = {
-                        min: Math.min(...sanitizedCols[idx]),
-                        max: Math.max(...sanitizedCols[idx])
+                        min,
+                        max
                     };
                     return acc;
                 }, {})

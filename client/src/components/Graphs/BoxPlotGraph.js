@@ -196,6 +196,7 @@ function BoxPlotGraph(props) {
                 }, {})
             );
         if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" , "));
+        setDefaultsInitialized(true);
     }
 
     useEffect(_ => {

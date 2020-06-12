@@ -109,7 +109,8 @@ function MapGraph(props) {
         if (!init || !bounds)
             setBounds(
                 baseCols.reduce((acc, col) => {
-                    acc[col.feature] = { min: Math.min(...col.data), max: Math.max(...col.data) };
+                    const [min, max] = utils.getMinMax(col.data);
+                    acc[col.feature] = { min, max };
                     return acc;
                 }, {})
             );

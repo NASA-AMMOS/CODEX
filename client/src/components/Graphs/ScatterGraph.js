@@ -234,6 +234,7 @@ function ScatterGraph(props) {
     );
 
     const traces = [baseTrace, trendLineTrace, ...selectionTraces];
+    console.log(traces);
 
     // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState({
