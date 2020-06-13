@@ -30,7 +30,7 @@ def save_session(msg, result, savePath):
     '''
     try:
 
-        cache = get_cache(msg['sessionkey'])
+        cache = get_cache(msg['sessionkey'], timeout=None)
 
         session_name = msg['session_name']
 
@@ -59,7 +59,7 @@ def load_session(msg, result, loadPath):
     '''
     try:
 
-        cache = get_cache(msg['sessionkey'])
+        cache = get_cache(msg['sessionkey'], timeout=None)
 
         session_name = msg['session_name']
         session_path = os.path.join(loadPath, 'sessions', session_name)

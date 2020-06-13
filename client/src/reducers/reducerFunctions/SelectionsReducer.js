@@ -1,5 +1,5 @@
-import * as uiTypes from "constants/uiTypes";
-import * as utils from "utils/utils";
+import * as uiTypes from "../../constants/uiTypes";
+import * as utils from "../../utils/utils";
 
 export default class SelectionsReducer {
     static setCurrentSelection(state, action) {

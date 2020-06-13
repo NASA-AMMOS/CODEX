@@ -1,13 +1,9 @@
-import "components/Graphs/SingleXMultipleYGraph.scss";
+import "./SingleXMultipleYGraph.scss";
 
 import Plot from "react-plotly.js";
 import Plotly from "plotly.js";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import mergeImg from "merge-img";
-
-import GraphWrapper from "components/Graphs/GraphWrapper";
-import * as uiTypes from "constants/uiTypes";
-import * as utils from "utils/utils";
 
 import { filterBounds } from "./graphFunctions";
 import { useFeatureDisplayNames } from "../../hooks/DataHooks";
@@ -23,6 +19,9 @@ import {
     useWindowTitle,
     useWindowXAxis
 } from "../../hooks/WindowHooks";
+import GraphWrapper from "./GraphWrapper";
+import * as uiTypes from "../../constants/uiTypes";
+import * as utils from "../../utils/utils";
 
 const Jimp = require("jimp");
 
@@ -66,7 +65,9 @@ export function SingleXMultipleYGraphLegend(props) {
 }
 
 function SingleXMultipleYGraph(props) {
+    const [defaultsInitialized, setDefaultsInitialized] = useState(false);
     const chart = useRef(null);
+    const selectionCharts = useRef([]);
     const [chartId] = useState(utils.createNewId());
     const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
@@ -83,27 +84,31 @@ function SingleXMultipleYGraph(props) {
     const [axisScales, setAxisScales] = useWindowAxisScale(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
-    const processedData = (function() {
-        const sanitizedCols = utils.removeSentinelValues(
-            props.data.map(col => col.get("data")).toJS(),
-            props.fileInfo
-        );
-        return filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
-    })();
+    const [sanitizedCols] = useState(_ =>
+        utils.removeSentinelValues(props.data.map(col => col.get("data")).toJS(), props.fileInfo)
+    );
+
+    const processedData = useMemo(
+        _ => filterBounds(featureList, sanitizedCols, bounds && bounds.toJS()),
+        [bounds]
+    );
 
     const dataLength = processedData[0].length;
 
     // Generic index array
-    const indexAry = [...Array(processedData[0].length)].map((_, idx) => idx);
+    const [indexAry] = useState(_ => [...Array(processedData[0].length)].map((_, idx) => idx));
 
-    const x =
-        !xAxis || xAxis === uiTypes.GRAPH_INDEX
-            ? indexAry
-            : Array.from(
-                  processedData[
-                      props.data.findIndex(col => col.get("feature") === props.win.data.xAxis)
-                  ]
-              ).sort((a, b) => b - a);
+    const x = useMemo(
+        _ =>
+            !xAxis || xAxis === uiTypes.GRAPH_INDEX
+                ? indexAry
+                : Array.from(
+                      processedData[
+                          props.data.findIndex(col => col.get("feature") === props.win.data.xAxis)
+                      ]
+                  ).sort((a, b) => b - a),
+        [xAxis]
+    );
 
     const cols = props.data
         .filter(col => col.get("feature") !== xAxis)
@@ -138,7 +143,7 @@ function SingleXMultipleYGraph(props) {
                     acc[idx] = col.data[idx];
                     return acc;
                 }, Array(col.data.length).fill(null)),
-                type: "scatter",
+                type: "scattergl",
                 mode: "lines",
                 marker: { color: selection.color },
                 visible: true,
@@ -149,19 +154,27 @@ function SingleXMultipleYGraph(props) {
         });
     }
 
-    const traces = cols.map((col, idx) => ({
-        x,
-        y: col.data,
-        type: "scatter",
-        mode: "lines",
-        marker: {
-            color: ((featureInfo && featureInfo.toJS()) || baseFeatureInfo).find(
-                f => f.name === col.name
-            ).color
-        },
-        visible: true,
-        hoverinfo: "x+y"
-    }));
+    const traces = useMemo(
+        _ =>
+            cols.map((col, idx) =>
+                !defaultsInitialized
+                    ? {}
+                    : {
+                          x,
+                          y: col.data,
+                          type: "scattergl",
+                          mode: "lines",
+                          marker: {
+                              color: ((featureInfo && featureInfo.toJS()) || baseFeatureInfo).find(
+                                  f => f.name === col.name
+                              ).color
+                          },
+                          visible: true,
+                          hoverinfo: "x+y"
+                      }
+            ),
+        [defaultsInitialized]
+    );
 
     // The plotly react element only changes when the revision is incremented.
     const chartRevision = useRef(0);
@@ -339,34 +352,37 @@ function SingleXMultipleYGraph(props) {
         [axisLabels]
     );
 
-    function setDefaults() {
+    function setDefaults(init) {
         if (!featureInfo) setFeatureInfo(baseFeatureInfo);
-        if (!bounds)
+        if (!init || !bounds)
             setBounds(
                 cols.reduce((acc, col) => {
-                    acc[col.name] = { min: Math.min(...col.data), max: Math.max(...col.data) };
+                    const [min, max] = utils.getMinMax(col.data);
+                    acc[col.name] = { min, max };
                     return acc;
                 }, {})
             );
-        if (!axisLabels)
+
+        if (!init || !axisLabels)
             setAxisLabels(
                 featureList.reduce((acc, featureName) => {
                     acc[featureName] = featureNameList.get(featureName, featureName);
                     return acc;
                 }, {})
             );
-        if (showGridLines === undefined) setShowGridLines(true);
-        if (!xAxis) setXAxis(uiTypes.GRAPH_INDEX);
-        if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
-        if (!axisScales)
+        if (!init || showGridLines === undefined) setShowGridLines(true);
+        if (!init || !xAxis) setXAxis(uiTypes.GRAPH_INDEX);
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        if (!init || !axisScales)
             setAxisScales([
                 { name: `X (${xAxisTitle})`, scale: "linear" },
                 { name: `Y (${yAxisTitle})`, scale: "linear" }
             ]);
+        setDefaultsInitialized(true);
     }
 
     useEffect(_ => {
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 
@@ -404,9 +420,10 @@ function SingleXMultipleYGraph(props) {
         [needsAutoscale]
     );
 
+    selectionCharts.current = selectionCharts.current.filter(sel => sel);
     return (
         <GraphWrapper
-            chart={chart}
+            chart={[chart.current, ...selectionCharts.current]}
             chartIds={chartIds}
             win={props.win}
             saveOptions={{ type: "singleXMultipleY" }}
@@ -438,14 +455,16 @@ function SingleXMultipleYGraph(props) {
                             divId={chartId}
                             useResizeHandler
                         />
-                        {selectionChartStates.map(selectionState => (
+                        {selectionChartStates.map((selectionState, idx) => (
                             <Plot
+                                ref={ref => (selectionCharts.current[idx] = ref)}
                                 key={selectionState.id}
                                 data={selectionState.data}
                                 layout={selectionState.layout}
                                 config={selectionState.config}
                                 style={{ width: "100%", height: "20px" }}
                                 divId={selectionState.id}
+                                useResizeHandler
                             />
                         ))}
                         <div className="x-axis-title">{xAxisTitle}</div>

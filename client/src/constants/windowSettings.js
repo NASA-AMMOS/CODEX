@@ -1,4 +1,4 @@
-import * as windowTypes from "constants/windowTypes";
+import * as windowTypes from "./windowTypes";
 
 export const defaultInitialSettings = {
     width: 650,

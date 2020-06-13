@@ -1,3 +1,6 @@
-FROM node:8
+FROM node:12
+COPY . /home/codex/client
 WORKDIR /home/codex/client
-CMD npm install && npm start
+RUN npm install
+RUN npm run build
+CMD node scripts/server.js

@@ -1,37 +1,25 @@
 import React from "react";
 
-import ClusterAlgorithm from "components/Algorithms/ClusterAlgorithm";
-import ContourGraph from "components/Graphs/ContourGraph";
-import ViolinPlotGraph from "components/Graphs/ViolinPlotGraph";
-import ScatterGraph from "components/Graphs/ScatterGraph";
-import HeatmapGraph from "components/Graphs/HeatmapGraph";
-import HeatmapGraph3d from "components/Graphs/HeatmapGraph3d";
-import BoxPlotGraph from "components/Graphs/BoxPlotGraph";
-import HistogramGraph from "components/Graphs/HistogramGraph";
-import FindMoreLikeThis from "components/FindMoreLikeThis/FindMoreLikeThis";
-import Sessions from "components/Sessions/Sessions";
-import TimeSeriesGraph from "components/Graphs/TimeSeriesGraph";
-import * as algorithmTypes from "constants/algorithmTypes";
-import * as classificationRegressionTypes from "constants/classificationRegressionTypes";
-import * as uiTypes from "constants/uiTypes";
-import DimensionalityReduction from "components/DimensionalityReduction/DimensionalityReduction";
-import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
-import * as workflowTypes from "constants/workflowTypes";
-import ExplainThis from "components/ExplainThis/ExplainThis";
-import GeneralClassifier from "components/GeneralClassifier/GeneralClassifier";
-import Filter from "components/Filter/Filter";
-import * as windowTypes from "constants/windowTypes";
-import Debugger from "components/Debug/Debug";
-import Table from "components/Table/Table";
-import Transform from "components/Transform/Transform";
-import QualityScan from "components/QualityScan/QualityScan";
-import SingleXMultipleYGraph from "components/Graphs/SingleXMultipleYGraph";
-import MapGraph from "components/Graphs/MapGraph";
-import GraphWindow from "components/Graphs/GraphWindow";
-import Normalization from "components/Normalization/Normalization";
-import PeakDetection from "components/PeakDetection/PeakDetection";
-import TemplateScan from "components/TemplateScan/TemplateScan";
-import Regression from "components/Regression/Regression";
+import ClusterAlgorithm from "../Algorithms/ClusterAlgorithm";
+import Correlation from "../Correlation/Correlation";
+import Debugger from "../Debug/Debug";
+import DimensionalityReduction from "../DimensionalityReduction/DimensionalityReduction";
+import ExplainThis from "../ExplainThis/ExplainThis";
+import Filter from "../Filter/Filter";
+import FindMoreLikeThis from "../FindMoreLikeThis/FindMoreLikeThis";
+import GeneralClassifier from "../GeneralClassifier/GeneralClassifier";
+import GraphWindow from "../Graphs/GraphWindow";
+import Normalization from "../Normalization/Normalization";
+import PeakDetection from "../PeakDetection/PeakDetection";
+import QualityScan from "../QualityScan/QualityScan";
+import Regression from "../Regression/Regression";
+import Table from "../Table/Table";
+import TemplateScan from "../TemplateScan/TemplateScan";
+import Transform from "../Transform/Transform";
+import * as algorithmTypes from "../../constants/algorithmTypes";
+import * as uiTypes from "../../constants/uiTypes";
+import * as windowTypes from "../../constants/windowTypes";
+import * as workflowTypes from "../../constants/workflowTypes";
 
 export function getWindowContent(win) {
     // Graphs get handled by the separate graph handler, as the graph type isn't fixed to the window.
@@ -47,8 +35,6 @@ export function getWindowContent(win) {
                     selectedFeatures={win.get("selectedFeatures")}
                 />
             );
-        case uiTypes.SESSIONS_WINDOW:
-            return <Sessions />;
         case windowTypes.DIMENSIONALITY_REDUCTION_WINDOW:
             return <DimensionalityReduction />;
         case workflowTypes.EXPLAIN_THIS_WINDOW:
@@ -75,6 +61,8 @@ export function getWindowContent(win) {
             return <TemplateScan />;
         case windowTypes.REGRESSION_WINDOW:
             return <Regression />;
+        case windowTypes.CORRELATION_WINDOW:
+            return <Correlation />;
         default:
             return (
                 <p>

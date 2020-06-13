@@ -2,10 +2,7 @@ import { fromJS } from "immutable";
 import { useDispatch, useSelector } from "react-redux";
 import { useLayoutEffect } from "react";
 
-import { defaultInitialSettings } from "constants/windowSettings";
-import * as wmActions from "actions/windowManagerActions";
-
-import { graphs } from "../constants/windowTypes";
+import { defaultInitialSettings } from "../constants/windowSettings";
 import {
     setWindowAxisFeature,
     setWindowAxisLabels,
@@ -23,7 +20,7 @@ import {
     setWindowNeedsPlotImage,
     setWindowShowGridLines
 } from "../actions/windowDataActions";
-import { useAllowGraphHotkeys } from "./UIHooks";
+import * as wmActions from "../actions/windowManagerActions";
 
 /*
  * Basically, this hook:
@@ -124,12 +121,10 @@ export function useActiveWindow() {
     const dispatch = useDispatch();
     const activeWindowId = useSelector(state => state.windowManager.get("activeWindow"));
     const windowList = useWindowList();
-    const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
 
     const setActiveWindow = id => {
         if (id !== activeWindowId) dispatch(wmActions.setActiveWindow(id));
         const activeWindow = windowList.find(win => win.get("id") === id);
-        if (graphs.includes(activeWindow.get("windowType"))) setAllowGraphHotkeys(true);
     };
 
     return [activeWindowId, setActiveWindow];

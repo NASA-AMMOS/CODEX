@@ -30,7 +30,7 @@ def export_contents(msg, result, savePath):
     try:
 
         if(msg["type"] == "code"):
-            cache = get_cache(msg['sessionkey'])
+            cache = get_cache(msg['sessionkey'], timeout=None)
             saveFile = os.path.join(savePath,"returned_code.py")
             cache.dump_code_to_file(saveFile)
             f = open(saveFile, "r")
@@ -44,7 +44,7 @@ def export_contents(msg, result, savePath):
             f.close()
 
         elif(msg["type"] == "features"):
-            cache = get_cache(msg['sessionkey'])
+            cache = get_cache(msg['sessionkey'], timeout=None)
             data = cache.return_data()
             names = []
             features = []
@@ -70,7 +70,7 @@ def export_contents(msg, result, savePath):
 
 
         elif(msg["type"] == "selections"):
-            cache = get_cache(msg['sessionkey'])
+            cache = get_cache(msg['sessionkey'], timeout=None)
             data = cache.return_data()
             names = []
             selections = []

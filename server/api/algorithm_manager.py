@@ -27,6 +27,7 @@ from api.normalize               import normalize
 from api.peak_detection          import peak_detection
 from api.regression              import regression
 from api.template_scan           import template_scan
+from api.correlation             import correlation
 
 from api.sub.system              import get_featureList
 from api.sub.hash                import get_cache
@@ -40,7 +41,7 @@ def algorithm_call(msg, result):
     '''
     try:
 
-        ch = get_cache(msg['sessionkey'])
+        ch = get_cache(msg['sessionkey'], timeout=None)
 
         parms = msg['parameters']
         downsampled = msg["downsampled"]

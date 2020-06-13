@@ -1,8 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 
-import * as uiActions from "actions/ui";
-
-import { clearAllPlotImages } from "../actions/ui";
+import * as uiActions from "../actions/ui";
 
 /**
  * Get current global graph state
@@ -53,14 +51,6 @@ export function useStatsPanelHidden() {
     ];
 }
 
-export function useAllowGraphHotkeys() {
-    const dispatch = useDispatch();
-    return [
-        useSelector(state => state.ui.get("allowGraphHotkeys")),
-        allow => dispatch(uiActions.setAllowGraphHotkeys(allow))
-    ];
-}
-
 export function useHelpMode() {
     const dispatch = useDispatch();
     return [
@@ -87,5 +77,5 @@ export function useSetStoredPlotImage() {
 
 export function useClearAllPlotImages() {
     const dispatch = useDispatch();
-    return _ => dispatch(clearAllPlotImages());
+    return _ => dispatch(uiActions.clearAllPlotImages());
 }

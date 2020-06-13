@@ -1,4 +1,4 @@
-import "components/DimensionalityReduction/dimensionalityReductions.scss";
+import "./dimensionalityReductions.scss";
 
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -7,18 +7,14 @@ import React, { useEffect, useState } from "react";
 import Slider from "@material-ui/core/Slider";
 import Typography from "@material-ui/core/Typography";
 
-import { WindowCircularProgress, WindowError } from "components/WindowHelpers/WindowCenter";
-import {
-    WindowLayout,
-    ExpandingContainer,
-    FixedContainer
-} from "components/WindowHelpers/WindowLayout";
-import { WindowXScroller } from "components/WindowHelpers/WindowScroller";
-import { useSelectedFeatureNames, useFilename, useNewFeature } from "hooks/DataHooks";
-import { useWindowManager } from "hooks/WindowHooks";
-import HelpButton from "components/WindowHelpers/WindowHelp";
-import * as dimensionalityReductionTypes from "constants/dimensionalityReductionTypes";
-import * as utils from "utils/utils";
+import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
+import { WindowLayout, ExpandingContainer, FixedContainer } from "../WindowHelpers/WindowLayout";
+import { WindowXScroller } from "../WindowHelpers/WindowScroller";
+import { useSelectedFeatureNames, useFilename, useNewFeature } from "../../hooks/DataHooks";
+import { useWindowManager } from "../../hooks/WindowHooks";
+import HelpButton from "../WindowHelpers/WindowHelp";
+import * as dimensionalityReductionTypes from "../../constants/dimensionalityReductionTypes";
+import * as utils from "../../utils/utils";
 
 /**
  * Create the dimensionality reduction window

@@ -1,6 +1,7 @@
-import * as actionTypes from "constants/actionTypes";
-import WorkerSocket from "worker-loader!workers/socket.worker";
-import * as utils from "utils/utils";
+import WorkerSocket from "worker-loader!../workers/socket.worker";
+
+import * as actionTypes from "../constants/actionTypes";
+import * as utils from "../utils/utils";
 
 export function saveCurrentSelection() {
     return (dispatch, getState) => {

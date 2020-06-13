@@ -53,7 +53,7 @@ class algorithm():
 
     def run(self):
 
-        self.cache = get_cache(self.session)
+        self.cache = get_cache(self.session, timeout=None)
 
         startTime = time.time()
         self.result = {'algorithm': self.algorithmName,
@@ -63,6 +63,7 @@ class algorithm():
         returnHash = self.cache.findHashArray("hash", self.inputHash, "feature")
         if returnHash is None:
             logging.warning("Input hash not found: {inputHash}".format(inputHash=self.inputHash))
+            self.result["WARNING"] = "Input hash not found: {inputHash}".format(inputHash=self.inputHash)
             self.result['message'] = "failure"
             return self.result
 

@@ -1,4 +1,4 @@
-import "components/LeftPanel/SelectionList.scss";
+import "./SelectionList.scss";
 
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { RemoveRedEye } from "@material-ui/icons";

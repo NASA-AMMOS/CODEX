@@ -1,5 +1,5 @@
 import Immutable from "immutable";
-import * as uiActions from "actions/ui";
+import * as uiActions from "../../actions/ui";
 
 export default class UiReducer {
     static changeGlobalChartState(state, action) {
@@ -48,10 +48,6 @@ export default class UiReducer {
 
     static setStatsPanelHidden(state, action) {
         return state.set("statsPanelHidden", action.hidden);
-    }
-
-    static setAllowGraphHotkeys(state, action) {
-        return state.set("allowGraphHotkeys", action.allow);
     }
 
     static setHelpMode(state, action) {

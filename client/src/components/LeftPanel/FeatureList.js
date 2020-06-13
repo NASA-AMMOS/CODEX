@@ -1,4 +1,4 @@
-import "components/LeftPanel/FeatureList.scss";
+import "./FeatureList.scss";
 
 import { CircularProgress } from "@material-ui/core";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
@@ -19,27 +19,25 @@ import React, { useState, useEffect, useContext } from "react";
 import Select from "@material-ui/core/Select";
 import TextField from "@material-ui/core/TextField";
 
-import {
-    useFeatureStatistics,
-    useFeatureStatisticsLoader,
-    useFeatureMetadata,
-    useFeatureDelete
-} from "hooks/DataHooks";
 import classnames from "classnames";
 
 import { reorderList, addNewItem } from "../../utils/utils";
-import { useAllowGraphHotkeys, useStatsPanelHidden } from "../../hooks/UIHooks";
 import {
     useChangeFeatureGroup,
     useDeleteFeatureGroup,
+    useFeatureDelete,
     useFeatureDisplayNames,
     useFeatureGroups,
     useFeatureListLoading,
+    useFeatureMetadata,
+    useFeatureStatistics,
+    useFeatureStatisticsLoader,
     useRenameFeatureGroup,
     useSelectFeatureGroup,
     useSelectFeatureInGroup,
     useSetFeatureSelect
 } from "../../hooks/DataHooks";
+import { useStatsPanelHidden } from "../../hooks/UIHooks";
 import { useWindowList } from "../../hooks/WindowHooks";
 import featureList from "./FeatureList";
 
@@ -354,11 +352,9 @@ function GroupContextMenu(props) {
 function FeatureGroup(props) {
     const featureListContext = useContext(FeatureListContext);
     const selectGroup = useSelectFeatureGroup();
-    const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
 
     function groupSelectClick(e) {
         selectGroup(props.group.id, e.target.checked);
-        setAllowGraphHotkeys(true);
     }
 
     const [anchorEl, setAnchorEl] = useState();
@@ -375,7 +371,7 @@ function FeatureGroup(props) {
                 <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="selection-group"
+                    className="selection-group list"
                 >
                     <button className={iconClasses} onClick={_ => setPanelExpanded(!panelExpanded)}>
                         <KeyboardArrowRightIcon />
@@ -434,7 +430,6 @@ function FeatureItem(props) {
     const [featureNames, setFeatureName] = useFeatureDisplayNames();
     const displayName = featureNames.get(props.feature.name, props.feature.name);
     const [rowHover, setRowHover] = useState(false);
-    const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
     const [groupSelections, setGroupSelection] = props.group
         ? useSelectFeatureInGroup(props.group.id)
         : [];
@@ -470,7 +465,6 @@ function FeatureItem(props) {
                 ? getShiftSelectedFeatures()
                 : [props.feature.name];
         featuresToSelect.forEach(feature => selectFeature(feature, e.target.checked));
-        setAllowGraphHotkeys(true);
     }
 
     const [anchorEl, setAnchorEl] = useState();
@@ -480,7 +474,7 @@ function FeatureItem(props) {
     }
 
     const featureNameClasses = classnames({ ["feature-name"]: true, alias: props.group });
-
+    const featureNameRowClasses = classnames({ ["feature-name-row"]: true, alias: props.group });
     return (
         <Draggable draggableId={props.feature.name} index={props.idx}>
             {provided => (
@@ -495,7 +489,7 @@ function FeatureItem(props) {
                         onMouseEnter={_ => setRowHover(true)}
                         onMouseLeave={_ => setRowHover(false)}
                     >
-                        <div className="feature-name-row">
+                        <div className={featureNameRowClasses}>
                             <Checkbox
                                 checked={isSelected}
                                 className="selected-checkbox"

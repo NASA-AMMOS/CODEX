@@ -2,16 +2,16 @@ import "./View.css";
 
 import React from "react";
 
-import CodexSnackbar from "components/CodexSnackbar/CodexSnackbar";
-import ConfirmationModal from "components/ConfirmationModal/ConfirmationModal";
-import LeftPanel from "components/LeftPanel/LeftPanel";
-import PropertyEditor from "components/PropertyEditor/PropertyEditor";
-import TopBar from "components/TopBar/TopBar";
-import WindowManager from "components/WindowManager/WindowManager";
+import CodexSnackbar from "../CodexSnackbar/CodexSnackbar";
+import ConfirmationModal from "../ConfirmationModal/ConfirmationModal";
+import LeftPanel from "../LeftPanel/LeftPanel";
+import PropertyEditor from "../PropertyEditor/PropertyEditor";
+import TopBar from "../TopBar/TopBar";
+import WindowManager from "../WindowManager/WindowManager";
 import { hot } from "react-hot-loader";
-import KeyboardHandler from "components/KeyboardHandler/KeyboardHandler";
-import HelpModal from "components/Help/HelpModal";
-import Export from "components/Export/Export";
+import KeyboardHandler from "../KeyboardHandler/KeyboardHandler";
+import HelpModal from "../Help/HelpModal";
+import Export from "../Export/Export";
 
 function View(props) {
     return (

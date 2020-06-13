@@ -1,4 +1,4 @@
-import "components/Graphs/GraphWrapper.css";
+import "./GraphWrapper.css";
 
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
@@ -11,10 +11,9 @@ import React, { useState, useEffect } from "react";
 import ReactResizeDetector from "react-resize-detector";
 import mergeImg from "merge-img";
 
-import * as selectionActions from "actions/selectionActions";
-
 import { useSetStoredPlotImage } from "../../hooks/UIHooks";
 import { useSetWindowNeedsPlotImage } from "../../hooks/WindowHooks";
+import * as selectionActions from "../../actions/selectionActions";
 
 const Jimp = require("jimp");
 
@@ -216,7 +215,13 @@ function GraphWrapper(props) {
     const resizeHandler =
         props.resizeHandler !== undefined
             ? props.resizeHandler
-            : _ => props.chart.current.resizeHandler();
+            : _ => {
+                  if (Array.isArray(props.chart))
+                      return props.chart.forEach(chart => {
+                          if (chart.resizeHandler) chart.resizeHandler();
+                      });
+                  props.chart.current.resizeHandler();
+              };
 
     function handleContextMenu(e) {
         e.preventDefault();

@@ -1,15 +1,15 @@
-import "components/Graphs/ScatterGraph.css";
+import "./ScatterGraph.css";
 
 import { TinyColor } from "@ctrl/tinycolor";
+import { scaleLog } from "d3-scale";
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import regression from "regression";
 
-import GraphWrapper from "components/Graphs/GraphWrapper";
-import * as utils from "utils/utils";
-
+import { GRAPH_INDEX } from "../../constants/uiTypes";
+import { WindowCircularProgress } from "../WindowHelpers/WindowCenter";
 import { filterBounds } from "./graphFunctions";
-import { unzip } from "../../utils/utils";
+import { usePrevious } from "../../hooks/UtilHooks";
 import {
     useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
@@ -26,9 +26,10 @@ import {
     useWindowXAxis,
     useWindowYAxis
 } from "../../hooks/WindowHooks";
-import { scaleLog } from "d3-scale";
+import GraphWrapper from "./GraphWrapper";
+import * as utils from "../../utils/utils";
 
-const DEFAULT_POINT_COLOR = "rgba(0, 0, 0, 0.5)";
+const DEFAULT_POINT_COLOR = [0, 0, 0, 0.5];
 const DEFAULT_POINT_OPACITY = 0.5;
 const DEFAULT_POINT_SHAPE = "circle";
 const DEFAULT_POINT_SIZE = 5;
@@ -57,37 +58,46 @@ function ScatterGraph(props) {
     );
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
+    // To avoid needless rerenders, we only start rendering traces once all defaults have been set.
+    const [defaultsInitialized, setDefaultsInitialized] = useState(false);
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
 
-    const sanitizedCols = utils.removeSentinelValues(
-        featureNames.map(colName =>
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS()
-        ),
-        props.fileInfo
+    const [sanitizedCols] = useState(_ =>
+        utils.removeSentinelValues(
+            featureNames.map(colName =>
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS()
+            ),
+            props.fileInfo
+        )
     );
 
-    const filteredCols = (function() {
-        const baseData = filterBounds(featureNames, sanitizedCols, bounds && bounds.toJS());
-        if (!axisScale) return baseData;
-        return baseData.map((col, idx) => {
-            const scaleData = axisScale.find(f => f.get("name") === featureNames[idx]);
-            const scale = scaleData || "linear";
-            if (scale === "linear") return col;
-            const scaleFunc = scaleLog()
-                .clamp(true)
-                .domain([0.1, Math.max(...col)])
-                .nice();
-            return col.map(val => scaleFunc(val));
-        });
-    })();
+    const filteredCols = useMemo(
+        _ => {
+            const baseData = filterBounds(featureNames, sanitizedCols, bounds && bounds.toJS());
+            if (!axisScale) return baseData;
+            return baseData.map((col, idx) => {
+                const scaleData = axisScale.find(f => f.get("name") === featureNames[idx]);
+                const scale = scaleData ? scaleData.get("scale") : "linear";
+                if (scale === "linear") return col;
+                const [_, max] = utils.getMinMax(col);
+                const scaleFunc = scaleLog()
+                    .clamp(true)
+                    .domain([0.1, max])
+                    .nice();
+                return col.map(val => scaleFunc(val));
+            });
+        },
+        [bounds]
+    );
 
-    const baseX = xAxis
-        ? filteredCols[featureNames.findIndex(feature => feature === xAxis)]
-        : filteredCols[0];
+    const baseX =
+        xAxis && xAxis !== GRAPH_INDEX
+            ? filteredCols[featureNames.findIndex(feature => feature === xAxis)]
+            : filteredCols[0];
     const baseY = yAxis
         ? filteredCols[featureNames.findIndex(feature => feature === yAxis)]
         : filteredCols[1];
@@ -107,37 +117,63 @@ function ScatterGraph(props) {
     // The plotly react element only changes when the revision is incremented.
     const chartRevision = useRef(0);
 
+    // Want to avoid redrawing the selections unless we know that something visual has changed
+    const previousSelectionIds = usePrevious(
+        props.savedSelections.map(sel => [sel.id, sel.hidden])
+    );
+    const newSelections =
+        JSON.stringify(previousSelectionIds) !==
+        JSON.stringify(props.savedSelections.map(sel => [sel.id, sel.hidden]));
     const baseTrace = useMemo(
         _ => {
-            const [x, y] = unzip(
-                baseX
-                    .map((_, idx) => idx)
-                    .filter(idx =>
-                        props.savedSelections.every(sel => !sel.rowIndices.includes(idx))
-                    )
-                    .map(idx => [baseX[idx], baseY[idx]])
+            if (!defaultsInitialized) return {};
+            const x = baseX;
+            const y = baseY;
+            const colors = Array(baseX.length).fill(
+                props.hoverSelection
+                    ? `rgba(${DEFAULT_POINT_COLOR.slice(0, -1)
+                          .concat([0.1])
+                          .join(",")})`
+                    : `rgba(${DEFAULT_POINT_COLOR.join(",")})`
             );
-            const opacity = props.hoverSelection ? 0.1 : dotOpacity;
+            props.savedSelections.forEach(sel => {
+                if (sel.hidden) return;
+                sel.rowIndices.forEach(idx => {
+                    colors[idx] = "rgba(0,0,0,0)";
+                });
+            });
+            props.currentSelection.forEach(idx => (colors[idx] = "rgba(0,0,0,0)"));
             return {
                 x,
                 y,
-                type: "scatter",
+                type: "scattergl",
                 mode: "markers",
                 hoverinfo: "x+y",
                 marker: {
-                    color: new TinyColor(DEFAULT_POINT_COLOR).setAlpha(opacity).toString(),
-                    size: dotSize,
-                    symbol: dotShape
+                    color: colors,
+                    size: dotSize || DEFAULT_POINT_SIZE,
+                    symbol: dotShape || DEFAULT_POINT_SHAPE
                 },
-                visible: true
+                visible: true,
+                name: "baseData"
             };
         },
-        [baseX, baseY, props.savedSelections, props.hoverSelection, props.currentSelection]
+        [
+            baseX,
+            baseY,
+            newSelections,
+            props.hoverSelection,
+            props.currentSelection,
+            dotOpacity,
+            dotSize,
+            dotShape
+        ]
     );
 
     const trendLineTrace = useMemo(
         _ => {
-            const [x, y] = unzip(regression.linear(unzip(filteredCols)).points);
+            if (!trendLineVisible) return {};
+            const [x, y] = utils.unzip(regression.linear(utils.unzip(filteredCols)).points);
             return {
                 x,
                 y,
@@ -147,8 +183,7 @@ function ScatterGraph(props) {
                         ? "markers"
                         : "lines",
                 hoverinfo: "x+y",
-                marker: { color: "red", size: 5 },
-                visible: Boolean(trendLineVisible)
+                marker: { color: "red", size: 5 }
             };
         },
         [filteredCols, trendLineVisible]
@@ -156,28 +191,26 @@ function ScatterGraph(props) {
 
     const selectionTraces = useMemo(
         _ => {
+            if (!defaultsInitialized) return [];
             const currentSelectionTrace = props.currentSelection
                 ? { color: "red", rowIndices: props.currentSelection }
                 : [];
             return props.savedSelections
+                .filter(sel => !sel.hidden)
                 .concat(props.hoverSelection ? currentSelectionTrace : [])
                 .sort((a, b) =>
                     a.id === props.hoverSelection ? 1 : b.id === props.hoverSelection ? -1 : 0
                 )
                 .concat(!props.hoverSelection ? currentSelectionTrace : [])
-                .map(sel => {
-                    const [x, y] = unzip(
-                        baseX
-                            .map((_, idx) => idx)
-                            .filter(idx => sel.rowIndices.includes(idx))
-                            .map(idx => [baseX[idx], baseY[idx]])
-                    );
+                .filter(sel => sel.rowIndices.length)
+                .map((sel, _, ary) => {
+                    const [x, y] = utils.unzip(sel.rowIndices.map(idx => [baseX[idx], baseY[idx]]));
                     const opacity =
                         props.hoverSelection && props.hoverSelection !== sel.id ? 0.1 : dotOpacity;
                     return {
                         x,
                         y,
-                        type: "scatter",
+                        type: "scattergl",
                         mode: "markers",
                         marker: {
                             color: new TinyColor(sel.color).setAlpha(opacity).toString(),
@@ -188,7 +221,16 @@ function ScatterGraph(props) {
                     };
                 });
         },
-        [props.savedSelections, props.hoverSelection, props.currentSelection]
+        [
+            baseX,
+            baseY,
+            newSelections,
+            props.hoverSelection,
+            props.currentSelection,
+            dotOpacity,
+            dotSize,
+            dotShape
+        ]
     );
 
     const traces = [baseTrace, trendLineTrace, ...selectionTraces];
@@ -201,7 +243,7 @@ function ScatterGraph(props) {
             margin: { l: 0, r: 0, t: 0, b: 0, pad: 10 }, // Axis tick labels are drawn in the margin space
             dragmode: props.globalChartState || "lasso",
             datarevision: chartRevision.current,
-            hovermode: "closest", // Turning off hovermode seems to screw up click handling
+            hovermode: "closest",
             titlefont: { size: 5 },
             xaxis: {
                 automargin: true,
@@ -228,27 +270,28 @@ function ScatterGraph(props) {
         });
     }
 
-    function setDefaults() {
-        if (!bounds)
+    function setDefaults(init) {
+        if (!init || !bounds)
             setBounds(
                 featureNames.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(sanitizedCols[idx]);
                     acc[colName] = {
-                        min: Math.min(...sanitizedCols[idx]),
-                        max: Math.max(...sanitizedCols[idx])
+                        min,
+                        max
                     };
                     return acc;
                 }, {})
             );
-        if (!axisLabels)
+        if (!init || !axisLabels)
             setAxisLabels(
                 featureNames.reduce((acc, featureName) => {
                     acc[featureName] = featureName;
                     return acc;
                 }, {})
             );
-        if (!dotSize) setDotSize(DEFAULT_POINT_SIZE);
-        if (!dotOpacity) setDotOpacity(DEFAULT_POINT_OPACITY);
-        if (!dotShape) setDotShape(DEFAULT_POINT_SHAPE);
+        setDotSize(DEFAULT_POINT_SIZE);
+        setDotOpacity(DEFAULT_POINT_OPACITY);
+        setDotShape(DEFAULT_POINT_SHAPE);
         setAxisScale(
             featureNames.map(featureName => ({
                 name: featureName,
@@ -260,10 +303,11 @@ function ScatterGraph(props) {
         if (!xAxis) setXAxis(featureNames[0]);
         if (!yAxis) setYAxis(featureNames[1]);
         if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        setDefaultsInitialized(true);
     }
 
     useEffect(_ => {
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 
@@ -329,8 +373,11 @@ function ScatterGraph(props) {
         [needsAutoscale]
     );
 
+    const [loading, setLoading] = useState(true);
+
     return (
         <GraphWrapper chart={chart} chartId={chartId} win={props.win}>
+            {loading ? <WindowCircularProgress /> : null}
             <Plot
                 ref={chart}
                 data={chartState.data}
@@ -345,8 +392,14 @@ function ScatterGraph(props) {
                     props.setCurrentSelection([]);
                 }}
                 onSelected={e => {
-                    if (e) props.setCurrentSelection(e.points.map(point => point.pointIndex));
+                    if (e)
+                        props.setCurrentSelection(
+                            e.points
+                                .filter(point => point.data.name === "baseData")
+                                .map(point => point.pointIndex)
+                        );
                 }}
+                onAfterPlot={_ => setLoading(false)}
                 divId={chartId}
             />
         </GraphWrapper>

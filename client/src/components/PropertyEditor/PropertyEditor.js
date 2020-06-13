@@ -1,4 +1,4 @@
-import "components/PropertyEditor/PropertyEditor.scss";
+import "./PropertyEditor.scss";
 
 import { Checkbox, InputAdornment } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
@@ -9,13 +9,6 @@ import Immutable from "immutable";
 import React, { useRef } from "react";
 import TextField from "@material-ui/core/TextField";
 
-import SwapAxesIcon from "components/Icons/SwapAxes";
-import * as scatterGraphTypes from "constants/scatterGraphTypes";
-import * as uiTypes from "constants/uiTypes";
-import * as windowTypes from "constants/windowTypes";
-
-import { NUM_FEATURES_REQUIRED } from "../../constants/windowTypes";
-import { useAllowGraphHotkeys } from "../../hooks/UIHooks";
 import { useFeatureDisplayNames } from "../../hooks/DataHooks";
 import {
     useSwapAxes,
@@ -40,6 +33,10 @@ import {
     useWindowXAxis,
     useWindowTitle
 } from "../../hooks/WindowHooks";
+import SwapAxesIcon from "../Icons/SwapAxes";
+import * as scatterGraphTypes from "../../constants/scatterGraphTypes";
+import * as uiTypes from "../../constants/uiTypes";
+import * as windowTypes from "../../constants/windowTypes";
 
 function TrendLineToggle(props) {
     const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.activeWindowId);
@@ -204,11 +201,10 @@ function ScatterOptionsEditor(props) {
 function ChangeGraphType(props) {
     const [windowType, setWindowType] = useWindowType(props.activeWindowId);
     const [features, setFeatures] = useWindowFeatureList(props.activeWindowId);
-    const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
     const [activeWindowId] = useActiveWindow();
 
     const availableWindowTypes = windowTypes.graphs.filter(type => {
-        const featuresRequired = NUM_FEATURES_REQUIRED[type];
+        const featuresRequired = windowTypes.NUM_FEATURES_REQUIRED[type];
         if (!featuresRequired || !features) return true;
         return (
             (typeof featuresRequired === "number" && features.size === featuresRequired) ||
@@ -220,7 +216,6 @@ function ChangeGraphType(props) {
     function handleDropdown(e) {
         setWindowType(e.target.value);
         menuRef.current.blur();
-        setAllowGraphHotkeys(true);
     }
 
     return (
@@ -542,7 +537,7 @@ function HeatmapGraphEditor(props) {
             </Button>
             <div className="input-field-container">
                 <TextField
-                    label="Grid-width"
+                    label="Number of X-axis bins"
                     variant="filled"
                     className="text-input"
                     value={binSize ? binSize.get("x") : ""}
@@ -551,7 +546,7 @@ function HeatmapGraphEditor(props) {
                     onChange={handleChangeBinSize("x")}
                 />
                 <TextField
-                    label="Grid-height"
+                    label="Number of Y-axis bins"
                     variant="filled"
                     className="text-input"
                     value={binSize ? binSize.get("y") : ""}
@@ -649,7 +644,7 @@ function ThreeAxisGraphEditor(props) {
             </div>
             <div className="input-field-container">
                 <TextField
-                    label="Grid-width"
+                    label="Number of X-axis bins"
                     variant="filled"
                     className="text-input"
                     value={binSize && binSize.get("x")}
@@ -658,7 +653,7 @@ function ThreeAxisGraphEditor(props) {
                     onChange={handleChangeBinSize("x")}
                 />
                 <TextField
-                    label="Grid-height"
+                    label="Number of Y-axis bins"
                     variant="filled"
                     className="text-input"
                     value={binSize && binSize.get("y")}
@@ -881,7 +876,6 @@ function MapGraphEditor(props) {
 function PropertyEditor(props) {
     const [activeWindowId] = useActiveWindow();
     const windowList = useWindowList();
-    const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
 
     const activeWindow = windowList.find(win => win.get("id") === activeWindowId);
 
@@ -973,7 +967,7 @@ function PropertyEditor(props) {
     ) : null;
 
     return (
-        <div className="propertyEditorContainer" onClick={_ => setAllowGraphHotkeys(false)}>
+        <div className="propertyEditorContainer">
             <div className="header">Graph Details</div>
             <WindowRenameInput activeWindowId={activeWindowId} />
             {graphSelection}

@@ -36,12 +36,15 @@ $ python codex.py
 
 A version of CODEX for development can be run in Docker for ease of setup. (You'll need to install [Docker](https://www.docker.com/]) on your system first.)
 
+Note that CODEX requirest 4GB of RAM to run, the default Docker RAM allocation is smaller, so you will need to adjust this in the Docker container settings.  More information about how to do this can be found [here](https://forums.docker.com/t/how-to-increase-memory-size-that-is-available-for-a-docker-container/78483)
+
 To start, run `docker-compose up` in the root directory of this repo. Docker will build two different images, one for the backend (using the `Dockerfile` in `server/`) and one with the web client (using the `Dockerfile` in `client/`). Note that the installation and build may take a while to complete.
 
 The client will be available at http://localhost:3000. (port selection can be set in the `docker-compose.yaml` file.)
 
 _Development note:_
 
-For most code changes (i.e., development or pulling the latest branch), the client will automatically rebuild. However, it may be necessary to re-run `docker-compose up` if the server code or client dependencies have changed.
-
-If server code dependencies have changed, run `docker-compose up --build` to force Docker to rebuild the server container with those new dependencies.
+The development build can be run by using the following command:
+```
+docker-compose -f docker-compose.dev.yml up
+```

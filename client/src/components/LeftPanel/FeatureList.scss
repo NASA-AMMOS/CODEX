@@ -1,4 +1,4 @@
-@import "styles/theme.scss";
+@import "../../styles/theme.scss";
 
 .feature-list-container {
     height: 40vh;
@@ -20,6 +20,14 @@
 
         .feature-name-row {
             width: 415px;
+
+            &.alias {
+                width: 215px;
+
+                .feature-name {
+                    font-style: italic;
+                }
+            }
         }
     }
 

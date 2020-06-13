@@ -1,4 +1,4 @@
-import * as uiTypes from "constants/uiTypes";
+import * as uiTypes from "./uiTypes";
 
 export const CONFIRMATION_MESSAGES = {
     [uiTypes.CLOSE_GRAPH_WHEN_DELETE_FEATURE]: {

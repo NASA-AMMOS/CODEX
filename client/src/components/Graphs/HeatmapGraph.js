@@ -1,7 +1,7 @@
-import "components/Graphs/ContourGraph.css";
+import "./ContourGraph.css";
 
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 
 import { createNewId, removeSentinelValues, zip } from "../../utils/utils";
 import { filterBounds } from "./graphFunctions";
@@ -18,6 +18,7 @@ import {
     useWindowYAxis
 } from "../../hooks/WindowHooks";
 import GraphWrapper from "./GraphWrapper";
+import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
 const DEFAULT_BUCKET_COUNT = 50;
@@ -89,8 +90,15 @@ function dataRange(data) {
 }
 
 function squashDataIntoBuckets(data, numBuckets) {
-    const maxes = data.map(col => Math.max(...col));
-    const mins = data.map(col => Math.min(...col));
+    const [mins, maxes] = data.reduce(
+        (acc, col) => {
+            const [min, max] = utils.getMinMax(col);
+            acc[0].push(min);
+            acc[1].push(max);
+            return acc;
+        },
+        [[], []]
+    );
 
     const bucketSizes = data.map((_, idx) => (maxes[idx] - mins[idx]) / numBuckets[idx]);
 
@@ -149,17 +157,22 @@ function HeatmapGraph(props) {
         "linear"
     );
 
-    const sanitizedCols = removeSentinelValues(
-        featureList.map(colName =>
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS()
-        ),
-        props.fileInfo
+    const [sanitizedCols] = useState(_ =>
+        removeSentinelValues(
+            featureList.map(colName =>
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS()
+            ),
+            props.fileInfo
+        )
     );
 
-    const filteredCols = filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
+    const filteredCols = useMemo(
+        _ => filterBounds(featureList, sanitizedCols, bounds && bounds.toJS()),
+        [bounds]
+    );
 
     const baseX = xAxis
         ? filteredCols[featureList.findIndex(feature => feature === xAxis)]
@@ -168,13 +181,23 @@ function HeatmapGraph(props) {
         ? filteredCols[featureList.findIndex(feature => feature === yAxis)]
         : filteredCols[1];
 
-    const x = generateDataAxis(baseX, (binSize && binSize.get("x")) || DEFAULT_BUCKET_COUNT);
-    const y = generateDataAxis(baseY, (binSize && binSize.get("y")) || DEFAULT_BUCKET_COUNT);
-    const z = squashDataIntoBuckets(
-        filteredCols,
-        binSize
-            ? Object.values(binSize.toJS()).map(val => val || 1)
-            : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT]
+    const x = useMemo(
+        _ => generateDataAxis(baseX, (binSize && binSize.get("x")) || DEFAULT_BUCKET_COUNT),
+        [baseX, binSize]
+    );
+    const y = useMemo(
+        _ => generateDataAxis(baseY, (binSize && binSize.get("y")) || DEFAULT_BUCKET_COUNT),
+        [baseY, binSize]
+    );
+    const z = useMemo(
+        _ =>
+            squashDataIntoBuckets(
+                filteredCols,
+                binSize
+                    ? Object.values(binSize.toJS()).map(val => val || 1)
+                    : [DEFAULT_BUCKET_COUNT, DEFAULT_BUCKET_COUNT]
+            ),
+        [filteredCols, binSize]
     );
 
     const xAxisTitle =
@@ -218,14 +241,15 @@ function HeatmapGraph(props) {
                 anchor: "x"
             },
             autosize: true,
-            margin: { l: 0, r: 0, t: 0, b: 0 }, // Axis tick labels are drawn in the margin space
-            hovermode: false, // Turning off hovermode seems to screw up click handling
+            margin: { l: 0, r: 0, t: 0, b: 0 },
+            hovermode: "closest",
             titlefont: { size: 5 },
             annotations: []
         },
         config: {
+            responsive: true,
             displaylogo: false,
-            displayModeBar: false
+            modeBarButtons: [["zoomIn2d", "zoomOut2d", "autoScale2d"], ["toggleHover"]]
         }
     });
 
@@ -238,13 +262,14 @@ function HeatmapGraph(props) {
         setChartRevision(revision);
     }
 
-    function setDefaults() {
-        if (!bounds)
+    function setDefaults(init) {
+        if (!init || !bounds)
             setBounds(
                 featureList.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(sanitizedCols[idx]);
                     acc[colName] = {
-                        min: Math.min(...sanitizedCols[idx]),
-                        max: Math.max(...sanitizedCols[idx])
+                        min,
+                        max
                     };
                     return acc;
                 }, {})
@@ -253,20 +278,20 @@ function HeatmapGraph(props) {
             x: DEFAULT_BUCKET_COUNT,
             y: DEFAULT_BUCKET_COUNT
         });
-        if (!axisLabels)
+        if (!init || !axisLabels)
             setAxisLabels(
                 featureList.reduce((acc, featureName) => {
                     acc[featureName] = featureName;
                     return acc;
                 }, {})
             );
-        if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
-        if (!xAxis) setXAxis(featureList[0]);
-        if (!yAxis) setYAxis(featureList[1]);
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        if (!init || !xAxis) setXAxis(featureList[0]);
+        if (!init || !yAxis) setYAxis(featureList[1]);
     }
 
     useEffect(_ => {
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 

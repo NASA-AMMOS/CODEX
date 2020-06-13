@@ -1,5 +1,5 @@
-import * as actionTypes from "constants/actionTypes";
-import * as utils from "utils/utils";
+import * as actionTypes from "../constants/actionTypes";
+import * as utils from "../utils/utils";
 
 export function requestServerExport() {
     const request = {
