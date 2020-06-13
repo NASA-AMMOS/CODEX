@@ -1,7 +1,7 @@
-import { Set } from "immutable";
 import { batchActions } from "redux-batched-actions";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useRef, useEffect } from "react";
+import Immutable, { Set, List } from "immutable";
 
 import WorkerSocket from "worker-loader!../workers/socket.worker";
 
@@ -189,10 +189,18 @@ export function useLiveFeatures(windowHandle = undefined) {
  */
 export function usePinnedFeatures(windowHandle = undefined) {
     const domain = useSelector(state => state.data);
-    const selectedFeatures = domain
-        .get("featureList")
+
+    const ungroupedFeatures = useSelector(state => state.data.get("featureList"))
         .filter(f => f.get("selected"))
         .map(f => f.get("name"));
+
+    const featuresInGroups = useSelector(state =>
+        state.data.get("featureGroups").reduce((acc, group) => {
+            return acc.concat(group.get("selectedFeatures"));
+        }, List())
+    );
+
+    const selectedFeatures = ungroupedFeatures.concat(featuresInGroups);
 
     // pin the selected features to the state on the first run
     const [pinned, setPinned] = useState(null);
@@ -294,9 +302,18 @@ export function useFeatureMetadata() {
  */
 export function useSelectedFeatureNames() {
     const dispatch = useDispatch();
-    const currentFeatures = useSelector(state => state.data.get("featureList"))
+
+    const ungroupedFeatures = useSelector(state => state.data.get("featureList"))
         .filter(f => f.get("selected"))
         .map(f => f.get("name"));
+
+    const featuresInGroups = useSelector(state =>
+        state.data.get("featureGroups").reduce((acc, group) => {
+            return acc.concat(group.get("selectedFeatures"));
+        }, List())
+    );
+
+    const currentFeatures = ungroupedFeatures.concat(featuresInGroups);
 
     const setCurrentFeatures = sels => {
         // Here, perform a diff to figure out the minimum number of switches we need

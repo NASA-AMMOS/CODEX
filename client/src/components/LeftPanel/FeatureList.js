@@ -150,7 +150,7 @@ function SelectedDropdown(props) {
                 <MenuItem key="not_selected" value={2}>
                     {"Not Selected (" + inactive + "/" + totalCount + ")"}
                 </MenuItem>{" "}
-                <MenuItem key="not_selected" value={3}>
+                <MenuItem key="not_selected_2" value={3}>
                     {`Displayed in Graphs (${featuresInUseCount}/${totalCount})`}
                 </MenuItem>
             </Select>
@@ -430,13 +430,12 @@ function FeatureItem(props) {
     const [featureNames, setFeatureName] = useFeatureDisplayNames();
     const displayName = featureNames.get(props.feature.name, props.feature.name);
     const [rowHover, setRowHover] = useState(false);
-
     const [groupSelections, setGroupSelection] = props.group
         ? useSelectFeatureInGroup(props.group.id)
         : [];
 
     const isSelected = props.group
-        ? groupSelections.some(feature => props.feature.name)
+        ? groupSelections.some(feature => feature === props.feature.name)
         : props.feature.selected;
 
     const featureListContext = useContext(FeatureListContext);
@@ -474,6 +473,7 @@ function FeatureItem(props) {
         setAnchorEl(e.currentTarget);
     }
 
+    const featureNameClasses = classnames({ ["feature-name"]: true, alias: props.group });
     const featureNameRowClasses = classnames({ ["feature-name-row"]: true, alias: props.group });
     return (
         <Draggable draggableId={props.feature.name} index={props.idx}>
@@ -499,7 +499,7 @@ function FeatureItem(props) {
                                 checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
                                 onClick={onSelectClick}
                             />
-                            <span className="feature-name">{displayName}</span>
+                            <span className={featureNameClasses}>{displayName}</span>
                         </div>
                         {featureListContext.statsHidden ? null : (
                             <StatisticsRow
