@@ -221,7 +221,6 @@ function ScatterOptionsEditor(props) {
                     ))}
                 </select>
             </div>
-            <TrendLineToggle activeWindowId={props.activeWindowId} />
             <TrendLineStyle activeWindowId={props.activeWindowId} />
             <GridLinesVisibleToggle activeWindowId={props.activeWindowId} />
             <ResetToDefaultsButton activeWindowId={props.activeWindowId} />

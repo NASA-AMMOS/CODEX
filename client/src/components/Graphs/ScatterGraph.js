@@ -23,7 +23,6 @@ import {
     useWindowShowGridLines,
     useWindowTitle,
     useWindowTrendLineStyle,
-    useWindowTrendLineVisible,
     useWindowXAxis,
     useWindowYAxis
 } from "../../hooks/WindowHooks";
@@ -51,7 +50,6 @@ function ScatterGraph(props) {
     const [dotShape, setDotShape] = useWindowDotShape(props.win.id);
     const [axisScale, setAxisScale] = useWindowAxisScale(props.win.id);
     const [trendLineStyle, setTrendLineStyle] = useWindowTrendLineStyle(props.win.id);
-    const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.win.id);
     const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
@@ -304,7 +302,6 @@ function ScatterGraph(props) {
             }))
         );
         setTrendLineStyle("disabled");
-        setTrendLineVisible(false);
         setShowGridLines(true);
         if (!xAxis) setXAxis(featureNames[0]);
         if (!yAxis) setYAxis(featureNames[1]);
