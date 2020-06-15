@@ -226,9 +226,10 @@ function HistogramGraph(props) {
         if (!init || !bounds)
             setBounds(
                 featureNames.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(baseCols[idx][0]);
                     acc[colName] = {
-                        min: Math.min(...baseCols[idx][0]),
-                        max: Math.max(...baseCols[idx][0])
+                        min,
+                        max
                     };
                     return acc;
                 }, {})

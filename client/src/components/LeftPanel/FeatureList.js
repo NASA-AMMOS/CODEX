@@ -150,7 +150,7 @@ function SelectedDropdown(props) {
                 <MenuItem key="not_selected" value={2}>
                     {"Not Selected (" + inactive + "/" + totalCount + ")"}
                 </MenuItem>{" "}
-                <MenuItem key="not_selected" value={3}>
+                <MenuItem key="not_selected_2" value={3}>
                     {`Displayed in Graphs (${featuresInUseCount}/${totalCount})`}
                 </MenuItem>
             </Select>
@@ -371,7 +371,7 @@ function FeatureGroup(props) {
                 <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="selection-group"
+                    className="selection-group list"
                 >
                     <button className={iconClasses} onClick={_ => setPanelExpanded(!panelExpanded)}>
                         <KeyboardArrowRightIcon />
@@ -430,13 +430,12 @@ function FeatureItem(props) {
     const [featureNames, setFeatureName] = useFeatureDisplayNames();
     const displayName = featureNames.get(props.feature.name, props.feature.name);
     const [rowHover, setRowHover] = useState(false);
-
     const [groupSelections, setGroupSelection] = props.group
         ? useSelectFeatureInGroup(props.group.id)
         : [];
 
     const isSelected = props.group
-        ? groupSelections.some(feature => props.feature.name)
+        ? groupSelections.some(feature => feature === props.feature.name)
         : props.feature.selected;
 
     const featureListContext = useContext(FeatureListContext);
@@ -475,7 +474,7 @@ function FeatureItem(props) {
     }
 
     const featureNameClasses = classnames({ ["feature-name"]: true, alias: props.group });
-
+    const featureNameRowClasses = classnames({ ["feature-name-row"]: true, alias: props.group });
     return (
         <Draggable draggableId={props.feature.name} index={props.idx}>
             {provided => (
@@ -490,7 +489,7 @@ function FeatureItem(props) {
                         onMouseEnter={_ => setRowHover(true)}
                         onMouseLeave={_ => setRowHover(false)}
                     >
-                        <div className="feature-name-row">
+                        <div className={featureNameRowClasses}>
                             <Checkbox
                                 checked={isSelected}
                                 className="selected-checkbox"
