@@ -40,6 +40,10 @@ export function setWindowDataTrendLineVisible(id, trendLineVisible) {
     return { type: types.WINDOW_SET_DATA_TREND_LINE_VISIBLE, id, trendLineVisible };
 }
 
+export function setWindowDataTrendLineStyle(id, trendLineStyle) {
+    return { type: types.WINDOW_SET_DATA_TREND_LINE_STYLE, id, trendLineStyle };
+}
+
 export function setWindowDataDotSize(id, dotSize) {
     return { type: types.WINDOW_SET_DATA_DOT_SIZE, id, dotSize };
 }

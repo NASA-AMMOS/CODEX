@@ -23,6 +23,7 @@ import {
     useWindowNeedsResetToDefault,
     useWindowShowGridLines,
     useWindowTrendLineVisible,
+    useWindowTrendLineStyle,
     useWindowType,
     useWindowYAxis,
     useWindowZAxis,
@@ -37,6 +38,35 @@ import SwapAxesIcon from "../Icons/SwapAxes";
 import * as scatterGraphTypes from "../../constants/scatterGraphTypes";
 import * as uiTypes from "../../constants/uiTypes";
 import * as windowTypes from "../../constants/windowTypes";
+
+function TrendLineStyle(props) {
+    //
+    let [trendLineStyle, setTrendLineStyle] = useWindowTrendLineStyle(props.activeWindowId);
+    trendLineStyle = trendLineStyle || "disabled";
+
+    const handleChange = e => {
+        setTrendLineStyle(e.target.value);
+    };
+
+    let trend_styles = ["Disabled", "Linear", "Exponential", "Logarithmic", "Power", "Polynomial"];
+    trend_styles = trend_styles.map(name => (
+        <option
+            value={name.toLowerCase()}
+            key={name}
+            disabled={name === "Logarithmic" || name === "Power"}
+            selected={name === trendLineStyle}
+        >
+            {name}
+        </option>
+    ));
+
+    return (
+        <div className="axis">
+            <label>Trend Line</label>
+            <select onChange={handleChange}>{trend_styles}</select>
+        </div>
+    );
+}
 
 function TrendLineToggle(props) {
     const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.activeWindowId);
@@ -192,6 +222,7 @@ function ScatterOptionsEditor(props) {
                 </select>
             </div>
             <TrendLineToggle activeWindowId={props.activeWindowId} />
+            <TrendLineStyle activeWindowId={props.activeWindowId} />
             <GridLinesVisibleToggle activeWindowId={props.activeWindowId} />
             <ResetToDefaultsButton activeWindowId={props.activeWindowId} />
         </React.Fragment>

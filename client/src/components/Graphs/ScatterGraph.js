@@ -22,6 +22,7 @@ import {
     useWindowNeedsResetToDefault,
     useWindowShowGridLines,
     useWindowTitle,
+    useWindowTrendLineStyle,
     useWindowTrendLineVisible,
     useWindowXAxis,
     useWindowYAxis
@@ -49,6 +50,7 @@ function ScatterGraph(props) {
     const [dotOpacity, setDotOpacity] = useWindowDotOpacity(props.win.id);
     const [dotShape, setDotShape] = useWindowDotShape(props.win.id);
     const [axisScale, setAxisScale] = useWindowAxisScale(props.win.id);
+    const [trendLineStyle, setTrendLineStyle] = useWindowTrendLineStyle(props.win.id);
     const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.win.id);
     const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
@@ -172,8 +174,11 @@ function ScatterGraph(props) {
 
     const trendLineTrace = useMemo(
         _ => {
-            if (!trendLineVisible) return {};
-            const [x, y] = utils.unzip(regression.linear(utils.unzip([baseX, baseY])).points);
+            if (!trendLineStyle || trendLineStyle === "disabled") return {};
+
+            const [x, y] = utils.unzip(
+                regression[trendLineStyle](utils.zip([baseX, baseY])).points
+            );
             return {
                 x,
                 y,
@@ -186,7 +191,7 @@ function ScatterGraph(props) {
                 marker: { color: "red", size: 5 }
             };
         },
-        [baseX, baseY, trendLineVisible]
+        [baseX, baseY, trendLineStyle]
     );
 
     const selectionTraces = useMemo(
@@ -234,7 +239,6 @@ function ScatterGraph(props) {
     );
 
     const traces = [baseTrace, trendLineTrace, ...selectionTraces];
-    console.log(traces);
 
     // Initial chart settings. These need to be kept in state and updated as necessary
     const [chartState, setChartState] = useState({
@@ -299,6 +303,7 @@ function ScatterGraph(props) {
                 scale: "linear"
             }))
         );
+        setTrendLineStyle("disabled");
         setTrendLineVisible(false);
         setShowGridLines(true);
         if (!xAxis) setXAxis(featureNames[0]);
@@ -341,7 +346,7 @@ function ScatterGraph(props) {
             dotSize,
             dotOpacity,
             dotShape,
-            trendLineVisible,
+            trendLineStyle,
             axisScale,
             showGridLines,
             xAxis,
