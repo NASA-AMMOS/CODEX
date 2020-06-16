@@ -964,7 +964,7 @@ function PropertyEditor(props) {
                 return (
                     <React.Fragment>
                         <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
-                        <TrendLineToggle activeWindowId={activeWindowId} />
+                        <TrendLineStyle activeWindowId={activeWindowId} />
                         <GridLinesVisibleToggle activeWindowId={activeWindowId} />
                         <ResetToDefaultsButton activeWindowId={activeWindowId} />
                     </React.Fragment>

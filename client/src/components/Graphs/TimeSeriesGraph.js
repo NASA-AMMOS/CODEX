@@ -14,7 +14,7 @@ import {
     useWindowNeedsResetToDefault,
     useWindowShowGridLines,
     useWindowTitle,
-    useWindowTrendLineVisible
+    useWindowTrendLineStyle
 } from "../../hooks/WindowHooks";
 import GraphWrapper from "./GraphWrapper";
 import PlotlyPatched from "../../plotly-patched/src/core";
@@ -80,7 +80,7 @@ function TimeSeriesGraph(props) {
     );
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
-    const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.win.id);
+    const [trendLineStyle, setTrendLineStyle] = useWindowTrendLineStyle(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     const chart = useRef(null);
@@ -120,15 +120,22 @@ function TimeSeriesGraph(props) {
         _ =>
             filteredCols.map((col, idx) => {
                 const timeAxis = [...Array(col.length).keys()];
-                const [x, y] = utils.unzip(regression.linear(utils.unzip([timeAxis, col])).points);
+
+                if (trendLineStyle === undefined || trendLineStyle === "disabled") {
+                    return {};
+                }
+                const [x, y] = utils.unzip(
+                    regression[trendLineStyle](utils.zip([timeAxis, col])).points,
+                    { precision: 100 }
+                );
+                console.log("col/idx: ", col, idx, x, y);
                 const trace = {
                     x,
                     y,
                     type: "scatter",
                     mode: "lines",
                     hoverinfo: "x+y",
-                    marker: { color: "red", size: 5 },
-                    visible: Boolean(trendLineVisible)
+                    marker: { color: "red", size: 5 }
                 };
                 if (idx > 0) {
                     trace.xaxis = `x`;
@@ -136,7 +143,7 @@ function TimeSeriesGraph(props) {
                 }
                 return trace;
             }),
-        [filteredCols, trendLineVisible]
+        [filteredCols, trendLineStyle]
     );
 
     const traces = useMemo(
@@ -234,7 +241,7 @@ function TimeSeriesGraph(props) {
             );
         if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" , "));
         if (!init || showGridLines === undefined) setShowGridLines(true);
-        if (!init || trendLineVisible === undefined) setTrendLineVisible(false);
+        if (!init || trendLineStyle === undefined) setTrendLineStyle("disabled");
     }
 
     useEffect(_ => {
@@ -261,7 +268,7 @@ function TimeSeriesGraph(props) {
             updateData();
             updateChartRevision();
         },
-        [bounds, trendLineVisible]
+        [bounds, trendLineStyle]
     );
 
     // Effect to handle drawing of selections
