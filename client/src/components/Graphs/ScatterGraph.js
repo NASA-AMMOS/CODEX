@@ -175,7 +175,7 @@ function ScatterGraph(props) {
             if (!trendLineStyle || trendLineStyle === "disabled") return {};
 
             const [x, y] = utils.unzip(
-                regression[trendLineStyle](utils.zip([baseX, baseY])).points
+                regression[trendLineStyle](utils.zip([baseX, baseY]), { precision: 100 }).points
             );
             return {
                 x,
