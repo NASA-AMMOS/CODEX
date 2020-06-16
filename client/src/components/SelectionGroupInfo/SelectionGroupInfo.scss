@@ -1,0 +1,29 @@
+.windowContainer {
+    background: #152f53;
+    margin: -10px;
+    padding: 10px;
+    height: calc(100% + 40px);
+}
+
+.field {
+    margin-bottom: 10px;
+}
+
+.fieldLabel {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 11px;
+    line-height: 13px;
+    color: #bbbbbb;
+    text-transform: capitalize;
+}
+
+.fieldValue {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 17px;
+    color: #eeeeee;
+}

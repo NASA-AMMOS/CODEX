@@ -8,16 +8,20 @@ import Checkbox from "@material-ui/core/Checkbox";
 import CheckboxIcon from "@material-ui/icons/CheckBox";
 import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import InfoIcon from "@material-ui/icons/Info";
 import KeyboardArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import Popover from "@material-ui/core/Popover";
 import React, { useState, useEffect } from "react";
 import TextField from "@material-ui/core/TextField";
+import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 
 import classnames from "classnames";
 
+import { SELECTION_GROUP_INFO_WINDOW } from "../../constants/windowTypes";
 import { addNewItem, reorderList } from "../../utils/utils";
+import { closeWindow } from "../../actions/windowManagerActions";
 import { deleteSelection, hoverSelection } from "../../actions/selectionActions";
 import {
     useChangeSelectionGroup,
@@ -35,6 +39,7 @@ import {
     useSetSelectionGroupHidden,
     useSetSelectionHidden
 } from "../../hooks/DataHooks";
+import { useOpenNewWindow, useWindowList } from "../../hooks/WindowHooks";
 import { useStatsPanelHidden } from "../../hooks/UIHooks";
 
 function SelectionContextMenu(props) {
@@ -258,6 +263,9 @@ function SelectionGroup(props) {
     const [anchorEl, setAnchorEl] = useState();
     const setGroupActive = useSetSelectionGroupActive();
     const setGroupHidden = useSetSelectionGroupHidden();
+    const openNewWindow = useOpenNewWindow();
+    const windowList = useWindowList();
+    const dispatch = useDispatch();
 
     function onContextMenu(e) {
         e.preventDefault();
@@ -270,6 +278,19 @@ function SelectionGroup(props) {
 
     function eyeballClick(e) {
         setGroupHidden(props.group.id, e.target.checked);
+    }
+
+    const infoWindows = windowList.filter(
+        win => win.get("windowType") === SELECTION_GROUP_INFO_WINDOW
+    );
+    const infoWindow = infoWindows.find(win => win.get("groupID") === props.group.id);
+
+    function handleOpenGroupInfoWindow() {
+        if (infoWindow) {
+            dispatch(closeWindow(infoWindow.get("id")));
+            return;
+        }
+        openNewWindow({ windowType: SELECTION_GROUP_INFO_WINDOW, groupID: props.group.id });
     }
 
     const [panelExpanded, setPanelExpanded] = useState(true);
@@ -300,15 +321,26 @@ function SelectionGroup(props) {
                             />
                             <label onContextMenu={onContextMenu}>{props.group.name}</label>
                         </div>
-                        <Checkbox
-                            className="eye-icon-checkbox"
-                            checked={props.group.hidden}
-                            value="checkedA"
-                            icon={<RemoveRedEye style={{ fill: "#DADADA" }} />}
-                            checkedIcon={<RemoveRedEye style={{ fill: "#061427" }} />}
-                            onClick={eyeballClick}
-                            style={{ height: "22px", padding: "0px" }}
-                        />
+                        <div>
+                            <Checkbox
+                                className="eye-icon-checkbox"
+                                checked={props.group.hidden}
+                                value="checkedA"
+                                icon={<RemoveRedEye style={{ fill: "#DADADA" }} />}
+                                checkedIcon={<RemoveRedEye style={{ fill: "#061427" }} />}
+                                onClick={eyeballClick}
+                                style={{ height: "22px", padding: "0px" }}
+                            />
+                            <Checkbox
+                                className="eye-icon-checkbox"
+                                checked={Boolean(infoWindow)}
+                                value="checkedA"
+                                icon={<InfoIcon style={{ fill: "#DADADA" }} />}
+                                checkedIcon={<InfoOutlinedIcon style={{ fill: "#DADADA" }} />}
+                                onClick={handleOpenGroupInfoWindow}
+                                style={{ height: "22px", padding: "0px" }}
+                            />
+                        </div>
                     </div>
                     {panelExpanded ? (
                         <div className="selection-group-items">

@@ -20,6 +20,7 @@ import * as algorithmTypes from "../../constants/algorithmTypes";
 import * as uiTypes from "../../constants/uiTypes";
 import * as windowTypes from "../../constants/windowTypes";
 import * as workflowTypes from "../../constants/workflowTypes";
+import SelectionGroupInfo from "../SelectionGroupInfo/SelectionGroupInfo";
 
 export function getWindowContent(win) {
     // Graphs get handled by the separate graph handler, as the graph type isn't fixed to the window.
@@ -63,6 +64,8 @@ export function getWindowContent(win) {
             return <Regression />;
         case windowTypes.CORRELATION_WINDOW:
             return <Correlation />;
+        case windowTypes.SELECTION_GROUP_INFO_WINDOW:
+            return <SelectionGroupInfo groupID={win.get("groupID")} winId={win.get("id")} />;
         default:
             return (
                 <p>

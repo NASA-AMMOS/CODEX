@@ -880,6 +880,7 @@ function PropertyEditor(props) {
     const activeWindow = windowList.find(win => win.get("id") === activeWindowId);
 
     if (!activeWindow) return null;
+    if (activeWindow.get("windowType") === windowTypes.SELECTION_GROUP_INFO_WINDOW) return null;
 
     const panelContent = (function() {
         switch (activeWindow.get("windowType")) {
