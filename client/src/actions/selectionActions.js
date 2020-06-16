@@ -87,8 +87,8 @@ export function setSelectionGroup(id, groupID) {
     return { type: actionTypes.SET_SELECTION_GROUP, id, groupID };
 }
 
-export function createSelectionGroup(name, selections) {
-    return { type: actionTypes.CREATE_SELECTION_GROUP, name, selections };
+export function createSelectionGroup(name, selections, info) {
+    return { type: actionTypes.CREATE_SELECTION_GROUP, name, selections, info };
 }
 
 export function toggleGroupActive(id) {

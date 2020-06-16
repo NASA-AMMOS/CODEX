@@ -26,7 +26,7 @@ function findOutputParam(subalgoState, paramName) {
 }
 
 // Saves the returned algorithm data to the state and spawns a new graph window if requested.
-function handleAlgorithmReturn(inMsg, subalgoState, dispatch, getState) {
+function handleAlgorithmReturn(inMsg, subalgoState, selectedFeatures, dispatch, getState) {
     // Update data store with new feature columns
     const basename = findOutputParam(subalgoState, "name");
 
@@ -48,8 +48,14 @@ function handleAlgorithmReturn(inMsg, subalgoState, dispatch, getState) {
     if (findOutputParam(subalgoState, "clusters")) {
         const uniqueName = getUniqueName("Clustering", 0);
 
+        const info = {
+            algorithm: subalgoState.serverData.algorithm,
+            ...subalgoState.parameters,
+            features_used: selectedFeatures.toJS()
+        };
+
         //create a group with a unique name
-        dispatch(selectionActions.createSelectionGroup(uniqueName));
+        dispatch(selectionActions.createSelectionGroup(uniqueName, null, info));
 
         const groupId = getState().selections.groups.find(group => group.name === uniqueName).id;
 
@@ -141,7 +147,7 @@ export function runAlgorithm(subalgoState, selectedFeatures, winId) {
             inMsg => {
                 clearInterval(loadingTimerInterval);
                 dispatch({ type: actionTypes.CLOSE_WINDOW, id: loadingWindowId });
-                handleAlgorithmReturn(inMsg, subalgoState, dispatch, getState);
+                handleAlgorithmReturn(inMsg, subalgoState, selectedFeatures, dispatch, getState);
             }
         );
     };
