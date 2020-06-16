@@ -22,7 +22,6 @@ import {
     useWindowMapType,
     useWindowNeedsResetToDefault,
     useWindowShowGridLines,
-    useWindowTrendLineVisible,
     useWindowTrendLineStyle,
     useWindowType,
     useWindowYAxis,
@@ -64,29 +63,6 @@ function TrendLineStyle(props) {
         <div className="axis">
             <label>Trend Line</label>
             <select onChange={handleChange}>{trend_styles}</select>
-        </div>
-    );
-}
-
-function TrendLineToggle(props) {
-    const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.activeWindowId);
-
-    function handleClickTrendLine(e) {
-        setTrendLineVisible(e.target.checked);
-    }
-
-    return (
-        <div className="axis">
-            <label>Show Trend Line</label>
-            <Checkbox
-                checked={Boolean(trendLineVisible)}
-                className="selected-checkbox"
-                value="trendLine"
-                style={{ height: "22px", padding: "0px" }}
-                icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
-                checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
-                onClick={handleClickTrendLine}
-            />
         </div>
     );
 }

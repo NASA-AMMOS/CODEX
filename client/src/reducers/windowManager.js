@@ -56,8 +56,6 @@ export default function windowManager(
             return opt_reducer.setWindowDataScale(state, action);
         case actionTypes.WINDOW_SET_DATA_MAP_TYPE:
             return opt_reducer.setWindowDataMapType(state, action);
-        case actionTypes.WINDOW_SET_DATA_TREND_LINE_VISIBLE:
-            return opt_reducer.setWindowTrendLineVisible(state, action);
         case actionTypes.WINDOW_SET_DATA_TREND_LINE_STYLE:
             return opt_reducer.setWindowTrendLineStyle(state, action);
         case actionTypes.WINDOW_SET_DATA_DOT_SIZE:

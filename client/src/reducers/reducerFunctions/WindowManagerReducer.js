@@ -257,19 +257,6 @@ export default class WindowManagerReducer {
         );
     }
 
-    static setWindowTrendLineVisible(state, action) {
-        return state.set(
-            "windows",
-            state
-                .get("windows")
-                .map(win =>
-                    win.get("id") === action.id
-                        ? win.setIn(["data", "trendLineVisible"], action.trendLineVisible)
-                        : win
-                )
-        );
-    }
-
     static setWindowTrendLineStyle(state, action) {
         return state.set(
             "windows",
