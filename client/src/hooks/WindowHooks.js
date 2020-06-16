@@ -14,7 +14,7 @@ import {
     setWindowDataMapType,
     setWindowDataNeedsResetToDefault,
     setWindowDataScale,
-    setWindowDataTrendLineVisible,
+    setWindowDataTrendLineStyle,
     setWindowFeatureInfo,
     setWindowNeedsAutoscale,
     setWindowNeedsPlotImage,
@@ -393,16 +393,16 @@ export function useWindowAxisScale(id) {
     ];
 }
 
-export function useWindowTrendLineVisible(id) {
+export function useWindowTrendLineStyle(id) {
     const dispatch = useDispatch();
     return [
         useSelector(state =>
             state.windowManager
                 .get("windows")
                 .find(win => win.get("id") === id)
-                .getIn(["data", "trendLineVisible"])
+                .getIn(["data", "trendLineStyle"])
         ),
-        trendLineVisible => dispatch(setWindowDataTrendLineVisible(id, trendLineVisible))
+        trendLineStyle => dispatch(setWindowDataTrendLineStyle(id, trendLineStyle))
     ];
 }
 

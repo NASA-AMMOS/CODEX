@@ -22,7 +22,7 @@ import {
     useWindowMapType,
     useWindowNeedsResetToDefault,
     useWindowShowGridLines,
-    useWindowTrendLineVisible,
+    useWindowTrendLineStyle,
     useWindowType,
     useWindowYAxis,
     useWindowZAxis,
@@ -38,25 +38,31 @@ import * as scatterGraphTypes from "../../constants/scatterGraphTypes";
 import * as uiTypes from "../../constants/uiTypes";
 import * as windowTypes from "../../constants/windowTypes";
 
-function TrendLineToggle(props) {
-    const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.activeWindowId);
+function TrendLineStyle(props) {
+    //
+    let [trendLineStyle, setTrendLineStyle] = useWindowTrendLineStyle(props.activeWindowId);
+    trendLineStyle = trendLineStyle || "disabled";
 
-    function handleClickTrendLine(e) {
-        setTrendLineVisible(e.target.checked);
-    }
+    const handleChange = e => {
+        setTrendLineStyle(e.target.value);
+    };
+
+    let trend_styles = ["Disabled", "Linear", "Exponential", "Logarithmic", "Power", "Polynomial"];
+    trend_styles = trend_styles.map(name => (
+        <option
+            value={name.toLowerCase()}
+            key={name}
+            disabled={name === "Logarithmic" || name === "Power"}
+            selected={name === trendLineStyle}
+        >
+            {name}
+        </option>
+    ));
 
     return (
         <div className="axis">
-            <label>Show Trend Line</label>
-            <Checkbox
-                checked={Boolean(trendLineVisible)}
-                className="selected-checkbox"
-                value="trendLine"
-                style={{ height: "22px", padding: "0px" }}
-                icon={<CheckboxOutlineBlank style={{ fill: "#828282" }} />}
-                checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
-                onClick={handleClickTrendLine}
-            />
+            <label>Trend Line</label>
+            <select onChange={handleChange}>{trend_styles}</select>
         </div>
     );
 }
@@ -191,7 +197,7 @@ function ScatterOptionsEditor(props) {
                     ))}
                 </select>
             </div>
-            <TrendLineToggle activeWindowId={props.activeWindowId} />
+            <TrendLineStyle activeWindowId={props.activeWindowId} />
             <GridLinesVisibleToggle activeWindowId={props.activeWindowId} />
             <ResetToDefaultsButton activeWindowId={props.activeWindowId} />
         </React.Fragment>
@@ -934,7 +940,7 @@ function PropertyEditor(props) {
                 return (
                     <React.Fragment>
                         <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
-                        <TrendLineToggle activeWindowId={activeWindowId} />
+                        <TrendLineStyle activeWindowId={activeWindowId} />
                         <GridLinesVisibleToggle activeWindowId={activeWindowId} />
                         <ResetToDefaultsButton activeWindowId={activeWindowId} />
                     </React.Fragment>
