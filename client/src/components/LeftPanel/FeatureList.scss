@@ -20,6 +20,14 @@
 
         .feature-name-row {
             width: 415px;
+
+            &.alias {
+                width: 215px;
+
+                .feature-name {
+                    font-style: italic;
+                }
+            }
         }
     }
 

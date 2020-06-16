@@ -173,7 +173,7 @@ function SingleXMultipleYGraph(props) {
                           hoverinfo: "x+y"
                       }
             ),
-        [defaultsInitialized]
+        [defaultsInitialized, processedData]
     );
 
     // The plotly react element only changes when the revision is incremented.
@@ -356,9 +356,12 @@ function SingleXMultipleYGraph(props) {
         if (!featureInfo) setFeatureInfo(baseFeatureInfo);
         if (!init || !bounds)
             setBounds(
-                cols.reduce((acc, col) => {
-                    const [min, max] = utils.getMinMax(col.data);
-                    acc[col.name] = { min, max };
+                featureList.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(sanitizedCols[idx]);
+                    acc[colName] = {
+                        min,
+                        max
+                    };
                     return acc;
                 }, {})
             );
