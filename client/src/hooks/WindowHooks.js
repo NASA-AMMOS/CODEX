@@ -371,7 +371,7 @@ export function useWindowAwareLabelShortener(id) {
 
         // ellipsis HTML: &hellip;, \u2026 in JS
 
-        let target_length = Math.floor(max_label_width / 14); // characters
+        let target_length = Math.floor(max_label_width / 12); // characters
 
         if (label.length <= target_length) {
             return label;
