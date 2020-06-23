@@ -474,4 +474,5 @@ export function useOpenNewWindow() {
     const dispatch = useDispatch();
     return newWindow => dispatch(wmActions.openNewWindow(newWindow));
 }
+
 export default useWindowManager;
