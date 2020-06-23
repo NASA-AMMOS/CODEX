@@ -19,7 +19,7 @@ function SelectionGroupInfo(props) {
     if (!selectionGroup) return null;
 
     return (
-        <div className="windowContainer">
+        <div className="selectionGroupWindowContainer">
             <div className="field">
                 <label className="fieldLabel">Name</label>
                 <div className="fieldValue">{selectionGroup.name}</div>
