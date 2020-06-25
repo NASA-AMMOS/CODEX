@@ -328,7 +328,8 @@ export function useWindowAxisLabels(id) {
 
 /**
  * Attempt to calculate the maximum height of the axis labels
- * and clip them so they fit.
+ * and clip them so they fit, and provide a method for injecting
+ * the styles into the chart
  *
  * @param {str} id window id
  * @return {function} axis label clipper
@@ -349,12 +350,12 @@ export function useWindowAwareLabelShortener(id) {
                 .getIn(["data", "features"], { size: 1 }).size // HACK
     );
 
-    // if the window is not attached, return an identity function
+    // if the window is not attached, return identity functions
     if (winHeight === 1 || winFeatureCount === 1) {
-        return x => x;
+        return [x => x, (x, y, z) => undefined];
     }
 
-    return (label, heightOverride) => {
+    const shortener = (label, heightOverride) => {
         const fullheight = heightOverride || winHeight;
 
         // get the maximum width of the label (plot height / number of labels), in pixels
@@ -387,6 +388,27 @@ export function useWindowAwareLabelShortener(id) {
             return `${label.slice(0, slicelen)}\u2026${label.slice(-1 * slicelen)}`;
         }
     };
+
+    // updater for axis labels--sets the labels for the elements directly
+    // to circumvent issues with plotly's state management (if you tie a post-
+    // action to change the resize event, then the updaters begin an infinite
+    // loop).
+    //
+    // This is bad.
+    const injector = (chart_el, layouts, axis) => {
+        const newheight = chart_el.getBoundingClientRect().height;
+
+        for (let key of Object.keys(layouts)) {
+            let name = shortener(layouts[key].title, newheight);
+            let idx_search = layouts[key].idx === 0 ? "" : layouts[key].idx + 1;
+            let text_el = chart_el.querySelector(`text.${axis}${idx_search}title`);
+            if (text_el) {
+                text_el.textContent = name;
+            }
+        }
+    };
+
+    return [shortener, injector];
 }
 
 export function useWindowType(id) {

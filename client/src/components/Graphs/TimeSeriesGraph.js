@@ -76,7 +76,7 @@ function TimeSeriesGraph(props) {
     const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
     const [binSize, setBinSize] = useWindowGraphBinSize(props.win.id);
     const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
-    const axisLabelShortener = useWindowAwareLabelShortener(props.win.id);
+    const [axisLabelShortener, axisLabelWriter] = useWindowAwareLabelShortener(props.win.id);
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
         props.win.id
     );
@@ -90,13 +90,12 @@ function TimeSeriesGraph(props) {
 
     const layouts = features.reduce((acc, feature, idx) => {
         const axisName = `yaxis${idx === 0 ? "" : idx + 1}`;
-        const original_title = axisLabels
+        const title = axisLabels
             ? axisLabels.get(feature.feature, feature.feature)
             : feature.feature;
         acc[axisName] = {
-            title: axisLabelShortener(original_title),
+            title,
             idx,
-            original_title,
             fixedrange: true
         };
         return acc;
@@ -341,24 +340,9 @@ function TimeSeriesGraph(props) {
         [needsAutoscale]
     );
 
-    // updater for axis labels--sets the labels for the elements directly
-    // to circumvent issues with plotly's state management (if you tie a post-
-    // action to change the resize event, then the updaters begin an infinite
-    // loop).
-    //
-    // This is bad.
     useLayoutEffect(() => {
         const chart_el = document.getElementById(chartId);
-        const newheight = chart_el.getBoundingClientRect().height;
-
-        for (let key of Object.keys(layouts)) {
-            let name = axisLabelShortener(layouts[key].original_title, newheight);
-            let idx_search = layouts[key].idx === 0 ? "" : layouts[key].idx + 1;
-            let text_el = chart_el.querySelector(`text.y${idx_search}title`);
-            if (text_el) {
-                text_el.textContent = name;
-            }
-        }
+        axisLabelWriter(chart_el, layouts, "y");
     }, [chartState]);
 
     return (
