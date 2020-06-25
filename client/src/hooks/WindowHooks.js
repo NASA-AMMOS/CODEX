@@ -356,6 +356,10 @@ export function useWindowAwareLabelShortener(id) {
     }
 
     const shortener = (label, heightOverride) => {
+        if (typeof label !== "string") {
+            label = label.text;
+        }
+
         const fullheight = heightOverride || winHeight;
 
         // get the maximum width of the label (plot height / number of labels), in pixels
@@ -400,10 +404,22 @@ export function useWindowAwareLabelShortener(id) {
 
         for (let key of Object.keys(layouts)) {
             let name = shortener(layouts[key].title, newheight);
-            let idx_search = layouts[key].idx === 0 ? "" : layouts[key].idx + 1;
-            let text_el = chart_el.querySelector(`text.${axis}${idx_search}title`);
+
+            // return if the name is the empty string--this will not be rendered
+            // anyways and the svg text will not be placed by plotly
+            if (name === "") {
+                continue;
+            }
+
+            // create the query
+            let query = key.replace("axis", "");
+
+            // identify and shorten the axis
+            let text_el = chart_el.querySelector(`text.${query}title`);
             if (text_el) {
                 text_el.textContent = name;
+            } else {
+                console.warn(`could not locate text.${query}title`);
             }
         }
     };
