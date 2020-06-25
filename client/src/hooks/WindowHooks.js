@@ -342,6 +342,13 @@ export function useWindowAwareLabelShortener(id) {
             .get("height", 1)
     );
 
+    const winWidth = useSelector(state =>
+        state.windowManager
+            .get("windows")
+            .find(win => win.get("id") === id)
+            .get("width", 1)
+    );
+
     const winFeatureCount = useSelector(
         state =>
             state.windowManager
@@ -355,17 +362,19 @@ export function useWindowAwareLabelShortener(id) {
         return [x => x, (x, y, z) => undefined];
     }
 
-    const shortener = (label, heightOverride) => {
+    const shortener = (label, axis = "y") => {
+        // shim to process layouts with (inexplicably) different chartstate representations
         if (typeof label !== "string") {
             label = label.text;
         }
 
-        const fullheight = heightOverride || winHeight;
+        // get the available space based on the axis we're looking at
+        const available_space = axis === "y" ? winHeight : winWidth;
 
         // get the maximum width of the label (plot height / number of labels), in pixels
         // this is somewhat magic, but we're subtracting ~50px of padding and then splitting
         // by the number of pads
-        const max_label_width = Math.max(0, winHeight - 50) / winFeatureCount;
+        const max_label_width = Math.max(0, available_space - 50) / winFeatureCount;
 
         // labels are Open Sans 14px, meaning an em width of ~10px
         // this is a conservative estimate, but resizing each requires rendering
@@ -399,11 +408,11 @@ export function useWindowAwareLabelShortener(id) {
     // loop).
     //
     // This is bad.
-    const injector = (chart_el, layouts, axis) => {
-        const newheight = chart_el.getBoundingClientRect().height;
-
+    const injector = (chart_el, layouts) => {
         for (let key of Object.keys(layouts)) {
-            let name = shortener(layouts[key].title, newheight);
+            // key is something like xaxis2, we can use the first char to figure
+            // out the direction ('x' or 'y')
+            let name = shortener(layouts[key].title, key[0]);
 
             // return if the name is the empty string--this will not be rendered
             // anyways and the svg text will not be placed by plotly
@@ -412,14 +421,14 @@ export function useWindowAwareLabelShortener(id) {
             }
 
             // create the query
-            let query = key.replace("axis", "");
+            let query = `text.${key.replace("axis", "")}title`;
 
             // identify and shorten the axis
-            let text_el = chart_el.querySelector(`text.${query}title`);
+            let text_el = chart_el.querySelector(query);
             if (text_el) {
                 text_el.textContent = name;
             } else {
-                console.warn(`could not locate text.${query}title`);
+                console.warn(`could not locate ${query}`);
             }
         }
     };
