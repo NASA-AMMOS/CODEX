@@ -408,14 +408,21 @@ export function useWindowAwareLabelShortener(id) {
     // loop).
     //
     // This is bad.
-    const injector = (chart_el, layouts) => {
+    const injector = (chart_id, layouts) => {
+        const chart_el = document.getElementById(chart_id);
+
         for (let key of Object.keys(layouts)) {
+            // skip if there is no title
+            if (!("title" in layouts[key])) {
+                continue;
+            }
+
             // key is something like xaxis2, we can use the first char to figure
             // out the direction ('x' or 'y')
             let name = shortener(layouts[key].title, key[0]);
 
-            // return if the name is the empty string--this will not be rendered
-            // anyways and the svg text will not be placed by plotly
+            // also skip if the name is empty string--this will not be
+            // rendered anyways and the svg text will not be placed by plotly
             if (name === "") {
                 continue;
             }
@@ -433,7 +440,7 @@ export function useWindowAwareLabelShortener(id) {
         }
     };
 
-    return [shortener, injector];
+    return injector;
 }
 
 export function useWindowType(id) {

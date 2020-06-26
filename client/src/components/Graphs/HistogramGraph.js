@@ -95,7 +95,7 @@ function HistogramGraph(props) {
     const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
     const [binSize, setBinSize] = useWindowGraphBinSize(props.win.id);
     const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
-    const [axisLabelShortener, axisLabelWriter] = useWindowAwareLabelShortener(props.win.id);
+    const axisLabelShortener = useWindowAwareLabelShortener(props.win.id);
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
         props.win.id
     );
@@ -345,8 +345,7 @@ function HistogramGraph(props) {
     }
 
     useLayoutEffect(() => {
-        const chart_el = document.getElementById(chartId);
-        axisLabelWriter(chart_el, layouts, "y");
+        axisLabelShortener(chartId, layouts);
     }, [chartState]);
 
     function handleSelection(e) {
