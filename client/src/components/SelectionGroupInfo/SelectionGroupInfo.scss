@@ -1,8 +1,31 @@
 .selectionGroupWindowContainer {
+    width: 300px;
+    height: 100%;
     background: #152f53;
-    margin: -10px;
     padding: 10px;
-    height: calc(100% + 40px);
+}
+
+.selectionGroupInfoHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.close-button-icon {
+    padding: 0 !important;
+    svg {
+        fill: #eeeeee;
+    }
+}
+
+.selectionGroupInfoTitle {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 19px;
+    color: #eeeeee;
 }
 
 .field {

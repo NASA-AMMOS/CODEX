@@ -9,17 +9,17 @@ import CheckboxIcon from "@material-ui/icons/CheckBox";
 import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import InfoIcon from "@material-ui/icons/Info";
+import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import KeyboardArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import Popover from "@material-ui/core/Popover";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import TextField from "@material-ui/core/TextField";
-import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
+import TinyPopover, { ArrowContainer } from "react-tiny-popover";
 
 import classnames from "classnames";
 
-import { SELECTION_GROUP_INFO_WINDOW } from "../../constants/windowTypes";
 import { addNewItem, reorderList } from "../../utils/utils";
 import { closeWindow } from "../../actions/windowManagerActions";
 import { deleteSelection, hoverSelection } from "../../actions/selectionActions";
@@ -41,6 +41,7 @@ import {
 } from "../../hooks/DataHooks";
 import { useOpenNewWindow, useWindowList } from "../../hooks/WindowHooks";
 import { useStatsPanelHidden } from "../../hooks/UIHooks";
+import SelectionGroupInfo from "../SelectionGroupInfo/SelectionGroupInfo";
 
 function SelectionContextMenu(props) {
     const [contextMode, setContextMode] = useState(null);
@@ -263,9 +264,6 @@ function SelectionGroup(props) {
     const [anchorEl, setAnchorEl] = useState();
     const setGroupActive = useSetSelectionGroupActive();
     const setGroupHidden = useSetSelectionGroupHidden();
-    const openNewWindow = useOpenNewWindow();
-    const windowList = useWindowList();
-    const dispatch = useDispatch();
 
     function onContextMenu(e) {
         e.preventDefault();
@@ -280,21 +278,11 @@ function SelectionGroup(props) {
         setGroupHidden(props.group.id, e.target.checked);
     }
 
-    const infoWindows = windowList.filter(
-        win => win.get("windowType") === SELECTION_GROUP_INFO_WINDOW
-    );
-    const infoWindow = infoWindows.find(win => win.get("groupID") === props.group.id);
-
-    function handleOpenGroupInfoWindow() {
-        if (infoWindow) {
-            dispatch(closeWindow(infoWindow.get("id")));
-            return;
-        }
-        openNewWindow({ windowType: SELECTION_GROUP_INFO_WINDOW, groupID: props.group.id });
-    }
-
     const [panelExpanded, setPanelExpanded] = useState(true);
     const iconClasses = classnames({ ["expand-icon"]: true, expanded: panelExpanded });
+
+    const [showGroupInfo, setShowGroupInfo] = useState(false);
+
     return (
         <Droppable key={props.group.id} droppableId={props.group.id}>
             {(provided, snapshot) => (
@@ -331,15 +319,33 @@ function SelectionGroup(props) {
                                 onClick={eyeballClick}
                                 style={{ height: "22px", padding: "0px" }}
                             />
-                            <Checkbox
-                                className="eye-icon-checkbox"
-                                checked={Boolean(infoWindow)}
-                                value="checkedA"
-                                icon={<InfoIcon style={{ fill: "#DADADA" }} />}
-                                checkedIcon={<InfoOutlinedIcon style={{ fill: "#DADADA" }} />}
-                                onClick={handleOpenGroupInfoWindow}
-                                style={{ height: "22px", padding: "0px" }}
-                            />
+                            <TinyPopover
+                                isOpen={showGroupInfo}
+                                position="right"
+                                content={({ position, targetRect, popoverRect }) => (
+                                    <ArrowContainer
+                                        position={position}
+                                        targetRect={targetRect}
+                                        popoverRect={popoverRect}
+                                        arrowColor="#152f53"
+                                    >
+                                        <SelectionGroupInfo
+                                            groupID={props.group.id}
+                                            handleClose={_ => setShowGroupInfo(false)}
+                                        />
+                                    </ArrowContainer>
+                                )}
+                            >
+                                <Checkbox
+                                    className="eye-icon-checkbox"
+                                    checked={showGroupInfo}
+                                    value="checkedA"
+                                    icon={<InfoIcon style={{ fill: "#DADADA" }} />}
+                                    checkedIcon={<InfoOutlinedIcon style={{ fill: "#DADADA" }} />}
+                                    onClick={_ => setShowGroupInfo(!showGroupInfo)}
+                                    style={{ height: "22px", padding: "0px" }}
+                                />
+                            </TinyPopover>
                         </div>
                     </div>
                     {panelExpanded ? (
