@@ -1,13 +1,14 @@
 import "./BoxPlotGraph.css";
 
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useLayoutEffect, useMemo } from "react";
 
 import { filterSingleCol } from "./graphFunctions";
 import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
     useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
+    useWindowAwareLabelShortener,
     useWindowFeatureList,
     useWindowGraphBinSize,
     useWindowGraphBounds,
@@ -74,6 +75,7 @@ function BoxPlotGraph(props) {
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
         props.win.id
     );
+    const axisLabelShortener = useWindowAwareLabelShortener(props.win.id);
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
@@ -283,6 +285,10 @@ function BoxPlotGraph(props) {
         },
         [needsAutoscale]
     );
+
+    useLayoutEffect(() => {
+        axisLabelShortener(chartId, layouts);
+    }, [chartState]);
 
     return (
         <GraphWrapper chart={chart} win={props.win} chartId={chartId}>

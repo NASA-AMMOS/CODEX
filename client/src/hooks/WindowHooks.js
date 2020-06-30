@@ -316,15 +316,131 @@ export function useWindowGraphBounds(id) {
 export function useWindowAxisLabels(id) {
     const dispatch = useDispatch();
 
-    return [
-        useSelector(state =>
+    const labels = useSelector(state =>
+        state.windowManager
+            .get("windows")
+            .find(win => win.get("id") === id)
+            .getIn(["data", "axisLabels"])
+    );
+
+    return [labels, axisLabels => dispatch(setWindowAxisLabels(id, axisLabels))];
+}
+
+/**
+ * Attempt to calculate the maximum height of the axis labels
+ * and clip them so they fit, and provide a method for injecting
+ * the styles into the chart
+ *
+ * @param {str} id window id
+ * @return {function} axis label clipper
+ */
+export function useWindowAwareLabelShortener(id) {
+    const winHeight = useSelector(state =>
+        state.windowManager
+            .get("windows")
+            .find(win => win.get("id") === id)
+            .get("height", 1)
+    );
+
+    const winWidth = useSelector(state =>
+        state.windowManager
+            .get("windows")
+            .find(win => win.get("id") === id)
+            .get("width", 1)
+    );
+
+    const winFeatureCount = useSelector(
+        state =>
             state.windowManager
                 .get("windows")
                 .find(win => win.get("id") === id)
-                .getIn(["data", "axisLabels"])
-        ),
-        axisLabels => dispatch(setWindowAxisLabels(id, axisLabels))
-    ];
+                .getIn(["data", "features"], { size: 1 }).size // HACK
+    );
+
+    // if the window is not attached, return identity functions
+    if (winHeight === 1 || winFeatureCount === 1) {
+        return [x => x, (x, y, z) => undefined];
+    }
+
+    const shortener = (label, axis = "y") => {
+        // shim to process layouts with (inexplicably) different chartstate representations
+        if (typeof label !== "string") {
+            label = label.text;
+        }
+
+        // get the available space based on the axis we're looking at
+        const available_space = axis === "y" ? winHeight : winWidth;
+
+        // get the maximum width of the label (plot height / number of labels), in pixels
+        // this is somewhat magic, but we're subtracting ~50px of padding and then splitting
+        // by the number of pads
+        const max_label_width = Math.max(0, available_space - 50) / winFeatureCount;
+
+        // labels are Open Sans 14px, meaning an em width of ~10px
+        // this is a conservative estimate, but resizing each requires rendering
+        // to a <canvas> and using measureText, and then doing a search over that
+        // to find the maximum compliant length. This is slow, especially on a resize.
+
+        // Future work: potentially memoize?
+
+        // ellipsis HTML: &hellip;, \u2026 in JS
+
+        let target_length = Math.floor(max_label_width / 12); // characters
+
+        if (label.length <= target_length) {
+            return label;
+        } else {
+            // drop the center, leaving the ends as context
+            let slicelen = Math.floor((target_length - 1) / 2);
+
+            if (slicelen === 0) {
+                return `${label[0]}.${label[label.length - 1]}`; // in extremely space-constrained layouts, just use the 1st and last char
+            }
+
+            // beginning slice + ellipsis + ending slice
+            return `${label.slice(0, slicelen)}\u2026${label.slice(-1 * slicelen)}`;
+        }
+    };
+
+    // updater for axis labels--sets the labels for the elements directly
+    // to circumvent issues with plotly's state management (if you tie a post-
+    // action to change the resize event, then the updaters begin an infinite
+    // loop).
+    //
+    // This is bad.
+    const injector = (chart_id, layouts) => {
+        const chart_el = document.getElementById(chart_id);
+
+        for (let key of Object.keys(layouts)) {
+            // skip if there is no title
+            if (!("title" in layouts[key])) {
+                continue;
+            }
+
+            // key is something like xaxis2, we can use the first char to figure
+            // out the direction ('x' or 'y')
+            let name = shortener(layouts[key].title, key[0]);
+
+            // also skip if the name is empty string--this will not be
+            // rendered anyways and the svg text will not be placed by plotly
+            if (name === "") {
+                continue;
+            }
+
+            // create the query
+            let query = `text.${key.replace("axis", "")}title`;
+
+            // identify and shorten the axis
+            let text_el = chart_el.querySelector(query);
+            if (text_el) {
+                text_el.textContent = name;
+            } else {
+                console.warn(`could not locate ${query}`);
+            }
+        }
+    };
+
+    return injector;
 }
 
 export function useWindowType(id) {
@@ -474,4 +590,5 @@ export function useOpenNewWindow() {
     const dispatch = useDispatch();
     return newWindow => dispatch(wmActions.openNewWindow(newWindow));
 }
+
 export default useWindowManager;

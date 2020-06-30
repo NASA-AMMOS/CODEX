@@ -1,13 +1,14 @@
 import "./ViolinPlotGraph.css";
 
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useLayoutEffect, useMemo } from "react";
 
 import { filterSingleCol } from "./graphFunctions";
 import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
     useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
+    useWindowAwareLabelShortener,
     useWindowFeatureList,
     useWindowGraphBinSize,
     useWindowGraphBounds,
@@ -72,6 +73,7 @@ function ViolinPlotGraph(props) {
     const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
     const [binSize, setBinSize] = useWindowGraphBinSize(props.win.id);
     const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const axisLabelShortener = useWindowAwareLabelShortener(props.win.id);
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
         props.win.id
     );
@@ -278,6 +280,11 @@ function ViolinPlotGraph(props) {
         },
         [needsAutoscale]
     );
+
+    useLayoutEffect(() => {
+        console.log(chartState);
+        axisLabelShortener(chartId, layouts);
+    }, [chartState]);
 
     return (
         <GraphWrapper chart={chart} win={props.win} chartId={chartId}>

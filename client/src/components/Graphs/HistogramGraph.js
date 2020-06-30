@@ -2,12 +2,13 @@ import "./HistogramGraph.css";
 
 import { scaleLinear } from "d3-scale";
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useLayoutEffect, useMemo } from "react";
 
 import { filterSingleCol } from "./graphFunctions";
 import {
     useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
+    useWindowAwareLabelShortener,
     useWindowFeatureList,
     useWindowGraphBinSize,
     useWindowGraphBounds,
@@ -94,6 +95,7 @@ function HistogramGraph(props) {
     const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
     const [binSize, setBinSize] = useWindowGraphBinSize(props.win.id);
     const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const axisLabelShortener = useWindowAwareLabelShortener(props.win.id);
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
         props.win.id
     );
@@ -341,6 +343,10 @@ function HistogramGraph(props) {
             .range([0, 100]);
         setZoom([zoomMin, zoomMax].map(scale));
     }
+
+    useLayoutEffect(() => {
+        axisLabelShortener(chartId, layouts);
+    }, [chartState]);
 
     function handleSelection(e) {
         if (!e) return;

@@ -1,6 +1,6 @@
 import "./TimeSeriesGraph.css";
 
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useMemo, useLayoutEffect } from "react";
 import plotComponentFactory from "react-plotly.js/factory";
 import regression from "regression";
 
@@ -8,6 +8,7 @@ import { filterSingleCol } from "./graphFunctions";
 import {
     useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
+    useWindowAwareLabelShortener,
     useWindowFeatureList,
     useWindowGraphBinSize,
     useWindowGraphBounds,
@@ -75,6 +76,7 @@ function TimeSeriesGraph(props) {
     const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
     const [binSize, setBinSize] = useWindowGraphBinSize(props.win.id);
     const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const axisLabelShortener = useWindowAwareLabelShortener(props.win.id);
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
         props.win.id
     );
@@ -88,13 +90,18 @@ function TimeSeriesGraph(props) {
 
     const layouts = features.reduce((acc, feature, idx) => {
         const axisName = `yaxis${idx === 0 ? "" : idx + 1}`;
+        const title = axisLabels
+            ? axisLabels.get(feature.feature, feature.feature)
+            : feature.feature;
         acc[axisName] = {
-            title: axisLabels ? axisLabels.get(feature.feature, feature.feature) : feature.feature,
+            title,
+            idx,
             fixedrange: true
         };
         return acc;
     }, {});
 
+    // baseCols is the list of tuple (cleaned data, name)
     const [baseCols] = useState(_ =>
         featureNames
             .map(colName => [
@@ -107,6 +114,9 @@ function TimeSeriesGraph(props) {
             .map(([col, name]) => [utils.removeSentinelValues([col], props.fileInfo)[0], name])
     );
 
+    // filteredCols takes baseCols and filters across it to remove out-of-bound values (leaving nulls in),
+    // returning just the column (loses name information). This is memoized on the bounds and base columns
+    // changing.
     const filteredCols = useMemo(
         _ =>
             baseCols.map(([col, name]) => {
@@ -116,6 +126,7 @@ function TimeSeriesGraph(props) {
         [bounds, baseCols]
     );
 
+    // trendLineTraces computes the trend lines for each graph
     const trendLineTraces = useMemo(
         _ =>
             filteredCols.map((col, idx) => {
@@ -128,7 +139,6 @@ function TimeSeriesGraph(props) {
                     regression[trendLineStyle](utils.zip([timeAxis, col])).points,
                     { precision: 100 }
                 );
-                console.log("col/idx: ", col, idx, x, y);
                 const trace = {
                     x,
                     y,
@@ -210,7 +220,7 @@ function TimeSeriesGraph(props) {
         const revision = chartRevision + 1;
         setChartState({
             ...chartState,
-            layout: { ...chartState.layout, datarevision: revision }
+            layout: { ...chartState.layout, ...layouts, datarevision: revision }
         });
         setChartRevision(revision);
     }
@@ -329,6 +339,10 @@ function TimeSeriesGraph(props) {
         },
         [needsAutoscale]
     );
+
+    useLayoutEffect(() => {
+        axisLabelShortener(chartId, layouts);
+    }, [chartState]);
 
     return (
         <GraphWrapper chart={chart} win={props.win} chartId={chartId}>
