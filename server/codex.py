@@ -58,6 +58,7 @@ from api.sub.hash           import get_cache
 from api.sub.hash           import create_cache_server
 from api.sub.hash           import stop_cache_server
 from api.sub.hash           import NoSessionSpecifiedError
+from api.sub.audit          import initialize_auditor, MessageAuditor
 
 def throttled_cpu_count():
     return max( 1, math.floor(cpu_count() * 0.75))
@@ -203,20 +204,25 @@ def execute_request(queue, message):
         logging.warning('session_key not in message!')
         raise NoSessionSpecifiedError()
 
-    # actually execute the function requested
     try:
-        # while the generator has more values...
-        for chunk in route_request(msg, result):
-            # ...shovel the result into a queue
-            chunk['message'] = "success"
-            queue.put_nowait( {'result': chunk, 'done': False} )
-            
-    except e:
-        response = {'message': 'failure'}
-        queue.put_nowait( { 'result': response, 'done': False} )
+        with MessageAuditor(msg) as audit:
+            # actually execute the function requested
+            try:
+                # while the generator has more values...
+                for chunk in route_request(msg, result):
+                    # ...shovel the result into a queue
+                    chunk['message'] = "success"
+                    queue.put_nowait( {'result': chunk, 'done': False} )
 
-    # let the readers know that we've drained the queue
-    queue.put_nowait({ 'done': True })
+            except e:
+                response = {'message': 'failure'}
+                queue.put_nowait( { 'result': response, 'done': False} )
+
+            # let the readers know that we've drained the queue
+            queue.put_nowait({ 'done': True })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
 
 
 # Tornado Websocket
@@ -258,6 +264,13 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         #       1) Send a job into the process pool
         #       2) Send another job to read the queue, as
         #          it blocks
+
+        # start an audit of the external message
+        audit = MessageAuditor(json.loads(message))
+        audit.start()
+        if audit.is_enabled():
+            audit.method = 'tornado:' + audit.method
+
         self.future = executor.schedule(functools.partial(execute_request, self.queue, message))
 
         while True:
@@ -273,6 +286,8 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
             logging.info("{time} : Response to front end: {json}".format(time=datetime.datetime.now().isoformat(), json={k:(result[k] if (k != 'data' and k != 'downsample' and k != 'y' and k != "y_pred") else '[data removed]') for k in result}))
 
             yield self.write_message(json.dumps(response['result']))
+
+        audit.finish()
 
         # close the thread? I don't think this is necessary
         yield self.future
@@ -313,6 +328,8 @@ def make_cache_process():
 
 
 if __name__ == '__main__':
+
+    initialize_auditor()
 
     if not os.path.exists("logs/"):
         os.makedirs("logs/")
