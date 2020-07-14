@@ -545,7 +545,7 @@ function FeatureList(props) {
     const totalCount = featureList.size;
     const selectFeature = useSetFeatureSelect();
 
-    const stats = useFeatureStatisticsLoader();
+    //const stats = useFeatureStatisticsLoader(); // handled by Saga
     const selectFeatureGroup = useSelectFeatureGroup();
 
     const [featureListLoading] = useFeatureListLoading();
