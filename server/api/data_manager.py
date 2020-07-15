@@ -19,7 +19,8 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 logger = logging.getLogger(__name__)
 
-from api.sub.hash   import get_cache
+from api.sub.hash       import get_cache
+from api.sub.downsample import simple_downsample
 
 def get_data_metrics(msg, result):
     '''
@@ -55,7 +56,11 @@ def get_data_metrics(msg, result):
                 result['std'] = np.nanstd(data)
                 result['var'] = np.nanvar(data)
                 result['name'] = feature_name
-                result['downsample'] = scipy.signal.resample(data[~np.isnan(data)],100).tolist()
+                try:
+                    result['downsample'] = simple_downsample(data[~np.isnan(data)], 100).tolist()
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
                 hist, bin_edges = np.histogram(data[~np.isnan(data)])
                 result['hist_data'] = hist.tolist()
                 result['hist_edges'] = bin_edges.tolist()

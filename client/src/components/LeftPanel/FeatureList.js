@@ -15,7 +15,7 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import MenuItem from "@material-ui/core/MenuItem";
 import Popover from "@material-ui/core/Popover";
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import Select from "@material-ui/core/Select";
 import TextField from "@material-ui/core/TextField";
 
@@ -167,6 +167,32 @@ function StatisticsRow(props) {
     const [loading, failed, stats] = useFeatureStatistics(props.feature.name);
     let [featureTypeData, setFeatureTypeData] = useState({ c: false, r: false });
 
+    // todo: remove this, the issue is rerendering the WHOLE LIST
+    const sparkline = useMemo(() => {
+        // hacky as fuck
+        let downsample = [];
+
+        if (loading || failed) {
+            return <div />;
+        }
+
+        try {
+            downsample = window.bcache.get(`stat:${props.feature.name}/downsample`);
+        } catch (e) {
+            console.log(`couldn't load downsample for ${stats.name}`);
+        }
+
+        return (
+            <Sparklines
+                data={downsample}
+                limit={100}
+                style={{ fill: "none", height: "20px", width: "100%" }}
+            >
+                <SparklinesLine color={props.rowHover ? "#051426" : "white"} />
+            </Sparklines>
+        );
+    }, [stats]);
+
     if (loading) {
         return <div className="feature-statistics-row loading">Loading...</div>;
     } else if (failed) {
@@ -179,10 +205,6 @@ function StatisticsRow(props) {
     const max = processFloatingPointNumber(stats.get("max"));
     let mean = processFloatingPointNumber(stats.get("mean"));
     let median = processFloatingPointNumber(stats.get("median"));
-    let downsample = stats.get("downsample");
-    if (downsample) {
-        downsample = downsample.toJS();
-    }
 
     return (
         <div className="feature-statistics-row">
@@ -190,15 +212,7 @@ function StatisticsRow(props) {
             <span className="label-field"> {median} </span>
             <span className="label-field"> {min} </span>
             <span className="label-field"> {max} </span>
-            <span className="sparkline-span">
-                <Sparklines
-                    data={downsample}
-                    limit={100}
-                    style={{ fill: "none", height: "20px", width: "100%" }}
-                >
-                    <SparklinesLine color={props.rowHover ? "#051426" : "white"} />
-                </Sparklines>
-            </span>
+            <span className="sparkline-span">{sparkline}</span>
         </div>
     );
 }

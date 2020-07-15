@@ -1,6 +1,6 @@
 import { put, select, takeEvery, takeLatest, all, delay } from "redux-saga/effects";
 import { batchActions } from "redux-batched-actions";
-import { REQUEST_FEATURE_STATS, FILE_LOAD } from "../constants/actionTypes";
+import { FILE_LOAD } from "../constants/actionTypes";
 import StreamWorker from "worker-loader!../workers/stream.worker";
 import {
     statSetFeatureLoading,
@@ -9,6 +9,7 @@ import {
 } from "../actions/data";
 import { getGlobalSessionKey, makeStreamRequest } from "../utils/utils";
 
+import { bcache } from "../index";
 import { store } from "../index"; // i am so sorry
 
 function* interceptFeatureStatRequest(action) {
@@ -55,6 +56,20 @@ function* interceptFeatureStatRequest(action) {
 
     makeStreamRequest(request, e => {
         console.log(e);
+
+        // handle failure
+        if (e.status !== "success") {
+            store.dispatch(statSetFeatureFailed(e.name));
+            return;
+        }
+
+        // save in bcache
+        bcache.add_native(`stat:${e.name}/downsample`, e.downsample);
+
+        // don't save large amounts of data in the store
+        delete e.hist_edges;
+        delete e.hist_data;
+        delete e.downsample;
 
         // HACKS HACKS HACKS
         store.dispatch(statSetFeatureResolved(e.name, e));

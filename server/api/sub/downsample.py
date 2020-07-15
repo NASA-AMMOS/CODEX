@@ -23,6 +23,21 @@ from api.sub.codex_math import impute
 from api.sub.hash       import get_cache
 from api.sub.spanning   import mask_spanning_subset
 
+def simple_downsample(inputArray, samples):
+    '''
+    Inputs:
+        inputArray  - numpy array to be downsampled (1D)
+        samples     - target sample size
+    '''
+    
+    if (inputArray.size < samples):
+        return inputArray
+
+    stride_size = inputArray.size // samples
+
+    return inputArray[::stride_size].copy()
+
+
 def downsample(inputArray, samples=0, percentage=0.0, session=None, algorithm="simple"):
     '''
     Inputs:
@@ -74,7 +89,7 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None, algorithm="s
 
             if algorithm == "simple":
 
-                outputArray = inputArray[np.random.choice(inputArray.shape[0], usedSamples, replace=False)]
+                outputArray = simple_downsample(inputArray, samples)
 
             elif algorithm == "spanning":
 

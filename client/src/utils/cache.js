@@ -40,16 +40,30 @@ class BlobCache {
      */
     add(hash, blob, dtype) {
         this.cache[hash] = blob;
-        this.dtypes[dtype] = dtype;
+        this.dtypes[hash] = dtype;
     }
 
     /**
-     * Get a typed array representing the data
+     * Add a native array to the cache
+     * @param {str} hash hash to store under
+     * @param {Array} arr array to store
+     */
+    add_native(hash, arr) {
+        this.cache[hash] = [...arr];
+        this.dtypes[hash] = null;
+    }
+
+    /**
+     * Get a (typed) array representing the data
      * @param {str} hash string keying the hash array
      * @return {TypedArray} a typed array corresponding to the data stored
      */
     get(hash) {
         this.__guard(hash);
+
+        if (this.dtypes[hash] === null) {
+            return this.cache[hash];
+        }
 
         // construct a typed array backed by this entry in the cache
         return new this.dtypes[hash](this.cache[hash]);
