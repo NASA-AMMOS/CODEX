@@ -26,7 +26,6 @@ import traceback
 from tornado         import web
 from tornado         import ioloop
 from tornado         import websocket
-from tornado         import gen
 from pebble          import ProcessPool, ThreadPool
 from multiprocessing import Manager, Process, cpu_count
 from tornado.ioloop  import IOLoop
@@ -70,7 +69,7 @@ queuemgr = Manager()
 
 fileChunks = []
 
-class uploadSocket(tornado.websocket.WebSocketHandler):
+class UploadSocket(tornado.websocket.WebSocketHandler):
     def open(self):
         logging.info("Upload Websocket opened")
 
@@ -192,7 +191,7 @@ def execute_request(queue, message):
 
     Inputs:
         queue - Queue to write into
-        message - Message from frontend:w
+        message - Message from frontend
     '''
     msg = json.loads(message)
     result = msg
@@ -255,8 +254,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         if self.reader is not None and (not self.reader.done()):
             self.reader.cancel()
 
-    @gen.engine
-    def on_message(self, message):
+    async def on_message(self, message):
         self.queue = queuemgr.Queue()
         # Helpful reading about multiprocessing.Queue from Tornado: https://stackoverflow.com/a/46864186
 
@@ -276,7 +274,8 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         while True:
             # Wait on reading the queue
             self.reader = readpool.schedule( self.queue.get )
-            response = yield self.reader
+
+            response = self.reader.result()
 
             # if we're done, there's nothing more to be read and we can stop
             if response['done']:
@@ -285,21 +284,33 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
             result = response['result']
             logging.info("{time} : Response to front end: {json}".format(time=datetime.datetime.now().isoformat(), json={k:(result[k] if (k != 'data' and k != 'downsample' and k != 'y' and k != "y_pred") else '[data removed]') for k in result}))
 
-            yield self.write_message(json.dumps(response['result']))
+            self.write_message(json.dumps(response['result']))
 
         audit.finish()
 
         # close the thread? I don't think this is necessary
-        yield self.future
+        await self.future
 
         # make sure the socket gets closed
         self.on_close()
         self.close()
 
 
+class APIHandler(tornado.web.RequestHandler):
+    connection = set()
+    queue      = None
+    future     = None
+    reader     = None
+
+    def get(self):
+        self.write('foo')
+
+
+
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         return
+
 
 def make_app():
     settings = dict(
@@ -308,8 +319,9 @@ def make_app():
 
     return web.Application([
         (r"/", MainHandler),
+        (r"/api/.*", APIHandler),
         (r"/codex", CodexSocket),
-        (r"/upload", uploadSocket),
+        (r"/upload", UploadSocket),
     ], **settings)
 
 def make_cache_process():
