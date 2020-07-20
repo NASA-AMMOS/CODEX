@@ -22,6 +22,7 @@ import os
 import math
 import logging
 import traceback
+import asyncio
 
 # TEMP: needs refactor
 import numpy as np
@@ -282,7 +283,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
             # Wait on reading the queue
             self.reader = readpool.schedule( self.queue.get )
 
-            response = self.reader.result()
+            response = await asyncio.wrap_future(self.reader)
 
             # if we're done, there's nothing more to be read and we can stop
             if response['done']:
@@ -350,7 +351,7 @@ class GenericAPIHandler(tornado.web.RequestHandler):
             # Wait on reading the queue
             self.reader = readpool.schedule( self.queue.get )
 
-            response = self.reader.result()
+            response = await asyncio.wrap_future(self.reader)
 
             # if we're done, there's nothing more to be read and we can stop
             if response['done']:
