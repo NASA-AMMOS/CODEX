@@ -25,6 +25,7 @@ import { reorderList, addNewItem } from "../../utils/utils";
 import {
     useChangeFeatureGroup,
     useDeleteFeatureGroup,
+    useBlobCache,
     useFeatureDelete,
     useFeatureDisplayNames,
     useFeatureGroups,
@@ -166,6 +167,7 @@ function SelectedDropdown(props) {
 function StatisticsRow(props) {
     const [loading, failed, stats] = useFeatureStatistics(props.feature.name);
     let [featureTypeData, setFeatureTypeData] = useState({ c: false, r: false });
+    const bcache = useBlobCache();
 
     // todo: remove this, the issue is rerendering the WHOLE LIST
     const sparkline = useMemo(() => {
@@ -177,7 +179,7 @@ function StatisticsRow(props) {
         }
 
         try {
-            downsample = window.bcache.get(`stat:${props.feature.name}/downsample`);
+            downsample = bcache.get(`stat:${props.feature.name}/downsample`);
         } catch (e) {
             console.log(`couldn't load downsample for ${stats.name}`);
         }

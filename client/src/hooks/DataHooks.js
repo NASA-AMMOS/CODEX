@@ -627,3 +627,7 @@ export function useSelectFeatureInGroup(id) {
         (featureName, remove) => dispatch(selectFeatureInGroup(id, featureName, remove))
     ];
 }
+
+export function useBlobCache() {
+    return window.bcache;
+}
