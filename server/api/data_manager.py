@@ -132,6 +132,7 @@ def get_data(msg, result):
 
         hashType = msg['hashType']
         names = msg["name"]
+        downsample = msg['downsample'] if 'downsample' in msg else None
         #data = np.array([])
         data = []
         status = True
@@ -154,6 +155,11 @@ def get_data(msg, result):
                 break
             else:
                 #data = np.vstack([data, array['data']]) if data.size else array['data']
+
+                # downsample if requested
+                if downsample is not None:
+                    array = simple_downsample(data, downsample)
+
                 data.append(array['data'])
 
         if (status):
