@@ -12,6 +12,7 @@ import random
 import sys
 import numpy as np
 import traceback
+import math
 import logging
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
@@ -33,9 +34,11 @@ def simple_downsample(inputArray, samples):
     if (inputArray.size < samples):
         return inputArray
 
-    stride_size = inputArray.size // samples
+    stride_size = math.floor(inputArray.size / samples)
 
-    return inputArray[::stride_size].copy()
+    # hackish, but sometimes this will fetch slightly too many samples
+    # so we add a [:samples] to get the first 'samples' downsamples
+    return inputArray[::stride_size][:samples].copy()
 
 
 def downsample(inputArray, samples=0, percentage=0.0, session=None, algorithm="simple"):
