@@ -44,10 +44,10 @@ class BootlegCache {
      * @return {TypedArray} typed array from the cache
      */
     get(key) {
-        if (!this.cache_has(key)) {
+        if (!this.has(key)) {
             console.warn(`Cache key '${key}' does not exist!`)
         } else {
-            return new this.dtype[key](this.loaded[key])
+            return new this.dtypes[key](this.loaded[key])
         }
     }
 }
@@ -86,7 +86,7 @@ class BootlegCodex {
      */
     arr_to_b64(bytes) {
         let binary = '';
-        const len = bytes.byteLength;
+        const len = bytes.length;
         for (let i = 0; i < len; i++) {
             binary += String.fromCharCode( bytes[ i ] );
         }
@@ -103,10 +103,12 @@ class BootlegCodex {
         const params = new URLSearchParams()
 
         for (let key in query) {
-            params.append(key, query[key])
+            if (query[key] !== null) {
+                params.append(key, query[key])
+            }
         }
 
-        return `${this.api_url}/${path}?${params.toString()}`
+        return `http://${this.api_url}/${path}?${params.toString()}`
     }
 
     /**
@@ -136,45 +138,70 @@ class BootlegCodex {
      * @return {Promise} Promise that resolves on the conclusion of the file upload
      */
     async upload_file(file_obj) {
+        console.log(file_obj.name)
         // create a buffer so we can chunk it
-        const buf = file_obj.arrayBuffer()
+        const buf = await file_obj.arrayBuffer()
 
-        // will transfer in 4KiB chunks
-        const CHUNK_SIZE = 1024 * 4
+        console.log('buf len: ' + buf.byteLength)
 
-        const make_chunk = (num) => ({
-            session: this.session,
-            filename: file_obj.name,
-            done: false,
-            chunk: this.arr_to_b64(
-                new Uint8Array(buf, num * CHUNK_SIZE, CHUNK_SIZE)
-            )
-        })
+        // will transfer in 1MiB chunks
+        const CHUNK_SIZE = 1024 * 1024
+
+
+        const make_chunk = (num) => {
+
+            const size = Math.min(CHUNK_SIZE, (buf.byteLength - (num * CHUNK_SIZE)))
+
+            return {
+                sessionkey: this.session,
+                filename: file_obj.name,
+                done: false,
+                chunk: this.arr_to_b64(
+                    new Uint8Array(buf, num * CHUNK_SIZE, size)
+                )
+            }
+        }
 
         // set up a websocket
-        const upload = new WebSocket(`ws://${this.api_url}/codex`)
+        const upload = new WebSocket(`ws://${this.api_url}/upload`)
+
+        // wait for it to open
+        await new Promise((resolve, reject) => {
+            upload.addEventListener('open', () => {
+                resolve()
+            })
+        })
 
         // create the promise that will end the upload
         let end_prom = new Promise((resolve, reject) => {
-            upload.onmessage = m => {
-                m = JSON.parse(m)
+            upload.addEventListener('message', m => {
+                m = JSON.parse(m.data)
 
-                if (m.status = 'complete') {
+                if (m.status === 'complete') {
                     resolve(m)
                 }
-            }
+            })
         })
 
         // the end case here ensures that the last chunk will be sent even if it
         // is not quite long enough for a full chunk
         for (let i = 0; i <= (buf.byteLength / CHUNK_SIZE); i++) {
+            console.log('sending chunk ' + i)
             upload.send(JSON.stringify(make_chunk(i)))
         }
+
+        // finish the upload for real
+        upload.send(JSON.stringify({
+            sessionkey: this.session,
+            filename: file_obj.name,
+            done: true,
+            chunk: ''
+        }))
 
         // wait for the go-ahead from the server
         const stats = await end_prom
 
-        this.features = stats.featureNames
+        this.features = stats.feature_names
     }
 
     /* --- FEATURE DOWNLOADING --- */
@@ -182,13 +209,13 @@ class BootlegCodex {
     /**
      * Resolve a feature
      * @param {str} name feature name
-     * @param {obj} options options object (downsample or null)
+     * @param {int} downsample downsample or null
      * @return {Promise} promise that resolves to the feature
      */
-    async get_feature(name, {downsample}) {
+    async get_feature(name, downsample) {
         downsample = downsample || null
 
-        if (!(name in this.features)) {
+        if (!this.features.includes(name)) {
             console.error(`No feature named '${name}'!`)
             return []
         }
@@ -202,12 +229,15 @@ class BootlegCodex {
                 name,
                 downsample
             })
+            console.log(url)
 
             const res = await fetch(url)
 
+            console.log(res.headers.get('X-Data-Type'))
             const dtype = this.str_to_type(
                 res.headers.get('X-Data-Type')
             )
+
 
             const buf = await res.arrayBuffer()
 
