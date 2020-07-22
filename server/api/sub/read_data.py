@@ -56,7 +56,7 @@ def codex_read_csv(file, featureList, hashType, session=None):
 
     for feature_name in featureList:
         try:
-            feature_data = columns[feature_name][:]
+            feature_data = columns[feature_name][:] # shouldn't be necessary?
         except BaseException:
             logging.warning("codex_read_csv: Feature not found.")
             return None
@@ -66,12 +66,15 @@ def codex_read_csv(file, featureList, hashType, session=None):
 
         try:
             feature_data = feature_data.astype(np.float)
-        except BaseException:
+        except BaseException as e:
             logging.info("Tokenizing {f}.".format(f=feature_name))
+            sys.stderr.write('{}, {}\n'.format(feature_name, feature_data[1] if len(feature_data) > 1 else feature_data))
+            sys.stderr.flush()
             feature_data = string2token(feature_data)
 
-        feature_hash = cache.hashArray(feature_name, feature_data, hashType)
+        feature_hash = cache.hashArray(feature_name.strip(), feature_data, hashType)
         hashList.append(feature_hash['hash'])
+
 
     return hashList, list(featureList)
 
