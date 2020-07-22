@@ -158,7 +158,7 @@ def get_data(msg, result):
 
                 # downsample if requested
                 if downsample is not None:
-                    array = simple_downsample(data, downsample)
+                    array['data'] = simple_downsample(np.array(array['data']), int(downsample))
 
                 data.append(array['data'])
 
