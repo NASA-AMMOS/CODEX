@@ -201,6 +201,8 @@ class BootlegCodex {
         // wait for the go-ahead from the server
         const stats = await end_prom
 
+        upload.close()
+
         this.features = stats.feature_names
     }
 
