@@ -312,6 +312,10 @@ class GenericAPIHandler(tornado.web.RequestHandler):
     def prepare(self):
         self.set_header('Content-Type', 'application/json')
 
+        # break off CORS headers
+        self.set_header('Access-Control-Allow-Origin', '*')
+        self.set_header('Access-Control-Expose-Headers', '*')
+
     async def make_api_call(self, request):
         '''
         Inputs:
