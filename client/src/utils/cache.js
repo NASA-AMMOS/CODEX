@@ -32,6 +32,43 @@ class BlobCache {
     }
 
     /**
+     * Map a data type to a string
+     * @param {str} key data type string
+     * @return {TypedArray prototype} prototype for corresponding typed array
+     */
+    str_to_dtype(key) {
+        const map = {
+            float32: Float32Array,
+            float64: Float64Array,
+
+            int8: Int8Array,
+            uint8: Uint8Array,
+
+            int16: Int16Array,
+            uint16: Uint16Array,
+
+            int32: Int32Array,
+            uint32: Uint32Array
+        };
+
+        return map[key];
+    }
+
+    /**
+     * Make a key
+     * @param {str} type type of data being stored (metric, feature, etc)
+     * @param {str} feature name of data
+     * @param {num} downsample (if applicable)
+     * @return {str} key
+     */
+    make_key(type, name, downsample) {
+        if (downsample) {
+            return `${type}:${name}/downsample/${downsample}`;
+        }
+        return `${type}:${name}`;
+    }
+
+    /**
      * Insert into the cache
      *
      * @param {str} hash hash string to store the blob under

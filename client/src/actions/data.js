@@ -339,6 +339,17 @@ export const featureDelete = featureName => {
     };
 };
 
+/**
+ * Request a feature to be loaded
+ * @param {string} featureName
+ * @param {number} downsample (potentially null) downsample
+ */
+export const requestFeatureLoad = (featureName, downsample) => ({
+    type: types.FEATURE_REQUEST,
+    feature: featureName,
+    downsample
+});
+
 export function createFeatureGroup(name, featureIDs, selected) {
     return { type: types.CREATE_FEATURE_GROUP, name, featureIDs, selected };
 }
