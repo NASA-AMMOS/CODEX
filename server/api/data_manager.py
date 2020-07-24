@@ -56,6 +56,7 @@ def get_data_metrics(msg, result):
                 result['std'] = np.nanstd(data)
                 result['var'] = np.nanvar(data)
                 result['name'] = feature_name
+                result['length'] = data.shape[0]
                 try:
                     result['downsample'] = simple_downsample(data[~np.isnan(data)], 100).tolist()
                 except Exception as e:
