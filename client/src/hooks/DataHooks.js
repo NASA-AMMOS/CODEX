@@ -19,6 +19,7 @@ import {
     featureSelect,
     featureUnselect,
     fileLoad,
+    requestFeatureLoad,
     renameFeatureGroup,
     selectFeatureGroup,
     selectFeatureInGroup,
@@ -41,7 +42,7 @@ function loadColumnFromServer(feature) {
         socketWorker.addEventListener("message", e => {
             //console.log("server column");
             //console.log(JSON.parse(e.data));
-            console.log(`Received column: ${feature}`);
+            console.log(`Received column: ${feature}`, e.data);
             const data = JSON.parse(e.data).data.map(ary => ary[0]);
             resolve(data);
         });
@@ -51,7 +52,8 @@ function loadColumnFromServer(feature) {
             JSON.stringify({
                 action: actionTypes.GET_GRAPH_DATA,
                 sessionkey: utils.getGlobalSessionKey(),
-                selectedFeatures: [feature]
+                selectedFeatures: [feature],
+                downsample: 5000
             })
         );
     });
@@ -78,6 +80,8 @@ function usePrevious(value) {
  * @return {array} feature state
  */
 export function useFeatures(features, windowHandle = undefined) {
+    // OLD
+
     features = Set(features);
 
     // know what we had before
@@ -630,4 +634,67 @@ export function useSelectFeatureInGroup(id) {
 
 export function useBlobCache() {
     return window.bcache;
+}
+
+export function useDownsampledFeatures(windowHandle = undefined) {
+    const domain = useSelector(state => state.data);
+    const dispatch = useDispatch();
+    const bcache = useBlobCache();
+
+    const ungroupedFeatures = useSelector(state => state.data.get("featureList"))
+        .filter(f => f.get("selected"))
+        .map(f => f.get("name"));
+
+    const featuresInGroups = useSelector(state =>
+        state.data.get("featureGroups").reduce((acc, group) => {
+            return acc.concat(group.get("selectedFeatures"));
+        }, List())
+    );
+
+    const selectedFeatures = ungroupedFeatures.concat(featuresInGroups);
+
+    // pin the selected features to the state on the first run
+    const [pinned, setPinned] = useState(null);
+
+    useEffect(() => {
+        let to_be_loaded;
+        if (
+            windowHandle !== undefined &&
+            windowHandle.data !== undefined &&
+            windowHandle.data.features !== undefined
+        ) {
+            to_be_loaded = windowHandle.data.features;
+        } else {
+            to_be_loaded = selectedFeatures;
+        }
+        setPinned(to_be_loaded);
+
+        let actions = to_be_loaded.map(f => requestFeatureLoad(f)).toJS();
+
+        console.log("to_be_loaded", to_be_loaded, windowHandle);
+
+        if (windowHandle !== undefined) {
+            let data = { ...windowHandle, features: to_be_loaded.toJS() };
+            console.log("wm action data", data);
+            actions.push(wmActions.setWindowData(windowHandle.id, data));
+        }
+
+        dispatch(batchActions(actions));
+    }, []); // run once
+
+    if (pinned === null) {
+        return null;
+    }
+
+    const loadedData = domain.get("loadedData");
+
+    const lockedFeatures = loadedData.filter(f => pinned.includes(f.get("feature")));
+
+    // Ensure that we only return the features when they're locked
+    if (pinned.size !== lockedFeatures.size) {
+        return null;
+    } else {
+        console.log("returning locked features: ", lockedFeatures.toJS());
+        return lockedFeatures.toJS().map(f => ({ ...f, data: bcache.get(f.data) }));
+    }
 }

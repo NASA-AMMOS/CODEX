@@ -8,6 +8,7 @@ import {
     useFileInfo,
     useHoveredSelection,
     usePinnedFeatures,
+    useDownsampledFeatures,
     useSavedSelections
 } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
@@ -36,16 +37,19 @@ function GraphWindow(props) {
     const [globalChartState, setGlobalChartState] = useGlobalChartState();
     const [hoverSelection, saveHoverSelection] = useHoveredSelection();
     const fileInfo = useFileInfo();
-    let features = usePinnedFeatures(win);
+    let features = useDownsampledFeatures(win);
     const [featureNameList] = useFeatureDisplayNames();
 
-    if (features === null || !win.data) {
+    console.log(features);
+
+    if (features === null) {
         return <WindowCircularProgress />;
     }
 
     features = features.map(feature => {
-        const featureName = featureNameList.get(feature.get("feature"), feature.get("feature"));
-        return feature.set("displayName", featureName);
+        const featureName = featureNameList.get(feature.feature, feature.feature);
+        feature.displayName = featureName;
+        return feature;
     });
 
     const baseProps = {
@@ -64,9 +68,9 @@ function GraphWindow(props) {
     const featuresRequired = windowTypes.NUM_FEATURES_REQUIRED[props.windowType];
     if (featuresRequired) {
         if (
-            (typeof featuresRequired === "number" && features.size !== featuresRequired) ||
-            features.size < featuresRequired[0] ||
-            features.size > featuresRequired[1]
+            (typeof featuresRequired === "number" && features.length !== featuresRequired) ||
+            features.length < featuresRequired[0] ||
+            features.length > featuresRequired[1]
         )
             return (
                 <WindowError>

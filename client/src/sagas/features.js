@@ -2,11 +2,7 @@ import { put, select, takeEvery, call } from "redux-saga/effects";
 import { batchActions } from "redux-batched-actions";
 import { FEATURE_REQUEST } from "../constants/actionTypes";
 import StreamWorker from "worker-loader!../workers/stream.worker";
-import {
-    statSetFeatureLoading,
-    statSetFeatureFailed,
-    statSetFeatureResolved
-} from "../actions/data";
+import { addDataset } from "../actions/data";
 import { getGlobalSessionKey } from "../utils/utils";
 
 import { bcache } from "../index";
@@ -18,7 +14,7 @@ const get_feature = query => {
     const params = new URLSearchParams();
 
     for (let key in query) {
-        if (query[key] !== null) {
+        if (query[key]) {
             params.append(key, query[key]);
         }
     }
@@ -39,16 +35,17 @@ function* interceptFeatureRequest(action) {
     // resolve a feature
     const res = yield call(get_feature, {
         name: action.feature,
-        downsample: action.downsample !== undefined ? null : action.downsample
+        downsample: action.downsample !== undefined ? null : action.downsample,
+        session: getGlobalSessionKey()
     });
 
-    const dtype = this.str_to_type(res.headers.get("X-Data-Type"));
+    const dtype = bcache.str_to_dtype(res.headers.get("X-Data-Type"));
 
-    const buf = yield call(res.arrayBuffer);
+    const buf = yield call(async () => await res.arrayBuffer());
 
     bcache.add(key, buf, dtype);
 
-    // todo: plug key into store
+    yield put(addDataset(action.feature, key));
 }
 
 function* watchFeatureRequests() {

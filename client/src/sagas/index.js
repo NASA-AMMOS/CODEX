@@ -4,5 +4,5 @@ import watchFeatureRequests from "./features";
 import watchFeatureStatRequests from "./metrics";
 
 export default function* rootSaga() {
-    yield all([watchFeatureStatRequests()]);
+    yield all([watchFeatureStatRequests(), watchFeatureRequests()]);
 }
