@@ -76,7 +76,7 @@ def codex_read_csv(file, featureList, hashType, session=None):
         hashList.append(feature_hash['hash'])
 
 
-    return hashList, list(featureList)
+    return hashList, list(map(lambda f: f.strip(), list(featureList)))
 
 
 def traverse_datasets(hdf_file):
