@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
 import { useGlobalChartState } from "../../hooks/UIHooks";
@@ -37,10 +37,24 @@ function GraphWindow(props) {
     const [globalChartState, setGlobalChartState] = useGlobalChartState();
     const [hoverSelection, saveHoverSelection] = useHoveredSelection();
     const fileInfo = useFileInfo();
-    let features = useDirectDownsampledFeatures(win);
+    let [features, sel_to_downsample, downsample_to_sel] = useDirectDownsampledFeatures(win);
     const [featureNameList] = useFeatureDisplayNames();
 
-    console.log(features);
+    const currentSelectionTranslated = useMemo(
+        () => currentSelection.map(sel_to_downsample).filter(e => e !== null),
+        [currentSelection]
+    );
+
+    const savedSelectionsTranslated = useMemo(
+        () =>
+            savedSelections.map(sel => ({
+                ...sel,
+                rowIndices: sel.rowIndices.map(sel_to_downsample).filter(e => e !== null)
+            })),
+        [savedSelections]
+    );
+
+    const setCurrentSelectionTranslated = arr => setCurrentSelection(arr.map(downsample_to_sel));
 
     if (features === null) {
         return <WindowCircularProgress />;
@@ -53,9 +67,9 @@ function GraphWindow(props) {
     });
 
     const baseProps = {
-        currentSelection: currentSelection,
-        setCurrentSelection: setCurrentSelection,
-        savedSelections: savedSelections,
+        currentSelection: currentSelectionTranslated,
+        setCurrentSelection: setCurrentSelectionTranslated,
+        savedSelections: savedSelectionsTranslated,
         saveCurrentSelection: saveCurrentSelection,
         hoverSelection: hoverSelection,
         globalChartState: globalChartState,

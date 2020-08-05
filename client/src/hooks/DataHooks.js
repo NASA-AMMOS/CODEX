@@ -36,6 +36,7 @@ import * as windowTypes from "../constants/windowTypes";
 import * as wmActions from "../actions/windowManagerActions";
 import { resolve_feature } from "../utils/features";
 import { DEFAULT_DOWNSAMPLE } from "../constants/defaults";
+import { useWindowDataDownsample } from "./WindowHooks";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -673,8 +674,6 @@ export function useDownsampledFeatures(windowHandle = undefined) {
 
         let actions = to_be_loaded.map(f => requestFeatureLoad(f)).toJS();
 
-        console.log("to_be_loaded", to_be_loaded, windowHandle);
-
         if (windowHandle !== undefined) {
             let win_data = { ...windowHandle?.data, features: to_be_loaded.toJS() };
             windowHandle.setData(win_data);
@@ -700,13 +699,23 @@ export function useDownsampledFeatures(windowHandle = undefined) {
     }
 }
 
+/**
+ * Lock a downsampled feature from the dataset, resolving directly from the server
+ *
+ * Returns both the data and a pair of functions to translate indices from the downsample to the underlying dataset and vice versa
+ *
+ * If data isn't ready, the data will be null and the translators will return 0 for all indices
+ *
+ * @param {obj} windowHandle window handle from WM
+ * @return {triple} triple of [data, sel_to_downsample, downsample_to_sel]
+ */
 export function useDirectDownsampledFeatures(windowHandle = null) {
     const dispatch = useDispatch();
 
     const currentSelection = useSelector(state => state.selections.currentSelection);
-    const [pinnedSelection, _] = useState(currentSelection);
+    const [pinnedSelection] = useState(currentSelection);
 
-    console.log("currentSelection", currentSelection, pinnedSelection);
+    const allMetrics = useSelector(state => state.data.get("featureStats"));
 
     const ungroupedFeatures = useSelector(state => state.data.get("featureList"))
         .filter(f => f.get("selected"))
@@ -725,6 +734,29 @@ export function useDirectDownsampledFeatures(windowHandle = null) {
 
     // load the feature information
     const [data, setData] = useState(null);
+
+    // use the selection translator
+    const [selectionTranslators, setSelectionTranslators] = useState([() => null, () => 0]);
+
+    // note that this will break if other kinds of downsamples are
+    // permitted
+    const createTranslatorPair = (downsample, downsampleMax) => {
+        const stride_size = Math.floor(downsampleMax / downsample);
+
+        const sel_to_downsample = sel_index => {
+            if (0 === sel_index % stride_size) {
+                return sel_index / stride_size;
+            } else {
+                return null;
+            }
+        };
+
+        const downsample_to_sel = down_index => {
+            return down_index * stride_size;
+        };
+
+        return [sel_to_downsample, downsample_to_sel];
+    };
 
     useEffect(() => {
         // avoiding IFFE pattern to avoid TypeError on destruction
@@ -750,12 +782,20 @@ export function useDirectDownsampledFeatures(windowHandle = null) {
                 windowHandle.setData(window_data);
             }
 
-            const downsample = windowHandle?.data?.downsample || DEFAULT_DOWNSAMPLE;
+            const downsampleMax = Math.min(
+                ...to_be_loaded.map(f => allMetrics.getIn([f, "stats", "length"]))
+            );
+
+            const downsample = Math.min(
+                windowHandle?.data?.downsample || DEFAULT_DOWNSAMPLE,
+                downsampleMax
+            );
 
             let feature_data = to_be_loaded.map(f => resolve_feature(f, downsample));
 
             feature_data = await Promise.all(feature_data);
 
+            setSelectionTranslators(createTranslatorPair(downsample, downsampleMax));
             setData(to_be_loaded.map((v, i) => ({ feature: v, data: feature_data[i] })));
 
             // Hacks! this forces this graph to update
@@ -767,7 +807,7 @@ export function useDirectDownsampledFeatures(windowHandle = null) {
     }, []); // should only run once--data is treated as immutable
 
     if (pinned === null || data === null) {
-        return null;
+        return [null, ...selectionTranslators];
     }
     if (
         windowHandle?.data?.downsample !== undefined &&
@@ -778,10 +818,8 @@ export function useDirectDownsampledFeatures(windowHandle = null) {
             data[0].data.length,
             windowHandle?.data?.downsample
         );
-        return null;
+        return [null, () => null, () => 0];
     }
 
-    console.log("shipping ", data);
-
-    return data;
+    return [data, ...selectionTranslators];
 }
