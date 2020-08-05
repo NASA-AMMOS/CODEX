@@ -34,6 +34,8 @@ import * as uiTypes from "../constants/uiTypes";
 import * as utils from "../utils/utils";
 import * as windowTypes from "../constants/windowTypes";
 import * as wmActions from "../actions/windowManagerActions";
+import { resolve_feature } from "../utils/features";
+import { DEFAULT_DOWNSAMPLE } from "../constants/defaults";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -674,9 +676,8 @@ export function useDownsampledFeatures(windowHandle = undefined) {
         console.log("to_be_loaded", to_be_loaded, windowHandle);
 
         if (windowHandle !== undefined) {
-            let data = { ...windowHandle, features: to_be_loaded.toJS() };
-            console.log("wm action data", data);
-            actions.push(wmActions.setWindowData(windowHandle.id, data));
+            let win_data = { ...windowHandle?.data, features: to_be_loaded.toJS() };
+            windowHandle.setData(win_data);
         }
 
         dispatch(batchActions(actions));
@@ -697,4 +698,90 @@ export function useDownsampledFeatures(windowHandle = undefined) {
         console.log("returning locked features: ", lockedFeatures.toJS());
         return lockedFeatures.toJS().map(f => ({ ...f, data: bcache.get(f.data) }));
     }
+}
+
+export function useDirectDownsampledFeatures(windowHandle = null) {
+    const dispatch = useDispatch();
+
+    const currentSelection = useSelector(state => state.selections.currentSelection);
+    const [pinnedSelection, _] = useState(currentSelection);
+
+    console.log("currentSelection", currentSelection, pinnedSelection);
+
+    const ungroupedFeatures = useSelector(state => state.data.get("featureList"))
+        .filter(f => f.get("selected"))
+        .map(f => f.get("name"));
+
+    const featuresInGroups = useSelector(state =>
+        state.data.get("featureGroups").reduce((acc, group) => {
+            return acc.concat(group.get("selectedFeatures"));
+        }, List())
+    );
+
+    const selectedFeatures = ungroupedFeatures.concat(featuresInGroups);
+
+    // pin the selected features to the state on the first run
+    const [pinned, setPinned] = useState(null);
+
+    // load the feature information
+    const [data, setData] = useState(null);
+
+    useEffect(() => {
+        // avoiding IFFE pattern to avoid TypeError on destruction
+        // using IFFE returns a promise rather than a function and React
+        // breaks on cleanup
+        const asyncResolver = async () => {
+            let to_be_loaded;
+            if (
+                windowHandle !== undefined &&
+                windowHandle.data !== undefined &&
+                windowHandle.data.features !== undefined
+            ) {
+                to_be_loaded = windowHandle.data.features;
+            } else {
+                to_be_loaded = selectedFeatures;
+            }
+            setPinned(to_be_loaded);
+
+            to_be_loaded = "toJS" in to_be_loaded ? to_be_loaded.toJS() : to_be_loaded;
+
+            if (windowHandle !== undefined) {
+                let window_data = { ...windowHandle?.data, features: to_be_loaded };
+                windowHandle.setData(window_data);
+            }
+
+            const downsample = windowHandle?.data?.downsample || DEFAULT_DOWNSAMPLE;
+
+            let feature_data = to_be_loaded.map(f => resolve_feature(f, downsample));
+
+            feature_data = await Promise.all(feature_data);
+
+            setData(to_be_loaded.map((v, i) => ({ feature: v, data: feature_data[i] })));
+
+            // Hacks! this forces this graph to update
+            dispatch(selectionActions.setCurrentSelection([]));
+            dispatch(selectionActions.setCurrentSelection(pinnedSelection));
+        };
+
+        asyncResolver();
+    }, []); // should only run once--data is treated as immutable
+
+    if (pinned === null || data === null) {
+        return null;
+    }
+    if (
+        windowHandle?.data?.downsample !== undefined &&
+        data[0].data.length !== windowHandle?.data?.downsample
+    ) {
+        console.log(
+            "data not shipping due to length mismatch...",
+            data[0].data.length,
+            windowHandle?.data?.downsample
+        );
+        return null;
+    }
+
+    console.log("shipping ", data);
+
+    return data;
 }

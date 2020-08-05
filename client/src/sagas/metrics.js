@@ -38,9 +38,6 @@ function* interceptFeatureStatRequest(action) {
     // triggering actions are dispatched, though this is ultimately harmless.
     yield put(batchActions(loadingActions));
 
-    // Open the socket we'll use to load the feature stats
-    const sock = new StreamWorker();
-
     // create the batched request
     const request = {
         routine: "arrange",
@@ -63,13 +60,19 @@ function* interceptFeatureStatRequest(action) {
             return;
         }
 
+        // create the bcache key
+        const key = `stats:${e.name}/downsample`;
+
         // save in bcache
-        bcache.add_native(`stat:${e.name}/downsample`, e.downsample);
+        bcache.add_native(key, e.downsample);
 
         // don't save large amounts of data in the store
         delete e.hist_edges;
         delete e.hist_data;
         delete e.downsample;
+
+        // store the hash key on the store
+        e.downsample_key = key;
 
         // HACKS HACKS HACKS
         store.dispatch(statSetFeatureResolved(e.name, e));

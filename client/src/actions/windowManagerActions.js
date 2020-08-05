@@ -1,7 +1,7 @@
 import * as actionTypes from "../constants/actionTypes";
 
-export function openNewWindow(info) {
-    return { type: actionTypes.OPEN_NEW_WINDOW, info };
+export function openNewWindow(info, data) {
+    return { type: actionTypes.OPEN_NEW_WINDOW, info, data };
 }
 
 export function closeWindow(id) {

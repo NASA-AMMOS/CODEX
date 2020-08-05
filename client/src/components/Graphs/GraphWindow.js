@@ -8,7 +8,7 @@ import {
     useFileInfo,
     useHoveredSelection,
     usePinnedFeatures,
-    useDownsampledFeatures,
+    useDirectDownsampledFeatures,
     useSavedSelections
 } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
@@ -37,7 +37,7 @@ function GraphWindow(props) {
     const [globalChartState, setGlobalChartState] = useGlobalChartState();
     const [hoverSelection, saveHoverSelection] = useHoveredSelection();
     const fileInfo = useFileInfo();
-    let features = useDownsampledFeatures(win);
+    let features = useDirectDownsampledFeatures(win);
     const [featureNameList] = useFeatureDisplayNames();
 
     console.log(features);
