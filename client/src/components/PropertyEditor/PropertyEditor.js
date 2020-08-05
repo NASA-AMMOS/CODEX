@@ -932,6 +932,7 @@ function PropertyEditor(props) {
             case windowTypes.CONTOUR_GRAPH:
                 return (
                     <React.Fragment>
+                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <TwoAxisGraphEditor activeWindowId={activeWindowId} />
                         <WindowGraphBounds activeWindowId={activeWindowId} />
                         <ResetToDefaultsButton activeWindowId={activeWindowId} />
@@ -940,6 +941,7 @@ function PropertyEditor(props) {
             case windowTypes.HEATMAP_GRAPH:
                 return (
                     <React.Fragment>
+                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <HeatmapGraphEditor activeWindowId={activeWindowId} />
                         <WindowGraphBounds activeWindowId={activeWindowId} />
                         <ResetToDefaultsButton activeWindowId={activeWindowId} />
@@ -948,6 +950,7 @@ function PropertyEditor(props) {
             case windowTypes.HEATMAP_3D_GRAPH:
                 return (
                     <React.Fragment>
+                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <ThreeAxisGraphEditor activeWindowId={activeWindowId} />
                         <WindowGraphBounds activeWindowId={activeWindowId} />
                         <ResetToDefaultsButton activeWindowId={activeWindowId} />
@@ -956,6 +959,7 @@ function PropertyEditor(props) {
             case windowTypes.SINGLE_X_MULTIPLE_Y:
                 return (
                     <React.Fragment>
+                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <MultiAxisGraphEditor activeWindowId={activeWindowId} />
                         <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
                         <GridLinesVisibleToggle activeWindowId={activeWindowId} />
@@ -966,6 +970,7 @@ function PropertyEditor(props) {
             case windowTypes.MAP_GRAPH:
                 return (
                     <React.Fragment>
+                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <MapGraphEditor activeWindowId={activeWindowId} />
                         <ResetToDefaultsButton activeWindowId={activeWindowId} />
                     </React.Fragment>
@@ -973,6 +978,7 @@ function PropertyEditor(props) {
             case windowTypes.HISTOGRAM_GRAPH:
                 return (
                     <React.Fragment>
+                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <HistogramGraphEditor activeWindowId={activeWindowId} />
                         <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
                         <ResetToDefaultsButton activeWindowId={activeWindowId} />
@@ -981,6 +987,7 @@ function PropertyEditor(props) {
             case windowTypes.TIME_SERIES_GRAPH:
                 return (
                     <React.Fragment>
+                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
                         <TrendLineStyle activeWindowId={activeWindowId} />
                         <GridLinesVisibleToggle activeWindowId={activeWindowId} />
@@ -991,6 +998,7 @@ function PropertyEditor(props) {
             case windowTypes.BOX_PLOT_GRAPH:
                 return (
                     <React.Fragment>
+                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
                         <ResetToDefaultsButton activeWindowId={activeWindowId} />
                     </React.Fragment>
