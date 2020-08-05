@@ -85,7 +85,7 @@ function SingleXMultipleYGraph(props) {
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     const [sanitizedCols] = useState(_ =>
-        utils.removeSentinelValues(props.data.map(col => col.get("data")).toJS(), props.fileInfo)
+        utils.removeSentinelValues(props.data.map(col => col.data), props.fileInfo)
     );
 
     const processedData = useMemo(
@@ -104,29 +104,28 @@ function SingleXMultipleYGraph(props) {
                 ? indexAry
                 : Array.from(
                       processedData[
-                          props.data.findIndex(col => col.get("feature") === props.win.data.xAxis)
+                          props.data.findIndex(col => col.feature === props.win.data.xAxis)
                       ]
                   ).sort((a, b) => b - a),
         [xAxis]
     );
 
     const cols = props.data
-        .filter(col => col.get("feature") !== xAxis)
-        .map((col, idx) => ({ name: col.get("feature"), data: processedData[idx] }))
-        .toJS();
+        .filter(col => col.feature !== xAxis)
+        .map((col, idx) => ({ name: col.feature, data: processedData[idx] }));
 
-    const featureDisplayNames = featureList.map(featureName =>
-        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    const featureDisplayNames = featureList.map(
+        featureName => props.data.find(feature => feature.feature === featureName)?.displayName
     );
 
     const xAxisTitle =
         !xAxis || xAxis === uiTypes.GRAPH_INDEX
             ? "Row Index"
-            : props.data.find(feature => feature.get("feature") === xAxis).get("displayName");
+            : props.data.find(feature => feature.feature === xAxis).displayName;
 
     const yAxisTitle = props.data
-        .filter(col => col.get("feature") !== xAxis)
-        .map(col => (axisLabels ? axisLabels.get(col.get("feature")) : col.get("feature")))
+        .filter(col => col.feature !== xAxis)
+        .map(col => (axisLabels ? axisLabels.get(col.feature) : col.feature))
         .join(", ");
 
     const palette = utils.getSelectionPalette();

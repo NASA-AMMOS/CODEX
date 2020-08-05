@@ -741,6 +741,10 @@ export function useDirectDownsampledFeatures(windowHandle = null) {
     // note that this will break if other kinds of downsamples are
     // permitted
     const createTranslatorPair = (downsample, downsampleMax) => {
+        // if we don't need to downsample, then return identity functions
+        if (downsampleMax === downsample) {
+            return [i => i, i => i];
+        }
         const stride_size = Math.floor(downsampleMax / downsample);
 
         const sel_to_downsample = sel_index => {
