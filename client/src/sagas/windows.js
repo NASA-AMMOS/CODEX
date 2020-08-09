@@ -2,7 +2,7 @@ import { put, takeEvery, delay, select } from "redux-saga/effects";
 import { WINDOW_SET_DATA_DOWNSAMPLE } from "../constants/actionTypes";
 import { featureSelect, featuresUnselectAll } from "../actions/data";
 import { setCurrentSelection } from "../actions/selectionActions";
-import { openNewWindow, closeWindow } from "../actions/windowManagerActions";
+import { openNewWindow, closeWindow, resizeWindow } from "../actions/windowManagerActions";
 import { batchActions } from "redux-batched-actions";
 
 /*
@@ -34,6 +34,8 @@ function* interceptDownsampleRequest(action) {
         .substring(7);
 
     yield put(batchActions([openNewWindow(win_info), closeWindow(old_id)]));
+
+    yield put(resizeWindow(win_info.id, { width: win_info.width, height: win_info.height }));
 }
 
 function* watchDownsampleRequests() {
