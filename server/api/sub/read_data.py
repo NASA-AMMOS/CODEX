@@ -125,6 +125,8 @@ def codex_read_hd5(file, featureList, hashType, session=None):
         featureList = list(traverse_datasets(file))
 
     for feature_name in featureList:
+        feature_name = feature_name.strip()
+
         try:
             feature_data = f[feature_name][:]
         except BaseException:
