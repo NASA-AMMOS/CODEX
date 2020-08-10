@@ -179,9 +179,9 @@ function StatisticsRow(props) {
         }
 
         try {
-            downsample = bcache.get(`stat:${props.feature.name}/downsample`);
+            downsample = bcache.get(`stats:${props.feature.name}/downsample`);
         } catch (e) {
-            console.log(`couldn't load downsample for ${stats.name}`);
+            console.log(`couldn't load downsample for ${stats.name}`, e);
         }
 
         return (
@@ -193,7 +193,7 @@ function StatisticsRow(props) {
                 <SparklinesLine color={props.rowHover ? "#051426" : "white"} />
             </Sparklines>
         );
-    }, [stats]);
+    }, [stats, loading, failed]);
 
     if (loading) {
         return <div className="feature-statistics-row loading">Loading...</div>;
