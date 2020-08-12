@@ -8,6 +8,7 @@ import WorkerSocket from "worker-loader!../workers/socket.worker";
 import WorkerUpload from "worker-loader!../workers/upload.worker";
 import * as types from "../constants/actionTypes";
 import * as uiActions from "./ui";
+import { DIALOG_BOX } from "../constants/windowTypes";
 
 export function fileLoad(fileList) {
     return dispatch => {
@@ -25,6 +26,19 @@ export function fileLoad(fileList) {
             if (res.status === "failure") {
                 console.log("whoops! upload failed!");
                 dispatch(uiActions.setUploadStateDone());
+                dispatch({ type: types.FEATURE_LIST_LOADING, isLoading: false });
+                dispatch({ type: types.FILE_LOAD, data: [], filename: null });
+                dispatch({
+                    type: types.OPEN_NEW_WINDOW,
+                    info: {
+                        windowType: DIALOG_BOX,
+                        title: "Load failure!",
+                        data: {
+                            variant: "load_failure",
+                            message: res.message
+                        }
+                    }
+                });
                 workerUpload = null;
                 return;
             }
