@@ -644,4 +644,11 @@ export default class DataReducer {
                 .map(group => (group.get("id") === action.id ? newGroup : group))
         );
     }
+
+    /**
+     * Set the global session key (typically done on file load)
+     */
+    static setSessionKey(state, action) {
+        return state.set("serverSessionKey", action.key);
+    }
 }
