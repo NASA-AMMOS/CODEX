@@ -43,8 +43,10 @@
             width: 150px;
         }
 
-        span {
-            color: #eeeeee;
+        color: #eeeeee;
+
+        &.axis__control--paddingright {
+            padding-right: 1em;
         }
     }
 

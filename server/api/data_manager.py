@@ -19,7 +19,8 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 logger = logging.getLogger(__name__)
 
-from api.sub.hash   import get_cache
+from api.sub.hash       import get_cache
+from api.sub.downsample import simple_downsample
 
 def get_data_metrics(msg, result):
     '''
@@ -55,7 +56,12 @@ def get_data_metrics(msg, result):
                 result['std'] = np.nanstd(data)
                 result['var'] = np.nanvar(data)
                 result['name'] = feature_name
-                result['downsample'] = scipy.signal.resample(data[~np.isnan(data)],100).tolist()
+                result['length'] = data.shape[0]
+                try:
+                    result['downsample'] = simple_downsample(data[~np.isnan(data)], 100).tolist()
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
                 hist, bin_edges = np.histogram(data[~np.isnan(data)])
                 result['hist_data'] = hist.tolist()
                 result['hist_edges'] = bin_edges.tolist()
@@ -127,6 +133,7 @@ def get_data(msg, result):
 
         hashType = msg['hashType']
         names = msg["name"]
+        downsample = msg['downsample'] if 'downsample' in msg else None
         #data = np.array([])
         data = []
         status = True
@@ -149,6 +156,14 @@ def get_data(msg, result):
                 break
             else:
                 #data = np.vstack([data, array['data']]) if data.size else array['data']
+
+                # downsample if requested
+                if downsample is not None:
+                    array['data'] = simple_downsample(np.array(array['data']), int(downsample))
+                else:
+                    array['data'] = simple_downsample(np.array(array['data']), 5000)
+
+
                 data.append(array['data'])
 
         if (status):

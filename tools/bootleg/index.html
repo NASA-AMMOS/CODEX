@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+        <title> bootleg codex </title>
+    </head>
+
+    <body>
+        <h1>bootleg codex</h1>
+        <div class="row">
+            <input type="file" id="file"/>
+            <button type="button" id="upload">upload</button>
+            <a href="/">
+                <button type="button">reset</button>
+            </a>
+
+        </div>
+
+        <p>
+            <b>Session:</b> <span data-from="session"></span><br/>
+            Features:
+            <ul data-from="features">
+
+            </ul>
+        </p>
+
+        <form id="get_feature">
+            <b>Load feature:</b><br/>
+            <select data-from="features_select" name="feature">
+                <option disabled selected value="no">not loaded</option>
+            </select>
+            <input type="number" placeholder="downsample" name="downsample"/>
+            <button type="submit"> load </button>
+        </form>
+
+        <p>
+            <b>Feature data:</b><br/>
+            Length: <span data-from="feature_length"></span><br/>
+            Head/10: <code data-from="feature_head"></code>
+        </p>
+
+        <script src="bootleg.js" type="text/javascript"></script>
+        <script src="index.js" defer type="text/javascript"></script>
+    </body>
+</html>
+

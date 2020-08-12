@@ -339,6 +339,17 @@ export const featureDelete = featureName => {
     };
 };
 
+/**
+ * Request a feature to be loaded
+ * @param {string} featureName
+ * @param {number} downsample (potentially null) downsample
+ */
+export const requestFeatureLoad = (featureName, downsample) => ({
+    type: types.FEATURE_REQUEST,
+    feature: featureName,
+    downsample
+});
+
 export function createFeatureGroup(name, featureIDs, selected) {
     return { type: types.CREATE_FEATURE_GROUP, name, featureIDs, selected };
 }
@@ -361,4 +372,8 @@ export function renameFeatureGroup(id, name) {
 
 export function selectFeatureInGroup(id, featureName, remove) {
     return { type: types.SELECT_FEATURE_IN_GROUP, id, featureName, remove };
+}
+
+export function deferUntilAvailable(features, action) {
+    return { type: types.DEFER_UNTIL_AVAILABLE, features, action };
 }

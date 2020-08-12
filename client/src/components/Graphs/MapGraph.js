@@ -89,14 +89,14 @@ function MapGraph(props) {
         [baseCols, bounds]
     );
 
-    const featureDisplayNames = featureList.map(featureName =>
-        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    const featureDisplayNames = featureList.map(
+        featureName => props.data.find(feature => feature.feature === featureName).displayName
     );
 
     const heatMode = featureList.length === 3;
     const zAxisTitle = heatMode
         ? (axisLabels && axisLabels.get(zAxis)) ||
-          props.data.find(feature => feature.get("feature") === featureList[2]).get("displayName")
+          props.data.find(feature => feature.feature === featureList[2]).displayName
         : null;
 
     const baseX =

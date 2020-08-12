@@ -15,7 +15,7 @@ dependencies:
   - pyyaml
   - yaml
   - matplotlib
-  - tornado=4.5.3
+  - tornado=6.0.4
   - psutil
   - pandas
   - pillow
