@@ -4,6 +4,7 @@ import { useNewFeature } from "../hooks/DataHooks";
 import * as actionTypes from "../constants/actionTypes";
 import * as algorithmTypes from "../constants/algorithmTypes";
 import * as selectionActions from "./selectionActions";
+import { deferUntilAvailable } from "./data";
 
 export function createAlgorithm(algoMode) {
     return (dispatch, getState) => {
@@ -96,10 +97,12 @@ function handleAlgorithmReturn(inMsg, subalgoState, selectedFeatures, dispatch, 
             }
             return axisName;
         });
-        dispatch({
-            type: actionTypes.OPEN_NEW_WINDOW,
-            info: { windowType: SCATTER_GRAPH, data: { features } }
-        });
+        dispatch(
+            deferUntilAvailable(features, {
+                type: actionTypes.OPEN_NEW_WINDOW,
+                info: { windowType: SCATTER_GRAPH, data: { features } }
+            })
+        );
     }
 }
 
