@@ -373,3 +373,7 @@ export function renameFeatureGroup(id, name) {
 export function selectFeatureInGroup(id, featureName, remove) {
     return { type: types.SELECT_FEATURE_IN_GROUP, id, featureName, remove };
 }
+
+export function deferUntilAvailable(features, action) {
+    return { type: types.DEFER_UNTIL_AVAILABLE, features, action };
+}

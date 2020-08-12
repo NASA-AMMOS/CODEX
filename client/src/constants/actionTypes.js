@@ -130,3 +130,6 @@ export const CLEAR_ALL_PLOT_IMAGES = "CLEAR_ALL_PLOT_IMAGES";
 
 // Graph actions
 export const SET_WINDOW_FEATURES = "SET_WINDOW_FEATURES";
+
+// Meta actions
+export const DEFER_UNTIL_AVAILABLE = "DEFER_UNTIL_AVAILABLE";
