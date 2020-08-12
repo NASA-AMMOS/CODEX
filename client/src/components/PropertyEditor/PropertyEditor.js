@@ -54,10 +54,12 @@ function DownsampleSlider(props) {
     const stepSize = Math.min(Math.pow(10, Math.floor(Math.log10(downsampleMax))), 1000);
 
     const marks = [];
-    for (let i = 0; i < downsampleMax; i += stepSize) {
-        marks.push({ value: i === 0 ? 1 : i, label: "" });
+    if (downsampleMax !== Infinity) {
+        for (let i = 0; i < downsampleMax; i += stepSize) {
+            marks.push({ value: i === 0 ? 1 : i, label: "" });
+        }
+        marks.push({ value: downsampleMax });
     }
-    marks.push({ value: downsampleMax });
 
     return (
         <div className="axis axis__control--paddingright">
