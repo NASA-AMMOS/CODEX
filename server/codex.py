@@ -92,9 +92,9 @@ class UploadSocket(tornado.websocket.WebSocketHandler):
 
         if (msg["done"] == True):
 
-            stop_cache_server()
-            codex_hash_server = make_cache_process()
-            codex_hash_server.start()
+            #stop_cache_server()
+            #codex_hash_server = make_cache_process()
+            #codex_hash_server.start()
 
             logging.info('Finished file transfer, initiating save...')
             cache = get_cache(msg['sessionkey'], timeout=None)
@@ -106,42 +106,48 @@ class UploadSocket(tornado.websocket.WebSocketHandler):
             fileChunks = []
 
             fileExtension = filename.split(".")[-1]
-            if (fileExtension == "csv"):
-                hashList, featureList = cache.import_csv(filepath)
+            try:
+                if (fileExtension == "csv"):
+                    hashList, featureList = cache.import_csv(filepath)
 
-            elif (fileExtension == "h5"):
-                hashList, featureList = cache.import_hd5(filepath)
+                elif (fileExtension == "h5"):
+                    hashList, featureList = cache.import_hd5(filepath)
 
-            elif (fileExtension == "npy"):
-                hashList, featureList = cache.import_npy(filepath)
+                elif (fileExtension == "npy"):
+                    hashList, featureList = cache.import_npy(filepath)
 
+                else:
+                    result['message'] = "Currently unsupported filetype"
+                    stringMsg = json.dumps(result)
+                    self.write_message(stringMsg)
+            except Exception as e:
+                logging.info('Unable to save file: ' + repr(e))
+                result['status'] = 'failure'
+                result['message'] = repr(e)
             else:
-                result['message'] = "Currently unsupported filetype"
-                stringMsg = json.dumps(result)
-                self.write_message(stringMsg)
+                sentinel_values = cache.getSentinelValues(featureList)
+                nan  = sentinel_values["nan"]
+                inf  = sentinel_values["inf"]
+                ninf = sentinel_values["ninf"]
 
-            sentinel_values = cache.getSentinelValues(featureList)
-            nan  = sentinel_values["nan"]
-            inf  = sentinel_values["inf"]
-            ninf = sentinel_values["ninf"]
+                result['status'] = 'complete'
+                result['feature_names'] = featureList
+                result["nan"]  = nan
+                result["inf"]  = inf
+                result["ninf"] = ninf
+                logging.info('Finished file save.')
 
         else:
             contents = base64.decodebytes(str.encode(msg["chunk"]))
             fileChunks.append(contents)
-
-        if msg['done']:
-            result['status'] = 'complete'
-            result['feature_names'] = featureList
-            result["nan"]  = nan
-            result["inf"]  = inf
-            result["ninf"] = ninf
-            logging.info('Finished file save.')
-        else:
             result['status'] = 'streaming'
 
 
         stringMsg = json.dumps(result)
         self.write_message(stringMsg)
+        
+        if result['status'] == 'failure':
+            self.close()
 
 def route_request(msg, result):
     '''
@@ -227,6 +233,7 @@ def execute_request(queue, message):
             # let the readers know that we've drained the queue
             queue.put_nowait({ 'done': True })
     except Exception as e:
+        sys.stderr.write('Exception caught in request: {}\n'.format(repr(e)))
         import traceback
         traceback.print_exc()
         queue.put_nowait({ result: {'message': 'failure'}, 'done': True })
