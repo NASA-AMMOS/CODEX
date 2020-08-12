@@ -69,6 +69,9 @@ const wrapWindow = (win, dispatch) => {
                 dispatch(wmActions.setWindowData(win.get("id"), data));
             }
         },
+        close: () => {
+            dispatch(wmActions.closeWindow(win.get("id")));
+        },
         ...(win ? win.toJS() : {})
     };
 };
@@ -82,6 +85,7 @@ const wrapDummy = () => {
         setTitle: warn,
         setResizable: warn,
         setData: warn,
+        close: warn,
         ...defaultInitialSettings
     };
 };
@@ -98,7 +102,8 @@ export function useWindowManager(props, initialSettings) {
     let window_obj = {};
 
     if (props.__wm_parent_id) {
-        window_obj = domain.get("windows").filter(win => win.get("id") === props.__wm_parent_id)[0];
+        window_obj = domain.get("windows").find(win => win.get("id") === props.__wm_parent_id);
+        console.log("identified window", window_obj, props.__wm_parent_id);
         window_obj = wrapWindow(window_obj, dispatch);
     } else {
         window_obj = wrapDummy();
