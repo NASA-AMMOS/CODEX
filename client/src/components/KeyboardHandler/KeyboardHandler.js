@@ -172,6 +172,20 @@ function KeyboardHandler(props) {
         [tKey]
     );
 
+    // "shift-F" keys toggle fullscreen
+    const fKey = useKey("f");
+    useEffect(() => {
+        if (disableHotkeys) return;
+        if (!fKey) return;
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    }, [fKey]);
+
     return null;
 }
 

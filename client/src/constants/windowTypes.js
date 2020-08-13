@@ -11,6 +11,9 @@ export const DEBUG_WINDOW = "DEBUG_WINDOW";
  * workflowTypes
  */
 
+// general
+export const DIALOG_BOX = "DIALOG_BOX";
+
 // algorithmTypes
 export const ALGO_LOADING_WINDOW = "ALGO_LOADING_WINDOW";
 export const CLUSTER_ALGORITHM = "Cluster";

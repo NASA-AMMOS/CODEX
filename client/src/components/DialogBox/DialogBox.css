@@ -1,0 +1,9 @@
+.DialogBox__content {
+    flex-grow: 1;
+}
+
+.DialogBox__actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}

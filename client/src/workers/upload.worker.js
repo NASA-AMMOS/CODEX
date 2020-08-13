@@ -80,7 +80,7 @@ function processFile(files, sessionkey) {
                 self.postMessage(JSON.stringify(Object.assign(r, { filename: blob.name })));
                 sock.close();
             } else if (r.status === "failure") {
-                self.postMessage("Upload Failed");
+                self.postMessage(JSON.stringify(r));
                 sock.close();
             }
         };

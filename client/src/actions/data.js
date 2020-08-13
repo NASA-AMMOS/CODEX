@@ -3,15 +3,18 @@
  * @author Patrick Kage
  */
 
-import { getGlobalSessionKey } from "../utils/utils";
+import { getGlobalSessionKey, createMemorableId } from "../utils/utils";
 import WorkerSocket from "worker-loader!../workers/socket.worker";
 import WorkerUpload from "worker-loader!../workers/upload.worker";
 import * as types from "../constants/actionTypes";
 import * as uiActions from "./ui";
+import { DIALOG_BOX } from "../constants/windowTypes";
 
 export function fileLoad(fileList) {
     return dispatch => {
         // Clear out list of feature names while we handle new file
+        let newSessionKey = createMemorableId();
+        dispatch({ type: types.SET_SESSION_KEY, key: newSessionKey });
         dispatch({ type: types.FILE_LOAD, data: [], filename: "" });
         dispatch({ type: types.FEATURE_LIST_LOADING, isLoading: true });
         dispatch({ type: types.CLOSE_ALL_WINDOWS });
@@ -19,6 +22,26 @@ export function fileLoad(fileList) {
         let workerUpload = new WorkerUpload();
         workerUpload.addEventListener("message", msg => {
             const res = JSON.parse(msg.data);
+            console.log(res);
+            if (res.status === "failure") {
+                console.log("whoops! upload failed!");
+                dispatch(uiActions.setUploadStateDone());
+                dispatch({ type: types.FEATURE_LIST_LOADING, isLoading: false });
+                dispatch({ type: types.FILE_LOAD, data: [], filename: null });
+                dispatch({
+                    type: types.OPEN_NEW_WINDOW,
+                    info: {
+                        windowType: DIALOG_BOX,
+                        title: "Load failure!",
+                        data: {
+                            variant: "load_failure",
+                            message: res.message
+                        }
+                    }
+                });
+                workerUpload = null;
+                return;
+            }
             if (res.status !== "complete") {
                 if (res.percent + 0.1 > 1) {
                     dispatch(uiActions.setUploadStateProcessing());
@@ -42,7 +65,7 @@ export function fileLoad(fileList) {
 
         workerUpload.postMessage({
             files: fileList,
-            sessionkey: getGlobalSessionKey(),
+            sessionkey: newSessionKey,
             NODE_ENV: process.env.NODE_ENV
         });
     };

@@ -7,6 +7,7 @@ import msgpack
 from termcolor import colored
 from contextlib import redirect_stdout
 from io import StringIO
+import traceback
 
 # function decorator to expose methods
 # use @expose('func name')
@@ -127,11 +128,20 @@ class Server:
 
         # create the output stream
         stdout = StringIO()
+        
+        # if we have an exception, get it here
+        excep = None
+        rv = None
 
         # make the wrapped call
         with redirect_stdout(stdout):
-            rv = getattr(self.wrapped, desc['field'])(*args, **kwargs)
-        return rv, stdout.getvalue()
+            try:
+                rv = getattr(self.wrapped, desc['field'])(*args, **kwargs)
+            except Exception as e:
+                self.__log.warn('method call failed! {}'.format(repr(e)))
+                traceback.print_exc()
+                excep = e
+        return rv, excep, stdout.getvalue()
 
     def get_listing(self):
         desc = [{"name": key} for key in self.methods]
@@ -168,7 +178,7 @@ class Server:
                         ', '.join('{}={}'.format(k, self.__shorten_repr(message['kwargs'][k])) for k in message['kwargs'])
                     ))
 
-                    reply['return'], reply['stdout'] = self.call(message['func'], message['args'], message['kwargs'])
+                    reply['return'], reply['exception'], reply['stdout'] = self.call(message['func'], message['args'], message['kwargs'])
                 reply['success'] = True
             except Exception as e:
                 if not self.__debug:
