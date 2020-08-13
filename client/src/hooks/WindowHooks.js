@@ -366,7 +366,7 @@ export function useWindowAwareLabelShortener(id) {
 
     // if the window is not attached, return identity functions
     if (winHeight === 1 || winFeatureCount === 1) {
-        return [x => x, (x, y, z) => undefined];
+        return () => {};
     }
 
     const shortener = (label, axis = "y") => {
