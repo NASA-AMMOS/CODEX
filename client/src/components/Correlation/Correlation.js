@@ -202,13 +202,17 @@ function CorrelationContent(props) {
         setChartRevision(revision);
     }
 
-    console.log(data.ordering);
-    console.log(data.corr_matrix);
     useEffect(
         _ => {
             chartState.data[0].x = data.ordering.slice();
-            chartState.data[0].y = data.ordering.slice().reverse();
-            chartState.data[0].z = data.corr_matrix.slice().reverse();
+            chartState.data[0].y =
+                currentSortOption === "sorted"
+                    ? data.ordering.slice().reverse()
+                    : data.ordering.slice();
+            chartState.data[0].z =
+                currentSortOption === "sorted"
+                    ? data.corr_matrix.slice().reverse()
+                    : data.corr_matrix.slice();
             chartState.layout.annotations = data.ordering
                 .slice()
                 .reverse()
