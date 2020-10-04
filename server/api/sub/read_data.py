@@ -55,6 +55,7 @@ def codex_read_csv(file, featureList, hashType, session=None):
         featureList = columns.keys()
 
     for feature_name in featureList:
+
         try:
             feature_data = columns[feature_name][:] # shouldn't be necessary?
         except BaseException:
