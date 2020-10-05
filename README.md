@@ -16,7 +16,7 @@ e.g., in bash something like
 
 1. Activate the conda environment, compile the client and start the server. run_codex.sh will run both the client and server in a single terminal. If you would like to start each individually, as reccomended for debugging, see the note below.
 
-in `server/`: 
+in `server/` run  
 `conda env update -f envs/environment.yml`
 
 ```
