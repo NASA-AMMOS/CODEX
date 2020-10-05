@@ -28,5 +28,5 @@ dependencies:
     - pysptools
     - scikit-image==0.15.0
     - fastdtw
-    - Pebble
+    - Pebble==4.3.10
     - pytest-cov==2.7.1
