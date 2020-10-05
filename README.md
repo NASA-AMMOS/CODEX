@@ -6,7 +6,7 @@ COmplex Data EXplorer
 
 1. `git clone https://github.jpl.nasa.gov/jackal/CODEX.git`
 
-1. Run `npm install` in this project's home directory. (you need [Node.js](https://nodejs.org/en/) installed)
+1. Run `npm install` in `client/` direcotry. (you need [Node.js](https://nodejs.org/en/) installed)
 
 1. Set a CODEX_ROOT environment variable to point into GIT/server/
 
