@@ -304,7 +304,7 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         audit.finish()
 
         # close the thread? I don't think this is necessary
-        await self.future
+        await asyncio.wrap_future(self.future)
 
         # make sure the socket gets closed
         self.on_close()
