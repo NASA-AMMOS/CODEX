@@ -67,7 +67,7 @@ def throttled_cpu_count():
     return max( 1, math.floor(cpu_count() * 0.75))
 
 # create our process pools
-executor = ProcessPool(max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
+executor = ThreadPool(max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
 readpool = ThreadPool( max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
 queuemgr = Manager()
 
@@ -302,9 +302,6 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
             self.write_message(json.dumps(response['result']))
 
         audit.finish()
-
-        # close the thread? I don't think this is necessary
-        await self.future
 
         # make sure the socket gets closed
         self.on_close()
