@@ -145,7 +145,7 @@ class UploadSocket(tornado.websocket.WebSocketHandler):
 
         stringMsg = json.dumps(result)
         self.write_message(stringMsg)
-        
+
         if result['status'] == 'failure':
             self.close()
 
@@ -226,7 +226,7 @@ def execute_request(queue, message):
                     chunk['message'] = "success"
                     queue.put_nowait( {'result': chunk, 'done': False} )
 
-            except e:
+            except Exception as e:
                 response = {'message': 'failure'}
                 queue.put_nowait( { 'result': response, 'done': False} )
 
@@ -474,4 +474,3 @@ if __name__ == '__main__':
     # gracefully shut down cache server
     stop_cache_server()
     codex_hash_server.join() # wait for process shutdown
-
