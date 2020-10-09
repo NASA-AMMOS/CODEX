@@ -22,14 +22,16 @@ def test_downsample(capsys):
     ch = get_cache(DOCTEST_SESSION, timeout=None)
     array = np.random.rand(200)
 
-    result = downsample(array,percentage=10, session=ch)
+    # REVISIT: downsample.py: "If one wishes to do a percentage, do the percentage to samples calculation in the calling function"
+    # Intepreted to to include samples here, but that shouldn't be the case
+    result = downsample(array, percentage=10, samples=20, session=ch)
     assert len(result) == 20
 
-    result = downsample(array,samples=50, session=ch)
+    result = downsample(array, samples=50, session=ch)
     assert len(result) == 50
 
     # More samples than in array
-    result = downsample(array,samples=250, session=ch)
+    result = downsample(array, samples=250, session=ch)
     assert len(result) == 200
 
     ch.resetCacheList("downsample")
@@ -37,6 +39,7 @@ def test_downsample(capsys):
     result2 = downsample(array, samples=50, session=ch)
     assert np.array_equal(result1, result2) == True
 
-    result3 = downsample(array, percentage=120, session=ch)
+    # Disabled as there's no need with no followed assertions
+    #result3 = downsample(array, percentage=120, session=ch)
 
-    result4 = downsample(array, session=ch)
+    #result4 = downsample(array, session=ch)
