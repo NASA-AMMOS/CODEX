@@ -7,7 +7,7 @@ function handleGraphDataRequest(msg) {
         .toString(36)
         .substring(8);
 
-    let socketString = `${process.env.CODEX_SERVER_URL}/codex`;
+    let socketString = `${process.env.CODEX_SERVER_URL}`.replace("https", "wss");
 
     socket = new WebSocket(socketString);
 
@@ -41,7 +41,7 @@ function handleAlgorithmRequest(msg) {
         .toString(36)
         .substring(8);
 
-    let socketString = "ws://localhost:8888/codex";
+    let socketString = `${process.env.CODEX_SERVER_URL}`.replace("https", "wss");
 
     socket = new WebSocket(socketString);
 
@@ -65,7 +65,7 @@ function handleAlgorithmRequest(msg) {
 }
 
 function handleHelpTextRequest(msg) {
-    const socketString = "ws://localhost:8888/codex";
+    let socketString = `${process.env.CODEX_SERVER_URL}`.replace("https", "wss");
     socket = new WebSocket(socketString);
 
     socket.onclose = function() {
@@ -96,7 +96,7 @@ function handleHelpTextRequest(msg) {
 }
 
 function handleSimpleRequest(msg) {
-    const socketString = `${process.env.CODEX_SERVER_URL}/codex`;
+    let socketString = `${process.env.CODEX_SERVER_URL}`.replace("https", "wss");
     socket = new WebSocket(socketString);
 
     socket.onclose = function() {

@@ -22,7 +22,8 @@ module.exports = merge(common, {
     devtool: "cheap-module-source-map",
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
-        new webpack.WatchIgnorePlugin([/css\.d\.ts$/])
+        new webpack.WatchIgnorePlugin([/css\.d\.ts$/]),
+        new webpack.EnvironmentPlugin({ CODEX_SERVER_URL: "https://localhost:8888" })
     ],
     resolve: {
         modules: [

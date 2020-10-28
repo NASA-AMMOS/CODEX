@@ -100,7 +100,7 @@ self.addEventListener("message", function(e) {
     }
 
     if (files.length > 0) {
-        let socketString = `${process.env.CODEX_SERVER_URL}/upload`;
+        let socketString = `${process.env.CODEX_SERVER_URL}`.replace("https", "wss");
 
         sock = new WebSocket(socketString);
 
