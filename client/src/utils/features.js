@@ -2,8 +2,6 @@ import { DEFAULT_DOWNSAMPLE } from "../constants/defaults";
 import { getGlobalSessionKey } from "../utils/utils";
 import { bcache } from "../index";
 
-const CODEX_URL = "http://localhost:8888";
-
 /*
  * Format and make a request to the frontend, returning a running Fetch request
  * @param {obj} query object containing query parameters
@@ -18,7 +16,7 @@ export const make_server_feature_request = query => {
         }
     }
 
-    const url = `${CODEX_URL}/api/feature?${params.toString()}`;
+    const url = `${process.env.CODEX_SERVER_URL}/api/feature?${params.toString()}`;
 
     return fetch(url);
 };
