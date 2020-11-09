@@ -18,7 +18,6 @@ import Popover from "@material-ui/core/Popover";
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import Select from "@material-ui/core/Select";
 import TextField from "@material-ui/core/TextField";
-import Tooltip from "@material-ui/core/Tooltip";
 
 import classnames from "classnames";
 
@@ -516,9 +515,7 @@ function FeatureItem(props) {
                                 checkedIcon={<CheckboxIcon style={{ fill: "#3988E3" }} />}
                                 onClick={onSelectClick}
                             />
-                            <Tooltip title={displayName} placement="top-start">
-                                <span className={featureNameClasses}>{displayName}</span>
-                            </Tooltip>
+                            <span className={featureNameClasses}>{displayName}</span>
                         </div>
                         {featureListContext.statsHidden ? null : (
                             <StatisticsRow

@@ -25,13 +25,15 @@ function LeftPanel() {
     const [filterString, setFilterString] = useState("");
 
     return (
-        <div className="Panel">
-            <div id="content">
-                <FilterBar setFilterString={setFilterString} />
-                <FeatureList filterString={filterString} />
-                <SelectionList filterString={filterString} />
+        <React.Fragment>
+            <div className="Panel">
+                <div id="content">
+                    <FilterBar setFilterString={setFilterString} />
+                    <FeatureList filterString={filterString} />
+                    <SelectionList filterString={filterString} />
+                </div>
             </div>
-        </div>
+        </React.Fragment>
     );
 }
 
