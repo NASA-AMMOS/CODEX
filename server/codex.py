@@ -67,7 +67,7 @@ def throttled_cpu_count():
     return max( 1, math.floor(cpu_count() * 0.75))
 
 # create our process pools
-executor = ProcessPool(max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
+executor = ThreadPool(max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
 readpool = ThreadPool( max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
 queuemgr = Manager()
 
@@ -145,7 +145,7 @@ class UploadSocket(tornado.websocket.WebSocketHandler):
 
         stringMsg = json.dumps(result)
         self.write_message(stringMsg)
-        
+
         if result['status'] == 'failure':
             self.close()
 
@@ -226,7 +226,7 @@ def execute_request(queue, message):
                     chunk['message'] = "success"
                     queue.put_nowait( {'result': chunk, 'done': False} )
 
-            except e:
+            except Exception as e:
                 response = {'message': 'failure'}
                 queue.put_nowait( { 'result': response, 'done': False} )
 
@@ -302,9 +302,6 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
             self.write_message(json.dumps(response['result']))
 
         audit.finish()
-
-        # close the thread? I don't think this is necessary
-        await self.future
 
         # make sure the socket gets closed
         self.on_close()
@@ -477,4 +474,3 @@ if __name__ == '__main__':
     # gracefully shut down cache server
     stop_cache_server()
     codex_hash_server.join() # wait for process shutdown
-

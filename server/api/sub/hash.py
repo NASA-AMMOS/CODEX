@@ -53,8 +53,8 @@ from api.sub.ntangle.server import expose
 # CODEX Support
 from api.sub.system         import string2token
 
-DEFAULT_CODEX_HASH_BIND    = 'tcp://*:64209'
-DEFAULT_CODEX_HASH_CONNECT = 'tcp://localhost:64209'
+DEFAULT_CODEX_HASH_BIND    = 'tcp://127.0.0.1:42354'
+DEFAULT_CODEX_HASH_CONNECT = 'tcp://127.0.0.1:42354'
 DOCTEST_SESSION            = '__doctest__'
 
 class NoSessionSpecifiedError(Exception):
