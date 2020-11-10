@@ -6,13 +6,18 @@ COmplex Data EXplorer
 
 1. `git clone https://github.jpl.nasa.gov/jackal/CODEX.git`
 
-1. Run `npm install` in this project's home directory. (you need [Node.js](https://nodejs.org/en/) installed)
+1. Run `npm install` in `client/` directory. (you need [Node.js](https://nodejs.org/en/) installed)
 
 1. Set a CODEX_ROOT environment variable to point into GIT/server/
+e.g., in bash something like
+`export CODEX_ROOT="/Users/myname/Documents/Projects/github/CODEX/server/"`
 
 1. Ensure you have the codex conda enviornment set up on your machine. Follow instructions [here](https://github.jpl.nasa.gov/jackal/CODEX/tree/develop/server/envs/README.md) to do this for the first time.
 
-1. Activate the conda enviornment, compile the client and start the server. run_codex.sh will run both the client and server in a single terminal. If you would like to start each individually, as reccomended for debugging, see the note below.
+1. Activate the conda environment, compile the client and start the server. run_codex.sh will run both the client and server in a single terminal. If you would like to start each individually, as reccomended for debugging, see the note below.
+
+in `server/` run  
+`conda env update -f envs/environment.yml`
 
 ```
 $ conda activate codex
