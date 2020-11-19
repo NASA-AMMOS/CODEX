@@ -1,3 +1,8 @@
+import urljoin from "url-join";
+
+const SERVER_URL =
+    process.env.CODEX_SERVER_URL ||
+    urljoin(self.location.href.replace("https", "wss").replace("http", "ws"), "../server/upload");
 let sock;
 
 let UPLOAD_PERCENTAGE_USEFUL_UPDATE = 0.05;
@@ -100,9 +105,7 @@ self.addEventListener("message", function(e) {
     }
 
     if (files.length > 0) {
-        let socketString = `${process.env.CODEX_SERVER_URL}`.replace("https", "wss");
-
-        sock = new WebSocket(socketString);
+        sock = new WebSocket(SERVER_URL);
 
         sock.onclose = function() {
             console.log("Closed Upload Socket");

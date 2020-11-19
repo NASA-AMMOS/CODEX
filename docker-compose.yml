@@ -4,12 +4,11 @@ services:
         build: "./server"
         # volumes:
         #     - "./server:/home/codex/server"
-        ports:
-            - "8888:8888"
     frontend:
         build:
             context: "./client"
+    webserver:
+        build:
+            context: "./webserver"
         ports:
             - "3000:3000"
-        environment:
-            - CODEX_SERVER_URL

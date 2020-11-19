@@ -1,5 +1,7 @@
+import urljoin from "url-join";
+
 import { DEFAULT_DOWNSAMPLE } from "../constants/defaults";
-import { getGlobalSessionKey } from "../utils/utils";
+import { getGlobalSessionKey, getServerUrl } from "../utils/utils";
 import { bcache } from "../index";
 
 /*
@@ -16,7 +18,7 @@ export const make_server_feature_request = query => {
         }
     }
 
-    const url = `${process.env.CODEX_SERVER_URL}/api/feature?${params.toString()}`;
+    const url = urljoin(getServerUrl(), `/api/feature?${params.toString()}`);
 
     return fetch(url);
 };

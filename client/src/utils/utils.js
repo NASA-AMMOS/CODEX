@@ -1,6 +1,7 @@
 import { generateCombination } from "gfycat-style-urls";
 import Immutable from "immutable";
 import ShelfPack from "@mapbox/shelf-pack";
+import urljoin from "url-join";
 
 import StreamSocket from "worker-loader!../workers/stream.worker";
 import WorkerSocket from "worker-loader!../workers/socket.worker";
@@ -424,4 +425,8 @@ export function getMinMax(col) {
         },
         [col[0], col[0]]
     );
+}
+
+export function getServerUrl() {
+    return process.env.CODEX_SERVER_URL || urljoin(window.location.href, "/server");
 }
