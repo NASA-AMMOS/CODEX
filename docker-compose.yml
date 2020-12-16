@@ -14,14 +14,14 @@ services:
     webserver:
         build:
             context: "./webserver"
-        # ports:
-        #     - "3000:3000"
+        ports:
+            - "3000:3000"
         networks:
             - codex
-    webserver_test:
-        build:
-            context: "./webserver_test"
-        ports:
-            - "3001:80"
+    # webserver_test:
+    #     build:
+    #         context: "./webserver_test"
+    #     ports:
+    #         - "3001:80"
 networks:
     codex:
