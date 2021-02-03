@@ -1,0 +1,3 @@
+#!/bin/bash
+
+exec setuser root /usr/sbin/nginx -c /etc/nginx/nginx.conf -c /home/codex/server.conf  -g "daemon off;"

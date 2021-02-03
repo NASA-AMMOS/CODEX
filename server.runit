@@ -1,0 +1,3 @@
+#!/bin/bash
+
+exec setuser root /home/codex/server/start_codex_server.sh 
