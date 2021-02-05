@@ -12,7 +12,7 @@ RUN sh Miniconda3-latest-Linux-x86_64.sh -b
 
 # Install server and dependencies
 COPY ./server/envs/ /home/codex/server/envs/
-RUN /root/miniconda3/bin/conda env create -f /home/codex/server/envs/environment.yml
+RUN /root/miniconda3/bin/conda env create -f /home/codex/server/envs/docker_environment.yml
 ENV CODEX_ROOT /home/codex/server/
 COPY ./server /home/codex/server
 
@@ -34,7 +34,7 @@ RUN apt-get -yq install nodejs
 
 # Install client dependencies
 RUN apt-get update
-RUN apt-get install -y pkg-config xorg
+RUN apt-get install -y pkg-config libxtst6
 COPY client/package.json /home/codex/client/
 WORKDIR /home/codex/client
 RUN npm i
