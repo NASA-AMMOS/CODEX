@@ -1,9 +1,12 @@
 import * as types from "../constants/actionTypes";
 import urljoin from "url-join";
 
-const SERVER_URL =
-    process.env.CODEX_SERVER_URL ||
-    urljoin(self.location.href.replace("https", "wss").replace("http", "ws"), "../server/codex");
+const SERVER_URL = urljoin(
+    (process.env.CODEX_SERVER_URL || self.location.href)
+        .replace("https", "wss")
+        .replace("http", "ws"),
+    "../codex"
+);
 let socket;
 
 function handleSimpleRequest(msg) {

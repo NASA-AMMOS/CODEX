@@ -1,8 +1,11 @@
 import urljoin from "url-join";
 
-const SERVER_URL =
-    process.env.CODEX_SERVER_URL ||
-    urljoin(self.location.href.replace("https", "wss").replace("http", "ws"), "../server/upload");
+const SERVER_URL = urljoin(
+    (process.env.CODEX_SERVER_URL || self.location.href)
+        .replace("https", "wss")
+        .replace("http", "ws"),
+    "../upload"
+);
 let sock;
 
 let UPLOAD_PERCENTAGE_USEFUL_UPDATE = 0.05;
