@@ -102,6 +102,7 @@ function HistogramGraph(props) {
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
     const [zoom, setZoom] = useState([0, 100]);
+    const [needsRedrawSelections, setNeedsRedrawSelections] = useState(false);
 
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
@@ -296,8 +297,9 @@ function HistogramGraph(props) {
                 .map(sel => makeSelectionShapes(sel, traces, chart))
                 .flat();
             updateChartRevision();
+            setNeedsRedrawSelections(false);
         },
-        [props.currentSelection, props.savedSelections]
+        [props.currentSelection, props.savedSelections, needsRedrawSelections]
     );
 
     // Update the chart state when the global chart state changes
@@ -336,6 +338,7 @@ function HistogramGraph(props) {
             .domain([min, max])
             .range([0, 100]);
         setZoom([zoomMin, zoomMax].map(scale));
+        setNeedsRedrawSelections(true);
     }
 
     useLayoutEffect(() => {
