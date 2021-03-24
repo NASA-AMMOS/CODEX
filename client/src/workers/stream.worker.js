@@ -2,10 +2,10 @@ import * as types from "../constants/actionTypes";
 import urljoin from "url-join";
 
 const SERVER_URL = urljoin(
-    (process.env.CODEX_SERVER_URL || self.location.href)
+    (process.env.CODEX_SERVER_URL || urljoin(self.location.href, "../server"))
         .replace("https", "wss")
         .replace("http", "ws"),
-    "../codex"
+    "./codex"
 );
 let socket;
 
