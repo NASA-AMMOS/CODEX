@@ -159,7 +159,7 @@ function TrendPlot(props) {
             {
                 x: props.data.y_pred,
                 y: props.data.y,
-                type: "scatter",
+                type: "scattergl",
                 mode: "markers",
                 marker: { color: DEFAULT_POINT_COLOR, size: 5 },
                 visible: true
@@ -218,15 +218,6 @@ function TrendPlot(props) {
     );
 
     const chart = useRef();
-
-    if (props.isUpdating)
-        return (
-            <div className="regression-plot-wrapper">
-                <div className="regression-loading">
-                    <WindowCircularProgress />
-                </div>
-            </div>
-        );
 
     const featureImportance = props.hideFeatureImportance ? null : (
         <React.Fragment>

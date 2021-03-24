@@ -103,7 +103,7 @@ export function useWindowManager(props, initialSettings) {
 
     if (props.__wm_parent_id) {
         window_obj = domain.get("windows").find(win => win.get("id") === props.__wm_parent_id);
-        console.log("identified window", window_obj, props.__wm_parent_id);
+        // console.log("identified window", window_obj, props.__wm_parent_id);
         window_obj = wrapWindow(window_obj, dispatch);
     } else {
         window_obj = wrapDummy();
