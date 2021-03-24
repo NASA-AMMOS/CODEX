@@ -18,7 +18,7 @@ from fixtures           import testData
 
 def test_clustering(capsys, testData):
 
-    ch = get_cache(DOCTEST_SESSION)
+    ch = get_cache(DOCTEST_SESSION, timeout=None)
 
     result = normalize(testData['inputHash'], None, testData['featureNames'], testData['hashList'], None, False, "test", False, {'k': 3, 'eps': 0.7, 'n_neighbors': 10, 'quantile': 0.5, 'damping': 0.9}, None, "direct", None, {}, ch).run()
     assert result['message'] == 'failure'

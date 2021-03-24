@@ -1,8 +1,9 @@
 import "./ContourGraph.css";
 
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 
+import { GRAPH_INDEX } from "../../constants/uiTypes";
 import { filterBounds } from "./graphFunctions";
 import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
@@ -329,17 +330,17 @@ function ContourGraph(props) {
     const [yAxis, setYAxis] = useWindowYAxis(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
-    const sanitizedCols = utils.removeSentinelValues(
-        featureList.map(colName =>
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS()
-        ),
-        props.fileInfo
+    const [sanitizedCols] = useState(_ =>
+        utils.removeSentinelValues(
+            featureList.map(colName => props.data.find(col => col.feature === colName)?.data),
+            props.fileInfo
+        )
     );
 
-    const filteredCols = filterBounds(featureList, sanitizedCols, bounds && bounds.toJS());
+    const filteredCols = useMemo(
+        _ => filterBounds(featureList, sanitizedCols, bounds && bounds.toJS()),
+        [bounds]
+    );
 
     const x = xAxis
         ? filteredCols[featureList.findIndex(feature => feature === xAxis)]
@@ -350,14 +351,14 @@ function ContourGraph(props) {
 
     const xAxisTitle =
         (axisLabels && axisLabels.get(xAxis)) ||
-        props.data.find(feature => feature.get("feature") === featureList[0]).get("displayName");
+        props.data.find(feature => feature.feature === featureList[0])?.displayName;
 
     const yAxisTitle =
         (axisLabels && axisLabels.get(yAxis)) ||
-        props.data.find(feature => feature.get("feature") === featureList[1]).get("displayName");
+        props.data.find(feature => feature.feature === featureList[1])?.displayName;
 
-    const featureDisplayNames = props.win.data.features.map(featureName =>
-        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    const featureDisplayNames = props.win.data.features.map(
+        featureName => props.data.find(feature => feature.feature === featureName)?.displayName
     );
 
     const [chartRevision, setChartRevision] = useState(0);
@@ -415,30 +416,32 @@ function ContourGraph(props) {
         setChartRevision(revision);
     }
 
-    function setDefaults() {
-        setBounds(
-            featureList.reduce((acc, colName, idx) => {
-                acc[colName] = {
-                    min: Math.min(...sanitizedCols[idx]),
-                    max: Math.max(...sanitizedCols[idx])
-                };
-                return acc;
-            }, {})
-        );
-        setAxisLabels(
-            featureList.reduce((acc, featureName) => {
-                acc[featureName] = featureName;
-                return acc;
-            }, {})
-        );
-        setXAxis(featureList[0]);
-        setYAxis(featureList[1]);
-        setWindowTitle(featureDisplayNames.join(" vs "));
+    function setDefaults(init) {
+        if (!init || !bounds)
+            setBounds(
+                featureList.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(sanitizedCols[idx]);
+                    acc[colName] = {
+                        min,
+                        max
+                    };
+                    return acc;
+                }, {})
+            );
+        if (!init || !axisLabels)
+            setAxisLabels(
+                featureList.reduce((acc, featureName) => {
+                    acc[featureName] = featureName;
+                    return acc;
+                }, {})
+            );
+        if (!init || !xAxis || xAxis === GRAPH_INDEX) setXAxis(featureList[0]);
+        if (!init || !yAxis) setYAxis(featureList[1]);
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
     }
 
     useEffect(_ => {
-        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 

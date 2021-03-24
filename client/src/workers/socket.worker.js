@@ -1,5 +1,12 @@
 import * as types from "../constants/actionTypes";
+import urljoin from "url-join";
 
+const SERVER_URL = urljoin(
+    (process.env.CODEX_SERVER_URL || self.location.href)
+        .replace("https", "wss")
+        .replace("http", "ws"),
+    "../codex"
+);
 let socket;
 
 function handleGraphDataRequest(msg) {
@@ -7,9 +14,7 @@ function handleGraphDataRequest(msg) {
         .toString(36)
         .substring(8);
 
-    let socketString = `${process.env.CODEX_SERVER_URL}/codex`;
-
-    socket = new WebSocket(socketString);
+    socket = new WebSocket(SERVER_URL);
 
     socket.onclose = function() {
         //console.log("Closed Graph Socket");
@@ -41,9 +46,7 @@ function handleAlgorithmRequest(msg) {
         .toString(36)
         .substring(8);
 
-    let socketString = "ws://localhost:8888/codex";
-
-    socket = new WebSocket(socketString);
+    socket = new WebSocket(SERVER_URL);
 
     socket.onclose = function() {
         console.log("Closed Algorithm Socket");
@@ -65,8 +68,7 @@ function handleAlgorithmRequest(msg) {
 }
 
 function handleHelpTextRequest(msg) {
-    const socketString = "ws://localhost:8888/codex";
-    socket = new WebSocket(socketString);
+    socket = new WebSocket(SERVER_URL);
 
     socket.onclose = function() {
         console.log("Closed Help Text Socket");
@@ -96,8 +98,7 @@ function handleHelpTextRequest(msg) {
 }
 
 function handleSimpleRequest(msg) {
-    const socketString = `${process.env.CODEX_SERVER_URL}/codex`;
-    socket = new WebSocket(socketString);
+    socket = new WebSocket(SERVER_URL);
 
     socket.onclose = function() {
         console.log("Closed Request Socket");

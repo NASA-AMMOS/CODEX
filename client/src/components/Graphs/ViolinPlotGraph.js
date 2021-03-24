@@ -1,20 +1,20 @@
 import "./ViolinPlotGraph.css";
 
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useLayoutEffect, useMemo } from "react";
 
 import { filterSingleCol } from "./graphFunctions";
 import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
     useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
+    useWindowAwareLabelShortener,
     useWindowFeatureList,
     useWindowGraphBinSize,
     useWindowGraphBounds,
     useWindowNeedsResetToDefault,
     useWindowShowGridLines,
-    useWindowTitle,
-    useWindowTrendLineVisible
+    useWindowTitle
 } from "../../hooks/WindowHooks";
 import GraphWrapper from "./GraphWrapper";
 import * as utils from "../../utils/utils";
@@ -67,20 +67,21 @@ function makeSelectionShapes(selection, data) {
 }
 
 function ViolinPlotGraph(props) {
-    const features = props.data.toJS();
+    const features = props.data;
     const [featuresImmutable] = useWindowFeatureList(props.win.id);
     const featureNames = featuresImmutable.toJS();
     const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
     const [binSize, setBinSize] = useWindowGraphBinSize(props.win.id);
     const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const axisLabelShortener = useWindowAwareLabelShortener(props.win.id);
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
         props.win.id
     );
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
-    const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
+    const [defaultsInitialized, setDefaultsInitialized] = useState(false);
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
 
@@ -99,31 +100,39 @@ function ViolinPlotGraph(props) {
         return acc;
     }, {});
 
-    const baseCols = featureNames
-        .map(colName => [
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS(),
-            bounds && bounds.get(colName).toJS()
-        ])
-        .map(([col, bound]) => [utils.removeSentinelValues([col], props.fileInfo)[0], bound]);
+    const [baseCols] = useState(_ =>
+        featureNames
+            .map(colName => [props.data.find(col => col.feature === colName)?.data, colName])
+            .map(([col, name]) => [utils.removeSentinelValues([col], props.fileInfo)[0], name])
+    );
 
-    const filteredCols = baseCols.map(([col, bound]) => filterSingleCol(col, bound));
+    const filteredCols = useMemo(
+        _ =>
+            baseCols.map(([col, name]) => {
+                const bound = bounds && bounds.get(name);
+                return filterSingleCol(col, bound && bound.toJS());
+            }),
+        [bounds, baseCols]
+    );
 
-    const traces = features.map((feature, idx) => {
-        const trace = {
-            y: filteredCols[idx],
-            type: "violin",
-            marker: { color: DEFAULT_POINT_COLOR },
-            name: ""
-        };
-        if (idx > 0) {
-            trace.xaxis = `x${idx + 1}`;
-            trace.yaxis = `y`;
-        }
-        return trace;
-    });
+    const traces = useMemo(
+        _ =>
+            features.map((feature, idx) => {
+                if (!defaultsInitialized) return {};
+                const trace = {
+                    y: filteredCols[idx],
+                    type: "violin",
+                    marker: { color: DEFAULT_POINT_COLOR },
+                    name: ""
+                };
+                if (idx > 0) {
+                    trace.xaxis = `x${idx + 1}`;
+                    trace.yaxis = `y`;
+                }
+                return trace;
+            }),
+        [filteredCols]
+    );
 
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
@@ -159,36 +168,40 @@ function ViolinPlotGraph(props) {
         setChartRevision(revision);
     }
 
-    const featureDisplayNames = props.win.data.features.map(featureName =>
-        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    const featureDisplayNames = props.win.data.features.map(
+        featureName => props.data.find(feature => feature.feature === featureName)?.displayName
     );
 
     const defaultTitle = featureDisplayNames.join(" , ");
 
-    function setDefaults() {
-        setBounds(
-            featureNames.reduce((acc, colName, idx) => {
-                acc[colName] = {
-                    min: Math.min(...baseCols[idx][0]),
-                    max: Math.max(...baseCols[idx][0])
-                };
-                return acc;
-            }, {})
-        );
-        setAxisLabels(
-            featureNames.reduce((acc, featureName) => {
-                acc[featureName] = featureName;
-                return acc;
-            }, {})
-        );
-        setWindowTitle(featureDisplayNames.join(" , "));
-        setShowGridLines(true);
-        setTrendLineVisible(false);
+    function setDefaults(init) {
+        if (!init || !bounds) {
+            setBounds(
+                featureNames.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(baseCols[idx][0]);
+                    acc[colName] = {
+                        min,
+                        max
+                    };
+                    return acc;
+                }, {})
+            );
+        }
+
+        if (!init || !axisLabels)
+            setAxisLabels(
+                featureNames.reduce((acc, featureName) => {
+                    acc[featureName] = featureName;
+                    return acc;
+                }, {})
+            );
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" , "));
+        if (!init || showGridLines === undefined) setShowGridLines(true);
+        setDefaultsInitialized(true);
     }
 
     useEffect(_ => {
-        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 
@@ -261,6 +274,11 @@ function ViolinPlotGraph(props) {
         },
         [needsAutoscale]
     );
+
+    useLayoutEffect(() => {
+        console.log(chartState);
+        axisLabelShortener(chartId, layouts);
+    }, [chartState]);
 
     return (
         <GraphWrapper chart={chart} win={props.win} chartId={chartId}>

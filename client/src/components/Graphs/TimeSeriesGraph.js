@@ -1,6 +1,6 @@
 import "./TimeSeriesGraph.css";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo, useLayoutEffect } from "react";
 import plotComponentFactory from "react-plotly.js/factory";
 import regression from "regression";
 
@@ -8,13 +8,14 @@ import { filterSingleCol } from "./graphFunctions";
 import {
     useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
+    useWindowAwareLabelShortener,
     useWindowFeatureList,
     useWindowGraphBinSize,
     useWindowGraphBounds,
     useWindowNeedsResetToDefault,
     useWindowShowGridLines,
     useWindowTitle,
-    useWindowTrendLineVisible
+    useWindowTrendLineStyle
 } from "../../hooks/WindowHooks";
 import GraphWrapper from "./GraphWrapper";
 import PlotlyPatched from "../../plotly-patched/src/core";
@@ -69,18 +70,19 @@ function makeSelectionShapes(selection) {
 }
 
 function TimeSeriesGraph(props) {
-    const features = props.data.toJS();
+    const features = props.data;
     const [featuresImmutable] = useWindowFeatureList(props.win.id);
     const featureNames = featuresImmutable.toJS();
     const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
     const [binSize, setBinSize] = useWindowGraphBinSize(props.win.id);
     const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const axisLabelShortener = useWindowAwareLabelShortener(props.win.id);
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
         props.win.id
     );
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
-    const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.win.id);
+    const [trendLineStyle, setTrendLineStyle] = useWindowTrendLineStyle(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     const chart = useRef(null);
@@ -88,61 +90,87 @@ function TimeSeriesGraph(props) {
 
     const layouts = features.reduce((acc, feature, idx) => {
         const axisName = `yaxis${idx === 0 ? "" : idx + 1}`;
+        const title = axisLabels
+            ? axisLabels.get(feature.feature, feature.feature)
+            : feature.feature;
         acc[axisName] = {
-            title: axisLabels ? axisLabels.get(feature.feature, feature.feature) : feature.feature,
+            title,
+            idx,
             fixedrange: true
         };
         return acc;
     }, {});
 
-    const baseCols = featureNames
-        .map(colName => [
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS(),
-            bounds && bounds.get(colName).toJS()
-        ])
-        .map(([col, bound]) => [utils.removeSentinelValues([col], props.fileInfo)[0], bound]);
+    // baseCols is the list of tuple (cleaned data, name)
+    const [baseCols] = useState(_ =>
+        featureNames
+            .map(colName => [props.data.find(col => col.feature === colName)?.data, colName])
+            .map(([col, name]) => [utils.removeSentinelValues([col], props.fileInfo)[0], name])
+    );
 
-    const filteredCols = baseCols.map(([col, bound]) => filterSingleCol(col, bound, true));
+    // filteredCols takes baseCols and filters across it to remove out-of-bound values (leaving nulls in),
+    // returning just the column (loses name information). This is memoized on the bounds and base columns
+    // changing.
+    const filteredCols = useMemo(
+        _ =>
+            baseCols.map(([col, name]) => {
+                const bound = bounds && bounds.get(name);
+                return filterSingleCol(col, bound && bound.toJS(), true);
+            }),
+        [bounds, baseCols]
+    );
 
-    const trendLineTraces = filteredCols.map((col, idx) => {
-        const timeAxis = [...Array(col.length).keys()];
-        const [x, y] = utils.unzip(regression.linear(utils.unzip([timeAxis, col])).points);
-        const trace = {
-            x,
-            y,
-            type: "scatter",
-            mode: "lines",
-            hoverinfo: "x+y",
-            marker: { color: "red", size: 5 },
-            visible: Boolean(trendLineVisible)
-        };
-        if (idx > 0) {
-            trace.xaxis = `x`;
-            trace.yaxis = `y${idx + 1}`;
-        }
-        return trace;
-    });
+    // trendLineTraces computes the trend lines for each graph
+    const trendLineTraces = useMemo(
+        _ =>
+            filteredCols.map((col, idx) => {
+                const timeAxis = [...Array(col.length).keys()];
 
-    const traces = filteredCols
-        .map((col, idx) => {
-            const trace = {
-                x: [...Array(col.length).keys()],
-                y: col,
-                mode: "lines",
-                type: "scatter",
-                hoverinfo: "x+y",
-                marker: { color: DEFAULT_POINT_COLOR }
-            };
-            if (idx > 0) {
-                trace.xaxis = `x`;
-                trace.yaxis = `y${idx + 1}`;
-            }
-            return trace;
-        })
-        .concat(trendLineTraces);
+                if (trendLineStyle === undefined || trendLineStyle === "disabled") {
+                    return {};
+                }
+                const [x, y] = utils.unzip(
+                    regression[trendLineStyle](utils.zip([timeAxis, col])).points,
+                    { precision: 100 }
+                );
+                const trace = {
+                    x,
+                    y,
+                    type: "scatter",
+                    mode: "lines",
+                    hoverinfo: "x+y",
+                    marker: { color: "red", size: 5 }
+                };
+                if (idx > 0) {
+                    trace.xaxis = `x`;
+                    trace.yaxis = `y${idx + 1}`;
+                }
+                return trace;
+            }),
+        [filteredCols, trendLineStyle]
+    );
+
+    const traces = useMemo(
+        _ =>
+            filteredCols
+                .map((col, idx) => {
+                    const trace = {
+                        x: [...Array(col.length).keys()],
+                        y: col,
+                        mode: "lines",
+                        type: "scatter",
+                        hoverinfo: "x+y",
+                        marker: { color: DEFAULT_POINT_COLOR }
+                    };
+                    if (idx > 0) {
+                        trace.xaxis = `x`;
+                        trace.yaxis = `y${idx + 1}`;
+                    }
+                    return trace;
+                })
+                .concat(trendLineTraces),
+        [filteredCols, trendLineTraces]
+    );
 
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
@@ -186,39 +214,42 @@ function TimeSeriesGraph(props) {
         const revision = chartRevision + 1;
         setChartState({
             ...chartState,
-            layout: { ...chartState.layout, datarevision: revision }
+            layout: { ...chartState.layout, ...layouts, datarevision: revision }
         });
         setChartRevision(revision);
     }
 
-    const featureDisplayNames = featureNames.map(featureName =>
-        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    const featureDisplayNames = featureNames.map(
+        featureName => props.data.find(feature => feature.feature === featureName)?.displayName
     );
 
-    function setDefaults() {
-        setBounds(
-            featureNames.reduce((acc, colName, idx) => {
-                acc[colName] = {
-                    min: Math.min(...baseCols[idx][0]),
-                    max: Math.max(...baseCols[idx][0])
-                };
-                return acc;
-            }, {})
-        );
-        setAxisLabels(
-            featureNames.reduce((acc, featureName) => {
-                acc[featureName] = featureName;
-                return acc;
-            }, {})
-        );
-        setWindowTitle(featureDisplayNames.join(" , "));
-        setShowGridLines(true);
-        setTrendLineVisible(false);
+    function setDefaults(init) {
+        if (!init || !bounds) {
+            setBounds(
+                featureNames.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(baseCols[idx][0]);
+                    acc[colName] = {
+                        min,
+                        max
+                    };
+                    return acc;
+                }, {})
+            );
+        }
+        if (!init || !axisLabels)
+            setAxisLabels(
+                featureNames.reduce((acc, featureName) => {
+                    acc[featureName] = featureName;
+                    return acc;
+                }, {})
+            );
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" , "));
+        if (!init || showGridLines === undefined) setShowGridLines(true);
+        if (!init || trendLineStyle === undefined) setTrendLineStyle("disabled");
     }
 
     useEffect(_ => {
-        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 
@@ -241,7 +272,7 @@ function TimeSeriesGraph(props) {
             updateData();
             updateChartRevision();
         },
-        [bounds, trendLineVisible]
+        [bounds, trendLineStyle]
     );
 
     // Effect to handle drawing of selections
@@ -302,6 +333,10 @@ function TimeSeriesGraph(props) {
         },
         [needsAutoscale]
     );
+
+    useLayoutEffect(() => {
+        axisLabelShortener(chartId, layouts);
+    }, [chartState]);
 
     return (
         <GraphWrapper chart={chart} win={props.win} chartId={chartId}>

@@ -135,7 +135,7 @@ export default class SelectionsReducer {
                     id,
                     active: true,
                     hidden: false,
-                    info: null,
+                    info: action.info,
                     name: action.name
                 }
             ],

@@ -41,7 +41,7 @@ def algorithm_call(msg, result):
     '''
     try:
 
-        ch = get_cache(msg['sessionkey'])
+        ch = get_cache(msg['sessionkey'], timeout=None)
 
         parms = msg['parameters']
         downsampled = msg["downsampled"]

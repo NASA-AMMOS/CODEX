@@ -53,7 +53,7 @@ class algorithm():
 
     def run(self):
 
-        self.cache = get_cache(self.session)
+        self.cache = get_cache(self.session, timeout=None)
 
         startTime = time.time()
         self.result = {'algorithm': self.algorithmName,

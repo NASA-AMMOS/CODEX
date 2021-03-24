@@ -4,17 +4,17 @@ services:
         build: "./server"
         volumes:
             - "./server:/home/codex/server"
-        ports:
-            - "8888:8888"
     frontend:
         build:
             context: "./client"
             dockerfile: "Dockerfile-dev"
         volumes:
             - "./client:/home/codex/client"
-        ports:
-            - "3000:3000"
         environment:
             - CHOKIDAR_USEPOLLING=true
             - CHOKIDAR_INTERVAL=1000
-            - CODEX_SERVER_URL
+    webserver:
+        build:
+            context: "./webserver"
+        ports:
+            - "3000:3000"

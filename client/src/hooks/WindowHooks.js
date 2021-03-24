@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLayoutEffect } from "react";
 
 import { defaultInitialSettings } from "../constants/windowSettings";
-import { graphs } from "../constants/windowTypes";
 import {
     setWindowAxisFeature,
     setWindowAxisLabels,
@@ -15,14 +14,15 @@ import {
     setWindowDataMapType,
     setWindowDataNeedsResetToDefault,
     setWindowDataScale,
-    setWindowDataTrendLineVisible,
+    setWindowDataTrendLineStyle,
     setWindowFeatureInfo,
     setWindowNeedsAutoscale,
     setWindowNeedsPlotImage,
-    setWindowShowGridLines
+    setWindowShowGridLines,
+    setWindowDataDownsample
 } from "../actions/windowDataActions";
-import { useAllowGraphHotkeys } from "./UIHooks";
 import * as wmActions from "../actions/windowManagerActions";
+import { DEFAULT_DOWNSAMPLE } from "../constants/defaults";
 
 /*
  * Basically, this hook:
@@ -69,6 +69,9 @@ const wrapWindow = (win, dispatch) => {
                 dispatch(wmActions.setWindowData(win.get("id"), data));
             }
         },
+        close: () => {
+            dispatch(wmActions.closeWindow(win.get("id")));
+        },
         ...(win ? win.toJS() : {})
     };
 };
@@ -82,6 +85,7 @@ const wrapDummy = () => {
         setTitle: warn,
         setResizable: warn,
         setData: warn,
+        close: warn,
         ...defaultInitialSettings
     };
 };
@@ -98,7 +102,8 @@ export function useWindowManager(props, initialSettings) {
     let window_obj = {};
 
     if (props.__wm_parent_id) {
-        window_obj = domain.get("windows").filter(win => win.get("id") === props.__wm_parent_id)[0];
+        window_obj = domain.get("windows").find(win => win.get("id") === props.__wm_parent_id);
+        console.log("identified window", window_obj, props.__wm_parent_id);
         window_obj = wrapWindow(window_obj, dispatch);
     } else {
         window_obj = wrapDummy();
@@ -123,12 +128,10 @@ export function useActiveWindow() {
     const dispatch = useDispatch();
     const activeWindowId = useSelector(state => state.windowManager.get("activeWindow"));
     const windowList = useWindowList();
-    const [_, setAllowGraphHotkeys] = useAllowGraphHotkeys();
 
     const setActiveWindow = id => {
         if (id !== activeWindowId) dispatch(wmActions.setActiveWindow(id));
         const activeWindow = windowList.find(win => win.get("id") === id);
-        if (graphs.includes(activeWindow.get("windowType"))) setAllowGraphHotkeys(true);
     };
 
     return [activeWindowId, setActiveWindow];
@@ -320,15 +323,131 @@ export function useWindowGraphBounds(id) {
 export function useWindowAxisLabels(id) {
     const dispatch = useDispatch();
 
-    return [
-        useSelector(state =>
+    const labels = useSelector(state =>
+        state.windowManager
+            .get("windows")
+            .find(win => win.get("id") === id)
+            .getIn(["data", "axisLabels"])
+    );
+
+    return [labels, axisLabels => dispatch(setWindowAxisLabels(id, axisLabels))];
+}
+
+/**
+ * Attempt to calculate the maximum height of the axis labels
+ * and clip them so they fit, and provide a method for injecting
+ * the styles into the chart
+ *
+ * @param {str} id window id
+ * @return {function} axis label clipper
+ */
+export function useWindowAwareLabelShortener(id) {
+    const winHeight = useSelector(state =>
+        state.windowManager
+            .get("windows")
+            .find(win => win.get("id") === id)
+            .get("height", 1)
+    );
+
+    const winWidth = useSelector(state =>
+        state.windowManager
+            .get("windows")
+            .find(win => win.get("id") === id)
+            .get("width", 1)
+    );
+
+    const winFeatureCount = useSelector(
+        state =>
             state.windowManager
                 .get("windows")
                 .find(win => win.get("id") === id)
-                .getIn(["data", "axisLabels"])
-        ),
-        axisLabels => dispatch(setWindowAxisLabels(id, axisLabels))
-    ];
+                .getIn(["data", "features"], { size: 1 }).size // HACK
+    );
+
+    // if the window is not attached, return identity functions
+    if (winHeight === 1 || winFeatureCount === 1) {
+        return () => {};
+    }
+
+    const shortener = (label, axis = "y") => {
+        // shim to process layouts with (inexplicably) different chartstate representations
+        if (typeof label !== "string") {
+            label = label.text;
+        }
+
+        // get the available space based on the axis we're looking at
+        const available_space = axis === "y" ? winHeight : winWidth;
+
+        // get the maximum width of the label (plot height / number of labels), in pixels
+        // this is somewhat magic, but we're subtracting ~50px of padding and then splitting
+        // by the number of pads
+        const max_label_width = Math.max(0, available_space - 50) / winFeatureCount;
+
+        // labels are Open Sans 14px, meaning an em width of ~10px
+        // this is a conservative estimate, but resizing each requires rendering
+        // to a <canvas> and using measureText, and then doing a search over that
+        // to find the maximum compliant length. This is slow, especially on a resize.
+
+        // Future work: potentially memoize?
+
+        // ellipsis HTML: &hellip;, \u2026 in JS
+
+        let target_length = Math.floor(max_label_width / 12); // characters
+
+        if (label.length <= target_length) {
+            return label;
+        } else {
+            // drop the center, leaving the ends as context
+            let slicelen = Math.floor((target_length - 1) / 2);
+
+            if (slicelen === 0) {
+                return `${label[0]}.${label[label.length - 1]}`; // in extremely space-constrained layouts, just use the 1st and last char
+            }
+
+            // beginning slice + ellipsis + ending slice
+            return `${label.slice(0, slicelen)}\u2026${label.slice(-1 * slicelen)}`;
+        }
+    };
+
+    // updater for axis labels--sets the labels for the elements directly
+    // to circumvent issues with plotly's state management (if you tie a post-
+    // action to change the resize event, then the updaters begin an infinite
+    // loop).
+    //
+    // This is bad.
+    const injector = (chart_id, layouts) => {
+        const chart_el = document.getElementById(chart_id);
+
+        for (let key of Object.keys(layouts)) {
+            // skip if there is no title
+            if (!("title" in layouts[key])) {
+                continue;
+            }
+
+            // key is something like xaxis2, we can use the first char to figure
+            // out the direction ('x' or 'y')
+            let name = shortener(layouts[key].title, key[0]);
+
+            // also skip if the name is empty string--this will not be
+            // rendered anyways and the svg text will not be placed by plotly
+            if (name === "") {
+                continue;
+            }
+
+            // create the query
+            let query = `text.${key.replace("axis", "")}title`;
+
+            // identify and shorten the axis
+            let text_el = chart_el.querySelector(query);
+            if (text_el) {
+                text_el.textContent = name;
+            } else {
+                console.warn(`could not locate ${query}`);
+            }
+        }
+    };
+
+    return injector;
 }
 
 export function useWindowType(id) {
@@ -381,7 +500,7 @@ export function useWindowDotShape(id) {
 
 export function useCloseWindow(win) {
     const dispatch = useDispatch();
-    return id => dispatch(wmActions.closeWindow(win.id));
+    return () => dispatch(wmActions.closeWindow(win.id));
 }
 
 export function useWindowAxisScale(id) {
@@ -397,16 +516,16 @@ export function useWindowAxisScale(id) {
     ];
 }
 
-export function useWindowTrendLineVisible(id) {
+export function useWindowTrendLineStyle(id) {
     const dispatch = useDispatch();
     return [
         useSelector(state =>
             state.windowManager
                 .get("windows")
                 .find(win => win.get("id") === id)
-                .getIn(["data", "trendLineVisible"])
+                .getIn(["data", "trendLineStyle"])
         ),
-        trendLineVisible => dispatch(setWindowDataTrendLineVisible(id, trendLineVisible))
+        trendLineStyle => dispatch(setWindowDataTrendLineStyle(id, trendLineStyle))
     ];
 }
 
@@ -472,6 +591,51 @@ export function useSetWindowNeedsPlotImage(id) {
 export function useSetWindowNeedsPlotImageById() {
     const dispatch = useDispatch();
     return (id, needs) => dispatch(setWindowNeedsPlotImage(id, needs));
+}
+
+export function useOpenNewWindow() {
+    const dispatch = useDispatch();
+    return newWindow => dispatch(wmActions.openNewWindow(newWindow));
+}
+
+/**
+ * Set of controls for a window's downsample
+ * @return {triple} of [getter, setter, maximum]
+ */
+export function useWindowDataDownsample(id) {
+    const dispatch = useDispatch();
+    const features = useSelector(state =>
+        state.windowManager
+            .get("windows")
+            .find(win => win.get("id") === id)
+            .getIn(["data", "features"])
+    );
+    const feature_stats = useSelector(state => state.data.get("featureStats"));
+
+    let downsample = useSelector(state =>
+        state.windowManager
+            .get("windows")
+            .find(win => win.get("id") === id)
+            .getIn(["data", "downsample"])
+    );
+
+    if (!features) {
+        return [0, () => {}, 0];
+    }
+
+    const feature_lengths = [];
+    for (let key of feature_stats.keys()) {
+        if (!features.includes(key)) continue;
+        feature_lengths.push(feature_stats.getIn([key, "stats", "length"]));
+    }
+
+    const maximum = Math.min(...feature_lengths);
+
+    if (downsample === undefined) {
+        downsample = Math.min(maximum, DEFAULT_DOWNSAMPLE);
+    }
+
+    return [downsample, d => dispatch(setWindowDataDownsample(id, d)), maximum];
 }
 
 export default useWindowManager;

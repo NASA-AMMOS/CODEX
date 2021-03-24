@@ -1,15 +1,6 @@
 version: "3"
 services:
-    backend:
-        build: "./server"
-        volumes:
-            - "./server:/home/codex/server"
+    codex:
+        build: "./"
         ports:
-            - "8888:8888"
-    frontend:
-        build:
-            context: "./client"
-        ports:
-            - "3000:3000"
-        environment:
-            - CODEX_SERVER_URL
+            - "3000:80"

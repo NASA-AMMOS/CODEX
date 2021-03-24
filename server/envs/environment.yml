@@ -1,32 +1,82 @@
 name: codex
-
 channels:
   - conda-forge
   - defaults
-
 dependencies:
-  - python=3.6
-  - coverage
-  - h5py
-  - numpy=1.14.3
-  - scipy
-  - scikit-learn=0.20.3
-  - pytest
-  - pyyaml
-  - yaml
-  - matplotlib
-  - tornado=4.5.3
-  - psutil
-  - pandas
-  - pillow
-  - psutil
-  - msgpack-python
-  - pyzmq
-  - termcolor
-  - pip
+  - attrs=19.3.0=py_0
+  - blas=1.1=openblas
+  - ca-certificates=2020.6.24=0
+  - certifi=2020.6.20=py36_0
+  - coverage=5.1=py36h37b9a7d_0
+  - cycler=0.10.0=py36hfc81398_0
+  - freetype=2.10.2=ha233b18_0
+  - h5py=2.9.0=nompi_py36h35dc34b_1102
+  - hdf5=1.10.4=hfa1e0ec_0
+  - importlib-metadata=1.7.0=py36_0
+  - importlib_metadata=1.7.0=0
+  - jpeg=9c=h1de35cc_1001
+  - kiwisolver=1.2.0=py36h04f5b5a_0
+  - libblas=3.8.0=11_openblas
+  - libcblas=3.8.0=11_openblas
+  - libcxx=10.0.0=1
+  - libedit=3.1.20181209=hb402a30_0
+  - libffi=3.2.1=h0a44026_6
+  - libgfortran=3.0.1=h93005f0_2
+  - liblapack=3.8.0=11_openblas
+  - libopenblas=0.3.6=hdc02c5d_2
+  - libpng=1.6.37=ha441bb4_0
+  - libsodium=1.0.17=h01d97ff_0
+  - libtiff=4.1.0=hcb84e12_1
+  - lz4-c=1.9.2=h0a44026_0
+  - matplotlib=3.1.0=py36_0
+  - matplotlib-base=3.1.0=py36habd5b94_0
+  - more-itertools=8.4.0=py_0
+  - msgpack-python=1.0.0=py36h863e41a_1
+  - ncurses=6.1=h0a44026_1002
+  - numpy=1.14.3=py36_blas_openblas_200
+  - olefile=0.46=py36_0
+  - openblas=0.2.20=8
+  - openssl=1.1.1g=h1de35cc_0
+  - packaging=20.4=py_0
+  - pandas=0.24.2=py36h0a44026_0
+  - pillow=7.1.2=py36h2ae5dfa_0
+  - pip=20.0.2=py_2
+  - pluggy=0.13.1=py36_0
+  - psutil=5.7.0=py36h37b9a7d_1
+  - py=1.9.0=py_0
+  - pyparsing=2.4.7=py_0
+  - pytest=5.4.1=py36h9f0ad1d_0
+  - python=3.6.10=h4334963_1011_cpython
+  - python-dateutil=2.8.1=py_0
+  - python_abi=3.6=1_cp36m
+  - pytz=2020.1=py_0
+  - pyyaml=5.3.1=py36h37b9a7d_0
+  - pyzmq=19.0.0=py36h820b253_1
+  - readline=8.0=h1de35cc_0
+  - scikit-learn=0.20.3=py36hca23c92_1
+  - scipy=1.2.1=py36hbd7caa9_1
+  - setuptools=49.2.0=py36_0
+  - six=1.15.0=py_0
+  - sqlite=3.31.1=ha441bb4_0
+  - termcolor=1.1.0=py_2
+  - tk=8.6.10=hb0a8c7a_0
+  - tornado=6.0.4=py36h1de35cc_1
+  - wcwidth=0.2.5=py_0
+  - wheel=0.34.2=py36_0
+  - xz=5.2.5=h1de35cc_0
+  - yaml=0.2.4=h0b31af3_0
+  - zeromq=4.3.2=h6de7cb9_2
+  - zipp=3.1.0=py_0
+  - zlib=1.2.11=h1de35cc_3
+  - zstd=1.4.4=h1990bb4_3
   - pip:
-    - pysptools
-    - scikit-image==0.15.0
-    - fastdtw
-    - Pebble
+    - decorator==4.4.2
+    - fastdtw==0.3.4
+    - imageio==2.8.0
+    - networkx==2.4
+    - pebble==4.5.1
+    - pysptools==0.15.0
     - pytest-cov==2.7.1
+    - pywavelets==1.1.1
+    - scikit-image==0.15.0
+

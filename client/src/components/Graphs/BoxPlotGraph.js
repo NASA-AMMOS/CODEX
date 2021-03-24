@@ -1,23 +1,21 @@
 import "./BoxPlotGraph.css";
 
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect } from "react";
-
-import GraphWrapper from "./GraphWrapper";
+import React, { useRef, useState, useEffect, useLayoutEffect, useMemo } from "react";
 
 import { filterSingleCol } from "./graphFunctions";
 import { setWindowNeedsAutoscale } from "../../actions/windowDataActions";
 import {
     useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
+    useWindowAwareLabelShortener,
     useWindowFeatureList,
     useWindowGraphBinSize,
     useWindowGraphBounds,
     useWindowNeedsResetToDefault,
-    useWindowShowGridLines,
-    useWindowTitle,
-    useWindowTrendLineVisible
+    useWindowTitle
 } from "../../hooks/WindowHooks";
+import GraphWrapper from "./GraphWrapper";
 import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3386E6";
@@ -68,7 +66,7 @@ function makeSelectionShapes(selection, data) {
 }
 
 function BoxPlotGraph(props) {
-    const features = props.data.toJS();
+    const features = props.data;
     const [featuresImmutable] = useWindowFeatureList(props.win.id);
     const featureNames = featuresImmutable.toJS();
     const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
@@ -77,11 +75,12 @@ function BoxPlotGraph(props) {
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
         props.win.id
     );
+    const axisLabelShortener = useWindowAwareLabelShortener(props.win.id);
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
-    const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
-    const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
+    // To avoid needless rerenders, we only start rendering traces once all defaults have been set.
+    const [defaultsInitialized, setDefaultsInitialized] = useState(false);
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
 
@@ -100,32 +99,40 @@ function BoxPlotGraph(props) {
         return acc;
     }, {});
 
-    const baseCols = featureNames
-        .map(colName => [
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS(),
-            bounds && bounds.get(colName).toJS()
-        ])
-        .map(([col, bound]) => [utils.removeSentinelValues([col], props.fileInfo)[0], bound]);
-
-    const filteredCols = baseCols.map(([col, bound]) => filterSingleCol(col, bound));
-
-    const traces = features.map((feature, idx) => {
-        const trace = {
-            y: filteredCols[idx],
-            type: "box",
-            hoverinfo: "x+y",
-            marker: { color: DEFAULT_POINT_COLOR },
-            name: ""
-        };
-        if (idx > 0) {
-            trace.xaxis = `x${idx + 1}`;
-            trace.yaxis = `y`;
-        }
-        return trace;
+    const [baseCols] = useState(_ => {
+        return featureNames
+            .map(colName => [props.data.find(col => col.feature === colName).data, colName])
+            .map(([col, name]) => [utils.removeSentinelValues([col], props.fileInfo)[0], name]);
     });
+
+    const filteredCols = useMemo(
+        _ =>
+            baseCols.map(([col, name]) => {
+                const bound = bounds && bounds.get(name);
+                return filterSingleCol(col, bound && bound.toJS());
+            }),
+        [bounds, baseCols]
+    );
+
+    const traces = useMemo(
+        _ =>
+            features.map((feature, idx) => {
+                if (!defaultsInitialized) return {};
+                const trace = {
+                    y: filteredCols[idx],
+                    type: "box",
+                    hoverinfo: "x+y",
+                    marker: { color: DEFAULT_POINT_COLOR },
+                    name: ""
+                };
+                if (idx > 0) {
+                    trace.xaxis = `x${idx + 1}`;
+                    trace.yaxis = `y`;
+                }
+                return trace;
+            }),
+        [filteredCols, defaultsInitialized]
+    );
 
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
@@ -161,34 +168,35 @@ function BoxPlotGraph(props) {
         setChartRevision(revision);
     }
 
-    const featureDisplayNames = featureNames.map(featureName =>
-        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    const featureDisplayNames = featureNames.map(
+        featureName => props.data.find(feature => feature.feature === featureName).displayName
     );
 
-    function setDefaults() {
-        setBounds(
-            featureNames.reduce((acc, colName, idx) => {
-                acc[colName] = {
-                    min: Math.min(...baseCols[idx][0]),
-                    max: Math.max(...baseCols[idx][0])
-                };
-                return acc;
-            }, {})
-        );
-        setAxisLabels(
-            featureNames.reduce((acc, featureName) => {
-                acc[featureName] = featureName;
-                return acc;
-            }, {})
-        );
-        setWindowTitle(featureDisplayNames.join(" , "));
-        setShowGridLines(true);
-        setTrendLineVisible(false);
+    function setDefaults(init) {
+        if (!init || !bounds)
+            setBounds(
+                featureNames.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(baseCols[idx][0]);
+                    acc[colName] = {
+                        min,
+                        max
+                    };
+                    return acc;
+                }, {})
+            );
+        if (!init || !axisLabels)
+            setAxisLabels(
+                featureNames.reduce((acc, featureName) => {
+                    acc[featureName] = featureName;
+                    return acc;
+                }, {})
+            );
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" , "));
+        setDefaultsInitialized(true);
     }
 
     useEffect(_ => {
-        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 
@@ -271,6 +279,10 @@ function BoxPlotGraph(props) {
         },
         [needsAutoscale]
     );
+
+    useLayoutEffect(() => {
+        axisLabelShortener(chartId, layouts);
+    }, [chartState]);
 
     return (
         <GraphWrapper chart={chart} win={props.win} chartId={chartId}>

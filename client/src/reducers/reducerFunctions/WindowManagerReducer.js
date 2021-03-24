@@ -15,6 +15,8 @@ export default class WindowManagerReducer {
                       .toString(36)
                       .substring(7);
 
+        let data = action.data || undefined;
+
         const perWindowSettings = initialSettingsByWindowType[action.info.windowType];
         const baseInfo = Immutable.fromJS({
             ...defaultInitialSettings,
@@ -24,7 +26,9 @@ export default class WindowManagerReducer {
         });
 
         // Set new window position
-        const info = baseInfo.merge(utils.getNewWindowPosition(baseInfo, state.get("windows")));
+        const info = Immutable.fromJS(
+            utils.getNewWindowPosition(baseInfo, state.get("windows"))
+        ).merge(baseInfo);
 
         state = state.set("activeWindow", id);
         return state.set("windows", state.get("windows").concat([info]));
@@ -120,7 +124,12 @@ export default class WindowManagerReducer {
                 .get("windows")
                 .map(win =>
                     win.get("id") === action.id
-                        ? win.set("data", Immutable.fromJS(action.data))
+                        ? win.set(
+                              "data",
+                              Immutable.fromJS(action.data).merge(
+                                  win.get("data") || Immutable.fromJS({})
+                              )
+                          )
                         : win
                 )
         );
@@ -257,14 +266,14 @@ export default class WindowManagerReducer {
         );
     }
 
-    static setWindowTrendLineVisible(state, action) {
+    static setWindowTrendLineStyle(state, action) {
         return state.set(
             "windows",
             state
                 .get("windows")
                 .map(win =>
                     win.get("id") === action.id
-                        ? win.setIn(["data", "trendLineVisible"], action.trendLineVisible)
+                        ? win.setIn(["data", "trendLineStyle"], action.trendLineStyle)
                         : win
                 )
         );
@@ -330,6 +339,19 @@ export default class WindowManagerReducer {
                 .map(win =>
                     win.get("id") === action.id
                         ? win.setIn(["data", "needsPlotImage"], action.needs)
+                        : win
+                )
+        );
+    }
+
+    static setWindowDownsample(state, action) {
+        return state.set(
+            "windows",
+            state
+                .get("windows")
+                .map(win =>
+                    win.get("id") === action.id
+                        ? win.setIn(["data", "downsample"], action.downsample)
                         : win
                 )
         );

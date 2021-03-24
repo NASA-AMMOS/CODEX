@@ -23,7 +23,7 @@ export const dataState = Immutable.fromJS({
     },
     featureList: [],
     featureListLoading: false,
-    serverSessionKey: createMemorableId(),
+    serverSessionKey: "NO_KEY",
     nan: null,
     inf: null,
     ninf: null,
@@ -40,5 +40,7 @@ export const loadedDataModel = {
 
 export const featureGroupModel = {
     name: "",
-    selected: false
+    featureIDs: [],
+    selected: false,
+    selectedFeatures: []
 };

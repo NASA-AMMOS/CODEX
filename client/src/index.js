@@ -12,6 +12,12 @@ import View from "./components/View/View";
 import configureStore from "./store";
 import registerServiceWorker from "./registerServiceWorker";
 
+import BlobCache from "./utils/cache";
+
+export const bcache = new BlobCache();
+
+window.bcache = bcache;
+
 export const store = configureStore();
 
 ReactDOM.render(

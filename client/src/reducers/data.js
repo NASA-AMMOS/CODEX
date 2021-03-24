@@ -68,6 +68,10 @@ export default function data(state = dataState, action, opt_reducer = DataReduce
             return opt_reducer.deleteFeatureGroup(state, action);
         case actionTypes.RENAME_FEATURE_GROUP:
             return opt_reducer.renameFeatureGroup(state, action);
+        case actionTypes.SELECT_FEATURE_IN_GROUP:
+            return opt_reducer.selectFeatureInGroup(state, action);
+        case actionTypes.SET_SESSION_KEY:
+            return opt_reducer.setSessionKey(state, action);
         default:
             return state;
     }

@@ -1,7 +1,7 @@
-import { Set } from "immutable";
 import { batchActions } from "redux-batched-actions";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useRef, useEffect } from "react";
+import Immutable, { Set, List } from "immutable";
 
 import WorkerSocket from "worker-loader!../workers/socket.worker";
 
@@ -19,8 +19,10 @@ import {
     featureSelect,
     featureUnselect,
     fileLoad,
+    requestFeatureLoad,
     renameFeatureGroup,
     selectFeatureGroup,
+    selectFeatureInGroup,
     statSetFeatureFailed,
     statSetFeatureLoading,
     statSetFeatureResolved
@@ -32,6 +34,9 @@ import * as uiTypes from "../constants/uiTypes";
 import * as utils from "../utils/utils";
 import * as windowTypes from "../constants/windowTypes";
 import * as wmActions from "../actions/windowManagerActions";
+import { resolve_feature } from "../utils/features";
+import { DEFAULT_DOWNSAMPLE } from "../constants/defaults";
+import { useWindowDataDownsample } from "./WindowHooks";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -40,15 +45,18 @@ function loadColumnFromServer(feature) {
         socketWorker.addEventListener("message", e => {
             //console.log("server column");
             //console.log(JSON.parse(e.data));
+            console.log(`Received column: ${feature}`, e.data);
             const data = JSON.parse(e.data).data.map(ary => ary[0]);
             resolve(data);
         });
 
+        console.log(`Requesting column: ${feature}`);
         socketWorker.postMessage(
             JSON.stringify({
                 action: actionTypes.GET_GRAPH_DATA,
                 sessionkey: utils.getGlobalSessionKey(),
-                selectedFeatures: [feature]
+                selectedFeatures: [feature],
+                downsample: 5000
             })
         );
     });
@@ -75,6 +83,8 @@ function usePrevious(value) {
  * @return {array} feature state
  */
 export function useFeatures(features, windowHandle = undefined) {
+    // OLD
+
     features = Set(features);
 
     // know what we had before
@@ -186,34 +196,33 @@ export function useLiveFeatures(windowHandle = undefined) {
  */
 export function usePinnedFeatures(windowHandle = undefined) {
     const domain = useSelector(state => state.data);
-    const selectedFeatures = domain
-        .get("featureList")
+
+    const ungroupedFeatures = useSelector(state => state.data.get("featureList"))
         .filter(f => f.get("selected"))
         .map(f => f.get("name"));
 
-    function getPinnedFeatures(windowHandle) {
+    const featuresInGroups = useSelector(state =>
+        state.data.get("featureGroups").reduce((acc, group) => {
+            return acc.concat(group.get("selectedFeatures"));
+        }, List())
+    );
+
+    const selectedFeatures = ungroupedFeatures.concat(featuresInGroups);
+
+    // pin the selected features to the state on the first run
+    const [pinned, setPinned] = useState(null);
+
+    useEffect(() => {
         if (
             windowHandle !== undefined &&
             windowHandle.data !== undefined &&
             windowHandle.data.features !== undefined
         ) {
-            return windowHandle.data.features;
+            setPinned(windowHandle.data.features);
         } else {
-            return selectedFeatures;
+            setPinned(selectedFeatures);
         }
-    }
-
-    const [pinned, setPinned] = useState(getPinnedFeatures(windowHandle));
-
-    // If the window handle selected features have changed
-    // reload the feature data.
-    useEffect(
-        _ => {
-            const currentlyPinned = getPinnedFeatures(windowHandle);
-            if (!utils.equalArrays(currentlyPinned, pinned)) setPinned(currentlyPinned);
-        },
-        [windowHandle]
-    );
+    }, []); // run once
 
     return useFeatures(pinned, windowHandle);
 }
@@ -300,9 +309,18 @@ export function useFeatureMetadata() {
  */
 export function useSelectedFeatureNames() {
     const dispatch = useDispatch();
-    const currentFeatures = useSelector(state => state.data.get("featureList"))
+
+    const ungroupedFeatures = useSelector(state => state.data.get("featureList"))
         .filter(f => f.get("selected"))
         .map(f => f.get("name"));
+
+    const featuresInGroups = useSelector(state =>
+        state.data.get("featureGroups").reduce((acc, group) => {
+            return acc.concat(group.get("selectedFeatures"));
+        }, List())
+    );
+
+    const currentFeatures = ungroupedFeatures.concat(featuresInGroups);
 
     const setCurrentFeatures = sels => {
         // Here, perform a diff to figure out the minimum number of switches we need
@@ -393,55 +411,37 @@ export function useFeatureStatisticsLoader() {
     const features = useSelector(store => store.data.get("featureList"));
     const existing = useSelector(store => store.data.get("featureStats"));
 
-    // hold the socket's close method
-    const socket = useRef(null);
+    const [socketCloseHandles, setSocketCloseHandles] = useState([]);
+    useEffect(
+        _ => {
+            features
+                .map(f => f.get("name"))
+                .filter(n => !existing.has(n))
+                .toJS()
+                .forEach(feature => {
+                    const request = {
+                        routine: "arrange",
+                        hashType: "feature",
+                        activity: "metrics",
+                        name: [feature],
+                        sessionkey: utils.getGlobalSessionKey()
+                    };
+                    dispatch(statSetFeatureLoading(feature));
+                    const { req, cancel } = utils.makeSimpleRequest(request);
+                    setSocketCloseHandles(handles => handles.concat([cancel]));
+                    req.then(msg => {
+                        if (msg.status !== "success" || msg.message !== "success") {
+                            dispatch(statSetFeatureFailed(msg.name));
+                        }
+                        dispatch(statSetFeatureResolved(msg.name, msg));
+                    });
+                });
+        },
+        [features]
+    );
 
-    // callback for when the socket gives us data
-    const sock_cb = msg => {
-        if (msg.message !== "success" || msg.status !== "success") {
-            dispatch(statSetFeatureFailed(msg.name));
-        }
-        dispatch(statSetFeatureResolved(msg.name, msg));
-    };
-
-    // figure out the diff between the features that we need
-    // and the ones we have
-    useEffect(() => {
-        const fnames = features.map(f => f.get("name"));
-
-        let actions = fnames.filter(n => !existing.has(n)).toJS();
-
-        if (actions.length > 0) {
-            if (socket.current !== null) {
-                socket.current(); // call the cancel function
-                socket.current = null;
-            }
-
-            // create the request
-            const request = {
-                routine: "arrange",
-                hashType: "feature",
-                activity: "metrics",
-                name: actions,
-                sessionkey: utils.getGlobalSessionKey()
-            };
-
-            // dispatch, save the cancel function
-            socket.current = utils.makeStreamRequest(request, sock_cb);
-
-            // dispatch onto the store
-            actions = actions.map(n => statSetFeatureLoading(n));
-            dispatch(batchActions(actions));
-        }
-    }, [features]);
-
-    // Clean up the socket if this gets unmounted
-    useEffect(() => {
-        return () => {
-            if (socket.current !== null) {
-                socket.current(); // call the cancel function
-            }
-        };
+    useEffect(_ => {
+        return _ => socketCloseHandles.forEach(close => close());
     }, []);
 }
 
@@ -617,4 +617,213 @@ export function useFeatureListLoading() {
     const dispatch = useDispatch();
     const loading = useSelector(state => state.data.get("featureListLoading"));
     return [loading, isLoading => dispatch(featureListLoading(isLoading))];
+}
+
+export function useSelectFeatureInGroup(id) {
+    const dispatch = useDispatch();
+    const groupSelections = useSelector(state => {
+        const group = state.data.get("featureGroups").find(group => group.get("id") === id);
+        if (!group) {
+            console.warn(`Error in "useSelectFeatureInGroup": Group with id ${id} not found`);
+            return null;
+        }
+        return group.get("selectedFeatures");
+    });
+    return [
+        groupSelections,
+        (featureName, remove) => dispatch(selectFeatureInGroup(id, featureName, remove))
+    ];
+}
+
+export function useBlobCache() {
+    return window.bcache;
+}
+
+export function useDownsampledFeatures(windowHandle = undefined) {
+    const domain = useSelector(state => state.data);
+    const dispatch = useDispatch();
+    const bcache = useBlobCache();
+
+    const ungroupedFeatures = useSelector(state => state.data.get("featureList"))
+        .filter(f => f.get("selected"))
+        .map(f => f.get("name"));
+
+    const featuresInGroups = useSelector(state =>
+        state.data.get("featureGroups").reduce((acc, group) => {
+            return acc.concat(group.get("selectedFeatures"));
+        }, List())
+    );
+
+    const selectedFeatures = ungroupedFeatures.concat(featuresInGroups);
+
+    // pin the selected features to the state on the first run
+    const [pinned, setPinned] = useState(null);
+
+    useEffect(() => {
+        let to_be_loaded;
+        if (
+            windowHandle !== undefined &&
+            windowHandle.data !== undefined &&
+            windowHandle.data.features !== undefined
+        ) {
+            to_be_loaded = windowHandle.data.features;
+        } else {
+            to_be_loaded = selectedFeatures;
+        }
+        setPinned(to_be_loaded);
+
+        let actions = to_be_loaded.map(f => requestFeatureLoad(f)).toJS();
+
+        if (windowHandle !== undefined) {
+            let win_data = { ...windowHandle?.data, features: to_be_loaded.toJS() };
+            windowHandle.setData(win_data);
+        }
+
+        dispatch(batchActions(actions));
+    }, []); // run once
+
+    if (pinned === null) {
+        return null;
+    }
+
+    const loadedData = domain.get("loadedData");
+
+    const lockedFeatures = loadedData.filter(f => pinned.includes(f.get("feature")));
+
+    // Ensure that we only return the features when they're locked
+    if (pinned.size !== lockedFeatures.size) {
+        return null;
+    } else {
+        console.log("returning locked features: ", lockedFeatures.toJS());
+        return lockedFeatures.toJS().map(f => ({ ...f, data: bcache.get(f.data) }));
+    }
+}
+
+/**
+ * Lock a downsampled feature from the dataset, resolving directly from the server
+ *
+ * Returns both the data and a pair of functions to translate indices from the downsample to the underlying dataset and vice versa
+ *
+ * If data isn't ready, the data will be null and the translators will return 0 for all indices
+ *
+ * @param {obj} windowHandle window handle from WM
+ * @return {triple} triple of [data, sel_to_downsample, downsample_to_sel]
+ */
+export function useDirectDownsampledFeatures(windowHandle = null) {
+    const dispatch = useDispatch();
+
+    const currentSelection = useSelector(state => state.selections.currentSelection);
+    const [pinnedSelection] = useState(currentSelection);
+
+    const allMetrics = useSelector(state => state.data.get("featureStats"));
+
+    const ungroupedFeatures = useSelector(state => state.data.get("featureList"))
+        .filter(f => f.get("selected"))
+        .map(f => f.get("name"));
+
+    const featuresInGroups = useSelector(state =>
+        state.data.get("featureGroups").reduce((acc, group) => {
+            return acc.concat(group.get("selectedFeatures"));
+        }, List())
+    );
+
+    const selectedFeatures = ungroupedFeatures.concat(featuresInGroups);
+
+    // pin the selected features to the state on the first run
+    const [pinned, setPinned] = useState(null);
+
+    // load the feature information
+    const [data, setData] = useState(null);
+
+    // use the selection translator
+    const [selectionTranslators, setSelectionTranslators] = useState([() => null, () => 0]);
+
+    // note that this will break if other kinds of downsamples are
+    // permitted
+    const createTranslatorPair = (downsample, downsampleMax) => {
+        // if we don't need to downsample, then return identity functions
+        if (downsampleMax === downsample) {
+            return [i => i, i => i];
+        }
+        const stride_size = Math.floor(downsampleMax / downsample);
+
+        const sel_to_downsample = sel_index => {
+            if (0 === sel_index % stride_size) {
+                return sel_index / stride_size;
+            } else {
+                return null;
+            }
+        };
+
+        const downsample_to_sel = down_index => {
+            return down_index * stride_size;
+        };
+
+        return [sel_to_downsample, downsample_to_sel];
+    };
+
+    useEffect(() => {
+        // avoiding IFFE pattern to avoid TypeError on destruction
+        // using IFFE returns a promise rather than a function and React
+        // breaks on cleanup
+        const asyncResolver = async () => {
+            let to_be_loaded;
+            if (
+                windowHandle !== undefined &&
+                windowHandle.data !== undefined &&
+                windowHandle.data.features !== undefined
+            ) {
+                to_be_loaded = windowHandle.data.features;
+            } else {
+                to_be_loaded = selectedFeatures;
+            }
+            setPinned(to_be_loaded);
+
+            to_be_loaded = "toJS" in to_be_loaded ? to_be_loaded.toJS() : to_be_loaded;
+
+            if (windowHandle !== undefined) {
+                let window_data = { ...windowHandle?.data, features: to_be_loaded };
+                windowHandle.setData(window_data);
+            }
+
+            const downsampleMax = Math.min(
+                ...to_be_loaded.map(f => allMetrics.getIn([f, "stats", "length"]))
+            );
+
+            const downsample = Math.min(
+                windowHandle?.data?.downsample || DEFAULT_DOWNSAMPLE,
+                downsampleMax
+            );
+
+            let feature_data = to_be_loaded.map(f => resolve_feature(f, downsample));
+
+            feature_data = await Promise.all(feature_data);
+
+            setSelectionTranslators(createTranslatorPair(downsample, downsampleMax));
+            setData(to_be_loaded.map((v, i) => ({ feature: v, data: feature_data[i] })));
+
+            // Hacks! this forces this graph to update
+            dispatch(selectionActions.setCurrentSelection([]));
+            dispatch(selectionActions.setCurrentSelection(pinnedSelection));
+        };
+
+        asyncResolver();
+    }, []); // should only run once--data is treated as immutable
+
+    if (pinned === null || data === null) {
+        return [null, ...selectionTranslators];
+    }
+    if (
+        windowHandle?.data?.downsample !== undefined &&
+        data[0].data.length !== windowHandle?.data?.downsample
+    ) {
+        console.log(
+            "data not shipping due to length mismatch...",
+            data[0].data.length,
+            windowHandle?.data?.downsample
+        );
+        return [null, () => null, () => 0];
+    }
+
+    return [data, ...selectionTranslators];
 }

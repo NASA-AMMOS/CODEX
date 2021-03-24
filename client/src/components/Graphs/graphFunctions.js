@@ -55,9 +55,10 @@ export function interpolateColors(color1, color2, steps, scaling) {
 }
 
 export function filterBounds(features, cols, bounds) {
+    console.log("bounds filtering", features, cols, bounds);
     if (!bounds) return cols;
 
-    const filtered = zip(cols).filter((row, idx) =>
+    const filtered = zip(cols).map((row, idx) =>
         row.every((val, idx) => {
             const boundsForCol = bounds[features[idx]];
             if (!boundsForCol || (!boundsForCol.min && !boundsForCol.max)) return true;
@@ -66,6 +67,8 @@ export function filterBounds(features, cols, bounds) {
                 (!boundsForCol.max || boundsForCol.max >= val)
             );
         })
+            ? row
+            : [null, null]
     );
 
     return filtered.length

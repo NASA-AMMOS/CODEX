@@ -2,11 +2,9 @@ import "./TopBar.scss";
 
 import { ButtonGroup } from "reactstrap";
 import { Tooltip } from "@material-ui/core";
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
+import { useDispatch } from "react-redux";
 import Dropdown, { MenuItem } from "@trendmicro/react-dropdown";
-import PropTypes from "prop-types";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 
 import { ALGORITHM_TYPES } from "../../constants/algorithmTypes";
 import {
@@ -25,24 +23,33 @@ import {
 import { WORKFLOW_TYPES } from "../../constants/workflowTypes";
 import { createAlgorithm } from "../../actions/algorithmActions";
 import { createWorkflow } from "../../actions/workflowActions";
-import { fileLoad } from "../../actions/data";
-import { openAlgorithm, openDevelopment, openWorkflow } from "../../actions/ui";
 import { openNewWindow, setWindowTileAction } from "../../actions/windowManagerActions";
+import { useActiveWindow, useWindowList } from "../../hooks/WindowHooks";
 import { useExportModalVisible } from "../../hooks/UIHooks";
-import { useSavedSelections, useSelectedFeatureNames } from "../../hooks/DataHooks";
+import {
+    useFeatureMetadata,
+    useSavedSelections,
+    useSelectedFeatureNames
+} from "../../hooks/DataHooks";
 import ControlBar from "../ControlBar/ControlBar";
 import SessionBar from "./SessionBar";
 
 function NavigationBar(props) {
-    const [features] = useSelectedFeatureNames();
+    const [featureNames] = useSelectedFeatureNames();
+    const features = new Set(featureNames);
     const defaultBackground = "#05101f";
     const [savedSelections] = useSavedSelections();
+    const dispatch = useDispatch();
 
     const ref = useRef(null);
     const ref_loading = useRef(null);
     const ref_message = useRef(null);
 
     const [exportModalVisible, setExportModalVisible] = useExportModalVisible();
+    const featureList = useFeatureMetadata();
+    const windows = useWindowList();
+    const [activeWindow, setActiveWindow] = useActiveWindow();
+    const [pinnedActiveWindow, setPinnedActiveWindow] = useState();
 
     let timeout = null;
 
@@ -110,7 +117,7 @@ function NavigationBar(props) {
         return (
             <MenuItem
                 key={window_type}
-                onSelect={() => props.openWindow(window_type)}
+                onSelect={() => dispatch(openNewWindow({ windowType: window_type }))}
                 disabled={disabled}
             >
                 <Tooltip
@@ -129,7 +136,7 @@ function NavigationBar(props) {
             <MenuItem
                 key={workflow}
                 onSelect={() => {
-                    props.createWorkflow(workflow);
+                    dispatch(createWorkflow(workflow));
                 }}
             >
                 {workflow}
@@ -147,12 +154,34 @@ function NavigationBar(props) {
             <MenuItem
                 key={algo}
                 onSelect={() => {
-                    props.createAlgorithm(algo);
+                    dispatch(createAlgorithm(algo));
                 }}
             >
                 {algo}
             </MenuItem>
         ));
+    }
+
+    function handleWindowMenuItemClick(id) {
+        return _ => {
+            setPinnedActiveWindow(null);
+            setActiveWindow(id);
+        };
+    }
+
+    function handleWindowMenuItemHoverOver(id) {
+        return _ => {
+            if (!pinnedActiveWindow) {
+                setPinnedActiveWindow(activeWindow);
+            }
+            setActiveWindow(id);
+        };
+    }
+
+    function handleWindowMenuMouseLeave() {
+        if (!pinnedActiveWindow) return;
+        setActiveWindow(pinnedActiveWindow);
+        setPinnedActiveWindow(null);
     }
 
     return (
@@ -166,7 +195,7 @@ function NavigationBar(props) {
                 <Dropdown
                     className="dropdownMain"
                     autoOpen={false}
-                    disabled={props.featureList.every(feature => !feature.get("selected"))}
+                    disabled={featureList.every(feature => !feature.get("selected"))}
                 >
                     <Dropdown.Toggle className="dropdownToggle" title="Graphs" />
                     <Dropdown.Menu>{getGraphMenuItems()}</Dropdown.Menu>
@@ -217,23 +246,33 @@ function NavigationBar(props) {
             */}
             <ControlBar />
             <div id="topBarTools">
+                <ButtonGroup>
+                    <Dropdown>
+                        <Dropdown.Toggle className="dropdownToggle" title="Windows" />
+                        <Dropdown.Menu onMouseLeave={handleWindowMenuMouseLeave}>
+                            <MenuItem header>Arrange</MenuItem>
+                            <MenuItem onSelect={() => dispatch(setWindowTileAction(true))}>
+                                Tile
+                            </MenuItem>
+                            <MenuItem divider />
+                            {windows.map(win => (
+                                <MenuItem
+                                    key={win.get("id")}
+                                    onClick={handleWindowMenuItemClick(win.get("id"))}
+                                    onMouseOver={handleWindowMenuItemHoverOver(win.get("id"))}
+                                >
+                                    {win.get("title")}
+                                </MenuItem>
+                            ))}
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </ButtonGroup>
                 <button
                     className="export-button"
                     onClick={_ => setExportModalVisible(!exportModalVisible)}
                 >
                     <span>Export</span>
                 </button>
-                <ButtonGroup>
-                    <Dropdown>
-                        <Dropdown.Toggle className="dropdownToggle" title="Windows" />
-                        <Dropdown.Menu>
-                            <MenuItem header>Arrange</MenuItem>
-                            <MenuItem onSelect={() => props.setWindowTileAction(true)}>
-                                Tile
-                            </MenuItem>
-                        </Dropdown.Menu>
-                    </Dropdown>
-                </ButtonGroup>
                 <div className="triTopRight" />
             </div>
         </div>
@@ -249,38 +288,4 @@ function TopBar(props) {
     );
 }
 
-// validation
-TopBar.propTypes = {
-    openAlgorithm: PropTypes.func.isRequired,
-    openWorkflow: PropTypes.func.isRequired,
-    setWindowTileAction: PropTypes.func.isRequired
-};
-
-// redux store
-const mapStateToProps = state => {
-    return {
-        data: state.data,
-        ui: state.ui,
-        filename: state.data.get("filename"),
-        featureList: state.data.get("featureList")
-    };
-};
-
-function mapDispatchToProps(dispatch) {
-    return {
-        openAlgorithm: (d, n, w, h) => dispatch(openAlgorithm(d, n, w, h)),
-        openDevelopment: (d, n) => dispatch(openDevelopment(d, n)),
-        openWorkflow: (d, n) => dispatch(openWorkflow(d, n)),
-        openWindow: n => dispatch(openNewWindow({ windowType: n })),
-        createAlgorithm: name => dispatch(createAlgorithm(name)),
-        createWorkflow: name => dispatch(createWorkflow(name)),
-        setWindowTileAction: bindActionCreators(setWindowTileAction, dispatch),
-        fileLoad: bindActionCreators(fileLoad, dispatch)
-    };
-}
-
-export { TopBar };
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(TopBar);
+export default TopBar;

@@ -67,3 +67,8 @@ export function openSessionsWindow() {
         });
     };
 }
+
+export const setSessionKey = key => ({
+    type: types.SET_SESSION_KEY,
+    key
+});

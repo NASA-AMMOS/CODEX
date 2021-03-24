@@ -34,7 +34,7 @@ def workflow_call(msg, result):
     '''
     try:
 
-        cache = get_cache(msg['sessionkey'])
+        cache = get_cache(msg['sessionkey'], timeout=None)
 
         if(msg['workflow'] == "explain_this"):
             featureList = msg["dataFeatures"]

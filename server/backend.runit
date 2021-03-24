@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /sbin/setuser root bash /home/codex/server/start_codex.sh

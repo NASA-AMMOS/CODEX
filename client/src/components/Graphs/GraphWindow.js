@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
-import { useAllowGraphHotkeys, useGlobalChartState } from "../../hooks/UIHooks";
+import { useGlobalChartState } from "../../hooks/UIHooks";
 import {
     useCurrentSelection,
     useFeatureDisplayNames,
     useFileInfo,
     useHoveredSelection,
     usePinnedFeatures,
+    useDirectDownsampledFeatures,
     useSavedSelections
 } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
@@ -36,23 +37,39 @@ function GraphWindow(props) {
     const [globalChartState, setGlobalChartState] = useGlobalChartState();
     const [hoverSelection, saveHoverSelection] = useHoveredSelection();
     const fileInfo = useFileInfo();
-    let features = usePinnedFeatures(win);
+    let [features, sel_to_downsample, downsample_to_sel] = useDirectDownsampledFeatures(win);
     const [featureNameList] = useFeatureDisplayNames();
-    const [allowGraphHotkeys, setAllowGraphHotkeys] = useAllowGraphHotkeys();
 
-    if (features === null || !win.data) {
+    const currentSelectionTranslated = useMemo(
+        () => currentSelection.map(sel_to_downsample).filter(e => e !== null),
+        [currentSelection]
+    );
+
+    const savedSelectionsTranslated = useMemo(
+        () =>
+            savedSelections.map(sel => ({
+                ...sel,
+                rowIndices: sel.rowIndices.map(sel_to_downsample).filter(e => e !== null)
+            })),
+        [savedSelections]
+    );
+
+    const setCurrentSelectionTranslated = arr => setCurrentSelection(arr.map(downsample_to_sel));
+
+    if (features === null) {
         return <WindowCircularProgress />;
     }
 
     features = features.map(feature => {
-        const featureName = featureNameList.get(feature.get("feature"), feature.get("feature"));
-        return feature.set("displayName", featureName);
+        const featureName = featureNameList.get(feature.feature, feature.feature);
+        feature.displayName = featureName;
+        return feature;
     });
 
     const baseProps = {
-        currentSelection: currentSelection,
-        setCurrentSelection: setCurrentSelection,
-        savedSelections: savedSelections,
+        currentSelection: currentSelectionTranslated,
+        setCurrentSelection: setCurrentSelectionTranslated,
+        savedSelections: savedSelectionsTranslated,
         saveCurrentSelection: saveCurrentSelection,
         hoverSelection: hoverSelection,
         globalChartState: globalChartState,
@@ -65,8 +82,9 @@ function GraphWindow(props) {
     const featuresRequired = windowTypes.NUM_FEATURES_REQUIRED[props.windowType];
     if (featuresRequired) {
         if (
-            (typeof featuresRequired === "number" && features.size !== featuresRequired) ||
-            features.size < featuresRequired[0] || features.size > featuresRequired[1]
+            (typeof featuresRequired === "number" && features.length !== featuresRequired) ||
+            features.length < featuresRequired[0] ||
+            features.length > featuresRequired[1]
         )
             return (
                 <WindowError>
@@ -110,7 +128,6 @@ function GraphWindow(props) {
         <div
             onClick={e => {
                 document.activeElement.blur(); // For some reason, right-panel stuff isn't defocusing on Plotly clicks
-                setAllowGraphHotkeys(true);
             }}
             style={{ height: "100%", width: "100%" }}
         >

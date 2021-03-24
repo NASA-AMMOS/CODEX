@@ -78,6 +78,8 @@ class Client:
                 sys.stdout.write(msg['stdout'])
                 # skip flush for speed
                 #sys.stdout.flush()
+            if 'exception' in msg and msg['exception'] is not None:
+                raise msg['exception']
             return msg['return']
         else:
             raise RemoteError(msg['error'])

@@ -1,10 +1,16 @@
 import * as types from "../constants/actionTypes";
+import urljoin from "url-join";
 
+const SERVER_URL = urljoin(
+    (process.env.CODEX_SERVER_URL || self.location.href)
+        .replace("https", "wss")
+        .replace("http", "ws"),
+    "../codex"
+);
 let socket;
 
 function handleSimpleRequest(msg) {
-    const socketString = `${process.env.CODEX_SERVER_URL}/codex`;
-    socket = new WebSocket(socketString);
+    socket = new WebSocket(SERVER_URL);
 
     socket.onclose = function() {
         console.log("Closed Stream Request Socket");

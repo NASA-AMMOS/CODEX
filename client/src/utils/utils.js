@@ -1,6 +1,7 @@
 import { generateCombination } from "gfycat-style-urls";
 import Immutable from "immutable";
 import ShelfPack from "@mapbox/shelf-pack";
+import urljoin from "url-join";
 
 import StreamSocket from "worker-loader!../workers/stream.worker";
 import WorkerSocket from "worker-loader!../workers/socket.worker";
@@ -27,10 +28,10 @@ export const getId = idName => {
 
 /**
  * Get a new ID
- * @param {number} length (optional, default 5)
+ * @param {number} length (optional, default 7)
  */
 export function createNewId(length = 5) {
-    const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789";
+    const alphabet = "abcdefghijklmnopqrstuvwxyz";
     let out = "";
     for (let i = 0; i < length; i++) {
         out += alphabet[Math.floor(Math.random() * alphabet.length)];
@@ -424,4 +425,8 @@ export function getMinMax(col) {
         },
         [col[0], col[0]]
     );
+}
+
+export function getServerUrl() {
+    return process.env.CODEX_SERVER_URL || urljoin(window.location.href, "/server");
 }

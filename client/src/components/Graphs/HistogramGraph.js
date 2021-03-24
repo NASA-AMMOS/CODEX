@@ -2,12 +2,13 @@ import "./HistogramGraph.css";
 
 import { scaleLinear } from "d3-scale";
 import Plot from "react-plotly.js";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useLayoutEffect, useMemo } from "react";
 
 import { filterSingleCol } from "./graphFunctions";
 import {
     useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
+    useWindowAwareLabelShortener,
     useWindowFeatureList,
     useWindowGraphBinSize,
     useWindowGraphBounds,
@@ -88,81 +89,95 @@ function makeSelectionShapes(selection, data, chartRef) {
 }
 
 function HistogramGraph(props) {
-    const features = props.data.toJS();
+    const features = props.data;
     const [featuresImmutable] = useWindowFeatureList(props.win.id);
     const featureNames = featuresImmutable.toJS();
     const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
     const [binSize, setBinSize] = useWindowGraphBinSize(props.win.id);
     const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
+    const axisLabelShortener = useWindowAwareLabelShortener(props.win.id);
     const [needsResetToDefault, setNeedsResetToDefault] = useWindowNeedsResetToDefault(
         props.win.id
     );
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
     const [zoom, setZoom] = useState([0, 100]);
+    const [needsRedrawSelections, setNeedsRedrawSelections] = useState(false);
 
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
 
-    const baseCols = featureNames
-        .map(colName => [
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS(),
-            bounds && bounds.get(colName).toJS()
-        ])
-        .map(([col, bound]) => [utils.removeSentinelValues([col], props.fileInfo)[0], bound]);
+    const [baseCols] = useState(_ =>
+        featureNames
+            .map(colName => [props.data.find(col => col.feature === colName)?.data, colName])
+            .map(([col, name]) => [utils.removeSentinelValues([col], props.fileInfo)[0], name])
+    );
 
-    const filteredCols = baseCols.map(([col, bound]) => filterSingleCol(col, bound));
+    const filteredCols = useMemo(
+        _ =>
+            baseCols.map(([col, name]) => {
+                const bound = bounds && bounds.get(name);
+                return filterSingleCol(col, bound && bound.toJS());
+            }),
+        [baseCols, bounds]
+    );
 
-    const layouts = features.reduce((acc, feature, idx) => {
-        const xAxisName = `xaxis${idx === 0 ? "" : idx + 1}`;
-        const yAxisName = `yaxis${idx === 0 ? "" : idx + 1}`;
-        const x = filteredCols[idx];
-        const scale = scaleLinear()
-            .domain([0, 100])
-            .range([Math.min(...x), Math.max(...x)]);
-        const range = zoom.map(scale);
-        acc[xAxisName] = {
-            title: "",
-            automargin: true,
-            showline: true,
-            showticklabels: true,
-            range
-        };
-        acc[yAxisName] = {
-            title:
-                (axisLabels && axisLabels.get(feature.feature, feature.feature)) || feature.feature,
-            automargin: true,
-            fixedrange: true
-        };
-        return acc;
-    }, {});
+    const layouts = useMemo(
+        _ =>
+            features.reduce((acc, feature, idx) => {
+                const xAxisName = `xaxis${idx === 0 ? "" : idx + 1}`;
+                const yAxisName = `yaxis${idx === 0 ? "" : idx + 1}`;
+                const x = filteredCols[idx];
+                const [min, max] = utils.getMinMax(x);
+                const scale = scaleLinear()
+                    .domain([0, 100])
+                    .range([min, max]);
+                const range = zoom.map(scale);
+                acc[xAxisName] = {
+                    title: "",
+                    automargin: true,
+                    showline: true,
+                    showticklabels: true,
+                    range
+                };
+                acc[yAxisName] = {
+                    title:
+                        (axisLabels && axisLabels.get(feature.feature, feature.feature)) ||
+                        feature.feature,
+                    automargin: true,
+                    fixedrange: true
+                };
+                return acc;
+            }, {}),
+        [filteredCols, axisLabels]
+    );
 
-    const traces = features.map((feature, idx) => {
-        const x = filteredCols[idx];
-        const min = Math.min(...x);
-        const max = Math.max(...x);
-        const trace = {
-            x,
-            type: "histogram",
-            hoverinfo: "y",
-            marker: { color: DEFAULT_POINT_COLOR },
-            name: "",
-            xbins: {
-                start: min,
-                end: max,
-                size: (max - min) / ((binSize && binSize.get("x")) || DEFAULT_BINS)
-            },
-            selected: { marker: { color: DEFAULT_POINT_COLOR } }
-        };
-        if (idx > 0) {
-            trace.xaxis = `x${idx + 1}`;
-            trace.yaxis = `y${idx + 1}`;
-        }
-        return trace;
-    });
+    const traces = useMemo(
+        _ =>
+            features.map((feature, idx) => {
+                const x = filteredCols[idx];
+                const [min, max] = utils.getMinMax(x);
+                const trace = {
+                    x,
+                    type: "histogram",
+                    hoverinfo: "y",
+                    marker: { color: DEFAULT_POINT_COLOR },
+                    name: "",
+                    xbins: {
+                        start: min,
+                        end: max,
+                        size: (max - min) / ((binSize && binSize.get("x")) || DEFAULT_BINS)
+                    },
+                    selected: { marker: { color: DEFAULT_POINT_COLOR } }
+                };
+                if (idx > 0) {
+                    trace.xaxis = `x${idx + 1}`;
+                    trace.yaxis = `y${idx + 1}`;
+                }
+                return trace;
+            }),
+        [filteredCols, binSize]
+    );
 
     // The plotly react element only changes when the revision is incremented.
     const [chartRevision, setChartRevision] = useState(0);
@@ -200,35 +215,38 @@ function HistogramGraph(props) {
         setChartRevision(revision);
     }
 
-    const featureDisplayNames = props.win.data.features.map(featureName =>
-        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    const featureDisplayNames = props.win.data.features.map(
+        featureName => props.data.find(feature => feature.feature === featureName)?.displayName
     );
 
-    function setDefaults() {
-        setBounds(
-            featureNames.reduce((acc, colName, idx) => {
-                acc[colName] = {
-                    min: Math.min(...baseCols[idx][0]),
-                    max: Math.max(...baseCols[idx][0])
-                };
-                return acc;
-            }, {})
-        );
-        setBinSize({
-            x: DEFAULT_BINS
-        });
-        setAxisLabels(
-            featureNames.reduce((acc, featureName) => {
-                acc[featureName] = featureName;
-                return acc;
-            }, {})
-        );
-        setWindowTitle(featureDisplayNames.join(" , "));
+    function setDefaults(init) {
+        if (!init || !bounds)
+            setBounds(
+                featureNames.reduce((acc, colName, idx) => {
+                    const [min, max] = utils.getMinMax(baseCols[idx][0]);
+                    acc[colName] = {
+                        min,
+                        max
+                    };
+                    return acc;
+                }, {})
+            );
+        if (!init || !binSize)
+            setBinSize({
+                x: DEFAULT_BINS
+            });
+        if (!init || !axisLabels)
+            setAxisLabels(
+                featureNames.reduce((acc, featureName) => {
+                    acc[featureName] = featureName;
+                    return acc;
+                }, {})
+            );
+        if (!init || !windowTitle) setWindowTitle(featureDisplayNames.join(" , "));
     }
 
     useEffect(_ => {
-        if (windowTitle) return; // Don't set defaults if we're keeping numbers from a previous chart in this window.
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 
@@ -279,8 +297,9 @@ function HistogramGraph(props) {
                 .map(sel => makeSelectionShapes(sel, traces, chart))
                 .flat();
             updateChartRevision();
+            setNeedsRedrawSelections(false);
         },
-        [props.currentSelection, props.savedSelections]
+        [props.currentSelection, props.savedSelections, needsRedrawSelections]
     );
 
     // Update the chart state when the global chart state changes
@@ -314,11 +333,17 @@ function HistogramGraph(props) {
         const zoomMin = e[`${parsedKey[0]}.range[0]`];
         const zoomMax = e[`${parsedKey[0]}.range[1]`];
         const dataset = filteredCols[dataIndex];
+        const [min, max] = utils.getMinMax(dataset);
         const scale = scaleLinear()
-            .domain([Math.min(...dataset), Math.max(...dataset)])
+            .domain([min, max])
             .range([0, 100]);
         setZoom([zoomMin, zoomMax].map(scale));
+        setNeedsRedrawSelections(true);
     }
+
+    useLayoutEffect(() => {
+        axisLabelShortener(chartId, layouts);
+    }, [chartState]);
 
     function handleSelection(e) {
         if (!e) return;

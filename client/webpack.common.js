@@ -59,8 +59,7 @@ module.exports = {
         }),
         new webpack.DefinePlugin({
             "process.browser": "true"
-        }),
-        new webpack.EnvironmentPlugin({ CODEX_SERVER_URL: "ws://localhost:8888" })
+        })
     ],
     resolve: {
         // modules: [

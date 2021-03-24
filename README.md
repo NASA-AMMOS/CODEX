@@ -12,7 +12,7 @@ COmplex Data EXplorer
 e.g., in bash something like
 `export CODEX_ROOT="/Users/myname/Documents/Projects/github/CODEX/server/"`
 
-1. Ensure you have the codex conda environment set up on your machine. Follow instructions [here](https://github.jpl.nasa.gov/jackal/CODEX/tree/develop/server/envs/README.md) to do this for the first time.
+1. Ensure you have the codex conda enviornment set up on your machine. Follow instructions [here](https://github.jpl.nasa.gov/jackal/CODEX/tree/develop/server/envs/README.md) to do this for the first time.
 
 1. Activate the conda environment, compile the client and start the server. run_codex.sh will run both the client and server in a single terminal. If you would like to start each individually, as reccomended for debugging, see the note below.
 

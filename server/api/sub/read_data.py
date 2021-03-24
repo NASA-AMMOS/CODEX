@@ -34,7 +34,7 @@ def codex_read_csv(file, featureList, hashType, session=None):
     Outputs:
 
     '''
-    cache = get_cache(session)
+    cache = get_cache(session, timeout=None)
     #cache.logReturnCode(inspect.currentframe())
 
     hashList = []
@@ -55,8 +55,9 @@ def codex_read_csv(file, featureList, hashType, session=None):
         featureList = columns.keys()
 
     for feature_name in featureList:
+
         try:
-            feature_data = columns[feature_name][:]
+            feature_data = columns[feature_name][:] # shouldn't be necessary?
         except BaseException:
             logging.warning("codex_read_csv: Feature not found.")
             return None
@@ -66,14 +67,17 @@ def codex_read_csv(file, featureList, hashType, session=None):
 
         try:
             feature_data = feature_data.astype(np.float)
-        except BaseException:
+        except BaseException as e:
             logging.info("Tokenizing {f}.".format(f=feature_name))
+            sys.stderr.write('{}, {}\n'.format(feature_name, feature_data[1] if len(feature_data) > 1 else feature_data))
+            sys.stderr.flush()
             feature_data = string2token(feature_data)
 
-        feature_hash = cache.hashArray(feature_name, feature_data, hashType)
+        feature_hash = cache.hashArray(feature_name.strip(), feature_data, hashType)
         hashList.append(feature_hash['hash'])
 
-    return hashList, list(featureList)
+
+    return hashList, list(map(lambda f: f.strip(), list(featureList)))
 
 
 def traverse_datasets(hdf_file):
@@ -108,7 +112,7 @@ def codex_read_hd5(file, featureList, hashType, session=None):
     Notes:
 
     '''
-    cache = get_cache(session)
+    cache = get_cache(session, timeout=None)
 
     hashList = []
 
@@ -122,6 +126,8 @@ def codex_read_hd5(file, featureList, hashType, session=None):
         featureList = list(traverse_datasets(file))
 
     for feature_name in featureList:
+        feature_name = feature_name.strip()
+
         try:
             feature_data = f[feature_name][:]
         except BaseException:
@@ -150,7 +156,7 @@ def codex_read_npy(file, featureList, hashType, session=None):
     Notes:
 
     '''
-    cache = get_cache(session)
+    cache = get_cache(session, timeout=None)
 
     hashList = []
 
@@ -185,7 +191,7 @@ def save_subset(inputHash, subsetHash, saveFilePath, session=None):
     Outputs:
 
     '''
-    cache = get_cache(session)
+    cache = get_cache(session, timeout=None)
     returnHash = cache.findHashArray("hash", inputHash, "feature")
     if(returnHash is None):
         logging.warning("Hash not found. Returning!")

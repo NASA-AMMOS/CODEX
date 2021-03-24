@@ -6,7 +6,10 @@ import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import regression from "regression";
 
+import { GRAPH_INDEX } from "../../constants/uiTypes";
+import { WindowCircularProgress } from "../WindowHelpers/WindowCenter";
 import { filterBounds } from "./graphFunctions";
+import { usePrevious } from "../../hooks/UtilHooks";
 import {
     useSetWindowNeedsAutoscale,
     useWindowAxisLabels,
@@ -19,14 +22,14 @@ import {
     useWindowNeedsResetToDefault,
     useWindowShowGridLines,
     useWindowTitle,
-    useWindowTrendLineVisible,
+    useWindowTrendLineStyle,
     useWindowXAxis,
     useWindowYAxis
 } from "../../hooks/WindowHooks";
 import GraphWrapper from "./GraphWrapper";
 import * as utils from "../../utils/utils";
 
-const DEFAULT_POINT_COLOR = "rgba(0, 0, 0, 0.5)";
+const DEFAULT_POINT_COLOR = [0, 0, 0, 0.5];
 const DEFAULT_POINT_OPACITY = 0.5;
 const DEFAULT_POINT_SHAPE = "circle";
 const DEFAULT_POINT_SIZE = 5;
@@ -36,7 +39,7 @@ const COLOR_CURRENT_SELECTION = "#FF0000";
 const DEFAULT_TITLE = "Scatter Graph";
 
 function ScatterGraph(props) {
-    const features = props.data.toJS();
+    const features = props.data;
     const [featuresImmutable] = useWindowFeatureList(props.win.id);
     const featureNames = featuresImmutable.toJS();
     const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
@@ -46,7 +49,7 @@ function ScatterGraph(props) {
     const [dotOpacity, setDotOpacity] = useWindowDotOpacity(props.win.id);
     const [dotShape, setDotShape] = useWindowDotShape(props.win.id);
     const [axisScale, setAxisScale] = useWindowAxisScale(props.win.id);
-    const [trendLineVisible, setTrendLineVisible] = useWindowTrendLineVisible(props.win.id);
+    const [trendLineStyle, setTrendLineStyle] = useWindowTrendLineStyle(props.win.id);
     const [showGridLines, setShowGridLines] = useWindowShowGridLines(props.win.id);
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [axisLabels, setAxisLabels] = useWindowAxisLabels(props.win.id);
@@ -55,73 +58,80 @@ function ScatterGraph(props) {
     );
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
+    // To avoid needless rerenders, we only start rendering traces once all defaults have been set.
+    const [defaultsInitialized, setDefaultsInitialized] = useState(false);
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
 
-    const sanitizedCols = utils.removeSentinelValues(
-        featureNames.map(colName =>
-            props.data
-                .find(col => col.get("feature") === colName)
-                .get("data")
-                .toJS()
-        ),
-        props.fileInfo
+    const [sanitizedCols] = useState(_ =>
+        utils.removeSentinelValues(props.data.map(f => f.data), props.fileInfo)
     );
 
-    const filteredCols = (function() {
-        const baseData = filterBounds(featureNames, sanitizedCols, bounds && bounds.toJS());
-        if (!axisScale) return baseData;
-        return baseData.map((col, idx) => {
-            const scaleData = axisScale.find(f => f.get("name") === featureNames[idx]);
-            const scale = scaleData ? scaleData.get("scale") : "linear";
-            if (scale === "linear") return col;
-            const [_, max] = utils.getMinMax(col);
-            const scaleFunc = scaleLog()
-                .clamp(true)
-                .domain([0.1, max])
-                .nice();
-            return col.map(val => scaleFunc(val));
-        });
-    })();
+    const filteredCols = useMemo(
+        _ => {
+            const baseData = filterBounds(featureNames, sanitizedCols, bounds && bounds.toJS());
+            if (!axisScale) return baseData;
+            return baseData.map((col, idx) => {
+                const scaleData = axisScale.find(f => f.get("name") === featureNames[idx]);
+                const scale = scaleData ? scaleData.get("scale") : "linear";
+                if (scale === "linear") return col;
+                const [_, max] = utils.getMinMax(col);
+                const scaleFunc = scaleLog()
+                    .clamp(true)
+                    .domain([0.1, max])
+                    .nice();
+                return col.map(val => scaleFunc(val));
+            });
+        },
+        [bounds]
+    );
 
-    const baseX = xAxis
-        ? filteredCols[featureNames.findIndex(feature => feature === xAxis)]
-        : filteredCols[0];
+    const baseX =
+        xAxis && xAxis !== GRAPH_INDEX
+            ? filteredCols[featureNames.findIndex(feature => feature === xAxis)]
+            : filteredCols[0];
     const baseY = yAxis
         ? filteredCols[featureNames.findIndex(feature => feature === yAxis)]
         : filteredCols[1];
 
-    const xAxisTitle =
-        (axisLabels && axisLabels.get(xAxis)) ||
-        props.data.find(feature => feature.get("feature") === featureNames[0]).get("displayName");
+    const xAxisTitle = (axisLabels && axisLabels.get(xAxis)) || props.data[0].displayName;
 
-    const yAxisTitle =
-        (axisLabels && axisLabels.get(yAxis)) ||
-        props.data.find(feature => feature.get("feature") === featureNames[1]).get("displayName");
+    const yAxisTitle = (axisLabels && axisLabels.get(yAxis)) || props.data[1].displayName;
 
-    const featureDisplayNames = props.win.data.features.map(featureName =>
-        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
-    );
+    const featureDisplayNames = props.win.data.features.map(featureName => {
+        //props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+        return featureName;
+    });
 
     // The plotly react element only changes when the revision is incremented.
     const chartRevision = useRef(0);
 
+    // Want to avoid redrawing the selections unless we know that something visual has changed
+    const previousSelectionIds = usePrevious(
+        props.savedSelections.map(sel => [sel.id, sel.hidden])
+    );
+    const newSelections =
+        JSON.stringify(previousSelectionIds) !==
+        JSON.stringify(props.savedSelections.map(sel => [sel.id, sel.hidden]));
     const baseTrace = useMemo(
         _ => {
-            const [x, y, colors] = utils.unzip(
-                baseX.map((_, idx) => {
-                    const opacity = props.savedSelections.some(
-                        sel => !sel.hidden && sel.rowIndices.includes(idx)
-                    )
-                        ? 0
-                        : props.hoverSelection
-                        ? 0.1
-                        : dotOpacity;
-                    const color = new TinyColor(DEFAULT_POINT_COLOR).setAlpha(opacity).toString();
-                    return [baseX[idx], baseY[idx], color];
-                })
+            if (!defaultsInitialized) return {};
+            const x = baseX;
+            const y = baseY;
+            const colors = Array(baseX.length).fill(
+                props.hoverSelection
+                    ? `rgba(${DEFAULT_POINT_COLOR.slice(0, -1)
+                          .concat([0.1])
+                          .join(",")})`
+                    : `rgba(${DEFAULT_POINT_COLOR.join(",")})`
             );
-
+            props.savedSelections.forEach(sel => {
+                if (sel.hidden) return;
+                sel.rowIndices.forEach(idx => {
+                    colors[idx] = "rgba(0,0,0,0)";
+                });
+            });
+            props.currentSelection.forEach(idx => (colors[idx] = "rgba(0,0,0,0)"));
             return {
                 x,
                 y,
@@ -140,7 +150,7 @@ function ScatterGraph(props) {
         [
             baseX,
             baseY,
-            props.savedSelections,
+            newSelections,
             props.hoverSelection,
             props.currentSelection,
             dotOpacity,
@@ -151,25 +161,29 @@ function ScatterGraph(props) {
 
     const trendLineTrace = useMemo(
         _ => {
-            const [x, y] = utils.unzip(regression.linear(utils.unzip(filteredCols)).points);
+            if (!trendLineStyle || trendLineStyle === "disabled") return {};
+
+            const [x, y] = utils.unzip(
+                regression[trendLineStyle](utils.zip([baseX, baseY]), { precision: 100 }).points
+            );
             return {
                 x,
                 y,
-                type: "scatter",
+                type: "scattergl",
                 mode:
                     axisScale && axisScale.every(x => x.get("scale") === "log")
                         ? "markers"
                         : "lines",
                 hoverinfo: "x+y",
-                marker: { color: "red", size: 5 },
-                visible: Boolean(trendLineVisible)
+                marker: { color: "red", size: 5 }
             };
         },
-        [filteredCols, trendLineVisible]
+        [baseX, baseY, trendLineStyle]
     );
 
     const selectionTraces = useMemo(
         _ => {
+            if (!defaultsInitialized) return [];
             const currentSelectionTrace = props.currentSelection
                 ? { color: "red", rowIndices: props.currentSelection }
                 : [];
@@ -202,7 +216,7 @@ function ScatterGraph(props) {
         [
             baseX,
             baseY,
-            props.savedSelections,
+            newSelections,
             props.hoverSelection,
             props.currentSelection,
             dotOpacity,
@@ -221,7 +235,7 @@ function ScatterGraph(props) {
             margin: { l: 0, r: 0, t: 0, b: 0, pad: 10 }, // Axis tick labels are drawn in the margin space
             dragmode: props.globalChartState || "lasso",
             datarevision: chartRevision.current,
-            hovermode: "closest", // Turning off hovermode seems to screw up click handling
+            hovermode: "closest",
             titlefont: { size: 5 },
             xaxis: {
                 automargin: true,
@@ -248,8 +262,8 @@ function ScatterGraph(props) {
         });
     }
 
-    function setDefaults() {
-        if (!bounds)
+    function setDefaults(init) {
+        if (!init || !bounds)
             setBounds(
                 featureNames.reduce((acc, colName, idx) => {
                     const [min, max] = utils.getMinMax(sanitizedCols[idx]);
@@ -260,7 +274,7 @@ function ScatterGraph(props) {
                     return acc;
                 }, {})
             );
-        if (!axisLabels)
+        if (!init || !axisLabels)
             setAxisLabels(
                 featureNames.reduce((acc, featureName) => {
                     acc[featureName] = featureName;
@@ -276,15 +290,16 @@ function ScatterGraph(props) {
                 scale: "linear"
             }))
         );
-        setTrendLineVisible(false);
+        setTrendLineStyle("disabled");
         setShowGridLines(true);
         if (!xAxis) setXAxis(featureNames[0]);
         if (!yAxis) setYAxis(featureNames[1]);
         if (!windowTitle) setWindowTitle(featureDisplayNames.join(" vs "));
+        setDefaultsInitialized(true);
     }
 
     useEffect(_ => {
-        setDefaults();
+        setDefaults(true);
         updateChartRevision();
     }, []);
 
@@ -317,7 +332,7 @@ function ScatterGraph(props) {
             dotSize,
             dotOpacity,
             dotShape,
-            trendLineVisible,
+            trendLineStyle,
             axisScale,
             showGridLines,
             xAxis,
@@ -350,8 +365,11 @@ function ScatterGraph(props) {
         [needsAutoscale]
     );
 
+    const [loading, setLoading] = useState(true);
+
     return (
         <GraphWrapper chart={chart} chartId={chartId} win={props.win}>
+            {loading ? <WindowCircularProgress /> : null}
             <Plot
                 ref={chart}
                 data={chartState.data}
@@ -373,6 +391,7 @@ function ScatterGraph(props) {
                                 .map(point => point.pointIndex)
                         );
                 }}
+                onAfterPlot={_ => setLoading(false)}
                 divId={chartId}
             />
         </GraphWrapper>

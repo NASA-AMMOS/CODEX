@@ -16,6 +16,7 @@ import Regression from "../Regression/Regression";
 import Table from "../Table/Table";
 import TemplateScan from "../TemplateScan/TemplateScan";
 import Transform from "../Transform/Transform";
+import DialogBox from "../DialogBox/DialogBox";
 import * as algorithmTypes from "../../constants/algorithmTypes";
 import * as uiTypes from "../../constants/uiTypes";
 import * as windowTypes from "../../constants/windowTypes";
@@ -63,6 +64,8 @@ export function getWindowContent(win) {
             return <Regression />;
         case windowTypes.CORRELATION_WINDOW:
             return <Correlation />;
+        case windowTypes.DIALOG_BOX:
+            return <DialogBox />;
         default:
             return (
                 <p>

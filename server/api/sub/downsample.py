@@ -12,6 +12,7 @@ import random
 import sys
 import numpy as np
 import traceback
+import math
 import logging
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
@@ -22,6 +23,23 @@ logger = logging.getLogger(__name__)
 from api.sub.codex_math import impute
 from api.sub.hash       import get_cache
 from api.sub.spanning   import mask_spanning_subset
+
+def simple_downsample(inputArray, samples):
+    '''
+    Inputs:
+        inputArray  - numpy array to be downsampled (1D)
+        samples     - target sample size
+    '''
+    
+    if (inputArray.size < samples):
+        return inputArray
+
+    stride_size = math.floor(inputArray.size / samples)
+
+    # hackish, but sometimes this will fetch slightly too many samples
+    # so we add a [:samples] to get the first 'samples' downsamples
+    return inputArray[::stride_size][:samples].copy()
+
 
 def downsample(inputArray, samples=0, percentage=0.0, session=None, algorithm="simple"):
     '''
@@ -37,7 +55,7 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None, algorithm="s
         If one wishes to do a percentage, do the
         percentage to samples calculation in the calling function
     '''
-    cache = get_cache(session)
+    cache = get_cache(session, timeout=None)
 
     # first, create a hash of the input array, don't save
     inputHash = cache.hashArray("NOSAVE", inputArray, "NOSAVE")
@@ -74,7 +92,7 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None, algorithm="s
 
             if algorithm == "simple":
 
-                outputArray = inputArray[np.random.choice(inputArray.shape[0], usedSamples, replace=False)]
+                outputArray = simple_downsample(inputArray, samples)
 
             elif algorithm == "spanning":
 

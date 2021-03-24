@@ -11,6 +11,9 @@ export const DEBUG_WINDOW = "DEBUG_WINDOW";
  * workflowTypes
  */
 
+// general
+export const DIALOG_BOX = "DIALOG_BOX";
+
 // algorithmTypes
 export const ALGO_LOADING_WINDOW = "ALGO_LOADING_WINDOW";
 export const CLUSTER_ALGORITHM = "Cluster";
@@ -82,7 +85,7 @@ export const NUM_FEATURES_REQUIRED = {
     [DIMENSIONALITY_REDUCTION_WINDOW]: [2],
     [NORMALIZATION_WINDOW]: [1],
     [PEAK_DETECTION_WINDOW]: [1, 1],
-    [REGRESSION_WINDOW]: [2],
+    [REGRESSION_WINDOW]: [3],
     [TEMPLATE_SCAN_WINDOW]: [2]
 };
 

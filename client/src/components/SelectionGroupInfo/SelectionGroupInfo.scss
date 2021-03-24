@@ -1,0 +1,52 @@
+.selectionGroupWindowContainer {
+    width: 300px;
+    height: 100%;
+    background: #152f53;
+    padding: 10px;
+}
+
+.selectionGroupInfoHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.close-button-icon {
+    padding: 0 !important;
+    svg {
+        fill: #eeeeee;
+    }
+}
+
+.selectionGroupInfoTitle {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 19px;
+    color: #eeeeee;
+}
+
+.field {
+    margin-bottom: 10px;
+}
+
+.fieldLabel {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 11px;
+    line-height: 13px;
+    color: #bbbbbb;
+    text-transform: capitalize;
+}
+
+.fieldValue {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 17px;
+    color: #eeeeee;
+}

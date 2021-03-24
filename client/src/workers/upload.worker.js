@@ -1,3 +1,11 @@
+import urljoin from "url-join";
+
+const SERVER_URL = urljoin(
+    (process.env.CODEX_SERVER_URL || self.location.href)
+        .replace("https", "wss")
+        .replace("http", "ws"),
+    "../upload"
+);
 let sock;
 
 let UPLOAD_PERCENTAGE_USEFUL_UPDATE = 0.05;
@@ -80,7 +88,7 @@ function processFile(files, sessionkey) {
                 self.postMessage(JSON.stringify(Object.assign(r, { filename: blob.name })));
                 sock.close();
             } else if (r.status === "failure") {
-                self.postMessage("Upload Failed");
+                self.postMessage(JSON.stringify(r));
                 sock.close();
             }
         };
@@ -100,9 +108,7 @@ self.addEventListener("message", function(e) {
     }
 
     if (files.length > 0) {
-        let socketString = `${process.env.CODEX_SERVER_URL}/upload`;
-
-        sock = new WebSocket(socketString);
+        sock = new WebSocket(SERVER_URL);
 
         sock.onclose = function() {
             console.log("Closed Upload Socket");
