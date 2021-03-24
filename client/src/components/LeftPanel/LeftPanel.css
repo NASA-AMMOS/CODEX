@@ -3,7 +3,6 @@
     /*border-right: 6px solid #7d39e0;*/
     /*z-index: 2000000000;*/
     position: relative;
-    width: 100%;
 }
 
 .Panel #border {
@@ -37,7 +36,16 @@
 }
 
 .Panel #content {
-    width: 100%;
+    width: auto;
+    height: 100%;
+    position: relative;
+    box-sizing: border-box;
+    /*z-index: 2000000001;*/
+    background: #061427;
+}
+
+.Panel #content {
+    width: 250px;
     height: 100%;
     display: flex;
     flex-flow: column;

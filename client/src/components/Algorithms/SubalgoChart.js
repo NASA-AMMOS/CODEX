@@ -1,6 +1,6 @@
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Plot from "react-plotly.js";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 
 import classnames from "classnames";
 
@@ -102,7 +102,12 @@ function SubalgoChart(props) {
     const timeToGenerate =
         props.serverData && props.serverData.eta ? `~${props.serverData.eta.toFixed(2)}s` : "";
 
-    const chart = props.serverData ? makeChart(props) : null;
+    const chart = useMemo(
+        _ => {
+            if (props.serverData) return makeChart(props);
+        },
+        [props.serverData]
+    );
 
     return (
         <div

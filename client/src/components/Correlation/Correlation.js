@@ -204,10 +204,18 @@ function CorrelationContent(props) {
 
     useEffect(
         _ => {
-            chartState.data[0].x = data.ordering;
-            chartState.data[0].y = data.ordering;
-            chartState.data[0].z = data.corr_matrix;
+            chartState.data[0].x = data.ordering.slice();
+            chartState.data[0].y =
+                currentSortOption === "sorted"
+                    ? data.ordering.slice().reverse()
+                    : data.ordering.slice();
+            chartState.data[0].z =
+                currentSortOption === "sorted"
+                    ? data.corr_matrix.slice().reverse()
+                    : data.corr_matrix.slice();
             chartState.layout.annotations = data.ordering
+                .slice()
+                .reverse()
                 .map((feature, idx, ary) => {
                     const selected = selectedFeatures.includes(feature);
                     return {
