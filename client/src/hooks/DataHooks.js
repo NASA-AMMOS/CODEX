@@ -45,7 +45,7 @@ function loadColumnFromServer(feature) {
         socketWorker.addEventListener("message", e => {
             //console.log("server column");
             //console.log(JSON.parse(e.data));
-            console.log(`Received column: ${feature}`, e.data);
+            // console.log(`Received column: ${feature}`, e.data);
             const data = JSON.parse(e.data).data.map(ary => ary[0]);
             resolve(data);
         });
