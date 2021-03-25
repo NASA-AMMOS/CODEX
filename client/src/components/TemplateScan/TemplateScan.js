@@ -373,7 +373,6 @@ function FeaturePreview(props) {
                     ];
                 }
             })();
-            console.log(newSelections);
             if (!newSelections) return;
             setSelections(selections => selections.concat(newSelections));
         },
@@ -594,6 +593,8 @@ function TemplateScanContent(props) {
             behavior: "smooth"
         });
     }
+
+    if (!features || !excludedFeature) return null;
 
     return (
         <div className="template-scan-container">
