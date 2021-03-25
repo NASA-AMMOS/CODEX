@@ -451,7 +451,11 @@ function SingleXMultipleYGraph(props) {
                             onSelected={e => {
                                 if (e)
                                     props.setCurrentSelection(
-                                        e.points.map(point => point.pointIndex)
+                                        utils.range(
+                                            ...utils
+                                                .getMinMax(e.lassoPoints.x)
+                                                .map(val => parseInt(val))
+                                        )
                                     );
                             }}
                             divId={chartId}
