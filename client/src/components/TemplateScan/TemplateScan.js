@@ -23,6 +23,7 @@ import {
     usePinnedFeatures,
     useSavedSelections
 } from "../../hooks/DataHooks";
+import { useGlobalChartState } from "../../hooks/UIHooks";
 import HelpContent from "../Help/HelpContent";
 import PlotlyPatched from "../../plotly-patched/src/core";
 import plotComponentFactory from "../../react-plotly-patched.js/factory";
@@ -236,6 +237,7 @@ function AlgoReturnPreview(props) {
 function FeaturePreview(props) {
     const [chartRevision, setChartRevision] = useState(0);
     const chart = useRef();
+    const [globalChartState] = useGlobalChartState();
 
     const data = props.feature.get("data").toJS();
     const [min, max] = utils.getMinMax(data);
@@ -280,11 +282,11 @@ function FeaturePreview(props) {
             hovermode: "closest",
             titlefont: { size: 5 },
             showlegend: false,
-            dragmode: "select",
+            dragmode: globalChartState || "select",
             selectdirection: "h",
             datarevision: chartRevision.current,
-            xaxis: { showgrid: false, zeroline: false },
-            yaxis: { showgrid: false, zeroline: false },
+            xaxis: { showgrid: false, zeroline: false, automargin: true },
+            yaxis: { showgrid: false, zeroline: false, automargin: true },
             shapes: baseShapes,
             images: []
         },
@@ -351,16 +353,29 @@ function FeaturePreview(props) {
 
     const handleSelect = useCallback(
         e => {
-            if (!e.range) return;
-            setSelections(selections =>
-                selections.concat([
-                    {
-                        positive: props.selectMode[0],
-                        range: e.range.x.map(Math.floor),
-                        shapeId: utils.createNewId()
-                    }
-                ])
-            );
+            const newSelections = (function() {
+                if (e.range)
+                    return [
+                        {
+                            positive: props.selectMode[0],
+                            range: e.range.x.map(Math.floor),
+                            shapeId: utils.createNewId()
+                        }
+                    ];
+
+                if (e.lassoPoints) {
+                    return [
+                        {
+                            positive: props.selectMode[0],
+                            range: utils.getMinMax(e.lassoPoints.x.map(val => parseInt(val))),
+                            shapeId: utils.createNewId()
+                        }
+                    ];
+                }
+            })();
+            console.log(newSelections);
+            if (!newSelections) return;
+            setSelections(selections => selections.concat(newSelections));
         },
         [props.selectMode[0]]
     );
@@ -404,6 +419,14 @@ function FeaturePreview(props) {
         if (JSON.stringify(selections) !== JSON.stringify(newSelections))
             setSelections(newSelections);
     }
+
+    useEffect(
+        _ => {
+            chartState.layout.dragmode = globalChartState;
+            updateChartRevision();
+        },
+        [globalChartState]
+    );
 
     return (
         <ExpansionPanel defaultExpanded>
