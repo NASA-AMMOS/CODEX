@@ -449,14 +449,12 @@ function SingleXMultipleYGraph(props) {
                                 props.setCurrentSelection([]);
                             }}
                             onSelected={e => {
-                                if (e)
-                                    props.setCurrentSelection(
-                                        utils.range(
-                                            ...utils
-                                                .getMinMax(e.lassoPoints.x)
-                                                .map(val => parseInt(val))
-                                        )
+                                if (e) {
+                                    const [min, max] = utils.getMinMax(
+                                        e.lassoPoints.x.map(val => parseInt(val))
                                     );
+                                    props.setCurrentSelection(utils.range(min, max + 1));
+                                }
                             }}
                             divId={chartId}
                             useResizeHandler
