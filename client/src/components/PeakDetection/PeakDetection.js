@@ -134,7 +134,7 @@ function PeakPlot(props) {
             </div>
         );
 
-    const [min, max] = utils.getMinMax(props.data.y_pred);
+    const [min, max] = utils.getMinMax(props.data);
     const chartRevision = useRef(0);
     const [chartState, setChartState] = useState({
         data: [
