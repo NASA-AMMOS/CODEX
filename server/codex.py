@@ -27,13 +27,13 @@ import asyncio
 # TEMP: needs refactor
 import numpy as np
 
-from tornado         import web
-from tornado         import ioloop
-from tornado         import websocket
-from pebble          import ProcessPool, ThreadPool
+from tornado import web
+from tornado import ioloop
+from tornado import websocket
+from pebble import ProcessPool, ThreadPool
 from multiprocessing import Manager, Process, cpu_count
-from tornado.ioloop  import IOLoop
-from zmq.error       import ZMQError
+from tornado.ioloop import IOLoop
+from zmq.error import ZMQError
 
 ## Enviornment variable for setting CODEX root directory.
 CODEX_ROOT = os.getenv('CODEX_ROOT')
@@ -42,36 +42,41 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX
-from api.workflow_manager   import workflow_call
-from api.algorithm_manager  import algorithm_call
-from api.guidance_manager   import get_guidance
-from api.session_manager    import save_session
-from api.session_manager    import load_session
-from api.session_manager    import get_sessions
-from api.data_manager       import add_data
-from api.data_manager       import get_data
-from api.data_manager       import delete_data
-from api.data_manager       import update_data
-from api.data_manager       import get_data_metrics
-from api.export_manager     import export_contents
-from api.eta_manager        import get_time_estimate
-from api.sub.system         import codex_server_memory_check
-from api.sub.time_log       import getTimeLogDict
-from api.sub.hash           import get_cache
-from api.sub.hash           import create_cache_server
-from api.sub.hash           import stop_cache_server
-from api.sub.hash           import NoSessionSpecifiedError
-from api.sub.audit          import initialize_auditor, MessageAuditor
+from api.workflow_manager import workflow_call
+from api.algorithm_manager import algorithm_call
+from api.guidance_manager import get_guidance
+from api.session_manager import save_session
+from api.session_manager import load_session
+from api.session_manager import get_sessions
+from api.data_manager import add_data
+from api.data_manager import get_data
+from api.data_manager import delete_data
+from api.data_manager import update_data
+from api.data_manager import get_data_metrics
+from api.export_manager import export_contents
+from api.eta_manager import get_time_estimate
+from api.sub.system import codex_server_memory_check
+from api.sub.time_log import getTimeLogDict
+from api.sub.hash import get_cache
+from api.sub.hash import create_cache_server
+from api.sub.hash import stop_cache_server
+from api.sub.hash import NoSessionSpecifiedError
+from api.sub.audit import initialize_auditor, MessageAuditor
+
 
 def throttled_cpu_count():
-    return max( 1, math.floor(cpu_count() * 0.75))
+    return max(1, math.floor(cpu_count() * 0.75))
+
 
 # create our process pools
-executor = ThreadPool(max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
-readpool = ThreadPool( max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
+executor = ProcessPool(
+    max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
+readpool = ThreadPool(
+    max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
 queuemgr = Manager()
 
 fileChunks = []
+
 
 class UploadSocket(tornado.websocket.WebSocketHandler):
     def open(self):
@@ -126,14 +131,14 @@ class UploadSocket(tornado.websocket.WebSocketHandler):
                 result['message'] = repr(e)
             else:
                 sentinel_values = cache.getSentinelValues(featureList)
-                nan  = sentinel_values["nan"]
-                inf  = sentinel_values["inf"]
+                nan = sentinel_values["nan"]
+                inf = sentinel_values["inf"]
                 ninf = sentinel_values["ninf"]
 
                 result['status'] = 'complete'
                 result['feature_names'] = featureList
-                result["nan"]  = nan
-                result["inf"]  = inf
+                result["nan"] = nan
+                result["inf"] = inf
                 result["ninf"] = ninf
                 logging.info('Finished file save.')
 
@@ -142,12 +147,12 @@ class UploadSocket(tornado.websocket.WebSocketHandler):
             fileChunks.append(contents)
             result['status'] = 'streaming'
 
-
         stringMsg = json.dumps(result)
         self.write_message(stringMsg)
 
         if result['status'] == 'failure':
             self.close()
+
 
 def route_request(msg, result):
     '''
@@ -159,11 +164,11 @@ def route_request(msg, result):
     '''
 
     routine = msg['routine']
-    if(routine == 'algorithm'):
+    if (routine == 'algorithm'):
         yield algorithm_call(msg, result)
-    elif(routine == 'workflow'):
+    elif (routine == 'workflow'):
         yield workflow_call(msg, result)
-    elif(routine == 'guidance'):
+    elif (routine == 'guidance'):
         yield get_guidance(msg, result, CODEX_ROOT)
     elif (routine == "save_session"):
         yield save_session(msg, result, CODEX_ROOT)
@@ -210,7 +215,10 @@ def execute_request(queue, message):
     result = msg
 
     # log the response but without the data
-    logging.info("{time} : Message from front end: {json}".format(time=datetime.datetime.now().isoformat(), json={k:(msg[k] if k != 'data' else '[data removed]') for k in msg}))
+    logging.info("{time} : Message from front end: {json}".format(
+        time=datetime.datetime.now().isoformat(),
+        json={k: (msg[k] if k != 'data' else '[data removed]')
+              for k in msg}))
 
     if 'sessionkey' not in msg:
         logging.warning('session_key not in message!')
@@ -224,27 +232,28 @@ def execute_request(queue, message):
                 for chunk in route_request(msg, result):
                     # ...shovel the result into a queue
                     chunk['message'] = "success"
-                    queue.put_nowait( {'result': chunk, 'done': False} )
+                    queue.put_nowait({'result': chunk, 'done': False})
 
             except Exception as e:
                 response = {'message': 'failure'}
-                queue.put_nowait( { 'result': response, 'done': False} )
+                queue.put_nowait({'result': response, 'done': False})
 
             # let the readers know that we've drained the queue
-            queue.put_nowait({ 'done': True })
+            queue.put_nowait({'done': True})
     except Exception as e:
         sys.stderr.write('Exception caught in request: {}\n'.format(repr(e)))
         import traceback
         traceback.print_exc()
-        queue.put_nowait({ result: {'message': 'failure'}, 'done': True })
+        queue.put_nowait({result: {'message': 'failure'}, 'done': True})
 
 
 # Tornado Websocket
 class CodexSocket(tornado.websocket.WebSocketHandler):
     connection = set()
-    queue      = None
-    future     = None
-    reader     = None
+    queue = None
+    message_handler_future = None
+    future = None
+    reader = None
 
     def open(self):
         logging.info("{self}".format(self=self))
@@ -261,6 +270,11 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
             functools.partial(self.on_response, response))
 
     def on_close(self):
+        logging.info("Websocket closed")
+
+        if self.message_handler_future:
+            self.message_handler_future.cancel()
+
         # close the executor
         if self.future is not None and (not self.future.done()):
             self.future.cancel()
@@ -269,7 +283,11 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         if self.reader is not None and (not self.reader.done()):
             self.reader.cancel()
 
-    async def on_message(self, message):
+    def on_message(self, message):
+        self.message_handler_future = asyncio.ensure_future(
+            self.handle_message(message))
+
+    async def handle_message(self, message):
         self.queue = queuemgr.Queue()
         # Helpful reading about multiprocessing.Queue from Tornado: https://stackoverflow.com/a/46864186
 
@@ -284,11 +302,12 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         if audit.is_enabled():
             audit.method = 'tornado:' + audit.method
 
-        self.future = executor.schedule(functools.partial(execute_request, self.queue, message))
+        self.future = executor.schedule(
+            functools.partial(execute_request, self.queue, message))
 
         while True:
             # Wait on reading the queue
-            self.reader = readpool.schedule( self.queue.get )
+            self.reader = readpool.schedule(self.queue.get)
 
             response = await asyncio.wrap_future(self.reader)
 
@@ -297,9 +316,19 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
                 break
 
             result = response['result']
-            logging.info("{time} : Response to front end: {json}".format(time=datetime.datetime.now().isoformat(), json={k:(result[k] if (k != 'data' and k != 'downsample' and k != 'y' and k != "y_pred") else '[data removed]') for k in result}))
+            logging.info("{time} : Response to front end: {json}".format(
+                time=datetime.datetime.now().isoformat(),
+                json={
+                    k: (result[k] if
+                        (k != 'data' and k != 'downsample' and k != 'y'
+                         and k != "y_pred") else '[data removed]')
+                    for k in result
+                }))
 
-            self.write_message(json.dumps(response['result']))
+            try:
+                self.write_message(json.dumps(response['result']))
+            except tornado.websocket.WebSocketClosedError:
+                break
 
         audit.finish()
 
@@ -309,9 +338,9 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
 
 
 class GenericAPIHandler(tornado.web.RequestHandler):
-    queue      = None
-    future     = None
-    reader     = None
+    queue = None
+    future = None
+    reader = None
 
     def prepare(self):
         self.set_header('Content-Type', 'application/json')
@@ -353,11 +382,12 @@ class GenericAPIHandler(tornado.web.RequestHandler):
         if audit.is_enabled():
             audit.method = 'tornado_http:' + audit.method
 
-        self.future = executor.schedule(functools.partial(execute_request, self.queue, request))
+        self.future = executor.schedule(
+            functools.partial(execute_request, self.queue, request))
 
         while True:
             # Wait on reading the queue
-            self.reader = readpool.schedule( self.queue.get )
+            self.reader = readpool.schedule(self.queue.get)
 
             response = await asyncio.wrap_future(self.reader)
 
@@ -366,8 +396,14 @@ class GenericAPIHandler(tornado.web.RequestHandler):
                 break
 
             result = response['result']
-            logging.info("{time} : Response to front end: {json}".format(time=datetime.datetime.now().isoformat(), json={k:(result[k] if (k != 'data' and k != 'downsample' and k != 'y' and k != "y_pred") else '[data removed]') for k in result}))
-
+            logging.info("{time} : Response to front end: {json}".format(
+                time=datetime.datetime.now().isoformat(),
+                json={
+                    k: (result[k] if
+                        (k != 'data' and k != 'downsample' and k != 'y'
+                         and k != "y_pred") else '[data removed]')
+                    for k in result
+                }))
 
         audit.finish()
 
@@ -375,15 +411,19 @@ class GenericAPIHandler(tornado.web.RequestHandler):
 
     def send_failure(self, reason=None):
         self.set_status(400)
-        self.write(json.dumps({
-            'reason': reason if reason is not None else 'Invalid request.',
-            'success': False
-        }))
+        self.write(
+            json.dumps({
+                'reason':
+                reason if reason is not None else 'Invalid request.',
+                'success':
+                False
+            }))
+
 
 class FeatureAPIHandler(GenericAPIHandler):
     async def get(self):
-        session    = self.get_argument('session', None)
-        name       = self.get_argument('name', None)
+        session = self.get_argument('session', None)
+        name = self.get_argument('name', None)
         downsample = self.get_argument('downsample', None)
 
         if name is None or session is None:
@@ -409,9 +449,10 @@ class FeatureAPIHandler(GenericAPIHandler):
         arr = np.asarray(resp['data'], dtype=np.float32)
 
         self.set_header('X-Endianness', sys.byteorder)
-        self.set_header('X-Data-Type',  'float32')
+        self.set_header('X-Data-Type', 'float32')
         self.set_header('Content-Type', 'application/octet-stream')
         self.write(bytes(arr.data))
+
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
@@ -432,6 +473,7 @@ def make_app():
         (r"/upload", UploadSocket),
     ], **settings)
 
+
 def make_cache_process():
     def run_cache():
         try:
@@ -444,6 +486,7 @@ def make_cache_process():
         except Exception as e:
             logging.warning('Cache server launch failure!', e)
             raise
+
     return Process(target=run_cache)
 
 
@@ -454,7 +497,9 @@ if __name__ == '__main__':
     if not os.path.exists("logs/"):
         os.makedirs("logs/")
 
-    logging.basicConfig(filename='logs/{time}.log'.format(time=datetime.datetime.now()), level=0)
+    logging.basicConfig(
+        filename='logs/{time}.log'.format(time=datetime.datetime.now()),
+        level=0)
     logging.info("CODEX Server Started")
     logging.info(" ".join(sys.argv))
 
@@ -473,4 +518,4 @@ if __name__ == '__main__':
 
     # gracefully shut down cache server
     stop_cache_server()
-    codex_hash_server.join() # wait for process shutdown
+    codex_hash_server.join()  # wait for process shutdown

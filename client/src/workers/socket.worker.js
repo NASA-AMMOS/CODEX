@@ -138,6 +138,7 @@ self.addEventListener("message", function(e) {
             break;
         case types.CLOSE_SOCKET:
             if (socket) socket.close();
+
             break;
     }
 });
