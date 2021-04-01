@@ -21,8 +21,9 @@ logger = logging.getLogger(__name__)
 
 # CODEX library imports
 from api.sub.codex_math import impute
-from api.sub.hash       import get_cache
-from api.sub.spanning   import mask_spanning_subset
+from api.sub.hash import get_cache
+from api.sub.spanning import mask_spanning_subset
+
 
 def simple_downsample(inputArray, samples):
     '''
@@ -30,7 +31,7 @@ def simple_downsample(inputArray, samples):
         inputArray  - numpy array to be downsampled (1D)
         samples     - target sample size
     '''
-    
+
     if (inputArray.size < samples):
         return inputArray
 
@@ -38,15 +39,21 @@ def simple_downsample(inputArray, samples):
 
     # hackish, but sometimes this will fetch slightly too many samples
     # so we add a [:samples] to get the first 'samples' downsamples
+    logging.info(inputArray.size)
+    # This doesn't work, for some reason.
     return inputArray[::stride_size][:samples].copy()
 
 
-def downsample(inputArray, samples=0, percentage=0.0, session=None, algorithm="simple"):
+def downsample(inputArray,
+               samples=0,
+               percentage=0.0,
+               session=None,
+               algorithm="simple"):
     '''
     Inputs:
         inputArray  - numpy array       - array to be downsampled
         samples     - int (optional)    - number of samples requested in output array
-        percentage  - float	(optional)  -
+        percentage  - float (optional)  -
 
     Outputs:
         outputArray - numpy array - resulting downsampled array
@@ -60,18 +67,21 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None, algorithm="s
     # first, create a hash of the input array, don't save
     inputHash = cache.hashArray("NOSAVE", inputArray, "NOSAVE")
     inputHashCode = inputHash["hash"]
-    inputArray = impute(inputArray) # TODO - mblib spanning seems to have problems with NaNs.  Impute until fixed.
+    inputArray = impute(
+        inputArray
+    )  # TODO - mblib spanning seems to have problems with NaNs.  Impute until fixed.
     totalPoints = inputArray.shape[0]
 
     # if number of samples is provided, use
-    if(samples > 0):
+    if (samples > 0):
         usedSamples = samples
 
-    elif(percentage != 0):
-        if(percentage <= 100 and percentage >= 0):
+    elif (percentage != 0):
+        if (percentage <= 100 and percentage >= 0):
             usedSamples = int(float(percentage / 100) * totalPoints)
         else:
-            logging.warning("ERROR: downsample - perceange out of bounds 0-100")
+            logging.warning(
+                "ERROR: downsample - perceange out of bounds 0-100")
             usedSamples = totalPoints
 
     else:
@@ -79,11 +89,18 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None, algorithm="s
         usedSamples = totalPoints
 
     # first, check if this downsampling has already been done before
-    existingHashCheck = cache.findHashArray("name", inputHashCode, "downsample")
+    existingHashCheck = cache.findHashArray("name", inputHashCode,
+                                            "downsample")
+
+    if existingHashCheck:
+        logging.info(
+            f'existing samples: {existingHashCheck["samples"]}, usedSamples: {usedSamples}'
+        )
 
     # Check if raw length is already less than requested downsample rate.
     #   If it is, use that, otherwise, resample.
-    if(existingHashCheck is not None and existingHashCheck["samples"] == usedSamples):
+    if (existingHashCheck is not None
+            and existingHashCheck["samples"] == usedSamples):
         outputArray = existingHashCheck["data"]
 
     else:
@@ -104,16 +121,19 @@ def downsample(inputArray, samples=0, percentage=0.0, session=None, algorithm="s
                 outputArray = inputArray[mask_]
 
             else:
-                logging.warning("Unknown downsampling algorithm: {algorithm}".format(algorithm=algorithm))
+                logging.warning(
+                    "Unknown downsampling algorithm: {algorithm}".format(
+                        algorithm=algorithm))
                 outputArray = inputArray
 
         except BaseException:
-            logging.warning("downsample - failed to downsample.\n\n{trace}".format(trace=traceback.format_exc()))
+            logging.warning(
+                "downsample - failed to downsample.\n\n{trace}".format(
+                    trace=traceback.format_exc()))
             outputArray = inputArray
 
+    logging.info(outputArray.size)
     # Hash the downsampled output, using the hash of the input in place of the name.
-    #	Later look up using this, w.r.t origin data
+    #   Later look up using this, w.r.t origin data
     outputHash = cache.hashArray(inputHashCode, outputArray, "downsample")
     return outputArray
-
-
