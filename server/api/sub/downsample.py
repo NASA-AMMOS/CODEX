@@ -30,18 +30,31 @@ def simple_downsample(inputArray, samples):
     Inputs:
         inputArray  - numpy array to be downsampled (1D)
         samples     - target sample size
+
+    Notes:
+        This function was written to handle 1D arrays, however during testing
+        2D arrays were noticed to be passed in. To handle these cases, these
+        arrays are flattened to 1D, downsample applied, then reconstructed
+        to the original shape.
     '''
+    if inputArray.shape[1] != 1:
+        logger.error('Simple downsampling expects inputArray to be 1D! It is: {inputArray.shape[1]}D. Will attempt to downsample but may not work correctly')
 
     if (inputArray.size < samples):
         return inputArray
 
-    stride_size = math.floor(inputArray.size / samples)
+    stride = math.floor(inputArray.size / samples)
 
     # hackish, but sometimes this will fetch slightly too many samples
     # so we add a [:samples] to get the first 'samples' downsamples
-    logging.info(inputArray.size)
-    # This doesn't work, for some reason.
-    return inputArray[::stride_size][:samples].copy()
+    try:
+        data = inputArray.flatten()[::stride][:samples].reshape(int(samples/inputArray.shape[1]), inputArray.shape[1])
+    except:
+        logger.exception('Failed to using multi-dimensional downsampling, falling back to original method')
+        data = inputArray[::stride][:samples].copy()
+
+    logger.debug(f'Returning downsample\n\tsize  = {data.size}\n\tshape = {data.shape}\n\texpected: {samples}')
+    return data
 
 
 def downsample(inputArray,
@@ -101,17 +114,20 @@ def downsample(inputArray,
     #   If it is, use that, otherwise, resample.
     if (existingHashCheck is not None
             and existingHashCheck["samples"] == usedSamples):
+        logger.info('Using existing downsampled hash')
         outputArray = existingHashCheck["data"]
 
     else:
-
+        logger.info('Generating new downsampled hash')
         try:
 
             if algorithm == "simple":
+                logging.debug(f'Generating downsample using simple(samples={usedSamples})')
 
                 outputArray = simple_downsample(inputArray, samples)
 
             elif algorithm == "spanning":
+                logging.debug(f'Generating downsample using spanning(samples={usedSamples})')
 
                 if inputArray.ndim == 1:
                     inputList = [inputArray.tolist()]
@@ -132,8 +148,11 @@ def downsample(inputArray,
                     trace=traceback.format_exc()))
             outputArray = inputArray
 
-    logging.info(outputArray.size)
-    # Hash the downsampled output, using the hash of the input in place of the name.
-    #   Later look up using this, w.r.t origin data
-    outputHash = cache.hashArray(inputHashCode, outputArray, "downsample")
+        finally:
+            # Hash the downsampled output, using the hash of the input in place of the name.
+            #   Later look up using this, w.r.t origin data
+            outputHash = cache.hashArray(inputHashCode, outputArray, "downsample")
+
+    logging.debug(f'Downsample size: {outputArray.size}')
+
     return outputArray

@@ -474,42 +474,54 @@ class CodexHash:
 
             for point in self.sessions[session]["featureList"]:
                 if (point[field] == name):
+                    logger.debug(f'Cache hit findHashArray({field}, {name}, {hashType}, {session})')
                     return point
+            logger.debug(f'Cache miss findHashArray({field}, {name}, {hashType}, {session})')
             return None
 
         elif (hashType == "subset"):
 
             for point in self.sessions[session]["subsetList"]:
                 if (point[field] == name):
+                    logger.debug(f'Cache hit findHashArray({field}, {name}, {hashType}, {session})')
                     return point
+            logger.debug(f'Cache miss findHashArray({field}, {name}, {hashType}, {session})')
             return None
 
         elif (hashType == "downsample"):
 
             for point in self.sessions[session]["downsampleList"]:
                 if (point[field] == name):
+                    logger.debug(f'Cache hit findHashArray({field}, {name}, {hashType}, {session})')
                     return point
+            logger.debug(f'Cache miss findHashArray({field}, {name}, {hashType}, {session})')
             return None
 
         elif (hashType == "label"):
 
             for point in self.sessions[session]["labelList"]:
                 if (point[field] == name):
+                    logger.debug(f'Cache hit findHashArray({field}, {name}, {hashType}, {session})')
                     return point
+            logger.debug(f'Cache miss findHashArray({field}, {name}, {hashType}, {session})')
             return None
 
         elif (hashType == "regressor"):
 
             for point in self.sessions[session]["regressorList"]:
                 if (point[field] == name):
+                    logger.debug(f'Cache hit findHashArray({field}, {name}, {hashType}, {session})')
                     return point
+            logger.debug(f'Cache miss findHashArray({field}, {name}, {hashType}, {session})')
             return None
 
         elif (hashType == "classifier"):
 
             for point in self.sessions[session]["classifierList"]:
                 if (point[field] == name):
+                    logger.debug(f'Cache hit findHashArray({field}, {name}, {hashType}, {session})')
                     return point
+            logger.debug(f'Cache miss findHashArray({field}, {name}, {hashType}, {session})')
             return None
 
         else:
