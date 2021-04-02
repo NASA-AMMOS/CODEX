@@ -468,65 +468,20 @@ class CodexHash:
             hashArray function defined dictionary of information about data set
 
         '''
+        start = time.time()
         session = self.__set_session(session)
 
-        if (hashType == "feature"):
-
-            for point in self.sessions[session]["featureList"]:
+        ret = None
+        if f'{hashType}List' in self.sessions[session]:
+            for point in self.sessions[session][f'{hashType}List']:
                 if (point[field] == name):
-                    logger.debug(f'Cache hit findHashArray({field}, {name}, {hashType}, {session})')
-                    return point
-            logger.debug(f'Cache miss findHashArray({field}, {name}, {hashType}, {session})')
-            return None
-
-        elif (hashType == "subset"):
-
-            for point in self.sessions[session]["subsetList"]:
-                if (point[field] == name):
-                    logger.debug(f'Cache hit findHashArray({field}, {name}, {hashType}, {session})')
-                    return point
-            logger.debug(f'Cache miss findHashArray({field}, {name}, {hashType}, {session})')
-            return None
-
-        elif (hashType == "downsample"):
-
-            for point in self.sessions[session]["downsampleList"]:
-                if (point[field] == name):
-                    logger.debug(f'Cache hit findHashArray({field}, {name}, {hashType}, {session})')
-                    return point
-            logger.debug(f'Cache miss findHashArray({field}, {name}, {hashType}, {session})')
-            return None
-
-        elif (hashType == "label"):
-
-            for point in self.sessions[session]["labelList"]:
-                if (point[field] == name):
-                    logger.debug(f'Cache hit findHashArray({field}, {name}, {hashType}, {session})')
-                    return point
-            logger.debug(f'Cache miss findHashArray({field}, {name}, {hashType}, {session})')
-            return None
-
-        elif (hashType == "regressor"):
-
-            for point in self.sessions[session]["regressorList"]:
-                if (point[field] == name):
-                    logger.debug(f'Cache hit findHashArray({field}, {name}, {hashType}, {session})')
-                    return point
-            logger.debug(f'Cache miss findHashArray({field}, {name}, {hashType}, {session})')
-            return None
-
-        elif (hashType == "classifier"):
-
-            for point in self.sessions[session]["classifierList"]:
-                if (point[field] == name):
-                    logger.debug(f'Cache hit findHashArray({field}, {name}, {hashType}, {session})')
-                    return point
-            logger.debug(f'Cache miss findHashArray({field}, {name}, {hashType}, {session})')
-            return None
-
+                    ret = point
         else:
-            logging.warning("ERROR: findHashArray - hash not found")
-            return None
+            logging.error(f"findHashArray - hash not found: {hashType}")
+
+        logger.debug(f'Cache {"hit" if ret else "miss"} findHashArray({field}, {name}, {hashType}, {session})')
+        logger.debug(f'findHashArray() completed in {time.time() - start:.2f} seconds')
+        return ret
 
     @expose('mergeHashResults')
     def mergeHashResults(self, hashList, verbose=False, session=None):

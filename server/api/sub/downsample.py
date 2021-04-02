@@ -37,7 +37,8 @@ def simple_downsample(inputArray, samples):
         arrays are flattened to 1D, downsample applied, then reconstructed
         to the original shape.
     '''
-    if inputArray.shape[1] != 1:
+    dims = len(inputArray.shape)
+    if dims != 1:
         logger.error('Simple downsampling expects inputArray to be 1D! It is: {inputArray.shape[1]}D. Will attempt to downsample but may not work correctly')
 
     if (inputArray.size < samples):
@@ -48,7 +49,7 @@ def simple_downsample(inputArray, samples):
     # hackish, but sometimes this will fetch slightly too many samples
     # so we add a [:samples] to get the first 'samples' downsamples
     try:
-        data = inputArray.flatten()[::stride][:samples].reshape(int(samples/inputArray.shape[1]), inputArray.shape[1])
+        data = inputArray.flatten()[::stride][:samples].reshape(int(samples/dims), dims)
     except:
         logger.exception('Failed to using multi-dimensional downsampling, falling back to original method')
         data = inputArray[::stride][:samples].copy()
@@ -156,3 +157,9 @@ def downsample(inputArray,
     logging.debug(f'Downsample size: {outputArray.size}')
 
     return outputArray
+
+#%%
+
+a = np.array([1, 2, 3])
+
+len(a.shape)
