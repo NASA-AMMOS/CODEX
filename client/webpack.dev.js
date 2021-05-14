@@ -23,7 +23,7 @@ module.exports = merge(common, {
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
         new webpack.WatchIgnorePlugin([/css\.d\.ts$/]),
-        new webpack.EnvironmentPlugin({ CODEX_SERVER_URL: "https://localhost:8888" })
+        new webpack.EnvironmentPlugin({ CODEX_SERVER_URL: "http://localhost:8888" })
     ],
     resolve: {
         modules: [
