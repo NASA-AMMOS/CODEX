@@ -18,11 +18,9 @@ import {
     setWindowFeatureInfo,
     setWindowNeedsAutoscale,
     setWindowNeedsPlotImage,
-    setWindowShowGridLines,
-    setWindowDataDownsample
+    setWindowShowGridLines
 } from "../actions/windowDataActions";
 import * as wmActions from "../actions/windowManagerActions";
-import { DEFAULT_DOWNSAMPLE } from "../constants/defaults";
 
 /*
  * Basically, this hook:
@@ -596,46 +594,6 @@ export function useSetWindowNeedsPlotImageById() {
 export function useOpenNewWindow() {
     const dispatch = useDispatch();
     return newWindow => dispatch(wmActions.openNewWindow(newWindow));
-}
-
-/**
- * Set of controls for a window's downsample
- * @return {triple} of [getter, setter, maximum]
- */
-export function useWindowDataDownsample(id) {
-    const dispatch = useDispatch();
-    const features = useSelector(state =>
-        state.windowManager
-            .get("windows")
-            .find(win => win.get("id") === id)
-            .getIn(["data", "features"])
-    );
-    const feature_stats = useSelector(state => state.data.get("featureStats"));
-
-    let downsample = useSelector(state =>
-        state.windowManager
-            .get("windows")
-            .find(win => win.get("id") === id)
-            .getIn(["data", "downsample"])
-    );
-
-    if (!features) {
-        return [0, () => {}, 0];
-    }
-
-    const feature_lengths = [];
-    for (let key of feature_stats.keys()) {
-        if (!features.includes(key)) continue;
-        feature_lengths.push(feature_stats.getIn([key, "stats", "length"]));
-    }
-
-    const maximum = Math.min(...feature_lengths);
-
-    if (downsample === undefined) {
-        downsample = Math.min(maximum, DEFAULT_DOWNSAMPLE);
-    }
-
-    return [downsample, d => dispatch(setWindowDataDownsample(id, d)), maximum];
 }
 
 export default useWindowManager;

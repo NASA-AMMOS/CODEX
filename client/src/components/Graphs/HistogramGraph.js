@@ -89,7 +89,7 @@ function makeSelectionShapes(selection, data, chartRef) {
 }
 
 function HistogramGraph(props) {
-    const features = props.data;
+    const features = props.data.toJS();
     const [featuresImmutable] = useWindowFeatureList(props.win.id);
     const featureNames = featuresImmutable.toJS();
     const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
@@ -102,14 +102,19 @@ function HistogramGraph(props) {
     const [windowTitle, setWindowTitle] = useWindowTitle(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
     const [zoom, setZoom] = useState([0, 100]);
-    const [needsRedrawSelections, setNeedsRedrawSelections] = useState(false);
 
     const chart = useRef(null);
     const [chartId] = useState(utils.createNewId());
 
     const [baseCols] = useState(_ =>
         featureNames
-            .map(colName => [props.data.find(col => col.feature === colName)?.data, colName])
+            .map(colName => [
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS(),
+                colName
+            ])
             .map(([col, name]) => [utils.removeSentinelValues([col], props.fileInfo)[0], name])
     );
 
@@ -215,8 +220,8 @@ function HistogramGraph(props) {
         setChartRevision(revision);
     }
 
-    const featureDisplayNames = props.win.data.features.map(
-        featureName => props.data.find(feature => feature.feature === featureName)?.displayName
+    const featureDisplayNames = props.win.data.features.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
     );
 
     function setDefaults(init) {
@@ -297,9 +302,8 @@ function HistogramGraph(props) {
                 .map(sel => makeSelectionShapes(sel, traces, chart))
                 .flat();
             updateChartRevision();
-            setNeedsRedrawSelections(false);
         },
-        [props.currentSelection, props.savedSelections, needsRedrawSelections]
+        [props.currentSelection, props.savedSelections]
     );
 
     // Update the chart state when the global chart state changes
@@ -338,7 +342,6 @@ function HistogramGraph(props) {
             .domain([min, max])
             .range([0, 100]);
         setZoom([zoomMin, zoomMax].map(scale));
-        setNeedsRedrawSelections(true);
     }
 
     useLayoutEffect(() => {
