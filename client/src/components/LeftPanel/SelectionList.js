@@ -534,13 +534,17 @@ function SelectionList(props) {
     const shownCount = activeCount;
     const totalCount = selections.length;
 
+    const [selectionEditMode, setSelectionEditMode] = props.selectionEditModeState;
+
     return (
         <React.Fragment>
             <div className="selections">
                 <div className="header stats-hidden-header">
-                    <div className="title">Selections</div>
-                    <span className="counts">
-                        {activeCount}/{shownCount}/{totalCount}
+                    <div className="title">
+                        Selections {activeCount}/{shownCount}/{totalCount}
+                    </div>
+                    <span className="counts" onClick={_ => setSelectionEditMode(mode => !mode)}>
+                        edit
                     </span>
                 </div>
                 <SelectionItems panelCollapsed={props.panelCollapsed} />
