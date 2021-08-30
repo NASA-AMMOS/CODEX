@@ -499,8 +499,7 @@ if __name__ == '__main__':
     if not os.path.exists(f'{CODEX_ROOT}/logs'):
         os.makedirs(f'{CODEX_ROOT}/logs')
 
-    #logging.basicConfig(filename=f'{CODEX_ROOT}/logs/{datetime.datetime.now()}.log', level=0)
-    logging.basicConfig(filename=f'{CODEX_ROOT}/logs/testing.log', level=0)
+    logging.basicConfig(filename=f'{CODEX_ROOT}/logs/{datetime.datetime.now()}.log', level=0)
     logging.info("CODEX Server Started")
     logging.info(" ".join(sys.argv))
 
