@@ -151,7 +151,7 @@
         "json-loader": "^0.5.7",
         "lint-staged": "^8.2.1",
         "mock-socket": "^7.1.0",
-        "node-sass": "^4.13.1",
+        "node-sass": "^7.0.0",
         "react-svg-loader": "^3.0.3",
         "sass-loader": "^7.1.0",
         "sinon": "^6.1.4",
