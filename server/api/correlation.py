@@ -16,6 +16,7 @@ import traceback
 import logging
 
 import numpy as np
+import pandas as pd
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
@@ -60,67 +61,74 @@ class correlation(algorithm):
         # to the same cluster correlated.
         latent = np.random.randn(n_clusters, n_samples)
 
-        variables = self.X.transpose()
-        C = np.cov(variables)
+        # variables = self.X.transpose()
+        # C = np.cov(variables)
+        corr = pd.DataFrame(self.X, columns=self.featureList).corr()
 
         if(self.algorithmName == "alphabetical"):
-            self.featureList = np.asarray(self.featureList)
-            C = C[:, np.argsort(self.featureList)]
+            # TODO: Not sure why this is not working, switched to pandas in the mean time
+            # self.featureList = np.asarray(self.featureList)
+            # C = C[:, np.argsort(self.featureList)]
+            #
+            # self.featureList = np.sort(self.featureList)
+            # C = preprocessing.MinMaxScaler().fit_transform(C)
+            #
+            # self.result["ordering"] = self.featureList.tolist()
+            # self.result["corr_matrix"] = C.tolist()
+            corr = corr.sort_index()[sorted(corr.columns)]
 
-            self.featureList = np.sort(self.featureList)
-            C = preprocessing.MinMaxScaler().fit_transform(C)
-
-            self.result["ordering"] = self.featureList.tolist()
-            self.result["corr_matrix"] = C.tolist()
-
+            self.result["ordering"] = list(corr.columns)
+            self.result["corr_matrix"] = corr.to_numpy().tolist()
         elif(self.algorithmName == "sorted"):
-
-            initial_C = C
-            initial_score = score(C, n_clusters, cluster_size, n_variables)
-            initial_ordering = np.arange(n_variables)
-
-            current_C = C
-            current_ordering = initial_ordering
-            current_score = initial_score
-
-            max_iter = 1000
-            for i in range(max_iter):
-                # Find the best row swap to make
-                best_C = current_C
-                best_ordering = current_ordering
-                best_score = current_score
-                for row1 in range(n_variables):
-                    for row2 in range(n_variables):
-                        if row1 == row2:
-                            continue
-                        option_ordering = best_ordering.copy()
-                        option_ordering[row1] = best_ordering[row2]
-                        option_ordering[row2] = best_ordering[row1]
-                        option_C = swap_rows(best_C, row1, row2)
-                        option_score = score(option_C, n_clusters, cluster_size, n_variables)
-
-                        if option_score > best_score:
-                            best_C = option_C
-                            best_ordering = option_ordering
-                            best_score = option_score
-
-                if best_score > current_score:
-                    # Perform the best row swap
-                    current_C = best_C
-                    current_ordering = best_ordering
-                    current_score = best_score
-                else:
-                    # No row swap found that improves the solution, we're done
-                    break
-
-            current_C = preprocessing.MinMaxScaler().fit_transform(current_C)
-
-            ordering = []
-            for x in range(0, len(current_ordering)):
-                ordering.append(self.featureList[current_ordering[x]])
-
-            self.result["ordering"] = ordering
-            self.result["corr_matrix"] = current_C.tolist()
+            self.result["ordering"] = list(corr.columns)
+            self.result["corr_matrix"] = corr.to_numpy().tolist()
+            #
+            # initial_C = C
+            # initial_score = score(C, n_clusters, cluster_size, n_variables)
+            # initial_ordering = np.arange(n_variables)
+            #
+            # current_C = C
+            # current_ordering = initial_ordering
+            # current_score = initial_score
+            #
+            # max_iter = 1000
+            # for i in range(max_iter):
+            #     # Find the best row swap to make
+            #     best_C = current_C
+            #     best_ordering = current_ordering
+            #     best_score = current_score
+            #     for row1 in range(n_variables):
+            #         for row2 in range(n_variables):
+            #             if row1 == row2:
+            #                 continue
+            #             option_ordering = best_ordering.copy()
+            #             option_ordering[row1] = best_ordering[row2]
+            #             option_ordering[row2] = best_ordering[row1]
+            #             option_C = swap_rows(best_C, row1, row2)
+            #             option_score = score(option_C, n_clusters, cluster_size, n_variables)
+            #
+            #             if option_score > best_score:
+            #                 best_C = option_C
+            #                 best_ordering = option_ordering
+            #                 best_score = option_score
+            #
+            #     if best_score > current_score:
+            #         # Perform the best row swap
+            #         current_C = best_C
+            #         current_ordering = best_ordering
+            #         current_score = best_score
+            #     else:
+            #         # No row swap found that improves the solution, we're done
+            #         break
+            #
+            # current_C = preprocessing.MinMaxScaler().fit_transform(current_C)
+            #
+            # ordering = []
+            # for x in range(0, len(current_ordering)):
+            #     ordering.append(self.featureList[current_ordering[x]])
+            #
+            # self.result["ordering"] = ordering
+            # self.result["corr_matrix"] = current_C.tolist()
 
         else:
 
@@ -165,4 +173,3 @@ def score(C, n_clusters, cluster_size, n_variables):
         score -= np.sum(C[outside_cluster, :][:, inside_cluster])
 
     return score
-       

@@ -15,7 +15,7 @@ import sys
 import logging
 import inspect
 
-import numpy  as np
+import numpy as np
 
 from collections import defaultdict
 
@@ -24,8 +24,9 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.system  import string2token
-from api.sub.hash    import get_cache
+from api.sub.system import string2token
+from api.sub.hash import get_cache
+
 
 def codex_read_csv(file, featureList, hashType, session=None):
     '''
@@ -51,31 +52,33 @@ def codex_read_csv(file, featureList, hashType, session=None):
         logging.warning("codex_read_csv - cannot open file")
         return None
 
-    if(featureList is None):
+    if (featureList is None):
         featureList = columns.keys()
 
     for feature_name in featureList:
 
         try:
-            feature_data = columns[feature_name][:] # shouldn't be necessary?
+            feature_data = columns[feature_name][:]  # shouldn't be necessary?
         except BaseException:
             logging.warning("codex_read_csv: Feature not found.")
             return None
 
-        if(isinstance(feature_data, list)):
+        if (isinstance(feature_data, list)):
             feature_data = np.asarray(feature_data)
 
         try:
             feature_data = feature_data.astype(np.float)
         except BaseException as e:
             logging.info("Tokenizing {f}.".format(f=feature_name))
-            sys.stderr.write('{}, {}\n'.format(feature_name, feature_data[1] if len(feature_data) > 1 else feature_data))
+            sys.stderr.write('{}, {}\n'.format(
+                feature_name,
+                feature_data[1] if len(feature_data) > 1 else feature_data))
             sys.stderr.flush()
             feature_data = string2token(feature_data)
 
-        feature_hash = cache.hashArray(feature_name.strip(), feature_data, hashType)
+        feature_hash = cache.hashArray(feature_name.strip(), feature_data,
+                                       hashType)
         hashList.append(feature_hash['hash'])
-
 
     return hashList, list(map(lambda f: f.strip(), list(featureList)))
 
@@ -89,6 +92,7 @@ def traverse_datasets(hdf_file):
     Notes:
 
     '''
+
     def h5py_dataset_iterator(g, prefix=''):
         for key in g.keys():
             item = g[key]
@@ -122,7 +126,7 @@ def codex_read_hd5(file, featureList, hashType, session=None):
         logging.warning("ERROR: codex_read_hd5 - cannot open file")
         return None
 
-    if(featureList is None):
+    if (featureList is None):
         featureList = list(traverse_datasets(file))
 
     for feature_name in featureList:
@@ -193,17 +197,17 @@ def save_subset(inputHash, subsetHash, saveFilePath, session=None):
     '''
     cache = get_cache(session, timeout=None)
     returnHash = cache.findHashArray("hash", inputHash, "feature")
-    if(returnHash is None):
+    if (returnHash is None):
         logging.warning("Hash not found. Returning!")
         return
 
     data = returnHash['data']
     feature_name = returnHash['name']
 
-    if(subsetHash is not False):
+    if (subsetHash is not False):
         data, subsetName = cache.applySubsetMask(data, subsetHash)
 
-    if(subsetHash is not False):
+    if (subsetHash is not False):
         newFeatureName = feature_name + "_" + subsetName
     else:
         newFeatureName = feature_name
@@ -214,5 +218,3 @@ def save_subset(inputHash, subsetHash, saveFilePath, session=None):
     h5f.create_dataset(newFeatureName, data=data)
 
     return newHash['hash'], newFeatureName
-
-

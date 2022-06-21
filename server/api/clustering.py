@@ -18,68 +18,88 @@ import logging
 import numpy as np
 
 from sklearn.neighbors import kneighbors_graph
-from sklearn           import cluster
+from sklearn import cluster
 
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.codex_math         import impute
-from api.sub.time_log           import getComputeTimeEstimate
-from api.sub.time_log           import logTime
-from api.sub.downsample         import downsample
-from api.sub.labels             import label_swap
-from api.sub.hash               import get_cache
-from api.algorithm              import algorithm
+from api.sub.codex_math import impute
+from api.sub.time_log import getComputeTimeEstimate
+from api.sub.time_log import logTime
+from api.sub.downsample import downsample
+from api.sub.labels import label_swap
+from api.sub.hash import get_cache
+from api.algorithm import algorithm
+
 
 class clustering(algorithm):
-
     def get_algorithm(self):
+        logging.info(f'Processing {self.algorithmName}')
+        if (self.algorithmName == "kmeans"):
 
-        if(self.algorithmName == "kmeans"):
+            cluster_alg = cluster.MiniBatchKMeans(
+                n_clusters=int(self.parms['k']))
 
-            cluster_alg = cluster.MiniBatchKMeans(n_clusters=int(self.parms['k']))
+        elif (self.algorithmName == "mean_shift"):
 
-        elif(self.algorithmName == "mean_shift"):
+            bandwidth = cluster.estimate_bandwidth(
+                self.X, quantile=float(self.parms['quantile']))
+            cluster_alg = cluster.MeanShift(
+                bandwidth=bandwidth, bin_seeding=True)
 
-            bandwidth = cluster.estimate_bandwidth(self.X, quantile=float(self.parms['quantile']))
-            cluster_alg = cluster.MeanShift(bandwidth=bandwidth, bin_seeding=True)
+        elif (self.algorithmName == "affinity_propagation"):
 
-        elif(self.algorithmName == "affinity_propagation"):
+            cluster_alg = cluster.AffinityPropagation(
+                damping=float(self.parms['damping']))
 
-            cluster_alg = cluster.AffinityPropagation(damping=float(self.parms['damping']))
-
-        elif(self.algorithmName == "birch"):
+        elif (self.algorithmName == "birch"):
 
             cluster_alg = cluster.Birch(n_clusters=int(self.parms['k']))
 
-        elif(self.algorithmName == "ward"):
+        elif (self.algorithmName == "ward"):
 
-            connectivity = kneighbors_graph(self.X, n_neighbors=int(self.parms['n_neighbors']), include_self=False)
+            connectivity = kneighbors_graph(
+                self.X,
+                n_neighbors=int(self.parms['n_neighbors']),
+                include_self=False)
             connectivity = 0.5 * (connectivity + connectivity.T)
-            cluster_alg = cluster.AgglomerativeClustering(n_clusters=int(self.parms['k']), linkage='ward', connectivity=connectivity)
+            cluster_alg = cluster.AgglomerativeClustering(
+                n_clusters=int(self.parms['k']),
+                linkage='ward',
+                connectivity=connectivity)
 
-        elif(self.algorithmName == "spectral"):
+        elif (self.algorithmName == "spectral"):
 
-            cluster_alg = cluster.SpectralClustering(n_clusters=int(self.parms['k']), eigen_solver='arpack', affinity="nearest_neighbors")
+            cluster_alg = cluster.SpectralClustering(
+                n_clusters=int(self.parms['k']),
+                eigen_solver='arpack',
+                affinity="nearest_neighbors")
 
-        elif(self.algorithmName == "dbscan"):
+        elif (self.algorithmName == "dbscan"):
 
             cluster_alg = cluster.DBSCAN(eps=float(self.parms['eps']))
 
-        elif(self.algorithmName == "agglomerative"):
+        elif (self.algorithmName == "agglomerative"):
 
-            connectivity = kneighbors_graph(self.X, n_neighbors=int(self.parms['n_neighbors']), include_self=False)
+            connectivity = kneighbors_graph(
+                self.X,
+                n_neighbors=int(self.parms['n_neighbors']),
+                include_self=False)
             connectivity = 0.5 * (connectivity + connectivity.T)
 
-            cluster_alg = cluster.AgglomerativeClustering(linkage="average", affinity="cityblock", n_clusters=int(self.parms['k']), connectivity=connectivity)
+            cluster_alg = cluster.AgglomerativeClustering(
+                linkage="average",
+                affinity="cityblock",
+                n_clusters=int(self.parms['k']),
+                connectivity=connectivity)
 
         else:
             return None
 
+        logging.info(f'Done processing {self.algorithmName}')
         return cluster_alg
-
 
     def fit_algorithm(self):
 
@@ -101,14 +121,11 @@ class clustering(algorithm):
             centers = None
             self.result['centers'] = None
 
-
     def check_valid(self):
 
         if self.X.ndim < 2:
-            logging.warning("ERROR: run_codex_clustering - insufficient data dimmensions")
+            logging.warning(
+                "ERROR: run_codex_clustering - insufficient data dimmensions")
             return None
 
         return 1
-
-
-        

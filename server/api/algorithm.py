@@ -18,7 +18,7 @@ import json
 
 import numpy as np
 
-from sklearn           import cluster
+from sklearn import cluster
 
 CODEX_ROOT = os.getenv('CODEX_ROOT')
 sys.path.insert(1, os.getenv('CODEX_ROOT'))
@@ -26,16 +26,19 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 logger = logging.getLogger(__name__)
 
 # CODEX Support
-from api.sub.codex_math         import impute
-from api.sub.time_log           import getComputeTimeEstimate
-from api.sub.time_log           import logTime
-from api.sub.downsample         import downsample
-from api.sub.labels             import label_swap
-from api.sub.hash               import get_cache
+from api.sub.codex_math import impute
+from api.sub.time_log import getComputeTimeEstimate
+from api.sub.time_log import logTime
+from api.sub.downsample import downsample
+from api.sub.labels import label_swap
+from api.sub.hash import get_cache
+
 
 class algorithm():
-    def __init__(self, inputHash, activeLabels, featureList, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, session):
-        
+    def __init__(self, inputHash, activeLabels, featureList, hashList,
+                 labelHash, subsetHashName, algorithmName, downsampled, parms,
+                 scoring, search_type, cross_val, result, session):
+
         self.featureList = featureList
         self.inputHash = inputHash
         self.hashList = hashList
@@ -56,16 +59,26 @@ class algorithm():
         self.cache = get_cache(self.session, timeout=None)
 
         startTime = time.time()
-        self.result = {'algorithm': self.algorithmName,
-                       'downsample': self.downsampled,
-                       'WARNING':None}
+        self.result = {
+            'algorithm': self.algorithmName,
+            'downsample': self.downsampled,
+            'WARNING': None
+        }
 
-        returnHash = self.cache.findHashArray("hash", self.inputHash, "feature")
+        returnHash = self.cache.findHashArray("hash", self.inputHash,
+                                              "feature")
+
         if returnHash is None:
-            logging.warning("Input hash not found: {inputHash}".format(inputHash=self.inputHash))
-            self.result["WARNING"] = "Input hash not found: {inputHash}".format(inputHash=self.inputHash)
+            logging.warning("Input hash not found: {inputHash}".format(
+                inputHash=self.inputHash))
+            self.result[
+                "WARNING"] = "Input hash not found: {inputHash}".format(
+                    inputHash=self.inputHash)
             self.result['message'] = "failure"
             return self.result
+
+        logging.info(f'Got hash in {time.time() - startTime}')
+        startTime = time.time()
 
         self.X = returnHash['data']
         if self.X is None:
@@ -78,32 +91,54 @@ class algorithm():
             self.result['message'] = "failure"
             return self.result
 
+        logging.info(f'Checked valid in {time.time() - startTime}')
+        startTime = time.time()
+
         if self.X.ndim == 1:
             full_samples = self.X.shape[0]
             full_features = 1
         else:
             full_samples, full_features = self.X.shape
 
-        self.result['eta'] = getComputeTimeEstimate(self.__class__.__name__, self.algorithmName, full_samples, full_features)
+        self.result['eta'] = getComputeTimeEstimate(
+            self.__class__.__name__, self.algorithmName, full_samples,
+            full_features)
+
+        logging.info(f'Got estimate in {time.time() - startTime}')
+        startTime = time.time()
 
         if self.subsetHashName is not False:
             self.X = self.cache.applySubsetMask(self.X, self.subsetHashName)
-            if(self.X is None):
-                logging.warning("Subset hash not found: {subsetHash}".format(subsetHash=self.subsetHashName))
+            if (self.X is None):
+                logging.warning("Subset hash not found: {subsetHash}".format(
+                    subsetHash=self.subsetHashName))
                 self.result['message'] = "failure"
                 return self.result
 
+        logging.info(f'Got mask in {time.time() - startTime}')
+        startTime = time.time()
+
         if self.downsampled is not False:
-            self.X = downsample(self.X, samples=self.downsampled, session=self.cache, algorithm='simple')
-            logging.info("Downsampled to {samples} samples".format(samples=len(self.X)))
+            self.X = downsample(
+                self.X,
+                samples=self.downsampled,
+                session=self.cache,
+                algorithm='simple')
+            logging.info(
+                "Downsampled to {samples} samples".format(samples=self.X.size))
+
+        logging.info(f'Got downsample in {time.time() - startTime}')
+        startTime = time.time()
 
         # TODO - labels are currently cached under features
         if self.labelHash:
-            labelHash_dict = self.cache.findHashArray("hash", self.labelHash, "feature")
+            labelHash_dict = self.cache.findHashArray("hash", self.labelHash,
+                                                      "feature")
             if labelHash_dict is None:
-                logging.warning("Label hash not found: {labelHash}".format(self.labelHash))
+                logging.warning("Label hash not found: {labelHash}".format(
+                    self.labelHash))
                 self.result['message'] = "failure"
-                return self.result                  
+                return self.result
             else:
                 self.y = labelHash_dict['data']
                 self.result['y'] = self.y.tolist()
@@ -117,32 +152,42 @@ class algorithm():
         self.X = impute(self.X)
         self.result['data'] = self.X.tolist()
 
+        logging.info(f'Got other stuff in {time.time() - startTime}')
+        startTime = time.time()
+
         self.algorithm = self.get_algorithm()
         if self.algorithm == None:
             self.result['message'] = "failure"
-            self.result['WARNING'] = "{alg} algorithm not supported".format(alg=self.algorithmName)
+            self.result['WARNING'] = "{alg} algorithm not supported".format(
+                alg=self.algorithmName)
             return self.result
+
+        logging.info(f'Got algo in {time.time() - startTime}')
+        startTime = time.time()
 
         self.fit_algorithm()
 
+        logging.info(f'Fit algo in {time.time() - startTime}')
+        startTime = time.time()
+
         # TODO - The front end should specify a save name for the model
-        model_name = self.algorithmName +  "_" + str(random.random())
+        model_name = self.algorithmName + "_" + str(random.random())
         if self.search_type == 'direct':
-            model_dict = self.cache.saveModel(model_name, self.algorithm, "regressor")
+            model_dict = self.cache.saveModel(model_name, self.algorithm,
+                                              "regressor")
         else:
-            model_dict = self.cache.saveModel(model_name, self.algorithm.best_estimator_, "regressor")
+            model_dict = self.cache.saveModel(
+                model_name, self.algorithm.best_estimator_, "regressor")
         if not model_dict:
             self.result['WARNING'] = "Model could not be saved."
         else:
             self.result['model_name'] = model_dict['name']
             self.result['model_hash'] = model_dict['hash']
 
-
         endTime = time.time()
         computeTime = endTime - startTime
-        logTime(self.__class__.__name__, self.algorithmName, computeTime, computed_samples, computed_features)
+        logTime(self.__class__.__name__, self.algorithmName, computeTime,
+                computed_samples, computed_features)
 
         self.result['message'] = "success"
         return self.result
-
-

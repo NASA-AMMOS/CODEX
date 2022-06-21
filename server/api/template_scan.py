@@ -47,8 +47,7 @@ class template_scan(algorithm):
             self.activeLabels = np.asarray(self.activeLabels)
             labeled, ncomponents = label(self.activeLabels)
 
-            score_set = np.ones(labeled.shape[0])
-            results = np.zeros(labeled.shape[0])
+            score_set = None
             for x in range(1, ncomponents+1):
                 seg_start = np.min(np.argwhere(labeled == x))
                 seg_end = np.max(np.argwhere(labeled == x))
@@ -56,18 +55,20 @@ class template_scan(algorithm):
                 distance, scores = fastdtw(self.X, seg, radius=self.parms['radius'], dist=euclidean)
                 score_array = np.array(scores)
                 seg_scores = np.asarray(score_array[:,1]) * distance
+                if score_set is None:
+                    score_set = np.ones(seg_scores.shape)
                 score_set = np.column_stack((score_set, seg_scores))
-            
+
+            results = np.zeros(seg_scores.shape)
             if ncomponents >= 1:
                 score_set = score_set[:,1:]
                 score_set = np.average(score_set, axis=1)
                 threshold_indices = score_set > (((np.max(score_set) - np.min(score_set)) / 2) + np.min(score_set))
                 results[threshold_indices] = 1
-                
+
             self.result['results'] = results.tolist()
 
 
 
     def check_valid(self):
         return 1
-        
