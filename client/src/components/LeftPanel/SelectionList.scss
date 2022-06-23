@@ -56,9 +56,6 @@
             }
         }
 
-        .group-dnd-div {
-        }
-
         .drag-drop-div {
             flex: 1;
             width: 100%;
@@ -273,4 +270,8 @@
         width: 22px;
         margin-right: 6px;
     }
+}
+
+.react-tiny-popover-container {
+    z-index: 1000;
 }
