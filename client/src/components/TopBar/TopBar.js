@@ -79,9 +79,7 @@ function NavigationBar(props) {
                         features.size > requiredNumFeatures[1]
                         ? [
                               true,
-                              `Requires between ${requiredNumFeatures[0]} and ${
-                                  requiredNumFeatures[1]
-                              } selected features`
+                              `Requires between ${requiredNumFeatures[0]} and ${requiredNumFeatures[1]} selected features`
                           ]
                         : [false, null];
                 }
@@ -117,8 +115,8 @@ function NavigationBar(props) {
         return (
             <MenuItem
                 key={window_type}
-                classes={{root: "actionMenuItem"}}
-                onSelect={() => props.openWindow(window_type)}
+                classes={{ root: "actionMenuItem" }}
+                onSelect={() => dispatch(openNewWindow({ windowType: window_type }))}
                 disabled={disabled}
             >
                 <Tooltip
@@ -136,7 +134,7 @@ function NavigationBar(props) {
         return WORKFLOW_TYPES.map(workflow => (
             <MenuItem
                 key={workflow}
-                classes={{root: "actionMenuItem"}}
+                classes={{ root: "actionMenuItem" }}
                 onSelect={() => {
                     dispatch(createWorkflow(workflow));
                 }}
@@ -155,7 +153,7 @@ function NavigationBar(props) {
         return ALGORITHM_TYPES.map(algo => (
             <MenuItem
                 key={algo}
-                classes={{root: "actionMenuItem"}}
+                classes={{ root: "actionMenuItem" }}
                 onSelect={() => {
                     dispatch(createAlgorithm(algo));
                 }}
@@ -205,7 +203,10 @@ function NavigationBar(props) {
                 </Dropdown>
 
                 <Dropdown className="dropdownMain" autoOpen={false}>
-                    <Dropdown.Toggle className="dropdownToggle actionMenuLabel" title="Algorithms" />
+                    <Dropdown.Toggle
+                        className="dropdownToggle actionMenuLabel"
+                        title="Algorithms"
+                    />
                     <Dropdown.Menu className="actionMenu">
                         {createMenuItem(CLUSTER_ALGORITHM, "Clustering")}
                         {createMenuItem(
@@ -251,10 +252,18 @@ function NavigationBar(props) {
             <div id="topBarTools">
                 <ButtonGroup>
                     <Dropdown>
-                        <Dropdown.Toggle className="dropdownToggle actionMenuLabel" title="Windows" />
+                        <Dropdown.Toggle
+                            className="dropdownToggle actionMenuLabel"
+                            title="Windows"
+                        />
                         <Dropdown.Menu className="actionMenu">
-                            <MenuItem header className="actionMenuItem">Arrange</MenuItem>
-                            <MenuItem  className="actionMenuItem" onSelect={() => props.setWindowTileAction(true)}>
+                            <MenuItem header className="actionMenuItem">
+                                Arrange
+                            </MenuItem>
+                            <MenuItem
+                                className="actionMenuItem"
+                                onSelect={() => props.setWindowTileAction(true)}
+                            >
                                 Tile
                             </MenuItem>
                             <MenuItem divider />
