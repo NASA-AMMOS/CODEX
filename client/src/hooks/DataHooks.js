@@ -1,7 +1,7 @@
-import { Set, List } from "immutable";
 import { batchActions } from "redux-batched-actions";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useRef, useEffect } from "react";
+import Immutable, { Set, List } from "immutable";
 
 import WorkerSocket from "worker-loader!../workers/socket.worker";
 
@@ -19,6 +19,7 @@ import {
     featureSelect,
     featureUnselect,
     fileLoad,
+    requestFeatureLoad,
     renameFeatureGroup,
     selectFeatureGroup,
     selectFeatureInGroup,
@@ -33,6 +34,9 @@ import * as uiTypes from "../constants/uiTypes";
 import * as utils from "../utils/utils";
 import * as windowTypes from "../constants/windowTypes";
 import * as wmActions from "../actions/windowManagerActions";
+import { resolve_feature } from "../utils/features";
+import { DEFAULT_DOWNSAMPLE } from "../constants/defaults";
+import { useWindowDataDownsample } from "./WindowHooks";
 
 function loadColumnFromServer(feature) {
     return new Promise(resolve => {
@@ -633,4 +637,193 @@ export function useSelectFeatureInGroup(id) {
 
 export function useBlobCache() {
     return window.bcache;
+}
+
+export function useDownsampledFeatures(windowHandle = undefined) {
+    const domain = useSelector(state => state.data);
+    const dispatch = useDispatch();
+    const bcache = useBlobCache();
+
+    const ungroupedFeatures = useSelector(state => state.data.get("featureList"))
+        .filter(f => f.get("selected"))
+        .map(f => f.get("name"));
+
+    const featuresInGroups = useSelector(state =>
+        state.data.get("featureGroups").reduce((acc, group) => {
+            return acc.concat(group.get("selectedFeatures"));
+        }, List())
+    );
+
+    const selectedFeatures = ungroupedFeatures.concat(featuresInGroups);
+
+    // pin the selected features to the state on the first run
+    const [pinned, setPinned] = useState(null);
+
+    useEffect(() => {
+        let to_be_loaded;
+        if (
+            windowHandle !== undefined &&
+            windowHandle.data !== undefined &&
+            windowHandle.data.features !== undefined
+        ) {
+            to_be_loaded = windowHandle.data.features;
+        } else {
+            to_be_loaded = selectedFeatures;
+        }
+        setPinned(to_be_loaded);
+
+        let actions = to_be_loaded.map(f => requestFeatureLoad(f)).toJS();
+
+        if (windowHandle !== undefined) {
+            let win_data = { ...windowHandle?.data, features: to_be_loaded.toJS() };
+            windowHandle.setData(win_data);
+        }
+
+        dispatch(batchActions(actions));
+    }, []); // run once
+
+    if (pinned === null) {
+        return null;
+    }
+
+    const loadedData = domain.get("loadedData");
+
+    const lockedFeatures = loadedData.filter(f => pinned.includes(f.get("feature")));
+
+    // Ensure that we only return the features when they're locked
+    if (pinned.size !== lockedFeatures.size) {
+        return null;
+    } else {
+        console.log("returning locked features: ", lockedFeatures.toJS());
+        return lockedFeatures.toJS().map(f => ({ ...f, data: bcache.get(f.data) }));
+    }
+}
+
+/**
+ * Lock a downsampled feature from the dataset, resolving directly from the server
+ *
+ * Returns both the data and a pair of functions to translate indices from the downsample to the underlying dataset and vice versa
+ *
+ * If data isn't ready, the data will be null and the translators will return 0 for all indices
+ *
+ * @param {obj} windowHandle window handle from WM
+ * @return {triple} triple of [data, sel_to_downsample, downsample_to_sel]
+ */
+export function useDirectDownsampledFeatures(windowHandle = null) {
+    const dispatch = useDispatch();
+
+    const currentSelection = useSelector(state => state.selections.currentSelection);
+    const [pinnedSelection] = useState(currentSelection);
+
+    const allMetrics = useSelector(state => state.data.get("featureStats"));
+
+    const ungroupedFeatures = useSelector(state => state.data.get("featureList"))
+        .filter(f => f.get("selected"))
+        .map(f => f.get("name"));
+
+    const featuresInGroups = useSelector(state =>
+        state.data.get("featureGroups").reduce((acc, group) => {
+            return acc.concat(group.get("selectedFeatures"));
+        }, List())
+    );
+
+    const selectedFeatures = ungroupedFeatures.concat(featuresInGroups);
+
+    // pin the selected features to the state on the first run
+    const [pinned, setPinned] = useState(null);
+
+    // load the feature information
+    const [data, setData] = useState(null);
+
+    // use the selection translator
+    const [selectionTranslators, setSelectionTranslators] = useState([() => null, () => 0]);
+
+    // note that this will break if other kinds of downsamples are
+    // permitted
+    const createTranslatorPair = (downsample, downsampleMax) => {
+        // if we don't need to downsample, then return identity functions
+        if (downsampleMax === downsample) {
+            return [i => i, i => i];
+        }
+        const stride_size = Math.floor(downsampleMax / downsample);
+
+        const sel_to_downsample = sel_index => {
+            if (0 === sel_index % stride_size) {
+                return sel_index / stride_size;
+            } else {
+                return null;
+            }
+        };
+
+        const downsample_to_sel = down_index => {
+            return down_index * stride_size;
+        };
+
+        return [sel_to_downsample, downsample_to_sel];
+    };
+
+    useEffect(() => {
+        // avoiding IFFE pattern to avoid TypeError on destruction
+        // using IFFE returns a promise rather than a function and React
+        // breaks on cleanup
+        const asyncResolver = async () => {
+            let to_be_loaded;
+            if (
+                windowHandle !== undefined &&
+                windowHandle.data !== undefined &&
+                windowHandle.data.features !== undefined
+            ) {
+                to_be_loaded = windowHandle.data.features;
+            } else {
+                to_be_loaded = selectedFeatures;
+            }
+            setPinned(to_be_loaded);
+
+            to_be_loaded = "toJS" in to_be_loaded ? to_be_loaded.toJS() : to_be_loaded;
+
+            if (windowHandle !== undefined) {
+                let window_data = { ...windowHandle?.data, features: to_be_loaded };
+                windowHandle.setData(window_data);
+            }
+
+            const downsampleMax = Math.min(
+                ...to_be_loaded.map(f => allMetrics.getIn([f, "stats", "length"]))
+            );
+
+            const downsample = Math.min(
+                windowHandle?.data?.downsample || DEFAULT_DOWNSAMPLE,
+                downsampleMax
+            );
+
+            let feature_data = to_be_loaded.map(f => resolve_feature(f, downsample));
+
+            feature_data = await Promise.all(feature_data);
+
+            setSelectionTranslators(createTranslatorPair(downsample, downsampleMax));
+            setData(to_be_loaded.map((v, i) => ({ feature: v, data: feature_data[i] })));
+
+            // Hacks! this forces this graph to update
+            dispatch(selectionActions.setCurrentSelection([]));
+            dispatch(selectionActions.setCurrentSelection(pinnedSelection));
+        };
+
+        asyncResolver();
+    }, []); // should only run once--data is treated as immutable
+
+    if (pinned === null || data === null) {
+        return [null, ...selectionTranslators];
+    }
+    if (
+        windowHandle?.data?.downsample !== undefined &&
+        data[0].data.length !== windowHandle?.data?.downsample
+    ) {
+        console.log(
+            "data not shipping due to length mismatch...",
+            data[0].data.length,
+            windowHandle?.data?.downsample
+        );
+        return [null, () => null, () => 0];
+    }
+
+    return [data, ...selectionTranslators];
 }

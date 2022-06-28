@@ -59,3 +59,7 @@ export function setWindowNeedsAutoscale(id, needsAutoscale) {
 export function setWindowNeedsPlotImage(id, needs) {
     return { type: types.WINDOW_SET_NEEDS_PLOT_IMAGE, id, needs };
 }
+
+export function setWindowDataDownsample(id, downsample) {
+    return { type: types.WINDOW_SET_DATA_DOWNSAMPLE, id, downsample };
+}

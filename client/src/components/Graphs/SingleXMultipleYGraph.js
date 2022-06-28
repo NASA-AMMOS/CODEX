@@ -84,19 +84,22 @@ function SingleXMultipleYGraph(props) {
     const [axisScales, setAxisScales] = useWindowAxisScale(props.win.id);
     const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
-    const [sanitizedCols] = useState(_ =>
-        utils.removeSentinelValues(props.data.map(col => col.get("data")).toJS(), props.fileInfo)
+    const sanitizedCols = useMemo(
+        _ => utils.removeSentinelValues(props.data.map(col => col.data), props.fileInfo),
+        [props.data]
     );
 
     const processedData = useMemo(
         _ => filterBounds(featureList, sanitizedCols, bounds && bounds.toJS()),
-        [bounds]
+        [bounds, sanitizedCols]
     );
 
     const dataLength = processedData[0].length;
 
     // Generic index array
-    const [indexAry] = useState(_ => [...Array(processedData[0].length)].map((_, idx) => idx));
+    const indexAry = useMemo(_ => [...Array(processedData[0].length)].map((_, idx) => idx), [
+        processedData
+    ]);
 
     const x = useMemo(
         _ =>
@@ -104,29 +107,28 @@ function SingleXMultipleYGraph(props) {
                 ? indexAry
                 : Array.from(
                       processedData[
-                          props.data.findIndex(col => col.get("feature") === props.win.data.xAxis)
+                          props.data.findIndex(col => col.feature === props.win.data.xAxis)
                       ]
                   ).sort((a, b) => b - a),
-        [xAxis]
+        [xAxis, processedData]
     );
 
     const cols = props.data
-        .filter(col => col.get("feature") !== xAxis)
-        .map((col, idx) => ({ name: col.get("feature"), data: processedData[idx] }))
-        .toJS();
+        .filter(col => col.feature !== xAxis)
+        .map((col, idx) => ({ name: col.feature, data: processedData[idx] }));
 
-    const featureDisplayNames = featureList.map(featureName =>
-        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    const featureDisplayNames = featureList.map(
+        featureName => props.data.find(feature => feature.feature === featureName)?.displayName
     );
 
     const xAxisTitle =
         !xAxis || xAxis === uiTypes.GRAPH_INDEX
             ? "Row Index"
-            : props.data.find(feature => feature.get("feature") === xAxis).get("displayName");
+            : props.data.find(feature => feature.feature === xAxis).displayName;
 
     const yAxisTitle = props.data
-        .filter(col => col.get("feature") !== xAxis)
-        .map(col => (axisLabels ? axisLabels.get(col.get("feature")) : col.get("feature")))
+        .filter(col => col.feature !== xAxis)
+        .map(col => (axisLabels ? axisLabels.get(col.feature) : col.feature))
         .join(", ");
 
     const palette = utils.getSelectionPalette();
@@ -231,6 +233,14 @@ function SingleXMultipleYGraph(props) {
             });
     }
 
+    useEffect(
+        _ => {
+            chartState.data = traces;
+            updateChartRevision();
+        },
+        [traces]
+    );
+
     /* SELECTION HANDLERS
     Selections are handled as a bunch of tick plots that are generated below the main plot.
     The selection graph objects are stored in state and then rendered. We don't modify these charts
@@ -310,10 +320,9 @@ function SingleXMultipleYGraph(props) {
         [props.currentSelection, props.savedSelections]
     );
 
-    // TODO: How do selections work in this chart?
     useEffect(
         _ => {
-            chartState.layout.dragmode = props.globalChartState; // Weirdly this works, can't do it with setChartState
+            chartState.layout.dragmode = props.globalChartState;
             updateChartRevision();
         },
         [props.globalChartState]
@@ -450,10 +459,12 @@ function SingleXMultipleYGraph(props) {
                                 props.setCurrentSelection([]);
                             }}
                             onSelected={e => {
-                                if (e)
-                                    props.setCurrentSelection(
-                                        e.points.map(point => point.pointIndex)
+                                if (e) {
+                                    const [min, max] = utils.getMinMax(
+                                        e.lassoPoints.x.map(val => parseInt(val))
                                     );
+                                    props.setCurrentSelection(utils.range(min, max + 1));
+                                }
                             }}
                             divId={chartId}
                             useResizeHandler

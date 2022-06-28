@@ -79,7 +79,9 @@ function NavigationBar(props) {
                         features.size > requiredNumFeatures[1]
                         ? [
                               true,
-                              `Requires between ${requiredNumFeatures[0]} and ${requiredNumFeatures[1]} selected features`
+                              `Requires between ${requiredNumFeatures[0]} and ${
+                                  requiredNumFeatures[1]
+                              } selected features`
                           ]
                         : [false, null];
                 }
@@ -115,7 +117,6 @@ function NavigationBar(props) {
         return (
             <MenuItem
                 key={window_type}
-                classes={{ root: "actionMenuItem" }}
                 onSelect={() => dispatch(openNewWindow({ windowType: window_type }))}
                 disabled={disabled}
             >
@@ -134,7 +135,6 @@ function NavigationBar(props) {
         return WORKFLOW_TYPES.map(workflow => (
             <MenuItem
                 key={workflow}
-                classes={{ root: "actionMenuItem" }}
                 onSelect={() => {
                     dispatch(createWorkflow(workflow));
                 }}
@@ -153,7 +153,6 @@ function NavigationBar(props) {
         return ALGORITHM_TYPES.map(algo => (
             <MenuItem
                 key={algo}
-                classes={{ root: "actionMenuItem" }}
                 onSelect={() => {
                     dispatch(createAlgorithm(algo));
                 }}
@@ -198,16 +197,13 @@ function NavigationBar(props) {
                     autoOpen={false}
                     disabled={featureList.every(feature => !feature.get("selected"))}
                 >
-                    <Dropdown.Toggle className="dropdownToggle actionMenuLabel" title="Graphs" />
-                    <Dropdown.Menu className="actionMenu">{getGraphMenuItems()}</Dropdown.Menu>
+                    <Dropdown.Toggle className="dropdownToggle" title="Graphs" />
+                    <Dropdown.Menu>{getGraphMenuItems()}</Dropdown.Menu>
                 </Dropdown>
 
                 <Dropdown className="dropdownMain" autoOpen={false}>
-                    <Dropdown.Toggle
-                        className="dropdownToggle actionMenuLabel"
-                        title="Algorithms"
-                    />
-                    <Dropdown.Menu className="actionMenu">
+                    <Dropdown.Toggle className="dropdownToggle" title="Algorithms" />
+                    <Dropdown.Menu>
                         {createMenuItem(CLUSTER_ALGORITHM, "Clustering")}
                         {createMenuItem(
                             DIMENSIONALITY_REDUCTION_WINDOW,
@@ -223,7 +219,7 @@ function NavigationBar(props) {
 
                 {/** <Dropdown className="dropdownMain" autoOpen={false}>
                     <Dropdown.Toggle className="dropdownToggle" title="Development" />
-                    <Dropdown.Menu className="actionMenu">
+                    <Dropdown.Menu>
                         <MenuItem onSelect={() => props.openWindow(DEBUG_WINDOW)}>
                             Open debug window
                         </MenuItem>
@@ -231,8 +227,8 @@ function NavigationBar(props) {
                 </Dropdown>
             **/}
                 <Dropdown className="dropdownMain" autoOpen={false}>
-                    <Dropdown.Toggle className="dropdownToggle actionMenuLabel" title="Workflows" />
-                    <Dropdown.Menu className="actionMenu">
+                    <Dropdown.Toggle className="dropdownToggle" title="Workflows" />
+                    <Dropdown.Menu>
                         {createMenuItem(EXPLAIN_THIS_WINDOW, "Explain This")}
                         {createMenuItem(TABLE_WINDOW, "Table")}
                     </Dropdown.Menu>
@@ -252,18 +248,10 @@ function NavigationBar(props) {
             <div id="topBarTools">
                 <ButtonGroup>
                     <Dropdown>
-                        <Dropdown.Toggle
-                            className="dropdownToggle actionMenuLabel"
-                            title="Windows"
-                        />
-                        <Dropdown.Menu className="actionMenu">
-                            <MenuItem header className="actionMenuItem">
-                                Arrange
-                            </MenuItem>
-                            <MenuItem
-                                className="actionMenuItem"
-                                onSelect={() => props.setWindowTileAction(true)}
-                            >
+                        <Dropdown.Toggle className="dropdownToggle" title="Windows" />
+                        <Dropdown.Menu onMouseLeave={handleWindowMenuMouseLeave}>
+                            <MenuItem header>Arrange</MenuItem>
+                            <MenuItem onSelect={() => dispatch(setWindowTileAction(true))}>
                                 Tile
                             </MenuItem>
                             <MenuItem divider />
