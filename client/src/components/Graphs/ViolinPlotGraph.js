@@ -67,7 +67,7 @@ function makeSelectionShapes(selection, data) {
 }
 
 function ViolinPlotGraph(props) {
-    const features = props.data.toJS();
+    const features = props.data;
     const [featuresImmutable] = useWindowFeatureList(props.win.id);
     const featureNames = featuresImmutable.toJS();
     const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
@@ -102,13 +102,7 @@ function ViolinPlotGraph(props) {
 
     const [baseCols] = useState(_ =>
         featureNames
-            .map(colName => [
-                props.data
-                    .find(col => col.get("feature") === colName)
-                    .get("data")
-                    .toJS(),
-                colName
-            ])
+            .map(colName => [props.data.find(col => col.feature === colName)?.data, colName])
             .map(([col, name]) => [utils.removeSentinelValues([col], props.fileInfo)[0], name])
     );
 
@@ -174,8 +168,8 @@ function ViolinPlotGraph(props) {
         setChartRevision(revision);
     }
 
-    const featureDisplayNames = props.win.data.features.map(featureName =>
-        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    const featureDisplayNames = props.win.data.features.map(
+        featureName => props.data.find(feature => feature.feature === featureName)?.displayName
     );
 
     const defaultTitle = featureDisplayNames.join(" , ");

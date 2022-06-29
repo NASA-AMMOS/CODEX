@@ -28,6 +28,15 @@ const DEFAULT_ZOOM = 0;
 const DEFAULT_TITLE = "Map Graph";
 const DEFAULT_POINT_SIZE = 4;
 
+function interpretDragMode(dragMode) {
+    switch (dragMode) {
+        case "lasso":
+            return "pan";
+        default:
+            return dragMode;
+    }
+}
+
 function getMapConfig(mapType) {
     switch (mapType) {
         case uiTypes.MAP_USGS:
@@ -89,14 +98,14 @@ function MapGraph(props) {
         [baseCols, bounds]
     );
 
-    const featureDisplayNames = featureList.map(featureName =>
-        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    const featureDisplayNames = featureList.map(
+        featureName => props.data.find(feature => feature.feature === featureName).displayName
     );
 
     const heatMode = featureList.length === 3;
     const zAxisTitle = heatMode
         ? (axisLabels && axisLabels.get(zAxis)) ||
-          props.data.find(feature => feature.get("feature") === featureList[2]).get("displayName")
+          props.data.find(feature => feature.feature === featureList[2]).displayName
         : null;
 
     const baseX =
@@ -201,7 +210,7 @@ function MapGraph(props) {
         data: dataset,
         layout: {
             showlegend: false,
-            dragmode: props.globalChartState || "lasso",
+            dragmode: interpretDragMode(props.globalChartState) || "pan",
             datarevision: chartRevision.current,
             mapbox: {
                 ...getMapConfig(DEFAULT_MAP_TYPE)
@@ -340,7 +349,8 @@ function MapGraph(props) {
 
     useEffect(
         _ => {
-            chartState.layout.dragmode = props.globalChartState;
+            console.log(interpretDragMode(props.globalChartState));
+            chartState.layout.dragmode = interpretDragMode(props.globalChartState);
             updateChartRevision();
         },
         [props.globalChartState]
