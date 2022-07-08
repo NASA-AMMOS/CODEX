@@ -45,7 +45,7 @@
 }
 
 .Panel #content {
-    width: 275px;
+    width: 250px;
     height: 100%;
     display: flex;
     flex-flow: column;
