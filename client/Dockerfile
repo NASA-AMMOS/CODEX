@@ -9,6 +9,10 @@ RUN npm i
 
 # Build frontend
 COPY . /home/codex/client
+
+# package-lock.json that is generated from 'npm i' wont't work, so we have to overwrite it with 
+# the one located at the root of the repo
+COPY ./package-lock.json /home/codex/client/package-lock.json
 RUN npm run build
 CMD node scripts/server.js
 
