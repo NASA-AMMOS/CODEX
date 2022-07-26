@@ -332,7 +332,12 @@ function ContourGraph(props) {
 
     const [sanitizedCols] = useState(_ =>
         utils.removeSentinelValues(
-            featureList.map(colName => props.data.find(col => col.feature === colName)?.data),
+            featureList.map(colName =>
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS()
+            ),
             props.fileInfo
         )
     );
@@ -351,14 +356,14 @@ function ContourGraph(props) {
 
     const xAxisTitle =
         (axisLabels && axisLabels.get(xAxis)) ||
-        props.data.find(feature => feature.feature === featureList[0])?.displayName;
+        props.data.find(feature => feature.get("feature") === featureList[0]).get("displayName");
 
     const yAxisTitle =
         (axisLabels && axisLabels.get(yAxis)) ||
-        props.data.find(feature => feature.feature === featureList[1])?.displayName;
+        props.data.find(feature => feature.get("feature") === featureList[1]).get("displayName");
 
-    const featureDisplayNames = props.win.data.features.map(
-        featureName => props.data.find(feature => feature.feature === featureName)?.displayName
+    const featureDisplayNames = props.win.data.features.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
     );
 
     const [chartRevision, setChartRevision] = useState(0);

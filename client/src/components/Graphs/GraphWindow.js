@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
 import { useGlobalChartState } from "../../hooks/UIHooks";
@@ -8,7 +8,6 @@ import {
     useFileInfo,
     useHoveredSelection,
     usePinnedFeatures,
-    useDirectDownsampledFeatures,
     useSavedSelections
 } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
@@ -37,39 +36,22 @@ function GraphWindow(props) {
     const [globalChartState, setGlobalChartState] = useGlobalChartState();
     const [hoverSelection, saveHoverSelection] = useHoveredSelection();
     const fileInfo = useFileInfo();
-    let [features, sel_to_downsample, downsample_to_sel] = useDirectDownsampledFeatures(win);
+    let features = usePinnedFeatures(win);
     const [featureNameList] = useFeatureDisplayNames();
 
-    const currentSelectionTranslated = useMemo(
-        () => currentSelection.map(sel_to_downsample).filter(e => e !== null),
-        [currentSelection]
-    );
-
-    const savedSelectionsTranslated = useMemo(
-        () =>
-            savedSelections.map(sel => ({
-                ...sel,
-                rowIndices: sel.rowIndices.map(sel_to_downsample).filter(e => e !== null)
-            })),
-        [savedSelections]
-    );
-
-    const setCurrentSelectionTranslated = arr => setCurrentSelection(arr.map(downsample_to_sel));
-
-    if (features === null) {
+    if (features === null || !win.data) {
         return <WindowCircularProgress />;
     }
 
     features = features.map(feature => {
-        const featureName = featureNameList.get(feature.feature, feature.feature);
-        feature.displayName = featureName;
-        return feature;
+        const featureName = featureNameList.get(feature.get("feature"), feature.get("feature"));
+        return feature.set("displayName", featureName);
     });
 
     const baseProps = {
-        currentSelection: currentSelectionTranslated,
-        setCurrentSelection: setCurrentSelectionTranslated,
-        savedSelections: savedSelectionsTranslated,
+        currentSelection: currentSelection,
+        setCurrentSelection: setCurrentSelection,
+        savedSelections: savedSelections,
         saveCurrentSelection: saveCurrentSelection,
         hoverSelection: hoverSelection,
         globalChartState: globalChartState,
@@ -82,9 +64,9 @@ function GraphWindow(props) {
     const featuresRequired = windowTypes.NUM_FEATURES_REQUIRED[props.windowType];
     if (featuresRequired) {
         if (
-            (typeof featuresRequired === "number" && features.length !== featuresRequired) ||
-            features.length < featuresRequired[0] ||
-            features.length > featuresRequired[1]
+            (typeof featuresRequired === "number" && features.size !== featuresRequired) ||
+            features.size < featuresRequired[0] ||
+            features.size > featuresRequired[1]
         )
             return (
                 <WindowError>

@@ -7,7 +7,7 @@ RUN apt-get install -y nginx
 # Install miniconda
 WORKDIR /tmp
 RUN curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-RUN echo "1314b90489f154602fd794accfc90446111514a5a72fe1f71ab83e07de9504a7 Miniconda3-latest-Linux-x86_64.sh" | sha256sum -c
+RUN echo "78f39f9bae971ec1ae7969f0516017f2413f17796670f7040725dd83fcff5689 Miniconda3-latest-Linux-x86_64.sh" | sha256sum -c
 RUN sh Miniconda3-latest-Linux-x86_64.sh -b
 
 # Install server and dependencies

@@ -66,7 +66,7 @@ function makeSelectionShapes(selection, data) {
 }
 
 function BoxPlotGraph(props) {
-    const features = props.data;
+    const features = props.data.toJS();
     const [featuresImmutable] = useWindowFeatureList(props.win.id);
     const featureNames = featuresImmutable.toJS();
     const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
@@ -101,7 +101,13 @@ function BoxPlotGraph(props) {
 
     const [baseCols] = useState(_ => {
         return featureNames
-            .map(colName => [props.data.find(col => col.feature === colName).data, colName])
+            .map(colName => [
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS(),
+                colName
+            ])
             .map(([col, name]) => [utils.removeSentinelValues([col], props.fileInfo)[0], name]);
     });
 
@@ -168,8 +174,8 @@ function BoxPlotGraph(props) {
         setChartRevision(revision);
     }
 
-    const featureDisplayNames = featureNames.map(
-        featureName => props.data.find(feature => feature.feature === featureName).displayName
+    const featureDisplayNames = featureNames.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
     );
 
     function setDefaults(init) {
