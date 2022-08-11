@@ -3,8 +3,12 @@ FROM node:14
 RUN mkdir -p /home/codex/client
 WORKDIR /home/codex/client
 
+RUN apt-get update
+RUN apt-get install -y libxi-dev libgl-dev
+
 # Install dependencies
 COPY package.json /home/codex/client
+RUN npm install -g node-gyp
 RUN npm i
 
 # Build frontend
