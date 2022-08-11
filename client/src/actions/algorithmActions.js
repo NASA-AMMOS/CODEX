@@ -106,7 +106,7 @@ function handleAlgorithmReturn(inMsg, subalgoState, selectedFeatures, dispatch, 
     }
 }
 
-export function runAlgorithm(subalgoState, selectedFeatures, winId) {
+export function runAlgorithm(subalgoState, selectedFeatures, winId, limitState) {
     return (dispatch, getState) => {
         dispatch({ type: actionTypes.CLOSE_WINDOW, id: winId });
 
@@ -146,7 +146,12 @@ export function runAlgorithm(subalgoState, selectedFeatures, winId) {
             selectedFeatures,
             getState().data.get("filename"),
             false,
-            getState().selections.savedSelections,
+            limitState[0].filter === "include"
+                ? [limitState[0].selection.include.name]
+                : limitState[0].filter === "exclude"
+                ? [limitState[0].selection.exclude.name]
+                : [],
+            limitState[0].filter === "exclude",
             inMsg => {
                 clearInterval(loadingTimerInterval);
                 dispatch({ type: actionTypes.CLOSE_WINDOW, id: loadingWindowId });

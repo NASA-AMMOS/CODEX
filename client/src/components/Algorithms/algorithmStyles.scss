@@ -1,7 +1,7 @@
 .preview-title {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin-bottom: 0;
     margin-left: 10px;
 
     .title {
@@ -228,4 +228,8 @@
         overflow: scroll;
         margin-left: 10px;
     }
+}
+
+.selection-limit-panel {
+    margin-bottom: 10px;
 }

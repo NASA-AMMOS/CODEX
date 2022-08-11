@@ -26,8 +26,10 @@ import {
 import { useGlobalChartState } from "../../hooks/UIHooks";
 import HelpContent from "../Help/HelpContent";
 import PlotlyPatched from "../../plotly-patched/src/core";
+import SelectionLimiter from "../SelectionLimiter/SelectionLimiter";
 import plotComponentFactory from "../../react-plotly-patched.js/factory";
 import * as utils from "../../utils/utils";
+import Immutable from "immutable";
 
 const DEFAULT_LINE_COLOR = "#3988E3";
 const DEFAULT_POINT_COLOR = "rgba(0, 0, 0, 0.5)";
@@ -40,7 +42,25 @@ const Plot = plotComponentFactory(PlotlyPatched);
 
 const ALGOS = [{ name: "dtw", displayName: "Dynamic Time Warping" }];
 
-function makeServerRequestObj(algorithmName, features, labelName, activeLabels) {
+function filterFeature(feature, selectionLimits) {
+    const selection =
+        selectionLimits.filter === "include"
+            ? selectionLimits.selection.include
+            : selectionLimits.filter === "exclude"
+            ? selectionLimits.selection.exclude
+            : null;
+    if (!selection) return feature;
+    const newData = feature
+        .get("data")
+        .filter((val, idx) =>
+            selectionLimits.filter === "include"
+                ? selection.rowIndices.includes(idx)
+                : !selection.rowIndices.includes(idx)
+        );
+    return feature.set("data", newData);
+}
+
+function makeServerRequestObj(algorithmName, features, labelName, activeLabels, selectionLimits) {
     return {
         routine: "algorithm",
         algorithmName,
@@ -52,8 +72,14 @@ function makeServerRequestObj(algorithmName, features, labelName, activeLabels) 
         guidance: null,
         identification: { id: "dev0" },
         parameters: { radius: 10, dist: "euclidean" },
-        dataSelections: [],
-        activeLabels
+        dataSelections:
+            selectionLimits.filter === "include"
+                ? [selectionLimits.selection.include.name]
+                : selectionLimits.filter === "exclude"
+                ? [selectionLimits.selection.exclude.name]
+                : [],
+        activeLabels,
+        excludeDataSelections: selectionLimits.filter === "exclude"
     };
 }
 
@@ -180,6 +206,8 @@ function AlgoReturnPreview(props) {
         },
         [returnedSelections]
     );
+
+    useEffect(_ => console.log(props.algo.data), [props.algo.data]);
 
     const [_, createNewSelection] = useSavedSelections();
     function saveScanClick() {
@@ -381,6 +409,19 @@ function FeaturePreview(props) {
 
     useEffect(_ => updateChartRevision(), [props.selectMode[0]]); // Update callback when the select mode changes
 
+    useEffect(
+        _ => {
+            chartState.layout.shapes[0].y0 = min - (max - min) * 0.25;
+            chartState.layout.shapes[0].x1 = data.length;
+            chartState.layout.shapes[0].y1 = min - (max - min) * 0.25;
+            chartState.data[0].x = data.map((_, idx) => idx);
+            chartState.data[0].y = data;
+            chartState.data[0].base = min - 0.1 * min;
+            updateChartRevision();
+        },
+        [props.feature.get("data")]
+    );
+
     const [hoveredSelection, setHoveredSelection] = useState();
     function clearShapeHover() {
         setHoveredSelection();
@@ -534,6 +575,8 @@ function TemplateScanContent(props) {
     // We store the previews in a portal so we don't have to re-render them when the user switches back from help mode
     const previews = React.useMemo(() => portals.createPortalNode(), []);
 
+    const limitState = useState({ filter: null, selection: { include: null, exclude: null } });
+
     // Handle to re-request algo information when selections/parameters have changed
     const [algoData, setAlgoData] = useState(ALGOS);
     useEffect(
@@ -566,7 +609,8 @@ function TemplateScanContent(props) {
                     algo.name,
                     dataFeatures.toJS(),
                     labelName,
-                    activeLabels
+                    activeLabels,
+                    limitState[0]
                 );
                 const { req, cancel } = utils.makeSimpleRequest(reqObj);
                 req.then(data => {
@@ -582,7 +626,7 @@ function TemplateScanContent(props) {
             });
             return _ => handles.forEach(cancel => cancel());
         },
-        [selectionState[0], features.size, excludedFeature]
+        [selectionState[0], features.size, excludedFeature, limitState[0]]
     );
 
     const closeWindow = useCloseWindow(win);
@@ -648,6 +692,7 @@ function TemplateScanContent(props) {
                     </div>
                     {features
                         .filter(feature => feature.get("displayName") !== excludedFeature)
+                        .map(feature => filterFeature(feature, limitState[0]))
                         .map(feature => (
                             <FeaturePreview
                                 feature={feature}

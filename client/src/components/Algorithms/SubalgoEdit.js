@@ -20,7 +20,7 @@ import * as algorithmTypes from "../../constants/algorithmTypes";
 function handleRunAlgorithm(props) {
     // todo: re-enable when we need this
     //if (!props.subalgoState.serverData.eta) return; // Don't run the algorithm until we have a time estimate from the server
-    props.runAlgorithm(props.subalgoState, props.selectedFeatures, props.winId);
+    props.runAlgorithm(props.subalgoState, props.selectedFeatures, props.winId, props.limitState);
 }
 
 function getTitle(props, helpModeState) {
@@ -176,6 +176,7 @@ function SubalgoEdit(props) {
                         paramDispatch={props.paramDispatch}
                         selectedFeatures={props.selectedFeatures}
                         filename={props.filename}
+                        limitState={props.limitState}
                     />
                     <SubalgoOutputParams
                         hidden={

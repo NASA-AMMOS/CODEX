@@ -100,6 +100,7 @@ function SubalgoParams(props) {
     const baseParams = algorithmTypes.SUBALGORITHMS[props.algo].find(
         subalgo => subalgo.simplename === props.subalgoState.name
     ).parameters;
+    const limitState = props.limitState;
 
     const [previewState, previewDispatch] = useReducer(
         subalgoPreviewReducer,
@@ -121,7 +122,12 @@ function SubalgoParams(props) {
                     props.selectedFeatures,
                     props.filename,
                     500,
-                    [],
+                    limitState[0].filter === "include"
+                        ? [limitState[0].selection.include.name]
+                        : limitState[0].filter === "exclude"
+                        ? [limitState[0].selection.exclude.name]
+                        : [],
+                    limitState[0].filter === "exclude",
                     inMsg =>
                         previewDispatch({
                             type: "updateServerData",
