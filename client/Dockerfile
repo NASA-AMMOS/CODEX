@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:16 AS builder
 
 RUN mkdir -p /home/codex/client
 WORKDIR /home/codex/client
@@ -14,6 +14,14 @@ RUN npm i
 COPY . /home/codex/client
 
 RUN npm run build
+
+FROM node:16-alpine
+RUN mkdir -p /home/codex/client/dist
+RUN mkdir /home/codex/client/scripts
+WORKDIR /home/codex/client
+COPY --from=builder /home/codex/client/dist/* /home/codex/client/dist
+COPY scripts/* /home/codex/client/scripts
+RUN npm i express
 CMD node scripts/server.js
 
 EXPOSE 3000
