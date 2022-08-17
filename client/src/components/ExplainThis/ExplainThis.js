@@ -9,7 +9,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Plot from "react-plotly.js";
 import React, { useRef, useState, useEffect } from "react";
 import Select from "@material-ui/core/Select";
-import Slider from "@material-ui/lab/Slider";
+import Slider from "@material-ui/core/Slider";
 import * as d3SC from "d3-scale-chromatic";
 
 import * as d3 from "d3";

@@ -8,7 +8,7 @@ const webpack = require("webpack");
 module.exports = {
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "bundle.js"
+        filename: "bundle.js",
     },
     module: {
         rules: [
@@ -18,48 +18,48 @@ module.exports = {
                 exclude: /node_modules/,
                 use: [
                     {
-                        loader: "babel-loader"
+                        loader: "babel-loader",
                     },
-                    "eslint-loader"
-                ]
+                    "eslint-loader",
+                ],
             },
             {
                 test: /styles\/\.(css|scss)$/,
                 include: [path.resolve(__dirname, "styles")],
-                use: ["@teamsupercell/typings-for-css-modules-loader"]
+                use: ["@teamsupercell/typings-for-css-modules-loader"],
             },
             {
                 test: /\.(css|scss)$/,
-                use: ["style-loader", "css-loader", "sass-loader"]
+                use: ["style-loader", "css-loader", "sass-loader"],
             },
             {
                 test: /\.(png|jpg|gif|eot|ttf|woff|woff2|fnt)$/,
-                loader: "file-loader"
+                loader: "file-loader",
             },
             {
                 test: /\.svg$/,
                 use: [
                     {
-                        loader: "babel-loader"
+                        loader: "babel-loader",
                     },
                     {
                         loader: "react-svg-loader",
                         options: {
-                            jsx: true // true outputs JSX tags
-                        }
-                    }
-                ]
-            }
-        ]
+                            jsx: true, // true outputs JSX tags
+                        },
+                    },
+                ],
+            },
+        ],
     },
     plugins: [
         new HtmlWebpackPlugin({
             inject: true,
-            template: paths.appHtml
+            template: paths.appHtml,
         }),
         new webpack.DefinePlugin({
-            "process.browser": "true"
-        })
+            "process.browser": "true",
+        }),
     ],
     resolve: {
         // modules: [
@@ -67,11 +67,11 @@ module.exports = {
         //     path.resolve("./node_modules"),
         //     path.resolve("./src/react-cristal/src")
         // ],
-        extensions: [".ts", ".tsx", ".js", ".json"]
+        extensions: [".ts", ".tsx", ".js", ".json"],
     },
     node: {
         fs: "empty",
         net: "empty",
-        tls: "empty"
-    }
+        tls: "empty",
+    },
 };

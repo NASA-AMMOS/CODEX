@@ -5,7 +5,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import IconButton from "@material-ui/core/IconButton";
 import Plot from "react-plotly.js";
 import React, { useState, useEffect, useContext, useRef, useMemo } from "react";
-import Slider from "@material-ui/lab/Slider";
+import Slider from "@material-ui/core/Slider";
 import Typography from "@material-ui/core/Typography";
 
 import classnames from "classnames";

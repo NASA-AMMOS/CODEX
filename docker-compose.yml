@@ -8,11 +8,8 @@ services:
     frontend:
         build: "./client"
         restart: "always"
-        platform: "linux/x86_64"
         networks:
             - "codex"
-        environment:
-            - CODEX_SERVER_URL
     webserver:
         image: nginx
         ports:
