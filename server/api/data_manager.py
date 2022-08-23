@@ -169,9 +169,9 @@ def get_data(msg, result):
                 if downsample is not None:
                     array['data'] = simple_downsample(
                         np.array(array['data']), int(downsample))
-                else:
-                    array['data'] = simple_downsample(
-                        np.array(array['data']), 5000)
+                # else:
+                #     array['data'] = simple_downsample(
+                #         np.array(array['data']), 5000)
 
                 data.append(array['data'])
 
