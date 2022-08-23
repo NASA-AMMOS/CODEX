@@ -23,13 +23,13 @@ module.exports = merge(common, {
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
         new webpack.WatchIgnorePlugin([/css\.d\.ts$/]),
-        new webpack.EnvironmentPlugin({ CODEX_SERVER_URL: "http://localhost:8888" }),
+        new webpack.EnvironmentPlugin({ CODEX_SERVER_URL: "http://localhost:8000/server" }),
     ],
     resolve: {
         modules: [
-            path.resolve("./src"),
-            path.resolve("./node_modules"),
-            path.resolve("./src/react-cristal/src"),
+            path.resolve(__dirname, "src/"),
+            "node_modules",
+            path.resolve(__dirname, "src/react-cristal/src/"),
         ],
         extensions: [".ts", ".tsx", ".js", ".json"],
         alias: { "react-dom": "@hot-loader/react-dom" },
