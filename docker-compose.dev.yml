@@ -5,6 +5,8 @@ services:
         restart: "always"
         networks:
             - "codex"
+        volumes:
+            - "./server:/home/codex/server"
     frontend-dev:
         build:
             context: "./client"

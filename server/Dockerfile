@@ -13,6 +13,6 @@ COPY . /home/codex/server
 # Copy service script
 RUN mkdir -p /etc/service/backend
 COPY backend.runit /etc/service/backend/run
-
+ENV PYTHONUNBUFFERED 1
 EXPOSE 8888
-CMD ["conda", "run", "-n", "codex", "python", "/home/codex/server/codex.py"]
+CMD ["conda", "run", "--no-capture-output", "-n", "codex", "python", "-u", "/home/codex/server/codex.py"]
