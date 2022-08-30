@@ -463,7 +463,7 @@ def make_app():
     settings = dict(
         app_name=u"JPL Complex Data Explorer",
         debug=True,
-        autoreload=False,
+        autoreload=True,
         static_path=os.path.join(os.path.dirname(__file__), "static"))
 
     return web.Application([
@@ -500,6 +500,7 @@ if __name__ == '__main__':
     logging.basicConfig(
         filename='logs/{time}.log'.format(time=datetime.datetime.now()),
         level=0)
+    print("CODEX Server Started")
     logging.info("CODEX Server Started")
     logging.info(" ".join(sys.argv))
 

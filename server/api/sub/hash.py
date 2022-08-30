@@ -330,7 +330,8 @@ class CodexHash:
         except BaseException:
             inputArray = string2token(inputArray)
 
-        hashValue = hashlib.sha1(inputArray).hexdigest()
+        # Add feature name to hash calc in case of identical (i.e., all zero) arrays
+        hashValue = hashlib.sha1(inputArray.tostring() + arrayName.encode('utf-8')).hexdigest()
         samples = len(inputArray)
 
         # TODO - better figure out how to calculate RAM usage. Don't think static
