@@ -71,7 +71,8 @@
         "webpack-hot-middleware": "^2.25.0",
         "whatwg-fetch": "2.0.3",
         "worker-loader": "^2.0.0",
-        "workerize": "^0.1.7"
+        "workerize": "^0.1.7",
+        "@types/express-serve-static-core": "4.17.24"
     },
     "scripts": {
         "start": "npm run open:src",
