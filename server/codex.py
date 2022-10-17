@@ -420,6 +420,46 @@ class GenericAPIHandler(tornado.web.RequestHandler):
             }))
 
 
+class AlgorithmAPIHandler(GenericAPIHandler):
+    async def post(self):
+        in_msg = tornado.escape.json_decode(self.request.body)
+        # session = self.get_argument('session', None)
+        # name = self.get_argument('name', None)
+        # print(self.get_argument('algorithmType'))
+
+        if not in_msg.get('sessionkey', None):
+            self.send_failure()
+            return
+
+        resp = await self.make_api_call(in_msg)
+        # resp = await self.make_api_call({
+        #     'routine': 'arrange',
+        #     'activity': 'get',
+        #     'hashType': 'feature',
+        #     'sessionkey': session,
+        #     'downsample': downsample,
+        #     'name': [name]
+        # })
+
+        if not 'data' in resp:
+            self.send_failure()
+            return
+
+        self.write(resp)
+
+    def on_connection_close():
+        print('CONNECTION CLOSED!!!')
+
+        # # we need to reconstruct the numpy array
+        # # even though it's a column vector, it's still contiguous in memory
+        # # so we can just swap here
+        # arr = np.asarray(resp['data'], dtype=np.float32)
+
+        # self.set_header('X-Endianness', sys.byteorder)
+        # self.set_header('X-Data-Type', 'float32')
+        # self.set_header('Content-Type', 'application/octet-stream')
+        # self.write(bytes(arr.data))
+
 class FeatureAPIHandler(GenericAPIHandler):
     async def get(self):
         session = self.get_argument('session', None)
@@ -469,6 +509,7 @@ def make_app():
     return web.Application([
         (r"/", MainHandler),
         (r"/api/feature", FeatureAPIHandler),
+        (r"/api/algorithm", AlgorithmAPIHandler),
         (r"/codex", CodexSocket),
         (r"/upload", UploadSocket),
     ], **settings)

@@ -16,8 +16,8 @@ export function createAlgorithm(algoMode) {
                     .data.get("featureList")
                     .filter(f => f.get("selected"))
                     .map(f => f.get("name")),
-                filename: getState().data.get("filename")
-            }
+                filename: getState().data.get("filename"),
+            },
         });
     };
 }
@@ -52,7 +52,7 @@ function handleAlgorithmReturn(inMsg, subalgoState, selectedFeatures, dispatch, 
         const info = {
             algorithm: subalgoState.serverData.algorithm,
             ...subalgoState.parameters,
-            features_used: selectedFeatures.toJS()
+            features_used: selectedFeatures.toJS(),
         };
 
         //create a group with a unique name
@@ -100,7 +100,7 @@ function handleAlgorithmReturn(inMsg, subalgoState, selectedFeatures, dispatch, 
         dispatch(
             deferUntilAvailable(features, {
                 type: actionTypes.OPEN_NEW_WINDOW,
-                info: { windowType: SCATTER_GRAPH, data: { features } }
+                info: { windowType: SCATTER_GRAPH, data: { features } },
             })
         );
     }
@@ -111,9 +111,7 @@ export function runAlgorithm(subalgoState, selectedFeatures, winId, limitState) 
         dispatch({ type: actionTypes.CLOSE_WINDOW, id: winId });
 
         // Give our new loading "window" an ID
-        const loadingWindowId = Math.random()
-            .toString(36)
-            .substring(7);
+        const loadingWindowId = Math.random().toString(36).substring(7);
 
         dispatch({
             type: actionTypes.OPEN_NEW_WINDOW,
@@ -121,8 +119,8 @@ export function runAlgorithm(subalgoState, selectedFeatures, winId, limitState) 
                 windowType: algorithmTypes.ALGO_LOADING_WINDOW,
                 minimized: true,
                 minimizedOnly: true,
-                id: loadingWindowId
-            }
+                id: loadingWindowId,
+            },
         });
 
         // Right now, the only metric we have of algorithm processing time is the ETA we got from
@@ -134,7 +132,7 @@ export function runAlgorithm(subalgoState, selectedFeatures, winId, limitState) 
                 dispatch({
                     type: actionTypes.UPDATE_WINDOW_INFO,
                     id: loadingWindowId,
-                    info: { loadingSecRemaining: secRemaining || 0 }
+                    info: { loadingSecRemaining: secRemaining || 0 },
                 });
                 return;
             }

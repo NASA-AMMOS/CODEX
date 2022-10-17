@@ -1,3 +1,4 @@
+import urljoin from "url-join";
 import WorkerSocket from "worker-loader!../../workers/socket.worker";
 
 import { getGlobalSessionKey } from "../../utils/utils";
@@ -22,12 +23,12 @@ function buildSubalgoServerRequest(
         sessionkey: getGlobalSessionKey(),
         guidance: null,
         identification: {
-            id: "dev0"
+            id: "dev0",
         },
         parameters,
         dataSelections,
         excludeDataSelections,
-        downsampled
+        downsampled,
     };
 }
 
@@ -56,28 +57,48 @@ export function getSubAlgorithmData(
     );
 
     const requestObject = {};
-    const socketWorker = new WorkerSocket();
-
-    socketWorker.addEventListener("message", e => {
-        const inMsg = JSON.parse(e.data);
-
-        inMsg.algorithmName = request.algorithmName;
-        dataCallback(inMsg);
-    });
-
-    socketWorker.postMessage(
+    console.log(
         JSON.stringify({
             action: actionTypes.GET_ALGORITHM_DATA,
-            request
+            request,
         })
     );
 
+    const SERVER_URL = process.env.CODEX_SERVER_URL || urljoin(self.location.href, "../server");
+
+    const abortController = new AbortController();
+    const algoUrl = SERVER_URL + "/api/algorithm";
+    fetch(algoUrl, {
+        method: "POST",
+        body: JSON.stringify(request),
+        headers: { "Content-type": "application/json" },
+        signal: abortController.signal,
+    })
+        .then(data => data.json())
+        .then(json => {
+            json.algorithmName = request.algorithmName;
+            dataCallback(json);
+        });
+
+    // const socketWorker = new WorkerSocket();
+
+    // socketWorker.addEventListener("message", e => {
+    //     const inMsg = JSON.parse(e.data);
+
+    //     inMsg.algorithmName = request.algorithmName;
+    //     dataCallback(inMsg);
+    // });
+
+    // socketWorker.postMessage(
+    //     JSON.stringify({
+    //         action: actionTypes.GET_ALGORITHM_DATA,
+    //         request
+    //     })
+    // );
+
     requestObject.closeSocket = _ => {
-        socketWorker.postMessage(
-            JSON.stringify({
-                action: actionTypes.CLOSE_SOCKET
-            })
-        );
+        console.log(abortController);
+        abortController.abort();
     };
 
     return requestObject;

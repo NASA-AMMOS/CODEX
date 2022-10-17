@@ -32,3 +32,4 @@ dependencies:
           - pytest-cov==2.7.1
           # - numpy==1.14.3
           - scikit-learn==0.20.3
+          - fastapi==0.83.0
