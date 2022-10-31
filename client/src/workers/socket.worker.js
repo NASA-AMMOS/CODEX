@@ -10,17 +10,15 @@ const SERVER_URL = urljoin(
 let socket;
 
 function handleGraphDataRequest(msg) {
-    const cid = Math.random()
-        .toString(36)
-        .substring(8);
+    const cid = Math.random().toString(36).substring(8);
 
     socket = new WebSocket(SERVER_URL);
 
-    socket.onclose = function() {
+    socket.onclose = function () {
         //console.log("Closed Graph Socket");
     };
 
-    socket.onopen = function() {
+    socket.onopen = function () {
         //console.log("Opened Graph Socket");
         const outMsg = JSON.stringify({
             routine: "arrange",
@@ -28,7 +26,7 @@ function handleGraphDataRequest(msg) {
             sessionkey: msg.sessionkey,
             activity: "get",
             name: msg.selectedFeatures,
-            cid
+            cid,
         });
 
         socket.send(outMsg);
@@ -42,17 +40,15 @@ function handleGraphDataRequest(msg) {
 }
 
 function handleAlgorithmRequest(msg) {
-    const cid = Math.random()
-        .toString(36)
-        .substring(8);
+    const cid = Math.random().toString(36).substring(8);
 
     socket = new WebSocket(SERVER_URL);
 
-    socket.onclose = function() {
+    socket.onclose = function () {
         console.log("Closed Algorithm Socket");
     };
 
-    socket.onopen = function() {
+    socket.onopen = function () {
         console.log("Opened Algorithm Socket");
         msg.request.cid = cid;
         const outMsg = JSON.stringify(msg.request);
@@ -70,21 +66,19 @@ function handleAlgorithmRequest(msg) {
 function handleHelpTextRequest(msg) {
     socket = new WebSocket(SERVER_URL);
 
-    socket.onclose = function() {
+    socket.onclose = function () {
         console.log("Closed Help Text Socket");
     };
 
-    socket.onopen = function() {
+    socket.onopen = function () {
         console.log("Opened Help Text Socket");
-        const cid = Math.random()
-            .toString(36)
-            .substring(8);
+        const cid = Math.random().toString(36).substring(8);
         const outMsg = JSON.stringify({
             routine: "guidance",
             guidance: msg.path,
             sessionkey: msg.sessionkey,
             identification: cid,
-            cid
+            cid,
         });
         socket.send(outMsg);
     };
@@ -100,15 +94,13 @@ function handleHelpTextRequest(msg) {
 function handleSimpleRequest(msg) {
     socket = new WebSocket(SERVER_URL);
 
-    socket.onclose = function() {
+    socket.onclose = function () {
         console.log("Closed Request Socket");
     };
 
-    socket.onopen = function() {
+    socket.onopen = function () {
         console.log("Opened Request Socket");
-        const cid = Math.random()
-            .toString(36)
-            .substring(8);
+        const cid = Math.random().toString(36).substring(8);
         const req = { ...msg.request, cid };
         const outMsg = JSON.stringify(req);
         socket.send(outMsg);
@@ -121,7 +113,7 @@ function handleSimpleRequest(msg) {
     };
 }
 
-self.addEventListener("message", function(e) {
+self.addEventListener("message", function (e) {
     const msg = JSON.parse(e.data);
     switch (msg.action) {
         case types.GET_GRAPH_DATA:

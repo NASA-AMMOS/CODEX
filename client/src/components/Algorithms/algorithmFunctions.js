@@ -10,7 +10,8 @@ function buildSubalgoServerRequest(
     filename,
     parameters,
     downsampled,
-    dataSelections
+    dataSelections,
+    excludeDataSelections
 ) {
     return {
         routine: "algorithm",
@@ -24,7 +25,8 @@ function buildSubalgoServerRequest(
             id: "dev0"
         },
         parameters,
-        dataSelections: [],
+        dataSelections,
+        excludeDataSelections,
         downsampled
     };
 }
@@ -36,6 +38,7 @@ export function getSubAlgorithmData(
     filename,
     downsampled,
     dataSelections,
+    excludeDataSelections,
     dataCallback
 ) {
     const parameters = subalgo.parameters.reduce(
@@ -48,7 +51,8 @@ export function getSubAlgorithmData(
         filename,
         parameters,
         downsampled,
-        dataSelections
+        dataSelections,
+        excludeDataSelections
     );
 
     const requestObject = {};

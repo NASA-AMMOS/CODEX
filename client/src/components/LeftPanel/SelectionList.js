@@ -395,7 +395,12 @@ function SelectionItems(props) {
                             selections.find(x => x.id === sel.id) &&
                             !selections.find(x => x.id === sel.id).groupID
                     )
-                    .map(sel => Object.assign(sel, selections.find(x => x.id === sel.id)))
+                    .map(sel =>
+                        Object.assign(
+                            sel,
+                            selections.find(x => x.id === sel.id)
+                        )
+                    )
                     .concat(
                         selections.filter(
                             sel => !orderedSingletons.find(x => x.id === sel.id) && !sel.groupID
@@ -424,7 +429,12 @@ function SelectionItems(props) {
                         .filter(sel => currentGroupSelections.find(x => x.id === sel.id))
                         .map((
                             sel // Merge current state of the selection with the one we're storing
-                        ) => Object.assign(sel, currentGroupSelections.find(x => x.id === sel.id)))
+                        ) =>
+                            Object.assign(
+                                sel,
+                                currentGroupSelections.find(x => x.id === sel.id)
+                            )
+                        )
                         .concat(
                             currentGroupSelections.filter(
                                 sel => !previousGroupSelections.find(x => x.id === sel.id)
@@ -534,13 +544,17 @@ function SelectionList(props) {
     const shownCount = activeCount;
     const totalCount = selections.length;
 
+    const [selectionEditMode, setSelectionEditMode] = props.selectionEditModeState;
+
     return (
         <React.Fragment>
             <div className="selections">
                 <div className="header stats-hidden-header">
-                    <div className="title">Selections</div>
-                    <span className="counts">
-                        {activeCount}/{shownCount}/{totalCount}
+                    <div className="title">
+                        Selections {activeCount}/{shownCount}/{totalCount}
+                    </div>
+                    <span className="counts" onClick={_ => setSelectionEditMode(mode => !mode)}>
+                        edit
                     </span>
                 </div>
                 <SelectionItems panelCollapsed={props.panelCollapsed} />

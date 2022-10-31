@@ -27,6 +27,7 @@ import {
 } from "../../hooks/DataHooks";
 import { useCloseWindow, useWindowManager } from "../../hooks/WindowHooks";
 import HelpContent from "../Help/HelpContent";
+import SelectionLimiter from "../SelectionLimiter/SelectionLimiter";
 import * as utils from "../../utils/utils";
 
 const GUIDANCE_PATH = "correlation_page:general_correlation";
@@ -35,7 +36,7 @@ const CORRELATION_OPTIONS = [
     { name: "alphabetical", displayName: "Alphabetical" }
 ];
 
-function makeServerRequestObj(algorithmName, features, parameters) {
+function makeServerRequestObj(algorithmName, features, selectionLimits) {
     return {
         routine: "algorithm",
         algorithmName,
@@ -46,7 +47,13 @@ function makeServerRequestObj(algorithmName, features, parameters) {
         guidance: null,
         identification: { id: "dev0" },
         parameters: [],
-        dataSelections: []
+        dataSelections:
+            selectionLimits.filter === "include"
+                ? [selectionLimits.selection.include.name]
+                : selectionLimits.filter === "exclude"
+                ? [selectionLimits.selection.exclude.name]
+                : [],
+        excludeDataSelections: selectionLimits.filter === "exclude"
     };
 }
 
@@ -146,10 +153,11 @@ function CorrelationContent(props) {
     const [groupSelectDialogVisible, setGroupSelectDialogVisible] = groupSelectDialogVisibleState;
     const closeWindow = useCloseWindow(props.win);
     const [helpMode, setHelpMode] = useState(false);
+    const limitState = useState({ filter: null, selection: { include: null, exclude: null } });
     useEffect(
         _ => {
             if (!needsUpdate || !features) return;
-            const requestObj = makeServerRequestObj(currentSortOption, features);
+            const requestObj = makeServerRequestObj(currentSortOption, features, limitState[0]);
             setLastReq(requestObj);
             const { req, cancel } = utils.makeSimpleRequest(requestObj);
             req.then(data => {
@@ -159,6 +167,13 @@ function CorrelationContent(props) {
             return cancel;
         },
         [needsUpdate, currentSortOption, features]
+    );
+
+    useEffect(
+        _ => {
+            setNeedsUpdate(true);
+        },
+        [limitState[0]]
     );
 
     const chart = useRef(null);

@@ -9,7 +9,6 @@ import ReactResizeDetector from "react-resize-detector";
 import * as portals from "react-reverse-portal";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
-import { makeSimpleRequest } from "../../utils/utils";
 import {
     useFeatureDisplayNames,
     useNewFeature,
@@ -18,8 +17,9 @@ import {
 } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
 import HelpContent from "../Help/HelpContent";
+import SelectionLimiter from "../SelectionLimiter/SelectionLimiter";
+import { getMinMax, makeSimpleRequest } from "../../utils/utils";
 import * as wmActions from "../../actions/windowManagerActions";
-import * as utils from "../../utils/utils";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
 const GUIDANCE_PATH = "peak_detection_page:general_peak_detection";
@@ -134,7 +134,7 @@ function PeakPlot(props) {
             </div>
         );
 
-    const [min, max] = utils.getMinMax(props.data);
+    const [min, max] = getMinMax(props.data);
     const chartRevision = useRef(0);
     const [chartState, setChartState] = useState({
         data: [
@@ -366,6 +366,8 @@ function FindPeaksAlgo(props) {
 
     const [indexes, setIndexes] = useState();
 
+    const limitState = useState({ filter: null, selection: { include: null, exclude: null } });
+
     useEffect(
         _ => {
             if (needsUpdate) {
@@ -414,6 +416,9 @@ function FindPeaksAlgo(props) {
                 hidden={props.hidden}
             />
             <div className="peak-detect-control-area">
+                <div className="selection-limit-panel">
+                    <SelectionLimiter limitState={limitState} />
+                </div>
                 <div className="peak-detect-control-row">
                     <Tooltip
                         title={

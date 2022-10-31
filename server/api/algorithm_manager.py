@@ -21,16 +21,17 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 logger = logging.getLogger(__name__)
 
-from api.clustering              import clustering
-from api.dimmension_reduction    import dimension_reduction
-from api.normalize               import normalize
-from api.peak_detection          import peak_detection
-from api.regression              import regression
-from api.template_scan           import template_scan
-from api.correlation             import correlation
+from api.clustering import clustering
+from api.dimmension_reduction import dimension_reduction
+from api.normalize import normalize
+from api.peak_detection import peak_detection
+from api.regression import regression
+from api.template_scan import template_scan
+from api.correlation import correlation
 
-from api.sub.system              import get_featureList
-from api.sub.hash                import get_cache
+from api.sub.system import get_featureList
+from api.sub.hash import get_cache
+
 
 def algorithm_call(msg, result):
     '''
@@ -56,6 +57,8 @@ def algorithm_call(msg, result):
             subsetHashName = subsetHashName[0]
         else:
             subsetHashName = False
+
+        excludeDataSelections = msg.get('excludeDataSelections', False)
 
         try:
             labelName = msg["labelName"]
@@ -83,7 +86,6 @@ def algorithm_call(msg, result):
         except:
             activeLabels = None
 
-
         hashList = ch.feature2hashList(featureList)
 
         data = ch.mergeHashResults(hashList)
@@ -96,37 +98,65 @@ def algorithm_call(msg, result):
             downsampled = int(downsampled)
 
         if (algorithmType == "clustering"):
-            pca = dimension_reduction(inputHash, activeLabels, featureList, hashList, labelHash, subsetHashName, "PCA", downsampled, {"n_components":2}, scoring, search_type, cross_val, result, ch).run()
-            result =       clustering(inputHash, activeLabels, featureList, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+            pca = dimension_reduction(inputHash, activeLabels, featureList,
+                                      hashList, labelHash, subsetHashName,
+                                      "PCA", downsampled, {
+                                          "n_components": 2
+                                      }, scoring, search_type, cross_val,
+                                      result, ch, excludeDataSelections).run()
+            result = clustering(inputHash, activeLabels, featureList, hashList,
+                                labelHash, subsetHashName, algorithmName,
+                                downsampled, parms, scoring, search_type,
+                                cross_val, result, ch,
+                                excludeDataSelections).run()
             result['data'] = pca['data']
 
         elif (algorithmType == "dimensionality_reduction"):
-            result = dimension_reduction(inputHash, activeLabels, featureList, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+            result = dimension_reduction(
+                inputHash, activeLabels, featureList, hashList, labelHash,
+                subsetHashName, algorithmName, downsampled, parms, scoring,
+                search_type, cross_val, result, ch,
+                excludeDataSelections).run()
 
         elif (algorithmType == "normalize"):
-            result = normalize(inputHash, activeLabels, featureList, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+            result = normalize(inputHash, activeLabels, featureList, hashList,
+                               labelHash, subsetHashName, algorithmName,
+                               downsampled, parms, scoring, search_type,
+                               cross_val, result, ch,
+                               excludeDataSelections).run()
 
         elif (algorithmType == "peak_detect"):
-            result = peak_detection(inputHash, activeLabels, featureList, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+            result = peak_detection(inputHash, activeLabels, featureList,
+                                    hashList, labelHash, subsetHashName,
+                                    algorithmName, downsampled, parms, scoring,
+                                    search_type, cross_val, result, ch,
+                                    excludeDataSelections).run()
 
         elif (algorithmType == "regression"):
-            result = regression(inputHash, activeLabels, featureList, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+            result = regression(inputHash, activeLabels, featureList, hashList,
+                                labelHash, subsetHashName, algorithmName,
+                                downsampled, parms, scoring, search_type,
+                                cross_val, result, ch,
+                                excludeDataSelections).run()
 
         elif (algorithmType == "template_scan"):
-            result = template_scan(inputHash, activeLabels, featureList, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+            result = template_scan(inputHash, activeLabels, featureList,
+                                   hashList, labelHash, subsetHashName,
+                                   algorithmName, downsampled, parms, scoring,
+                                   search_type, cross_val, result, ch,
+                                   excludeDataSelections).run()
 
         elif (algorithmType == "correlation"):
-            result = correlation(inputHash, activeLabels, featureList, hashList, labelHash, subsetHashName, algorithmName, downsampled, parms, scoring, search_type, cross_val, result, ch).run()
+            result = correlation(inputHash, activeLabels, featureList,
+                                 hashList, labelHash, subsetHashName,
+                                 algorithmName, downsampled, parms, scoring,
+                                 search_type, cross_val, result, ch,
+                                 excludeDataSelections).run()
 
         else:
             result['message'] = "Cannot parse algorithmType"
-
 
     except:
         logging.warning(traceback.format_exc())
 
     return result
-
-
-
-

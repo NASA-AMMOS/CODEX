@@ -150,3 +150,9 @@
     height: 100%;
     z-index: 1;
 }
+
+.selection-limit-panel {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+}

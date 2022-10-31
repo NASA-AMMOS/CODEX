@@ -1,5 +1,6 @@
 import urljoin from "url-join";
 
+console.log(process.env.CODEX_SERVER_URL);
 const SERVER_URL = urljoin(
     (process.env.CODEX_SERVER_URL || urljoin(self.location.href, "../server"))
         .replace("https", "wss")
@@ -14,7 +15,7 @@ function blobToBase64(blob, callback) {
     let reader = new self.FileReader();
     reader.readAsDataURL(blob);
 
-    reader.onloadend = function() {
+    reader.onloadend = function () {
         callback(null, reader.result);
     };
 }
@@ -26,7 +27,7 @@ function processFile(files, sessionkey) {
     let blob = files[0];
     let buffer;
     let fileReader = new FileReader();
-    fileReader.onload = function() {
+    fileReader.onload = function () {
         buffer = new Buffer(this.result, "binary");
 
         const BYTES_PER_CHUNK = 1024 * 1024;
@@ -42,11 +43,11 @@ function processFile(files, sessionkey) {
             JSON.stringify({
                 filename: blob.name,
                 chunk: "",
-                done: false
+                done: false,
             })
         );
 
-        sock.onmessage = function(e) {
+        sock.onmessage = function (e) {
             const r = JSON.parse(e.data);
             if (r.status === "streaming") {
                 if (start < SIZE) {
@@ -56,13 +57,13 @@ function processFile(files, sessionkey) {
                         JSON.stringify({
                             filename: blob.name,
                             chunk: chunk.toString("base64"),
-                            done: false
+                            done: false,
                         })
                     );
 
                     const outMsg = {
                         status: "uploading " + start / SIZE,
-                        percent: start / SIZE
+                        percent: start / SIZE,
                     };
                     if (
                         start / SIZE - self.lastPercentageStatus >
@@ -79,7 +80,7 @@ function processFile(files, sessionkey) {
                         JSON.stringify({
                             filename: blob.name,
                             sessionkey,
-                            done: true
+                            done: true,
                         })
                     );
                 }
@@ -97,7 +98,7 @@ function processFile(files, sessionkey) {
     //}
 }
 
-self.addEventListener("message", function(e) {
+self.addEventListener("message", function (e) {
     // to try to only send useful updates, we'll only send updates when the the percentage
     // is more than 5% different from the previous value. hence, starting at -5 means that we'll
     // be starting on the leading edge (rather than the trailing edge)
@@ -110,10 +111,10 @@ self.addEventListener("message", function(e) {
     if (files.length > 0) {
         sock = new WebSocket(SERVER_URL);
 
-        sock.onclose = function() {
+        sock.onclose = function () {
             console.log("Closed Upload Socket");
         };
-        sock.onopen = function() {
+        sock.onopen = function () {
             console.log("Opened Upload Socket");
             processFile(files, e.data.sessionkey);
         };

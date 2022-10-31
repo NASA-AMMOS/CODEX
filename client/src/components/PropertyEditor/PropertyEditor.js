@@ -5,9 +5,8 @@ import Button from "@material-ui/core/Button";
 import CheckboxIcon from "@material-ui/icons/CheckBox";
 import CheckboxOutlineBlank from "@material-ui/icons/CheckBoxOutlineBlank";
 import EditIcon from "@material-ui/icons/Edit";
-import Slider from "@material-ui/core/Slider";
 import Immutable from "immutable";
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import TextField from "@material-ui/core/TextField";
 
 import { useFeatureDisplayNames } from "../../hooks/DataHooks";
@@ -27,7 +26,6 @@ import {
     useWindowType,
     useWindowYAxis,
     useWindowZAxis,
-    useWindowDataDownsample,
     useActiveWindow,
     useWindowList,
     useWindowFeatureList,
@@ -39,47 +37,6 @@ import SwapAxesIcon from "../Icons/SwapAxes";
 import * as scatterGraphTypes from "../../constants/scatterGraphTypes";
 import * as uiTypes from "../../constants/uiTypes";
 import * as windowTypes from "../../constants/windowTypes";
-
-function DownsampleSlider(props) {
-    const [downsample, setDownsample, downsampleMax] = useWindowDataDownsample(
-        props.activeWindowId
-    );
-
-    const [sliderVal, setSliderVal] = useState(null);
-
-    if (sliderVal === null && downsample !== 0) {
-        setSliderVal(downsample);
-    }
-
-    const stepSize = Math.min(Math.pow(10, Math.floor(Math.log10(downsampleMax))), 1000);
-
-    const marks = [];
-    if (downsampleMax !== Infinity) {
-        for (let i = 0; i < downsampleMax; i += stepSize) {
-            marks.push({ value: i === 0 ? 1 : i, label: "" });
-        }
-        marks.push({ value: downsampleMax });
-    }
-
-    return (
-        <div className="axis axis__control--paddingright">
-            <label>
-                Downsample ({downsample} / {downsampleMax})
-            </label>
-            <Slider
-                defaultValue={downsample}
-                value={sliderVal === null ? 0 : sliderVal}
-                onChange={(_, val) => setSliderVal(val)}
-                step={null}
-                marks={marks}
-                min={0}
-                max={downsampleMax}
-                onChangeCommitted={() => setDownsample(sliderVal)}
-                valueLabelDisplay="auto"
-            />
-        </div>
-    );
-}
 
 function TrendLineStyle(props) {
     //
@@ -925,7 +882,6 @@ function PropertyEditor(props) {
             case windowTypes.SCATTER_GRAPH:
                 return (
                     <React.Fragment>
-                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <TwoAxisGraphEditor activeWindowId={activeWindowId} />
                         <WindowGraphBounds activeWindowId={activeWindowId} />
                         <ScatterOptionsEditor activeWindowId={activeWindowId} />
@@ -934,7 +890,6 @@ function PropertyEditor(props) {
             case windowTypes.CONTOUR_GRAPH:
                 return (
                     <React.Fragment>
-                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <TwoAxisGraphEditor activeWindowId={activeWindowId} />
                         <WindowGraphBounds activeWindowId={activeWindowId} />
                         <ResetToDefaultsButton activeWindowId={activeWindowId} />
@@ -943,7 +898,6 @@ function PropertyEditor(props) {
             case windowTypes.HEATMAP_GRAPH:
                 return (
                     <React.Fragment>
-                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <HeatmapGraphEditor activeWindowId={activeWindowId} />
                         <WindowGraphBounds activeWindowId={activeWindowId} />
                         <ResetToDefaultsButton activeWindowId={activeWindowId} />
@@ -952,7 +906,6 @@ function PropertyEditor(props) {
             case windowTypes.HEATMAP_3D_GRAPH:
                 return (
                     <React.Fragment>
-                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <ThreeAxisGraphEditor activeWindowId={activeWindowId} />
                         <WindowGraphBounds activeWindowId={activeWindowId} />
                         <ResetToDefaultsButton activeWindowId={activeWindowId} />
@@ -961,7 +914,6 @@ function PropertyEditor(props) {
             case windowTypes.SINGLE_X_MULTIPLE_Y:
                 return (
                     <React.Fragment>
-                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <MultiAxisGraphEditor activeWindowId={activeWindowId} />
                         <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
                         <GridLinesVisibleToggle activeWindowId={activeWindowId} />
@@ -972,7 +924,6 @@ function PropertyEditor(props) {
             case windowTypes.MAP_GRAPH:
                 return (
                     <React.Fragment>
-                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <MapGraphEditor activeWindowId={activeWindowId} />
                         <ResetToDefaultsButton activeWindowId={activeWindowId} />
                     </React.Fragment>
@@ -980,7 +931,6 @@ function PropertyEditor(props) {
             case windowTypes.HISTOGRAM_GRAPH:
                 return (
                     <React.Fragment>
-                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <HistogramGraphEditor activeWindowId={activeWindowId} />
                         <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
                         <ResetToDefaultsButton activeWindowId={activeWindowId} />
@@ -989,7 +939,6 @@ function PropertyEditor(props) {
             case windowTypes.TIME_SERIES_GRAPH:
                 return (
                     <React.Fragment>
-                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
                         <TrendLineStyle activeWindowId={activeWindowId} />
                         <GridLinesVisibleToggle activeWindowId={activeWindowId} />
@@ -1000,7 +949,6 @@ function PropertyEditor(props) {
             case windowTypes.BOX_PLOT_GRAPH:
                 return (
                     <React.Fragment>
-                        <DownsampleSlider activeWindowId={activeWindowId} />
                         <MultipleWindowGraphBounds activeWindowId={activeWindowId} />
                         <ResetToDefaultsButton activeWindowId={activeWindowId} />
                     </React.Fragment>

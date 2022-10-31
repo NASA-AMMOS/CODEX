@@ -4,28 +4,30 @@ import { Button, IconButton } from "@material-ui/core";
 import { useDispatch } from "react-redux";
 import HelpIcon from "@material-ui/icons/Help";
 import Plot from "react-plotly.js";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import * as portals from "react-reverse-portal";
 
 import classnames from "classnames";
 
 import { WindowCircularProgress } from "../WindowHelpers/WindowCenter";
-import { makeSimpleRequest, removeSentinelValuesRevised } from "../../utils/utils";
+import { getMinMax, makeSimpleRequest, removeSentinelValuesRevised } from "../../utils/utils";
 import {
     useFeatureDisplayNames,
     useFileInfo,
     useNewFeature,
-    usePinnedFeatures
+    usePinnedFeatures,
+    useSavedSelections
 } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
 import HelpContent from "../Help/HelpContent";
+import SelectionLimiter from "../SelectionLimiter/SelectionLimiter";
 import * as wmActions from "../../actions/windowManagerActions";
-import * as portals from "react-reverse-portal";
-import * as utils from "../../utils/utils";
+import Immutable from "immutable";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
 const GUIDANCE_PATH = "normalization_page:general_normalization";
 
-function makeServerRequestObj(algorithmName, feature) {
+function makeServerRequestObj(algorithmName, feature, selectionLimits) {
     return {
         routine: "algorithm",
         algorithmName,
@@ -36,7 +38,13 @@ function makeServerRequestObj(algorithmName, feature) {
         guidance: null,
         identification: { id: "dev0" },
         parameters: {},
-        dataSelections: []
+        dataSelections:
+            selectionLimits.filter === "include"
+                ? [selectionLimits.selection.include.name]
+                : selectionLimits.filter === "exclude"
+                ? [selectionLimits.selection.exclude.name]
+                : [],
+        excludeDataSelections: selectionLimits.filter === "exclude"
     };
 }
 
@@ -53,7 +61,7 @@ function PreviewPlot(props) {
 
     const [hover, setHover] = useState(false);
 
-    const [min, max] = utils.getMinMax(props.data).map(val => val.toFixed(2));
+    const [min, max] = getMinMax(props.data).map(val => val.toFixed(2));
 
     const chartRevision = useRef(0);
     const [chartState, setChartState] = useState({
@@ -115,6 +123,15 @@ function PreviewPlot(props) {
         [props.maxYValue]
     );
 
+    useEffect(
+        _ => {
+            chartState.data[0].x = props.data;
+            chartState.data[0].marker.color = props.data.map((val, idx) => DEFAULT_POINT_COLOR);
+            updateChartRevision();
+        },
+        [props.data]
+    );
+
     const containerClass = classnames({
         "normalize-plot-container": true,
         selected: props.selected
@@ -149,10 +166,41 @@ function PreviewPlot(props) {
 
 function FeatureRow(props) {
     const fileInfo = useFileInfo();
-    const originalData = removeSentinelValuesRevised([props.feature.get("data")], fileInfo);
+    const baseData = useMemo(_ =>
+        removeSentinelValuesRevised([props.feature.get("data")], fileInfo)
+    );
+    const [originalData, setOriginalData] = useState(baseData);
 
     const [selections, setSelections] = props.selectionState;
     const featureState = selections[props.feature.get("feature")];
+    const [savedSelections] = useSavedSelections();
+
+    useEffect(
+        _ => {
+            const selection =
+                props.selectionLimits.filter === "include"
+                    ? props.selectionLimits.selection.include
+                    : props.selectionLimits.filter === "exclude"
+                    ? props.selectionLimits.selection.exclude
+                    : null;
+
+            const filteredOriginalData = (function() {
+                if (!selection) return baseData;
+
+                const dataOut =
+                    props.selectionLimits.filter === "include"
+                        ? selection.rowIndices.map(rowIndex => baseData[0].get(rowIndex))
+                        : baseData[0]
+                              .toJS()
+                              .map((val, idx) => (selection.rowIndices.includes(idx) ? null : val))
+                              .filter(val => val !== null);
+
+                return [Immutable.fromJS(dataOut)];
+            })();
+            setOriginalData(filteredOriginalData);
+        },
+        [props.selectionLimits]
+    );
 
     // Seed state with empty data
     useEffect(_ => {
@@ -167,35 +215,63 @@ function FeatureRow(props) {
     }, []);
 
     // Request standardized and normalized data from server and store it in the state
-    useEffect(_ => {
-        const requestObj = makeServerRequestObj("normalize", props.feature);
-        const { req, cancel } = makeSimpleRequest(requestObj);
-        req.then(data =>
+    useEffect(
+        _ => {
             setSelections(sels => ({
                 ...sels,
                 [props.feature.get("feature")]: {
                     ...sels[props.feature.get("feature")],
-                    normalized: data.scaled.flat()
+                    normalized: null
                 }
-            }))
-        );
-        return _ => cancel();
-    }, []);
+            }));
+            const requestObj = makeServerRequestObj(
+                "normalize",
+                props.feature,
+                props.selectionLimits
+            );
+            const { req, cancel } = makeSimpleRequest(requestObj);
+            req.then(data =>
+                setSelections(sels => ({
+                    ...sels,
+                    [props.feature.get("feature")]: {
+                        ...sels[props.feature.get("feature")],
+                        normalized: data.scaled.flat()
+                    }
+                }))
+            );
+            return _ => cancel();
+        },
+        [props.selectionLimits]
+    );
 
-    useEffect(_ => {
-        const requestObj = makeServerRequestObj("standardize", props.feature);
-        const { req, cancel } = makeSimpleRequest(requestObj);
-        req.then(data =>
+    useEffect(
+        _ => {
             setSelections(sels => ({
                 ...sels,
                 [props.feature.get("feature")]: {
                     ...sels[props.feature.get("feature")],
-                    standardized: data.scaled.flat()
+                    standardized: null
                 }
-            }))
-        );
-        return _ => cancel();
-    }, []);
+            }));
+            const requestObj = makeServerRequestObj(
+                "standardize",
+                props.feature,
+                props.selectionLimits
+            );
+            const { req, cancel } = makeSimpleRequest(requestObj);
+            req.then(data =>
+                setSelections(sels => ({
+                    ...sels,
+                    [props.feature.get("feature")]: {
+                        ...sels[props.feature.get("feature")],
+                        standardized: data.scaled.flat()
+                    }
+                }))
+            );
+            return _ => cancel();
+        },
+        [props.selectionLimits]
+    );
 
     function setSelection(val) {
         setSelections(sels => ({
@@ -259,6 +335,8 @@ function Normalization(props) {
     const addNewFeature = useNewFeature();
     const [helpMode, setHelpMode] = useState(false);
 
+    const limitState = useState({ filter: null, selection: { include: null, exclude: null } });
+
     // We store the previews in a portal so we don't have to re-render them when the user switches back from help mode
     const previews = React.useMemo(() => portals.createPortalNode(), []);
 
@@ -316,6 +394,9 @@ function Normalization(props) {
                     <Button onClick={globalSelect(1)}>set all normalized</Button>
                     <Button onClick={globalSelect(2)}>set all standardized</Button>
                 </div>
+                <div className="selection-limit-panel">
+                    <SelectionLimiter limitState={limitState} />
+                </div>
             </div>
             <portals.InPortal node={previews}>
                 {features.map(feature => (
@@ -323,6 +404,7 @@ function Normalization(props) {
                         key={feature.get("feature")}
                         feature={feature}
                         selectionState={selectionState}
+                        selectionLimits={limitState[0]}
                     />
                 ))}
             </portals.InPortal>

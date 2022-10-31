@@ -1,3 +1,18 @@
 .Table--monospace {
     font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
+
+.swatch {
+    width: 15px;
+    height: 15px;
+    margin: 5px;
+    border-radius: 50%;
+}
+
+.Table--selection-swatches {
+    display: flex;
+}
+
+.selection-limit-panel {
+    margin-bottom: 10px;
+}

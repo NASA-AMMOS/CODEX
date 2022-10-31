@@ -13,6 +13,7 @@ import { WindowXScroller } from "../WindowHelpers/WindowScroller";
 import { useSelectedFeatureNames, useFilename, useNewFeature } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
 import HelpButton from "../WindowHelpers/WindowHelp";
+import SelectionLimiter from "../SelectionLimiter/SelectionLimiter";
 import * as dimensionalityReductionTypes from "../../constants/dimensionalityReductionTypes";
 import * as utils from "../../utils/utils";
 
@@ -21,7 +22,7 @@ import * as utils from "../../utils/utils";
  * @param state current state
  * @return tuple of (requests, runParams)
  */
-async function createAllDrRequests(selectedFeatures, filename) {
+async function createAllDrRequests(selectedFeatures, filename, selectionLimits) {
     selectedFeatures = selectedFeatures.toJS();
 
     // create all the requests
@@ -39,7 +40,7 @@ async function createAllDrRequests(selectedFeatures, filename) {
             )
         };
     })
-        .map(drstate => createDrRequest(filename, selectedFeatures, drstate))
+        .map(drstate => createDrRequest(filename, selectedFeatures, drstate, selectionLimits))
         .map(request => {
             const { req, cancel } = utils.makeSimpleRequest(request);
             return { req, cancel, requestObj: request };
@@ -52,7 +53,7 @@ async function createAllDrRequests(selectedFeatures, filename) {
 }
 
 // Creates a request object for a regression run that can be converted to JSON and sent to the server.
-function createDrRequest(filename, selectedFeatures, drstate) {
+function createDrRequest(filename, selectedFeatures, drstate, selectionLimits) {
     return {
         routine: "algorithm",
         algorithmName: drstate.name,
@@ -61,8 +62,14 @@ function createDrRequest(filename, selectedFeatures, drstate) {
         filename,
         identification: { id: "dev0" },
         parameters: { [drstate.paramData[0].name]: drstate.paramData[0].subParams[0].value }, // UGH! This is really hacky and should be fixed when we refactor all these algo functions.
-        dataSelections: [],
-        downsampled: false
+        dataSelections:
+            selectionLimits.filter === "include"
+                ? [selectionLimits.selection.include.name]
+                : selectionLimits.filter === "exclude"
+                ? [selectionLimits.selection.exclude.name]
+                : [],
+        downsampled: false,
+        excludeDataSelections: selectionLimits.filter === "exclude"
     };
 }
 
@@ -171,30 +178,33 @@ function DimensionalityReductionResults(props) {
         );
     }
 
-    useEffect(_ => {
-        // As each request promise resolves with server data, update the state.
-        props.requests.forEach(request => {
-            request.req.then(data => {
-                setAlgoStates(
-                    algoStates.map(algo =>
-                        algo.algorithmName === data.algorithmName
-                            ? Object.assign(algo, { data })
-                            : algo
-                    )
-                );
-                //update the redux feature state with the new data
-                //this is subject to change
-                //let featureName = data.algorithm;
-                //let featureData = data.data;
-                //props.featureAdd(featureName, featureData);
+    useEffect(
+        _ => {
+            // As each request promise resolves with server data, update the state.
+            props.requests.forEach(request => {
+                request.req.then(data => {
+                    setAlgoStates(
+                        algoStates.map(algo =>
+                            algo.algorithmName === data.algorithmName
+                                ? Object.assign(algo, { data })
+                                : algo
+                        )
+                    );
+                    //update the redux feature state with the new data
+                    //this is subject to change
+                    //let featureName = data.algorithm;
+                    //let featureData = data.data;
+                    //props.featureAdd(featureName, featureData);
+                });
             });
-        });
 
-        // If the window is closed before the requests have all resolved, cancel all of them.
-        return function cleanup() {
-            props.requests.map(({ cancel }) => cancel());
-        };
-    }, []);
+            // If the window is closed before the requests have all resolved, cancel all of them.
+            return function cleanup() {
+                props.requests.map(({ cancel }) => cancel());
+            };
+        },
+        [props.requests]
+    );
 
     // State getter and setter for the list of currently selected drs
     const [selectedAlgos, setSelectedAlgos] = useState([]);
@@ -277,6 +287,7 @@ const DimensionalityReduction = props => {
     const [selectedFeatures, setSelectedFeatures] = useSelectedFeatureNames();
     const filename = useFilename();
     const featureAdd = useNewFeature();
+    const limitState = useState({ filter: null, selection: { include: null, exclude: null } });
 
     // wrap the request creation
     useEffect(() => {
@@ -284,8 +295,8 @@ const DimensionalityReduction = props => {
             setCurrentError("Dimensionality reduction requires at least two selected features!");
             return;
         }
-        createAllDrRequests(selectedFeatures, filename).then(r => setIsResolved(r));
-    }, []);
+        createAllDrRequests(selectedFeatures, filename, limitState[0]).then(r => setIsResolved(r));
+    }, [limitState[0]]);
 
     if (currentError !== null) {
         return <WindowError>{currentError}</WindowError>;
@@ -296,16 +307,18 @@ const DimensionalityReduction = props => {
         const getVectorFromSlider = a => a.data.data.map(r => r[a.sliderVal - 1]);
 
         return (
-            <DimensionalityReductionResults
-                requests={requests}
-                runParams={runParams}
-                featureAdd={a => {
-                    featureAdd(
-                        `${a.data.algorithm}_${selectedFeatures.join("_")}/${a.sliderVal}`,
-                        getVectorFromSlider(a)
-                    );
-                }}
-            />
+            <React.Fragment>
+                <DimensionalityReductionResults
+                    requests={requests}
+                    runParams={runParams}
+                    featureAdd={a => {
+                        featureAdd(
+                            `${a.data.algorithm}_${selectedFeatures.join("_")}/${a.sliderVal}`,
+                            getVectorFromSlider(a)
+                        );
+                    }}
+                />
+            </React.Fragment>
         );
     }
 };

@@ -1,3 +1,6 @@
+@import "../../styles/theme.scss";
+@import "../../styles/fonts.css";
+
 .top-bar {
     color: white;
     width: 100%;
@@ -30,24 +33,76 @@
 }
 
 .navigation-bar .dropdownMain {
+    color: $grey9 !important;
+
     margin-left: 0px;
 }
+
+.navigation-bar .dropdownMain:hover {
+    background-color: $light-blue-black !important;
+}
+
+.navigation-bar .dropdownMain:active {
+    background-color: $light-blue-black !important;
+}
+
 .navigation-bar .dropdownMain.right > div {
     right: 0;
     left: unset;
 }
 .navigation-bar .dropdownToggle {
-    color: white;
+    color: $grey9 !important;
+    background: transparent;
+    background-color: transparent !important;
     border-radius: 0;
     border: none;
-    background: transparent;
 }
+
 .navigation-bar .dropdownToggle.thin {
     padding-left: 2px;
     padding-right: 2px;
 }
+
 .navigation-bar .dropdownToggle > span {
     border-top: 4px dashed #fff;
+}
+
+.navigation-bar .dropdownToggle:hover {
+    color: $grey9 !important;
+    background-color: $light-blue-black !important;
+    border: none;
+}
+
+.navigation-bar .dropdownToggle:focus {
+    color: $grey9 !important;
+    background-color: $light-blue-black !important;
+    border: none;
+}
+
+.navigation-bar .dropdownToggle:active {
+    color: $grey9 !important;
+    background-color: $light-blue-black !important;
+    border: none;
+}
+
+.dropdownMain .actionMenu {
+    background-color: $light-blue-black !important;
+    border: none;
+}
+
+.dropdown .actionMenuItem {
+    color: $grey9 !important;
+    background-color: $light-blue-black !important;
+}
+
+.dropdown .actionMenuItem:hover {
+    color: $grey9 !important;
+    background-color: $primary-blue !important;
+}
+
+.dropdown .actionMenuItem:disabled {
+    color: $grey3 !important;
+    background-color: $light-blue-black !important;
 }
 
 .navigation-bar .triTopLeft {

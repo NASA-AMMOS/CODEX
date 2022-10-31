@@ -6,9 +6,10 @@ import IconButton from "@material-ui/core/IconButton";
 import React, { useState, useEffect, useReducer } from "react";
 
 import { getSubAlgorithmData } from "./algorithmFunctions";
-import { useSelectedFeatureNames, useFilename } from "../../hooks/DataHooks";
+import { useFilename, useSavedSelections, useSelectedFeatureNames } from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
 import AlgorithmHelpContent from "./AlgorithmHelpContent";
+import SelectionLimiter from "../SelectionLimiter/SelectionLimiter";
 import SubalgoChart from "./SubalgoChart";
 import SubalgoEdit from "./SubalgoEdit";
 import * as algorithmTypes from "../../constants/algorithmTypes";
@@ -126,16 +127,18 @@ function getSubalgoPreviews(subalgoStates, subalgoStatesDispatch) {
 function ClusterAlgorithm(props) {
     const win = useWindowManager(props, {
         width: 900,
-        height: 600,
+        height: 650,
         isResizable: false,
         title: "Algorithm: Cluster"
     });
 
     const filename = useFilename();
     const [selectedFeatures, _] = useSelectedFeatureNames();
+    const [selections] = useSavedSelections();
 
     const algorithm = algorithmTypes.CLUSTER_ALGORITHM;
     const algoVerb = "clustering";
+    const limitState = useState({ filter: null, selection: { include: null, exclude: null } });
 
     // SUBALGORITHM STATE MANAGEMENT
 
@@ -147,26 +150,35 @@ function ClusterAlgorithm(props) {
 
     // Initial render routine to get data from the backend for each subalgorithm. State is updated as data comes in.
     // A reference to the socket connection is stored in the state for each subalgo.
-    useEffect(_ => {
-        subalgoStates.forEach(subalgo => {
-            const socket = getSubAlgorithmData(
-                subalgo,
-                selectedFeatures,
-                filename,
-                500,
-                [],
-                inMsg => {
-                    subalgoStatesDispatch({ type: "updateData", inMsg });
-                }
-            );
-            subalgoStatesDispatch({ type: "addSocketHandler", name: subalgo.name, socket });
-        });
+    useEffect(
+        _ => {
+            subalgoStates.forEach(subalgo => {
+                subalgoStatesDispatch({ type: "refreshPending", name: subalgo.name });
+                const socket = getSubAlgorithmData(
+                    subalgo,
+                    selectedFeatures,
+                    filename,
+                    500,
+                    limitState[0].filter === "include"
+                        ? [limitState[0].selection.include.name]
+                        : limitState[0].filter === "exclude"
+                        ? [limitState[0].selection.exclude.name]
+                        : [],
+                    limitState[0].filter === "exclude",
+                    inMsg => {
+                        subalgoStatesDispatch({ type: "updateData", inMsg });
+                    }
+                );
+                subalgoStatesDispatch({ type: "addSocketHandler", name: subalgo.name, socket });
+            });
 
-        // This cleanup function will fire when the component unloads, closing any in-progress socket connections
-        return _ => {
-            subalgoStates.forEach(subalgo => subalgo.socket.closeSocket());
-        };
-    }, []); // Only run this call once, on component load.
+            // This cleanup function will fire when the component unloads, closing any in-progress socket connections
+            return _ => {
+                subalgoStates.forEach(subalgo => subalgo.socket.closeSocket());
+            };
+        },
+        [limitState[0]]
+    ); // Only run this call once, on component load.
 
     // Routine to update a subalgo preview if a user has changed any of the parameters
     // (these changes are initiated in the lower subalgo components but we want to show those changes in the overview window too)
@@ -181,7 +193,12 @@ function ClusterAlgorithm(props) {
                     selectedFeatures,
                     filename,
                     500,
-                    [],
+                    limitState[0].filter === "include"
+                        ? [limitState[0].selection.include.name]
+                        : limitState[0].filter === "exclude"
+                        ? [limitState[0].selection.exclude.name]
+                        : [],
+                    limitState[0].filter === "exclude",
                     inMsg => {
                         subalgoStatesDispatch({ type: "updateData", inMsg });
                     }
@@ -212,6 +229,9 @@ function ClusterAlgorithm(props) {
                 hidden={!helpModeState}
                 guidancePath={`${algoVerb}_page:general_${algoVerb}`}
             />
+            <div className="selection-limit-panel">
+                <SelectionLimiter limitState={limitState} />
+            </div>
             {!selectedSubalgo && getSubalgoPreviews(subalgoStates, subalgoStatesDispatch)}
             <div className="subalgo-focus" hidden={!selectedSubalgo}>
                 {!selectedSubalgo ? null : (
@@ -223,6 +243,7 @@ function ClusterAlgorithm(props) {
                         selectedFeatures={selectedFeatures}
                         filename={filename}
                         winId={props.winId}
+                        limitState={limitState}
                     />
                 )}
             </div>

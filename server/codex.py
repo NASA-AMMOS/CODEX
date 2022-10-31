@@ -41,8 +41,6 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 logger = logging.getLogger(__name__)
 
-assert 'api' in os.listdir(CODEX_ROOT), 'The environment variable `CODEX_ROOT` must be set to the server directory prior to starting the server'
-
 # CODEX
 from api.workflow_manager import workflow_call
 from api.algorithm_manager import algorithm_call
@@ -465,7 +463,7 @@ def make_app():
     settings = dict(
         app_name=u"JPL Complex Data Explorer",
         debug=True,
-        autoreload=False,
+        autoreload=True,
         static_path=os.path.join(os.path.dirname(__file__), "static"))
 
     return web.Application([
@@ -496,10 +494,13 @@ if __name__ == '__main__':
 
     initialize_auditor()
 
-    if not os.path.exists(f'{CODEX_ROOT}/logs'):
-        os.makedirs(f'{CODEX_ROOT}/logs')
+    if not os.path.exists("logs/"):
+        os.makedirs("logs/")
 
-    logging.basicConfig(filename=f'{CODEX_ROOT}/logs/{datetime.datetime.now()}.log', level=0)
+    logging.basicConfig(
+        filename='logs/{time}.log'.format(time=datetime.datetime.now()),
+        level=0)
+    print("CODEX Server Started")
     logging.info("CODEX Server Started")
     logging.info(" ".join(sys.argv))
 

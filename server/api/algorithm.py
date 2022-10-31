@@ -37,7 +37,8 @@ from api.sub.hash import get_cache
 class algorithm():
     def __init__(self, inputHash, activeLabels, featureList, hashList,
                  labelHash, subsetHashName, algorithmName, downsampled, parms,
-                 scoring, search_type, cross_val, result, session):
+                 scoring, search_type, cross_val, result, session,
+                 excludeDataSelections):
 
         self.featureList = featureList
         self.inputHash = inputHash
@@ -53,6 +54,7 @@ class algorithm():
         self.search_type = search_type
         self.cross_val = cross_val
         self.activeLabels = activeLabels
+        self.excludeDataSelections = excludeDataSelections
 
     def run(self):
 
@@ -67,7 +69,6 @@ class algorithm():
 
         returnHash = self.cache.findHashArray("hash", self.inputHash,
                                               "feature")
-
         if returnHash is None:
             logging.warning("Input hash not found: {inputHash}".format(
                 inputHash=self.inputHash))
@@ -76,9 +77,6 @@ class algorithm():
                     inputHash=self.inputHash)
             self.result['message'] = "failure"
             return self.result
-
-        logging.info(f'Got hash in {time.time() - startTime}')
-        startTime = time.time()
 
         self.X = returnHash['data']
         if self.X is None:
@@ -91,9 +89,6 @@ class algorithm():
             self.result['message'] = "failure"
             return self.result
 
-        logging.info(f'Checked valid in {time.time() - startTime}')
-        startTime = time.time()
-
         if self.X.ndim == 1:
             full_samples = self.X.shape[0]
             full_features = 1
@@ -104,19 +99,16 @@ class algorithm():
             self.__class__.__name__, self.algorithmName, full_samples,
             full_features)
 
-        logging.info(f'Got estimate in {time.time() - startTime}')
-        startTime = time.time()
-
         if self.subsetHashName is not False:
-            self.X = self.cache.applySubsetMask(self.X, self.subsetHashName)
+            self.X, _ = self.cache.applySubsetMask(
+                self.X,
+                self.subsetHashName,
+                excludeDataSelections=self.excludeDataSelections)
             if (self.X is None):
                 logging.warning("Subset hash not found: {subsetHash}".format(
                     subsetHash=self.subsetHashName))
                 self.result['message'] = "failure"
                 return self.result
-
-        logging.info(f'Got mask in {time.time() - startTime}')
-        startTime = time.time()
 
         if self.downsampled is not False:
             self.X = downsample(
@@ -125,11 +117,7 @@ class algorithm():
                 session=self.cache,
                 algorithm='simple')
             logging.info(
-                "Downsampled to {samples} samples".format(samples=self.X.size))
-
-        logging.info(f'Got downsample in {time.time() - startTime}')
-        startTime = time.time()
-
+                "Downsampled to {samples} samples".format(samples=len(self.X)))
         # TODO - labels are currently cached under features
         if self.labelHash:
             labelHash_dict = self.cache.findHashArray("hash", self.labelHash,
@@ -152,9 +140,6 @@ class algorithm():
         self.X = impute(self.X)
         self.result['data'] = self.X.tolist()
 
-        logging.info(f'Got other stuff in {time.time() - startTime}')
-        startTime = time.time()
-
         self.algorithm = self.get_algorithm()
         if self.algorithm == None:
             self.result['message'] = "failure"
@@ -162,13 +147,7 @@ class algorithm():
                 alg=self.algorithmName)
             return self.result
 
-        logging.info(f'Got algo in {time.time() - startTime}')
-        startTime = time.time()
-
         self.fit_algorithm()
-
-        logging.info(f'Fit algo in {time.time() - startTime}')
-        startTime = time.time()
 
         # TODO - The front end should specify a save name for the model
         model_name = self.algorithmName + "_" + str(random.random())

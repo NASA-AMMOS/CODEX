@@ -13,10 +13,18 @@ import TableHead from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
 import styled from "styled-components";
+import SelectionLimiter from "../SelectionLimiter/SelectionLimiter";
+import Immutable from "immutable";
 
 import { WindowError, WindowCircularProgress } from "../WindowHelpers/WindowCenter";
 import { WindowLayout, FixedContainer, ExpandingContainer } from "../WindowHelpers/WindowLayout";
-import { useFeatureDisplayNames, useFileInfo, useLiveFeatures } from "../../hooks/DataHooks";
+import {
+    useCurrentSelection,
+    useFeatureDisplayNames,
+    useFileInfo,
+    useLiveFeatures,
+    useSavedSelections
+} from "../../hooks/DataHooks";
 import { useWindowManager } from "../../hooks/WindowHooks";
 import * as dataTypes from "../../constants/dataTypes";
 
@@ -80,6 +88,9 @@ const DataTable = props => {
     });
 
     const [featureNameList] = useFeatureDisplayNames();
+    const [selections] = useSavedSelections();
+    const [currentSelection] = useCurrentSelection();
+    const limitState = useState({ filter: null, selection: { include: null, exclude: null } });
 
     // by default, this will render as a row per feature
     const features = useLiveFeatures();
@@ -105,7 +116,22 @@ const DataTable = props => {
         // N-ary zips, we'll have to emulate it by mapping along axis zero
         const cleaned = features
             .map(f => f.get("data"))
-            .map(f => {
+            .map((f, idx) => {
+                f = (function() {
+                    switch (limitState[0].filter) {
+                        case "include":
+                            return Immutable.fromJS(
+                                limitState[0].selection.include.rowIndices.map(idx => f.get(idx))
+                            );
+                        case "exclude":
+                            return f.filter(
+                                (_, idx) =>
+                                    !limitState[0].selection.exclude.rowIndices.includes(idx)
+                            );
+                        default:
+                            return f;
+                    }
+                })();
                 // First check if we even have any sentinel values for this file.
                 if (dataTypes.SENTINEL_KEYS.every(key => !fileInfo[key])) return f;
                 // Check if value is a sentinel and change to descriptive string if so.
@@ -117,13 +143,70 @@ const DataTable = props => {
 
         // this may be inefficient but w/e
         const transposed = cleaned.get(0).map((f, i) => cleaned.map(row => row.get(i)));
-
         return [indices, transposed];
-    }, [features]); // depend on the features list
+    }, [features, limitState]); // depend on the features list
 
     // table setup
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(25);
+
+    const fixedHeadStyle = { backgroundColor: "#fff", position: "sticky", top: 0 };
+
+    // compute the table headers + visible rows
+    const headers = useMemo(
+        _ =>
+            indices
+                ? indices.map(n => (
+                      <TableCell key={n} align="right" style={fixedHeadStyle}>
+                          {featureNameList.get(n, n)}
+                      </TableCell>
+                  ))
+                : [],
+        [selections, indices, currentSelection]
+    );
+
+    const rows = useMemo(
+        _ =>
+            transposed
+                ? transposed
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) // slice to visible
+                      .map((row, idx) => {
+                          let cells = row.map((v, i) => (
+                              <TableCell className="Table--monospace" key={i} align="right">
+                                  {v}
+                              </TableCell>
+                          ));
+
+                          return (
+                              <TableRow key={idx}>
+                                  {selections.length ? (
+                                      <TableCell className="Table--monospace" align="left">
+                                          <div style={{ display: "flex" }}>
+                                              {currentSelection.includes(idx) ? (
+                                                  <div
+                                                      className="swatch"
+                                                      style={{ backgroundColor: "red" }}
+                                                  />
+                                              ) : null}
+                                              {selections.map(sel =>
+                                                  sel.rowIndices.find(i => i === idx) ? (
+                                                      <div
+                                                          className="swatch"
+                                                          style={{ backgroundColor: sel.color }}
+                                                      />
+                                                  ) : null
+                                              )}
+                                          </div>
+                                      </TableCell>
+                                  ) : null}
+                                  <TableCell>{page * rowsPerPage + idx}</TableCell>
+                                  {cells}
+                              </TableRow>
+                          );
+                      })
+                : null,
+        [selections, transposed, currentSelection]
+    );
 
     //  ---- NO MORE HOOKS BEYOND THIS POINT ----
 
@@ -142,38 +225,19 @@ const DataTable = props => {
     const handleChangePage = (event, newPage) => setPage(newPage);
     const handleChangeRowsPerPage = event => setRowsPerPage(parseInt(event.target.value, 25));
 
-    const fixedHeadStyle = { backgroundColor: "#fff", position: "sticky", top: 0 };
-
-    // compute the table headers + visible rows
-    const headers = indices.map(n => (
-        <TableCell key={n} align="right" style={fixedHeadStyle}>
-            {featureNameList.get(n, n)}
-        </TableCell>
-    ));
-    const rows = transposed
-        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) // slice to visible
-        .map((row, idx) => {
-            let cells = row.map((v, i) => (
-                <TableCell className="Table--monospace" key={i} align="right">
-                    {v}
-                </TableCell>
-            ));
-
-            return (
-                <TableRow key={idx}>
-                    <TableCell>{page * rowsPerPage + idx}</TableCell>
-                    {cells}
-                </TableRow>
-            );
-        });
-
     // final render: nested flex layout
     return (
         <WindowLayout direction="column">
+            <div className="selection-limit-panel">
+                <SelectionLimiter limitState={limitState} />
+            </div>
             <ExpandingContainer scrollable={true}>
                 <Table size={"small"}>
                     <TableHead>
                         <TableRow>
+                            {selections.length ? (
+                                <TableCell style={fixedHeadStyle}>Selections</TableCell>
+                            ) : null}
                             <TableCell style={fixedHeadStyle}>Index</TableCell>
                             {headers}
                         </TableRow>

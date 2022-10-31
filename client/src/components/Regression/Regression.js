@@ -8,11 +8,11 @@ import ReactResizeDetector from "react-resize-detector";
 import * as portals from "react-reverse-portal";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
-import { makeSimpleRequest, zip } from "../../utils/utils";
+import { getMinMax, makeSimpleRequest, zip } from "../../utils/utils";
 import { useFeatureDisplayNames, usePinnedFeatures } from "../../hooks/DataHooks";
 import { useWindowManager, useCloseWindow } from "../../hooks/WindowHooks";
 import HelpContent from "../Help/HelpContent";
-import * as utils from "../../utils/utils";
+import SelectionLimiter from "../SelectionLimiter/SelectionLimiter";
 
 const DEFAULT_POINT_COLOR = "#3988E3";
 const GUIDANCE_PATH = "regression_page:general_regression";
@@ -112,7 +112,7 @@ const RANDOM_FOREST_REGRESSOR_PARAMS = [
     }
 ];
 
-function makeServerRequestObj(algorithmName, features, parameters, labelName) {
+function makeServerRequestObj(algorithmName, features, parameters, labelName, selectionLimits) {
     return {
         routine: "algorithm",
         algorithmName,
@@ -126,11 +126,17 @@ function makeServerRequestObj(algorithmName, features, parameters, labelName) {
             acc[param.name] = param.value !== "" ? param.value : null; // Turn empty strings to nulls
             return acc;
         }, {}),
-        dataSelections: [],
+        dataSelections:
+            selectionLimits.filter === "include"
+                ? [selectionLimits.selection.include.name]
+                : selectionLimits.filter === "exclude"
+                ? [selectionLimits.selection.exclude.name]
+                : [],
         labelName,
         scoring: "r2",
         cross_val: null,
-        search_type: "direct"
+        search_type: "direct",
+        excludeDataSelections: selectionLimits.filter === "exclude"
     };
 }
 
@@ -153,7 +159,7 @@ function TrendPlot(props) {
     const [showFeatureImportance, setShowFeatureImportance] = useState(false);
     const chartRevision = useRef(0);
     const [x, y] = useMemo(_ => zip(props.data.data), [props.data.data]);
-    const [_, max] = useMemo(_ => utils.getMinMax(props.data.y_pred), [props.data.y_pred]);
+    const [_, max] = useMemo(_ => getMinMax(props.data.y_pred), [props.data.y_pred]);
     const [chartState, setChartState] = useState(_ => ({
         data: [
             {
@@ -445,6 +451,7 @@ function DecisionTreeRegressorAlgo(props) {
     const algoAPIName = "DecisionTreeRegressor";
     const [needsUpdate, setNeedsUpdate] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [selectionLimits] = props.limitState;
 
     const paramState = useState(
         DECISION_TREE_REGRESSOR_PARAMS.map(param =>
@@ -468,7 +475,8 @@ function DecisionTreeRegressorAlgo(props) {
                         .toJS()
                         .filter(feature => feature.feature !== props.targetFeature),
                     paramState[0],
-                    props.targetFeature
+                    props.targetFeature,
+                    selectionLimits
                 );
 
                 const { req, cancel } = makeSimpleRequest(requestObj);
@@ -496,6 +504,14 @@ function DecisionTreeRegressorAlgo(props) {
             return _ => clearTimeout(timeout.current);
         },
         [paramState[0], props.targetFeature]
+    );
+
+    useEffect(
+        _ => {
+            setNeedsUpdate(true);
+            setIsUpdating(true);
+        },
+        [selectionLimits]
     );
 
     return (
@@ -529,6 +545,7 @@ function KNeighborsRegressorAlgo(props) {
     const algoAPIName = "KNeighborsRegressor";
     const [needsUpdate, setNeedsUpdate] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [selectionLimits] = props.limitState;
 
     const paramState = useState(
         K_NEIGHBORS_REGRESSOR_PARAMS.map(param =>
@@ -552,7 +569,8 @@ function KNeighborsRegressorAlgo(props) {
                         .toJS()
                         .filter(feature => feature.feature !== props.targetFeature),
                     paramState[0],
-                    props.targetFeature
+                    props.targetFeature,
+                    selectionLimits
                 );
 
                 const { req, cancel } = makeSimpleRequest(requestObj);
@@ -581,6 +599,8 @@ function KNeighborsRegressorAlgo(props) {
         },
         [paramState[0], props.targetFeature]
     );
+
+    useEffect(_ => setNeedsUpdate(true), [selectionLimits]);
 
     return (
         <Paper className="regression-algo-container">
@@ -614,6 +634,7 @@ function LinearRegressorAlgo(props) {
     const algoAPIName = "LinearRegression";
     const [needsUpdate, setNeedsUpdate] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [selectionLimits] = props.limitState;
 
     const paramState = useState(LINEAR_REGRESSOR_PARAMS);
 
@@ -628,7 +649,8 @@ function LinearRegressorAlgo(props) {
                         .toJS()
                         .filter(feature => feature.feature !== props.targetFeature),
                     paramState[0],
-                    props.targetFeature
+                    props.targetFeature,
+                    selectionLimits
                 );
 
                 const { req, cancel } = makeSimpleRequest(requestObj);
@@ -657,6 +679,8 @@ function LinearRegressorAlgo(props) {
         },
         [paramState[0], props.targetFeature]
     );
+
+    useEffect(_ => setNeedsUpdate(true), [selectionLimits]);
 
     return (
         <Paper className="regression-algo-container">
@@ -688,6 +712,7 @@ function RandomForestRegressorAlgo(props) {
     const algoAPIName = "RandomForestRegressor";
     const [needsUpdate, setNeedsUpdate] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [selectionLimits] = props.limitState;
 
     const paramState = useState(
         RANDOM_FOREST_REGRESSOR_PARAMS.map(param => {
@@ -717,7 +742,8 @@ function RandomForestRegressorAlgo(props) {
                         .toJS()
                         .filter(feature => feature.feature !== props.targetFeature),
                     paramState[0],
-                    props.targetFeature
+                    props.targetFeature,
+                    selectionLimits
                 );
 
                 const { req, cancel } = makeSimpleRequest(requestObj);
@@ -746,6 +772,8 @@ function RandomForestRegressorAlgo(props) {
         },
         [paramState[0], props.targetFeature]
     );
+
+    useEffect(_ => setNeedsUpdate(true), [selectionLimits]);
 
     return (
         <Paper className="regression-algo-container">
@@ -805,6 +833,7 @@ function Regression(props) {
         },
         [features]
     );
+    const limitState = useState({ filter: null, selection: { include: null, exclude: null } });
 
     if (features === null || !win.data) {
         return <WindowCircularProgress />;
@@ -862,15 +891,22 @@ function Regression(props) {
                         <DecisionTreeRegressorAlgo
                             features={features}
                             targetFeature={targetFeature}
+                            limitState={limitState}
                         />
                         <KNeighborsRegressorAlgo
                             features={features}
                             targetFeature={targetFeature}
+                            limitState={limitState}
                         />
-                        <LinearRegressorAlgo features={features} targetFeature={targetFeature} />
+                        <LinearRegressorAlgo
+                            features={features}
+                            targetFeature={targetFeature}
+                            limitState={limitState}
+                        />
                         <RandomForestRegressorAlgo
                             features={features}
                             targetFeature={targetFeature}
+                            limitState={limitState}
                         />
                     </div>
                 </portals.InPortal>

@@ -19,8 +19,9 @@ sys.path.insert(1, os.getenv('CODEX_ROOT'))
 
 logger = logging.getLogger(__name__)
 
-from api.sub.hash       import get_cache
+from api.sub.hash import get_cache
 from api.sub.downsample import simple_downsample
+
 
 def get_data_metrics(msg, result):
     '''
@@ -36,7 +37,7 @@ def get_data_metrics(msg, result):
 
         for feature_name in msg['name']:
 
-            hashLib = ch.findHashArray("name",  feature_name, "feature")
+            hashLib = ch.findHashArray("name", feature_name, "feature")
 
             if hashLib:
                 data = hashLib['data']
@@ -44,7 +45,7 @@ def get_data_metrics(msg, result):
                 logging.warning("Failed to return hashLib")
                 result = {}
                 result["status"] = "failed"
-                result['name'] = feature_name   
+                result['name'] = feature_name
                 yield result
 
             try:
@@ -58,7 +59,8 @@ def get_data_metrics(msg, result):
                 result['name'] = feature_name
                 result['length'] = data.shape[0]
                 try:
-                    result['downsample'] = simple_downsample(data[~np.isnan(data)], 100).tolist()
+                    result['downsample'] = simple_downsample(
+                        data[~np.isnan(data)], 100).tolist()
                 except Exception as e:
                     import traceback
                     traceback.print_exc()
@@ -66,18 +68,21 @@ def get_data_metrics(msg, result):
                 result['hist_data'] = hist.tolist()
                 result['hist_edges'] = bin_edges.tolist()
                 result["status"] = "success"
-                logging.info("Successfully retrieved {f} metrics".format(f=feature_name))
+                logging.info("Successfully retrieved {f} metrics".format(
+                    f=feature_name))
 
             except:
-                logging.warning("Error occured while computing feature data metrics")
+                logging.warning(
+                    "Error occured while computing feature data metrics")
                 logging.warning(traceback.format_exc())
                 result["status"] = "failed"
                 result['name'] = feature_name
-            
-            yield result  
+
+            yield result
     except:
         logging.warning(traceback.format_exc())
         yield result
+
 
 def add_data(msg, result):
     '''
@@ -95,8 +100,8 @@ def add_data(msg, result):
         hashType = msg['hashType']
 
         # assert the data is 1D
-        np_data = np.asarray(msg['data']);
-        assert np_data.ndim == 1;
+        np_data = np.asarray(msg['data'])
+        assert np_data.ndim == 1
 
         if (hashType == "selection"):
 
@@ -105,7 +110,8 @@ def add_data(msg, result):
         elif (hashType == "feature"):
 
             virtual = msg['virtual'] if 'virtual' in msg else False
-            hashResult = ch.hashArray(msg["name"], np_data, "feature", virtual=virtual)
+            hashResult = ch.hashArray(
+                msg["name"], np_data, "feature", virtual=virtual)
 
         else:
             result["message"] = 'failure'
@@ -117,6 +123,7 @@ def add_data(msg, result):
         logging.warning(traceback.format_exc())
 
     return result
+
 
 def get_data(msg, result):
     '''
@@ -151,7 +158,8 @@ def get_data(msg, result):
                 result["message"] = 'failure'
 
             if not array:
-                result["message"] = 'failed to find {name} feature.'.format(name=name)
+                result["message"] = 'failed to find {name} feature.'.format(
+                    name=name)
                 status = False
                 break
             else:
@@ -159,10 +167,11 @@ def get_data(msg, result):
 
                 # downsample if requested
                 if downsample is not None:
-                    array['data'] = simple_downsample(np.array(array['data']), int(downsample))
-                else:
-                    array['data'] = simple_downsample(np.array(array['data']), 5000)
-
+                    array['data'] = simple_downsample(
+                        np.array(array['data']), int(downsample))
+                # else:
+                #     array['data'] = simple_downsample(
+                #         np.array(array['data']), 5000)
 
                 data.append(array['data'])
 
@@ -171,11 +180,11 @@ def get_data(msg, result):
             x_, y_ = data.shape
             data = data.astype(float)
             for x in range(0, x_):
-                if(np.isnan(data[x][0])):
+                if (np.isnan(data[x][0])):
                     data[x][0] = ch.get_nan()
-                elif(np.isinf(data[x][0]) and data[x][0] > 0):
+                elif (np.isinf(data[x][0]) and data[x][0] > 0):
                     data[x][0] = ch.get_inf()
-                elif(np.isinf(data[x][0]) and data[x][0] < 0):
+                elif (np.isinf(data[x][0]) and data[x][0] < 0):
                     data[x][0] = ch.get_ninf()
 
             #data[data == np.float64("nan")] = nan
@@ -188,6 +197,7 @@ def get_data(msg, result):
         logging.warning(traceback.format_exc())
 
     return result
+
 
 def delete_data(msg, result):
     '''
@@ -223,6 +233,7 @@ def delete_data(msg, result):
         logging.warning(traceback.format_exc())
 
     return result
+
 
 def update_data(msg, result):
     '''
@@ -260,5 +271,3 @@ def update_data(msg, result):
         logging.warning(traceback.format_exc())
 
     return result
-    
-

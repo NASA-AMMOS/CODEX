@@ -330,8 +330,9 @@ class CodexHash:
         except BaseException:
             inputArray = string2token(inputArray)
 
-        hashValue = hashlib.sha1(inputArray).hexdigest()
-        samples = inputArray.size
+        # Add feature name to hash calc in case of identical (i.e., all zero) arrays
+        hashValue = hashlib.sha1(inputArray.tostring() + arrayName.encode('utf-8')).hexdigest()
+        samples = len(inputArray)
 
         # TODO - better figure out how to calculate RAM usage. Don't think static
         # is possible
@@ -468,20 +469,51 @@ class CodexHash:
             hashArray function defined dictionary of information about data set
 
         '''
-        start = time.time()
         session = self.__set_session(session)
 
-        ret = None
-        if f'{hashType}List' in self.sessions[session]:
-            for point in self.sessions[session][f'{hashType}List']:
+        if (hashType == "feature"):
+            for point in self.sessions[session]["featureList"]:
                 if (point[field] == name):
-                    ret = point
-        else:
-            logging.error(f"findHashArray - hash not found: {hashType}")
+                    return point
+            return None
 
-        logger.debug(f'Cache {"hit" if ret else "miss"} findHashArray({field}, {name}, {hashType}, {session})')
-        logger.debug(f'findHashArray() completed in {time.time() - start:.2f} seconds')
-        return ret
+        elif (hashType == "subset"):
+            for point in self.sessions[session]["subsetList"]:
+                if (point[field] == name):
+                    return point
+            return None
+
+        elif (hashType == "downsample"):
+
+            for point in self.sessions[session]["downsampleList"]:
+                if (point[field] == name):
+                    return point
+            return None
+
+        elif (hashType == "label"):
+
+            for point in self.sessions[session]["labelList"]:
+                if (point[field] == name):
+                    return point
+            return None
+
+        elif (hashType == "regressor"):
+
+            for point in self.sessions[session]["regressorList"]:
+                if (point[field] == name):
+                    return point
+            return None
+
+        elif (hashType == "classifier"):
+
+            for point in self.sessions[session]["classifierList"]:
+                if (point[field] == name):
+                    return point
+            return None
+
+        else:
+            logging.warning("ERROR: findHashArray - hash not found")
+            return None
 
     @expose('mergeHashResults')
     def mergeHashResults(self, hashList, verbose=False, session=None):
@@ -570,11 +602,16 @@ class CodexHash:
         return hashList
 
     @expose('applySubsetMask')
-    def applySubsetMask(self, featureArray, subsetHash, session=None):
+    def applySubsetMask(self,
+                        featureArray,
+                        subsetHash,
+                        session=None,
+                        excludeDataSelections=False):
         '''
         Inputs:
             featureArray (np array) - feature to which subset mask will be applied
             subsetHash (string)     - reference hash for the subset which should be applied to featureArray
+            excludeDataSelections (bool) - indicates whether the mask should be applied inclusive or exclusively
 
         Outputs:
             resultArray (np array)  - featureArray data with subset mask applied
@@ -586,7 +623,7 @@ class CodexHash:
         subsetHashName = None
 
         returnDict = self.findHashArray(
-            "hash", subsetHash, "subset", session=session)
+            "name", subsetHash, "subset", session=session)
         if (returnDict is None):
             logging.warning("Hash not found. Returning!")
             return None
@@ -606,19 +643,23 @@ class CodexHash:
             outData = np.zeros((included, y1))
 
             count = 0
+            indexer = 0 if excludeDataSelections else 1
             for x in range(0, x1):
-                if (indexArray[x] == 1):
+                if (indexArray[x] == indexer):
                     for y in range(0, y1):
                         outData[count, y] = featureArray[x, y]
                     count += 1
 
             return outData, returnDict['name']
 
-        except BaseException:
+        except BaseException as e:
 
             x1 = featureArray.size
             x2 = indexArray.size
 
+            # print(f'x1: {x1}, x2: {x2}')
+            # print(x1 == x2)
+            # print(e)
             if (x1 != x2):
                 logging.warning("Error: mask must match length of feature")
                 return None

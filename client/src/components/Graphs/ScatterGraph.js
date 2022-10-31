@@ -39,7 +39,7 @@ const COLOR_CURRENT_SELECTION = "#FF0000";
 const DEFAULT_TITLE = "Scatter Graph";
 
 function ScatterGraph(props) {
-    const features = props.data;
+    const features = props.data.toJS();
     const [featuresImmutable] = useWindowFeatureList(props.win.id);
     const featureNames = featuresImmutable.toJS();
     const [bounds, setBounds] = useWindowGraphBounds(props.win.id);
@@ -64,7 +64,15 @@ function ScatterGraph(props) {
     const [chartId] = useState(utils.createNewId());
 
     const [sanitizedCols] = useState(_ =>
-        utils.removeSentinelValues(props.data.map(f => f.data), props.fileInfo)
+        utils.removeSentinelValues(
+            featureNames.map(colName =>
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS()
+            ),
+            props.fileInfo
+        )
     );
 
     const filteredCols = useMemo(
@@ -94,14 +102,17 @@ function ScatterGraph(props) {
         ? filteredCols[featureNames.findIndex(feature => feature === yAxis)]
         : filteredCols[1];
 
-    const xAxisTitle = (axisLabels && axisLabels.get(xAxis)) || props.data[0].displayName;
+    const xAxisTitle =
+        (axisLabels && axisLabels.get(xAxis)) ||
+        props.data.find(feature => feature.get("feature") === featureNames[0]).get("displayName");
 
-    const yAxisTitle = (axisLabels && axisLabels.get(yAxis)) || props.data[1].displayName;
+    const yAxisTitle =
+        (axisLabels && axisLabels.get(yAxis)) ||
+        props.data.find(feature => feature.get("feature") === featureNames[1]).get("displayName");
 
-    const featureDisplayNames = props.win.data.features.map(featureName => {
-        //props.data.find(feature => feature.get("feature") === featureName).get("displayName")
-        return featureName;
-    });
+    const featureDisplayNames = props.win.data.features.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
+    );
 
     // The plotly react element only changes when the revision is incremented.
     const chartRevision = useRef(0);

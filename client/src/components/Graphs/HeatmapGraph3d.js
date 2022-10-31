@@ -113,7 +113,12 @@ function HeatmapGraph3d(props) {
 
     const [sanitizedCols] = useState(_ =>
         utils.removeSentinelValues(
-            featureList.map(colName => props.data.find(col => col.feature === colName)?.data),
+            featureList.map(colName =>
+                props.data
+                    .find(col => col.get("feature") === colName)
+                    .get("data")
+                    .toJS()
+            ),
             props.fileInfo
         )
     );
@@ -156,18 +161,18 @@ function HeatmapGraph3d(props) {
 
     const xAxisTitle =
         (axisLabels && axisLabels.get(xAxis)) ||
-        props.data.find(feature => feature.feature === featureList[0])?.displayName;
+        props.data.find(feature => feature.get("feature") === featureList[0]).get("displayName");
 
     const yAxisTitle =
         (axisLabels && axisLabels.get(yAxis)) ||
-        props.data.find(feature => feature.feature === featureList[1])?.displayName;
+        props.data.find(feature => feature.get("feature") === featureList[1]).get("displayName");
 
     const zAxisTitle =
         (axisLabels && axisLabels.get(zAxis)) ||
-        props.data.find(feature => feature.feature === featureList[2])?.displayName;
+        props.data.find(feature => feature.get("feature") === featureList[2]).get("displayName");
 
-    const featureDisplayNames = featureList.map(
-        featureName => props.data.find(feature => feature.feature === featureName)?.displayName
+    const featureDisplayNames = featureList.map(featureName =>
+        props.data.find(feature => feature.get("feature") === featureName).get("displayName")
     );
 
     function setDefaults(init) {

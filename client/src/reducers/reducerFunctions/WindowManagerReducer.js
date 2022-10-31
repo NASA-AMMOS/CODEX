@@ -35,7 +35,10 @@ export default class WindowManagerReducer {
     }
 
     static closeWindow(state, action) {
-        return state.set("windows", state.get("windows").filter(f => f.get("id") !== action.id));
+        return state.set(
+            "windows",
+            state.get("windows").filter(f => f.get("id") !== action.id)
+        );
     }
 
     static closeAllWindows(state, action) {
@@ -339,19 +342,6 @@ export default class WindowManagerReducer {
                 .map(win =>
                     win.get("id") === action.id
                         ? win.setIn(["data", "needsPlotImage"], action.needs)
-                        : win
-                )
-        );
-    }
-
-    static setWindowDownsample(state, action) {
-        return state.set(
-            "windows",
-            state
-                .get("windows")
-                .map(win =>
-                    win.get("id") === action.id
-                        ? win.setIn(["data", "downsample"], action.downsample)
                         : win
                 )
         );
