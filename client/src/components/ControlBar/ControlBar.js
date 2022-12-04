@@ -4,7 +4,7 @@ import React from "react";
 
 import classnames from "classnames";
 
-import { graphs } from "../../constants/windowTypes";
+import { graphs, TEMPLATE_SCAN_WINDOW } from "../../constants/windowTypes";
 import { useGlobalChartState } from "../../hooks/UIHooks";
 import { useWindowList } from "../../hooks/WindowHooks";
 import Lasso from "../../styles/resources/Icons/lasso.svg";
@@ -22,7 +22,11 @@ function ControlBar(props) {
     return (
         <div
             className="controlBar"
-            hidden={windowList.every(win => !graphs.includes(win.get("windowType")))}
+            hidden={windowList.every(
+                win =>
+                    win.get("windowType") !== TEMPLATE_SCAN_WINDOW &&
+                    !graphs.includes(win.get("windowType"))
+            )}
         >
             <Lasso className={lassoClass} onClick={_ => changeGlobalChartState("lasso")} />
             <Zoom className={zoomClass} onClick={_ => changeGlobalChartState("zoom")} />
