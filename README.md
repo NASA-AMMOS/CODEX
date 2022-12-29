@@ -45,7 +45,7 @@ Note that CODEX requirest 4GB of RAM to run, the default Docker RAM allocation i
 
 To start, run `docker-compose up` in the root directory of this repo. Docker will build two different images, one for the backend (using the `Dockerfile` in `server/`) and one with the web client (using the `Dockerfile` in `client/`). Note that the installation and build may take a while to complete.
 
-The client will be available at http://localhost:3000. (port selection can be set in the `docker-compose.yaml` file.)
+The client will be available at http://localhost:8000. (port selection can be set in the `docker-compose.yaml` file.)
 
 _Development note:_
 
