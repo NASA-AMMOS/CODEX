@@ -32,11 +32,26 @@ Selections are arbitrary groups of rows, and are created within the CODEX web ap
 - as an output of analysis by an Algorithm, e.g. each cluster created by a Clustering Algorithm will be stored in a Selection
 - by Editing existing Selections, such as combining two existing Selections or finding the overlap between two Selections
 
+## Quick Visual Overview
+![Visual Overview](user_guide_images/codex-overview.png)
+
 ## Analyzing Data
 
-When you select Features or Selections using the checkboxes next to them 
+When you select Features or Selections using the checkboxes next to them, options in the Graphs, Algorithms, and Workflows menus will activate. If your current set of selected Features and Selections is not valid for a partiuclar menu option, you can determine how to make it available by mousing over the item which will trigger a message letting you know the input requirements for a particular action.
 
 ### Graphs: Plotting Data
+
+To plot data in a Graph, choose 1 or more Feature and then choose which Graph to draw from the dropdown menu. If your current number of selected Features is not valid for a graph you'd like to draw, there is help guidance when you mouse over an option.
+
+![Plotting data](user_guide_images/4-plotting-data.png)
+
+To create a selection, draw a lasso around it. This will highlight the same data points across the other graphs. You can save the selection to the Selections list by pressing the Save Selection button in the lower-left, or by pressing shift-s (S).
+
+![Selecting data](user_guide_images/select-lasso-draw.png)
+
+![Saving a selection](user_guide_images/select-lasso-display.png)
+
+![Display of saved selection](user_guide_images/selection-saved.png)
 
 ### Algorithms: Analyzing Data
 
