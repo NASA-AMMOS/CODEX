@@ -55,6 +55,20 @@ To create a selection, draw a lasso around it. This will highlight the same data
 
 ### Algorithms: Analyzing Data
 
+To run an Algorithm, choose some Features. `Correlation` uses a single Feature and input and the other Algorithms use 2+ Features as inputs. Built-in Help will help you make choices within the tools.
+
+| Algorithm | Inputs | Outputs | Summary |
+| --- | --- | --- | --- |
+| Clustering | 2+ Features | 1+ Selections (optionally also Features) | summary of clustering | 
+
+
+[table here with algorithm vs. inputs vs. outputs vs. brief summary of what it does]
+
+Below is an example of how to trigger the `Clustering` Algorithm.
+
+![Clustering](user_guide_images/5-algorithms-clustering.png)
+
 ### Workflows: Higher-level Analysis
 
+To run a Workflow, choose some Selections. `Explain This` uses at least two Selections. The Table tool does not require any Features or Selections to be chosen ahead of time.
 
