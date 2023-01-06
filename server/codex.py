@@ -71,8 +71,6 @@ def throttled_cpu_count():
 # create our process pools
 executor = ProcessPool(
     max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
-readpool = ThreadPool(
-    max_workers=throttled_cpu_count(), max_tasks=throttled_cpu_count() * 2)
 queuemgr = Manager()
 
 fileChunks = []
@@ -273,15 +271,20 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         logging.info("Websocket closed")
 
         if self.message_handler_future:
+            # logging.info('Canceling Handler Future')
             self.message_handler_future.cancel()
 
         # close the executor
         if self.future is not None and (not self.future.done()):
+            # logging.info('Canceling Future')
             self.future.cancel()
 
         # ...and close the reader
         if self.reader is not None and (not self.reader.done()):
+            # logging.info('Canceling Reader')
             self.reader.cancel()
+
+        self.queue = None
 
     def on_message(self, message):
         self.message_handler_future = asyncio.ensure_future(
@@ -302,16 +305,19 @@ class CodexSocket(tornado.websocket.WebSocketHandler):
         if audit.is_enabled():
             audit.method = 'tornado:' + audit.method
 
+        # print(f'Scheduling {message}')
+
         self.future = executor.schedule(
             functools.partial(execute_request, self.queue, message))
 
+        # def end_task(future):
+        #     logging.info(f'task done: {future}')
+        # self.future.add_done_callback(end_task)
+
+        loop = asyncio.get_event_loop()
         while True:
-            # Wait on reading the queue
-            self.reader = readpool.schedule(self.queue.get)
+            response = await loop.run_in_executor(None, self.queue.get)
 
-            response = await asyncio.wrap_future(self.reader)
-
-            # if we're done, there's nothing more to be read and we can stop
             if response['done']:
                 break
 
@@ -385,11 +391,14 @@ class GenericAPIHandler(tornado.web.RequestHandler):
         self.future = executor.schedule(
             functools.partial(execute_request, self.queue, request))
 
+        loop = asyncio.get_event_loop()
         while True:
             # Wait on reading the queue
             self.reader = readpool.schedule(self.queue.get)
 
-            response = await asyncio.wrap_future(self.reader)
+            response = await loop.run_in_executor(None, self.queue.get)
+            
+            logging.info(f'RESPONSE: {response}')
 
             # if we're done, there's nothing more to be read and we can stop
             if response['done']:

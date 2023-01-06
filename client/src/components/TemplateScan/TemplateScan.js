@@ -17,7 +17,11 @@ import * as portals from "react-reverse-portal";
 import classnames from "classnames";
 
 import { WindowCircularProgress, WindowError } from "../WindowHelpers/WindowCenter";
-import { useCloseWindow, useWindowManager } from "../../hooks/WindowHooks";
+import {
+    useCloseWindow,
+    useWindowManager,
+    useSetWindowNeedsAutoscale
+} from "../../hooks/WindowHooks";
 import {
     useFeatureDisplayNames,
     usePinnedFeatures,
@@ -88,6 +92,7 @@ function AlgoReturnPreview(props) {
 
     const [chartRevision, setChartRevision] = useState(0);
     const chart = useRef();
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     const data = props.features
         .find(feature => feature.get("feature") === props.excludedFeature)
@@ -139,7 +144,7 @@ function AlgoReturnPreview(props) {
             selectdirection: "h",
             datarevision: chartRevision.current,
             xaxis: { showgrid: false, zeroline: false },
-            yaxis: { showgrid: false, zeroline: false },
+            yaxis: { showgrid: false, zeroline: false, fixedrange: true },
             shapes: baseShapes,
             images: []
         },
@@ -207,7 +212,17 @@ function AlgoReturnPreview(props) {
         [returnedSelections]
     );
 
-    useEffect(_ => console.log(props.algo.data), [props.algo.data]);
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                updateChartRevision();
+                setNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
+    );
 
     const [_, createNewSelection] = useSavedSelections();
     function saveScanClick() {
@@ -266,6 +281,7 @@ function FeaturePreview(props) {
     const [chartRevision, setChartRevision] = useState(0);
     const chart = useRef();
     const [globalChartState] = useGlobalChartState();
+    const [needsAutoscale, setNeedsAutoscale] = useSetWindowNeedsAutoscale(props.win.id);
 
     const data = props.feature.get("data").toJS();
     const [min, max] = utils.getMinMax(data);
@@ -314,7 +330,7 @@ function FeaturePreview(props) {
             selectdirection: "h",
             datarevision: chartRevision.current,
             xaxis: { showgrid: false, zeroline: false, automargin: true },
-            yaxis: { showgrid: false, zeroline: false, automargin: true },
+            yaxis: { showgrid: false, zeroline: false, automargin: true, fixedrange: true },
             shapes: baseShapes,
             images: []
         },
@@ -420,6 +436,18 @@ function FeaturePreview(props) {
             updateChartRevision();
         },
         [props.feature.get("data")]
+    );
+
+    useEffect(
+        _ => {
+            if (needsAutoscale) {
+                chartState.layout.xaxis.autorange = true;
+                chartState.layout.yaxis.autorange = true;
+                updateChartRevision();
+                setNeedsAutoscale(false);
+            }
+        },
+        [needsAutoscale]
     );
 
     const [hoveredSelection, setHoveredSelection] = useState();
@@ -699,6 +727,7 @@ function TemplateScanContent(props) {
                                 selectMode={selectMode}
                                 key={feature.get("feature")}
                                 selectionState={selectionState}
+                                win={win}
                             />
                         ))}
                 </div>
@@ -723,6 +752,7 @@ function TemplateScanContent(props) {
                             key={algo.name}
                             selectionState={selectionState}
                             features={features}
+                            win={win}
                         />
                     ))}
                 </div>

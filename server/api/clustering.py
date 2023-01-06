@@ -102,7 +102,6 @@ class clustering(algorithm):
         return cluster_alg
 
     def fit_algorithm(self):
-
         self.algorithm.fit(self.X)
         y_pred = self.algorithm.labels_.astype(np.int)
 

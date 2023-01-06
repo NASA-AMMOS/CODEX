@@ -148,7 +148,9 @@ function KeyboardHandler(props) {
     const windowList = useWindowList();
     const activeWindow = windowList.find(win => win.get("id") === activeWindowId);
     const graphWindowActive =
-        activeWindow && windowTypes.graphs.includes(activeWindow.get("windowType"));
+        activeWindow &&
+        (windowTypes.graphs.includes(activeWindow.get("windowType")) ||
+            activeWindow.get("windowType") === windowTypes.TEMPLATE_SCAN_WINDOW);
     const setWindowNeedsAutoscale = useSetWindowNeedsAutoscaleById();
     const ZKey = useKey("Z");
     useEffect(

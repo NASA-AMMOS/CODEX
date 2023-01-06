@@ -163,11 +163,12 @@ function SingleXMultipleYGraph(props) {
                           x,
                           y: col.data,
                           type: "scattergl",
-                          mode: "lines",
+                          mode: "lines+markers",
                           marker: {
                               color: ((featureInfo && featureInfo.toJS()) || baseFeatureInfo).find(
                                   f => f.name === col.name
-                              ).color
+                              ).color,
+                              size: 1
                           },
                           visible: true,
                           hoverinfo: "x+y"
@@ -427,6 +428,7 @@ function SingleXMultipleYGraph(props) {
     );
 
     selectionCharts.current = selectionCharts.current.filter(sel => sel);
+    console.log(selectionChartStates);
     return (
         <GraphWrapper
             chart={[chart.current, ...selectionCharts.current]}

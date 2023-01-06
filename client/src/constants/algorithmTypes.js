@@ -31,21 +31,21 @@ export const SUBALGORITHMS = {
                 }
             ]
         },
-        {
-            name: "Affinity Propagation",
-            simplename: "affinity_propagation",
-            parameters: [
-                {
-                    name: "damping",
-                    title: "Damping",
-                    inputType: "number",
-                    min: 0.5,
-                    value: 0.5,
-                    max: 0.96,
-                    step: 0.05
-                }
-            ]
-        },
+        // {
+        //     name: "Affinity Propagation",
+        //     simplename: "affinity_propagation",
+        //     parameters: [
+        //         {
+        //             name: "damping",
+        //             title: "Damping",
+        //             inputType: "number",
+        //             min: 0.5,
+        //             value: 0.5,
+        //             max: 0.96,
+        //             step: 0.05
+        //         }
+        //     ]
+        // },
         {
             name: "Mean Shift",
             simplename: "mean_shift",

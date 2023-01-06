@@ -355,9 +355,9 @@ explain_this_page:
         Explain This is a workflow that allows you to describe the difference between two selections of data. 
 
         The procedure goes as follows: 
-          - You open up a plot and make two selections of data that you would like to explain the difference between.
-          - Select the features that you wish to be used in the trianing process.  
-          - You then choose these selections on the dropdown list and hit run.
+          - You open up a plot and make at least two Selections of data that you would like to explain the difference between.
+          - Select the Features that you wish to be used in the training process.  
+          - You then choose two Selections on the dropdown list and hit run.
           - Explain This will then train several decision tree classifiers on the data from your selections.
           - These classifiers will then be visualized in the window. 
         
