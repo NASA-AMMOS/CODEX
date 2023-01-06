@@ -59,8 +59,8 @@ To run an Algorithm, choose some Features. `Correlation` uses a single Feature a
 
 | Algorithm | Input Features | Outputs | Summary |
 | --- | --- | --- | --- |
-| Clustering | 2+  | 1+ Selections (optionally also Features) | summary of clustering | 
-| Dimensionality Reduction	| 2+		| One Feature	Use Principle Component Analysis or Independent Component Analysis to reduce | 2+ Features into 1 Feature that retains properties of the higher-dimensional information. The single Feature can then be plotted etc.
+| Clustering | 2+  | 1+ Selections (optionally also Features) | Use various clustering algorithms to compute high-dimensional similarity of rows using multiple Features; can visualize clusters in a scatter plot using princple component analysis (PCA) | 
+| Dimensionality Reduction	| 2+		| One Feature	Use Principle Component Analysis or Independent Component Analysis to reduce 2+ Features into 1 Feature that retains properties of the higher-dimensional information. The single Feature can then be plotted etc.
 | Normalization	| 1+		| One Feature per input Feature normalized or standardized	[https://en.wikipedia.org/wiki/Feature_scaling] Processes Feature data to prepare it for downstream algorithms. Normalization will rescale values within -1 to 1. Standardization will rescale values to have zero mean. |
 | Peak Detection	| 1		| One Selection per peak-detection algorithm	Find peaks and troughs in data based on various algorithms |
 | Regression	| 3+ (one used as target)		| Four visualizations	One Feature is used as a target and the other Features are used by each method (Decision Tree, Random Forest, K Neighbors, or Linear) to estimate the target value. Target vs estimate is visualized along with some statistics. |
