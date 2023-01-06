@@ -1,6 +1,6 @@
 # CODEX
 
-COmplex Data EXplorer
+The COmplex Data EXplorer is a web-application that was developed to help scientists and operators at NASA JPL perform quick explorations of high-dimensional data-sets to find patterns or relationships in the data and prepare it for in-depth follow-on analysis.
 
 ## User Guide
 The [user guide](docs/codex_user_guide/user_guide.md) is in the docs folder of this repo, in markdown format. It covers what to do once you get the web application up and running.
