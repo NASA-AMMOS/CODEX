@@ -5,7 +5,7 @@ COmplex Data EXplorer
 ## User Guide
 The [user guide](docs/codex_user_guide/user_guide.md) is in the docs folder of this repo, in markdown format. It covers what to do once you get the web application up and running.
 
-### Installing and Running CODEX
+## Installing and Running CODEX
 There are three options for installing and running CODEX:
 - a local install using Docker containers
 - a local install with npm and conda
@@ -15,7 +15,7 @@ These two main install options are covered below.
 
 Installation on a server is the same as for a local machine, with the additional step of opening up access to remote users and creating a DNS entry for ease-of-use. Remote-server installation is not covered here; it will be straightforward for someone who typically manages web servers.
 
-## Running CODEX in Docker
+### Running CODEX in Docker
 
 A version of CODEX for development can be run in Docker for ease of setup. (You'll need to install [Docker](https://www.docker.com/]) on your system first.)
 
@@ -33,7 +33,7 @@ docker-compose -f docker-compose.dev.yml up
 ```
 
 
-## Local Installation of CODEX
+### Local Installation of CODEX
 
 1. `git clone https://github.jpl.nasa.gov/jackal/CODEX.git`
 
