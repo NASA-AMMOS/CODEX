@@ -57,9 +57,15 @@ To create a selection, draw a lasso around it. This will highlight the same data
 
 To run an Algorithm, choose some Features. `Correlation` uses a single Feature and input and the other Algorithms use 2+ Features as inputs. Built-in Help will help you make choices within the tools.
 
-| Algorithm | Inputs | Outputs | Summary |
+| Algorithm | Input Features | Outputs | Summary |
 | --- | --- | --- | --- |
-| Clustering | 2+ Features | 1+ Selections (optionally also Features) | summary of clustering | 
+| Clustering | 2+  | 1+ Selections (optionally also Features) | summary of clustering | 
+| Dimensionality Reduction	| 2+		| One Feature	Use Principle Component Analysis or Independent Component Analysis to reduce | 2+ Features into 1 Feature that retains properties of the higher-dimensional information. The single Feature can then be plotted etc.
+| Normalization	| 1+		| One Feature per input Feature normalized or standardized	[https://en.wikipedia.org/wiki/Feature_scaling] Processes Feature data to prepare it for downstream algorithms. Normalization will rescale values within -1 to 1. Standardization will rescale values to have zero mean. |
+| Peak Detection	| 1		| One Selection per peak-detection algorithm	Find peaks and troughs in data based on various algorithms |
+| Regression	| 3+ (one used as target)		| Four visualizations	One Feature is used as a target and the other Features are used by each method (Decision Tree, Random Forest, K Neighbors, or Linear) to estimate the target value. Target vs estimate is visualized along with some statistics. |
+| Template Scan	| 2+		| One Selection	Highlight Positive and Negative patterns on 1+ Feature and find that pattern in a holdout Feature. Save the matched locations in the holdout Feature as a Selection. |
+| Correlation	| 2+		| Feature Group	Select Features by clicking the y-axis labels and then press Add Selected to Group to create a Feature Group with those Features (or add them to an existing group). |
 
 Below is an example of how to trigger the `Clustering` Algorithm.
 
