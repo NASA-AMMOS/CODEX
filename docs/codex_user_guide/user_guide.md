@@ -61,9 +61,6 @@ To run an Algorithm, choose some Features. `Correlation` uses a single Feature a
 | --- | --- | --- | --- |
 | Clustering | 2+ Features | 1+ Selections (optionally also Features) | summary of clustering | 
 
-
-[table here with algorithm vs. inputs vs. outputs vs. brief summary of what it does]
-
 Below is an example of how to trigger the `Clustering` Algorithm.
 
 ![Clustering](user_guide_images/5-algorithms-clustering.png)
@@ -72,3 +69,6 @@ Below is an example of how to trigger the `Clustering` Algorithm.
 
 To run a Workflow, choose some Selections. `Explain This` uses at least two Selections. The Table tool does not require any Features or Selections to be chosen ahead of time.
 
+Below is an example of how to use the `Explain This` Workflow.
+
+![Explain This](user_guide_images/6-explain-this.png)
