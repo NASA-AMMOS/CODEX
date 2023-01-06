@@ -9,6 +9,10 @@ Currently the application does not take other data formats. It also does not cur
 
 CODEX is built on top of SciKit Learn, which is the engine for much of the analysis. Other technical architecture is described in the [subcomponent breakdown](../subcomponent_breakdown.md) document.
 
+## Installing CODEX
+
+Installation instructions are in the main [README document](../../README.md) at the top level of the code repository. See https://github.com/NASA-AMMOS/CODEX/
+
 ## Getting Started
 
 When you first go to the CODEX web site, whether locally or on a server, you will be presented with an empty page that has an UPLOAD button in the upper-left. Press that button and choose a CSV file to upload.
