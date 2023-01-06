@@ -73,7 +73,18 @@ Below is an example of how to trigger the `Clustering` Algorithm.
 
 ### Workflows: Higher-level Analysis
 
-To run a Workflow, choose some Selections. `Explain This` uses at least two Selections. The Table tool does not require any Features or Selections to be chosen ahead of time.
+To run a Workflow, choose some Selections. `Explain This` uses at least two Selections plus some Features. The Table tool does not require any Features or Selections to be chosen ahead of time.
+
+#### Explain This
+Explain This is a Workflow intended to help understand the difference between two groups of data-points (two Selections). To use it, choose two Selections and some Features, chose Workflows > Explain This, then press Run in the bottom-left of the Explain This window. The Features in the left panel and the two Selections in the dropdowns (just above Run) are used for the analysis. You can choose a different set of Features in the left panel and press Run again to analyze with a different set of Features.
+
+The analysis uses each Selection and the input Features to train a decision-tree classifier to distinguish between data-points in your first Selection vs. the second Selection.
+
+The output of the analysis includes:
+1. A decision tree indicating how your chosen Features can be used to differentiate between the two Selections (groups of data points).
+2. A plot showing Score vs Tree Depth which indicates how complex a decision tree is needed to explain the differences between your two Selections. You can drag the slider under the plot to change how complex a tree is drawn.
+3. A bar chart showing relative Feature Importance to the effectiveness of the classifier.
+4. If you press the Summary button, you will see pseudocode describing the decision-tree.
 
 Below is an example of how to use the `Explain This` Workflow.
 
