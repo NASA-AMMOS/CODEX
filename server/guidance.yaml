@@ -260,28 +260,41 @@ normalization_page:
 peak_detection_page:
 
     general_peak_detection: |
-      # Peak Find
+      ## Peak Detection
 
-      Fill out with general information about peak find data anlysis techniques.
+      Peak Detection algorithms discover local peaks for a given feature. Peaks can be difficult to discover, so many parameters are needed to be tweaked to filter out unwanted detections.
 
-    findpeaks: |
+      ## How do I select a method?
+      Peak detection is a difficult problem as the definition of a peak can vary based on the data. Try out different methods and tweak parameters to discover one that gives the best result you’re looking for.
 
-      #Find Peaks
+      ## Algorithms
+      #### CWT
+      Uses wavelet transformation to discover peaks.
+      * Designed for finding sharp peaks among noisy data
+      * More at [Scipy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks_cwt.html)
 
-    peak_cwt: |
+      #### Find Peaks
+      Generic peak detection by using simple comparisons between neighboring values.
+      * Peaks defined as any sample whose direct two neighbors have a smaller amplitude
+      * Many parameter options to filter desired/undesired peaks
+      * More at [Scipy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html)
 
-      #Peak CWT
 
 template_scan_page:
 
     general_template_scan: |
-      # Template Scanning
+      ## Template Scanning
 
-      Fill out with general information about template scanning data anlysis techniques.
+      Template Scanning measures similarity or distance between two different arrays with different lengths.
 
-    template: |
+      ## Algorithms
 
-      #Template Scan
+      #### Dynamic Time Warping (DWT)
+      Warps a series of data to align in a way to be comparable to another series of data of different lengths.
+      * Measures the similarity between two temporal sequences which may vary in rate
+      * [Explanation of DTW](https://towardsdatascience.com/dynamic-time-warping-3933f25fcdd)
+
+
 
 binning_page:
 
@@ -362,7 +375,18 @@ dimensionality_reduction_page:
 correlation_page:
 
     general_correlation: |
-      # Correlation
+      ## Correlation
+
+      Correlation is the linear relationship between two features. A correlation coefficient r measures the linear strength relationship on a scale between -1 and 1, where:
+      * -1 is perfect negative correlation
+      * 1 is perfect positive correlation
+      * 0 is no correlation
+
+      ## When should I use correlation?
+      Correlation helps discover relationships between features. Some Algorithms are influenced by heavily-correlated features, so sometimes correlation can be used to determine which features to drop or keep.
+
+      ### External links
+      * [Wikipedia](https://en.wikipedia.org/wiki/Correlation_and_dependence)
 
 quality_scan_page:
 
