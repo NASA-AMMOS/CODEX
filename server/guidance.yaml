@@ -427,7 +427,7 @@ explain_this_page:
         algorithm does is it finds the optimal "splits" in the dimensions of your selected features that seperate
         the two given classes. A "split" just takes a feature and seperates the feature into two sides one greater than
         and one less then a chosen value. This "split" on a chosen value is meant to maximize purity of both sides of 
-        said "split". The The color of the branches represents the proportion of the two input classes(selections) flowing down 
+        said "split". The color of the branches represents the proportion of the two input classes (Selections) flowing down 
         a branch, all one color being 100% one class and all another meaning 100% the other class. The tree diagram 
         is also collapseable if you touch one of the tree nodes. At the rightmost side of the tree the "leaf" nodes' colors 
         represent the predicted class for samples flowing down the tree to that "leaf". The size of the branches 
