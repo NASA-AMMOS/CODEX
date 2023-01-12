@@ -406,9 +406,12 @@ quality_scan_page:
 regression_page:
 
     general_regression: |
+      ## Regression
 
-        Sample data
+      Regression algorithms will estimate the value of a Regression target (one of your input Features, selected at the top of the window) using information from the other Features you sent to the Algorithm.
+      * [Wikipedia](https://en.wikipedia.org/wiki/Regression_analysis)
 
+      There are four different methods that are plotted in the Regression Algorithm tool. You can press the Show Feature Importance button on each to see which of your input Features most impact the estimation. You can also tweak the parameters of each method to re-calculate the regression.
 
 explain_this_page:
 
