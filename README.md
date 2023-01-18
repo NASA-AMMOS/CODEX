@@ -17,7 +17,7 @@ Installation on a server is the same as for a local machine, with the additional
 
 ### Running CODEX in Docker
 
-A version of CODEX for development can be run in Docker for ease of setup. (You'll need to install [Docker](https://www.docker.com/]) on your system first.)
+A version of CODEX for development can be run in Docker for ease of setup. (You'll need to install [Docker](https://www.docker.com/) on your system first.)
 
 Note that CODEX requirest 4GB of RAM to run, the default Docker RAM allocation is smaller, so you will need to adjust this in the Docker container settings.  More information about how to do this can be found [here](https://forums.docker.com/t/how-to-increase-memory-size-that-is-available-for-a-docker-container/78483)
 
