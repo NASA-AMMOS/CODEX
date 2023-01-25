@@ -419,7 +419,7 @@ explain_this_page:
 
         Explain This is a workflow that allows you to describe the difference between two selections of data. 
 
-        The procedure goes as follows: 
+        The procedure goes as follows
           - You open up a plot and make at least two Selections of data that you would like to explain the difference between.
           - Select the Features that you wish to be used in the training process.  
           - You then choose two Selections on the dropdown list and hit run.
@@ -438,16 +438,18 @@ explain_this_page:
 
 general:
 
-    getting_started: |
+    about: |
 
-      CODEX is a data visualization tool for quick exploration of high-dimensional data sets. More info can be found at https://github.com/NASA-AMMOS/CODEX
+      CODEX is a data visualization tool for quick exploration of high-dimensional data sets. The user guide can be found at https://github.com/NASA-AMMOS/CODEX/blob/main/docs/codex_user_guide/user_guide.md
+
+      Each tool has a basic reference built-in to the web application. Additional information can be found in the user guide.
 
     keyboard_shortcuts: |
 
       #### In charts
       _shift-S_ : Add Selection with the active chart selection
 
-      _z (hold)_ : Go to Zoom mode while pressing s
+      _z (hold)_ : Go to Zoom mode while pressing z
 
       _spacebar (hold)_ : Go to Pan mode while pressing spacebar
 
