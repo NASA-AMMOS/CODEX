@@ -124,7 +124,6 @@ function ViolinPlotGraph(props) {
     const traces = useMemo(
         _ =>
             features.map((feature, idx) => {
-                if (!defaultsInitialized) return {};
                 const trace = {
                     y: filteredCols[idx],
                     type: "violin",
@@ -282,7 +281,6 @@ function ViolinPlotGraph(props) {
     );
 
     useLayoutEffect(() => {
-        console.log(chartState);
         axisLabelShortener(chartId, layouts);
     }, [chartState]);
 

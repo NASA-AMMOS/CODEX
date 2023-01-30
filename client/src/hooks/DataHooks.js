@@ -24,7 +24,7 @@ import {
     selectFeatureInGroup,
     statSetFeatureFailed,
     statSetFeatureLoading,
-    statSetFeatureResolved,
+    statSetFeatureResolved
 } from "../actions/data";
 import * as actionTypes from "../constants/actionTypes";
 import * as selectionActions from "../actions/selectionActions";
@@ -39,8 +39,7 @@ function loadColumnFromServer(feature) {
         const socketWorker = new WorkerSocket();
 
         socketWorker.addEventListener("message", e => {
-            console.log("server column");
-            console.log(JSON.parse(e.data));
+            // console.log("server column");
             // console.log(`Received column: ${feature}`, e.data);
             const data = JSON.parse(e.data).data.map(ary => ary[0]);
             resolve(data);
@@ -51,7 +50,7 @@ function loadColumnFromServer(feature) {
             JSON.stringify({
                 action: actionTypes.GET_GRAPH_DATA,
                 sessionkey: utils.getGlobalSessionKey(),
-                selectedFeatures: [feature],
+                selectedFeatures: [feature]
                 //  downsample: 5000
             })
         );
@@ -246,7 +245,7 @@ export function useSavedSelections() {
     return [
         savedSelections,
         (name, indices, groupID) =>
-            dispatch(selectionActions.saveNewSelection(name, indices, groupID)),
+            dispatch(selectionActions.saveNewSelection(name, indices, groupID))
     ];
 }
 
@@ -262,7 +261,7 @@ export function useSelectionGroups() {
 
     return [
         groups,
-        (name, selections) => dispatch(selectionActions.createSelectionGroup(name, selections)),
+        (name, selections) => dispatch(selectionActions.createSelectionGroup(name, selections))
     ];
 }
 
@@ -379,7 +378,7 @@ export function useNewFeature(dispatch) {
             hashType: "feature",
             name,
             data: data,
-            length: data.length,
+            length: data.length
         };
 
         utils.makeSimpleRequest(req).req.then(r => {
@@ -420,7 +419,7 @@ export function useFeatureStatisticsLoader() {
                         hashType: "feature",
                         activity: "metrics",
                         name: [feature],
-                        sessionkey: utils.getGlobalSessionKey(),
+                        sessionkey: utils.getGlobalSessionKey()
                     };
                     dispatch(statSetFeatureLoading(feature));
                     const { req, cancel } = utils.makeSimpleRequest(request);
@@ -468,7 +467,7 @@ export function useFileInfo() {
         filename: useSelector(store => store.data.get("filename")),
         nan: useSelector(store => store.data.get("nan")),
         inf: useSelector(store => store.data.get("inf")),
-        ninf: useSelector(store => store.data.get("ninf")),
+        ninf: useSelector(store => store.data.get("ninf"))
     };
 }
 
@@ -498,18 +497,18 @@ export function useFeatureDelete() {
 
                     const featureActions = [
                         featureRelease(featureName),
-                        featureDelete(featureName),
+                        featureDelete(featureName)
                     ];
 
                     snackbarMessage = [
                         snackbarMessage,
-                        ...windowsUsingFeature.map(win => `Closing window "${win.get("title")}"`),
+                        ...windowsUsingFeature.map(win => `Closing window "${win.get("title")}"`)
                     ];
 
                     return batchActions([
                         ...windowActions,
                         ...featureActions,
-                        uiActions.showSnackbar(snackbarMessage),
+                        uiActions.showSnackbar(snackbarMessage)
                     ]);
                 })
             );
@@ -579,7 +578,7 @@ export function useFeatureGroups() {
     const groupList = useSelector(state => state.data.get("featureGroups"));
     return [
         groupList,
-        (name, featureIDs, selected) => dispatch(createFeatureGroup(name, featureIDs, selected)),
+        (name, featureIDs, selected) => dispatch(createFeatureGroup(name, featureIDs, selected))
     ];
 }
 
@@ -627,7 +626,7 @@ export function useSelectFeatureInGroup(id) {
     });
     return [
         groupSelections,
-        (featureName, remove) => dispatch(selectFeatureInGroup(id, featureName, remove)),
+        (featureName, remove) => dispatch(selectFeatureInGroup(id, featureName, remove))
     ];
 }
 
