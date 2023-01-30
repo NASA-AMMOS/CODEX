@@ -98,7 +98,7 @@ function GroupSelectDialog(props) {
             className="group-select-dialog"
         >
             <DialogTitle disableTypography className="group-select-dialog-title">
-                <Typography variant="h6">Choose group</Typography>
+                <Typography variant="h6">Choose Feature Group</Typography>
                 <IconButton onClick={onClose} style={{ color: "white" }}>
                     <CloseIcon />
                 </IconButton>
@@ -300,6 +300,9 @@ function CorrelationContent(props) {
                 onResize={_ => chart.current.resizeHandler()}
             >
                 <div className="correlation-top-bar">
+                    <span>
+                        Select Features by clicking their names along the Y-axis. Then you can Add Selected to Group to add them to a Feature Group.
+                    </span>
                     <IconButton>
                         <HelpIcon onClick={_ => setHelpMode(mode => !mode)} />
                     </IconButton>

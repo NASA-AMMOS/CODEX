@@ -153,7 +153,7 @@ function makeDRPlot(algo, maxYRange, changeSliderVal, featureAdd) {
                 }}
             />
             <Button onClick={e => featureAdd(algo)} className="saveButton">
-                Save
+                Save as Feature
             </Button>
         </React.Fragment>
     );

@@ -297,7 +297,7 @@ def train_general_classifier_model(data):
     return rf_random
 
 """
-    This function handles getting the data for, trianing, and evaluating
+    This function handles getting the data for, training, and evaluating
     the general_classifier model
 
     dataSelections is assumed to be an all encompassing set from the front end

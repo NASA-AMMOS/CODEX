@@ -229,39 +229,72 @@ segmentation_page:
 normalization_page:
 
     general_normalization: |
-      # Normalization
+      ## Normalization
 
-      Fill out with general information about normalization data anlysis techniques.
+      Normalization is the process of scaling data.
 
-    min_max: |
+      ## When should I use normalization?
+      Some algorithms may require data to be within a certain range. Other benefits include potentially improved algorithm performance and better visualization drawing.
 
-      #Min/Max
+      ## How do I select a method?
+      It depends on your use case with the post-processed data.
+
+      ## Algorithms
+      #### Normalization (Min_max): Scales data to be between 0 and 1.
+
+      Why this algorithm?
+      * Easier to visualize via plotting
+      * Some algorithms require data on the scale of 0 to 1
+
+      #### Standardization: Scales a feature to have a mean of 0 and a standard deviation of 1.
+
+      Why this algorithm?
+      * Effectively scales between -1 and 1
+      * Useful for other algorithms such as PCA to maximize variance
+
+      ### External links
+      * [Normalization vs Standardization](https://towardsdatascience.com/normalization-vs-standardization-cb8fe15082eb)
+      * [Wikipedia](https://en.wikipedia.org/wiki/Normalization_(statistics))
+
 
 peak_detection_page:
 
     general_peak_detection: |
-      # Peak Find
+      ## Peak Detection
 
-      Fill out with general information about peak find data anlysis techniques.
+      Peak Detection algorithms discover local peaks for a given feature. Peaks can be difficult to discover, so many parameters are needed to be tweaked to filter out unwanted detections.
 
-    findpeaks: |
+      ## How do I select a method?
+      Peak detection is a difficult problem as the definition of a peak can vary based on the data. Try out different methods and tweak parameters to discover one that gives the best result you’re looking for.
 
-      #Find Peaks
+      ## Algorithms
+      #### CWT
+      Uses wavelet transformation to discover peaks.
+      * Designed for finding sharp peaks among noisy data
+      * More at [Scipy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks_cwt.html)
 
-    peak_cwt: |
+      #### Find Peaks
+      Generic peak detection by using simple comparisons between neighboring values.
+      * Peaks defined as any sample whose direct two neighbors have a smaller amplitude
+      * Many parameter options to filter desired/undesired peaks
+      * More at [Scipy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html)
 
-      #Peak CWT
 
 template_scan_page:
 
     general_template_scan: |
-      # Template Scanning
+      ## Template Scanning
 
-      Fill out with general information about template scanning data anlysis techniques.
+      Template Scanning measures similarity or distance between two different arrays with different lengths.
 
-    template: |
+      ## Algorithms
 
-      #Template Scan
+      #### Dynamic Time Warping (DWT)
+      Warps a series of data to align in a way to be comparable to another series of data of different lengths.
+      * Measures the similarity between two temporal sequences which may vary in rate
+      * [Explanation of DTW](https://towardsdatascience.com/dynamic-time-warping-3933f25fcdd)
+
+
 
 binning_page:
 
@@ -297,34 +330,63 @@ endmember_page:
 dimensionality_reduction_page:
 
     general_dimensionality_reduction: |
-      # Dimensionality Reduction
-
-      Fill out with general information about dimensionality reduction data anlysis techniques.
+      ## Dimensionality Reduction
+    
+      Dimensionality Reduction aims to reduce the complexity of a dataset while minimizing data loss.
       * [Wikipedia](https://en.wikipedia.org/wiki/Dimensionality_reduction)
 
-    PCA: |
+      ## When should I use dimensionality reduction?
 
-      #PCA
-      * [Wikipedia](https://en.wikipedia.org/wiki/Dimensionality_reduction#Principal_component_analysis_(PCA))
+      * When there are too many features, many of which may be redundant
+      * When algorithms are performing poorly due to too many features
+      * When data is mixed together and needs to be separated into parts
+      * How do I select an algorithm?
+      * Input data needs to be reduced:
 
-    PCA_Incremental: |
+      Too much data --> use PCA
+      Separated --> use ICA
 
-      #PCA_Incremental
+      ## Algorithms
+
+      #### PCA (Principal Component Analysis)
+      Summarizes the data by retaining information by maximizing variance while reducing redundancy by minimizing correlation.
       
+      Why this algorithm?
+      * Retains maximum information while removing redundancies
+      * Reduces total amount of data
+      * Improves algorithm performances by retaining only data that matters
 
-    LDA: |
+      External links
+      * [Walkthrough of the algorithm](https://www.sartorius.com/en/knowledge/science-snippets/what-is-principal-component-analysis-pca-and-how-it-is-used-507186)
+      * [Wikipedia](https://en.wikipedia.org/wiki/Dimensionality_reduction#Principal_component_analysis_(PCA))
+    
+      #### ICA (Independent  Component Analysis)
+      Separates independent sources from a mixed noise.
 
-      #LDA
-      * [Wikipedia](https://en.wikipedia.org/wiki/Dimensionality_reduction#Linear_discriminant_analysis_(LDA))
+      Why this algorithm?
+      * Data comes mixed together and needs to be reduced into parts
+      * Independent parts can be extracted from a single source
 
-    ICA: |
+      ### External links
+      * [Simple explanation and example](https://www.geeksforgeeks.org/ml-independent-component-analysis/)
+      * [Wikipedia](https://en.wikipedia.org/wiki/Independent_component_analysis)
 
-      #ICA
 
 correlation_page:
 
     general_correlation: |
-      # Correlation
+      ## Correlation
+
+      Correlation is the linear relationship between two features. A correlation coefficient r measures the linear strength relationship on a scale between -1 and 1, where:
+      * -1 is perfect negative correlation
+      * 1 is perfect positive correlation
+      * 0 is no correlation
+
+      ## When should I use correlation?
+      Correlation helps discover relationships between features. Some Algorithms are influenced by heavily-correlated features, so sometimes correlation can be used to determine which features to drop or keep.
+
+      ### External links
+      * [Wikipedia](https://en.wikipedia.org/wiki/Correlation_and_dependence)
 
 quality_scan_page:
 
@@ -344,9 +406,12 @@ quality_scan_page:
 regression_page:
 
     general_regression: |
+      ## Regression
 
-        Sample data
+      Regression algorithms will estimate the value of a Regression target (one of your input Features, selected at the top of the window) using information from the other Features you sent to the Algorithm.
+      * [Wikipedia](https://en.wikipedia.org/wiki/Regression_analysis)
 
+      There are four different methods that are plotted in the Regression Algorithm tool. You can press the Show Feature Importance button on each to see which of your input Features most impact the estimation. You can also tweak the parameters of each method to re-calculate the regression.
 
 explain_this_page:
 
@@ -354,10 +419,10 @@ explain_this_page:
 
         Explain This is a workflow that allows you to describe the difference between two selections of data. 
 
-        The procedure goes as follows: 
-          - You open up a plot and make two selections of data that you would like to explain the difference between.
-          - Select the features that you wish to be used in the trianing process.  
-          - You then choose these selections on the dropdown list and hit run.
+        The procedure goes as follows
+          - You open up a plot and make at least two Selections of data that you would like to explain the difference between.
+          - Select the Features that you wish to be used in the training process.  
+          - You then choose two Selections on the dropdown list and hit run.
           - Explain This will then train several decision tree classifiers on the data from your selections.
           - These classifiers will then be visualized in the window. 
         
@@ -365,7 +430,7 @@ explain_this_page:
         algorithm does is it finds the optimal "splits" in the dimensions of your selected features that seperate
         the two given classes. A "split" just takes a feature and seperates the feature into two sides one greater than
         and one less then a chosen value. This "split" on a chosen value is meant to maximize purity of both sides of 
-        said "split". The The color of the branches represents the proportion of the two input classes(selections) flowing down 
+        said "split". The color of the branches represents the proportion of the two input classes (Selections) flowing down 
         a branch, all one color being 100% one class and all another meaning 100% the other class. The tree diagram 
         is also collapseable if you touch one of the tree nodes. At the rightmost side of the tree the "leaf" nodes' colors 
         represent the predicted class for samples flowing down the tree to that "leaf". The size of the branches 
@@ -374,18 +439,17 @@ explain_this_page:
 general:
 
     about: |
-      Placeholder general CODEX data
 
-    getting_started: |
+      CODEX is a data visualization tool for quick exploration of high-dimensional data sets. The user guide can be found at https://github.com/NASA-AMMOS/CODEX/blob/main/docs/codex_user_guide/user_guide.md
 
-      Placeholder getting started data
+      Each tool has a basic reference built-in to the web application. Additional information can be found in the user guide.
 
     keyboard_shortcuts: |
 
       #### In charts
       _shift-S_ : Add Selection with the active chart selection
 
-      _z (hold)_ : Go to Zoom mode while pressing s
+      _z (hold)_ : Go to Zoom mode while pressing z
 
       _spacebar (hold)_ : Go to Pan mode while pressing spacebar
 

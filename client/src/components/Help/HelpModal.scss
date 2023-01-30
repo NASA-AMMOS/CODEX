@@ -1,9 +1,10 @@
 .help-modal-container {
     position: fixed;
     top: 20%;
-    left: 12vw;
+    left: 20vw;
     color: white;
-    width: 75vw;
+    width: 50vw;
+    max-width: 40rem;
 }
 
 .help-modal-header {
