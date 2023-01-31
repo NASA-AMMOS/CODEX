@@ -32,6 +32,7 @@ def export_contents(msg, result, savePath):
         if(msg["type"] == "code"):
             cache = get_cache(msg['sessionkey'], timeout=None)
             saveFile = os.path.join(savePath,"returned_code.py")
+            cache.makeReturnCode()   # fix here: make sure to capture function returns and write to file
             cache.dump_code_to_file(saveFile)
             f = open(saveFile, "r")
             lines = f.readlines()
