@@ -19,7 +19,7 @@
 }
 
 .filter-bar {
-    width: 250px;
+    width: 100%;
     padding: 4px;
 
     input {
