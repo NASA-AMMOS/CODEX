@@ -21,7 +21,7 @@ const OPTIONS = [
     { key: "plots", text: "Images of open plots" },
     { key: "features", text: "Features as a CSV" },
     { key: "selections", text: "Selections as a CSV" },
-    { key: "code", text: "Python code" }
+    //{ key: "code", text: "Python code" }
 ];
 
 function Export(props) {

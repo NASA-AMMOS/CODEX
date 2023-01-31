@@ -52,8 +52,6 @@ function* interceptFeatureStatRequest(action) {
     // in a not-braindead way at 3AM
 
     makeStreamRequest(request, e => {
-        console.log(e);
-
         // handle failure
         if (e.status !== "success") {
             store.dispatch(statSetFeatureFailed(e.name));

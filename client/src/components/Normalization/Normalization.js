@@ -383,7 +383,7 @@ function Normalization(props) {
             <div className="normalize-top-bar">
                 <div className="help-row">
                     <span>
-                        Select whether you wish to normalize or standardize each feature below.
+                        Select whether you wish to normalize or standardize each feature below. Then press Save as Features to create new Features based on your normaliztion choices.
                     </span>
                     <IconButton onClick={_ => setHelpMode(!helpMode)}>
                         <HelpIcon />
@@ -429,7 +429,7 @@ function Normalization(props) {
                         size="small"
                         onClick={runNormalization}
                     >
-                        Run
+                        Save as Features
                     </Button>
                 </div>
             </div>

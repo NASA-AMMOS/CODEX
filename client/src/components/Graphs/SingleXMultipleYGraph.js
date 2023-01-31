@@ -107,7 +107,7 @@ function SingleXMultipleYGraph(props) {
                           props.data.findIndex(col => col.get("feature") === props.win.data.xAxis)
                       ]
                   ).sort((a, b) => b - a),
-        [xAxis]
+        [xAxis, processedData]
     );
 
     const cols = props.data
@@ -156,24 +156,20 @@ function SingleXMultipleYGraph(props) {
 
     const traces = useMemo(
         _ =>
-            cols.map((col, idx) =>
-                !defaultsInitialized
-                    ? {}
-                    : {
-                          x,
-                          y: col.data,
-                          type: "scattergl",
-                          mode: "lines+markers",
-                          marker: {
-                              color: ((featureInfo && featureInfo.toJS()) || baseFeatureInfo).find(
-                                  f => f.name === col.name
-                              ).color,
-                              size: 1
-                          },
-                          visible: true,
-                          hoverinfo: "x+y"
-                      }
-            ),
+            cols.map((col, idx) => ({
+                x,
+                y: col.data,
+                type: "scattergl",
+                mode: "lines+markers",
+                marker: {
+                    color: ((featureInfo && featureInfo.toJS()) || baseFeatureInfo).find(
+                        f => f.name === col.name
+                    ).color,
+                    size: 1
+                },
+                visible: true,
+                hoverinfo: "x+y"
+            })),
         [defaultsInitialized, processedData]
     );
 
@@ -408,6 +404,7 @@ function SingleXMultipleYGraph(props) {
             if (!axisScales) return;
             chartState.layout.xaxis.type = axisScales.get(0).get("scale");
             chartState.layout.yaxis.type = axisScales.get(1).get("scale");
+
             updateChartRevision();
         },
         [axisScales]
@@ -428,7 +425,7 @@ function SingleXMultipleYGraph(props) {
     );
 
     selectionCharts.current = selectionCharts.current.filter(sel => sel);
-    console.log(selectionChartStates);
+
     return (
         <GraphWrapper
             chart={[chart.current, ...selectionCharts.current]}

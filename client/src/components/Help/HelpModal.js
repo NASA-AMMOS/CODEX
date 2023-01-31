@@ -20,16 +20,10 @@ const ML_REFERENCE = "ML_REFERENCE";
 
 const MENU_ITEMS = [
     { type: ABOUT, name: "About", guidancePath: "general:about" },
-    { type: GETTING_STARTED, name: "Getting Started", guidancePath: "general:getting_started" },
     {
         type: KEYBOARD_SHORTCUTS,
         name: "Keyboard Shortcuts",
         guidancePath: "general:keyboard_shortcuts"
-    },
-    {
-        type: ML_REFERENCE,
-        name: "Machine Learning Reference",
-        guidancePath: "general:machine_learning_resources"
     }
 ];
 
