@@ -29,30 +29,19 @@ const MENU_ITEMS = [
 
 function HelpItem(props) {
     const [textContent, setTextContent] = useState(null);
-    const guidancePath = MENU_ITEMS.find(item => item.type === props.mode).guidancePath;
+    // const guidancePath = MENU_ITEMS.find(item => item.type === props.mode).guidancePath;
 
     useEffect(
         _ => {
-            if (props.hidden) return;
-            let socketWorker = new WorkerSocket();
-
-            socketWorker.addEventListener("message", e => {
-                const textContent = JSON.parse(e.data).guidance;
-                setTextContent(textContent);
-            });
-
-            socketWorker.postMessage(
-                JSON.stringify({
-                    action: actionTypes.GET_HELP_TEXT,
-                    sessionkey: getGlobalSessionKey(),
-                    path: guidancePath
-                })
-            );
-
-            return function cleanup() {
-                socketWorker.postMessage(JSON.stringify({ action: actionTypes.CLOSE_SOCKET }));
-                socketWorker = null;
-            };
+            async function getAboutText() {
+                const res = await fetch("/public/user_guide.md");
+                if (res.ok) {
+                    setTextContent(
+                        (await res.text()).replace(/user_guide_images/g, "public/user_guide_images")
+                    );
+                }
+            }
+            getAboutText();
         },
         [props.hidden]
     );
@@ -62,7 +51,9 @@ function HelpItem(props) {
             <div className="loading-indicator" hidden={textContent}>
                 <CircularProgress />
             </div>
-            <ReactMarkdown source={textContent} linkTarget="_blank" />
+            <div className="about-content">
+                <ReactMarkdown source={textContent} linkTarget="_blank" />
+            </div>
         </div>
     );
 }
@@ -86,22 +77,22 @@ function HelpModal(props) {
     const modeState = useState(MAIN_MENU);
     const [mode, setMode] = modeState;
 
-    const content = (function() {
-        switch (mode) {
-            case MAIN_MENU:
-                return <MainMenu modeState={modeState} />;
-            default:
-                return <HelpItem mode={mode} />;
-        }
-    })();
+    // const content = (function() {
+    //     switch (mode) {
+    //         case MAIN_MENU:
+    //             return <MainMenu modeState={modeState} />;
+    //         default:
+    //             return ;
+    //     }
+    // })();
 
     function closeHelp() {
         setHelpMode(false);
         setMode(MAIN_MENU);
     }
 
-    const headerText =
-        mode === MAIN_MENU ? "Help" : MENU_ITEMS.find(item => item.type === mode).name;
+    // const headerText =
+    //     mode === MAIN_MENU ? "Help" : MENU_ITEMS.find(item => item.type === mode).name;
     return (
         <div>
             <Modal open={helpMode} onClose={closeHelp}>
@@ -113,11 +104,11 @@ function HelpModal(props) {
                                 onClick={_ => setMode(MAIN_MENU)}
                                 className="help-modal-back-button"
                             />
-                            <span>{headerText}</span>
+                            <span>Help</span>
                         </div>
                         <CloseIcon className="help-modal-close-icon" onClick={closeHelp} />
                     </div>
-                    {content}
+                    <HelpItem mode={mode} />
                 </div>
             </Modal>
         </div>

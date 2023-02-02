@@ -62,3 +62,12 @@
     cursor: pointer;
     margin-right: 5px;
 }
+
+.about-content {
+    height: 500px;
+    overflow: scroll;
+
+    img {
+        width: 100%;
+    }
+}
