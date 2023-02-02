@@ -16,11 +16,10 @@ COPY . /home/codex/client
 RUN npm run build
 
 FROM node:16-alpine
-RUN mkdir -p /home/codex/client/dist
-RUN mkdir /home/codex/client/scripts
 WORKDIR /home/codex/client
-COPY --from=builder /home/codex/client/dist/* /home/codex/client/dist
-COPY scripts/* /home/codex/client/scripts
+
+COPY --from=builder /home/codex/client/dist /home/codex/client/dist
+COPY scripts /home/codex/client/scripts
 RUN npm i express
 CMD node scripts/server.js
 
