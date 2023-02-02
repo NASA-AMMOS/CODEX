@@ -139,7 +139,9 @@
         "@teamsupercell/typings-for-css-modules-loader": "^2.0.0",
         "babel-eslint": "^10.0.2",
         "babel-loader": "^8.1.0",
+        "cheerio": "=1.0.0-rc.5",
         "concurrently": "^3.5.1",
+        "copy-webpack-plugin": "^6.4.1",
         "css-loader": "^2.1.0",
         "enzyme": "^3.10.0",
         "enzyme-adapter-react-16": "^1.15.2",
@@ -154,8 +156,8 @@
         "json-loader": "^0.5.7",
         "lint-staged": "^8.2.1",
         "mock-socket": "^7.1.0",
-        "sass": "^1.54.4",
         "react-svg-loader": "^3.0.3",
+        "sass": "^1.54.4",
         "sass-loader": "^7.1.0",
         "sinon": "^6.1.4",
         "ts-loader": "^8.4.0",
@@ -163,8 +165,7 @@
         "webpack": "^4.42.1",
         "webpack-cli": "^3.3.6",
         "webpack-dev-server": "^3.10.3",
-        "webpack-merge": "^4.2.2",
-        "cheerio": "=1.0.0-rc.5"
+        "webpack-merge": "^4.2.2"
     },
     "lint-staged": {
         "*.{js,css,scss,json}": [
