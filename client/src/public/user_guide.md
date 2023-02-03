@@ -23,6 +23,25 @@ The web application will then process the input file and put the column-headers 
 
 ![2 CODEX Upload](user_guide_images/2-file-uploaded.png)
 
+### Keyboard Shortcuts
+
+#### In charts
+_shift-S_ : Add Selection with the active chart selection
+
+_z (hold)_ : Go to Zoom mode while pressing z
+
+_spacebar (hold)_ : Go to Pan mode while pressing spacebar
+
+_s (hold)_ : Go to Select mode while pressing s
+
+#### In Feature and Selection panel
+_`_ (back-tick) : Clear active Features
+
+_~_ (shift-back-tick or tilde) : Clear active Selections
+
+_t_ : Open and Close the stats panel
+
+
 ## Features and Selections
 
 Input to the various type of analysis is done via Features and Selections.
