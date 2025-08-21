@@ -1,9 +1,23 @@
-FROM continuumio/miniconda3
+FROM continuumio/miniconda3:latest
 
-RUN apt-get update
+# Update package lists with retry logic and cleanup
+RUN apt-get clean && \
+    apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends \
+        libgl1-mesa-glx \
+        libegl1-mesa \
+        libxrandr2 \
+        libxss1 \
+        libxcursor1 \
+        libxcomposite1 \
+        libasound2 \
+        libxi6 \
+        libxtst6 \
+        build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set up CODEX environment
-RUN apt-get install -y libgl1-mesa-glx libegl1-mesa libxrandr2 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 libxtst6 build-essential
 RUN mkdir -p /home/codex/server/envs
 COPY envs/ /home/codex/server/envs/
 RUN conda env create -f /home/codex/server/envs/docker_environment.yml

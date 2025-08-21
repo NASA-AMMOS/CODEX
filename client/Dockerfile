@@ -3,8 +3,14 @@ FROM node:16 AS builder
 RUN mkdir -p /home/codex/client
 WORKDIR /home/codex/client
 
-RUN apt-get update
-RUN apt-get install -y libxi-dev libgl-dev
+# Update package lists with proper cleanup
+RUN apt-get clean && \
+    apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends \
+        libxi-dev \
+        libgl-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
 COPY package.json /home/codex/client
